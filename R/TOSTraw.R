@@ -29,8 +29,10 @@ TOSTraw<-function(m1,m2,sd1,sd2,n1,n2,low_eqbound, high_eqbound, alpha, var.equa
     p1<-pt(t1, degree_f, lower=FALSE) 
     t2<-(abs(m1-m2)-low_eqbound)/(sdpooled*sqrt(1/n1 + 1/n2))
     p2<-pt(t2, degree_f, lower=TRUE) 
-    LL<-(m1-m2)-qt(1-alpha, degree_f)*(sdpooled*sqrt(1/n1 + 1/n2))
-    UL<-(m1-m2)+qt(1-alpha, degree_f)*(sdpooled*sqrt(1/n1 + 1/n2))
+    LL90<-(m1-m2)-qt(1-alpha, degree_f)*(sdpooled*sqrt(1/n1 + 1/n2))
+    UL90<-(m1-m2)+qt(1-alpha, degree_f)*(sdpooled*sqrt(1/n1 + 1/n2))
+    LL95<-(m1-m2)-qt(1-(alpha/2), degree_f)*(sdpooled*sqrt(1/n1 + 1/n2))
+    UL95<-(m1-m2)+qt(1-(alpha/2), degree_f)*(sdpooled*sqrt(1/n1 + 1/n2))
     t<-(m1-m2)/(sdpooled*sqrt(1/n1 + 1/n2))
     pttest<-2*pt(-abs(t), df=degree_f)
   } else {
@@ -42,30 +44,31 @@ TOSTraw<-function(m1,m2,sd1,sd2,n1,n2,low_eqbound, high_eqbound, alpha, var.equa
     p2<-pt(t2, degree_f, lower=TRUE) #p-value for Welch's TOST t-test
     t<-(m1-m2)/sqrt(sd1^2/n1 + sd2^2/n2) #welch's t-test NHST
     pttest<-2*pt(-abs(t), df=degree_f) #p-value for Welch's t-test
-    LL<-(m1-m2)-qt(1-alpha, degree_f)*sqrt(sd1^2/n1 + sd2^2/n2) #Lower limit for CI Welch's t-test
-    UL<-(m1-m2)+qt(1-alpha, degree_f)*sqrt(sd1^2/n1 + sd2^2/n2) #Upper limit for CI Welch's t-test
+    LL90<-(m1-m2)-qt(1-alpha, degree_f)*sqrt(sd1^2/n1 + sd2^2/n2) #Lower limit for CI Welch's t-test
+    UL90<-(m1-m2)+qt(1-alpha, degree_f)*sqrt(sd1^2/n1 + sd2^2/n2) #Upper limit for CI Welch's t-test
+    LL95<-(m1-m2)-qt(1-(alpha/2), degree_f)*sqrt(sd1^2/n1 + sd2^2/n2) #Lower limit for CI Welch's t-test
+    UL95<-(m1-m2)+qt(1-(alpha/2), degree_f)*sqrt(sd1^2/n1 + sd2^2/n2) #Upper limit for CI Welch's t-test
   }
   ptost<-max(p1,p2) #Get highest p-value for summary TOST result
   ttost<-ifelse(abs(t1) < abs(t2), t1, t2) #Get lowest t-value for summary TOST result
-  results<-data.frame(ttost,degree_f,ptost,LL,UL)
+  results<-data.frame(ttost,degree_f,ptost,LL90,UL90)
   dif<-(m1-m2)
-  df = data.frame(labels=c(paste(100*(1-2*alpha),"% CI mean", sep=""),"Equivalence Range"), mean=c(dif,0), lower=c(LL,low_eqbound), upper = c(UL,high_eqbound))
-  plot(NA, xlim=c(.5,2.5), ylim=c(min(LL,low_eqbound)-0.5, max(UL,high_eqbound)+0.5), bty="l", xaxt="n", xlab="",ylab="Mean Difference")
-  points(df$mean[1:2], pch=19)
-  points(1,(m1-m2)-qnorm(0.975)*(sdpooled*sqrt(1/n1 + 1/n2)),pch=10)
-  points(1,(m1-m2)+qnorm(0.975)*(sdpooled*sqrt(1/n1 + 1/n2)),pch=10)
-  axis(1, 1:2, df$labels)
-  segments(1:2,df$lower[1:2],1:2,df$upper[1:2])
-  segments(1:1,df$upper[1:1],1:2,df$upper[1:1],lty=3)
-  segments(2,0,0,0,lty=2)
-  segments(1:1,df$lower[1:1],1:2,df$lower[1:1],lty=3)
-  text(2, min(LL,low_eqbound)-0.2, paste("P-value",round(ptost, digits=3)), cex = .8)
-  text(1, min(LL,low_eqbound)-0.2, paste("P-value",round(pttest, digits=3)), cex = .8)
-  text(1.5, dif, paste("Mdif = ",round(dif, digits=3)), cex = .8)
-  title(main=paste("Mdif = ",round(dif,digits=3),", 95% CI [",round(((m1-m2)-qnorm(0.975)*(sdpooled*sqrt(1/n1 + 1/n2))),digits=3),";",round(((m1-m2)+qnorm(0.975)*(sdpooled*sqrt(1/n1 + 1/n2))),digits=3),"]",", p = ",round(pttest,digits=3), sep=""), cex.main=1)
   testoutcome<-ifelse(pttest<0.05,"significant","non-significant")
   TOSToutcome<-ifelse(ptost<0.05,"significant","non-significant")
-  message(cat("The NHST t-test was ",testoutcome,", t(",n1+n2-2,") = ",t,", p = ",pttest,sep=""))
-  message(cat("The equivalence test was ",TOSToutcome,", t(",n1+n2-2,") = ",ttost,", p = ",ptost,sep=""))
+  plot(NA, ylim=c(0,1), xlim=c(min(LL90,low_eqbound)-max(UL90-LL90, high_eqbound-low_eqbound)/10, max(UL90,high_eqbound)+max(UL90-LL90, high_eqbound-low_eqbound)/10), bty="l", yaxt="n", ylab="",xlab="Mean Difference")
+  points(x=dif, y=0.5, pch=15, cex=2)
+  abline(v=high_eqbound, lty=2)
+  abline(v=low_eqbound, lty=2)
+  abline(v=0, lty=2, col="grey")
+  segments(LL90,0.5,UL90,0.5, lwd=3)
+  segments(LL95,0.5,UL95,0.5, lwd=1)
+  title(main=paste("Equivalence bounds ",round(low_eqbound,digits=3)," and ",round(high_eqbound,digits=3),"\nMean difference = ",round(dif,digits=3)," \n TOST: 90% CI [",round(LL90,digits=3),";",round(UL90,digits=3),"] ", TOSToutcome," \n NHST: 95% CI [",round(LL95,digits=3),";",round(UL95,digits=3),"] ", testoutcome,sep=""), cex.main=1)
+  if(var.equal == TRUE) {
+    message(cat("Student's t-test was ",testoutcome,", t(",degree_f,") = ",t,", p = ",pttest,sep=""))
+    message(cat("The equivalence test based on Student's t-test was ",TOSToutcome,", t(",degree_f,") = ",ttost,", p = ",ptost,sep=""))
+  } else {
+    message(cat("Welch's t-test was ",testoutcome,", t(",degree_f,") = ",t,", p = ",pttest,sep=""))
+    message(cat("The equivalence test based on Welch's t-test  was ",TOSToutcome,", t(",degree_f,") = ",ttost,", p = ",ptost,sep=""))
+  }
   return(results)
 }

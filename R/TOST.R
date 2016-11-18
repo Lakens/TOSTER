@@ -55,21 +55,18 @@ TOST<-function(m1,m2,sd1,sd2,n1,n2,low_eqbound_d, high_eqbound_d, alpha, var.equ
   }
   ptost<-max(p1,p2) #Get highest p-value for summary TOST result
   ttost<-ifelse(abs(t1) < abs(t2), t1, t2) #Get lowest t-value for summary TOST result
-  results<-data.frame(ttost,degree_f,ptost,LL,UL)
+  results<-data.frame(ttost,degree_f,ptost,LL90,UL90)
   dif<-(m1-m2)
   testoutcome<-ifelse(pttest<0.05,"significant","non-significant")
   TOSToutcome<-ifelse(ptost<0.05,"significant","non-significant")
   plot(NA, ylim=c(0,1), xlim=c(min(LL90,low_eqbound)-max(UL90-LL90, high_eqbound-low_eqbound)/10, max(UL90,high_eqbound)+max(UL90-LL90, high_eqbound-low_eqbound)/10), bty="l", yaxt="n", ylab="",xlab="Mean Difference")
-  points(x=dif, y=0.25, pch=7, cex=1.5)
-  points(x=dif, y=0.75, pch=7, cex=1.5)
+  points(x=dif, y=0.5, pch=15, cex=2)
   abline(v=high_eqbound, lty=2)
   abline(v=low_eqbound, lty=2)
   abline(v=0, lty=2, col="grey")
-  segments(LL90,0.25,UL90,0.25)
-  segments(LL95,0.75,UL95,0.75)
-  axis(2, 0.25, "90% CI")
-  axis(2, 0.75, "95% CI")
-  title(main=paste("Equivalence bounds ",round(low_eqbound,digits=3)," and ",round(high_eqbound,digits=3),"\nMean difference = ",round(dif,digits=3)," \n TOST: 90% CI [",round(((m1-m2)-qnorm(0.95)*(sdpooled*sqrt(1/n1 + 1/n2))),digits=3),";",round(((m1-m2)+qnorm(0.95)*(sdpooled*sqrt(1/n1 + 1/n2))),digits=3),"] ", TOSToutcome," \n NHST: 95% CI [",round(((m1-m2)-qnorm(0.975)*(sdpooled*sqrt(1/n1 + 1/n2))),digits=3),";",round(((m1-m2)+qnorm(0.975)*(sdpooled*sqrt(1/n1 + 1/n2))),digits=3),"] ", testoutcome,sep=""), cex.main=1)
+  segments(LL90,0.5,UL90,0.5, lwd=3)
+  segments(LL95,0.5,UL95,0.5, lwd=1)
+  title(main=paste("Equivalence bounds ",round(low_eqbound,digits=3)," and ",round(high_eqbound,digits=3),"\nMean difference = ",round(dif,digits=3)," \n TOST: 90% CI [",round(LL90,digits=3),";",round(UL90,digits=3),"] ", TOSToutcome," \n NHST: 95% CI [",round(LL95,digits=3),";",round(UL95,digits=3),"] ", testoutcome,sep=""), cex.main=1)
   if(var.equal == TRUE) {
     message(cat("Student's t-test was ",testoutcome,", t(",degree_f,") = ",t,", p = ",pttest,sep=""))
     message(cat("The equivalence test based on Student's t-test was ",TOSToutcome,", t(",degree_f,") = ",ttost,", p = ",ptost,sep=""))

@@ -17,36 +17,31 @@
 TOSTdz<-function(n,m1,m2,sd1,sd2,r12,low_eqbound_dz, high_eqbound_dz, alpha){
   sdif<-sqrt(sd1^2+sd2^2-2*r12*sd1*sd2)
   se<-sdif/sqrt(n)
-  t<-(m2-m1)/se
+  t<-(m1-m2)/se
   degree_f<-n-1
   pttest<-2*pt(abs(t), degree_f, lower=FALSE)
-  t1<-((m2-m1)+(low_eqbound_dz*sdif))/se
+  t1<-((m1-m2)+(low_eqbound_dz*sdif))/se
   p1<-1-pt(t1, degree_f, lower=FALSE)
-  t2<-((m2-m1)+(high_eqbound_dz*sdif))/se
+  t2<-((m1-m2)+(high_eqbound_dz*sdif))/se
   p2<-pt(t2, degree_f, lower=FALSE)
   ttost<-ifelse(abs(t1) < abs(t2), t1, t2)
-  LL_90<-((m2-m1)-qt(1-alpha, degree_f)*se)/sdif
-  UL_90<-((m2-m1)+qt(1-alpha, degree_f)*se)/sdif
+  LL90<-((m1-m2)-qt(1-alpha, degree_f)*se)/sdif
+  UL90<-((m1-m2)+qt(1-alpha, degree_f)*se)/sdif
   ptost<-max(p1,p2)
-  results<-data.frame(ttost,degree_f,ptost,LL_90,UL_90)
-  LL_95<-((m2-m1)-qt(0.975, degree_f)*se)/sdif
-  UL_95<-((m2-m1)+qt(0.975, degree_f)*se)/sdif
-  df = data.frame(labels=c(paste(100*(1-2*alpha),"% CI dz", sep=""),"Equivalence Range"), mean=c((m2-m1)/sdif,0), lower=c(LL_90,low_eqbound_dz), upper = c(UL_90,high_eqbound_dz))
-  plot(NA, xlim=c(.5,2.5), ylim=c(min(LL_90,low_eqbound_dz)-0.2, max(UL_90,high_eqbound_dz)+0.2), bty="l", xaxt="n", xlab="",ylab="Cohen's dz")
-  points(df$mean[1:2], pch=19)
-  points(1,UL_95,pch=10)
-  points(1,LL_95,pch=10)
-  axis(1, 1:2, df$labels)
-  segments(1:2,df$lower[1:2],1:2,df$upper[1:2])
-  segments(1:1,df$upper[1:1],1:2,df$upper[1:1],lty=3)
-  segments(2,0,0,0,lty=2)
-  segments(1:1,df$lower[1:1],1:2,df$lower[1:1],lty=3)
-  text(2, min(LL_90,low_eqbound_dz)-0.15, paste("P-value",round(ptost, digits=3)), cex = .8)
-  text(1, min(LL_90,low_eqbound_dz)-0.15, paste("P-value",round(pttest, digits=3)), cex = .8)
-  text(1.5, (m2-m1), paste("dz = ",round((m2-m1)/sdif, digits=3)), cex = .8)
-  title(main=paste("Mdif = ",round((m2-m1),digits=3),", 95% CI [",round((LL_95*sdif),digits=3),";",round((UL_95*sdif),digits=3),"]",", p = ",round(pttest,digits=3),sep=""))
+  results<-data.frame(ttost,degree_f,ptost,LL90,UL90)
+  dif<-(m1-m2)
+  LL95<-((m1-m2)-qt(1-(alpha/2), degree_f)*se)/sdif
+  UL95<-((m1-m2)+qt(1-(alpha/2), degree_f)*se)/sdif
   testoutcome<-ifelse(pttest<0.05,"significant","non-significant")
   TOSToutcome<-ifelse(ptost<0.05,"significant","non-significant")
+  plot(NA, ylim=c(0,1), xlim=c(min(LL90,low_eqbound)-max(UL90-LL90, high_eqbound-low_eqbound)/10, max(UL90,high_eqbound)+max(UL90-LL90, high_eqbound-low_eqbound)/10), bty="l", yaxt="n", ylab="",xlab="Mean Difference")
+  points(x=dif, y=0.5, pch=15, cex=2)
+  abline(v=high_eqbound, lty=2)
+  abline(v=low_eqbound, lty=2)
+  abline(v=0, lty=2, col="grey")
+  segments(LL90,0.5,UL90,0.5, lwd=3)
+  segments(LL95,0.5,UL95,0.5, lwd=1)
+  title(main=paste("Equivalence bounds ",round(low_eqbound,digits=3)," and ",round(high_eqbound,digits=3),"\nMean difference = ",round(dif,digits=3)," \n TOST: 90% CI [",round(LL90,digits=3),";",round(UL90,digits=3),"] ", TOSToutcome," \n NHST: 95% CI [",round(LL95,digits=3),";",round(UL95,digits=3),"] ", testoutcome,sep=""), cex.main=1)
   message(cat("The NHST t-test was ",testoutcome,", t(",degree_f,") = ",t,", p = ",pttest,sep=""))
   message(cat("The equivalence test was ",TOSToutcome,", t(",degree_f,") = ",ttost,", p = ",ptost,sep=""))
   return(results)
