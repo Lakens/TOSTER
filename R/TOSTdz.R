@@ -19,6 +19,8 @@ TOSTdz<-function(n,m1,m2,sd1,sd2,r12,low_eqbound_dz, high_eqbound_dz, alpha){
     alpha <- 0.05
   }  
   sdif<-sqrt(sd1^2+sd2^2-2*r12*sd1*sd2)
+  low_eqbound<-low_eqbound_dz*sdif
+  high_eqbound<-high_eqbound_dz*sdif
   se<-sdif/sqrt(n)
   t<-(m1-m2)/se
   degree_f<-n-1
@@ -28,23 +30,23 @@ TOSTdz<-function(n,m1,m2,sd1,sd2,r12,low_eqbound_dz, high_eqbound_dz, alpha){
   t2<-((m1-m2)+(high_eqbound_dz*sdif))/se
   p2<-pt(t2, degree_f, lower=FALSE)
   ttost<-ifelse(abs(t1) < abs(t2), t1, t2)
-  LL90<-((m1-m2)-qt(1-alpha, degree_f)*se)/sdif
-  UL90<-((m1-m2)+qt(1-alpha, degree_f)*se)/sdif
+  LL90<-((m1-m2)-qt(1-alpha, degree_f)*se)
+  UL90<-((m1-m2)+qt(1-alpha, degree_f)*se)
   ptost<-max(p1,p2)
   results<-data.frame(ttost,degree_f,ptost,LL90,UL90)
   dif<-(m1-m2)
-  LL95<-((m1-m2)-qt(1-(alpha/2), degree_f)*se)/sdif
-  UL95<-((m1-m2)+qt(1-(alpha/2), degree_f)*se)/sdif
+  LL95<-((m1-m2)-qt(1-(alpha/2), degree_f)*se)
+  UL95<-((m1-m2)+qt(1-(alpha/2), degree_f)*se)
   testoutcome<-ifelse(pttest<0.05,"significant","non-significant")
   TOSToutcome<-ifelse(ptost<0.05,"significant","non-significant")
-  plot(NA, ylim=c(0,1), xlim=c(min(LL90,low_eqbound_dz)-max(UL90-LL90, high_eqbound_dz-low_eqbound_dz)/10, max(UL90,high_eqbound_dz)+max(UL90-LL90, high_eqbound_dz-low_eqbound_dz)/10), bty="l", yaxt="n", ylab="",xlab="Mean Difference")
+  plot(NA, ylim=c(0,1), xlim=c(min(LL90,low_eqbound)-max(UL90-LL90, high_eqbound-low_eqbound)/10, max(UL90,high_eqbound)+max(UL90-LL90, high_eqbound-low_eqbound)/10), bty="l", yaxt="n", ylab="",xlab="Mean Difference")
   points(x=dif, y=0.5, pch=15, cex=2)
-  abline(v=high_eqbound_dz, lty=2)
-  abline(v=low_eqbound_dz, lty=2)
+  abline(v=high_eqbound, lty=2)
+  abline(v=low_eqbound, lty=2)
   abline(v=0, lty=2, col="grey")
   segments(LL90,0.5,UL90,0.5, lwd=3)
   segments(LL95,0.5,UL95,0.5, lwd=1)
-  title(main=paste("Equivalence bounds ",round(low_eqbound_dz,digits=3)," and ",round(high_eqbound_dz,digits=3),"\nMean difference = ",round(dif,digits=3)," \n TOST: 90% CI [",round(LL90,digits=3),";",round(UL90,digits=3),"] ", TOSToutcome," \n NHST: 95% CI [",round(LL95,digits=3),";",round(UL95,digits=3),"] ", testoutcome,sep=""), cex.main=1)
+  title(main=paste("Equivalence bounds ",round(low_eqbound,digits=3)," and ",round(high_eqbound,digits=3),"\nMean difference = ",round(dif,digits=3)," \n TOST: 90% CI [",round(LL90,digits=3),";",round(UL90,digits=3),"] ", TOSToutcome," \n NHST: 95% CI [",round(LL95,digits=3),";",round(UL95,digits=3),"] ", testoutcome,sep=""), cex.main=1)
   message(cat("The NHST t-test was ",testoutcome,", t(",degree_f,") = ",t,", p = ",pttest,sep=""))
   message(cat("The equivalence test was ",TOSToutcome,", t(",degree_f,") = ",ttost,", p = ",ptost,sep=""))
   return(results)
