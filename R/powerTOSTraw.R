@@ -1,0 +1,21 @@
+#' Function to perform power analysis for TOST
+#' @param alpha alpha used for the test (e.g., 0.05)
+#' @param statistical_power desired power (e.g., 0.8)
+#' @param low_eqbound lower equivalence bounds (e.g., -0.5) expressed in raw scale units (e.g., scalepoints)
+#' @param high_eqbound upper equivalence bounds (e.g., 0.5) expressed in raw scale units (e.g., scalepoints)
+#' @param epsilon By default, true effect is assumed to be 0. If you want to perform an equivalence test when expecting a non-zero effect, specify the expected standardized effect size raw scale units (e.g., scalepoints) as epsilon (e.g., 0.50)
+#' @return Returns a string summarizing the power analysis, and a numeric variable for the number of observations needed in each group
+#' @examples 
+#' powerTOSTraw(alpha=0.05, statistical_power=0.8, low_eqbound=-200, high_eqbound=200, sdpooled=350, epsilon=10)
+#' @export
+
+powerTOSTraw<-function(alpha, statistical_power, low_eqbound, high_eqbound, sdpooled, epsilon){
+  if(missing(epsilon)) {
+    epsilon<-0
+  }
+  NT1<-2*sdpooled^2*(qnorm(1-alpha)+qnorm(statistical_power/2))^2/(0-low_eqbound-epsilon)^2
+  NT2<-2*sdpooled^2*(qnorm(1-alpha)+qnorm(statistical_power/2))^2/(high_eqbound-0-epsilon)^2
+  N<-ceiling(max(NT1,NT2))
+  message(cat("The required sample size to achieve",100*statistical_power,"% power with equivalence bounds of",low_eqbound,"and",high_eqbound,"is",N,"per group, or", 2*N,"in total."))
+  return(N)
+}
