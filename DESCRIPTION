@@ -1,0 +1,10 @@
+Package: TOSTER
+Version: 0.0.1
+Date: 2016-11-18
+Title: TOSTER equivalence testing
+Description: Frequentist equivalence tests for t-tests, correlations, and meta-
+    analysis, including power analysis for t-tests and correlations. Allows you to
+    specify equivalence bounds in raw scale units or in terms of effect sizes.
+Author: Daniel Lakens <D.Lakens@tue.nl>
+Maintainer: Daniel Lakens <D.Lakens@tue.nl>
+RoxygenNote: 5.0.1
