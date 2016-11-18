@@ -22,8 +22,8 @@ TOSTraw<-function(m1,m2,sd1,sd2,n1,n2,low_eqbound, high_eqbound, alpha, var.equa
   if(missing(var.equal)) {
     var.equal<-FALSE
   }
-  sdpooled<-sqrt((((n1 - 1)*(sd1^2)) + (n2 - 1)*(sd2^2))/((n1+n2)-2)) #calculate sd pooled
   if(var.equal==TRUE) {
+    sdpooled<-sqrt((((n1 - 1)*(sd1^2)) + (n2 - 1)*(sd2^2))/((n1+n2)-2)) #calculate sd pooled
     t1<-(abs(m1-m2)-high_eqbound)/(sdpooled*sqrt(1/n1 + 1/n2))
     degree_f<-n1+n2-2
     p1<-pt(t1, degree_f, lower=FALSE) 
@@ -34,6 +34,7 @@ TOSTraw<-function(m1,m2,sd1,sd2,n1,n2,low_eqbound, high_eqbound, alpha, var.equa
     t<-(m1-m2)/(sdpooled*sqrt(1/n1 + 1/n2))
     pttest<-2*pt(-abs(t), df=degree_f)
   } else {
+    sdpooled<-sqrt((sd1^2 + sd2^2)/2) #calculate sd root mean squared for Welch's t-test
     t1<-(abs(m1-m2)-low_eqbound)/sqrt(sd1^2/n1 + sd2^2/n2) #welch's t-test lower bound
     degree_f<-(sd1^2/n1+sd2^2/n2)^2/(((sd1^2/n1)^2/(n1-1))+((sd2^2/n2)^2/(n2-1))) #degrees of freedom for Welch's t-test
     p1<-pt(t1, degree_f, lower=FALSE) #p-value for Welch's TOST t-test
