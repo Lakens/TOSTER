@@ -12,8 +12,9 @@
 
 TOSTr<-function(n, r, low_eqbound_r, high_eqbound_r, alpha){
   if(missing(alpha)) {
-    alpha<-0.05
-  }  z1<-((log((1+abs(r))/(1-abs(r)))/2)+(log((1+low_eqbound_r)/(1-low_eqbound_r))/2))/(sqrt(1/(n-3)))
+    alpha <- 0.05
+  }  
+  z1<-((log((1+abs(r))/(1-abs(r)))/2)+(log((1+low_eqbound_r)/(1-low_eqbound_r))/2))/(sqrt(1/(n-3)))
   z2<-((log((1+abs(r))/(1-abs(r)))/2)+(log((1+high_eqbound_r)/(1-high_eqbound_r))/2))/(sqrt(1/(n-3)))
   ptost1<-ifelse(low_eqbound_r<r,pnorm(-abs(z1)),1-pnorm(-abs(z1)))
   ptost2<-ifelse(high_eqbound_r>r,pnorm(-abs(z2)),1-pnorm(-abs(z2)))

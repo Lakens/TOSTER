@@ -3,6 +3,7 @@
 #' @param statistical_power desired power (e.g., 0.8)
 #' @param low_eqbound lower equivalence bounds (e.g., -0.5) expressed in raw scale units (e.g., scalepoints)
 #' @param high_eqbound upper equivalence bounds (e.g., 0.5) expressed in raw scale units (e.g., scalepoints)
+#' @param sdpooled specify the pooled standard deviation
 #' @param epsilon By default, true effect is assumed to be 0. If you want to perform an equivalence test when expecting a non-zero effect, specify the expected standardized effect size raw scale units (e.g., scalepoints) as epsilon (e.g., 0.50)
 #' @return Returns a string summarizing the power analysis, and a numeric variable for the number of observations needed in each group
 #' @examples 

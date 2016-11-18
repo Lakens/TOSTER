@@ -24,6 +24,6 @@ Returns a string summarizing the power analysis, and a numeric variable for the 
 Function to perform power analysis for TOST
 }
 \examples{
-powerTOST(alpha=0.05, beta=0.2, low_eqbound_d=-0.4, high_eqbound_d=0.4, epsilon=0.1) #Returns n (for each condition)
+powerTOST(alpha=0.05, statistical_power=0.8, low_eqbound_d=-0.4, high_eqbound_d=0.4, epsilon=0.1)
 }
 
