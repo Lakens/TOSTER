@@ -15,6 +15,9 @@
 #' 
 
 TOSTdz<-function(n,m1,m2,sd1,sd2,r12,low_eqbound_dz, high_eqbound_dz, alpha){
+  if(missing(alpha)) {
+    alpha <- 0.05
+  }  
   sdif<-sqrt(sd1^2+sd2^2-2*r12*sd1*sd2)
   se<-sdif/sqrt(n)
   t<-(m1-m2)/se
