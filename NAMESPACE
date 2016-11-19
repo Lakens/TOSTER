@@ -2,6 +2,7 @@
 
 export(TOST)
 export(TOSTdz)
+export(TOSTone)
 export(TOSTr)
 export(TOSTraw)
 export(powerTOST)

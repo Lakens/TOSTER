@@ -1,4 +1,4 @@
-#' TOSTone function
+#' TOSTone function for a one-sample t-test using equivalence bounds based on Cohen's d
 #' @param m mean
 #' @param mu value to compare against
 #' @param sd standard deviation

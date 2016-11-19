@@ -2,7 +2,7 @@
 % Please edit documentation in R/TOSTraw.R
 \name{TOSTraw}
 \alias{TOSTraw}
-\title{TOST raw function}
+\title{TOST raw function for an independent t-test using equivalence bounds based on raw scale differences}
 \usage{
 TOSTraw(m1, m2, sd1, sd2, n1, n2, low_eqbound, high_eqbound, alpha, var.equal)
 }
@@ -31,7 +31,7 @@ TOSTraw(m1, m2, sd1, sd2, n1, n2, low_eqbound, high_eqbound, alpha, var.equal)
 Returns dataframe with t-value, degrees of freedom, p-value, and lower and upper limit of confidence interval
 }
 \description{
-TOST raw function
+TOST raw function for an independent t-test using equivalence bounds based on raw scale differences
 }
 \examples{
 TOSTraw(m1=7.83,m2=7.98,sd1=1.21,sd2=1.29,n1=400,n2=400,low_eqbound=-0.25, high_eqbound=0.25,alpha=0.05)

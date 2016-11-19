@@ -2,7 +2,7 @@
 % Please edit documentation in R/TOST.R
 \name{TOST}
 \alias{TOST}
-\title{TOST function}
+\title{TOST function for an independent t-test using equivalence bounds based on Cohen's d}
 \usage{
 TOST(m1, m2, sd1, sd2, n1, n2, low_eqbound_d, high_eqbound_d, alpha, var.equal)
 }
@@ -31,7 +31,7 @@ TOST(m1, m2, sd1, sd2, n1, n2, low_eqbound_d, high_eqbound_d, alpha, var.equal)
 Returns dataframe with t-value, degrees of freedom, p-value, and lower and upper limit of confidence interval
 }
 \description{
-TOST function
+TOST function for an independent t-test using equivalence bounds based on Cohen's d
 }
 \examples{
 TOST(m1=7.83,m2=7.98,sd1=1.21,sd2=1.29,n1=400,n2=400,low_eqbound_d=-0.199897678576151, high_eqbound_d=0.199897678576151,alpha=0.05, var.equal=TRUE)

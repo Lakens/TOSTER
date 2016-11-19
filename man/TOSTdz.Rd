@@ -2,7 +2,7 @@
 % Please edit documentation in R/TOSTdz.R
 \name{TOSTdz}
 \alias{TOSTdz}
-\title{TOST function}
+\title{TOST function for a dependent t-test using equivalence bounds based on Cohen's dz}
 \usage{
 TOSTdz(n, m1, m2, sd1, sd2, r12, low_eqbound_dz, high_eqbound_dz, alpha)
 }
@@ -29,7 +29,7 @@ TOSTdz(n, m1, m2, sd1, sd2, r12, low_eqbound_dz, high_eqbound_dz, alpha)
 Returns dataframe with t-value, degrees of freedom, p-value, and lower and upper limit of confidence interval
 }
 \description{
-TOST function
+TOST function for a dependent t-test using equivalence bounds based on Cohen's dz
 }
 \examples{
 TOSTdz(n=65,m1=5.830769,m2=5.7538462,sd1=1.1668498,sd2=1.2994081,r12=0.744992,low_eqbound_dz=-0.337341706,high_eqbound_dz=0.337341706, alpha=0.05)

@@ -1,4 +1,4 @@
-#' TOST function
+#' TOST function for an independent t-test using equivalence bounds based on Cohen's d
 #' @param m1 mean of group 1
 #' @param m2 mean of group 2
 #' @param sd1 standard deviation of group 1
