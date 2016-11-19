@@ -1,4 +1,4 @@
-#' Function to perform power analysis for TOST
+#' Power analysis for TOST for dependent t-test
 #' @param alpha alpha used for the test (e.g., 0.05)
 #' @param statistical_power desired power (e.g., 0.8)
 #' @param low_eqbound_dz lower equivalence bounds (e.g., -0.5) expressed in standardized mean difference (Cohen's dz)
