@@ -1,4 +1,4 @@
-#' TOST function
+#' TOSTone function
 #' @param m mean
 #' @param mu value to compare against
 #' @param sd standard deviation
@@ -10,8 +10,9 @@
 #' @examples
 #' TOST(m=0.54,mu=0.5,sd=1.2,n=100,low_eqbound_d=-0.3, high_eqbound_d=0.3, alpha=0.05)
 #' @export
+#' 
 
-TOST<-function(m,mu,sd,n,low_eqbound_d, high_eqbound_d, alpha){
+TOSTone<-function(m,mu,sd,n,low_eqbound_d, high_eqbound_d, alpha){
   if(missing(alpha)) {
     alpha<-0.05
   }

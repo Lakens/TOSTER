@@ -16,6 +16,8 @@ powerTOSTraw(alpha, statistical_power, low_eqbound, high_eqbound, sdpooled,
 
 \item{high_eqbound}{upper equivalence bounds (e.g., 0.5) expressed in raw scale units (e.g., scalepoints)}
 
+\item{sdpooled}{specify the pooled standard deviation}
+
 \item{epsilon}{By default, true effect is assumed to be 0. If you want to perform an equivalence test when expecting a non-zero effect, specify the expected standardized effect size raw scale units (e.g., scalepoints) as epsilon (e.g., 0.50)}
 }
 \value{
