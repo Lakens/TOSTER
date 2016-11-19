@@ -26,11 +26,11 @@ TOST<-function(m1,m2,sd1,sd2,n1,n2,low_eqbound_d, high_eqbound_d, alpha, var.equ
     sdpooled<-sqrt((((n1 - 1)*(sd1^2)) + (n2 - 1)*(sd2^2))/((n1+n2)-2)) #calculate sd pooled
     low_eqbound<-low_eqbound_d*sdpooled
     high_eqbound<-high_eqbound_d*sdpooled
-    t1<-(abs(m1-m2)-high_eqbound)/(sdpooled*sqrt(1/n1 + 1/n2)) #students t-test upper bound
     degree_f<-n1+n2-2
-    p1<-pt(t1, degree_f, lower=TRUE) 
-    t2<-(abs(m1-m2)-low_eqbound)/(sdpooled*sqrt(1/n1 + 1/n2))  #students t-test lower bound
-    p2<-pt(t2, degree_f, lower=FALSE) 
+    t1<-(abs(m1-m2)-low_eqbound)/(sdpooled*sqrt(1/n1 + 1/n2))  #students t-test lower bound
+    p1<-pt(t1, degree_f, lower=FALSE) 
+    t2<-(abs(m1-m2)-high_eqbound)/(sdpooled*sqrt(1/n1 + 1/n2)) #students t-test upper bound
+    p2<-pt(t2, degree_f, lower=TRUE) 
     t<-(m1-m2)/(sdpooled*sqrt(1/n1 + 1/n2))
     pttest<-2*pt(-abs(t), df=degree_f)
     LL90<-(m1-m2)-qt(1-alpha, n1+n2-2)*(sdpooled*sqrt(1/n1 + 1/n2))
@@ -41,11 +41,11 @@ TOST<-function(m1,m2,sd1,sd2,n1,n2,low_eqbound_d, high_eqbound_d, alpha, var.equ
     sdpooled<-sqrt((sd1^2 + sd2^2)/2) #calculate sd root mean squared for Welch's t-test
     low_eqbound<-low_eqbound_d*sdpooled
     high_eqbound<-high_eqbound_d*sdpooled
-    t1<-(abs(m1-m2)-high_eqbound)/sqrt(sd1^2/n1 + sd2^2/n2) #welch's t-test lower bound
     degree_f<-(sd1^2/n1+sd2^2/n2)^2/(((sd1^2/n1)^2/(n1-1))+((sd2^2/n2)^2/(n2-1))) #degrees of freedom for Welch's t-test
-    p1<-pt(t1, degree_f, lower=TRUE) #p-value for Welch's TOST t-test
-    t2<-(abs(m1-m2)-low_eqbound)/sqrt(sd1^2/n1 + sd2^2/n2) #welch's t-test upper bound
-    p2<-pt(t2, degree_f, lower=FALSE) #p-value for Welch's TOST t-test
+    t1<-(abs(m1-m2)-low_eqbound)/sqrt(sd1^2/n1 + sd2^2/n2) #welch's t-test upper bound
+    p1<-pt(t1, degree_f, lower=FALSE) #p-value for Welch's TOST t-test
+    t2<-(abs(m1-m2)-high_eqbound)/sqrt(sd1^2/n1 + sd2^2/n2) #welch's t-test lower bound
+    p2<-pt(t2, degree_f, lower=TRUE) #p-value for Welch's TOST t-test
     t<-(m1-m2)/sqrt(sd1^2/n1 + sd2^2/n2) #welch's t-test NHST
     pttest<-2*pt(-abs(t), df=degree_f) #p-value for Welch's t-test
     LL90<-(m1-m2)-qt(1-alpha, degree_f)*sqrt(sd1^2/n1 + sd2^2/n2) #Lower limit for CI Welch's t-test
