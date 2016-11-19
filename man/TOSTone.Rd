@@ -2,7 +2,7 @@
 % Please edit documentation in R/TOSTone.R
 \name{TOSTone}
 \alias{TOSTone}
-\title{TOSTone function for a one-sample t-test using equivalence bounds based on Cohen's d}
+\title{TOSTone function for a one-sample t-test}
 \usage{
 TOSTone(m, mu, sd, n, low_eqbound_d, high_eqbound_d, alpha)
 }
@@ -25,7 +25,7 @@ TOSTone(m, mu, sd, n, low_eqbound_d, high_eqbound_d, alpha)
 Returns dataframe with t-value, degrees of freedom, p-value, and lower and upper limit of confidence interval
 }
 \description{
-TOSTone function for a one-sample t-test using equivalence bounds based on Cohen's d
+TOSTone function for a one-sample t-test
 }
 \examples{
 TOST(m=0.54,mu=0.5,sd=1.2,n=100,low_eqbound_d=-0.3, high_eqbound_d=0.3, alpha=0.05)

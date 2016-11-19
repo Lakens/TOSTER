@@ -1,4 +1,4 @@
-#' TOST function for a correlation using equivalence bounds based on r
+#' TOST function for a correlations
 #' @param n number of pairs of observations
 #' @param r observed correlation
 #' @param low_eqbound_r lower equivalence bounds (e.g., -0.3) expressed in a correlation effect size 

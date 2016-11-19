@@ -2,7 +2,7 @@
 % Please edit documentation in R/powerTOST.R
 \name{powerTOST}
 \alias{powerTOST}
-\title{Function to perform power analysis for TOST}
+\title{Power analysis for TOST for independent t-test}
 \usage{
 powerTOST(alpha, statistical_power, low_eqbound_d, high_eqbound_d, epsilon)
 }
@@ -21,7 +21,7 @@ powerTOST(alpha, statistical_power, low_eqbound_d, high_eqbound_d, epsilon)
 Returns a string summarizing the power analysis, and a numeric variable for the number of observations needed in each group
 }
 \description{
-Function to perform power analysis for TOST
+Power analysis for TOST for independent t-test
 }
 \examples{
 powerTOST(alpha=0.05, statistical_power=0.8, low_eqbound_d=-0.4, high_eqbound_d=0.4, epsilon=0.1)

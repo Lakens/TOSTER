@@ -2,7 +2,7 @@
 % Please edit documentation in R/powerTOSTraw.R
 \name{powerTOSTraw}
 \alias{powerTOSTraw}
-\title{Function to perform power analysis for TOST}
+\title{Power analysis for TOST for independent t-test (raw scores)}
 \usage{
 powerTOSTraw(alpha, statistical_power, low_eqbound, high_eqbound, sdpooled,
   epsilon)
@@ -24,7 +24,7 @@ powerTOSTraw(alpha, statistical_power, low_eqbound, high_eqbound, sdpooled,
 Returns a string summarizing the power analysis, and a numeric variable for the number of observations needed in each group
 }
 \description{
-Function to perform power analysis for TOST
+Power analysis for TOST for independent t-test (raw scores)
 }
 \examples{
 powerTOSTraw(alpha=0.05, statistical_power=0.8, low_eqbound=-200, high_eqbound=200, sdpooled=350, epsilon=10)

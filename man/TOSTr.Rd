@@ -2,7 +2,7 @@
 % Please edit documentation in R/TOSTr.R
 \name{TOSTr}
 \alias{TOSTr}
-\title{TOST function for a correlation using equivalence bounds based on r}
+\title{TOST function for a correlations}
 \usage{
 TOSTr(n, r, low_eqbound_r, high_eqbound_r, alpha)
 }
@@ -21,7 +21,7 @@ TOSTr(n, r, low_eqbound_r, high_eqbound_r, alpha)
 Returns dataframe with p-value, and lower and upper limit of confidence interval
 }
 \description{
-TOST function for a correlation using equivalence bounds based on r
+TOST function for a correlations
 }
 \examples{
 TOSTr(n=100, r = 0.02, low_eqbound_r=-0.3, high_eqbound_r=0.3, alpha=0.05)

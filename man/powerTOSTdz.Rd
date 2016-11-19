@@ -2,7 +2,7 @@
 % Please edit documentation in R/powerTOSTdz.R
 \name{powerTOSTdz}
 \alias{powerTOSTdz}
-\title{Function to perform power analysis for TOST}
+\title{Power analysis for TOST for dependent t-test}
 \usage{
 powerTOSTdz(alpha, statistical_power, low_eqbound_dz, high_eqbound_dz, epsilon)
 }
@@ -21,7 +21,7 @@ powerTOSTdz(alpha, statistical_power, low_eqbound_dz, high_eqbound_dz, epsilon)
 Returns a string summarizing the power analysis, and a numeric variable for the number of pairs needed
 }
 \description{
-Function to perform power analysis for TOST
+Power analysis for TOST for dependent t-test
 }
 \examples{
 powerTOSTdz(alpha=0.05,statistical_power=0.8,low_eqbound_dz=-0.3, high_eqbound_dz=0.3, epsilon=0.1)

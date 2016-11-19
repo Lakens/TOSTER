@@ -2,7 +2,7 @@
 % Please edit documentation in R/powerTOSTr.R
 \name{powerTOSTr}
 \alias{powerTOSTr}
-\title{Function to perform power analysis for TOST}
+\title{Power analysis for TOST for correlations}
 \usage{
 powerTOSTr(alpha, statistical_power, low_eqbound_r, high_eqbound_r, epsilon)
 }
@@ -21,7 +21,7 @@ powerTOSTr(alpha, statistical_power, low_eqbound_r, high_eqbound_r, epsilon)
 Returns a string summarizing the power analysis, and a numeric variable for the number of pairs needed
 }
 \description{
-Function to perform power analysis for TOST
+Power analysis for TOST for correlations
 }
 \examples{
 powerTOSTr(alpha=0.05, statistical_power=0.8, low_eqbound_r=-0.1, high_eqbound_r=0.1)
