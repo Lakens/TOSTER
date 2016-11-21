@@ -1,4 +1,4 @@
-#' TOST function for an independent t-test
+#' TOST function for an independent t-test (Cohen's d)
 #' @param m1 mean of group 1
 #' @param m2 mean of group 2
 #' @param sd1 standard deviation of group 1
@@ -11,11 +11,11 @@
 #' @param var.equal logical variable indicating whether equal variances assumption is assumed to be TRUE or FALSE.  Defaults to FALSE.
 #' @return Returns dataframe with t-value, degrees of freedom, p-value, and lower and upper limit of confidence interval
 #' @examples
-#' TOST(m1=7.83,m2=7.98,sd1=1.21,sd2=1.29,n1=400,n2=400,low_eqbound_d=-0.199897678576151, high_eqbound_d=0.199897678576151,alpha=0.05, var.equal=TRUE)
+#' TOSTtwo(m1=7.83,m2=7.98,sd1=1.21,sd2=1.29,n1=400,n2=400,low_eqbound_d=-0.199897678576151, high_eqbound_d=0.199897678576151,alpha=0.05, var.equal=TRUE)
 #' @export
 #' 
 
-TOST<-function(m1,m2,sd1,sd2,n1,n2,low_eqbound_d, high_eqbound_d, alpha, var.equal){
+TOSTtwo<-function(m1,m2,sd1,sd2,n1,n2,low_eqbound_d, high_eqbound_d, alpha, var.equal){
   if(missing(alpha)) {
     alpha<-0.05
   }

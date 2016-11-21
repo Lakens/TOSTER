@@ -1,4 +1,4 @@
-#' Power analysis for TOST for dependent t-test
+#' Power analysis for TOST for dependent t-test (Cohen's dz)
 #' @param alpha alpha used for the test (e.g., 0.05)
 #' @param statistical_power desired power (e.g., 0.8)
 #' @param low_eqbound_dz lower equivalence bounds (e.g., -0.5) expressed in standardized mean difference (Cohen's dz)
@@ -6,10 +6,10 @@
 #' @param epsilon By default, true effect is assumed to be 0. If you want to perform an equivalence test when expecting a non-zero effect, specify the expected standardized effect size in Cohen's dz as epsilon (e.g., 0.05)
 #' @return Returns a string summarizing the power analysis, and a numeric variable for the number of pairs needed
 #' @examples 
-#' powerTOSTdz(alpha=0.05,statistical_power=0.8,low_eqbound_dz=-0.3, high_eqbound_dz=0.3, epsilon=0.1)
+#' powerTOSTpaired(alpha=0.05,statistical_power=0.8,low_eqbound_dz=-0.3, high_eqbound_dz=0.3, epsilon=0.1)
 #' @export
 
-powerTOSTdz<-function(alpha, statistical_power, low_eqbound_dz, high_eqbound_dz, epsilon){
+powerTOSTpaired<-function(alpha, statistical_power, low_eqbound_dz, high_eqbound_dz, epsilon){
   if(missing(epsilon)) {
     epsilon<-0
   }

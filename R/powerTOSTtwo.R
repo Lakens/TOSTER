@@ -6,10 +6,10 @@
 #' @param epsilon By default, true effect is assumed to be 0. If you want to perform an equivalence test when expecting a non-zero effect, specify the expected standardized effect size in Cohen's d as epsilon (e.g., 0.05)
 #' @return Returns a string summarizing the power analysis, and a numeric variable for the number of observations needed in each group
 #' @examples 
-#' powerTOST(alpha=0.05, statistical_power=0.8, low_eqbound_d=-0.4, high_eqbound_d=0.4, epsilon=0.1)
+#' powerTOSTtwo(alpha=0.05, statistical_power=0.8, low_eqbound_d=-0.4, high_eqbound_d=0.4, epsilon=0.1)
 #' @export
 
-powerTOST<-function(alpha, statistical_power, low_eqbound_d, high_eqbound_d, epsilon){
+powerTOSTtwo<-function(alpha, statistical_power, low_eqbound_d, high_eqbound_d, epsilon){
   if(missing(epsilon)) {
     epsilon<-0
   }

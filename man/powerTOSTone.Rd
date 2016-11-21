@@ -2,7 +2,7 @@
 % Please edit documentation in R/powerTOSTone.R
 \name{powerTOSTone}
 \alias{powerTOSTone}
-\title{Power analysis for TOST for one-sample t-test}
+\title{Power analysis for TOST for one-sample t-test (Cohen's d)}
 \usage{
 powerTOSTone(alpha, statistical_power, low_eqbound_d, high_eqbound_d, epsilon)
 }
@@ -21,7 +21,7 @@ powerTOSTone(alpha, statistical_power, low_eqbound_d, high_eqbound_d, epsilon)
 Returns a string summarizing the power analysis, and a numeric variable for the number of observations needed in each group
 }
 \description{
-Power analysis for TOST for one-sample t-test
+Power analysis for TOST for one-sample t-test (Cohen's d)
 }
 \examples{
 powerTOSTone(alpha=0.05, statistical_power=0.9, low_eqbound_d=-0.3, high_eqbound_d=0.3, epsilon=0.1)

@@ -1,4 +1,4 @@
-#' TOST function for a one-sample t-test (Cohen's d)
+#' TOSTone function for a one-sample t-test
 #' @param m mean
 #' @param mu value to compare against
 #' @param sd standard deviation
@@ -8,16 +8,14 @@
 #' @param alpha alpha level (default = 0.05)
 #' @return Returns dataframe with t-value, degrees of freedom, p-value, and lower and upper limit of confidence interval
 #' @examples
-#' TOSTone(m=0.54,mu=0.5,sd=1.2,n=100,low_eqbound_d=-0.3, high_eqbound_d=0.3, alpha=0.05)
+#' TOSTone.raw(m=0.52,mu=0.5,sd=0.5,n=300,low_eqbound=-0.1, high_eqbound=0.1, alpha=0.05)
 #' @export
 #' 
 
-TOSTone<-function(m,mu,sd,n,low_eqbound_d, high_eqbound_d, alpha){
+TOSTone.raw<-function(m,mu,sd,n,low_eqbound, high_eqbound, alpha){
   if(missing(alpha)) {
     alpha<-0.05
   }
-  low_eqbound<-low_eqbound_d*sd
-  high_eqbound<-high_eqbound_d*sd
   degree_f<-n-1
   t1<-(m-mu-low_eqbound)/(sd/sqrt(n))# t-test
   p1<-pt(t1, degree_f, lower=FALSE) 

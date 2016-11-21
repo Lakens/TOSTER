@@ -7,10 +7,10 @@
 #' @param epsilon By default, true effect is assumed to be 0. If you want to perform an equivalence test when expecting a non-zero effect, specify the expected standardized effect size raw scale units (e.g., scalepoints) as epsilon (e.g., 0.50)
 #' @return Returns a string summarizing the power analysis, and a numeric variable for the number of observations needed in each group
 #' @examples 
-#' powerTOSTraw(alpha=0.05, statistical_power=0.8, low_eqbound=-200, high_eqbound=200, sdpooled=350, epsilon=10)
+#' powerTOSTtwo.raw(alpha=0.05, statistical_power=0.8, low_eqbound=-200, high_eqbound=200, sdpooled=350, epsilon=10)
 #' @export
 
-powerTOSTraw<-function(alpha, statistical_power, low_eqbound, high_eqbound, sdpooled, epsilon){
+powerTOSTtwo.raw<-function(alpha, statistical_power, low_eqbound, high_eqbound, sdpooled, epsilon){
   if(missing(epsilon)) {
     epsilon<-0
   }

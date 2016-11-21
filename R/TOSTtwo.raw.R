@@ -1,4 +1,4 @@
-#' TOST raw function for an independent t-test (raw scores)
+#' TOST function for an independent t-test (raw scores)
 #' @param m1 mean of group 1
 #' @param m2 mean of group 2
 #' @param sd1 standard deviation of group 1
@@ -11,11 +11,11 @@
 #' @param var.equal logical variable indicating whether equal variances assumption is assumed to be TRUE or FALSE. Defaults to FALSE.
 #' @return Returns dataframe with t-value, degrees of freedom, p-value, and lower and upper limit of confidence interval
 #' @examples
-#' TOSTraw(m1=7.83,m2=7.98,sd1=1.21,sd2=1.29,n1=400,n2=400,low_eqbound=-0.25, high_eqbound=0.25,alpha=0.05)
+#' TOSTtwo.raw(m1=7.83,m2=7.98,sd1=1.21,sd2=1.29,n1=400,n2=400,low_eqbound=-0.25, high_eqbound=0.25,alpha=0.05)
 #' @export
 
 
-TOSTraw<-function(m1,m2,sd1,sd2,n1,n2,low_eqbound, high_eqbound, alpha, var.equal){
+TOSTtwo.raw<-function(m1,m2,sd1,sd2,n1,n2,low_eqbound, high_eqbound, alpha, var.equal){
   if(missing(alpha)) {
     alpha<-0.05
   }

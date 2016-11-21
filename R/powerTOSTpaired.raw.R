@@ -7,10 +7,10 @@
 #' @param epsilon By default, true effect is assumed to be 0. If you want to perform an equivalence test when expecting a non-zero effect, specify the expected standardized effect size in Cohen's dz as epsilon (e.g., 0.05)
 #' @return Returns a string summarizing the power analysis, and a numeric variable for the number of pairs needed
 #' @examples 
-#' powerTOSTdzraw(alpha=0.05,statistical_power=0.8,low_eqbound=-3, high_eqbound=3, sdif=10, epsilon=0)
+#' powerTOSTpaired.raw(alpha=0.05,statistical_power=0.8,low_eqbound=-3, high_eqbound=3, sdif=10, epsilon=0)
 #' @export
 
-powerTOSTdzraw<-function(alpha, statistical_power, low_eqbound, high_eqbound, sdif, epsilon){
+powerTOSTpaired.raw<-function(alpha, statistical_power, low_eqbound, high_eqbound, sdif, epsilon){
   if(missing(epsilon)) {
     epsilon<-0
   }
