@@ -10,11 +10,11 @@
 #' @param alpha alpha level (default = 0.05)
 #' @return Returns dataframe with t-value, degrees of freedom, p-value, and lower and upper limit of confidence interval
 #' @examples
-#' TOSTdzraw(n=65,m1=5.830769,m2=5.7538462,sd1=1.1668498,sd2=1.2994081,r12=0.744992,low_eqbound_dz=-0.337341706,high_eqbound_dz=0.337341706, alpha=0.05)
+#' TOSTpaired.raw(n=65,m1=5.830769,m2=5.7538462,sd1=1.1668498,sd2=1.2994081,r12=0.744992,low_eqbound_dz=-0.337341706,high_eqbound_dz=0.337341706, alpha=0.05)
 #' @export
 #' 
 
-TOSTdzraw<-function(n,m1,m2,sd1,sd2,r12,low_eqbound, high_eqbound, alpha){
+TOSTpaired.raw<-function(n,m1,m2,sd1,sd2,r12,low_eqbound, high_eqbound, alpha){
   if(missing(alpha)) {
     alpha <- 0.05
   }  
