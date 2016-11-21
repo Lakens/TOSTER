@@ -1,4 +1,4 @@
-#' TOSTone function for a one-sample t-test
+#' TOST function for a one-sample t-test (raw scores)
 #' @param m mean
 #' @param mu value to compare against
 #' @param sd standard deviation

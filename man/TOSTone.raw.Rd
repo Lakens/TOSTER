@@ -2,7 +2,7 @@
 % Please edit documentation in R/TOSTone.raw.R
 \name{TOSTone.raw}
 \alias{TOSTone.raw}
-\title{TOSTone function for a one-sample t-test}
+\title{TOST function for a one-sample t-test (raw scores)}
 \usage{
 TOSTone.raw(m, mu, sd, n, low_eqbound, high_eqbound, alpha)
 }
@@ -25,7 +25,7 @@ TOSTone.raw(m, mu, sd, n, low_eqbound, high_eqbound, alpha)
 Returns dataframe with t-value, degrees of freedom, p-value, and lower and upper limit of confidence interval
 }
 \description{
-TOSTone function for a one-sample t-test
+TOST function for a one-sample t-test (raw scores)
 }
 \examples{
 TOSTone.raw(m=0.52,mu=0.5,sd=0.5,n=300,low_eqbound=-0.1, high_eqbound=0.1, alpha=0.05)
