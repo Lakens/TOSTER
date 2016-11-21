@@ -2,7 +2,7 @@
 % Please edit documentation in R/TOSTmeta.R
 \name{TOSTmeta}
 \alias{TOSTmeta}
-\title{TOSTmeta function for meta-analysis}
+\title{TOST function for meta-analysis}
 \usage{
 TOSTmeta(ES, var, se, low_eqbound_d, high_eqbound_d, alpha)
 }
@@ -23,7 +23,7 @@ TOSTmeta(ES, var, se, low_eqbound_d, high_eqbound_d, alpha)
 Returns dataframe with Z-value, p-value, and lower and upper limit of confidence interval
 }
 \description{
-TOSTmeta function for meta-analysis
+TOST function for meta-analysis
 }
 \examples{
 TOSTmeta(ES=0.12, var=0.0081, se=0.09, low_eqbound_d=-0.2, high_eqbound_d=0.2, alpha=0.05)

@@ -1,4 +1,4 @@
-#' TOSTmeta function for meta-analysis
+#' TOST function for meta-analysis
 #' @param ES meta-analytic effect size
 #' @param var meta-analytic variance
 #' @param se standard error
