@@ -1,9 +1,9 @@
 #' Power analysis for TOST for one-sample t-test (raw scores)
 #' @param alpha alpha used for the test (e.g., 0.05)
 #' @param statistical_power desired power (e.g., 0.8)
-#' @param low_eqbound_d lower equivalence bounds (e.g., -0.5) expressed in standardized mean difference (Cohen's d)
-#' @param high_eqbound_d upper equivalence bounds (e.g., 0.5) expressed in standardized mean difference (Cohen's d)
-#' @param epsilon By default, true effect is assumed to be 0. If you want to perform an equivalence test when expecting a non-zero effect, specify the expected standardized effect size in Cohen's d as epsilon (e.g., 0.05)
+#' @param low_eqbound lower equivalence bounds (e.g., -0.5) expressed in raw scores
+#' @param high_eqbound upper equivalence bounds (e.g., 0.5) expressed in raw scores
+#' @param epsilon By default, true effect is assumed to be 0. If you want to perform an equivalence test when expecting a non-zero effect, specify the expected true effect raw scores as epsilon (e.g., 0.05)
 #' @return Returns a string summarizing the power analysis, and a numeric variable for the number of observations needed in each group
 #' @examples 
 #' powerTOSTone.raw(alpha=0.05, statistical_power=0.9, low_eqbound=-0.3, high_eqbound=0.3, epsilon=0)

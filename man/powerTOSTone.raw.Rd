@@ -12,11 +12,11 @@ powerTOSTone.raw(alpha, statistical_power, sd, low_eqbound, high_eqbound,
 
 \item{statistical_power}{desired power (e.g., 0.8)}
 
-\item{epsilon}{By default, true effect is assumed to be 0. If you want to perform an equivalence test when expecting a non-zero effect, specify the expected standardized effect size in Cohen's d as epsilon (e.g., 0.05)}
+\item{low_eqbound}{lower equivalence bounds (e.g., -0.5) expressed in raw scores}
 
-\item{low_eqbound_d}{lower equivalence bounds (e.g., -0.5) expressed in standardized mean difference (Cohen's d)}
+\item{high_eqbound}{upper equivalence bounds (e.g., 0.5) expressed in raw scores}
 
-\item{high_eqbound_d}{upper equivalence bounds (e.g., 0.5) expressed in standardized mean difference (Cohen's d)}
+\item{epsilon}{By default, true effect is assumed to be 0. If you want to perform an equivalence test when expecting a non-zero effect, specify the expected true effect raw scores as epsilon (e.g., 0.05)}
 }
 \value{
 Returns a string summarizing the power analysis, and a numeric variable for the number of observations needed in each group

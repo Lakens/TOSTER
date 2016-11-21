@@ -12,13 +12,13 @@ powerTOSTpaired.raw(alpha, statistical_power, low_eqbound, high_eqbound, sdif,
 
 \item{statistical_power}{desired power (e.g., 0.8)}
 
-\item{low_eqbound}{lower equivalence bounds (e.g., -0.5) expressed in standardized mean difference (Cohen's dz)}
+\item{low_eqbound}{lower equivalence bounds (e.g., -0.5) expressed in raw mean difference}
 
-\item{high_eqbound}{upper equivalence bounds (e.g., 0.5) expressed in standardized mean difference (Cohen's dz)}
+\item{high_eqbound}{upper equivalence bounds (e.g., 0.5) expressed in raw mean difference}
 
 \item{sdif}{standard deviation of the difference scores}
 
-\item{epsilon}{By default, true effect is assumed to be 0. If you want to perform an equivalence test when expecting a non-zero effect, specify the expected standardized effect size in Cohen's dz as epsilon (e.g., 0.05)}
+\item{epsilon}{By default, true effect is assumed to be 0. If you want to perform an equivalence test when expecting a non-zero effect, specify the expected true effect in raw scores as epsilon (e.g., 0.05)}
 }
 \value{
 Returns a string summarizing the power analysis, and a numeric variable for the number of pairs needed
