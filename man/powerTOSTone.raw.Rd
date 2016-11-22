@@ -19,12 +19,12 @@ powerTOSTone.raw(alpha, statistical_power, sd, low_eqbound, high_eqbound,
 \item{epsilon}{By default, true effect is assumed to be 0. If you want to perform an equivalence test when expecting a non-zero effect, specify the expected true effect raw scores as epsilon (e.g., 0.05)}
 }
 \value{
-Returns a string summarizing the power analysis, and a numeric variable for the number of observations needed in each group
+Returns a string summarizing the power analysis, and a numeric variable for the number of observations needed.
 }
 \description{
 Power analysis for TOST for one-sample t-test (raw scores)
 }
 \examples{
-powerTOSTone.raw(alpha=0.05, statistical_power=0.9, low_eqbound=-0.3, high_eqbound=0.3, epsilon=0)
+powerTOSTone.raw(alpha=0.05, statistical_power=0.9, sd = 1, low_eqbound=-0.3, high_eqbound=0.3, epsilon=0)
 }
 
