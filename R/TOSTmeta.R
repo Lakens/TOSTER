@@ -28,7 +28,8 @@ TOSTmeta<-function(ES,var,se,low_eqbound_d, high_eqbound_d, alpha){
   UL95<-ES+qnorm(1-alpha/2)*(se)
   ptost<-max(p1,p2) #Get highest p-value for summary TOST result
   Ztost<-ifelse(abs(Z1) < abs(Z2), Z1, Z2) #Get lowest t-value for summary TOST result
-  results<-data.frame(Ztost,ptost,LL90,UL90)
+  results<-data.frame(Z1,p1,Z2,p2,LL90,UL90)
+  colnames(results) <- c("Z-value 1","p-value 1","Z-value 2","p-value 2", paste("Lower Limit ",100*(1-alpha*2),"% CI",sep=""),paste("Upper Limit ",100*(1-alpha*2),"% CI",sep=""))
   testoutcome<-ifelse(pttest<alpha,"significant","non-significant")
   TOSToutcome<-ifelse(ptost<alpha,"significant","non-significant")
   plot(NA, ylim=c(0,1), xlim=c(min(LL95,low_eqbound_d,ES)-max(UL95-LL95, high_eqbound_d-low_eqbound_d,ES)/10, max(UL95,high_eqbound_d,ES)+max(UL95-LL95, high_eqbound_d-low_eqbound_d, ES)/10), bty="l", yaxt="n", ylab="",xlab="Effect size")

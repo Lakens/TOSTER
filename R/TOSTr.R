@@ -29,6 +29,7 @@ TOSTr<-function(n, r, low_eqbound_r, high_eqbound_r, alpha){
   LL95<-(exp(1)^(2*zLL95)-1)/(exp(1)^(2*zLL95)+1)
   UL95<-(exp(1)^(2*zUL95)-1)/(exp(1)^(2*zUL95)+1)
   results<-data.frame(ptost,LL90,UL90)
+  colnames(results) <- c("p-value 1", paste("Lower Limit ",100*(1-alpha*2),"% CI",sep=""),paste("Upper Limit ",100*(1-alpha*2),"% CI",sep=""))
   testoutcome<-ifelse(pttest<alpha,"significant","non-significant")
   TOSToutcome<-ifelse(ptost<alpha,"significant","non-significant")
   plot(NA, ylim=c(0,1), xlim=c(min(LL90,low_eqbound_r)-max(UL90-LL90, high_eqbound_r-low_eqbound_r)/10, max(UL90,high_eqbound_r)+max(UL90-LL90, high_eqbound_r-low_eqbound_r)/10), bty="l", yaxt="n", ylab="",xlab="Correlation")

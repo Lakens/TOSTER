@@ -51,7 +51,8 @@ TOSTtwo.raw<-function(m1,m2,sd1,sd2,n1,n2,low_eqbound, high_eqbound, alpha, var.
   }
   ptost<-max(p1,p2) #Get highest p-value for summary TOST result
   ttost<-ifelse(abs(t1) < abs(t2), t1, t2) #Get lowest t-value for summary TOST result
-  results<-data.frame(ttost,degree_f,ptost,LL90,UL90)
+  results<-data.frame(t1,p1,t2,p2,degree_f,LL90,UL90)
+  colnames(results) <- c("t-value 1","p-value 1","t-value 2","p-value 2","df", paste("Lower Limit ",100*(1-alpha*2),"% CI",sep=""),paste("Upper Limit ",100*(1-alpha*2),"% CI",sep=""))
   dif<-(m1-m2)
   testoutcome<-ifelse(pttest<alpha,"significant","non-significant")
   TOSToutcome<-ifelse(ptost<alpha,"significant","non-significant")
