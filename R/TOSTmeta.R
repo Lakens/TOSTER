@@ -29,8 +29,8 @@ TOSTmeta<-function(ES,var,se,low_eqbound_d, high_eqbound_d, alpha){
   ptost<-max(p1,p2) #Get highest p-value for summary TOST result
   Ztost<-ifelse(abs(Z1) < abs(Z2), Z1, Z2) #Get lowest t-value for summary TOST result
   results<-data.frame(Ztost,ptost,LL90,UL90)
-  testoutcome<-ifelse(pttest<0.05,"significant","non-significant")
-  TOSToutcome<-ifelse(ptost<0.05,"significant","non-significant")
+  testoutcome<-ifelse(pttest<alpha,"significant","non-significant")
+  TOSToutcome<-ifelse(ptost<alpha,"significant","non-significant")
   plot(NA, ylim=c(0,1), xlim=c(min(LL95,low_eqbound_d,ES)-max(UL95-LL95, high_eqbound_d-low_eqbound_d,ES)/10, max(UL95,high_eqbound_d,ES)+max(UL95-LL95, high_eqbound_d-low_eqbound_d, ES)/10), bty="l", yaxt="n", ylab="",xlab="Effect size")
   points(x=ES, y=0.5, pch=15, cex=2)
   abline(v=high_eqbound_d, lty=2)
@@ -39,7 +39,7 @@ TOSTmeta<-function(ES,var,se,low_eqbound_d, high_eqbound_d, alpha){
   segments(LL90,0.5,UL90,0.5, lwd=3)
   segments(LL95,0.5,UL95,0.5, lwd=1)
   title(main=paste("Equivalence bounds ",round(low_eqbound_d,digits=3)," and ",round(high_eqbound_d,digits=3),"\nEffect size = ",round(ES,digits=3)," \n TOST: 90% CI [",round(LL90,digits=3),";",round(UL90,digits=3),"] ", TOSToutcome," \n NHST: 95% CI [",round(LL95,digits=3),";",round(UL95,digits=3),"] ", testoutcome,sep=""), cex.main=1)
-  message(cat("The meta-analysis was ",testoutcome,", Z = ",Z,", p = ",pttest,sep=""))
-  message(cat("The equivalence test was ",TOSToutcome,", Z = ",Ztost,", p = ",ptost,sep=""))
+  message(cat("Using alpha = ",alpha," the meta-analysis was ",testoutcome,", Z = ",Z,", p = ",pttest,sep=""))
+  message(cat("Using alpha = ",alpha," the equivalence test was ",TOSToutcome,", Z = ",Ztost,", p = ",ptost,sep=""))
   return(results)
 }

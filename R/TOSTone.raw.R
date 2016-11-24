@@ -31,8 +31,8 @@ TOSTone.raw<-function(m,mu,sd,n,low_eqbound, high_eqbound, alpha){
   ttost<-ifelse(abs(t1) < abs(t2), t1, t2) #Get lowest t-value for summary TOST result
   results<-data.frame(ttost,degree_f,ptost,LL90,UL90)
   dif<-(m-mu)
-  testoutcome<-ifelse(pttest<0.05,"significant","non-significant")
-  TOSToutcome<-ifelse(ptost<0.05,"significant","non-significant")
+  testoutcome<-ifelse(pttest<alpha,"significant","non-significant")
+  TOSToutcome<-ifelse(ptost<alpha,"significant","non-significant")
   plot(NA, ylim=c(0,1), xlim=c(min(LL95,low_eqbound,dif)-max(UL95-LL95, high_eqbound-low_eqbound,dif)/10, max(UL95,high_eqbound,dif)+max(UL95-LL95, high_eqbound-low_eqbound, dif)/10), bty="l", yaxt="n", ylab="",xlab="Mean Difference")
   points(x=dif, y=0.5, pch=15, cex=2)
   abline(v=high_eqbound, lty=2)
@@ -41,7 +41,7 @@ TOSTone.raw<-function(m,mu,sd,n,low_eqbound, high_eqbound, alpha){
   segments(LL90,0.5,UL90,0.5, lwd=3)
   segments(LL95,0.5,UL95,0.5, lwd=1)
   title(main=paste("Equivalence bounds ",round(low_eqbound,digits=3)," and ",round(high_eqbound,digits=3),"\nMean difference = ",round(dif,digits=3)," \n TOST: 90% CI [",round(LL90,digits=3),";",round(UL90,digits=3),"] ", TOSToutcome," \n NHST: 95% CI [",round(LL95,digits=3),";",round(UL95,digits=3),"] ", testoutcome,sep=""), cex.main=1)
-  message(cat("Student's t-test was ",testoutcome,", t(",degree_f,") = ",t,", p = ",pttest,sep=""))
-  message(cat("The equivalence test based on Student's t-test was ",TOSToutcome,", t(",degree_f,") = ",ttost,", p = ",ptost,sep=""))
+  message(cat("Using alpha = ",alpha," the NHST one-sample t-test was ",testoutcome,", t(",degree_f,") = ",t,", p = ",pttest,sep=""))
+  message(cat("Using alpha = ",alpha," the equivalence test was ",TOSToutcome,", t(",degree_f,") = ",ttost,", p = ",ptost,sep=""))
   return(results)
 }
