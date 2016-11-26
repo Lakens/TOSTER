@@ -4,18 +4,14 @@
 #' @param low_eqbound lower equivalence bounds (e.g., -0.5) expressed in raw mean difference
 #' @param high_eqbound upper equivalence bounds (e.g., 0.5) expressed in raw mean difference
 #' @param sdif standard deviation of the difference scores
-#' @param epsilon By default, true effect is assumed to be 0. If you want to perform an equivalence test when expecting a non-zero effect, specify the expected true effect in raw scores as epsilon (e.g., 0.05)
 #' @return Returns a string summarizing the power analysis, and a numeric variable for the number of pairs needed
 #' @examples 
-#' powerTOSTpaired.raw(alpha=0.05,statistical_power=0.8,low_eqbound=-3, high_eqbound=3, sdif=10, epsilon=0)
+#' powerTOSTpaired.raw(alpha=0.05,statistical_power=0.8,low_eqbound=-3, high_eqbound=3, sdif=10)
 #' @export
 
-powerTOSTpaired.raw<-function(alpha, statistical_power, low_eqbound, high_eqbound, sdif, epsilon){
-  if(missing(epsilon)) {
-    epsilon<-0
-  }
-  NT1<-ceiling((qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(low_eqbound/sdif-epsilon/sdif)^2)
-  NT2<-ceiling((qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(high_eqbound/sdif-epsilon/sdif)^2)
+powerTOSTpaired.raw<-function(alpha, statistical_power, low_eqbound, high_eqbound, sdif){
+  NT1<-ceiling((qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(low_eqbound/sdif)^2)
+  NT2<-ceiling((qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(high_eqbound/sdif)^2)
   N<-max(NT1,NT2)
   message(cat("The required sample size to achieve",100*statistical_power,"% power with equivalence bounds of",low_eqbound,"and",high_eqbound,"is",N,"pairs"))
   return(N)
