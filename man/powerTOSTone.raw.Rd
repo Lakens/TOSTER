@@ -4,8 +4,7 @@
 \alias{powerTOSTone.raw}
 \title{Power analysis for TOST for one-sample t-test (raw scores)}
 \usage{
-powerTOSTone.raw(alpha, statistical_power, sd, low_eqbound, high_eqbound,
-  epsilon)
+powerTOSTone.raw(alpha, statistical_power, sd, low_eqbound, high_eqbound)
 }
 \arguments{
 \item{alpha}{alpha used for the test (e.g., 0.05)}
@@ -15,8 +14,6 @@ powerTOSTone.raw(alpha, statistical_power, sd, low_eqbound, high_eqbound,
 \item{low_eqbound}{lower equivalence bounds (e.g., -0.5) expressed in raw scores}
 
 \item{high_eqbound}{upper equivalence bounds (e.g., 0.5) expressed in raw scores}
-
-\item{epsilon}{By default, true effect is assumed to be 0. If you want to perform an equivalence test when expecting a non-zero effect, specify the expected true effect raw scores as epsilon (e.g., 0.05)}
 }
 \value{
 Returns a string summarizing the power analysis, and a numeric variable for the number of observations needed.
@@ -25,6 +22,6 @@ Returns a string summarizing the power analysis, and a numeric variable for the 
 Power analysis for TOST for one-sample t-test (raw scores)
 }
 \examples{
-powerTOSTone.raw(alpha=0.05, statistical_power=0.9, sd = 1, low_eqbound=-0.3, high_eqbound=0.3, epsilon=0)
+powerTOSTone.raw(alpha=0.05, statistical_power=0.9, sd = 1, low_eqbound=-0.3, high_eqbound=0.3)
 }
 

@@ -4,7 +4,7 @@
 \alias{powerTOSTr}
 \title{Power analysis for TOST for correlations}
 \usage{
-powerTOSTr(alpha, statistical_power, low_eqbound_r, high_eqbound_r, epsilon)
+powerTOSTr(alpha, statistical_power, low_eqbound_r, high_eqbound_r)
 }
 \arguments{
 \item{alpha}{alpha used for the test (e.g., 0.05)}
@@ -14,8 +14,6 @@ powerTOSTr(alpha, statistical_power, low_eqbound_r, high_eqbound_r, epsilon)
 \item{low_eqbound_r}{lower equivalence bounds (e.g., -0.5) expressed in standardized mean difference (Cohen's dz)}
 
 \item{high_eqbound_r}{upper equivalence bounds (e.g., 0.5) expressed in standardized mean difference (Cohen's dz)}
-
-\item{epsilon}{By default, true effect is assumed to be 0. If you want to perform an equivalence test when expecting a non-zero effect, specify the expected standardized effect size in Cohen's dz as epsilon (e.g., 0.05)}
 }
 \value{
 Returns a string summarizing the power analysis, and a numeric variable for the number of pairs needed

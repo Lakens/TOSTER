@@ -4,7 +4,7 @@
 \alias{powerTOSTtwo}
 \title{Power analysis for TOST for independent t-test}
 \usage{
-powerTOSTtwo(alpha, statistical_power, low_eqbound_d, high_eqbound_d, epsilon)
+powerTOSTtwo(alpha, statistical_power, low_eqbound_d, high_eqbound_d)
 }
 \arguments{
 \item{alpha}{alpha used for the test (e.g., 0.05)}
@@ -14,8 +14,6 @@ powerTOSTtwo(alpha, statistical_power, low_eqbound_d, high_eqbound_d, epsilon)
 \item{low_eqbound_d}{lower equivalence bounds (e.g., -0.5) expressed in standardized mean difference (Cohen's d)}
 
 \item{high_eqbound_d}{upper equivalence bounds (e.g., 0.5) expressed in standardized mean difference (Cohen's d)}
-
-\item{epsilon}{By default, true effect is assumed to be 0. If you want to perform an equivalence test when expecting a non-zero effect, specify the expected standardized effect size in Cohen's d as epsilon (e.g., 0.05)}
 }
 \value{
 Returns a string summarizing the power analysis, and a numeric variable for the number of observations needed in each group
@@ -24,6 +22,6 @@ Returns a string summarizing the power analysis, and a numeric variable for the 
 Power analysis for TOST for independent t-test
 }
 \examples{
-powerTOSTtwo(alpha=0.05, statistical_power=0.8, low_eqbound_d=-0.4, high_eqbound_d=0.4, epsilon=0.1)
+powerTOSTtwo(alpha=0.05, statistical_power=0.8, low_eqbound_d=-0.4, high_eqbound_d=0.4)
 }
 

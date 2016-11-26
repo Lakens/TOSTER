@@ -4,8 +4,7 @@
 \alias{powerTOSTtwo.raw}
 \title{Power analysis for TOST for independent t-test (raw scores)}
 \usage{
-powerTOSTtwo.raw(alpha, statistical_power, low_eqbound, high_eqbound, sdpooled,
-  epsilon)
+powerTOSTtwo.raw(alpha, statistical_power, low_eqbound, high_eqbound, sdpooled)
 }
 \arguments{
 \item{alpha}{alpha used for the test (e.g., 0.05)}
@@ -17,8 +16,6 @@ powerTOSTtwo.raw(alpha, statistical_power, low_eqbound, high_eqbound, sdpooled,
 \item{high_eqbound}{upper equivalence bounds (e.g., 0.5) expressed in raw scale units (e.g., scalepoints)}
 
 \item{sdpooled}{specify the pooled standard deviation}
-
-\item{epsilon}{By default, true effect is assumed to be 0. If you want to perform an equivalence test when expecting a non-zero effect, specify the expected standardized effect size raw scale units (e.g., scalepoints) as epsilon (e.g., 0.50)}
 }
 \value{
 Returns a string summarizing the power analysis, and a numeric variable for the number of observations needed in each group
@@ -27,6 +24,6 @@ Returns a string summarizing the power analysis, and a numeric variable for the 
 Power analysis for TOST for independent t-test (raw scores)
 }
 \examples{
-powerTOSTtwo.raw(alpha=0.05, statistical_power=0.8, low_eqbound=-200, high_eqbound=200, sdpooled=350, epsilon=10)
+powerTOSTtwo.raw(alpha=0.05, statistical_power=0.8, low_eqbound=-200, high_eqbound=200, sdpooled=350)
 }
 
