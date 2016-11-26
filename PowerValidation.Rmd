@@ -1,0 +1,156 @@
+---
+title: "Power Validation"
+output:
+  html_document: default
+  html_notebook: default
+---
+
+#Power Validation
+
+Using the TrialSize package to calculate sample sizes base on examplesfrom Chow SC, Shao J, Wang H. Sample Size Calculation in Clinical Research. New York: Marcel Dekker, 2008.
+
+```{r}
+library(TrialSize)
+library(TOSTER)
+
+#Power for one-sample TOST based on raw scores
+Example.3.1.4<-OneSampleMean.Equivalence(alpha=0.05,beta=0.2,sigma=0.1,delta=0.05,margin=0) 
+Example.3.1.4   # 35
+
+powerTOSTone.raw(alpha=0.05, statistical_power=0.8, sd = 0.1, low_eqbound=-0.05, high_eqbound=0.05, epsilon=0) #35
+
+
+#Power for two-sample independent t-test based on raw scores
+Example.3.2.4<-TwoSampleMean.Equivalence(alpha=0.1,beta=0.1,sigma=0.1,k=1,delta=0.05,margin=0.01)
+Example.3.2.4 #107 (but ceiling rounded 108)
+
+#Margin 0.01 is identical to using bounds - margin, so 0.04
+powerTOSTtwo.raw(alpha=0.1, statistical_power=0.9, low_eqbound=-0.04, high_eqbound=0.04, sdpooled=0.1) #108
+
+```
+
+
+
+Table 1 Julious (2004) provides the sample sizes for *superiority* tests for a independent-samples *t*-test standardized effect sizes from 0.05 to 1.5, based equal sample sizes (in column 1). We can use the powerTOSTtwo function to calculate these values. Compared to an equivalence test, we can use the powerTOSTtwo function, when we double the alpha, and halve the Type 2 error. For alpha = 0.5 and a statistical power of 0.9, this means we will fill in an alpha of 0.1 and a statistical power of 0.95.
+
+Table 1:
+bound N
+0.05 8407
+0.10 2103
+0.15 935 
+0.20 527 
+0.25 338 
+0.30 235 
+0.35 173 
+0.40 133 
+0.45 105 
+0.50 86
+0.55 71
+0.60 60
+0.65 51
+0.70 44
+0.75 39
+0.80 34
+0.85 31
+0.90 27
+0.95 25
+1.00 23
+1.05 21
+1.10 19
+1.15 17
+1.20 16
+1.25 15
+1.30 14
+1.35 13
+1.40 12
+1.45 12
+1.50 11
+
+```{r}
+require(TOSTER)
+
+dlist<-seq(0.05,1.5,0.05)
+samplesize<-numeric(length(dlist))
+for(i in 1:length(dlist)){
+  samplesize[i]<-powerTOSTtwo(alpha=0.1, statistical_power=0.95, low_eqbound_d=-(dlist[i]), high_eqbound_d=(dlist[i]))
+}
+samplesize
+```
+Calculations differ only one or 2 participants max, due to the approximation that is used. 
+
+We can also recreate Table 3, column 1, which includes sample sizes for 90% power and alpha = 0.025, assuming equal sample sizes and a try effect size of 0. 
+
+```{r}
+require(TOSTER)
+
+dlist<-seq(0.05,1.5,0.05)
+samplesize<-numeric(length(dlist))
+for(i in 1:length(dlist)){
+  samplesize[i]<-powerTOSTtwo(alpha=0.025, statistical_power=0.9, low_eqbound_d=-(dlist[i]), high_eqbound_d=(dlist[i]))
+}
+samplesize
+```
+
+We again see a difference in sample size of 1 at most due to the approximation using here.
+
+#Validation through simulation
+
+We can calculate the sample size needed to achieve 80% power in a paired samples equivalence test:
+
+```{r}
+require(TOSTER)
+powerTOSTpaired(alpha=0.05, statistical_power=0.8, low_eqbound_dz=-0.1, high_eqbound_dz=0.1, epsilon=0) #Calculate n pairs
+#Required N: 857 pairs
+```
+
+Subsequently, we can simulate paired samples TOST tests with given sample size, which gives 80% power. 
+
+```{r}
+library(mvtnorm) #to simulate correlated data
+n <- 857 #set sample size simulation based on pwer
+r <- 0.0 #set correlation
+low_eqbound_dz=-0.1
+high_eqbound_dz=0.1
+sd<-4
+alpha<-0.05
+nSims <- 100000 #number of simulated experiments
+pttest<-numeric(nSims) #set up empty container for all simulated p-values
+ptost<-numeric(nSims) #set up empty container for all simulated p-values
+
+for(i in 1:nSims){ #for each simulated experiment
+  a <- rmvnorm(n=n,mean=c(0.0,0.0),sigma=matrix(c(sd,r,r,sd), 2,2))
+  x<-a[,1]
+  y<-a[,2]
+  m1<-mean(x)
+  m2<-mean(y)
+  sd1<-sd(x)
+  sd2<-sd(y)
+  r12<-cor(x,y)
+  sdif<-sqrt(sd1^2+sd2^2-2*r12*sd1*sd2)
+  se<-sdif/sqrt(n)
+  low_eqbound<-low_eqbound_dz*sdif
+  high_eqbound<-high_eqbound_dz*sdif
+  t<-(m1-m2)/se
+  degree_f<-n-1
+  pttest[i]<-2*pt(abs(t), degree_f, lower=FALSE)
+  t1<-((m1-m2)+(low_eqbound))/se
+  p1<-1-pt(t1, degree_f, lower=FALSE)
+  t2<-((m1-m2)+(high_eqbound))/se
+  p2<-pt(t2, degree_f, lower=FALSE)
+  ttost<-ifelse(abs(t1) < abs(t2), t1, t2)
+  LL90<-((m1-m2)-qt(1-alpha, degree_f)*se)
+  UL90<-((m1-m2)+qt(1-alpha, degree_f)*se)
+  ptost[i]<-max(p1,p2)
+}
+
+#P-value distribution normal t-test (uniform because null is true)
+hist(pttest, breaks=20, xlim=c(0,1))
+sum(pttest<0.05) #Type 1 error rate for NHST
+
+#P-value distribution TOST
+hist(ptost, breaks=20, xlim=c(0,1))
+sum(ptost<0.05) #Power for TOST
+```
+
+
+
