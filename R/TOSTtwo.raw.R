@@ -51,8 +51,6 @@ TOSTtwo.raw<-function(m1,m2,sd1,sd2,n1,n2,low_eqbound, high_eqbound, alpha, var.
   }
   ptost<-max(p1,p2) #Get highest p-value for summary TOST result
   ttost<-ifelse(abs(t1) < abs(t2), t1, t2) #Get lowest t-value for summary TOST result
-  results<-data.frame(t1,p1,t2,p2,degree_f,LL90,UL90)
-  colnames(results) <- c("t-value 1","p-value 1","t-value 2","p-value 2","df", paste("Lower Limit ",100*(1-alpha*2),"% CI",sep=""),paste("Upper Limit ",100*(1-alpha*2),"% CI",sep=""))
   dif<-(m1-m2)
   testoutcome<-ifelse(pttest<alpha,"significant","non-significant")
   TOSToutcome<-ifelse(ptost<alpha,"significant","non-significant")
@@ -71,5 +69,19 @@ TOSTtwo.raw<-function(m1,m2,sd1,sd2,n1,n2,low_eqbound, high_eqbound, alpha, var.
     message(cat("Using alpha = ",alpha," Welch's t-test was ",testoutcome,", t(",degree_f,") = ",t,", p = ",pttest,sep=""))
     message(cat("Using alpha = ",alpha," the equivalence test based on Welch's t-test  was ",TOSToutcome,", t(",degree_f,") = ",ttost,", p = ",ptost,sep=""))
   }
-  return(results)
+  TOSTresults<-data.frame(t1,p1,t2,p2,degree_f)
+  colnames(TOSTresults) <- c("t-value 1","p-value 1","t-value 2","p-value 2","df")
+  bound_results<-data.frame(low_eqbound,high_eqbound)
+  colnames(bound_results) <- c("low bound raw","high bound raw")
+  CIresults<-data.frame(LL90,UL90)
+  colnames(CIresults) <- c(paste("Lower Limit ",100*(1-alpha*2),"% CI raw",sep=""),paste("Upper Limit ",100*(1-alpha*2),"% CI raw",sep=""))
+  cat("TOST results:\n")
+  print(TOSTresults)  
+  cat("\n")
+  cat("Equivalence bounds (raw scores):\n")
+  print(bound_results)  
+  cat("\n")
+  cat("TOST confidence interval:\n")
+  print(CIresults)
+  invisible(list(TOST_t1=t1,TOST_p1=p1,TOST_t2=t2,TOST_p2=p2, TOST_df=degree_f,alpha=alpha,low_eqbound=low_eqbound,high_eqbound=high_eqbound, LL_CI_TOST=LL90,UL_CI_TOST=UL90))
 }
