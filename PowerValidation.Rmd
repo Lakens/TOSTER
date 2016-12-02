@@ -1,9 +1,15 @@
 ---
 title: "Power Validation"
 output:
-  html_document: default
+  pdf_document: default
   html_notebook: default
+  html_document: default
 ---
+
+```{r}
+library(knitr)
+opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=TRUE)
+```
 
 #Power Validation
 
@@ -17,7 +23,7 @@ library(TOSTER)
 Example.3.1.4<-OneSampleMean.Equivalence(alpha=0.05,beta=0.2,sigma=0.1,delta=0.05,margin=0) 
 Example.3.1.4   # 35
 
-powerTOSTone.raw(alpha=0.05, statistical_power=0.8, sd = 0.1, low_eqbound=-0.05, high_eqbound=0.05, epsilon=0) #35
+powerTOSTone.raw(alpha=0.05, statistical_power=0.8, sd = 0.1, low_eqbound=-0.05, high_eqbound=0.05) #35
 
 
 #Power for two-sample independent t-test based on raw scores
@@ -99,7 +105,7 @@ We can calculate the sample size needed to achieve 80% power in a paired samples
 
 ```{r}
 require(TOSTER)
-powerTOSTpaired(alpha=0.05, statistical_power=0.8, low_eqbound_dz=-0.1, high_eqbound_dz=0.1, epsilon=0) #Calculate n pairs
+powerTOSTpaired(alpha=0.05, statistical_power=0.8, low_eqbound_dz=-0.1, high_eqbound_dz=0.1) #Calculate n pairs
 #Required N: 857 pairs
 ```
 

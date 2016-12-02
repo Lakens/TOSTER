@@ -1,15 +1,20 @@
 ---
 title: "Validation file for Equivalence Functions"
 output:
+  pdf_document: default
   html_notebook: default
   html_document: default
-  pdf_document: default
   word_document: default
 ---
 
-#**Tests against Literature, equivalence package, and MiniTab**
+```{r}
+library(knitr)
+opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=TRUE)
+```
 
-Below I reproduce some examples from the literature, compare TOSTER against other packages that have equivalence test functions, and against Minitab. MiniTab software has implemented equivalence tests and power analysis for one-sample, independent, and paired t-tests. It is excellent - by far the most user-friendly software for anyone who prefers a commercial statistics program over an open source solution (it also hs equivalence tests for 2x2 crossover designs, but not for correlations or meta-analysis). It also allows users to enter summary statistics, which is used here to compare the output of the equivalence functions in TOSTER against minitab. Not that when SD  = 1, the mean difference equals the standardized difference. The MiniTab output is followed by the R function.
+#**Tests against Literature, existing packages, and MiniTab**
+
+Below I reproduce some examples from the literature, compare TOSTER against other R packages that have equivalence test functions, and against Minitab. MiniTab software has implemented equivalence tests and power analysis for one-sample, independent, and paired t-tests. It is excellent - by far the most user-friendly software for anyone who prefers a commercial statistics program over an open source solution (it also has equivalence tests for 2x2 crossover designs, but not for correlations or meta-analysis). It also allows users to enter summary statistics, which is used here to compare the output of the equivalence functions in TOSTER against minitab. Note that when SD  = 1, the mean difference equals the standardized difference. The MiniTab output is followed by the R function.
 
 
 #**TOST for two independent samples**
@@ -88,7 +93,7 @@ MiniTab by default uses Welch's t-test when testing for equivalence, which does 
 
 ### MiniTab Result Two-Sample Equivalence Test 
 
-Method
+*Method
 
 Test mean = mean of Test
 Reference mean = mean of Reference
@@ -409,5 +414,26 @@ Which is identical to the p-values observed in the spreadsheet, and returned by 
 ```{r}
 TOSTr(n=100, r = 0.02, low_eqbound_r=-0.3, high_eqbound_r=0.3, alpha=0.05)
 
+```
+
+#**Meta-analaysis based on Cohen's d**
+
+##*Example 5.1*
+
+We can reproduce an example for a meta-analysis from From Rogers, J. L., Howard, K. I., & Vessey, J. T. (1993). Using significance tests to evaluate equivalence between two experimental groups. Psychological Bulletin, 113(3), page 557.
+
+
+For example, we obtain the following calculations for the cognitive versus behavioral contrast. Traditional z: z = ES/SE = 0.12/0.09 = 1.333, p = .091.
+Traditional confidence interval: ES ± (za/2)(SE) = 0.12 ± (1.96)(0.09), or -0.056 to 0.296.
+Equivalence z: 
+z1 = (ES + 0.20)/SE = (0.12 + 0.20)/0.09 = 3.556, p = .000.
+z2 = (ES - Q.2Q)/SE = (0.12 - 0.20)/0.09 = -0.889, p= .187.
+So we table the larger p value of 0.187.
+Equivalence confidence interval:
+ES ± (za)(SE) = 0.12 ± (1.645)(0.09), or -0.028 to 0.268.
+
+We can recreate this with the TOSTmeta function:
+```{r}
+TOSTmeta(ES=0.12, var=0.0081, se=0.09, low_eqbound_d=-0.2, high_eqbound_d=0.2, alpha=0.05)
 ```
 
