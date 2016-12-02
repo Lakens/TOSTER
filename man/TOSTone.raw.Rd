@@ -22,7 +22,7 @@ TOSTone.raw(m, mu, sd, n, low_eqbound, high_eqbound, alpha)
 \item{high_eqbound_d}{upper equivalence bounds (e.g., 0.5) expressed in standardized mean difference (Cohen's d)}
 }
 \value{
-Returns dataframe with t-value, degrees of freedom, p-value, and lower and upper limit of confidence interval
+Returns TOST t-value 1, TOST p-value 1, TOST t-value 2, TOST p-value 2, degrees of freedom, low equivalence bound, high equivalence bound, Lower limit confidence interval TOST, Upper limit confidence interval TOST
 }
 \description{
 TOST function for a one-sample t-test (raw scores)

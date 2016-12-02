@@ -20,10 +20,14 @@ TOSTmeta(ES, var, se, low_eqbound_d, high_eqbound_d, alpha)
 \item{alpha}{alpha level (default = 0.05)}
 }
 \value{
-Returns dataframe with Z-value, p-value, and lower and upper limit of confidence interval
+Returns TOST Z-value 1, TOST p-value 1, TOST Z-value 2, TOST p-value 2,  alpha, low equivalence bound d, high equivalence bound d, Lower limit confidence interval TOST, Upper limit confidence interval TOST
 }
 \description{
 TOST function for meta-analysis
+}
+\section{References}{
+
+Rogers, J. L., Howard, K. I., & Vessey, J. T. (1993). Using significance tests to evaluate equivalence between two experimental groups. Psychological Bulletin, 113(3), 553, formula page 557.
 }
 \examples{
 TOSTmeta(ES=0.12, var=0.0081, se=0.09, low_eqbound_d=-0.2, high_eqbound_d=0.2, alpha=0.05)

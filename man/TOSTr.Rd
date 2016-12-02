@@ -18,14 +18,14 @@ TOSTr(n, r, low_eqbound_r, high_eqbound_r, alpha)
 \item{alpha}{alpha level (default = 0.05)}
 }
 \value{
-Returns dataframe with p-value, and lower and upper limit of confidence interval
+Returns TOST p-value 1, TOST p-value 2, alpha, low equivalence bound r, high equivalence bound r, Lower limit confidence interval TOST, Upper limit confidence interval TOST
 }
 \description{
 TOST function for a correlations
 }
 \section{References}{
 
-Gruman, J. A., Cribbie, R. A., & Arpin-Cribbie, C. A. (2007). The effects of heteroscedasticity on tests of equivalence. Journal of Modern Applied Statistical Methods, 6(1), 13.
+Goertzen, J. R., & Cribbie, R. A. (2010). Detecting a lack of association: An equivalence testing approach. British Journal of Mathematical and Statistical Psychology, 63(3), 527-537. https://doi.org/10.1348/000711009X475853, formula page 531.
 }
 \examples{
 TOSTr(n=100, r = 0.02, low_eqbound_r=-0.3, high_eqbound_r=0.3, alpha=0.05)
