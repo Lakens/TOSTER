@@ -23,6 +23,10 @@ Returns dataframe with p-value, and lower and upper limit of confidence interval
 \description{
 TOST function for a correlations
 }
+\section{References}{
+
+Gruman, J. A., Cribbie, R. A., & Arpin-Cribbie, C. A. (2007). The effects of heteroscedasticity on tests of equivalence. Journal of Modern Applied Statistical Methods, 6(1), 13.
+}
 \examples{
 TOSTr(n=100, r = 0.02, low_eqbound_r=-0.3, high_eqbound_r=0.3, alpha=0.05)
 }
