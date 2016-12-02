@@ -1,8 +1,9 @@
 ---
 title: "Error Rate Validation"
 output:
-  html_document: default
+  pdf_document: default
   html_notebook: default
+  html_document: default
 ---
 
 ```{r}
@@ -197,22 +198,24 @@ for(i in 1:nSims){ #for each simulated experiment
 
 #P-value distribution TOST
 hist(ptost, breaks=20, xlim=c(0,1))
-sum(ptost<0.05)/nSims #Power for TOST
+sum(ptost<=0.05)/nSims #Power for TOST
 
 sum(LLlist>=low_eqbound&ULlist<=high_eqbound)/nSims #Same power or Type 1 error, now based on CI
 
 ```
 
+#Validation error rate correlations
 
 
 ```{r}
 library(mvtnorm) #to simulate correlated data
-n <- 100 #set sample size
+n <- 1000 #set sample size
 m<-0
 sd<-1
-r_true <- -0.5 #set correlation
-low_eqbound_r <- -0.5
-high_eqbound_r <- 0.5
+alpha<-0.05
+r_true <- -0.25 #set correlation
+low_eqbound_r <- -0.25
+high_eqbound_r <- 0.25
 nSims<-1000000
 ptost<-numeric(nSims) #set up empty container for all simulated p-values
 p1list<-numeric(nSims) #set up empty container for all simulated p-values
@@ -246,7 +249,7 @@ for(i in 1:nSims){ #for each simulated experiment
 hist(ptost, breaks=20, xlim=c(0,1))
 sum(ptost<0.05)/nSims #Power for TOST
 
-sum(LLlist>=low_eqbound&ULlist<=high_eqbound)/nSims #Same power or Type 1 error, now based on CI
+sum(LLlist>=low_eqbound_r&ULlist<=high_eqbound_r)/nSims #Same power or Type 1 error, now based on CI
 
 mean(rlist)
 ```
