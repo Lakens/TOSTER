@@ -1,6 +1,6 @@
 Package: TOSTER
-Version: 0.0.1
-Date: 2016-11-18
+Version: 0.0.2
+Date: 2016-12-1
 Title: TOSTER equivalence testing
 Description: Frequentist equivalence tests for t-tests, correlations, and meta-
     analysis, including power analysis for t-tests and correlations. Allows you to
