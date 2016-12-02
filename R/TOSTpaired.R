@@ -8,9 +8,11 @@
 #' @param low_eqbound_dz lower equivalence bounds (e.g., -0.5) expressed in standardized mean difference (Cohen's dz)
 #' @param high_eqbound_dz upper equivalence bounds (e.g., 0.5) expressed in standardized mean difference (Cohen's dz)
 #' @param alpha alpha level (default = 0.05)
-#' @return Returns dataframe with t-value, degrees of freedom, p-value, and lower and upper limit of confidence interval
+#' @return Returns TOST t-value 1, TOST p-value 1, TOST t-value 2, TOST p-value 2, degrees of freedom, low equivalence bound, high equivalence bound, low equivalence bound in dz, high equivalence bound in dz, Lower limit confidence interval TOST, Upper limit confidence interval TOST
 #' @examples
 #' TOSTpaired(n=65,m1=5.830769,m2=5.7538462,sd1=1.1668498,sd2=1.2994081,r12=0.744992,low_eqbound_dz=-0.337341706,high_eqbound_dz=0.337341706, alpha=0.05)
+#' @section References:
+#' Mara, C. A., & Cribbie, R. A. (2012). Paired-Samples Tests of Equivalence. Communications in Statistics - Simulation and Computation, 41(10), 1928-1943. https://doi.org/10.1080/03610918.2011.626545, formula page 1932. Note there is a typo in the formula: n-1 should be n (personal communication, 31-8-2016)
 #' @export
 #' 
 

@@ -4,9 +4,11 @@
 #' @param low_eqbound_r lower equivalence bounds (e.g., -0.3) expressed in a correlation effect size 
 #' @param high_eqbound_r upper equivalence bounds (e.g., 0.3) expressed in a correlation effect size 
 #' @param alpha alpha level (default = 0.05)
-#' @return Returns dataframe with p-value, and lower and upper limit of confidence interval
+#' @return Returns TOST p-value 1, TOST p-value 2, alpha, low equivalence bound r, high equivalence bound r, Lower limit confidence interval TOST, Upper limit confidence interval TOST
 #' @examples
 #' TOSTr(n=100, r = 0.02, low_eqbound_r=-0.3, high_eqbound_r=0.3, alpha=0.05)
+#' @section References:
+#' Goertzen, J. R., & Cribbie, R. A. (2010). Detecting a lack of association: An equivalence testing approach. British Journal of Mathematical and Statistical Psychology, 63(3), 527-537. https://doi.org/10.1348/000711009X475853, formula page 531.
 #' @export
 #' 
 
@@ -14,8 +16,8 @@ TOSTr<-function(n, r, low_eqbound_r, high_eqbound_r, alpha){
   if(missing(alpha)) {
     alpha <- 0.05
   }  
-  z1<-((log((1+abs(r))/(1-abs(r)))/2)+(log((1+low_eqbound_r)/(1-low_eqbound_r))/2))/(sqrt(1/(n-3)))
-  z2<-((log((1+abs(r))/(1-abs(r)))/2)+(log((1+high_eqbound_r)/(1-high_eqbound_r))/2))/(sqrt(1/(n-3)))
+  z1<-((log((1+abs(r))/(1-abs(r)))/2)-(log((1+low_eqbound_r)/(1-low_eqbound_r))/2))/(sqrt(1/(n-3)))
+  z2<-((log((1+abs(r))/(1-abs(r)))/2)-(log((1+high_eqbound_r)/(1-high_eqbound_r))/2))/(sqrt(1/(n-3)))
   p1<-ifelse(low_eqbound_r<r,pnorm(-abs(z1)),1-pnorm(-abs(z1)))
   p2<-ifelse(high_eqbound_r>r,pnorm(-abs(z2)),1-pnorm(-abs(z2)))
   ptost<-max(p1,p2)

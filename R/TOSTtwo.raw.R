@@ -9,10 +9,14 @@
 #' @param high_eqbound upper equivalence bounds (e.g., 0.5) expressed in raw scale units (e.g., scalepoints)
 #' @param alpha alpha level (default = 0.05)
 #' @param var.equal logical variable indicating whether equal variances assumption is assumed to be TRUE or FALSE. Defaults to FALSE.
-#' @return Returns dataframe with t-value, degrees of freedom, p-value, and lower and upper limit of confidence interval
+#' @return Returns TOST t-value 1, TOST p-value 1, TOST t-value 2, TOST p-value 2, degrees of freedom, low equivalence bound, high equivalence bound, Lower limit confidence interval TOST, Upper limit confidence interval TOST
 #' @examples
 #' TOSTtwo.raw(m1=7.83,m2=7.98,sd1=1.21,sd2=1.29,n1=400,n2=400,low_eqbound=-0.25, high_eqbound=0.25,alpha=0.05)
+#' @section References:
+#' Berger, R. L., & Hsu, J. C. (1996). Bioequivalence Trials, Intersection-Union Tests and Equivalence Confidence Sets. Statistical Science, 11(4), 283-302. 
+#' Gruman, J. A., Cribbie, R. A., & Arpin-Cribbie, C. A. (2007). The effects of heteroscedasticity on tests of equivalence. Journal of Modern Applied Statistical Methods, 6(1), 133-140, formula for Welch's t-test on page 135
 #' @export
+
 
 
 TOSTtwo.raw<-function(m1,m2,sd1,sd2,n1,n2,low_eqbound, high_eqbound, alpha, var.equal){

@@ -8,9 +8,11 @@
 #' @param low_eqbound lower equivalence bounds (e.g., -0.5) expressed in raw scores
 #' @param high_eqbound upper equivalence bounds (e.g., 0.5) expressed in raw scores
 #' @param alpha alpha level (default = 0.05)
-#' @return Returns dataframe with t-value, degrees of freedom, p-value, and lower and upper limit of confidence interval
+#' @return Returns TOST t-value 1, TOST p-value 1, TOST t-value 2, TOST p-value 2, degrees of freedom, low equivalence bound, high equivalence bound, Lower limit confidence interval TOST, Upper limit confidence interval TOST
 #' @examples
 #' TOSTpaired.raw(n=65,m1=5.830769,m2=5.7538462,sd1=1.1668498,sd2=1.2994081,r12=0.744992,low_eqbound=-0.337341706,high_eqbound=0.337341706, alpha=0.05)
+#' @section References:
+#' Mara, C. A., & Cribbie, R. A. (2012). Paired-Samples Tests of Equivalence. Communications in Statistics - Simulation and Computation, 41(10), 1928-1943. https://doi.org/10.1080/03610918.2011.626545, formula page 1932. Note there is a typo in the formula: n-1 should be n (personal communication, 31-8-2016)
 #' @export
 #' 
 

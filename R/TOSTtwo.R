@@ -9,9 +9,12 @@
 #' @param high_eqbound_d upper equivalence bounds (e.g., 0.5) expressed in standardized mean difference (Cohen's d)
 #' @param alpha alpha level (default = 0.05)
 #' @param var.equal logical variable indicating whether equal variances assumption is assumed to be TRUE or FALSE.  Defaults to FALSE.
-#' @return Returns dataframe with t-value, degrees of freedom, p-value, and lower and upper limit of confidence interval
+#' @return Returns TOST t-value 1, TOST p-value 1, TOST t-value 2, TOST p-value 2, degrees of freedom, low equivalence bound, high equivalence bound, low equivalence bound in Cohen's d, high equivalence bound in Cohen's d, Lower limit confidence interval TOST, Upper limit confidence interval TOST
 #' @examples
 #' TOSTtwo(m1=7.83,m2=7.98,sd1=1.21,sd2=1.29,n1=400,n2=400,low_eqbound_d=-0.199897678576151, high_eqbound_d=0.199897678576151,alpha=0.05, var.equal=TRUE)
+#' @section References:
+#' Berger, R. L., & Hsu, J. C. (1996). Bioequivalence Trials, Intersection-Union Tests and Equivalence Confidence Sets. Statistical Science, 11(4), 283-302. 
+#' Gruman, J. A., Cribbie, R. A., & Arpin-Cribbie, C. A. (2007). The effects of heteroscedasticity on tests of equivalence. Journal of Modern Applied Statistical Methods, 6(1), 133-140, formula for Welch's t-test on page 135
 #' @export
 #' 
 

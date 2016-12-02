@@ -6,6 +6,8 @@
 #' @return Returns a string summarizing the power analysis, and a numeric variable for the number of observations needed in each group
 #' @examples 
 #' powerTOSTone(alpha=0.05, statistical_power=0.9, low_eqbound_d=-0.3, high_eqbound_d=0.3)
+#' @section References:
+#' Chow, S.-C., Wang, H., & Shao, J. (2007). Sample Size Calculations in Clinical Research, Second Edition - CRC Press Book. Formula 3.1.9
 #' @export
 
 powerTOSTone<-function(alpha, statistical_power, low_eqbound_d, high_eqbound_d, epsilon){

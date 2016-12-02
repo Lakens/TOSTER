@@ -5,9 +5,11 @@
 #' @param low_eqbound_d lower equivalence bounds (e.g., -0.5) expressed in standardized mean difference (Cohen's d)
 #' @param high_eqbound_d upper equivalence bounds (e.g., 0.5) expressed in standardized mean difference (Cohen's d)
 #' @param alpha alpha level (default = 0.05)
-#' @return Returns dataframe with Z-value, p-value, and lower and upper limit of confidence interval
+#' @return Returns TOST Z-value 1, TOST p-value 1, TOST Z-value 2, TOST p-value 2,  alpha, low equivalence bound d, high equivalence bound d, Lower limit confidence interval TOST, Upper limit confidence interval TOST
 #' @examples
 #' TOSTmeta(ES=0.12, var=0.0081, se=0.09, low_eqbound_d=-0.2, high_eqbound_d=0.2, alpha=0.05)
+#' @section References:
+#' Rogers, J. L., Howard, K. I., & Vessey, J. T. (1993). Using significance tests to evaluate equivalence between two experimental groups. Psychological Bulletin, 113(3), 553, formula page 557.
 #' @export
 #' 
 
