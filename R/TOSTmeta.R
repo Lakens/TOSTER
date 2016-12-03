@@ -7,7 +7,12 @@
 #' @param alpha alpha level (default = 0.05)
 #' @return Returns TOST Z-value 1, TOST p-value 1, TOST Z-value 2, TOST p-value 2,  alpha, low equivalence bound d, high equivalence bound d, Lower limit confidence interval TOST, Upper limit confidence interval TOST
 #' @examples
-#' TOSTmeta(ES=0.12, var=0.0081, se=0.09, low_eqbound_d=-0.2, high_eqbound_d=0.2, alpha=0.05)
+#' ## Run TOSTmeta by specifying the standard error
+#' TOSTmeta(ES=0.12, se=0.09, low_eqbound_d=-0.2, high_eqbound_d=0.2, alpha=0.05)
+#' ## Run TOSTmeta by specifying the variance
+#' TOSTmeta(ES=0.12, var=0.0081, low_eqbound_d=-0.2, high_eqbound_d=0.2, alpha=0.05)
+#' ## If both variance and se are specified, TOSTmeta will use standard error and ignore variance
+#' TOSTmeta(ES=0.12, var=9999, se = 0.09, low_eqbound_d=-0.2, high_eqbound_d=0.2, alpha=0.05)
 #' @section References:
 #' Rogers, J. L., Howard, K. I., & Vessey, J. T. (1993). Using significance tests to evaluate equivalence between two experimental groups. Psychological Bulletin, 113(3), 553, formula page 557.
 #' @export
@@ -17,6 +22,17 @@
 TOSTmeta<-function(ES,var,se,low_eqbound_d, high_eqbound_d, alpha){
   if(missing(alpha)) {
     alpha<-0.05
+  }
+  if(missing(se)) {
+    if(missing(var)) {
+      stop("Need to specify variance (var) or standard error (se).")
+    }
+    se<-sqrt(var)
+  }
+  if(missing(var)) {
+    if(missing(se)) {
+      stop("Need to specify variance (var) or standard error (se).")
+    }
   }
   Z1<-(ES+high_eqbound_d)/se
   p1<-pnorm(Z1, lower=FALSE) 
