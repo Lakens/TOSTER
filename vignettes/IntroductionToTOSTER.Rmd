@@ -1,0 +1,79 @@
+---
+title: "Introduction to Equivalence Testing with TOSTER"
+author: "Daniel Lakens"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+#Independent Groups Equivalence Test
+
+##Independent Groups Student's Equivalence Test
+
+Eskine (2013) showed that participants who had been exposed to organic food were substantially harsher in their moral judgments relative to those exposed to control (d = 0.81, 95% CI: [0.19, 1.45]). A replication by Moery & Calin-Jageman (2016, Study 2) did not observe a significant effect (Control: n = 95, M = 5.25, SD = 0.95, Organic Food: n = 89, M = 5.22, SD = 0.83). Following Simonsohn's (2015) recommendation the equivalence bound was set to the effect size the original study had 33% power to detect (with n = 21 in each condition, this means the equivalence bound is d = 0.48, which equals a difference of 0.384 on a 7-point scale given the sample sizes and a pooled standard deviation of 0.894). Using a TOST equivalence test with alpha = 0.05, assuming equal variances, and equivalence bounds of d = -0.43 and d = 0.43 is significant, t(182) = -2.69, p = 0.004. We can reject effects larger than d = 0.43. 
+
+```{r, fig.width=6}
+library("TOSTER")
+TOSTtwo.raw(m1=5.25,m2=5.22,sd1=0.95,sd2=0.83,n1=95,n2=89,low_eqbound=-0.384, high_eqbound=0.384, alpha = 0.05, var.equal=TRUE)
+```
+
+##Independent Groups Welch's Equivalence Test
+
+Deary, Thorpe, Wilson, Starr, and Whally (2003) report the IQ scores of 79.376 children in Scotland (39.343 girls and 40.033 boys). The IQ score for girls (M = 100.64, SD = 14.1) girls and boys (100.48, SD = 14.9) was non-significant. With such a huge sample, we can examine whether the data is equivalent using very small equivalence bounds, such as -0.05 and 0.05. Because sample sizes are unequal, and variances are unequal, Welch's t-test is used, and we can conclude IQ scores are indeed equivalent, based on equivalence bounds of -0.05 and 0.05.  
+
+```{r, fig.width=6}
+library("TOSTER")
+TOSTtwo(m1=100.64,m2=100.48,sd1=14.1,sd2=14.9,n1=39343,n2=40033,low_eqbound_d=-0.05, high_eqbound_d=0.05, alpha = 0.05, var.equal=FALSE)
+```
+
+#One-Sample Equivalence Test
+
+##Equivalence bounds based on standardized scores
+
+Lakens, Semin, & Foroni (2012) examined whether the color of Chinese ideographs (white vs. black) would bias whether participants judged that the ideograph correctly translated positive, neutral, or negative words. In Study 4 the prediction was that participants would judge negative words to be correctly translated by black ideographs above guessing average, but no effects were predicted for translations in the other 5 between subject conditions in the 2 (ideograph color: white vs. black) x 3 (word meaning: positive, neutral, negative) design. 
+
+With 19 to 21 participants in each between subject condition, the study had 80% power to detect equivalence with equivalence bounds of -0.68 to d = 0.68.
+
+
+```{r}
+library("TOSTER")
+powerTOSTone(alpha=0.05, statistical_power=0.8, low_eqbound_d=-0.68, high_eqbound_d=0.68)
+```
+
+We can perform 5 equivalence tests using equivalence bounds of -0.68 and 0.68. 
+
+```{r, fig.width=6}
+library("TOSTER")
+TOSTone(m=6.05,mu=6,sd=1.5,n=21,low_eqbound_d=-0.68, high_eqbound_d=0.68, alpha=0.05)
+
+TOSTone(m=6.68,mu=6,sd=1.7,n=19,low_eqbound_d=-0.68, high_eqbound_d=0.68, alpha=0.05)
+
+TOSTone(m=5.95,mu=6,sd=1.4,n=20,low_eqbound_d=-0.68, high_eqbound_d=0.68, alpha=0.05)
+
+TOSTone(m=6.45,mu=6,sd=1.91,n=20,low_eqbound_d=-0.68, high_eqbound_d=0.68, alpha=0.05)
+
+TOSTone(m=5.71,mu=6,sd=1.79,n=20,low_eqbound_d=-0.68, high_eqbound_d=0.68, alpha=0.05)
+```
+
+Using a Holm-Bonferroni sequential procedure to control error rates, we can conclude statistical equivalence for test 1, 3, and 5, but the conclusion is undetermined for tests 2 and 4, where the data is neither significantly different from guessing average, nor statistically equivalent.
+
+##Equivalence bounds based on raw scores
+
+Because equivalence bounds were set in standardized effect sizes, and the standard deviation differs across the five tests, the equivalence bounds in raw scores (a difference on a scale from -6 to 6) ranged from 0.952 to 1.2988. If a researcher would prefer to fix the equivalence bound to the same value in raw scores instead, we could choose an equivalence bound of for example 1 scale point, and use the TOSTone.raw function. 
+
+```{r, fig.width=6}
+library("TOSTER")
+TOSTone.raw(m=6.05,mu=6,sd=1.5,n=21,low_eqbound=-1, high_eqbound=1, alpha=0.05)
+
+TOSTone.raw(m=6.68,mu=6,sd=1.7,n=19,low_eqbound=-1, high_eqbound=1, alpha=0.05)
+
+TOSTone.raw(m=5.95,mu=6,sd=1.4,n=20,low_eqbound=-1, high_eqbound=1, alpha=0.05)
+
+TOSTone.raw(m=6.45,mu=6,sd=1.91,n=20,low_eqbound=-1, high_eqbound=1, alpha=0.05)
+
+TOSTone.raw(m=5.71,mu=6,sd=1.79,n=20,low_eqbound=-1, high_eqbound=1, alpha=0.05)
+```
+
