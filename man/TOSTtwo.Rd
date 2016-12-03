@@ -40,6 +40,19 @@ Berger, R. L., & Hsu, J. C. (1996). Bioequivalence Trials, Intersection-Union Te
 Gruman, J. A., Cribbie, R. A., & Arpin-Cribbie, C. A. (2007). The effects of heteroscedasticity on tests of equivalence. Journal of Modern Applied Statistical Methods, 6(1), 133-140, formula for Welch's t-test on page 135
 }
 \examples{
-TOSTtwo(m1=7.83,m2=7.98,sd1=1.21,sd2=1.29,n1=400,n2=400,low_eqbound_d=-0.199897678576151, high_eqbound_d=0.199897678576151,alpha=0.05, var.equal=TRUE)
+## Eskine (2013) showed that participants who had been exposed to organic 
+## food were substantially harsher in their moral judgments relative to 
+## those exposed to control (d = 0.81, 95\% CI: [0.19, 1.45]). A 
+## replication by Moery & Calin-Jageman (2016, Study 2) did not observe 
+## a significant effect (Control: n = 95, M = 5.25, SD = 0.95, Organic 
+## Food: n = 89, M = 5.22, SD = 0.83). Following Simonsohn's (2015) 
+## recommendation the equivalence bound was set the effect size the 
+## original study had 33\% power to detect (with n = 21 in each condition,
+## this means the equivalence bound is d = 0.48). Using a TOST equivalence
+## test with alpha = 0.05, assuming equal variances, and equivalence 
+## bounds of d = -0.43 and d = 0.43 is significant, t(182) = -2.69, 
+## p = 0.004. We can reject effects larger than d = 0.43.
+
+TOSTtwo(m1=5.25,m2=5.22,sd1=0.95,sd2=0.83,n1=95,n2=89,low_eqbound_d=-0.43,
 }
 
