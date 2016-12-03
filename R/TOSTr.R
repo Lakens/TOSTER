@@ -39,7 +39,7 @@ TOSTr<-function(n, r, low_eqbound_r, high_eqbound_r, alpha){
   abline(v=0, lty=2, col="grey")
   segments(LL90,0.5,UL90,0.5, lwd=3)
   segments(LL95,0.5,UL95,0.5, lwd=1)
-  title(main=paste("Equivalence bounds ",round(low_eqbound_r,digits=3)," and ",round(high_eqbound_r,digits=3),"\nr = ",round(r,digits=3)," \n TOST: 90% CI [",round(LL90,digits=3),";",round(UL90,digits=3),"] ", TOSToutcome," \n NHST: 95% CI [",round(LL95,digits=3),";",round(UL95,digits=3),"] ", testoutcome,sep=""), cex.main=1)
+  title(main=paste("Equivalence bounds ",round(low_eqbound_r,digits=3)," and ",round(high_eqbound_r,digits=3),"\nr = ",round(r,digits=3)," \n TOST: ", 100*(1-alpha*2),"% CI [",round(LL90,digits=3),";",round(UL90,digits=3),"] ", TOSToutcome," \n NHST: ", 100*(1-alpha),"% CI [",round(LL95,digits=3),";",round(UL95,digits=3),"] ", testoutcome,sep=""), cex.main=1)
   message(cat("Using alpha = ",alpha," the NHST t-test was ",testoutcome,", p = ",pttest,sep=""))
   message(cat("Using alpha = ",alpha, " the equivalence test was ",TOSToutcome,", p = ",ptost,sep=""))
   TOSTresults<-data.frame(p1,p2)

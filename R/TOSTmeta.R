@@ -41,7 +41,7 @@ TOSTmeta<-function(ES,var,se,low_eqbound_d, high_eqbound_d, alpha){
   abline(v=0, lty=2, col="grey")
   segments(LL90,0.5,UL90,0.5, lwd=3)
   segments(LL95,0.5,UL95,0.5, lwd=1)
-  title(main=paste("Equivalence bounds ",round(low_eqbound_d,digits=3)," and ",round(high_eqbound_d,digits=3),"\nEffect size = ",round(ES,digits=3)," \n TOST: 90% CI [",round(LL90,digits=3),";",round(UL90,digits=3),"] ", TOSToutcome," \n NHST: 95% CI [",round(LL95,digits=3),";",round(UL95,digits=3),"] ", testoutcome,sep=""), cex.main=1)
+  title(main=paste("Equivalence bounds ",round(low_eqbound_d,digits=3)," and ",round(high_eqbound_d,digits=3),"\nEffect size = ",round(ES,digits=3)," \n TOST: ", 100*(1-alpha*2),"% CI [",round(LL90,digits=3),";",round(UL90,digits=3),"] ", TOSToutcome," \n NHST: ", 100*(1-alpha),"% CI [",round(LL95,digits=3),";",round(UL95,digits=3),"] ", testoutcome,sep=""), cex.main=1)
   message(cat("Using alpha = ",alpha," the meta-analysis was ",testoutcome,", Z = ",Z,", p = ",pttest,sep=""))
   message(cat("Using alpha = ",alpha," the equivalence test was ",TOSToutcome,", Z = ",Ztost,", p = ",ptost,sep=""))
   TOSTresults<-data.frame(Z1,p1,Z2,p2)
