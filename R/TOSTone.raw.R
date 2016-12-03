@@ -43,6 +43,7 @@ TOSTone.raw<-function(m,mu,sd,n,low_eqbound, high_eqbound, alpha){
   segments(LL95,0.5,UL95,0.5, lwd=1)
   title(main=paste("Equivalence bounds ",round(low_eqbound,digits=3)," and ",round(high_eqbound,digits=3),"\nMean difference = ",round(dif,digits=3)," \n TOST: ", 100*(1-alpha*2),"% CI [",round(LL90,digits=3),";",round(UL90,digits=3),"] ", TOSToutcome," \n NHST: ", 100*(1-alpha),"% CI [",round(LL95,digits=3),";",round(UL95,digits=3),"] ", testoutcome,sep=""), cex.main=1)
   message(cat("Using alpha = ",alpha," the NHST one-sample t-test was ",testoutcome,", t(",degree_f,") = ",t,", p = ",pttest,sep=""))
+  cat("\n")
   message(cat("Using alpha = ",alpha," the equivalence test was ",TOSToutcome,", t(",degree_f,") = ",ttost,", p = ",ptost,sep=""))
   TOSTresults<-data.frame(t1,p1,t2,p2,degree_f)
   colnames(TOSTresults) <- c("t-value 1","p-value 1","t-value 2","p-value 2","df")
