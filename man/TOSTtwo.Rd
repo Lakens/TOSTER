@@ -37,6 +37,7 @@ TOST function for an independent t-test (Cohen's d)
 \section{References}{
 
 Berger, R. L., & Hsu, J. C. (1996). Bioequivalence Trials, Intersection-Union Tests and Equivalence Confidence Sets. Statistical Science, 11(4), 283-302. 
+
 Gruman, J. A., Cribbie, R. A., & Arpin-Cribbie, C. A. (2007). The effects of heteroscedasticity on tests of equivalence. Journal of Modern Applied Statistical Methods, 6(1), 133-140, formula for Welch's t-test on page 135
 }
 \examples{
@@ -46,7 +47,7 @@ Gruman, J. A., Cribbie, R. A., & Arpin-Cribbie, C. A. (2007). The effects of het
 ## replication by Moery & Calin-Jageman (2016, Study 2) did not observe 
 ## a significant effect (Control: n = 95, M = 5.25, SD = 0.95, Organic 
 ## Food: n = 89, M = 5.22, SD = 0.83). Following Simonsohn's (2015) 
-## recommendation the equivalence bound was set the effect size the 
+## recommendation the equivalence bound was set to the effect size the 
 ## original study had 33\% power to detect (with n = 21 in each condition,
 ## this means the equivalence bound is d = 0.48). Using a TOST equivalence
 ## test with alpha = 0.05, assuming equal variances, and equivalence 
