@@ -11,7 +11,6 @@
 #' @param var.equal logical variable indicating whether equal variances assumption is assumed to be TRUE or FALSE.  Defaults to FALSE.
 #' @return Returns TOST t-value 1, TOST p-value 1, TOST t-value 2, TOST p-value 2, degrees of freedom, low equivalence bound, high equivalence bound, low equivalence bound in Cohen's d, high equivalence bound in Cohen's d, Lower limit confidence interval TOST, Upper limit confidence interval TOST
 #' @examples
-<<<<<<< HEAD
 #' ## Eskine (2013) showed that participants who had been exposed to organic 
 #' ## food were substantially harsher in their moral judgments relative to 
 #' ## those exposed to control (d = 0.81, 95% CI: [0.19, 1.45]). A 
@@ -25,9 +24,6 @@
 #' ## bounds of d = -0.43 and d = 0.43 is significant, t(182) = -2.69, 
 #' ## p = 0.004. We can reject effects larger than d = 0.43.
 #' 
-=======
-#' ## Eskine (2013) showed that participants who had been exposed to organic food were substantially harsher in their moral judgments relative to those exposed to control (d = 0.81, 95% CI: [0.19, 1.45]). A replication by Moery & Calin-Jageman (2016, Study 2) did not observe a significant effect (Control: n = 95, M = 5.25, SD = 0.95, Organic Food: n = 89, M = 5.22, SD = 0.83). Following Simonsohn's (2015) recommendation the equivalence bound was set the effect size the original study had 33% power to detect (with n = 21 in each condition, this means the equivalence bound is d = 0.48). Using a TOST equivalence test with alpha = 0.05, assuming equal variances, and equivalence bounds of d = -0.43 and d = 0.43 is significant, t(182) = -2.69, p = 0.004. We can reject effects larger than d = 0.43.
->>>>>>> 6e91cad1f442fb1580a26b909fedc45716de7aab
 #' TOSTtwo(m1=5.25,m2=5.22,sd1=0.95,sd2=0.83,n1=95,n2=89,low_eqbound_d=-0.43,
 #' @section References:
 #' Berger, R. L., & Hsu, J. C. (1996). Bioequivalence Trials, Intersection-Union Tests and Equivalence Confidence Sets. Statistical Science, 11(4), 283-302. 
