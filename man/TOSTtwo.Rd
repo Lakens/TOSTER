@@ -49,11 +49,13 @@ Gruman, J. A., Cribbie, R. A., & Arpin-Cribbie, C. A. (2007). The effects of het
 ## Food: n = 89, M = 5.22, SD = 0.83). Following Simonsohn's (2015) 
 ## recommendation the equivalence bound was set to the effect size the 
 ## original study had 33\% power to detect (with n = 21 in each condition,
-## this means the equivalence bound is d = 0.48). Using a TOST equivalence
-## test with alpha = 0.05, assuming equal variances, and equivalence 
+## this means the equivalence bound is d = 0.48, which equals a 
+## difference of 0.384 on a 7-point scale given the sample sizes and a 
+## pooled standard deviation of 0.894). Using a TOST equivalence test 
+## with alpha = 0.05, assuming equal variances, and equivalence 
 ## bounds of d = -0.43 and d = 0.43 is significant, t(182) = -2.69, 
 ## p = 0.004. We can reject effects larger than d = 0.43.
 
-TOSTtwo(m1=5.25,m2=5.22,sd1=0.95,sd2=0.83,n1=95,n2=89,low_eqbound_d=-0.43,
+TOSTtwo(m1=5.25,m2=5.22,sd1=0.95,sd2=0.83,n1=95,n2=89,low_eqbound_d=-0.43, high_eqbound_d=0.43, alpha = 0.05, var.equal=TRUE)
 }
 
