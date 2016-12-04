@@ -17,7 +17,11 @@ A widely recommended approach within a Frequentist framework is to test for equi
 
 In this document I will present a number of practical examples for equivalence tests for independent t-tests, dependent t-tests, one-sample t-tests, correlations, and meta-analyses.
 
-##Equivalence test for Meta-analysis
+&nbsp;
+
+&nbsp;
+
+#Equivalence test for Meta-analysis
 
 Hyde, Lindberg, Linn, Ellis, and Williams (2008) report that effect sizes for gender differences in mathematics tests across the 7 million students in the US represent trivial differences, where a trivial difference is specified as an effect size smaller then d = 0.1. The present a table with Cohen's d and se is reproduced below:
 
@@ -43,7 +47,13 @@ We see that indeed, all effect size estimates are measured with such high precis
 
 *Hyde, J. S., Lindberg, S. M., Linn, M. C., Ellis, A. B., & Williams, C. C. (2008). Gender similarities characterize math performance. Science, 321(5888), 494-495.*
 
+&nbsp;
+
+&nbsp;
+
 #Independent Groups Equivalence Test
+
+&nbsp;
 
 ##Independent Groups Student's Equivalence Test
 
@@ -55,6 +65,7 @@ TOSTtwo.raw(m1=5.25,m2=5.22,sd1=0.95,sd2=0.83,n1=95,n2=89,low_eqbound=-0.384, hi
 
 *Moery, E., & Calin-Jageman, R. J. (2016). Direct and Conceptual Replications of Eskine (2013): Organic Food Exposure Has Little to No Effect on Moral Judgments and Prosocial Behavior. Social Psychological and Personality Science, 7(4), 312-319. https://doi.org/10.1177/1948550616639649 *
 
+&nbsp;
 
 ##Independent Groups Welch's Equivalence Test
 
@@ -67,10 +78,13 @@ TOSTtwo(m1=100.64,m2=100.48,sd1=14.1,sd2=14.9,n1=39343,n2=40033,low_eqbound_d=-0
 
 *Deary, I. J., Thorpe, G., Wilson, V., Starr, J. M., & Whalley, L. J. (2003). Population sex differences in IQ at age 11: The Scottish mental survey 1932. Intelligence, 31(6), 533-542.*
 
+&nbsp;
+
+&nbsp;
 
 #One-Sample Equivalence Test
 
-##Equivalence bounds based on standardized scores
+&nbsp;
 
 Lakens, Semin, & Foroni (2012) examined whether the color of Chinese ideographs (white vs. black) would bias whether participants judged that the ideograph correctly translated positive, neutral, or negative words. In Study 4 the prediction was that participants would judge negative words to be correctly translated by black ideographs above guessing average, but no effects were predicted for translations in the other 5 between subject conditions in the 2 (ideograph color: white vs. black) x 3 (word meaning: positive, neutral, negative) design. The table below is a summary of the data in all 6 conditions:
 
@@ -83,11 +97,7 @@ Lakens, Semin, & Foroni (2012) examined whether the color of Chinese ideographs 
 |Black	|Negative	|6.95	|57.92	|1.15	|3.71	|19	|.00	|.80|
 |Black	|Neutral	|5.71	|47.58	|1.79	|0.73	|20	|.47	|.16|
 
-
-
-
 With 19 to 21 participants in each between subject condition, the study had 80% power to detect equivalence with equivalence bounds of -0.68 to d = 0.68.
-
 
 ```{r}
 powerTOSTone(alpha=0.05, statistical_power=0.8, low_eqbound_d=-0.68, high_eqbound_d=0.68)
@@ -103,3 +113,35 @@ It is clear I should have been more tentative in my conclusions in this study. N
 
 *Lakens, D., Semin, G. R., & Foroni, F. (2012). But for the bad, there would not be good: Grounding valence in brightness through shared relational structures. Journal of Experimental Psychology: General, 141(3), 584-594. https://doi.org/10.1037/a0026468 *
 
+&nbsp;
+
+&nbsp;
+
+#Equivalence test for correlations
+
+&nbsp;
+
+Olson, Fazio, and Hermann (2007) reported correlations between implicit and explicit measures of self-esteem, such as the IAT, Rosenberg's self-esteem scale, a feeling thermometer, and trait ratings. In Study 1 71 participants completed the self-esteem measures. Because no equivalence bounds are mentioned, we can see which equivalence bounds the researchers would have 80% power to detect. 
+
+```{r, fig.width=6}
+powerTOSTr(alpha=0.05, statistical_power=0.8, low_eqbound_r=-0.24, high_eqbound_r=0.24)
+```
+With 71 pairs of observations between measures, the researchers have 80% power for equivalence bounds of r = -0.24 and r = 0.24. 
+
+The correlations observed by Olson et al (2007), Study 1, are presented in the table below (significant correlations are flagged by an asteriks). 
+
+|Measure |IAT |Rosenberg|Feeling thermometer| Trait ratings|
+|---|---|---|---|---|
+|IAT |- |-.12 |-.09 |-.06|
+|Rosenberg| | - |.62*| .09|
+|Feeling thermometer| | | - |.29*|
+|Trait ratings| | | |-|
+
+We can test each correlation, for example the correlation between the IAT and the Rosenberg self-esteem scale of -0.12, given 71 participants, and using equivalence bounds of r_U = 0.24 and r_L = -0.24. 
+
+```{r, fig.width=6}
+TOSTr(n=71, r=-0.06, low_eqbound_r=-0.24, high_eqbound_r=0.24, alpha=0.05)
+```
+We see that none of the correlations can be declared to be statistically equivalent. Instead, the tests yield undetermined outcomes: the correlations are not significantly different from 0, nor statistically equivalent.  
+
+*Olson, M. A., Fazio, R. H., & Hermann, A. D. (2007). Reporting tendencies underlie discrepancies between implicit and explicit measures of self-esteem. Psychological Science, 18(4), 287-291.*
