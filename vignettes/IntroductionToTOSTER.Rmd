@@ -58,7 +58,7 @@ TOSTtwo.raw(m1=5.25,m2=5.22,sd1=0.95,sd2=0.83,n1=95,n2=89,low_eqbound=-0.384, hi
 
 ##Independent Groups Welch's Equivalence Test
 
-Deary, Thorpe, Wilson, Starr, and Whally (2003) report the IQ scores of 79.376 children in Scotland (39.343 girls and 40.033 boys). The IQ score for girls (M = 100.64, SD = 14.1) girls and boys (100.48, SD = 14.9) was non-significant. With such a huge sample, we can examine whether the data is equivalent using very small equivalence bounds, such as -0.05 and 0.05. Because sample sizes are unequal, and variances are unequal, Welch's t-test is used, and we can conclude IQ scores are indeed equivalent, based on equivalence bounds of -0.05 and 0.05.  
+Deary, Thorpe, Wilson, Starr, and Whally (2003) report the IQ scores of 79,376 children in Scotland (39,343 girls and 40,033 boys). The IQ score for girls (M = 100.64, SD = 14.1) girls and boys (100.48, SD = 14.9) was non-significant. With such a huge sample, we can examine whether the data is equivalent using very small equivalence bounds, such as -0.05 and 0.05. Because sample sizes are unequal, and variances are unequal, Welch's t-test is used, and we can conclude IQ scores are indeed equivalent, based on equivalence bounds of -0.05 and 0.05.  
 
 
 ```{r, fig.width=6}
