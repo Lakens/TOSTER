@@ -9,6 +9,9 @@ Author: Daniel Lakens <D.Lakens@tue.nl>
 Maintainer: Daniel Lakens <D.Lakens@tue.nl>
 License: GPL-3
 RoxygenNote: 5.0.1
+Imports:
+    stats,
+    graphics
 Suggests: knitr,
     rmarkdown
 VignetteBuilder: knitr

@@ -27,16 +27,16 @@ Hyde, Lindberg, Linn, Ellis, and Williams (2008) report that effect sizes for ge
 
 |Grades|d + se|
 |---|---|
-|Grade 2	|0.06 ± 0.003|
-|Grade 3	|0.04 ± 0.002|
-|Grade 4	|-0.01 ± 0.002|
-|Grade 5	|-0.01 ± 0.002|
-|Grade 6	|-0.01 ± 0.002|
-|Grade 7	|-0.02 ± 0.002|
-|Grade 8	|-0.02 ± 0.002|
-|Grade 9	|-0.01 ± 0.003|
-|Grade 10	|0.04 ± 0.003|
-|Grade 11	|0.06 ± 0.003|
+|Grade 2	|0.06 +/- 0.003|
+|Grade 3	|0.04 +/- 0.002|
+|Grade 4	|-0.01 +/- 0.002|
+|Grade 5	|-0.01 +/- 0.002|
+|Grade 6	|-0.01 +/- 0.002|
+|Grade 7	|-0.02 +/- 0.002|
+|Grade 8	|-0.02 +/- 0.002|
+|Grade 9	|-0.01 +/- 0.003|
+|Grade 10	|0.04 +/- 0.003|
+|Grade 11	|0.06 +/- 0.003|
 
 ```{r, fig.width=6}
 library("TOSTER")

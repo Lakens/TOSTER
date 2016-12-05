@@ -26,6 +26,6 @@ Power analysis for TOST for dependent t-test (Cohen's dz)
 Chow, S.-C., Wang, H., & Shao, J. (2007). Sample Size Calculations in Clinical Research, Second Edition - CRC Press Book. Formula 3.1.9
 }
 \examples{
-powerTOSTpaired(alpha=0.05,statistical_power=0.8,low_eqbound_dz=-0.3, high_eqbound_dz=0.3)
+powerTOSTpaired(alpha=0.05,statistical_power=0.8,low_eqbound_dz=-0.3,high_eqbound_dz=0.3)
 }
 

@@ -26,7 +26,7 @@
 #' ## bounds of d = -0.43 and d = 0.43 is significant, t(182) = -2.69, 
 #' ## p = 0.004. We can reject effects larger than d = 0.43.
 #' 
-#' TOSTtwo.raw(m1=5.25,m2=5.22,sd1=0.95,sd2=0.83,n1=95,n2=89,low_eqbound=-0.384, high_eqbound=0.384, alpha = 0.05, var.equal=TRUE)
+#' TOSTtwo.raw(m1=5.25,m2=5.22,sd1=0.95,sd2=0.83,n1=95,n2=89,low_eqbound=-0.384,high_eqbound=0.384)
 #' @section References:
 #' Berger, R. L., & Hsu, J. C. (1996). Bioequivalence Trials, Intersection-Union Tests and Equivalence Confidence Sets. Statistical Science, 11(4), 283-302. 
 #' 
