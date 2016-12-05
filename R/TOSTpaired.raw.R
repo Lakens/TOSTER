@@ -24,11 +24,11 @@ TOSTpaired.raw<-function(n,m1,m2,sd1,sd2,r12,low_eqbound, high_eqbound, alpha){
   se<-sdif/sqrt(n)
   t<-(m1-m2)/se
   degree_f<-n-1
-  pttest<-2*pt(abs(t), degree_f, lower=FALSE)
+  pttest<-2*pt(abs(t), degree_f, lower.tail=FALSE)
   t1<-((m1-m2)+(low_eqbound))/se
-  p1<-1-pt(t1, degree_f, lower=FALSE)
+  p1<-1-pt(t1, degree_f, lower.tail=FALSE)
   t2<-((m1-m2)+(high_eqbound))/se
-  p2<-pt(t2, degree_f, lower=FALSE)
+  p2<-pt(t2, degree_f, lower.tail=FALSE)
   ttost<-ifelse(abs(t1) < abs(t2), t1, t2)
   LL90<-((m1-m2)-qt(1-alpha, degree_f)*se)
   UL90<-((m1-m2)+qt(1-alpha, degree_f)*se)
