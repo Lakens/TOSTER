@@ -11,6 +11,8 @@ powerTOSTone.raw(alpha, statistical_power, sd, low_eqbound, high_eqbound)
 
 \item{statistical_power}{desired power (e.g., 0.8)}
 
+\item{sd}{population standard deviation}
+
 \item{low_eqbound}{lower equivalence bounds (e.g., -0.5) expressed in raw scores}
 
 \item{high_eqbound}{upper equivalence bounds (e.g., 0.5) expressed in raw scores}

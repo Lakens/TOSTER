@@ -10,7 +10,7 @@
 #' Chow, S.-C., Wang, H., & Shao, J. (2007). Sample Size Calculations in Clinical Research, Second Edition - CRC Press Book. Formula 3.1.9
 #' @export
 
-powerTOSTone<-function(alpha, statistical_power, low_eqbound_d, high_eqbound_d, epsilon){
+powerTOSTone<-function(alpha, statistical_power, low_eqbound_d, high_eqbound_d){
   NT1<-(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(low_eqbound_d)^2
   NT2<-(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(high_eqbound_d)^2
   N<-ceiling(max(NT1,NT2))

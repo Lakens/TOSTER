@@ -1,5 +1,6 @@
 #' Power analysis for TOST for one-sample t-test (raw scores)
 #' @param alpha alpha used for the test (e.g., 0.05)
+#' @param sd population standard deviation 
 #' @param statistical_power desired power (e.g., 0.8)
 #' @param low_eqbound lower equivalence bounds (e.g., -0.5) expressed in raw scores
 #' @param high_eqbound upper equivalence bounds (e.g., 0.5) expressed in raw scores

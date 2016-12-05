@@ -15,11 +15,11 @@ TOSTone.raw(m, mu, sd, n, low_eqbound, high_eqbound, alpha)
 
 \item{n}{sample size}
 
+\item{low_eqbound}{lower equivalence bounds (e.g., -0.5) expressed in raw units}
+
+\item{high_eqbound}{upper equivalence bounds (e.g., 0.5) expressed in raw units}
+
 \item{alpha}{alpha level (default = 0.05)}
-
-\item{low_eqbound_d}{lower equivalence bounds (e.g., -0.5) expressed in standardized mean difference (Cohen's d)}
-
-\item{high_eqbound_d}{upper equivalence bounds (e.g., 0.5) expressed in standardized mean difference (Cohen's d)}
 }
 \value{
 Returns TOST t-value 1, TOST p-value 1, TOST t-value 2, TOST p-value 2, degrees of freedom, low equivalence bound, high equivalence bound, Lower limit confidence interval TOST, Upper limit confidence interval TOST

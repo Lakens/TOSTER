@@ -4,7 +4,7 @@
 \alias{powerTOSTone}
 \title{Power analysis for TOST for one-sample t-test (Cohen's d)}
 \usage{
-powerTOSTone(alpha, statistical_power, low_eqbound_d, high_eqbound_d, epsilon)
+powerTOSTone(alpha, statistical_power, low_eqbound_d, high_eqbound_d)
 }
 \arguments{
 \item{alpha}{alpha used for the test (e.g., 0.05)}
