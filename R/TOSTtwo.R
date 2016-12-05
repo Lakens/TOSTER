@@ -47,9 +47,9 @@ TOSTtwo<-function(m1,m2,sd1,sd2,n1,n2,low_eqbound_d, high_eqbound_d, alpha, var.
     high_eqbound<-high_eqbound_d*sdpooled
     degree_f<-n1+n2-2
     t1<-(abs(m1-m2)-low_eqbound)/(sdpooled*sqrt(1/n1 + 1/n2))  #students t-test lower bound
-    p1<-pt(t1, degree_f, lower=FALSE) 
+    p1<-pt(t1, degree_f, lower.tail=FALSE) 
     t2<-(abs(m1-m2)-high_eqbound)/(sdpooled*sqrt(1/n1 + 1/n2)) #students t-test upper bound
-    p2<-pt(t2, degree_f, lower=TRUE) 
+    p2<-pt(t2, degree_f, lower.tail=TRUE) 
     t<-(m1-m2)/(sdpooled*sqrt(1/n1 + 1/n2))
     pttest<-2*pt(-abs(t), df=degree_f)
     LL90<-(m1-m2)-qt(1-alpha, n1+n2-2)*(sdpooled*sqrt(1/n1 + 1/n2))

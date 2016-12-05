@@ -20,9 +20,9 @@ TOSTone<-function(m,mu,sd,n,low_eqbound_d, high_eqbound_d, alpha){
   high_eqbound<-high_eqbound_d*sd
   degree_f<-n-1
   t1<-(m-mu-low_eqbound)/(sd/sqrt(n))# t-test
-  p1<-pt(t1, degree_f, lower=FALSE) 
+  p1<-pt(t1, degree_f, lower.tail=FALSE) 
   t2<-(m-mu-high_eqbound)/(sd/sqrt(n)) #t-test
-  p2<-pt(t2, degree_f, lower=TRUE) 
+  p2<-pt(t2, degree_f, lower.tail=TRUE) 
   t<-(m-mu)/(sd/sqrt(n))
   pttest<-2*pt(-abs(t), df=degree_f)
   LL90<-(m-mu)-qt(1-alpha, degree_f)*(sd/sqrt(n))

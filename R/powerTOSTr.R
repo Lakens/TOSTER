@@ -6,6 +6,7 @@
 #' @return Returns a string summarizing the power analysis, and a numeric variable for the number of pairs needed
 #' @examples 
 #' powerTOSTr(alpha=0.05, statistical_power=0.8, low_eqbound_r=-0.1, high_eqbound_r=0.1)
+#' @importFrom stats pnorm pt qnorm qt
 #' @export
 
 powerTOSTr<-function(alpha, statistical_power, low_eqbound_r, high_eqbound_r){

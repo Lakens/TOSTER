@@ -35,9 +35,9 @@ TOSTmeta<-function(ES,var,se,low_eqbound_d, high_eqbound_d, alpha){
     }
   }
   Z1<-(ES+high_eqbound_d)/se
-  p1<-pnorm(Z1, lower=FALSE) 
+  p1<-pnorm(Z1, lower.tail=FALSE) 
   Z2<-(ES+low_eqbound_d)/se
-  p2<-pnorm(Z2, lower=TRUE) 
+  p2<-pnorm(Z2, lower.tail=TRUE) 
   Z<-(ES/se)
   pttest<-pnorm(-abs(Z))
   LL90<-ES-qnorm(1-alpha)*(se)

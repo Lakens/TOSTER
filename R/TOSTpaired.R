@@ -13,6 +13,7 @@
 #' TOSTpaired(n=65,m1=5.83,m2=5.75,sd1=1.17,sd2=1.29,r12=0.75,low_eqbound_dz=-0.4,high_eqbound_dz=0.4)
 #' @section References:
 #' Mara, C. A., & Cribbie, R. A. (2012). Paired-Samples Tests of Equivalence. Communications in Statistics - Simulation and Computation, 41(10), 1928-1943. https://doi.org/10.1080/03610918.2011.626545, formula page 1932. Note there is a typo in the formula: n-1 should be n (personal communication, 31-8-2016)
+#' @importFrom stats pnorm pt qnorm qt
 #' @export
 #' 
 
@@ -26,11 +27,11 @@ TOSTpaired<-function(n,m1,m2,sd1,sd2,r12,low_eqbound_dz, high_eqbound_dz, alpha)
   se<-sdif/sqrt(n)
   t<-(m1-m2)/se
   degree_f<-n-1
-  pttest<-2*pt(abs(t), degree_f, lower=FALSE)
+  pttest<-2*pt(abs(t), degree_f, lower.tail=FALSE)
   t1<-((m1-m2)+(low_eqbound_dz*sdif))/se
-  p1<-1-pt(t1, degree_f, lower=FALSE)
+  p1<-1-pt(t1, degree_f, lower.tail=FALSE)
   t2<-((m1-m2)+(high_eqbound_dz*sdif))/se
-  p2<-pt(t2, degree_f, lower=FALSE)
+  p2<-pt(t2, degree_f, lower.tail=FALSE)
   ttost<-ifelse(abs(t1) < abs(t2), t1, t2)
   LL90<-((m1-m2)-qt(1-alpha, degree_f)*se)
   UL90<-((m1-m2)+qt(1-alpha, degree_f)*se)
