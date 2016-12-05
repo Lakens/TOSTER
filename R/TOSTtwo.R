@@ -62,9 +62,9 @@ TOSTtwo<-function(m1,m2,sd1,sd2,n1,n2,low_eqbound_d, high_eqbound_d, alpha, var.
     high_eqbound<-high_eqbound_d*sdpooled
     degree_f<-(sd1^2/n1+sd2^2/n2)^2/(((sd1^2/n1)^2/(n1-1))+((sd2^2/n2)^2/(n2-1))) #degrees of freedom for Welch's t-test
     t1<-(abs(m1-m2)-low_eqbound)/sqrt(sd1^2/n1 + sd2^2/n2) #welch's t-test upper bound
-    p1<-pt(t1, degree_f, lower=FALSE) #p-value for Welch's TOST t-test
+    p1<-pt(t1, degree_f, lower.tail=FALSE) #p-value for Welch's TOST t-test
     t2<-(abs(m1-m2)-high_eqbound)/sqrt(sd1^2/n1 + sd2^2/n2) #welch's t-test lower bound
-    p2<-pt(t2, degree_f, lower=TRUE) #p-value for Welch's TOST t-test
+    p2<-pt(t2, degree_f, lower.tail=TRUE) #p-value for Welch's TOST t-test
     t<-(m1-m2)/sqrt(sd1^2/n1 + sd2^2/n2) #welch's t-test NHST
     pttest<-2*pt(-abs(t), df=degree_f) #p-value for Welch's t-test
     LL90<-(m1-m2)-qt(1-alpha, degree_f)*sqrt(sd1^2/n1 + sd2^2/n2) #Lower limit for CI Welch's t-test
