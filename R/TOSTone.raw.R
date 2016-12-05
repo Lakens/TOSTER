@@ -3,8 +3,8 @@
 #' @param mu value to compare against
 #' @param sd standard deviation
 #' @param n sample size
-#' @param low_eqbound_d lower equivalence bounds (e.g., -0.5) expressed in standardized mean difference (Cohen's d)
-#' @param high_eqbound_d upper equivalence bounds (e.g., 0.5) expressed in standardized mean difference (Cohen's d)
+#' @param low_eqbound lower equivalence bounds (e.g., -0.5) expressed in raw units
+#' @param high_eqbound upper equivalence bounds (e.g., 0.5) expressed in raw units
 #' @param alpha alpha level (default = 0.05)
 #' @return Returns TOST t-value 1, TOST p-value 1, TOST t-value 2, TOST p-value 2, degrees of freedom, low equivalence bound, high equivalence bound, Lower limit confidence interval TOST, Upper limit confidence interval TOST
 #' @examples
