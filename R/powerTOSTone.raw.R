@@ -9,6 +9,8 @@
 #' powerTOSTone.raw(alpha=0.05, statistical_power=0.9, sd = 1, low_eqbound=-0.3, high_eqbound=0.3)
 #' @section References:
 #' Chow, S.-C., Wang, H., & Shao, J. (2007). Sample Size Calculations in Clinical Research, Second Edition - CRC Press Book. Formula 3.1.9
+#' @importFrom stats pnorm pt qnorm qt
+#' @importFrom graphics abline plot points segments title
 #' @export
 
 

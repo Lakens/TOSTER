@@ -8,6 +8,8 @@
 #' powerTOSTtwo(alpha=0.05, statistical_power=0.8, low_eqbound_d=-0.4, high_eqbound_d=0.4)
 #' @section References:
 #' Chow, S.-C., Wang, H., & Shao, J. (2007). Sample Size Calculations in Clinical Research, Second Edition - CRC Press Book. Formula 3.2.4 with k = 1
+#' @importFrom stats pnorm pt qnorm qt
+#' @importFrom graphics abline plot points segments title
 #' @export
 
 powerTOSTtwo<-function(alpha, statistical_power, low_eqbound_d, high_eqbound_d){

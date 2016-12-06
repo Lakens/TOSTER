@@ -14,6 +14,7 @@
 #' @section References:
 #' Mara, C. A., & Cribbie, R. A. (2012). Paired-Samples Tests of Equivalence. Communications in Statistics - Simulation and Computation, 41(10), 1928-1943. https://doi.org/10.1080/03610918.2011.626545, formula page 1932. Note there is a typo in the formula: n-1 should be n (personal communication, 31-8-2016)
 #' @importFrom stats pnorm pt qnorm qt
+#' @importFrom graphics abline plot points segments title
 #' @export
 #' 
 

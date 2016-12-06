@@ -10,6 +10,8 @@
 #' @param alpha alpha level (default = 0.05)
 #' @param var.equal logical variable indicating whether equal variances assumption is assumed to be TRUE or FALSE. Defaults to FALSE.
 #' @return Returns TOST t-value 1, TOST p-value 1, TOST t-value 2, TOST p-value 2, degrees of freedom, low equivalence bound, high equivalence bound, Lower limit confidence interval TOST, Upper limit confidence interval TOST
+#' @importFrom stats pnorm pt qnorm qt
+#' @importFrom graphics abline plot points segments title
 #' @examples
 #' ## Eskine (2013) showed that participants who had been exposed to organic 
 #' ## food were substantially harsher in their moral judgments relative to 
