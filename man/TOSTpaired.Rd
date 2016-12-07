@@ -36,6 +36,9 @@ TOST function for a dependent t-test (Cohen's dz)
 Mara, C. A., & Cribbie, R. A. (2012). Paired-Samples Tests of Equivalence. Communications in Statistics - Simulation and Computation, 41(10), 1928-1943. https://doi.org/10.1080/03610918.2011.626545, formula page 1932. Note there is a typo in the formula: n-1 should be n (personal communication, 31-8-2016)
 }
 \examples{
+## Test means of 5.83 and 5.75, standard deviations of 1.17 and 1.29 in sample of 65 pairs
+## with correlation between observations of 0.75 using equivalence bounds in Cohen's dz of
+## -0.4 and 0.4 (with default alpha setting of = 0.05).
 TOSTpaired(n=65,m1=5.83,m2=5.75,sd1=1.17,sd2=1.29,r12=0.75,low_eqbound_dz=-0.4,high_eqbound_dz=0.4)
 }
 

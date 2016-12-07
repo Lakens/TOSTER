@@ -22,7 +22,8 @@ Returns a string summarizing the power analysis, and a numeric variable for the 
 Power analysis for TOST for correlations
 }
 \examples{
-## Sample size for alpha = 0.05, 80\% power, equivalence bounds of r = -0.1 and r = 0.1,assuming true effect = 0
+## Sample size for alpha = 0.05, 80\% power, equivalence bounds of 
+## r = -0.1 and r = 0.1,assuming true effect = 0
 powerTOSTr(alpha=0.05, statistical_power=0.8, low_eqbound_r=-0.1, high_eqbound_r=0.1)
 }
 

@@ -5,7 +5,8 @@
 #' @param high_eqbound_r upper equivalence bounds (e.g., 0.5) expressed in standardized mean difference (Cohen's dz)
 #' @return Returns a string summarizing the power analysis, and a numeric variable for the number of pairs needed
 #' @examples 
-#' ## Sample size for alpha = 0.05, 80% power, equivalence bounds of r = -0.1 and r = 0.1,assuming true effect = 0
+#' ## Sample size for alpha = 0.05, 80% power, equivalence bounds of 
+#' ## r = -0.1 and r = 0.1,assuming true effect = 0
 #' powerTOSTr(alpha=0.05, statistical_power=0.8, low_eqbound_r=-0.1, high_eqbound_r=0.1)
 #' @importFrom stats pnorm pt qnorm qt
 #' @importFrom graphics abline plot points segments title

@@ -24,7 +24,7 @@
 #' ## this means the equivalence bound is d = 0.48, which equals a 
 #' ## difference of 0.384 on a 7-point scale given the sample sizes and a 
 #' ## pooled standard deviation of 0.894). Using a TOST equivalence test 
-#' ## with default alpha = 0.05, assuming equal variances, and equivalence 
+#' ## with default alpha = 0.05, not assuming equal variances, and equivalence 
 #' ## bounds of d = -0.43 and d = 0.43 is significant, t(182) = -2.69, 
 #' ## p = 0.004. We can reject effects larger than d = 0.43.
 #' 

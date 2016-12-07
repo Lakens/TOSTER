@@ -6,7 +6,8 @@
 #' @param sdif standard deviation of the difference scores
 #' @return Returns a string summarizing the power analysis, and a numeric variable for the number of pairs needed
 #' @examples 
-#' ## Sample size for alpha = 0.05, 80% power, equivalence bounds of -3 and 3 in raw units, and assuming a standard deviation of the difference scores of 10, and assuming a true effect = 0
+#' ## Sample size for alpha = 0.05, 80% power, equivalence bounds of -3 and 3 in raw units
+#' ## and assuming a standard deviation of the difference scores of 10, and assuming a true effect = 0
 #' powerTOSTpaired.raw(alpha=0.05,statistical_power=0.8,low_eqbound=-3, high_eqbound=3, sdif=10)
 #' @section References:
 #' Chow, S.-C., Wang, H., & Shao, J. (2007). Sample Size Calculations in Clinical Research, Second Edition - CRC Press Book. Formula 3.1.9

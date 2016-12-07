@@ -26,7 +26,8 @@ Power analysis for TOST for one-sample t-test (Cohen's d)
 Chow, S.-C., Wang, H., & Shao, J. (2007). Sample Size Calculations in Clinical Research, Second Edition - CRC Press Book. Formula 3.1.9
 }
 \examples{
-## Sample size for alpha = 0.05, 90\% power, equivalence bounds of Cohen's d = -0.3 and Cohen's d = 0.3, and assuming true effect = 0
+## Sample size for alpha = 0.05, 90\% power, equivalence bounds of 
+## Cohen's d = -0.3 and Cohen's d = 0.3, and assuming true effect = 0
 powerTOSTone(alpha=0.05, statistical_power=0.9, low_eqbound_d=-0.3, high_eqbound_d=0.3)
 }
 

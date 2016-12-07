@@ -10,6 +10,9 @@
 #' @param alpha alpha level (default = 0.05)
 #' @return Returns TOST t-value 1, TOST p-value 1, TOST t-value 2, TOST p-value 2, degrees of freedom, low equivalence bound, high equivalence bound, low equivalence bound in dz, high equivalence bound in dz, Lower limit confidence interval TOST, Upper limit confidence interval TOST
 #' @examples
+#' ## Test means of 5.83 and 5.75, standard deviations of 1.17 and 1.29 in sample of 65 pairs
+#' ## with correlation between observations of 0.75 using equivalence bounds in Cohen's dz of
+#' ## -0.4 and 0.4 (with default alpha setting of = 0.05).
 #' TOSTpaired(n=65,m1=5.83,m2=5.75,sd1=1.17,sd2=1.29,r12=0.75,low_eqbound_dz=-0.4,high_eqbound_dz=0.4)
 #' @section References:
 #' Mara, C. A., & Cribbie, R. A. (2012). Paired-Samples Tests of Equivalence. Communications in Statistics - Simulation and Computation, 41(10), 1928-1943. https://doi.org/10.1080/03610918.2011.626545, formula page 1932. Note there is a typo in the formula: n-1 should be n (personal communication, 31-8-2016)

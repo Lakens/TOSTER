@@ -8,6 +8,8 @@
 #' @param alpha alpha level (default = 0.05)
 #' @return Returns TOST t-value 1, TOST p-value 1, TOST t-value 2, TOST p-value 2, degrees of freedom, low equivalence bound, high equivalence bound, Lower limit confidence interval TOST, Upper limit confidence interval TOST
 #' @examples
+#' ## Test observed mean of 0.54 and standard deviation of 1.2 in sample of 100 participants
+#' ## against 0.5 given equivalence bounds of Cohen's d = -0.3 and 0.3, with an alpha = 0.05.
 #' TOSTone(m=0.54,mu=0.5,sd=1.2,n=100,low_eqbound_d=-0.3, high_eqbound_d=0.3, alpha=0.05)
 #' @importFrom stats pnorm pt qnorm qt
 #' @importFrom graphics abline plot points segments title
