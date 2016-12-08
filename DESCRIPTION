@@ -1,9 +1,9 @@
 Package: TOSTER
-Version: 0.1.2
-Date: 2016-12-7
-Title: TOSTER Equivalence Testing
-Description: Frequentist equivalence tests for t-tests, correlations, and meta-
-    analysis, including power analysis for t-tests and correlations. Allows you to
+Version: 0.1.3
+Date: 2016-12-8
+Title: Two One-Sided Tests (TOST) Equivalence Testing
+Description: Two one-sided tests (TOST) procedure to test equivalence for t-tests, correlations, 
+	and meta-analyses, including power analysis for t-tests and correlations. Allows you to
     specify equivalence bounds in raw scale units or in terms of effect sizes.
 Author: Daniel Lakens <D.Lakens@tue.nl>
 Maintainer: Daniel Lakens <D.Lakens@tue.nl>
