@@ -1,4 +1,4 @@
-#' Power analysis for TOST for independent t-test
+#' Power analysis for TOST for independent t-test (Cohen's d)
 #' @param alpha alpha used for the test (e.g., 0.05)
 #' @param statistical_power desired power (e.g., 0.8)
 #' @param low_eqbound_d lower equivalence bounds (e.g., -0.5) expressed in standardized mean difference (Cohen's d)
