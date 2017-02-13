@@ -1,0 +1,59 @@
+title: TOST Paired Samples T-Test
+name: dataTOSTpaired
+jus: '1.0'
+stage: 0
+children:
+  - type: VariableSupplier
+    persistentItems: true
+    stretchFactor: 1
+    suggested:
+      - continuous
+    permitted:
+      - continuous
+      - ordinal
+      - nominal
+    children:
+      - type: VariableTargetListBox
+        name: pairs
+        label: Paired Variables
+        showColumnHeaders: false
+        fullRowSelect: true
+        itemDropBehaviour: overwrite
+        columns:
+          - type: ListItem.VariableLabel
+            name: i1
+            label: ''
+            stretchFactor: 1
+            format: variable
+          - type: ListItem.VariableLabel
+            name: i2
+            label: ''
+            stretchFactor: 1
+            format: variable
+  - type: LayoutBox
+    margin: large
+    children:
+      - name: lowEqBDz
+        type: TextBox
+        label: Lower equivalence bound (in Cohen's Dz)
+        format: number
+        inputPattern: '[0-9]+'
+      - name: highEqBDz
+        type: TextBox
+        label: Upper equivalence bound (in Cohen's Dz)
+        format: number
+        inputPattern: '[0-9]+'
+      - name: alpha
+        type: TextBox
+        label: Alpha level
+        format: number
+        inputPattern: '[0-9]+'
+  - type: LayoutBox
+    margin: large
+    children:
+      - name: desc
+        type: CheckBox
+        label: Descriptive statistics
+      - name: plots
+        type: CheckBox
+        label: Plots
