@@ -21,23 +21,27 @@ options:
         - nominal
         - ordinal
       description:
-          R: a list of vectors of strings naming variables to pair from `data`
+          R: >
+            a list of vectors of strings naming variables to correlate from
+            `data`
 
-    - name: lowEqBR
+    - name: low_eqbound_r
       title: Lower equivalence bound (in r)
       type: Number
       default: -0.3
       description:
           R: >
-            a number (default: -0.3), the lower equivalence bound in r
+            lower equivalence bounds (e.g., -0.3) expressed in a correlation
+            effect size
 
-    - name: highEqBR
+    - name: high_eqbound_r
       title: Upper equivalence bound (in r)
       type: Number
       default: 0.3
       description:
           R: >
-            a number (default: 0.3), the upper equivalence bound in r
+            upper equivalence bounds (e.g., 0.3) expressed in a correlation
+            effect size
 
     - name: alpha
       title: Alpha level
@@ -46,8 +50,7 @@ options:
       max: 1
       default: 0.05
       description:
-          R: >
-            a number between 0 and 1 (default: 0.05) specifying the alpha level
+          R: alpha level (default = 0.05)
 
     - name: desc
       title: Descriptive statistics

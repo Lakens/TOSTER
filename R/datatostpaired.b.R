@@ -61,8 +61,8 @@ dataTOSTpairedClass <- R6::R6Class(
         df <- unname(res$parameter)
 
         alpha <- self$options$alpha
-        low_eqbound_dz <- self$options$lowEqBDz
-        high_eqbound_dz <- self$options$highEqBDz
+        low_eqbound_dz <- self$options$low_eqbound_dz
+        high_eqbound_dz <- self$options$high_eqbound_dz
         r12 <- stats::cor(i1, i2)
 
         sdif<-sqrt(sd1^2+sd2^2-2*r12*sd1*sd2)

@@ -31,18 +31,18 @@ children:
   - type: LayoutBox
     margin: large
     children:
-      - name: eqVar
+      - name: var_equal
         type: CheckBox
         label: Assume equal variances
   - type: LayoutBox
     margin: large
     children:
-      - name: lowEqBD
+      - name: low_eqbound_d
         type: TextBox
         label: Lower equivalence bound
         format: number
         inputPattern: '[0-9]+'
-      - name: highEqBD
+      - name: high_eqbound_d
         type: TextBox
         label: Upper equivalence bound
         format: number

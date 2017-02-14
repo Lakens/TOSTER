@@ -4,8 +4,8 @@
 \alias{dataTOSTtwo}
 \title{TOST Independent Samples T-Test}
 \usage{
-dataTOSTtwo(data, deps, group, eqVar = FALSE, lowEqBD = -0.5,
-  highEqBD = 0.5, alpha = 0.05, desc = FALSE, plots = FALSE)
+dataTOSTtwo(data, deps, group, var_equal = FALSE, low_eqbound_d = -0.5,
+  high_eqbound_d = 0.5, alpha = 0.05, desc = FALSE, plots = FALSE)
 }
 \arguments{
 \item{data}{the data as a data frame}
@@ -15,16 +15,16 @@ dataTOSTtwo(data, deps, group, eqVar = FALSE, lowEqBD = -0.5,
 \item{group}{a string naming the grouping variable in \code{data}; must 
 have two levels}
 
-\item{eqVar}{\code{TRUE} or \code{FALSE} (default), assume equal variances}
+\item{var_equal}{\code{TRUE} or \code{FALSE} (default), assume equal 
+variances}
 
-\item{lowEqBD}{a number (default: -0.5), the lower equivalence bound in 
-Cohen's D}
+\item{low_eqbound_d}{lower equivalence bounds (e.g., -0.5) expressed in 
+standardized mean difference (Cohen's d)}
 
-\item{highEqBD}{a number (default: 0.5), the upper equivalence bound in 
-Cohen's D}
+\item{high_eqbound_d}{upper equivalence bounds (e.g., 0.5) expressed in 
+standardized mean difference (Cohen's d)}
 
-\item{alpha}{a number between 0 and 1 (default: 0.05) specifying the alpha 
-level}
+\item{alpha}{alpha level (default = 0.05)}
 
 \item{desc}{\code{TRUE} or \code{FALSE} (default), provide descriptive 
 statistics}

@@ -10,8 +10,8 @@ dataTOSToneOptions <- R6::R6Class(
         initialize = function(
             vars = NULL,
             mu = 0,
-            lowEqBD = -0.5,
-            highEqBD = 0.5,
+            low_eqbound_d = -0.5,
+            high_eqbound_d = 0.5,
             alpha = 0.05,
             desc = FALSE,
             plots = FALSE, ...) {
@@ -35,13 +35,13 @@ dataTOSToneOptions <- R6::R6Class(
                 "mu",
                 mu,
                 default=0)
-            private$..lowEqBD <- jmvcore::OptionNumber$new(
-                "lowEqBD",
-                lowEqBD,
+            private$..low_eqbound_d <- jmvcore::OptionNumber$new(
+                "low_eqbound_d",
+                low_eqbound_d,
                 default=-0.5)
-            private$..highEqBD <- jmvcore::OptionNumber$new(
-                "highEqBD",
-                highEqBD,
+            private$..high_eqbound_d <- jmvcore::OptionNumber$new(
+                "high_eqbound_d",
+                high_eqbound_d,
                 default=0.5)
             private$..alpha <- jmvcore::OptionNumber$new(
                 "alpha",
@@ -60,8 +60,8 @@ dataTOSToneOptions <- R6::R6Class(
         
             self$.addOption(private$..vars)
             self$.addOption(private$..mu)
-            self$.addOption(private$..lowEqBD)
-            self$.addOption(private$..highEqBD)
+            self$.addOption(private$..low_eqbound_d)
+            self$.addOption(private$..high_eqbound_d)
             self$.addOption(private$..alpha)
             self$.addOption(private$..desc)
             self$.addOption(private$..plots)
@@ -69,16 +69,16 @@ dataTOSToneOptions <- R6::R6Class(
     active = list(
         vars = function() private$..vars$value,
         mu = function() private$..mu$value,
-        lowEqBD = function() private$..lowEqBD$value,
-        highEqBD = function() private$..highEqBD$value,
+        low_eqbound_d = function() private$..low_eqbound_d$value,
+        high_eqbound_d = function() private$..high_eqbound_d$value,
         alpha = function() private$..alpha$value,
         desc = function() private$..desc$value,
         plots = function() private$..plots$value),
     private = list(
         ..vars = NA,
         ..mu = NA,
-        ..lowEqBD = NA,
-        ..highEqBD = NA,
+        ..low_eqbound_d = NA,
+        ..high_eqbound_d = NA,
         ..alpha = NA,
         ..desc = NA,
         ..plots = NA)
@@ -109,8 +109,9 @@ dataTOSToneResults <- R6::R6Class(
                 clearWith=list(
                     "mu",
                     "alpha",
-                    "lowEqBD",
-                    "highEqBD"),
+                    "var_equal",
+                    "low_eqbound_d",
+                    "high_eqbound_d"),
                 columns=list(
                     list(`name`="var", `title`="", `type`="text", `content`="($key)"),
                     list(`name`="b[0]", `title`="", `type`="text", `content`="t-test"),
@@ -133,8 +134,9 @@ dataTOSToneResults <- R6::R6Class(
                 clearWith=list(
                     "mu",
                     "alpha",
-                    "lowEqBD",
-                    "highEqBD"),
+                    "var_equal",
+                    "low_eqbound_d",
+                    "high_eqbound_d"),
                 columns=list(
                     list(`name`="var", `title`="", `type`="text", `content`="($key)"),
                     list(`name`="stat[cohen]", `title`="", `type`="text", `content`="Cohen's d"),
@@ -175,8 +177,9 @@ dataTOSToneResults <- R6::R6Class(
                     clearWith=list(
                         "mu",
                         "alpha",
-                        "lowEqBD",
-                        "highEqBD")))
+                        "var_equal",
+                        "low_eqbound_d",
+                        "high_eqbound_d")))
             self$add(private$..tost)
             self$add(private$..eqb)
             self$add(private$..desc)
@@ -208,12 +211,11 @@ dataTOSToneBase <- R6::R6Class(
 #' @param data the data as a data frame
 #' @param vars a vector of strings naming variables of interest in \code{data}
 #' @param mu a number (default: 0) to compare against 
-#' @param lowEqBD a number (default: -0.5), the lower equivalence bound in 
-#'   Cohen's D 
-#' @param highEqBD a number (default: 0.5), the upper equivalence bound in 
-#'   Cohen's D 
-#' @param alpha a number between 0 and 1 (default: 0.05) specifying the alpha 
-#'   level 
+#' @param low_eqbound_d lower equivalence bounds (e.g., -0.5) expressed in 
+#'   standardized mean difference (Cohen's d) 
+#' @param high_eqbound_d upper equivalence bounds (e.g., 0.5) expressed in 
+#'   standardized mean difference (Cohen's d) 
+#' @param alpha alpha level (default = 0.05)
 #' @param desc \code{TRUE} or \code{FALSE} (default), provide descriptive 
 #'   statistics 
 #' @param plots \code{TRUE} or \code{FALSE} (default), provide plots 
@@ -222,8 +224,8 @@ dataTOSTone <- function(
     data,
     vars,
     mu = 0,
-    lowEqBD = -0.5,
-    highEqBD = 0.5,
+    low_eqbound_d = -0.5,
+    high_eqbound_d = 0.5,
     alpha = 0.05,
     desc = FALSE,
     plots = FALSE) {
@@ -231,8 +233,8 @@ dataTOSTone <- function(
     options <- dataTOSToneOptions$new(
         vars = vars,
         mu = mu,
-        lowEqBD = lowEqBD,
-        highEqBD = highEqBD,
+        low_eqbound_d = low_eqbound_d,
+        high_eqbound_d = high_eqbound_d,
         alpha = alpha,
         desc = desc,
         plots = plots)

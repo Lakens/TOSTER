@@ -33,12 +33,12 @@ children:
   - type: LayoutBox
     margin: large
     children:
-      - name: lowEqBDz
+      - name: low_eqbound_dz
         type: TextBox
         label: Lower equivalence bound (in Cohen's Dz)
         format: number
         inputPattern: '[0-9]+'
-      - name: highEqBDz
+      - name: high_eqbound_dz
         type: TextBox
         label: Upper equivalence bound (in Cohen's Dz)
         format: number

@@ -33,12 +33,12 @@ children:
   - type: LayoutBox
     margin: large
     children:
-      - name: lowEqBR
+      - name: low_eqbound_r
         type: TextBox
         label: Lower equivalence bound (in r)
         format: number
         inputPattern: '[0-9]+'
-      - name: highEqBR
+      - name: high_eqbound_r
         type: TextBox
         label: Upper equivalence bound (in r)
         format: number

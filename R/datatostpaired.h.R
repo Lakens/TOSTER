@@ -9,8 +9,8 @@ dataTOSTpairedOptions <- R6::R6Class(
     public = list(
         initialize = function(
             pairs = NULL,
-            lowEqBDz = -0.5,
-            highEqBDz = 0.5,
+            low_eqbound_dz = -0.5,
+            high_eqbound_dz = 0.5,
             alpha = 0.05,
             desc = FALSE,
             plots = FALSE, ...) {
@@ -30,13 +30,13 @@ dataTOSTpairedOptions <- R6::R6Class(
                     "continuous",
                     "nominal",
                     "ordinal"))
-            private$..lowEqBDz <- jmvcore::OptionNumber$new(
-                "lowEqBDz",
-                lowEqBDz,
+            private$..low_eqbound_dz <- jmvcore::OptionNumber$new(
+                "low_eqbound_dz",
+                low_eqbound_dz,
                 default=-0.5)
-            private$..highEqBDz <- jmvcore::OptionNumber$new(
-                "highEqBDz",
-                highEqBDz,
+            private$..high_eqbound_dz <- jmvcore::OptionNumber$new(
+                "high_eqbound_dz",
+                high_eqbound_dz,
                 default=0.5)
             private$..alpha <- jmvcore::OptionNumber$new(
                 "alpha",
@@ -54,23 +54,23 @@ dataTOSTpairedOptions <- R6::R6Class(
                 default=FALSE)
         
             self$.addOption(private$..pairs)
-            self$.addOption(private$..lowEqBDz)
-            self$.addOption(private$..highEqBDz)
+            self$.addOption(private$..low_eqbound_dz)
+            self$.addOption(private$..high_eqbound_dz)
             self$.addOption(private$..alpha)
             self$.addOption(private$..desc)
             self$.addOption(private$..plots)
         }),
     active = list(
         pairs = function() private$..pairs$value,
-        lowEqBDz = function() private$..lowEqBDz$value,
-        highEqBDz = function() private$..highEqBDz$value,
+        low_eqbound_dz = function() private$..low_eqbound_dz$value,
+        high_eqbound_dz = function() private$..high_eqbound_dz$value,
         alpha = function() private$..alpha$value,
         desc = function() private$..desc$value,
         plots = function() private$..plots$value),
     private = list(
         ..pairs = NA,
-        ..lowEqBDz = NA,
-        ..highEqBDz = NA,
+        ..low_eqbound_dz = NA,
+        ..high_eqbound_dz = NA,
         ..alpha = NA,
         ..desc = NA,
         ..plots = NA)
@@ -100,8 +100,8 @@ dataTOSTpairedResults <- R6::R6Class(
                 rows="(pairs)",
                 clearWith=list(
                     "alpha",
-                    "lowEqBD",
-                    "highEqBD"),
+                    "low_eqbound_dz",
+                    "high_eqbound_dz"),
                 columns=list(
                     list(`name`="i1", `title`="", `type`="text", `content`="($key)"),
                     list(`name`="i2", `title`="", `type`="text", `content`="($key)"),
@@ -124,8 +124,8 @@ dataTOSTpairedResults <- R6::R6Class(
                 rows="(pairs)",
                 clearWith=list(
                     "alpha",
-                    "lowEqBD",
-                    "highEqBD"),
+                    "low_eqbound_dz",
+                    "high_eqbound_dz"),
                 columns=list(
                     list(`name`="i1", `title`="", `type`="text", `content`="($key)"),
                     list(`name`="i2", `title`="", `type`="text", `content`="($key)"),
@@ -172,8 +172,8 @@ dataTOSTpairedResults <- R6::R6Class(
                     width=180,
                     clearWith=list(
                         "alpha",
-                        "lowEqBD",
-                        "highEqBD")))
+                        "low_eqbound_dz",
+                        "high_eqbound_dz")))
             self$add(private$..tost)
             self$add(private$..eqb)
             self$add(private$..desc)
@@ -205,12 +205,11 @@ dataTOSTpairedBase <- R6::R6Class(
 #' @param data the data as a data frame
 #' @param pairs a list of vectors of strings naming variables to pair from 
 #'   \code{data}
-#' @param lowEqBDz a number (default: -0.5), the lower equivalence bound in 
-#'   Cohen's Dz 
-#' @param highEqBDz a number (default: 0.5), the upper equivalence bound in 
-#'   Cohen's Dz 
-#' @param alpha a number between 0 and 1 (default: 0.05) specifying the alpha 
-#'   level 
+#' @param low_eqbound_dz lower equivalence bounds (e.g., -0.5) expressed in 
+#'   standardized mean difference (Cohen's dz) 
+#' @param high_eqbound_dz upper equivalence bounds (e.g., 0.5) expressed in 
+#'   standardized mean difference (Cohen's dz) 
+#' @param alpha alpha level (default = 0.05)
 #' @param desc \code{TRUE} or \code{FALSE} (default), provide descriptive 
 #'   statistics 
 #' @param plots \code{TRUE} or \code{FALSE} (default), provide plots 
@@ -218,16 +217,16 @@ dataTOSTpairedBase <- R6::R6Class(
 dataTOSTpaired <- function(
     data,
     pairs,
-    lowEqBDz = -0.5,
-    highEqBDz = 0.5,
+    low_eqbound_dz = -0.5,
+    high_eqbound_dz = 0.5,
     alpha = 0.05,
     desc = FALSE,
     plots = FALSE) {
 
     options <- dataTOSTpairedOptions$new(
         pairs = pairs,
-        lowEqBDz = lowEqBDz,
-        highEqBDz = highEqBDz,
+        low_eqbound_dz = low_eqbound_dz,
+        high_eqbound_dz = high_eqbound_dz,
         alpha = alpha,
         desc = desc,
         plots = plots)
