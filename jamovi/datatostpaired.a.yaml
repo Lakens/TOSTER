@@ -23,21 +23,23 @@ options:
       description:
           R: a list of vectors of strings naming variables to pair from `data`
 
-    - name: lowEqBDz
+    - name: low_eqbound_dz
       title: Lower equivalence bound (in Cohen's Dz)
       type: Number
       default: -0.5
       description:
           R: >
-            a number (default: -0.5), the lower equivalence bound in Cohen's Dz
+            lower equivalence bounds (e.g., -0.5) expressed in standardized
+            mean difference (Cohen's dz)
 
-    - name: highEqBDz
-      title: Upper equivalence bound (in Cohen's Dz)
+    - name: high_eqbound_dz
+      title: Upper equivalence bound
       type: Number
       default: 0.5
       description:
           R: >
-            a number (default: 0.5), the upper equivalence bound in Cohen's Dz
+            upper equivalence bounds (e.g., 0.5) expressed in standardized mean
+            difference (Cohen's dz)
 
     - name: alpha
       title: Alpha level
@@ -46,8 +48,7 @@ options:
       max: 1
       default: 0.05
       description:
-          R: >
-            a number between 0 and 1 (default: 0.05) specifying the alpha level
+          R: alpha level (default = 0.05)
 
     - name: desc
       title: Descriptive statistics

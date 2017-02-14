@@ -4,21 +4,22 @@
 \alias{dataTOSTr}
 \title{TOST Correlation}
 \usage{
-dataTOSTr(data, pairs, lowEqBR = -0.3, highEqBR = 0.3, alpha = 0.05,
-  desc = FALSE, plots = FALSE)
+dataTOSTr(data, pairs, low_eqbound_r = -0.3, high_eqbound_r = 0.3,
+  alpha = 0.05, desc = FALSE, plots = FALSE)
 }
 \arguments{
 \item{data}{the data as a data frame}
 
-\item{pairs}{a list of vectors of strings naming variables to pair from 
-\code{data}}
+\item{pairs}{a list of vectors of strings naming variables to correlate 
+from \code{data}}
 
-\item{lowEqBR}{a number (default: -0.3), the lower equivalence bound in r}
+\item{low_eqbound_r}{lower equivalence bounds (e.g., -0.3) expressed in a 
+correlation effect size}
 
-\item{highEqBR}{a number (default: 0.3), the upper equivalence bound in r}
+\item{high_eqbound_r}{upper equivalence bounds (e.g., 0.3) expressed in a 
+correlation effect size}
 
-\item{alpha}{a number between 0 and 1 (default: 0.05) specifying the alpha 
-level}
+\item{alpha}{alpha level (default = 0.05)}
 
 \item{desc}{\code{TRUE} or \code{FALSE} (default), provide descriptive 
 statistics}

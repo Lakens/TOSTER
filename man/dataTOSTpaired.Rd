@@ -4,7 +4,7 @@
 \alias{dataTOSTpaired}
 \title{TOST Paired Samples T-Test}
 \usage{
-dataTOSTpaired(data, pairs, lowEqBDz = -0.5, highEqBDz = 0.5,
+dataTOSTpaired(data, pairs, low_eqbound_dz = -0.5, high_eqbound_dz = 0.5,
   alpha = 0.05, desc = FALSE, plots = FALSE)
 }
 \arguments{
@@ -13,14 +13,13 @@ dataTOSTpaired(data, pairs, lowEqBDz = -0.5, highEqBDz = 0.5,
 \item{pairs}{a list of vectors of strings naming variables to pair from 
 \code{data}}
 
-\item{lowEqBDz}{a number (default: -0.5), the lower equivalence bound in 
-Cohen's Dz}
+\item{low_eqbound_dz}{lower equivalence bounds (e.g., -0.5) expressed in 
+standardized mean difference (Cohen's dz)}
 
-\item{highEqBDz}{a number (default: 0.5), the upper equivalence bound in 
-Cohen's Dz}
+\item{high_eqbound_dz}{upper equivalence bounds (e.g., 0.5) expressed in 
+standardized mean difference (Cohen's dz)}
 
-\item{alpha}{a number between 0 and 1 (default: 0.05) specifying the alpha 
-level}
+\item{alpha}{alpha level (default = 0.05)}
 
 \item{desc}{\code{TRUE} or \code{FALSE} (default), provide descriptive 
 statistics}

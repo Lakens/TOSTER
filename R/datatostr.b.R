@@ -55,8 +55,8 @@ dataTOSTrClass <- R6::R6Class(
         se2  <- sd2/sqrt(n)
 
         alpha <- self$options$alpha
-        low_eqbound_r <- self$options$lowEqBR
-        high_eqbound_r <- self$options$highEqBR
+        low_eqbound_r <- self$options$low_eqbound_r
+        high_eqbound_r <- self$options$high_eqbound_r
         r <- stats::cor(i1, i2)
         res <- stats::cor.test(i1, i2)
 

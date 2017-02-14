@@ -41,9 +41,9 @@ dataTOSToneClass <- R6::R6Class(
         t   <- unname(res$statistic)
         p   <- unname(res$p.value)
 
-         low_eqbound_d <- self$options$lowEqBD
-        high_eqbound_d <- self$options$highEqBD
-         low_eqbound <-  low_eqbound_d * sd
+        low_eqbound_d <- self$options$low_eqbound_d
+        high_eqbound_d <- self$options$high_eqbound_d
+        low_eqbound <- low_eqbound_d * sd
         high_eqbound <- high_eqbound_d * sd
 
         degree_f<-n-1

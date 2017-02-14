@@ -31,12 +31,12 @@ children:
         label: mu
         format: number
         inputPattern: '[0-9]+'
-      - name: lowEqBD
+      - name: low_eqbound_d
         type: TextBox
         label: Lower equivalence bound (in Cohen's D)
         format: number
         inputPattern: '[0-9]+'
-      - name: highEqBD
+      - name: high_eqbound_d
         type: TextBox
         label: Upper equivalence bound (in Cohen's D)
         format: number

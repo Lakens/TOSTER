@@ -34,7 +34,7 @@ options:
             a string naming the grouping variable in `data`; must have two
             levels
 
-    - name: eqVar
+    - name: var_equal
       title: Assume equal variances
       type: Bool
       default: false
@@ -42,29 +42,30 @@ options:
           R: >
             `TRUE` or `FALSE` (default), assume equal variances
 
-    - name: lowEqBD
+    - name: low_eqbound_d
       title: Lower equivalence bound
       type: Number
       default: -0.5
       description:
           R: >
-            a number (default: -0.5), the lower equivalence bound in Cohen's D
+            lower equivalence bounds (e.g., -0.5) expressed in standardized
+            mean difference (Cohen's d)
 
-    - name: highEqBD
+    - name: high_eqbound_d
       title: Upper equivalence bound
       type: Number
       default: 0.5
       description:
           R: >
-            a number (default: 0.5), the upper equivalence bound in Cohen's D
+            upper equivalence bounds (e.g., 0.5) expressed in standardized mean
+            difference (Cohen's d)
 
     - name: alpha
       title: Alpha level
       type: Number
       default: 0.05
       description:
-          R: >
-            a number between 0 and 1 (default: 0.05) specifying the alpha level
+          R: alpha level (default = 0.05)
 
     - name: desc
       title: Descriptive statistics

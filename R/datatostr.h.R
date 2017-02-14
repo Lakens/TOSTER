@@ -9,8 +9,8 @@ dataTOSTrOptions <- R6::R6Class(
     public = list(
         initialize = function(
             pairs = NULL,
-            lowEqBR = -0.3,
-            highEqBR = 0.3,
+            low_eqbound_r = -0.3,
+            high_eqbound_r = 0.3,
             alpha = 0.05,
             desc = FALSE,
             plots = FALSE, ...) {
@@ -30,13 +30,13 @@ dataTOSTrOptions <- R6::R6Class(
                     "continuous",
                     "nominal",
                     "ordinal"))
-            private$..lowEqBR <- jmvcore::OptionNumber$new(
-                "lowEqBR",
-                lowEqBR,
+            private$..low_eqbound_r <- jmvcore::OptionNumber$new(
+                "low_eqbound_r",
+                low_eqbound_r,
                 default=-0.3)
-            private$..highEqBR <- jmvcore::OptionNumber$new(
-                "highEqBR",
-                highEqBR,
+            private$..high_eqbound_r <- jmvcore::OptionNumber$new(
+                "high_eqbound_r",
+                high_eqbound_r,
                 default=0.3)
             private$..alpha <- jmvcore::OptionNumber$new(
                 "alpha",
@@ -54,23 +54,23 @@ dataTOSTrOptions <- R6::R6Class(
                 default=FALSE)
         
             self$.addOption(private$..pairs)
-            self$.addOption(private$..lowEqBR)
-            self$.addOption(private$..highEqBR)
+            self$.addOption(private$..low_eqbound_r)
+            self$.addOption(private$..high_eqbound_r)
             self$.addOption(private$..alpha)
             self$.addOption(private$..desc)
             self$.addOption(private$..plots)
         }),
     active = list(
         pairs = function() private$..pairs$value,
-        lowEqBR = function() private$..lowEqBR$value,
-        highEqBR = function() private$..highEqBR$value,
+        low_eqbound_r = function() private$..low_eqbound_r$value,
+        high_eqbound_r = function() private$..high_eqbound_r$value,
         alpha = function() private$..alpha$value,
         desc = function() private$..desc$value,
         plots = function() private$..plots$value),
     private = list(
         ..pairs = NA,
-        ..lowEqBR = NA,
-        ..highEqBR = NA,
+        ..low_eqbound_r = NA,
+        ..high_eqbound_r = NA,
         ..alpha = NA,
         ..desc = NA,
         ..plots = NA)
@@ -100,8 +100,8 @@ dataTOSTrResults <- R6::R6Class(
                 rows="(pairs)",
                 clearWith=list(
                     "alpha",
-                    "lowEqBR",
-                    "highEqBR"),
+                    "low_eqbound_r",
+                    "high_eqbound_r"),
                 columns=list(
                     list(`name`="i1", `title`="", `type`="text", `content`="($key)"),
                     list(`name`="i2", `title`="", `type`="text", `content`="($key)"),
@@ -121,8 +121,8 @@ dataTOSTrResults <- R6::R6Class(
                 rows="(pairs)",
                 clearWith=list(
                     "alpha",
-                    "lowEqBR",
-                    "highEqBR"),
+                    "low_eqbound_r",
+                    "high_eqbound_r"),
                 columns=list(
                     list(`name`="i1", `title`="", `type`="text", `content`="($key)"),
                     list(`name`="i2", `title`="", `type`="text", `content`="($key)"),
@@ -163,8 +163,8 @@ dataTOSTrResults <- R6::R6Class(
                     width=180,
                     clearWith=list(
                         "alpha",
-                        "lowEqBR",
-                        "highEqBR")))
+                        "low_eqbound_r",
+                        "high_eqbound_r")))
             self$add(private$..tost)
             self$add(private$..eqb)
             self$add(private$..desc)
@@ -194,12 +194,13 @@ dataTOSTrBase <- R6::R6Class(
 #'
 #' 
 #' @param data the data as a data frame
-#' @param pairs a list of vectors of strings naming variables to pair from 
-#'   \code{data}
-#' @param lowEqBR a number (default: -0.3), the lower equivalence bound in r 
-#' @param highEqBR a number (default: 0.3), the upper equivalence bound in r 
-#' @param alpha a number between 0 and 1 (default: 0.05) specifying the alpha 
-#'   level 
+#' @param pairs a list of vectors of strings naming variables to correlate 
+#'   from \code{data} 
+#' @param low_eqbound_r lower equivalence bounds (e.g., -0.3) expressed in a 
+#'   correlation effect size 
+#' @param high_eqbound_r upper equivalence bounds (e.g., 0.3) expressed in a 
+#'   correlation effect size 
+#' @param alpha alpha level (default = 0.05)
 #' @param desc \code{TRUE} or \code{FALSE} (default), provide descriptive 
 #'   statistics 
 #' @param plots \code{TRUE} or \code{FALSE} (default), provide plots 
@@ -207,16 +208,16 @@ dataTOSTrBase <- R6::R6Class(
 dataTOSTr <- function(
     data,
     pairs,
-    lowEqBR = -0.3,
-    highEqBR = 0.3,
+    low_eqbound_r = -0.3,
+    high_eqbound_r = 0.3,
     alpha = 0.05,
     desc = FALSE,
     plots = FALSE) {
 
     options <- dataTOSTrOptions$new(
         pairs = pairs,
-        lowEqBR = lowEqBR,
-        highEqBR = highEqBR,
+        low_eqbound_r = low_eqbound_r,
+        high_eqbound_r = high_eqbound_r,
         alpha = alpha,
         desc = desc,
         plots = plots)

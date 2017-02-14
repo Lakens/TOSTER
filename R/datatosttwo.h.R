@@ -10,9 +10,9 @@ dataTOSTtwoOptions <- R6::R6Class(
         initialize = function(
             deps = NULL,
             group = NULL,
-            eqVar = FALSE,
-            lowEqBD = -0.5,
-            highEqBD = 0.5,
+            var_equal = FALSE,
+            low_eqbound_d = -0.5,
+            high_eqbound_d = 0.5,
             alpha = 0.05,
             desc = FALSE,
             plots = FALSE, ...) {
@@ -38,17 +38,17 @@ dataTOSTtwoOptions <- R6::R6Class(
                 suggested=list(
                     "nominal",
                     "ordinal"))
-            private$..eqVar <- jmvcore::OptionBool$new(
-                "eqVar",
-                eqVar,
+            private$..var_equal <- jmvcore::OptionBool$new(
+                "var_equal",
+                var_equal,
                 default=FALSE)
-            private$..lowEqBD <- jmvcore::OptionNumber$new(
-                "lowEqBD",
-                lowEqBD,
+            private$..low_eqbound_d <- jmvcore::OptionNumber$new(
+                "low_eqbound_d",
+                low_eqbound_d,
                 default=-0.5)
-            private$..highEqBD <- jmvcore::OptionNumber$new(
-                "highEqBD",
-                highEqBD,
+            private$..high_eqbound_d <- jmvcore::OptionNumber$new(
+                "high_eqbound_d",
+                high_eqbound_d,
                 default=0.5)
             private$..alpha <- jmvcore::OptionNumber$new(
                 "alpha",
@@ -65,9 +65,9 @@ dataTOSTtwoOptions <- R6::R6Class(
         
             self$.addOption(private$..deps)
             self$.addOption(private$..group)
-            self$.addOption(private$..eqVar)
-            self$.addOption(private$..lowEqBD)
-            self$.addOption(private$..highEqBD)
+            self$.addOption(private$..var_equal)
+            self$.addOption(private$..low_eqbound_d)
+            self$.addOption(private$..high_eqbound_d)
             self$.addOption(private$..alpha)
             self$.addOption(private$..desc)
             self$.addOption(private$..plots)
@@ -75,18 +75,18 @@ dataTOSTtwoOptions <- R6::R6Class(
     active = list(
         deps = function() private$..deps$value,
         group = function() private$..group$value,
-        eqVar = function() private$..eqVar$value,
-        lowEqBD = function() private$..lowEqBD$value,
-        highEqBD = function() private$..highEqBD$value,
+        var_equal = function() private$..var_equal$value,
+        low_eqbound_d = function() private$..low_eqbound_d$value,
+        high_eqbound_d = function() private$..high_eqbound_d$value,
         alpha = function() private$..alpha$value,
         desc = function() private$..desc$value,
         plots = function() private$..plots$value),
     private = list(
         ..deps = NA,
         ..group = NA,
-        ..eqVar = NA,
-        ..lowEqBD = NA,
-        ..highEqBD = NA,
+        ..var_equal = NA,
+        ..low_eqbound_d = NA,
+        ..high_eqbound_d = NA,
         ..alpha = NA,
         ..desc = NA,
         ..plots = NA)
@@ -117,9 +117,9 @@ dataTOSTtwoResults <- R6::R6Class(
                 clearWith=list(
                     "group",
                     "alpha",
-                    "lowEqBD",
-                    "highEqBD",
-                    "eqVar"),
+                    "low_eqbound_d",
+                    "high_eqbound_d",
+                    "var_equal"),
                 columns=list(
                     list(`name`="var", `title`="", `type`="text", `content`="($key)"),
                     list(`name`="b[0]", `title`="", `type`="text", `content`="t-test"),
@@ -142,9 +142,9 @@ dataTOSTtwoResults <- R6::R6Class(
                 clearWith=list(
                     "group",
                     "alpha",
-                    "lowEqBD",
-                    "highEqBD",
-                    "eqVar"),
+                    "low_eqbound_d",
+                    "high_eqbound_d",
+                    "var_equal"),
                 columns=list(
                     list(`name`="var", `title`="", `type`="text", `content`="($key)"),
                     list(`name`="stat[cohen]", `title`="", `type`="text", `content`="Cohen's d"),
@@ -192,8 +192,9 @@ dataTOSTtwoResults <- R6::R6Class(
                     clearWith=list(
                         "group",
                         "alpha",
-                        "lowEqBD",
-                        "highEqBD")))
+                        "low_eqbound_d",
+                        "high_eqbound_d",
+                        "var_equal")))
             self$add(private$..tost)
             self$add(private$..eqb)
             self$add(private$..desc)
@@ -226,13 +227,13 @@ dataTOSTtwoBase <- R6::R6Class(
 #' @param deps a vector of strings naming dependent variables in \code{data}
 #' @param group a string naming the grouping variable in \code{data}; must 
 #'   have two levels 
-#' @param eqVar \code{TRUE} or \code{FALSE} (default), assume equal variances 
-#' @param lowEqBD a number (default: -0.5), the lower equivalence bound in 
-#'   Cohen's D 
-#' @param highEqBD a number (default: 0.5), the upper equivalence bound in 
-#'   Cohen's D 
-#' @param alpha a number between 0 and 1 (default: 0.05) specifying the alpha 
-#'   level 
+#' @param var_equal \code{TRUE} or \code{FALSE} (default), assume equal 
+#'   variances 
+#' @param low_eqbound_d lower equivalence bounds (e.g., -0.5) expressed in 
+#'   standardized mean difference (Cohen's d) 
+#' @param high_eqbound_d upper equivalence bounds (e.g., 0.5) expressed in 
+#'   standardized mean difference (Cohen's d) 
+#' @param alpha alpha level (default = 0.05)
 #' @param desc \code{TRUE} or \code{FALSE} (default), provide descriptive 
 #'   statistics 
 #' @param plots \code{TRUE} or \code{FALSE} (default), provide plots 
@@ -241,9 +242,9 @@ dataTOSTtwo <- function(
     data,
     deps,
     group,
-    eqVar = FALSE,
-    lowEqBD = -0.5,
-    highEqBD = 0.5,
+    var_equal = FALSE,
+    low_eqbound_d = -0.5,
+    high_eqbound_d = 0.5,
     alpha = 0.05,
     desc = FALSE,
     plots = FALSE) {
@@ -251,9 +252,9 @@ dataTOSTtwo <- function(
     options <- dataTOSTtwoOptions$new(
         deps = deps,
         group = group,
-        eqVar = eqVar,
-        lowEqBD = lowEqBD,
-        highEqBD = highEqBD,
+        var_equal = var_equal,
+        low_eqbound_d = low_eqbound_d,
+        high_eqbound_d = high_eqbound_d,
         alpha = alpha,
         desc = desc,
         plots = plots)

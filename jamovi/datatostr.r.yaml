@@ -10,8 +10,8 @@ items:
       rows: (pairs)
       clearWith:
         - alpha
-        - lowEqBR
-        - highEqBR
+        - low_eqbound_r
+        - high_eqbound_r
       columns:
         - name: i1
           title: ''
@@ -61,8 +61,8 @@ items:
       rows: (pairs)
       clearWith:
         - alpha
-        - lowEqBR
-        - highEqBR
+        - low_eqbound_r
+        - high_eqbound_r
       columns:
         - name: i1
           title: ''
@@ -153,5 +153,5 @@ items:
         width: 180
         clearWith:
           - alpha
-          - lowEqBR
-          - highEqBR
+          - low_eqbound_r
+          - high_eqbound_r

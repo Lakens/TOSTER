@@ -31,8 +31,8 @@ dataTOSTtwoClass <- R6::R6Class(
           `name[2]`=groups[2]))
       }
 
-      if ( ! self$options$eqVar)
-        tt$setNote('eqVar', "Welch's t-test")
+      if ( ! self$options$var_equal)
+        tt$setNote('var_equal', "Welch's t-test")
     },
     .run = function() {
 
@@ -80,10 +80,10 @@ dataTOSTtwoClass <- R6::R6Class(
         d[is.na(d)] <- NaN
 
 
-        var.equal <- self$options$eqVar
+        var.equal <- self$options$var_equal
         alpha <- self$options$alpha
-        low_eqbound_d <- self$options$lowEqBD
-        high_eqbound_d <- self$options$highEqBD
+        low_eqbound_d <- self$options$low_eqbound_d
+        high_eqbound_d <- self$options$high_eqbound_d
 
         tresult <- t.test(dep ~ group, dataTTest, var.equal=var.equal)
         t <- unname(tresult$statistic)
