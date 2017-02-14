@@ -13,7 +13,8 @@ Imports:
     stats,
     graphics,
     jmvcore (>= 0.3.0),
-    ggplot2
+    ggplot2,
+    R6
 Suggests: knitr,
     rmarkdown
 VignetteBuilder: knitr
