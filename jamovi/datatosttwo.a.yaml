@@ -1,0 +1,83 @@
+---
+name:  dataTOSTtwo
+title: TOST Independent Samples T-Test
+jas:     "1.0"
+version: "1.0.0"
+menuGroup: TOSTER
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: deps
+      title: Variables
+      type: Variables
+      permitted:
+        - nominal
+        - ordinal
+        - continuous
+      suggested:
+        - continuous
+      description:
+          R: a vector of strings naming dependent variables in `data`
+
+    - name: group
+      title: Grouping Variable
+      type: Variable
+      suggested:
+        - nominal
+        - ordinal
+      description:
+          R: >
+            a string naming the grouping variable in `data`; must have two
+            levels
+
+    - name: eqVar
+      title: Assume equal variances
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), assume equal variances
+
+    - name: lowEqBD
+      title: Lower equivalence bound
+      type: Number
+      default: -0.5
+      description:
+          R: >
+            a number (default: -0.5), the lower equivalence bound in Cohen's D
+
+    - name: highEqBD
+      title: Upper equivalence bound
+      type: Number
+      default: 0.5
+      description:
+          R: >
+            a number (default: 0.5), the upper equivalence bound in Cohen's D
+
+    - name: alpha
+      title: Alpha level
+      type: Number
+      default: 0.05
+      description:
+          R: >
+            a number between 0 and 1 (default: 0.05) specifying the alpha level
+
+    - name: desc
+      title: Descriptive statistics
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide descriptive statistics
+
+    - name: plots
+      title: Plots
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide plots

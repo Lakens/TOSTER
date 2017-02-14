@@ -1,0 +1,74 @@
+---
+name:  dataTOSTone
+title: TOST One Sample T-Test
+jas:     "1.0"
+version: "1.0.0"
+menuGroup: TOSTER
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: vars
+      title: Variables
+      type: Variables
+      permitted:
+        - nominal
+        - ordinal
+        - continuous
+      suggested:
+        - continuous
+      description:
+          R: a vector of strings naming variables of interest in `data`
+
+    - name: mu
+      title: mu
+      type: Number
+      default: 0
+      description:
+          R: >
+            a number (default: 0) to compare against
+
+    - name: lowEqBD
+      title: Lower equivalence bound
+      type: Number
+      default: -0.5
+      description:
+          R: >
+            a number (default: -0.5), the lower equivalence bound in Cohen's D
+
+    - name: highEqBD
+      title: Upper equivalence bound
+      type: Number
+      default: 0.5
+      description:
+          R: >
+            a number (default: 0.5), the upper equivalence bound in Cohen's D
+
+    - name: alpha
+      title: Alpha level
+      type: Number
+      min: 0
+      max: 1
+      default: 0.05
+      description:
+          R: >
+            a number between 0 and 1 (default: 0.05) specifying the alpha level
+
+    - name: desc
+      title: Descriptive statistics
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide descriptive statistics
+
+    - name: plots
+      title: Plots
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide plots

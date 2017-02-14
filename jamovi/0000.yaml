@@ -1,0 +1,36 @@
+---
+title: TOSTER
+name: TOSTER
+version: 0.2.0
+jms: '1.0'
+authors:
+  - Daniel Lakens <D.Lakens@tue.nl>
+maintainer: Daniel Lakens <D.Lakens@tue.nl>
+date: '2017-02-13'
+type: R
+description: >-
+  Two one-sided tests (TOST) procedures to test equivalence for t-tests and
+  correlations.
+analyses:
+  - title: TOST Independent Samples T-Test
+    name: dataTOSTtwo
+    ns: TOSTER
+    menuGroup: TOSTER
+    menuTitle: TOST Independent Samples T-Test
+  - title: TOST Paired Samples T-Test
+    name: dataTOSTpaired
+    ns: TOSTER
+    menuGroup: TOSTER
+    menuTitle: TOST Paired Samples T-Test
+  - title: TOST One Sample T-Test
+    name: dataTOSTone
+    ns: TOSTER
+    menuGroup: TOSTER
+    menuTitle: TOST One Sample T-Test
+  - title: TOST Correlation
+    name: dataTOSTr
+    ns: TOSTER
+    menuGroup: TOSTER
+    menuTitle: TOST Correlation
+
+...

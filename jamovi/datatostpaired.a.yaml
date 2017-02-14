@@ -1,0 +1,66 @@
+---
+name:  dataTOSTpaired
+title: TOST Paired Samples T-Test
+jas:     "1.0"
+version: "1.0.0"
+menuGroup: TOSTER
+
+options:
+    - name: data
+      type: Data
+      description:
+          R: the data as a data frame
+
+    - name: pairs
+      title: Paired Variables
+      type: Pairs
+      suggested:
+        - continuous
+      permitted:
+        - continuous
+        - nominal
+        - ordinal
+      description:
+          R: a list of vectors of strings naming variables to pair from `data`
+
+    - name: lowEqBDz
+      title: Lower equivalence bound (in Cohen's Dz)
+      type: Number
+      default: -0.5
+      description:
+          R: >
+            a number (default: -0.5), the lower equivalence bound in Cohen's Dz
+
+    - name: highEqBDz
+      title: Upper equivalence bound (in Cohen's Dz)
+      type: Number
+      default: 0.5
+      description:
+          R: >
+            a number (default: 0.5), the upper equivalence bound in Cohen's Dz
+
+    - name: alpha
+      title: Alpha level
+      type: Number
+      min: 0
+      max: 1
+      default: 0.05
+      description:
+          R: >
+            a number between 0 and 1 (default: 0.05) specifying the alpha level
+
+    - name: desc
+      title: Descriptive statistics
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide descriptive statistics
+
+    - name: plots
+      title: Plots
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide plots

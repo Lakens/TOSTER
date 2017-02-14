@@ -2,7 +2,7 @@
 % Please edit documentation in R/powerTOSTtwo.R
 \name{powerTOSTtwo}
 \alias{powerTOSTtwo}
-\title{Power analysis for TOST for independent t-test}
+\title{Power analysis for TOST for independent t-test (Cohen's d)}
 \usage{
 powerTOSTtwo(alpha, statistical_power, low_eqbound_d, high_eqbound_d)
 }
@@ -19,7 +19,7 @@ powerTOSTtwo(alpha, statistical_power, low_eqbound_d, high_eqbound_d)
 Returns a string summarizing the power analysis, and a numeric variable for the number of observations needed in each group
 }
 \description{
-Power analysis for TOST for independent t-test
+Power analysis for TOST for independent t-test (Cohen's d)
 }
 \section{References}{
 

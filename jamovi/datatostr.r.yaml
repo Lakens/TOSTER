@@ -1,0 +1,157 @@
+---
+name:  dataTOSTr
+title: TOST Correlation
+jrs:   "1.0"
+
+items:
+    - name:  tost
+      title: TOST Results
+      type:  Table
+      rows: (pairs)
+      clearWith:
+        - alpha
+        - lowEqBR
+        - highEqBR
+      columns:
+        - name: i1
+          title: ''
+          type: text
+          content: ($key)
+        - name: i2
+          title: ''
+          type: text
+          content: ($key)
+        - name: b[0]
+          title: ''
+          type: text
+          content: Pearson's r
+        - name: r[0]
+          title: r
+          type: number
+        - name: p[0]
+          title: p
+          type: number
+          format: zto,pvalue
+        - name: b[1]
+          title: ''
+          type: text
+          content: TOST Upper
+        - name: r[1]
+          title: r
+          type: number
+        - name: p[1]
+          title: p
+          type: number
+          format: zto,pvalue
+        - name: b[2]
+          title: ''
+          type: text
+          content: TOST Lower
+        - name: r[2]
+          title: r
+          type: number
+        - name: p[2]
+          title: p
+          type: number
+          format: zto,pvalue
+
+    - name:  eqb
+      title: Equivalence Bounds
+      type:  Table
+      rows: (pairs)
+      clearWith:
+        - alpha
+        - lowEqBR
+        - highEqBR
+      columns:
+        - name: i1
+          title: ''
+          type: text
+          content: ($key)
+        - name: i2
+          title: ''
+          type: text
+          content: ($key)
+        - name: low
+          title: Low
+          type: number
+        - name: high
+          title: High
+          type: number
+        - name: cil
+          title: Lower
+          superTitle: Confidence interval
+        - name: ciu
+          title: Upper
+          superTitle: Confidence interval
+
+    - name: desc
+      title: Descriptives
+      type: Table
+      visible: (desc)
+      rows: (pairs)
+      clearWith:
+
+      columns:
+        - name: name[1]
+          title: ""
+          type: text
+
+        - name: n[1]
+          title: "N"
+          type: integer
+
+        - name: m[1]
+          title: Mean
+          type: number
+
+        - name: med[1]
+          title: Median
+          type: number
+
+        - name: sd[1]
+          title: SD
+          type: number
+
+        - name: se[1]
+          title: SE
+          type: number
+
+        - name: name[2]
+          title: ""
+          type: text
+
+        - name: n[2]
+          title: "N"
+          type: integer
+
+        - name: m[2]
+          title: Mean
+          type: number
+
+        - name: med[2]
+          title: Median
+          type: number
+
+        - name: sd[2]
+          title: SD
+          type: number
+
+        - name: se[2]
+          title: SE
+          type: number
+
+    - name: plots
+      type: Array
+      title: Plots
+      items: (pairs)
+      visible: (plots)
+      template:
+        title: $key
+        type: Image
+        renderFun: .plot
+        width: 180
+        clearWith:
+          - alpha
+          - lowEqBR
+          - highEqBR
