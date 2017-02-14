@@ -1,0 +1,160 @@
+---
+name:  dataTOSTone
+title: TOST One Sample T-Test
+jrs:   "1.0"
+
+items:
+    - name:  tost
+      title: TOST Results
+      type:  Table
+      rows: (vars)
+      clearWith:
+        - mu
+        - alpha
+        - lowEqBD
+        - highEqBD
+      columns:
+        - name: var
+          title: ''
+          type: text
+          content: ($key)
+        - name: b[0]
+          title: ''
+          type: text
+          content: t-test
+        - name: t[0]
+          title: t
+          type: number
+        - name: df[0]
+          title: df
+          type: integer
+        - name: p[0]
+          title: p
+          type: number
+          format: zto,pvalue
+        - name: b[1]
+          title: ''
+          type: text
+          content: TOST Upper
+        - name: t[1]
+          title: t
+          type: number
+        - name: df[1]
+          title: df
+          type: integer
+        - name: p[1]
+          title: p
+          type: number
+          format: zto,pvalue
+        - name: b[2]
+          title: ''
+          type: text
+          content: TOST Lower
+        - name: t[2]
+          title: t
+          type: number
+        - name: df[2]
+          title: df
+          type: integer
+        - name: p[2]
+          title: p
+          type: number
+          format: zto,pvalue
+
+    - name:  eqb
+      title: Equivalence Bounds
+      type:  Table
+      rows: (vars)
+      clearWith:
+        - mu
+        - alpha
+        - lowEqBD
+        - highEqBD
+      columns:
+        - name: var
+          title: ''
+          type: text
+          content: ($key)
+        - name: stat[cohen]
+          title: ''
+          type: text
+          content: Cohen's d
+        - name: low[cohen]
+          title: Low
+          type: number
+        - name: high[cohen]
+          title: High
+          type: number
+        - name: cil[cohen]
+          title: Lower
+          superTitle: Confidence interval
+          content: ''
+        - name: ciu[cohen]
+          title: Upper
+          superTitle: Confidence interval
+          content: ''
+        - name: stat[raw]
+          title: ''
+          type: text
+          content: Raw
+        - name: low[raw]
+          title: Low
+          type: number
+        - name: high[raw]
+          title: High
+          type: number
+        - name: cil[raw]
+          title: Lower
+          superTitle: Confidence interval
+        - name: ciu[raw]
+          title: Upper
+          superTitle: Confidence interval
+
+    - name: desc
+      title: Descriptives
+      type: Table
+      visible: (desc)
+      rows: (vars)
+      clearWith:
+
+      columns:
+        - name: name
+          title: ""
+          content: ($key)
+          type: text
+
+        - name: n
+          title: "N"
+          type: integer
+
+        - name: m
+          title: Mean
+          type: number
+
+        - name: med
+          title: Median
+          type: number
+
+        - name: sd
+          title: SD
+          type: number
+
+        - name: se
+          title: SE
+          type: number
+
+    - name: plots
+      type: Array
+      title: Plots
+      items: (vars)
+      visible: (plots)
+      template:
+        title: $key
+        type: Image
+        renderFun: .plot
+        width: 180
+        clearWith:
+          - mu
+          - alpha
+          - lowEqBD
+          - highEqBD

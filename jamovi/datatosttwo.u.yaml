@@ -1,0 +1,63 @@
+title: TOST Independent Samples T-Test
+name: dataTOSTtwo
+jus: '1.0'
+stage: 0
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: VariableTargetListBox
+        name: deps
+        label: Variables
+        showColumnHeaders: false
+        fullRowSelect: true
+        columns:
+          - type: ListItem.VariableLabel
+            name: column1
+            label: ''
+            stretchFactor: 1
+      - type: VariableTargetListBox
+        name: group
+        label: Grouping Variable
+        maxItemCount: 1
+        showColumnHeaders: false
+        fullRowSelect: true
+        columns:
+          - type: ListItem.VariableLabel
+            name: column1
+            label: ''
+            stretchFactor: 1
+  - type: LayoutBox
+    margin: large
+    children:
+      - name: eqVar
+        type: CheckBox
+        label: Assume equal variances
+  - type: LayoutBox
+    margin: large
+    children:
+      - name: lowEqBD
+        type: TextBox
+        label: Lower equivalence bound
+        format: number
+        inputPattern: '[0-9]+'
+      - name: highEqBD
+        type: TextBox
+        label: Upper equivalence bound
+        format: number
+        inputPattern: '[0-9]+'
+      - name: alpha
+        type: TextBox
+        label: Alpha level
+        format: number
+        inputPattern: '[0-9]+'
+  - type: LayoutBox
+    margin: large
+    children:
+      - name: desc
+        type: CheckBox
+        label: Descriptive statistics
+      - name: plots
+        type: CheckBox
+        label: Plots
