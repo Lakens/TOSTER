@@ -27,9 +27,9 @@ Power analysis for TOST for independent t-test (raw scores)
 
 Chow, S.-C., Wang, H., & Shao, J. (2007). Sample Size Calculations in Clinical Research, Second Edition - CRC Press Book. Formula 3.2.4 with k = 1
 }
+
 \examples{
 ## Sample size for alpha = 0.05, 80\% power, equivalence bounds of -200 and 200 in raw
 ## units, assuming pooled standard deviation of 350, and assuming true effect = 0
 powerTOSTtwo.raw(alpha=0.05,statistical_power=0.8,low_eqbound=-200,high_eqbound=200,sdpooled=350)
 }
-

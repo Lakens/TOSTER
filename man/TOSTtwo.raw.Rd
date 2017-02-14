@@ -40,6 +40,7 @@ Berger, R. L., & Hsu, J. C. (1996). Bioequivalence Trials, Intersection-Union Te
 
 Gruman, J. A., Cribbie, R. A., & Arpin-Cribbie, C. A. (2007). The effects of heteroscedasticity on tests of equivalence. Journal of Modern Applied Statistical Methods, 6(1), 133-140, formula for Welch's t-test on page 135
 }
+
 \examples{
 ## Eskine (2013) showed that participants who had been exposed to organic 
 ## food were substantially harsher in their moral judgments relative to 
@@ -58,4 +59,3 @@ Gruman, J. A., Cribbie, R. A., & Arpin-Cribbie, C. A. (2007). The effects of het
 
 TOSTtwo.raw(m1=5.25,m2=5.22,sd1=0.95,sd2=0.83,n1=95,n2=89,low_eqbound=-0.384,high_eqbound=0.384)
 }
-

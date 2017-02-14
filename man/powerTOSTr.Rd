@@ -26,4 +26,3 @@ Power analysis for TOST for correlations
 ## r = -0.1 and r = 0.1,assuming true effect = 0
 powerTOSTr(alpha=0.05, statistical_power=0.8, low_eqbound_r=-0.1, high_eqbound_r=0.1)
 }
-
