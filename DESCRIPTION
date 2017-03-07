@@ -1,6 +1,6 @@
 Package: TOSTER
-Version: 0.2.1
-Date: 2017-02-15
+Version: 0.2.2
+Date: 2017-03-08
 Title: Two One-Sided Tests (TOST) Equivalence Testing
 Description: Two one-sided tests (TOST) procedure to test equivalence for t-tests, correlations,
     and meta-analyses, including power analysis for t-tests and correlations. Allows you to
@@ -13,7 +13,6 @@ Imports:
     stats,
     graphics,
     jmvcore (>= 0.3.0),
-    ggplot2,
     R6
 Suggests: knitr,
     rmarkdown
