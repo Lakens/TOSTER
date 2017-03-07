@@ -8,7 +8,7 @@ Description: Two one-sided tests (TOST) procedure to test equivalence for t-test
 Author: Daniel Lakens <D.Lakens@tue.nl>
 Maintainer: Daniel Lakens <D.Lakens@tue.nl>
 License: GPL-3
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1
 Imports:
     stats,
     graphics,

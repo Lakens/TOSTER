@@ -5,7 +5,7 @@
 #' @param sd2 standard deviation of group 2
 #' @param n1 sample size in group 1
 #' @param n2 sample size in group 2
-#' @param low_eqbound lower equivalence bounds (e.g., -0.5) expressed in raw scale units (e.g., scalepoints) 
+#' @param low_eqbound lower equivalence bounds (e.g., -0.5) expressed in raw scale units (e.g., scalepoints)
 #' @param high_eqbound upper equivalence bounds (e.g., 0.5) expressed in raw scale units (e.g., scalepoints)
 #' @param alpha alpha level (default = 0.05)
 #' @param var.equal logical variable indicating whether equal variances assumption is assumed to be TRUE or FALSE. Defaults to FALSE.
@@ -13,25 +13,25 @@
 #' @importFrom stats pnorm pt qnorm qt
 #' @importFrom graphics abline plot points segments title
 #' @examples
-#' ## Eskine (2013) showed that participants who had been exposed to organic 
-#' ## food were substantially harsher in their moral judgments relative to 
-#' ## those exposed to control (d = 0.81, 95% CI: [0.19, 1.45]). A 
-#' ## replication by Moery & Calin-Jageman (2016, Study 2) did not observe 
-#' ## a significant effect (Control: n = 95, M = 5.25, SD = 0.95, Organic 
-#' ## Food: n = 89, M = 5.22, SD = 0.83). Following Simonsohn's (2015) 
-#' ## recommendation the equivalence bound was set to the effect size the 
+#' ## Eskine (2013) showed that participants who had been exposed to organic
+#' ## food were substantially harsher in their moral judgments relative to
+#' ## those exposed to control (d = 0.81, 95% CI: [0.19, 1.45]). A
+#' ## replication by Moery & Calin-Jageman (2016, Study 2) did not observe
+#' ## a significant effect (Control: n = 95, M = 5.25, SD = 0.95, Organic
+#' ## Food: n = 89, M = 5.22, SD = 0.83). Following Simonsohn's (2015)
+#' ## recommendation the equivalence bound was set to the effect size the
 #' ## original study had 33% power to detect (with n = 21 in each condition,
-#' ## this means the equivalence bound is d = 0.48, which equals a 
-#' ## difference of 0.384 on a 7-point scale given the sample sizes and a 
-#' ## pooled standard deviation of 0.894). Using a TOST equivalence test 
-#' ## with alpha = 0.05, assuming equal variances, and equivalence 
-#' ## bounds of d = -0.43 and d = 0.43 is significant, t(182) = -2.69, 
+#' ## this means the equivalence bound is d = 0.48, which equals a
+#' ## difference of 0.384 on a 7-point scale given the sample sizes and a
+#' ## pooled standard deviation of 0.894). Using a TOST equivalence test
+#' ## with alpha = 0.05, assuming equal variances, and equivalence
+#' ## bounds of d = -0.43 and d = 0.43 is significant, t(182) = -2.69,
 #' ## p = 0.004. We can reject effects larger than d = 0.43.
-#' 
+#'
 #' TOSTtwo.raw(m1=5.25,m2=5.22,sd1=0.95,sd2=0.83,n1=95,n2=89,low_eqbound=-0.384,high_eqbound=0.384)
 #' @section References:
-#' Berger, R. L., & Hsu, J. C. (1996). Bioequivalence Trials, Intersection-Union Tests and Equivalence Confidence Sets. Statistical Science, 11(4), 283-302. 
-#' 
+#' Berger, R. L., & Hsu, J. C. (1996). Bioequivalence Trials, Intersection-Union Tests and Equivalence Confidence Sets. Statistical Science, 11(4), 283-302.
+#'
 #' Gruman, J. A., Cribbie, R. A., & Arpin-Cribbie, C. A. (2007). The effects of heteroscedasticity on tests of equivalence. Journal of Modern Applied Statistical Methods, 6(1), 133-140, formula for Welch's t-test on page 135
 #' @export
 
@@ -46,11 +46,11 @@ TOSTtwo.raw<-function(m1,m2,sd1,sd2,n1,n2,low_eqbound, high_eqbound, alpha, var.
   }
   if(var.equal==TRUE) {
     sdpooled<-sqrt((((n1 - 1)*(sd1^2)) + (n2 - 1)*(sd2^2))/((n1+n2)-2)) #calculate sd pooled
-    t1<-(abs(m1-m2)-low_eqbound)/(sdpooled*sqrt(1/n1 + 1/n2))
+    t1<-((m1-m2)-low_eqbound)/(sdpooled*sqrt(1/n1 + 1/n2))
     degree_f<-n1+n2-2
-    p1<-pt(t1, degree_f, lower.tail=FALSE) 
-    t2<-(abs(m1-m2)-high_eqbound)/(sdpooled*sqrt(1/n1 + 1/n2))
-    p2<-pt(t2, degree_f, lower.tail=TRUE) 
+    p1<-pt(t1, degree_f, lower.tail=FALSE)
+    t2<-((m1-m2)-high_eqbound)/(sdpooled*sqrt(1/n1 + 1/n2))
+    p2<-pt(t2, degree_f, lower.tail=TRUE)
     LL90<-(m1-m2)-qt(1-alpha, degree_f)*(sdpooled*sqrt(1/n1 + 1/n2))
     UL90<-(m1-m2)+qt(1-alpha, degree_f)*(sdpooled*sqrt(1/n1 + 1/n2))
     LL95<-(m1-m2)-qt(1-(alpha/2), degree_f)*(sdpooled*sqrt(1/n1 + 1/n2))
@@ -59,10 +59,10 @@ TOSTtwo.raw<-function(m1,m2,sd1,sd2,n1,n2,low_eqbound, high_eqbound, alpha, var.
     pttest<-2*pt(-abs(t), df=degree_f)
   } else {
     sdpooled<-sqrt((sd1^2 + sd2^2)/2) #calculate sd root mean squared for Welch's t-test
-    t1<-(abs(m1-m2)-low_eqbound)/sqrt(sd1^2/n1 + sd2^2/n2) #welch's t-test lower bound
+    t1<-((m1-m2)-low_eqbound)/sqrt(sd1^2/n1 + sd2^2/n2) #welch's t-test lower bound
     degree_f<-(sd1^2/n1+sd2^2/n2)^2/(((sd1^2/n1)^2/(n1-1))+((sd2^2/n2)^2/(n2-1))) #degrees of freedom for Welch's t-test
     p1<-pt(t1, degree_f, lower.tail=FALSE) #p-value for Welch's TOST t-test
-    t2<-(abs(m1-m2)-high_eqbound)/sqrt(sd1^2/n1 + sd2^2/n2) #welch's t-test upper bound
+    t2<-((m1-m2)-high_eqbound)/sqrt(sd1^2/n1 + sd2^2/n2) #welch's t-test upper bound
     p2<-pt(t2, degree_f, lower.tail=TRUE) #p-value for Welch's TOST t-test
     t<-(m1-m2)/sqrt(sd1^2/n1 + sd2^2/n2) #welch's t-test NHST
     pttest<-2*pt(-abs(t), df=degree_f) #p-value for Welch's t-test
@@ -100,10 +100,10 @@ TOSTtwo.raw<-function(m1,m2,sd1,sd2,n1,n2,low_eqbound, high_eqbound, alpha, var.
   CIresults<-data.frame(LL90,UL90)
   colnames(CIresults) <- c(paste("Lower Limit ",100*(1-alpha*2),"% CI raw",sep=""),paste("Upper Limit ",100*(1-alpha*2),"% CI raw",sep=""))
   cat("TOST results:\n")
-  print(TOSTresults)  
+  print(TOSTresults)
   cat("\n")
   cat("Equivalence bounds (raw scores):\n")
-  print(bound_results)  
+  print(bound_results)
   cat("\n")
   cat("TOST confidence interval:\n")
   print(CIresults)

@@ -95,9 +95,9 @@ dataTOSTtwoClass <- R6::R6Class(
           low_eqbound<-low_eqbound_d*sdpooled
           high_eqbound<-high_eqbound_d*sdpooled
           degree_f<-n[1]+n[2]-2
-          t1<-(abs(m[1]-m[2])-low_eqbound)/(sdpooled*sqrt(1/n[1] + 1/n[2]))  #students t-test lower bound
+          t1<-((m[1]-m[2])-low_eqbound)/(sdpooled*sqrt(1/n[1] + 1/n[2]))  #students t-test lower bound
           p1<-pt(t1, degree_f, lower.tail=FALSE)
-          t2<-(abs(m[1]-m[2])-high_eqbound)/(sdpooled*sqrt(1/n[1] + 1/n[2])) #students t-test upper bound
+          t2<-((m[1]-m[2])-high_eqbound)/(sdpooled*sqrt(1/n[1] + 1/n[2])) #students t-test upper bound
           p2<-pt(t2, degree_f, lower.tail=TRUE)
           t<-(m[1]-m[2])/(sdpooled*sqrt(1/n[1] + 1/n[2]))
           pttest<-2*pt(-abs(t), df=degree_f)
@@ -110,9 +110,9 @@ dataTOSTtwoClass <- R6::R6Class(
           low_eqbound<-low_eqbound_d*sdpooled
           high_eqbound<-high_eqbound_d*sdpooled
           degree_f<-(sd[1]^2/n[1]+sd[2]^2/n[2])^2/(((sd[1]^2/n[1])^2/(n[1]-1))+((sd[2]^2/n[2])^2/(n[2]-1))) #degrees of freedom for Welch's t-test
-          t1<-(abs(m[1]-m[2])-low_eqbound)/sqrt(sd[1]^2/n[1] + sd[2]^2/n[2]) #welch's t-test upper bound
+          t1<-((m[1]-m[2])-low_eqbound)/sqrt(sd[1]^2/n[1] + sd[2]^2/n[2]) #welch's t-test upper bound
           p1<-pt(t1, degree_f, lower.tail=FALSE) #p-value for Welch's TOST t-test
-          t2<-(abs(m[1]-m[2])-high_eqbound)/sqrt(sd[1]^2/n[1] + sd[2]^2/n[2]) #welch's t-test lower bound
+          t2<-((m[1]-m[2])-high_eqbound)/sqrt(sd[1]^2/n[1] + sd[2]^2/n[2]) #welch's t-test lower bound
           p2<-pt(t2, degree_f, lower.tail=TRUE) #p-value for Welch's TOST t-test
           t<-(m[1]-m[2])/sqrt(sd[1]^2/n[1] + sd[2]^2/n[2]) #welch's t-test NHST
           pttest<-2*pt(-abs(t), df=degree_f) #p-value for Welch's t-test
