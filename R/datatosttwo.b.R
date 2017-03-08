@@ -46,6 +46,8 @@ dataTOSTtwoClass <- R6::R6Class(
 
       groupName <- self$options$group
       group <- self$data[[groupName]]
+      group <- as.factor(group)
+      group <- droplevels(group)
 
       groupLevels <- base::levels(group)
       if (length(groupLevels) != 2)
