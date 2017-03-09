@@ -50,6 +50,7 @@ data<-iris[which(iris$Species!="versicolor"),]
 
 ## TOST procedure on the raw data
 
-dataTOSTtwo(data, deps="Sepal.Width", group="Species", var_equal = TRUE, low_eqbound_d = -0.5, high_eqbound_d = 0.5, alpha = 0.05, desc = TRUE, plots = TRUE)
+dataTOSTtwo(data, deps="Sepal.Width", group="Species", var_equal = TRUE, low_eqbound_d = -0.5,
+            high_eqbound_d = 0.5, alpha = 0.05, desc = TRUE, plots = TRUE)
 
 }

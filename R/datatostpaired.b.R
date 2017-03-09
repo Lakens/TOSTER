@@ -55,7 +55,7 @@ dataTOSTpairedClass <- R6::R6Class(
         se1  <- sd1/sqrt(n)
         se2  <- sd2/sqrt(n)
 
-        res <- t.test(i1, i2)
+        res <- t.test(i1, i2, paired=TRUE)
         t <- unname(res$statistic)
         p <- unname(res$p.value)
         df <- unname(res$parameter)
