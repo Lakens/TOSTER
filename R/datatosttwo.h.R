@@ -222,7 +222,24 @@ dataTOSTtwoBase <- R6::R6Class(
 
 #' TOST Independent Samples T-Test
 #'
+#' TOST Independent Samples T-Test
+#'
+#' @examples
+#' library(TOSTER)
 #' 
+#' ## Load iris dataset, remove one of the three groups so two are left
+#' 
+#' data<-iris[which(iris$Species!="versicolor"),]
+#' 
+#' ## TOST procedure on the raw data
+#' 
+#' dataTOSTtwo(data, deps="Sepal.Width", group="Species", var_equal = TRUE, low_eqbound_d = -0.5, high_eqbound_d = 0.5, alpha = 0.05, desc = TRUE, plots = TRUE)
+#' 
+#' @section References:
+#' Berger, R. L., & Hsu, J. C. (1996). Bioequivalence Trials, Intersection-Union Tests and Equivalence Confidence Sets. Statistical Science, 11(4), 283-302.
+#'
+#' Gruman, J. A., Cribbie, R. A., & Arpin-Cribbie, C. A. (2007). The effects of heteroscedasticity on tests of equivalence. Journal of Modern Applied Statistical Methods, 6(1), 133-140, formula for Welch's t-test on page 135
+#'
 #' @param data the data as a data frame
 #' @param deps a vector of strings naming dependent variables in \code{data}
 #' @param group a string naming the grouping variable in \code{data}; must 
@@ -269,5 +286,5 @@ dataTOSTtwo <- function(
     analysis$run()
     analysis$render()
 
-    analysis
+    analysis$results
 }

@@ -207,6 +207,14 @@ dataTOSToneBase <- R6::R6Class(
 
 #' TOST One Sample T-Test
 #'
+#' TOST One Sample T-Test
+#'
+#' @examples
+#' library("TOSTER")
+#' 
+#' dataTOSTone(data = iris, vars = "Sepal.Width", mu = 3, low_eqbound_d = -0.3, high_eqbound_d = 0.3, alpha = 0.05, desc = TRUE, plots = TRUE)
+#' 
+#' TOSTone(m=3.05733,mu=3,sd=0.4358663,n=150,low_eqbound_d=-0.3, high_eqbound_d=0.3, alpha=0.05)
 #' 
 #' @param data the data as a data frame
 #' @param vars a vector of strings naming variables of interest in \code{data}
@@ -249,5 +257,5 @@ dataTOSTone <- function(
     analysis$run()
     analysis$render()
 
-    analysis
+    analysis$results
 }

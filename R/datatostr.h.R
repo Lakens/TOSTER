@@ -232,5 +232,5 @@ dataTOSTr <- function(
     analysis$run()
     analysis$render()
 
-    analysis
+    analysis$results
 }

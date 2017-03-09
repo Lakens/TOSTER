@@ -1,9 +1,20 @@
 ---
 name:  dataTOSTone
 title: TOST One Sample T-Test
-jas:     "1.0"
+jas:     "1.1"
 version: "1.0.0"
 menuGroup: TOSTER
+
+description:
+    main: TOST One Sample T-Test
+    R:
+        dontrun: false
+        usage: |
+            library("TOSTER")
+
+            dataTOSTone(data = iris, vars = "Sepal.Width", mu = 3, low_eqbound_d = -0.3, high_eqbound_d = 0.3, alpha = 0.05, desc = TRUE, plots = TRUE)
+
+            TOSTone(m=3.05733,mu=3,sd=0.4358663,n=150,low_eqbound_d=-0.3, high_eqbound_d=0.3, alpha=0.05)
 
 options:
     - name: data

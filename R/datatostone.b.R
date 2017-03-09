@@ -37,7 +37,7 @@ dataTOSToneClass <- R6::R6Class(
         med <- stats::median(var)
         sd  <- stats::sd(var)
         se  <- sd/sqrt(n)
-        res <- t.test(var)
+        res <- t.test(var-mu)
         t   <- unname(res$statistic)
         p   <- unname(res$p.value)
 
