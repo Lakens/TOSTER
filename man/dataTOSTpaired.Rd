@@ -37,6 +37,7 @@ Mara, C. A., & Cribbie, R. A. (2012). Paired-Samples Tests of Equivalence. Commu
 \examples{
 library("TOSTER")
 
-dataTOSTpaired(data = randu, pairs = list(c(i1="x",i2="y")), low_eqbound_dz = -0.3, high_eqbound_dz = 0.3, alpha = 0.05, desc = TRUE, plots = TRUE)
+dataTOSTpaired(data = randu, pairs = list(c(i1="x",i2="y")), low_eqbound_dz = -0.3,
+               high_eqbound_dz = 0.3, alpha = 0.05, desc = TRUE, plots = TRUE)
 
 }

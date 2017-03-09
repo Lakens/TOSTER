@@ -233,7 +233,8 @@ dataTOSTtwoBase <- R6::R6Class(
 #' 
 #' ## TOST procedure on the raw data
 #' 
-#' dataTOSTtwo(data, deps="Sepal.Width", group="Species", var_equal = TRUE, low_eqbound_d = -0.5, high_eqbound_d = 0.5, alpha = 0.05, desc = TRUE, plots = TRUE)
+#' dataTOSTtwo(data, deps="Sepal.Width", group="Species", var_equal = TRUE, low_eqbound_d = -0.5,
+#'             high_eqbound_d = 0.5, alpha = 0.05, desc = TRUE, plots = TRUE)
 #' 
 #' @section References:
 #' Berger, R. L., & Hsu, J. C. (1996). Bioequivalence Trials, Intersection-Union Tests and Equivalence Confidence Sets. Statistical Science, 11(4), 283-302.
