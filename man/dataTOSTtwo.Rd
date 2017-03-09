@@ -40,6 +40,7 @@ Berger, R. L., & Hsu, J. C. (1996). Bioequivalence Trials, Intersection-Union Te
 
 Gruman, J. A., Cribbie, R. A., & Arpin-Cribbie, C. A. (2007). The effects of heteroscedasticity on tests of equivalence. Journal of Modern Applied Statistical Methods, 6(1), 133-140, formula for Welch's t-test on page 135
 }
+
 \examples{
 library(TOSTER)
 
@@ -52,4 +53,3 @@ data<-iris[which(iris$Species!="versicolor"),]
 dataTOSTtwo(data, deps="Sepal.Width", group="Species", var_equal = TRUE, low_eqbound_d = -0.5, high_eqbound_d = 0.5, alpha = 0.05, desc = TRUE, plots = TRUE)
 
 }
-
