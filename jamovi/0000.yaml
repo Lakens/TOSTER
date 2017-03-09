@@ -17,16 +17,19 @@ analyses:
     ns: TOSTER
     menuGroup: TOSTER
     menuTitle: TOST Independent Samples T-Test
+    description: TOST Independent Samples T-Test
   - title: TOST Paired Samples T-Test
     name: dataTOSTpaired
     ns: TOSTER
     menuGroup: TOSTER
     menuTitle: TOST Paired Samples T-Test
+    description: TOST Paired Samples T-Test
   - title: TOST One Sample T-Test
     name: dataTOSTone
     ns: TOSTER
     menuGroup: TOSTER
     menuTitle: TOST One Sample T-Test
+    description: TOST One Sample T-Test
   - title: TOST Correlation
     name: dataTOSTr
     ns: TOSTER
