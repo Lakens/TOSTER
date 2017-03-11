@@ -4,13 +4,13 @@ tostplot <- function(image) {
 
   data <- image$state
 
-  plot <- ggplot(data=data, aes(x=0, y=m)) +
+  plot <- ggplot(data=data, aes_string(x=0, y='m')) +
     geom_hline(yintercept=data$low,  colour='#333333') +
     geom_hline(yintercept=data$high, colour='#333333') +
     geom_text(aes(5, data$low,  vjust=-.9, hjust=1), label='Lower bound') +
     geom_text(aes(5, data$high, vjust=1.9, hjust=1), label='Upper bound') +
-    geom_errorbar(aes(x=0, ymin=cil, ymax=ciu, width=.4), size=.8, colour='#333333') +
-    geom_point(aes(x=0, y=m), shape=21, fill='white', size=3, colour='#333333') +
+    geom_errorbar(aes_string(x=0, ymin='cil', ymax='ciu', width=.4), size=.8, colour='#333333') +
+    geom_point(aes_string(x=0, y='m'), shape=21, fill='white', size=3, colour='#333333') +
     labs(x='', y='') +
     expand_limits(x=c(-2, 5), y=0) +
     theme(
