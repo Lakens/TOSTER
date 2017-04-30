@@ -11,9 +11,9 @@ powerTOSTr(alpha, statistical_power, low_eqbound_r, high_eqbound_r)
 
 \item{statistical_power}{desired power (e.g., 0.8)}
 
-\item{low_eqbound_r}{lower equivalence bounds (e.g., -0.5) expressed in standardized mean difference (Cohen's dz)}
+\item{low_eqbound_r}{lower equivalence bounds (e.g., -0.3) expressed in a correlation effect size}
 
-\item{high_eqbound_r}{upper equivalence bounds (e.g., 0.5) expressed in standardized mean difference (Cohen's dz)}
+\item{high_eqbound_r}{upper equivalence bounds (e.g., 0.3) expressed in a correlation effect size}
 }
 \value{
 Returns a string summarizing the power analysis, and a numeric variable for the number of pairs needed
@@ -22,7 +22,7 @@ Returns a string summarizing the power analysis, and a numeric variable for the 
 Power analysis for TOST for correlations
 }
 \examples{
-## Sample size for alpha = 0.05, 80\% power, equivalence bounds of 
+## Sample size for alpha = 0.05, 80\% power, equivalence bounds of
 ## r = -0.1 and r = 0.1,assuming true effect = 0
 powerTOSTr(alpha=0.05, statistical_power=0.8, low_eqbound_r=-0.1, high_eqbound_r=0.1)
 }

@@ -1,11 +1,11 @@
 #' Power analysis for TOST for correlations
 #' @param alpha alpha used for the test (e.g., 0.05)
 #' @param statistical_power desired power (e.g., 0.8)
-#' @param low_eqbound_r lower equivalence bounds (e.g., -0.5) expressed in standardized mean difference (Cohen's dz)
-#' @param high_eqbound_r upper equivalence bounds (e.g., 0.5) expressed in standardized mean difference (Cohen's dz)
+#' @param low_eqbound_r lower equivalence bounds (e.g., -0.3) expressed in a correlation effect size
+#' @param high_eqbound_r upper equivalence bounds (e.g., 0.3) expressed in a correlation effect size
 #' @return Returns a string summarizing the power analysis, and a numeric variable for the number of pairs needed
-#' @examples 
-#' ## Sample size for alpha = 0.05, 80% power, equivalence bounds of 
+#' @examples
+#' ## Sample size for alpha = 0.05, 80% power, equivalence bounds of
 #' ## r = -0.1 and r = 0.1,assuming true effect = 0
 #' powerTOSTr(alpha=0.05, statistical_power=0.8, low_eqbound_r=-0.1, high_eqbound_r=0.1)
 #' @importFrom stats pnorm pt qnorm qt
