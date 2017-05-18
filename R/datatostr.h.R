@@ -187,7 +187,8 @@ dataTOSTrBase <- R6::R6Class(
                 datasetId = datasetId,
                 analysisId = analysisId,
                 revision = revision,
-                pause = NULL)
+                pause = NULL,
+                completeWhenFilled = FALSE)
         }))
 
 #' TOST Correlation
@@ -230,7 +231,6 @@ dataTOSTr <- function(
         data = data)
 
     analysis$run()
-    analysis$render()
 
     analysis$results
 }

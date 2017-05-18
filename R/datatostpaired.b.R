@@ -108,12 +108,12 @@ dataTOSTpairedClass <- R6::R6Class(
         plot$setState(points)
       }
     },
-    .plot=function(image, ...) {
+    .plot=function(image, ggtheme, theme, ...) {
 
       if (is.null(image$state))
         return(FALSE)
 
-      tostplot(image)
+      tostplot(image, ggtheme, theme)
 
       return(TRUE)
     })

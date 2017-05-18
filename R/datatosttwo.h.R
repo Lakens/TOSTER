@@ -217,7 +217,8 @@ dataTOSTtwoBase <- R6::R6Class(
                 datasetId = datasetId,
                 analysisId = analysisId,
                 revision = revision,
-                pause = NULL)
+                pause = NULL,
+                completeWhenFilled = FALSE)
         }))
 
 #' TOST Independent Samples T-Test
@@ -285,7 +286,6 @@ dataTOSTtwo <- function(
         data = data)
 
     analysis$run()
-    analysis$render()
 
     analysis$results
 }
