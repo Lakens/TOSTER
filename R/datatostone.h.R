@@ -202,7 +202,8 @@ dataTOSToneBase <- R6::R6Class(
                 datasetId = datasetId,
                 analysisId = analysisId,
                 revision = revision,
-                pause = NULL)
+                pause = NULL,
+                completeWhenFilled = FALSE)
         }))
 
 #' TOST One Sample T-Test
@@ -256,7 +257,6 @@ dataTOSTone <- function(
         data = data)
 
     analysis$run()
-    analysis$render()
 
     analysis$results
 }

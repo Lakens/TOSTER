@@ -1,33 +1,41 @@
 title: TOST Independent Samples T-Test
 name: dataTOSTtwo
-jus: '1.0'
+jus: '2.0'
 stage: 0
 children:
   - type: VariableSupplier
     persistentItems: false
     stretchFactor: 1
     children:
-      - type: VariableTargetListBox
-        name: deps
-        label: Variables
-        showColumnHeaders: false
-        fullRowSelect: true
-        columns:
-          - type: ListItem.VariableLabel
-            name: column1
-            label: ''
-            stretchFactor: 1
-      - type: VariableTargetListBox
-        name: group
-        label: Grouping Variable
-        maxItemCount: 1
-        showColumnHeaders: false
-        fullRowSelect: true
-        columns:
-          - type: ListItem.VariableLabel
-            name: column1
-            label: ''
-            stretchFactor: 1
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: deps
+            label: Variables
+            showColumnHeaders: false
+            fullRowSelect: true
+            columns:
+              - name: column1
+                label: ''
+                stretchFactor: 1
+                template:
+                  type: VariableLabel
+            isTarget: true
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: group
+            label: Grouping Variable
+            maxItemCount: 1
+            showColumnHeaders: false
+            fullRowSelect: true
+            columns:
+              - name: column1
+                label: ''
+                stretchFactor: 1
+                template:
+                  type: VariableLabel
+            isTarget: true
   - type: LayoutBox
     margin: large
     children:
@@ -61,3 +69,4 @@ children:
       - name: plots
         type: CheckBox
         label: Plots
+compilerMode: tame

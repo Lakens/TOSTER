@@ -1,6 +1,6 @@
 title: TOST Paired Samples T-Test
 name: dataTOSTpaired
-jus: '1.0'
+jus: '2.0'
 stage: 0
 children:
   - type: VariableSupplier
@@ -13,23 +13,28 @@ children:
       - ordinal
       - nominal
     children:
-      - type: VariableTargetListBox
-        name: pairs
-        label: Paired Variables
-        showColumnHeaders: false
-        fullRowSelect: true
-        itemDropBehaviour: overwrite
-        columns:
-          - type: ListItem.VariableLabel
-            name: i1
-            label: ''
-            stretchFactor: 1
-            format: variable
-          - type: ListItem.VariableLabel
-            name: i2
-            label: ''
-            stretchFactor: 1
-            format: variable
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: pairs
+            label: Paired Variables
+            showColumnHeaders: false
+            fullRowSelect: true
+            itemDropBehaviour: overwrite
+            columns:
+              - name: i1
+                label: ''
+                stretchFactor: 1
+                template:
+                  type: VariableLabel
+                  format: variable
+              - name: i2
+                label: ''
+                stretchFactor: 1
+                template:
+                  type: VariableLabel
+                  format: variable
+            isTarget: true
   - type: LayoutBox
     margin: large
     children:
@@ -57,3 +62,4 @@ children:
       - name: plots
         type: CheckBox
         label: Plots
+compilerMode: tame

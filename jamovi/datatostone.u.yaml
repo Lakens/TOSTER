@@ -1,6 +1,6 @@
 title: TOST One Sample T-Test
 name: dataTOSTone
-jus: '1.0'
+jus: '2.0'
 stage: 0
 children:
   - type: VariableSupplier
@@ -13,16 +13,20 @@ children:
       - ordinal
       - nominal
     children:
-      - type: VariableTargetListBox
-        name: vars
-        label: Variables
-        showColumnHeaders: false
-        fullRowSelect: true
-        columns:
-          - type: ListItem.VariableLabel
-            name: column1
-            label: ''
-            stretchFactor: 1
+      - type: TargetLayoutBox
+        children:
+          - type: VariablesListBox
+            name: vars
+            label: Variables
+            showColumnHeaders: false
+            fullRowSelect: true
+            columns:
+              - name: column1
+                label: ''
+                stretchFactor: 1
+                template:
+                  type: VariableLabel
+            isTarget: true
   - type: LayoutBox
     margin: large
     children:
@@ -55,3 +59,4 @@ children:
       - name: plots
         type: CheckBox
         label: Plots
+compilerMode: tame
