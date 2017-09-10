@@ -14,15 +14,15 @@
 #' TOSTtwo.prop(prop1 = .65, prop2 = .70, n1 = 100, n2 = 100, margin = .1, alpha = .05)
 #' @section References:
 #' Tunes da Silva, G., Logan, B. R., & Klein, J. P. (2008). Methods for Equivalence and Noninferiority Testing. Biology of Blood Marrow Transplant, 15(1 Suppl), 120-127.
-#' Yin, G. (20120). Clinical Trial Design: Bayesian and Frequentist Adaptive Methods. Wiley. p.179
+#' Yin, G. (2012). Clinical Trial Design: Bayesian and Frequentist Adaptive Methods. Hoboken, New Jersey: John Wiley & Sons, Inc.
 #' @export
 
 TOSTtwo.prop <- function(prop1, prop2, n1, n2, margin, alpha) {
   if(missing(alpha)) {
-    alpha<-0.05
+    alpha <- 0.05
   }
   if(margin < 0) {
-    alpha<-abs(margin)
+    margin <- abs(margin)
   }
   
   prop_dif <- prop1 - prop2
