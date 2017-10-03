@@ -5,8 +5,8 @@
 #' @param low_eqbound lower equivalence bounds (e.g., -0.5) expressed in raw scale units (e.g., scalepoints)
 #' @param high_eqbound upper equivalence bounds (e.g., 0.5) expressed in raw scale units (e.g., scalepoints)
 #' @param sdpooled specify the pooled standard deviation
-#' @return Calculate either achieved power (given N, alpha, and equivalence bounds) or required N (given desired power, alpha, and equivalence bounds).
-#' Returns a string summarizing the power analysis, and a numeric variable for the number of observations needed in each group or the power.
+#' @return Calculate either achieved power, equivalence bounds, or required N.
+#' Returns a string summarizing the power analysis, and a numeric variable for number of observations, equivalence bounds, or power.
 #' @examples
 #' ## Sample size for alpha = 0.05, 80% power, equivalence bounds of -200 and 200 in raw
 #' ## units, assuming pooled standard deviation of 350, and assuming true effect = 0
@@ -15,6 +15,11 @@
 #' ## Sample size for alpha = 0.05, N = 53 per group, equivalence bounds of
 #' ## -200 and 200 in raw units, assuming sdpooled = 350 and true effect = 0
 #' powerTOSTtwo.raw(alpha=0.05,statistical_power=0.8,low_eqbound=-200,high_eqbound=200,sdpooled=350)
+#'
+#' ## Equivalence bounds for alpha = 0.05, N = 108 per group, statistical power of
+#' ## 0.8, assuming true effect = 0
+#' powerTOSTtwo.raw(alpha=0.05, N=108, statistical_power=0.8)
+
 #' @section References:
 #' Chow, S.-C., Wang, H., & Shao, J. (2007). Sample Size Calculations in Clinical Research, Second Edition - CRC Press Book. Formula 3.2.4 with k = 1
 #' @importFrom stats pnorm pt qnorm qt
@@ -36,5 +41,12 @@ powerTOSTtwo.raw<-function(alpha, statistical_power, N, sdpooled, low_eqbound, h
     if(statistical_power<0) {statistical_power<-0}
     message(cat("The statistical power is",round(100*statistical_power,2),"% for equivalence bounds of",low_eqbound,"and",high_eqbound,"."))
     return(statistical_power)
+  }
+  if(missing(low_eqbound) && missing(high_eqbound)) {
+    low_eqbound<--sqrt(2*(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/N)
+    high_eqbound<-sqrt(2*(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/N)
+    message(cat("The equivalence bounds to achieve",100*statistical_power,"% power with N =",N,"are",round(low_eqbound,2),"and",round(high_eqbound,2),"."))
+    bounds<-c(low_eqbound,high_eqbound)
+    return(bounds)
   }
 }

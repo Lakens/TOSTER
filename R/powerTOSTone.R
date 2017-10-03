@@ -50,27 +50,3 @@ powerTOSTone<-function(alpha, statistical_power, N, low_eqbound_d, high_eqbound_
     return(bounds)
   }
 }
-
-
-
-2*(pnorm((abs(low_eqbound_d)*sqrt(N))-qnorm(1-alpha))+pnorm(-(abs(low_eqbound_d)*sqrt(N))-qnorm(1-alpha)))-1
-(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(low_eqbound_d)^2
-
-
-alpha=0.05
-statistical_power=0.902106
-N=121
-
-sqrt((qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/N)
-
-121 = 12100/(10)^2
-
-(10)^2 = sqrt(12100/121)
-
-
-powerTOSTone(alpha=0.05, N=121, low_eqbound_d=-0.3, high_eqbound_d=0.3)
-
-powerTOSTone(alpha=0.05, N=121, statistical_power=.9)
-
-
-powerTOSTone(alpha=0.05, statistical_power=0.9, low_eqbound_d=-0.3, high_eqbound_d=0.3)
