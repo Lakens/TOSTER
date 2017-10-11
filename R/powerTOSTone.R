@@ -16,7 +16,7 @@
 #'
 #' powerTOSTone(alpha=0.05, N=121, low_eqbound_d=-0.3, high_eqbound_d=0.3)
 #'
-#' ## Power for sample size of 121, alpha = 0.05, statistical power of
+#' ## Equivalence bounds for sample size of 121, alpha = 0.05, statistical power of
 #' ## 0.9, and assuming true effect = 0
 #'
 #' powerTOSTone(alpha=0.05, N=121, statistical_power=.9)
