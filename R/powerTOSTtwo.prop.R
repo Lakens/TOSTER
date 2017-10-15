@@ -30,6 +30,7 @@
 #' # Example 5 from Julious & Campbell (2012, p. 2932)
 #' powerTOSTproptwo(alpha=0.025, statistical_power=0.9, prop1 = 0.8, prop2 = 0.8, low_eqbound_prop=-0.1, high_eqbound_prop=0.1)
 #' # From Machin, D. (Ed.). (2008). Sample size tables for clinical studies (3rd ed). Chichester, West Sussex, UK ; Hoboken, NJ: Wiley-Blackwell.
+#'
 #' # Example 9.4b equivalence of two proportions (p. 113) #
 #' powerTOSTproptwo(alpha=0.010, statistical_power=0.8, prop1 = 0.5, prop2 = 0.5, low_eqbound_prop=-0.2, high_eqbound_prop=0.2)/2
 #' @section References:
