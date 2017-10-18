@@ -16,7 +16,7 @@
 #' @section References:
 #' Rogers, J. L., Howard, K. I., & Vessey, J. T. (1993). Using significance tests to evaluate equivalence between two experimental groups. Psychological Bulletin, 113(3), 553, formula page 557.
 #' @export
-#' 
+#'
 
 
 TOSTmeta<-function(ES,var,se,low_eqbound_d, high_eqbound_d, alpha){
@@ -34,10 +34,10 @@ TOSTmeta<-function(ES,var,se,low_eqbound_d, high_eqbound_d, alpha){
       stop("Need to specify variance (var) or standard error (se).")
     }
   }
-  Z1<-(ES+high_eqbound_d)/se
-  p1<-pnorm(Z1, lower.tail=FALSE) 
-  Z2<-(ES+low_eqbound_d)/se
-  p2<-pnorm(Z2, lower.tail=TRUE) 
+  Z1<-(ES-low_eqbound_d)/se
+  p1<-pnorm(Z1, lower.tail=FALSE)
+  Z2<-(ES-high_eqbound_d)/se
+  p2<-pnorm(Z2, lower.tail=TRUE)
   Z<-(ES/se)
   pttest<-pnorm(-abs(Z))
   LL90<-ES-qnorm(1-alpha)*(se)
@@ -68,10 +68,10 @@ TOSTmeta<-function(ES,var,se,low_eqbound_d, high_eqbound_d, alpha){
   CIresults<-data.frame(LL90,UL90)
   colnames(CIresults) <- c(paste("Lower Limit ",100*(1-alpha*2),"% CI",sep=""),paste("Upper Limit ",100*(1-alpha*2),"% CI",sep=""))
   cat("TOST results:\n")
-  print(TOSTresults)  
+  print(TOSTresults)
   cat("\n")
   cat("Equivalence bounds (Cohen's d):\n")
-  print(bound_d_results)  
+  print(bound_d_results)
   cat("\n")
   cat("TOST confidence interval:\n")
   print(CIresults)
