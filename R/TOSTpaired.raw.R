@@ -11,7 +11,7 @@
 #' @return Returns TOST t-value 1, TOST p-value 1, TOST t-value 2, TOST p-value 2, degrees of freedom, low equivalence bound, high equivalence bound, Lower limit confidence interval TOST, Upper limit confidence interval TOST
 #' @examples
 #' ## Test means of 5.83 and 5.75, standard deviations of 1.17 and 1.30 in sample of 65 pairs
-#' ## with correlation between observations of 0.745 using equivalence bounds in raw units of 
+#' ## with correlation between observations of 0.745 using equivalence bounds in raw units of
 #' ## -0.34 and 0.34, (with default alpha setting of = 0.05).
 #' TOSTpaired.raw(n=65,m1=5.83,m2=5.75,sd1=1.17,sd2=1.30,r12=0.745,low_eqbound=-0.34,high_eqbound=0.34)
 #' @section References:
@@ -19,21 +19,21 @@
 #' @importFrom stats pnorm pt qnorm qt
 #' @importFrom graphics abline plot points segments title
 #' @export
-#' 
+#'
 
 TOSTpaired.raw<-function(n,m1,m2,sd1,sd2,r12,low_eqbound, high_eqbound, alpha){
   if(missing(alpha)) {
     alpha <- 0.05
-  }  
+  }
   sdif<-sqrt(sd1^2+sd2^2-2*r12*sd1*sd2)
   se<-sdif/sqrt(n)
   t<-(m1-m2)/se
   degree_f<-n-1
   pttest<-2*pt(abs(t), degree_f, lower.tail=FALSE)
-  t1<-((m1-m2)+(low_eqbound))/se
-  p1<-1-pt(t1, degree_f, lower.tail=FALSE)
-  t2<-((m1-m2)+(high_eqbound))/se
-  p2<-pt(t2, degree_f, lower.tail=FALSE)
+  t1<-((m1-m2)-(low_eqbound_dz*sdif))/se
+  p1<-pt(t1, degree_f, lower.tail=FALSE)
+  t2<-((m1-m2)-(high_eqbound_dz*sdif))/se
+  p2<-pt(t2, degree_f, lower.tail=TRUE)
   ttost<-ifelse(abs(t1) < abs(t2), t1, t2)
   LL90<-((m1-m2)-qt(1-alpha, degree_f)*se)
   UL90<-((m1-m2)+qt(1-alpha, degree_f)*se)
@@ -61,10 +61,10 @@ TOSTpaired.raw<-function(n,m1,m2,sd1,sd2,r12,low_eqbound, high_eqbound, alpha){
   CIresults<-data.frame(LL90,UL90)
   colnames(CIresults) <- c(paste("Lower Limit ",100*(1-alpha*2),"% CI raw",sep=""),paste("Upper Limit ",100*(1-alpha*2),"% CI raw",sep=""))
   cat("TOST results:\n")
-  print(TOSTresults)  
+  print(TOSTresults)
   cat("\n")
   cat("Equivalence bounds (raw scores):\n")
-  print(bound_results)  
+  print(bound_results)
   cat("\n")
   cat("TOST confidence interval:\n")
   print(CIresults)
