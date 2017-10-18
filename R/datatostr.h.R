@@ -20,7 +20,7 @@ dataTOSTrOptions <- R6::R6Class(
                 name='dataTOSTr',
                 requiresData=TRUE,
                 ...)
-        
+
             private$..pairs <- jmvcore::OptionPairs$new(
                 "pairs",
                 pairs,
@@ -52,7 +52,7 @@ dataTOSTrOptions <- R6::R6Class(
                 "plots",
                 plots,
                 default=FALSE)
-        
+
             self$.addOption(private$..pairs)
             self$.addOption(private$..low_eqbound_r)
             self$.addOption(private$..high_eqbound_r)
@@ -108,10 +108,10 @@ dataTOSTrResults <- R6::R6Class(
                     list(`name`="b[0]", `title`="", `type`="text", `content`="Pearson's r"),
                     list(`name`="r[0]", `title`="r", `type`="number"),
                     list(`name`="p[0]", `title`="p", `type`="number", `format`="zto,pvalue"),
-                    list(`name`="b[1]", `title`="", `type`="text", `content`="TOST Upper"),
+                    list(`name`="b[1]", `title`="", `type`="text", `content`="TOST Lower"),
                     list(`name`="r[1]", `title`="r", `type`="number"),
                     list(`name`="p[1]", `title`="p", `type`="number", `format`="zto,pvalue"),
-                    list(`name`="b[2]", `title`="", `type`="text", `content`="TOST Lower"),
+                    list(`name`="b[2]", `title`="", `type`="text", `content`="TOST Upper"),
                     list(`name`="r[2]", `title`="r", `type`="number"),
                     list(`name`="p[2]", `title`="p", `type`="number", `format`="zto,pvalue")))
             private$..eqb <- jmvcore::Table$new(
@@ -193,18 +193,18 @@ dataTOSTrBase <- R6::R6Class(
 
 #' TOST Correlation
 #'
-#' 
+#'
 #' @param data the data as a data frame
-#' @param pairs a list of vectors of strings naming variables to correlate 
-#'   from \code{data} 
-#' @param low_eqbound_r lower equivalence bounds (e.g., -0.3) expressed in a 
-#'   correlation effect size 
-#' @param high_eqbound_r upper equivalence bounds (e.g., 0.3) expressed in a 
-#'   correlation effect size 
+#' @param pairs a list of vectors of strings naming variables to correlate
+#'   from \code{data}
+#' @param low_eqbound_r lower equivalence bounds (e.g., -0.3) expressed in a
+#'   correlation effect size
+#' @param high_eqbound_r upper equivalence bounds (e.g., 0.3) expressed in a
+#'   correlation effect size
 #' @param alpha alpha level (default = 0.05)
-#' @param desc \code{TRUE} or \code{FALSE} (default), provide descriptive 
-#'   statistics 
-#' @param plots \code{TRUE} or \code{FALSE} (default), provide plots 
+#' @param desc \code{TRUE} or \code{FALSE} (default), provide descriptive
+#'   statistics
+#' @param plots \code{TRUE} or \code{FALSE} (default), provide plots
 #' @export
 dataTOSTr <- function(
     data,

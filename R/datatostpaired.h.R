@@ -20,7 +20,7 @@ dataTOSTpairedOptions <- R6::R6Class(
                 name='dataTOSTpaired',
                 requiresData=TRUE,
                 ...)
-        
+
             private$..pairs <- jmvcore::OptionPairs$new(
                 "pairs",
                 pairs,
@@ -52,7 +52,7 @@ dataTOSTpairedOptions <- R6::R6Class(
                 "plots",
                 plots,
                 default=FALSE)
-        
+
             self$.addOption(private$..pairs)
             self$.addOption(private$..low_eqbound_dz)
             self$.addOption(private$..high_eqbound_dz)
@@ -109,11 +109,11 @@ dataTOSTpairedResults <- R6::R6Class(
                     list(`name`="t[0]", `title`="t", `type`="number"),
                     list(`name`="df[0]", `title`="df", `type`="integer"),
                     list(`name`="p[0]", `title`="p", `type`="number", `format`="zto,pvalue"),
-                    list(`name`="b[1]", `title`="", `type`="text", `content`="TOST Upper"),
+                    list(`name`="b[1]", `title`="", `type`="text", `content`="TOST Lower"),
                     list(`name`="t[1]", `title`="t", `type`="number"),
                     list(`name`="df[1]", `title`="df", `type`="integer"),
                     list(`name`="p[1]", `title`="p", `type`="number", `format`="zto,pvalue"),
-                    list(`name`="b[2]", `title`="", `type`="text", `content`="TOST Lower"),
+                    list(`name`="b[2]", `title`="", `type`="text", `content`="TOST Upper"),
                     list(`name`="t[2]", `title`="t", `type`="number"),
                     list(`name`="df[2]", `title`="df", `type`="integer"),
                     list(`name`="p[2]", `title`="p", `type`="number", `format`="zto,pvalue")))
@@ -206,24 +206,24 @@ dataTOSTpairedBase <- R6::R6Class(
 #'
 #' @examples
 #' library("TOSTER")
-#' 
+#'
 #' dataTOSTpaired(data = randu, pairs = list(c(i1="x",i2="y")), low_eqbound_dz = -0.3,
 #'                high_eqbound_dz = 0.3, alpha = 0.05, desc = TRUE, plots = TRUE)
-#' 
+#'
 #' @section References:
 #' Mara, C. A., & Cribbie, R. A. (2012). Paired-Samples Tests of Equivalence. Communications in Statistics - Simulation and Computation, 41(10), 1928-1943. https://doi.org/10.1080/03610918.2011.626545, formula page 1932. Note there is a typo in the formula: n-1 should be n (personal communication, 31-08-2016)
 #'
 #' @param data the data as a data frame
-#' @param pairs a list of vectors of strings naming variables to pair from 
+#' @param pairs a list of vectors of strings naming variables to pair from
 #'   \code{data}
-#' @param low_eqbound_dz lower equivalence bounds (e.g., -0.5) expressed in 
-#'   standardized mean difference (Cohen's dz) 
-#' @param high_eqbound_dz upper equivalence bounds (e.g., 0.5) expressed in 
-#'   standardized mean difference (Cohen's dz) 
+#' @param low_eqbound_dz lower equivalence bounds (e.g., -0.5) expressed in
+#'   standardized mean difference (Cohen's dz)
+#' @param high_eqbound_dz upper equivalence bounds (e.g., 0.5) expressed in
+#'   standardized mean difference (Cohen's dz)
 #' @param alpha alpha level (default = 0.05)
-#' @param desc \code{TRUE} or \code{FALSE} (default), provide descriptive 
-#'   statistics 
-#' @param plots \code{TRUE} or \code{FALSE} (default), provide plots 
+#' @param desc \code{TRUE} or \code{FALSE} (default), provide descriptive
+#'   statistics
+#' @param plots \code{TRUE} or \code{FALSE} (default), provide plots
 #' @export
 dataTOSTpaired <- function(
     data,
