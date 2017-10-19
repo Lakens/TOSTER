@@ -21,7 +21,7 @@ dataTOSToneOptions <- R6::R6Class(
                 name='dataTOSTone',
                 requiresData=TRUE,
                 ...)
-        
+
             private$..vars <- jmvcore::OptionVariables$new(
                 "vars",
                 vars,
@@ -57,7 +57,7 @@ dataTOSToneOptions <- R6::R6Class(
                 "plots",
                 plots,
                 default=FALSE)
-        
+
             self$.addOption(private$..vars)
             self$.addOption(private$..mu)
             self$.addOption(private$..low_eqbound_d)
@@ -118,11 +118,11 @@ dataTOSToneResults <- R6::R6Class(
                     list(`name`="t[0]", `title`="t", `type`="number"),
                     list(`name`="df[0]", `title`="df", `type`="integer"),
                     list(`name`="p[0]", `title`="p", `type`="number", `format`="zto,pvalue"),
-                    list(`name`="b[1]", `title`="", `type`="text", `content`="TOST Upper"),
+                    list(`name`="b[1]", `title`="", `type`="text", `content`="TOST Lower"),
                     list(`name`="t[1]", `title`="t", `type`="number"),
                     list(`name`="df[1]", `title`="df", `type`="integer"),
                     list(`name`="p[1]", `title`="p", `type`="number", `format`="zto,pvalue"),
-                    list(`name`="b[2]", `title`="", `type`="text", `content`="TOST Lower"),
+                    list(`name`="b[2]", `title`="", `type`="text", `content`="TOST Upper"),
                     list(`name`="t[2]", `title`="t", `type`="number"),
                     list(`name`="df[2]", `title`="df", `type`="integer"),
                     list(`name`="p[2]", `title`="p", `type`="number", `format`="zto,pvalue")))
@@ -212,23 +212,23 @@ dataTOSToneBase <- R6::R6Class(
 #'
 #' @examples
 #' library("TOSTER")
-#' 
+#'
 #' dataTOSTone(data = iris, vars = "Sepal.Width", mu = 3, low_eqbound_d = -0.3, high_eqbound_d = 0.3,
 #'             alpha = 0.05, desc = TRUE, plots = TRUE)
-#' 
+#'
 #' TOSTone(m=3.05733,mu=3,sd=0.4358663,n=150,low_eqbound_d=-0.3, high_eqbound_d=0.3, alpha=0.05)
-#' 
+#'
 #' @param data the data as a data frame
 #' @param vars a vector of strings naming variables of interest in \code{data}
-#' @param mu a number (default: 0) to compare against 
-#' @param low_eqbound_d lower equivalence bounds (e.g., -0.5) expressed in 
-#'   standardized mean difference (Cohen's d) 
-#' @param high_eqbound_d upper equivalence bounds (e.g., 0.5) expressed in 
-#'   standardized mean difference (Cohen's d) 
+#' @param mu a number (default: 0) to compare against
+#' @param low_eqbound_d lower equivalence bounds (e.g., -0.5) expressed in
+#'   standardized mean difference (Cohen's d)
+#' @param high_eqbound_d upper equivalence bounds (e.g., 0.5) expressed in
+#'   standardized mean difference (Cohen's d)
 #' @param alpha alpha level (default = 0.05)
-#' @param desc \code{TRUE} or \code{FALSE} (default), provide descriptive 
-#'   statistics 
-#' @param plots \code{TRUE} or \code{FALSE} (default), provide plots 
+#' @param desc \code{TRUE} or \code{FALSE} (default), provide descriptive
+#'   statistics
+#' @param plots \code{TRUE} or \code{FALSE} (default), provide plots
 #' @export
 dataTOSTone <- function(
     data,

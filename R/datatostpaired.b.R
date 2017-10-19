@@ -72,10 +72,10 @@ dataTOSTpairedClass <- R6::R6Class(
         t<-(m1-m2)/se
         degree_f<-n-1
         pttest<-2*pt(abs(t), degree_f, lower.tail=FALSE)
-        t1<-((m1-m2)+(low_eqbound_dz*sdif))/se
-        p1<-1-pt(t1, degree_f, lower.tail=FALSE)
-        t2<-((m1-m2)+(high_eqbound_dz*sdif))/se
-        p2<-pt(t2, degree_f, lower.tail=FALSE)
+        t1<-((m1-m2)-(low_eqbound_dz*sdif))/se
+        p1<-pt(t1, degree_f, lower.tail=FALSE)
+        t2<-((m1-m2)-(high_eqbound_dz*sdif))/se
+        p2<-pt(t2, degree_f, lower.tail=TRUE)
         ttost<-ifelse(abs(t1) < abs(t2), t1, t2)
         LL90<-((m1-m2)-qt(1-alpha, degree_f)*se)
         UL90<-((m1-m2)+qt(1-alpha, degree_f)*se)

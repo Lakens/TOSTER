@@ -22,7 +22,7 @@ dataTOSTtwoOptions <- R6::R6Class(
                 name='dataTOSTtwo',
                 requiresData=TRUE,
                 ...)
-        
+
             private$..deps <- jmvcore::OptionVariables$new(
                 "deps",
                 deps,
@@ -62,7 +62,7 @@ dataTOSTtwoOptions <- R6::R6Class(
                 "plots",
                 plots,
                 default=FALSE)
-        
+
             self$.addOption(private$..deps)
             self$.addOption(private$..group)
             self$.addOption(private$..var_equal)
@@ -126,11 +126,11 @@ dataTOSTtwoResults <- R6::R6Class(
                     list(`name`="t[0]", `title`="t", `type`="number"),
                     list(`name`="df[0]", `title`="df", `type`="number"),
                     list(`name`="p[0]", `title`="p", `type`="number", `format`="zto,pvalue"),
-                    list(`name`="b[1]", `title`="", `type`="text", `content`="TOST Upper"),
+                    list(`name`="b[1]", `title`="", `type`="text", `content`="TOST Lower"),
                     list(`name`="t[1]", `title`="t", `type`="number"),
                     list(`name`="df[1]", `title`="df", `type`="number"),
                     list(`name`="p[1]", `title`="p", `type`="number", `format`="zto,pvalue"),
-                    list(`name`="b[2]", `title`="", `type`="text", `content`="TOST Lower"),
+                    list(`name`="b[2]", `title`="", `type`="text", `content`="TOST Upper"),
                     list(`name`="t[2]", `title`="t", `type`="number"),
                     list(`name`="df[2]", `title`="df", `type`="number"),
                     list(`name`="p[2]", `title`="p", `type`="number", `format`="zto,pvalue")))
@@ -227,16 +227,16 @@ dataTOSTtwoBase <- R6::R6Class(
 #'
 #' @examples
 #' library(TOSTER)
-#' 
+#'
 #' ## Load iris dataset, remove one of the three groups so two are left
-#' 
+#'
 #' data<-iris[which(iris$Species!="versicolor"),]
-#' 
+#'
 #' ## TOST procedure on the raw data
-#' 
+#'
 #' dataTOSTtwo(data, deps="Sepal.Width", group="Species", var_equal = TRUE, low_eqbound_d = -0.5,
 #'             high_eqbound_d = 0.5, alpha = 0.05, desc = TRUE, plots = TRUE)
-#' 
+#'
 #' @section References:
 #' Berger, R. L., & Hsu, J. C. (1996). Bioequivalence Trials, Intersection-Union Tests and Equivalence Confidence Sets. Statistical Science, 11(4), 283-302.
 #'
@@ -244,18 +244,18 @@ dataTOSTtwoBase <- R6::R6Class(
 #'
 #' @param data the data as a data frame
 #' @param deps a vector of strings naming dependent variables in \code{data}
-#' @param group a string naming the grouping variable in \code{data}; must 
-#'   have two levels 
-#' @param var_equal \code{TRUE} or \code{FALSE} (default), assume equal 
-#'   variances 
-#' @param low_eqbound_d lower equivalence bounds (e.g., -0.5) expressed in 
-#'   standardized mean difference (Cohen's d) 
-#' @param high_eqbound_d upper equivalence bounds (e.g., 0.5) expressed in 
-#'   standardized mean difference (Cohen's d) 
+#' @param group a string naming the grouping variable in \code{data}; must
+#'   have two levels
+#' @param var_equal \code{TRUE} or \code{FALSE} (default), assume equal
+#'   variances
+#' @param low_eqbound_d lower equivalence bounds (e.g., -0.5) expressed in
+#'   standardized mean difference (Cohen's d)
+#' @param high_eqbound_d upper equivalence bounds (e.g., 0.5) expressed in
+#'   standardized mean difference (Cohen's d)
 #' @param alpha alpha level (default = 0.05)
-#' @param desc \code{TRUE} or \code{FALSE} (default), provide descriptive 
-#'   statistics 
-#' @param plots \code{TRUE} or \code{FALSE} (default), provide plots 
+#' @param desc \code{TRUE} or \code{FALSE} (default), provide descriptive
+#'   statistics
+#' @param plots \code{TRUE} or \code{FALSE} (default), provide plots
 #' @export
 dataTOSTtwo <- function(
     data,
