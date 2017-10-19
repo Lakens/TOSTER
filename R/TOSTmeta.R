@@ -18,7 +18,6 @@
 #' @export
 #'
 
-
 TOSTmeta<-function(ES,var,se,low_eqbound_d, high_eqbound_d, alpha){
   if(missing(alpha)) {
     alpha<-0.05
@@ -39,7 +38,7 @@ TOSTmeta<-function(ES,var,se,low_eqbound_d, high_eqbound_d, alpha){
   Z2<-(ES-high_eqbound_d)/se
   p2<-pnorm(Z2, lower.tail=TRUE)
   Z<-(ES/se)
-  pttest<-pnorm(-abs(Z))
+  pttest<-2*pnorm(-abs(Z))
   LL90<-ES-qnorm(1-alpha)*(se)
   UL90<-ES+qnorm(1-alpha)*(se)
   LL95<-ES-qnorm(1-alpha/2)*(se)
