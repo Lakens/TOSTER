@@ -37,13 +37,15 @@
 
 
 
-TOSTtwo.raw<-function(m1,m2,sd1,sd2,n1,n2,low_eqbound, high_eqbound, alpha, var.equal){
+TOSTtwo.raw<-function(m1,m2,sd1,sd2,n1,n2,low_eqbound, high_eqbound, alpha, var.equal, plot = TRUE){
   if(missing(alpha)) {
     alpha<-0.05
   }
   if(missing(var.equal)) {
     var.equal<-FALSE
   }
+
+  # Calculate TOST, t-test, 90% CIs and 95% CIs
   if(var.equal==TRUE) {
     sdpooled<-sqrt((((n1 - 1)*(sd1^2)) + (n2 - 1)*(sd2^2))/((n1+n2)-2)) #calculate sd pooled
     t1<-((m1-m2)-low_eqbound)/(sdpooled*sqrt(1/n1 + 1/n2))
@@ -76,6 +78,9 @@ TOSTtwo.raw<-function(m1,m2,sd1,sd2,n1,n2,low_eqbound, high_eqbound, alpha, var.
   dif<-(m1-m2)
   testoutcome<-ifelse(pttest<alpha,"significant","non-significant")
   TOSToutcome<-ifelse(ptost<alpha,"significant","non-significant")
+
+  # Plot results
+  if (plot == TRUE) {
   plot(NA, ylim=c(0,1), xlim=c(min(LL90,low_eqbound)-max(UL90-LL90, high_eqbound-low_eqbound)/10, max(UL90,high_eqbound)+max(UL90-LL90, high_eqbound-low_eqbound)/10), bty="l", yaxt="n", ylab="",xlab="Mean Difference")
   points(x=dif, y=0.5, pch=15, cex=2)
   abline(v=high_eqbound, lty=2)
@@ -84,6 +89,9 @@ TOSTtwo.raw<-function(m1,m2,sd1,sd2,n1,n2,low_eqbound, high_eqbound, alpha, var.
   segments(LL90,0.5,UL90,0.5, lwd=3)
   segments(LL95,0.5,UL95,0.5, lwd=1)
   title(main=paste("Equivalence bounds ",round(low_eqbound,digits=3)," and ",round(high_eqbound,digits=3),"\nMean difference = ",round(dif,digits=3)," \n TOST: ", 100*(1-alpha*2),"% CI [",round(LL90,digits=3),";",round(UL90,digits=3),"] ", TOSToutcome," \n NHST: ", 100*(1-alpha),"% CI [",round(LL95,digits=3),";",round(UL95,digits=3),"] ", testoutcome,sep=""), cex.main=1)
+  }
+
+  # Print TOST and t-test results in message form
   if(var.equal == TRUE) {
     message(cat("Using alpha = ",alpha," Student's t-test was ",testoutcome,", t(",degree_f,") = ",t,", p = ",pttest,sep=""))
     cat("\n")
@@ -93,6 +101,8 @@ TOSTtwo.raw<-function(m1,m2,sd1,sd2,n1,n2,low_eqbound, high_eqbound, alpha, var.
     cat("\n")
     message(cat("Using alpha = ",alpha," the equivalence test based on Welch's t-test  was ",TOSToutcome,", t(",degree_f,") = ",ttost,", p = ",ptost,sep=""))
   }
+
+  # Print TOST and t-test results in table form
   TOSTresults<-data.frame(t1,p1,t2,p2,degree_f)
   colnames(TOSTresults) <- c("t-value 1","p-value 1","t-value 2","p-value 2","df")
   bound_results<-data.frame(low_eqbound,high_eqbound)
@@ -107,5 +117,8 @@ TOSTtwo.raw<-function(m1,m2,sd1,sd2,n1,n2,low_eqbound, high_eqbound, alpha, var.
   cat("\n")
   cat("TOST confidence interval:\n")
   print(CIresults)
-  invisible(list(TOST_t1=t1,TOST_p1=p1,TOST_t2=t2,TOST_p2=p2, TOST_df=degree_f,alpha=alpha,low_eqbound=low_eqbound,high_eqbound=high_eqbound, LL_CI_TOST=LL90,UL_CI_TOST=UL90))
+
+
+  # Print TOST and t-test results in table form
+  invisible(list(diff=dif,TOST_t1=t1,TOST_p1=p1,TOST_t2=t2,TOST_p2=p2, TOST_df=degree_f,alpha=alpha,low_eqbound=low_eqbound,high_eqbound=high_eqbound, LL_CI_TOST=LL90,UL_CI_TOST=UL90,LL_CI_TTEST=LL95, UL_CI_TTEST=UL95))
 }
