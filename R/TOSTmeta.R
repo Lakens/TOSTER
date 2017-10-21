@@ -18,7 +18,7 @@
 #' @export
 #'
 
-TOSTmeta<-function(ES,var,se,low_eqbound_d, high_eqbound_d, alpha){
+TOSTmeta<-function(ES,var,se,low_eqbound_d, high_eqbound_d, alpha, plot = TRUE){
   if(missing(alpha)) {
     alpha<-0.05
   }
@@ -33,6 +33,7 @@ TOSTmeta<-function(ES,var,se,low_eqbound_d, high_eqbound_d, alpha){
       stop("Need to specify variance (var) or standard error (se).")
     }
   }
+  # Calculate TOST, z-test, 90% CIs and 95% CIs
   Z1<-(ES-low_eqbound_d)/se
   p1<-pnorm(Z1, lower.tail=FALSE)
   Z2<-(ES-high_eqbound_d)/se
@@ -49,6 +50,9 @@ TOSTmeta<-function(ES,var,se,low_eqbound_d, high_eqbound_d, alpha){
   colnames(results) <- c("Z-value 1","p-value 1","Z-value 2","p-value 2", paste("Lower Limit ",100*(1-alpha*2),"% CI",sep=""),paste("Upper Limit ",100*(1-alpha*2),"% CI",sep=""))
   testoutcome<-ifelse(pttest<alpha,"significant","non-significant")
   TOSToutcome<-ifelse(ptost<alpha,"significant","non-significant")
+
+  # Plot results
+  if (plot == TRUE) {
   plot(NA, ylim=c(0,1), xlim=c(min(LL95,low_eqbound_d,ES)-max(UL95-LL95, high_eqbound_d-low_eqbound_d,ES)/10, max(UL95,high_eqbound_d,ES)+max(UL95-LL95, high_eqbound_d-low_eqbound_d, ES)/10), bty="l", yaxt="n", ylab="",xlab="Effect size")
   points(x=ES, y=0.5, pch=15, cex=2)
   abline(v=high_eqbound_d, lty=2)
@@ -57,9 +61,14 @@ TOSTmeta<-function(ES,var,se,low_eqbound_d, high_eqbound_d, alpha){
   segments(LL90,0.5,UL90,0.5, lwd=3)
   segments(LL95,0.5,UL95,0.5, lwd=1)
   title(main=paste("Equivalence bounds ",round(low_eqbound_d,digits=3)," and ",round(high_eqbound_d,digits=3),"\nEffect size = ",round(ES,digits=3)," \n TOST: ", 100*(1-alpha*2),"% CI [",round(LL90,digits=3),";",round(UL90,digits=3),"] ", TOSToutcome," \n NHST: ", 100*(1-alpha),"% CI [",round(LL95,digits=3),";",round(UL95,digits=3),"] ", testoutcome,sep=""), cex.main=1)
+  }
+
+  # Print TOST and z-test results in message form
   message(cat("Using alpha = ",alpha," the meta-analysis was ",testoutcome,", Z = ",Z,", p = ",pttest,sep=""))
   cat("\n")
   message(cat("Using alpha = ",alpha," the equivalence test was ",TOSToutcome,", Z = ",Ztost,", p = ",ptost,sep=""))
+
+  # Print TOST and z test results in table form
   TOSTresults<-data.frame(Z1,p1,Z2,p2)
   colnames(TOSTresults) <- c("Z-value 1","p-value 1","Z-value 2","p-value 2")
   bound_d_results<-data.frame(low_eqbound_d,high_eqbound_d)
@@ -74,5 +83,7 @@ TOSTmeta<-function(ES,var,se,low_eqbound_d, high_eqbound_d, alpha){
   cat("\n")
   cat("TOST confidence interval:\n")
   print(CIresults)
-  invisible(list(TOST_Z1=Z1,TOST_p1=p1,TOST_Z2=Z2,TOST_p2=p2,alpha=alpha,low_eqbound_d=low_eqbound_d,high_eqbound_d=high_eqbound_d, LL_CI_TOST=LL90,UL_CI_TOST=UL90))
+
+  # Return results in list()
+  invisible(list(ES=ES,TOST_Z1=Z1,TOST_p1=p1,TOST_Z2=Z2,TOST_p2=p2,alpha=alpha,low_eqbound_d=low_eqbound_d,high_eqbound_d=high_eqbound_d, LL_CI_TOST=LL90,UL_CI_TOST=UL90,LL_CI_ZTEST=LL95,UL_CI_ZTEST=UL95))
 }
