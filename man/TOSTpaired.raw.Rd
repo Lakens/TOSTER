@@ -25,6 +25,8 @@ TOSTpaired.raw(n, m1, m2, sd1, sd2, r12, low_eqbound, high_eqbound, alpha,
 \item{high_eqbound}{upper equivalence bounds (e.g., 0.5) expressed in raw scores}
 
 \item{alpha}{alpha level (default = 0.05)}
+
+\item{plot}{set whether results should be plotted (plot = TRUE) or not (plot = FALSE) - defaults to TRUE}
 }
 \value{
 Returns TOST t-value 1, TOST p-value 1, TOST t-value 2, TOST p-value 2, degrees of freedom, low equivalence bound, high equivalence bound, Lower limit confidence interval TOST, Upper limit confidence interval TOST

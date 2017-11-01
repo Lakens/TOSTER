@@ -8,6 +8,7 @@
 #' @param low_eqbound lower equivalence bounds (e.g., -0.5) expressed in raw scores
 #' @param high_eqbound upper equivalence bounds (e.g., 0.5) expressed in raw scores
 #' @param alpha alpha level (default = 0.05)
+#' @param plot set whether results should be plotted (plot = TRUE) or not (plot = FALSE) - defaults to TRUE
 #' @return Returns TOST t-value 1, TOST p-value 1, TOST t-value 2, TOST p-value 2, degrees of freedom, low equivalence bound, high equivalence bound, Lower limit confidence interval TOST, Upper limit confidence interval TOST
 #' @examples
 #' ## Test means of 5.83 and 5.75, standard deviations of 1.17 and 1.30 in sample of 65 pairs

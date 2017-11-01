@@ -18,6 +18,8 @@ TOSTmeta(ES, var, se, low_eqbound_d, high_eqbound_d, alpha, plot = TRUE)
 \item{high_eqbound_d}{upper equivalence bounds (e.g., 0.5) expressed in standardized mean difference (Cohen's d)}
 
 \item{alpha}{alpha level (default = 0.05)}
+
+\item{plot}{set whether results should be plotted (plot = TRUE) or not (plot = FALSE) - defaults to TRUE}
 }
 \value{
 Returns TOST Z-value 1, TOST p-value 1, TOST Z-value 2, TOST p-value 2,  alpha, low equivalence bound d, high equivalence bound d, Lower limit confidence interval TOST, Upper limit confidence interval TOST

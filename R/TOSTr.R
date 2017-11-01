@@ -4,6 +4,7 @@
 #' @param low_eqbound_r lower equivalence bounds (e.g., -0.3) expressed in a correlation effect size
 #' @param high_eqbound_r upper equivalence bounds (e.g., 0.3) expressed in a correlation effect size
 #' @param alpha alpha level (default = 0.05)
+#' @param plot set whether results should be plotted (plot = TRUE) or not (plot = FALSE) - defaults to TRUE
 #' @return Returns TOST p-value 1, TOST p-value 2, alpha, low equivalence bound r, high equivalence bound r, Lower limit confidence interval TOST, Upper limit confidence interval TOST
 #' @examples
 #' TOSTr(n=100, r = 0.02, low_eqbound_r=-0.3, high_eqbound_r=0.3, alpha=0.05)

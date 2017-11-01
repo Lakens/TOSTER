@@ -16,6 +16,8 @@ TOSTr(n, r, low_eqbound_r, high_eqbound_r, alpha, plot = TRUE)
 \item{high_eqbound_r}{upper equivalence bounds (e.g., 0.3) expressed in a correlation effect size}
 
 \item{alpha}{alpha level (default = 0.05)}
+
+\item{plot}{set whether results should be plotted (plot = TRUE) or not (plot = FALSE) - defaults to TRUE}
 }
 \value{
 Returns TOST p-value 1, TOST p-value 2, alpha, low equivalence bound r, high equivalence bound r, Lower limit confidence interval TOST, Upper limit confidence interval TOST

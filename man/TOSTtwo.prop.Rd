@@ -21,6 +21,8 @@ TOSTtwo.prop(prop1, prop2, n1, n2, low_eqbound, high_eqbound, alpha,
 \item{high_eqbound}{upper equivalence bounds (e.g., 0.1) expressed in proportions}
 
 \item{alpha}{alpha level (default = 0.05)}
+
+\item{plot}{set whether results should be plotted (plot = TRUE) or not (plot = FALSE) - defaults to TRUE}
 }
 \value{
 Returns TOST z-value 1, TOST p-value 1, TOST z-value 2, TOST p-value 2, low equivalence bound, high equivalence bound, Lower limit confidence interval TOST, Upper limit confidence interval TOST
@@ -35,7 +37,7 @@ Yin, G. (2012). Clinical Trial Design: Bayesian and Frequentist Adaptive Methods
 }
 
 \examples{
-## Equivalence test for two independent proportions equal to .65 and .70, with 100 samples per group, a lower equivalence bound of -0.1,
-## a higher equivalence bound of 0.1, and an alpha of 0.05.
+## Equivalence test for two independent proportions equal to .65 and .70, with 100 samples per group, a lower
+## equivalence bound of -0.1, a higher equivalence bound of 0.1, and an alpha of 0.05.
 TOSTtwo.prop(prop1 = .65, prop2 = .70, n1 = 100, n2 = 100, low_eqbound = -0.1, high_eqbound = 0.1, alpha = .05)
 }
