@@ -10,18 +10,18 @@ dataTOSTpaired(data, pairs, low_eqbound_dz = -0.5, high_eqbound_dz = 0.5,
 \arguments{
 \item{data}{the data as a data frame}
 
-\item{pairs}{a list of vectors of strings naming variables to pair from 
+\item{pairs}{a list of vectors of strings naming variables to pair from
 \code{data}}
 
-\item{low_eqbound_dz}{lower equivalence bounds (e.g., -0.5) expressed in 
+\item{low_eqbound_dz}{lower equivalence bounds (e.g., -0.5) expressed in
 standardized mean difference (Cohen's dz)}
 
-\item{high_eqbound_dz}{upper equivalence bounds (e.g., 0.5) expressed in 
+\item{high_eqbound_dz}{upper equivalence bounds (e.g., 0.5) expressed in
 standardized mean difference (Cohen's dz)}
 
 \item{alpha}{alpha level (default = 0.05)}
 
-\item{desc}{\code{TRUE} or \code{FALSE} (default), provide descriptive 
+\item{desc}{\code{TRUE} or \code{FALSE} (default), provide descriptive
 statistics}
 
 \item{plots}{\code{TRUE} or \code{FALSE} (default), provide plots}

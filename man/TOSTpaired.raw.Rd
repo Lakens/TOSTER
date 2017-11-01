@@ -4,7 +4,8 @@
 \alias{TOSTpaired.raw}
 \title{TOST function for a dependent t-test (raw scores)}
 \usage{
-TOSTpaired.raw(n, m1, m2, sd1, sd2, r12, low_eqbound, high_eqbound, alpha)
+TOSTpaired.raw(n, m1, m2, sd1, sd2, r12, low_eqbound, high_eqbound, alpha,
+  plot = TRUE)
 }
 \arguments{
 \item{n}{sample size (pairs)}
@@ -38,7 +39,7 @@ Mara, C. A., & Cribbie, R. A. (2012). Paired-Samples Tests of Equivalence. Commu
 
 \examples{
 ## Test means of 5.83 and 5.75, standard deviations of 1.17 and 1.30 in sample of 65 pairs
-## with correlation between observations of 0.745 using equivalence bounds in raw units of 
+## with correlation between observations of 0.745 using equivalence bounds in raw units of
 ## -0.34 and 0.34, (with default alpha setting of = 0.05).
 TOSTpaired.raw(n=65,m1=5.83,m2=5.75,sd1=1.17,sd2=1.30,r12=0.745,low_eqbound=-0.34,high_eqbound=0.34)
 }

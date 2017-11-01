@@ -5,7 +5,7 @@
 \title{TOST function for an independent t-test (raw scores)}
 \usage{
 TOSTtwo.raw(m1, m2, sd1, sd2, n1, n2, low_eqbound, high_eqbound, alpha,
-  var.equal)
+  var.equal, plot = TRUE)
 }
 \arguments{
 \item{m1}{mean of group 1}

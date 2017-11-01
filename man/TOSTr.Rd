@@ -4,7 +4,7 @@
 \alias{TOSTr}
 \title{TOST function for a correlations}
 \usage{
-TOSTr(n, r, low_eqbound_r, high_eqbound_r, alpha)
+TOSTr(n, r, low_eqbound_r, high_eqbound_r, alpha, plot = TRUE)
 }
 \arguments{
 \item{n}{number of pairs of observations}

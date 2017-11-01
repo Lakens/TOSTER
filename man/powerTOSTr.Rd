@@ -2,27 +2,38 @@
 % Please edit documentation in R/powerTOSTr.R
 \name{powerTOSTr}
 \alias{powerTOSTr}
-\title{Power analysis for TOST for correlations}
+\title{Power analysis for TOST for correlations.}
 \usage{
-powerTOSTr(alpha, statistical_power, low_eqbound_r, high_eqbound_r)
+powerTOSTr(alpha, statistical_power, N, low_eqbound_r, high_eqbound_r)
 }
 \arguments{
 \item{alpha}{alpha used for the test (e.g., 0.05)}
 
 \item{statistical_power}{desired power (e.g., 0.8)}
 
+\item{N}{number of pairs (e.g., 96)}
+
 \item{low_eqbound_r}{lower equivalence bounds (e.g., -0.3) expressed in a correlation effect size}
 
 \item{high_eqbound_r}{upper equivalence bounds (e.g., 0.3) expressed in a correlation effect size}
 }
 \value{
-Returns a string summarizing the power analysis, and a numeric variable for the number of pairs needed
+Calculate either achieved power, equivalence bounds, or required N.
+Returns a string summarizing the power analysis, and a numeric variable for number of observations, equivalence bounds, or power.
 }
 \description{
-Power analysis for TOST for correlations
+Power analysis for TOST for correlations.
 }
 \examples{
-## Sample size for alpha = 0.05, 80\% power, equivalence bounds of
-## r = -0.1 and r = 0.1,assuming true effect = 0
-powerTOSTr(alpha=0.05, statistical_power=0.8, low_eqbound_r=-0.1, high_eqbound_r=0.1)
+## Sample size for alpha = 0.05, 90\% power, equivalence bounds of
+## r = -0.1 and r = 0.1, assuming true effect = 0
+powerTOSTr(alpha=0.05, statistical_power=0.9, low_eqbound_r=-0.1, high_eqbound_r=0.1)
+
+## Sample size for alpha = 0.05, N=536, equivalence bounds of
+## r = -0.1 and r = 0.1, assuming true effect = 0
+powerTOSTr(alpha=0.05, N=536, low_eqbound_r=-0.1, high_eqbound_r=0.1)
+
+## Equivalence bounds for alpha = 0.05, N=536, statistical power of
+## 0.9, assuming true effect = 0
+powerTOSTr(alpha=0.05, N=536, statistical_power=0.9)
 }

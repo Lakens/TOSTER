@@ -5,7 +5,7 @@
 \title{TOST function for an independent t-test (Cohen's d)}
 \usage{
 TOSTtwo(m1, m2, sd1, sd2, n1, n2, low_eqbound_d, high_eqbound_d, alpha,
-  var.equal)
+  var.equal, plot = TRUE)
 }
 \arguments{
 \item{m1}{mean of group 1}

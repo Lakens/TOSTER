@@ -4,7 +4,7 @@
 \alias{TOSTmeta}
 \title{TOST function for meta-analysis}
 \usage{
-TOSTmeta(ES, var, se, low_eqbound_d, high_eqbound_d, alpha)
+TOSTmeta(ES, var, se, low_eqbound_d, high_eqbound_d, alpha, plot = TRUE)
 }
 \arguments{
 \item{ES}{meta-analytic effect size}

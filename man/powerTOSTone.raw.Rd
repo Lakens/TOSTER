@@ -2,14 +2,16 @@
 % Please edit documentation in R/powerTOSTone.raw.R
 \name{powerTOSTone.raw}
 \alias{powerTOSTone.raw}
-\title{Power analysis for TOST for one-sample t-test (raw scores)}
+\title{Power analysis for TOST for one-sample t-test (raw scores).}
 \usage{
-powerTOSTone.raw(alpha, statistical_power, sd, low_eqbound, high_eqbound)
+powerTOSTone.raw(alpha, statistical_power, N, sd, low_eqbound, high_eqbound)
 }
 \arguments{
 \item{alpha}{alpha used for the test (e.g., 0.05)}
 
 \item{statistical_power}{desired power (e.g., 0.8)}
+
+\item{N}{sample size (e.g., 108)}
 
 \item{sd}{population standard deviation}
 
@@ -18,10 +20,11 @@ powerTOSTone.raw(alpha, statistical_power, sd, low_eqbound, high_eqbound)
 \item{high_eqbound}{upper equivalence bounds (e.g., 0.5) expressed in raw scores}
 }
 \value{
-Returns a string summarizing the power analysis, and a numeric variable for the number of observations needed.
+Calculate either achieved power, equivalence bounds, or required N.
+Returns a string summarizing the power analysis, and a numeric variable for number of observations, equivalence bounds, or power.
 }
 \description{
-Power analysis for TOST for one-sample t-test (raw scores)
+Power analysis for TOST for one-sample t-test (raw scores).
 }
 \section{References}{
 
@@ -29,7 +32,17 @@ Chow, S.-C., Wang, H., & Shao, J. (2007). Sample Size Calculations in Clinical R
 }
 
 \examples{
-## Sample size for alpha = 0.05, 90\% power, equivalence bounds of -0.3 and 0.3 in 
+## Sample size for alpha = 0.05, 90\% power, equivalence bounds of -0.3 and 0.3 in
 ## raw units, assuming pooled standard deviation of 1, and assuming true effect = 0
 powerTOSTone.raw(alpha=0.05, statistical_power=0.9, sd = 1, low_eqbound=-0.3, high_eqbound=0.3)
+
+## Power for sample size of 121, alpha = 0.05, equivalence bounds of
+## -0.3 and 0.3 in raw units, assuming pooled standard deviation of 1, and assuming true effect = 0
+
+powerTOSTone.raw(alpha=0.05, N=121, sd = 1, low_eqbound=-0.3, high_eqbound=0.3)
+
+## Power for sample size of 121, alpha = 0.05, statistical power of
+## 0.9, and assuming true effect = 0
+
+powerTOSTone.raw(alpha=0.05, N=121, statistical_power=.9)
 }
