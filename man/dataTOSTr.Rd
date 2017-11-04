@@ -10,21 +10,36 @@ dataTOSTr(data, pairs, low_eqbound_r = -0.3, high_eqbound_r = 0.3,
 \arguments{
 \item{data}{the data as a data frame}
 
-\item{pairs}{a list of vectors of strings naming variables to correlate
+\item{pairs}{a list of vectors of strings naming variables to correlate 
 from \code{data}}
 
-\item{low_eqbound_r}{lower equivalence bounds (e.g., -0.3) expressed in a
+\item{low_eqbound_r}{lower equivalence bounds (e.g., -0.3) expressed in a 
 correlation effect size}
 
-\item{high_eqbound_r}{upper equivalence bounds (e.g., 0.3) expressed in a
+\item{high_eqbound_r}{upper equivalence bounds (e.g., 0.3) expressed in a 
 correlation effect size}
 
 \item{alpha}{alpha level (default = 0.05)}
 
-\item{desc}{\code{TRUE} or \code{FALSE} (default), provide descriptive
+\item{desc}{\code{TRUE} or \code{FALSE} (default), provide descriptive 
 statistics}
 
 \item{plots}{\code{TRUE} or \code{FALSE} (default), provide plots}
+}
+\value{
+A results object containing:
+\tabular{llllll}{
+  \code{results$tost} \tab \tab \tab \tab \tab a table \cr
+  \code{results$eqb} \tab \tab \tab \tab \tab a table \cr
+  \code{results$desc} \tab \tab \tab \tab \tab a table \cr
+  \code{results$plots} \tab \tab \tab \tab \tab an array of images \cr
+}
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$tost$asDF}
+
+\code{as.data.frame(results$tost)}
 }
 \description{
 TOST Correlation
