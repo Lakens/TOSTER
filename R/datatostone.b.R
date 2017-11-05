@@ -63,8 +63,8 @@ dataTOSToneClass <- R6::R6Class(
 
         tt$setRow(rowKey=name, list(
           `t[0]`=t,  `df[0]`=degree_f, `p[0]`=p,
-          `t[1]`=t1, `df[1]`=degree_f, `p[1]`=p1,
-          `t[2]`=t2, `df[2]`=degree_f, `p[2]`=p2))
+          `t[1]`=t2, `df[1]`=degree_f, `p[1]`=p2,
+          `t[2]`=t1, `df[2]`=degree_f, `p[2]`=p1))
 
         eqb$setRow(rowKey=name, list(
           `low[raw]`=low_eqbound, `high[raw]`=high_eqbound, `cil[raw]`=LL90, `ciu[raw]`=UL90,

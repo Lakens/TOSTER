@@ -14,18 +14,33 @@ dataTOSTone(data, vars, mu = 0, low_eqbound_d = -0.5,
 
 \item{mu}{a number (default: 0) to compare against}
 
-\item{low_eqbound_d}{lower equivalence bounds (e.g., -0.5) expressed in
+\item{low_eqbound_d}{lower equivalence bounds (e.g., -0.5) expressed in 
 standardized mean difference (Cohen's d)}
 
-\item{high_eqbound_d}{upper equivalence bounds (e.g., 0.5) expressed in
+\item{high_eqbound_d}{upper equivalence bounds (e.g., 0.5) expressed in 
 standardized mean difference (Cohen's d)}
 
 \item{alpha}{alpha level (default = 0.05)}
 
-\item{desc}{\code{TRUE} or \code{FALSE} (default), provide descriptive
+\item{desc}{\code{TRUE} or \code{FALSE} (default), provide descriptive 
 statistics}
 
 \item{plots}{\code{TRUE} or \code{FALSE} (default), provide plots}
+}
+\value{
+A results object containing:
+\tabular{llllll}{
+  \code{results$tost} \tab \tab \tab \tab \tab a table \cr
+  \code{results$eqb} \tab \tab \tab \tab \tab a table \cr
+  \code{results$desc} \tab \tab \tab \tab \tab a table \cr
+  \code{results$plots} \tab \tab \tab \tab \tab an array of images \cr
+}
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$tost$asDF}
+
+\code{as.data.frame(results$tost)}
 }
 \description{
 TOST One Sample T-Test

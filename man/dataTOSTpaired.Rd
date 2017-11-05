@@ -10,21 +10,36 @@ dataTOSTpaired(data, pairs, low_eqbound_dz = -0.5, high_eqbound_dz = 0.5,
 \arguments{
 \item{data}{the data as a data frame}
 
-\item{pairs}{a list of vectors of strings naming variables to pair from
+\item{pairs}{a list of vectors of strings naming variables to pair from 
 \code{data}}
 
-\item{low_eqbound_dz}{lower equivalence bounds (e.g., -0.5) expressed in
+\item{low_eqbound_dz}{lower equivalence bounds (e.g., -0.5) expressed in 
 standardized mean difference (Cohen's dz)}
 
-\item{high_eqbound_dz}{upper equivalence bounds (e.g., 0.5) expressed in
+\item{high_eqbound_dz}{upper equivalence bounds (e.g., 0.5) expressed in 
 standardized mean difference (Cohen's dz)}
 
 \item{alpha}{alpha level (default = 0.05)}
 
-\item{desc}{\code{TRUE} or \code{FALSE} (default), provide descriptive
+\item{desc}{\code{TRUE} or \code{FALSE} (default), provide descriptive 
 statistics}
 
 \item{plots}{\code{TRUE} or \code{FALSE} (default), provide plots}
+}
+\value{
+A results object containing:
+\tabular{llllll}{
+  \code{results$tost} \tab \tab \tab \tab \tab a table \cr
+  \code{results$eqb} \tab \tab \tab \tab \tab a table \cr
+  \code{results$desc} \tab \tab \tab \tab \tab a table \cr
+  \code{results$plots} \tab \tab \tab \tab \tab an array of images \cr
+}
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$tost$asDF}
+
+\code{as.data.frame(results$tost)}
 }
 \description{
 TOST Paired Samples T-Test
