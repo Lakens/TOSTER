@@ -12,10 +12,8 @@ items:
         - mu
         - alpha
         - var_equal
-        - low_eqbound
-        - high_eqbound
-        - eqbound_type
-
+        - low_eqbound_d
+        - high_eqbound_d
       columns:
         - name: var
           title: ''
@@ -72,10 +70,8 @@ items:
         - mu
         - alpha
         - var_equal
-        - low_eqbound
-        - high_eqbound
-        - eqbound_type
-
+        - low_eqbound_d
+        - high_eqbound_d
       columns:
         - name: var
           title: ''
@@ -163,6 +159,5 @@ items:
           - mu
           - alpha
           - var_equal
-          - low_eqbound
-          - high_eqbound
-          - eqbound_type
+          - low_eqbound_d
+          - high_eqbound_d

@@ -8,14 +8,11 @@ dataTOSToneOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         initialize = function(
             vars = NULL,
             mu = 0,
-            low_eqbound = -0.5,
-            high_eqbound = 0.5,
-            eqbound_type = "d",
+            low_eqbound_d = -0.5,
+            high_eqbound_d = 0.5,
             alpha = 0.05,
             desc = FALSE,
-            plots = FALSE,
-            low_eqbound_d = -999999999,
-            high_eqbound_d = -999999999, ...) {
+            plots = FALSE, ...) {
 
             super$initialize(
                 package='TOSTER',
@@ -36,21 +33,14 @@ dataTOSToneOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "mu",
                 mu,
                 default=0)
-            private$..low_eqbound <- jmvcore::OptionNumber$new(
-                "low_eqbound",
-                low_eqbound,
+            private$..low_eqbound_d <- jmvcore::OptionNumber$new(
+                "low_eqbound_d",
+                low_eqbound_d,
                 default=-0.5)
-            private$..high_eqbound <- jmvcore::OptionNumber$new(
-                "high_eqbound",
-                high_eqbound,
+            private$..high_eqbound_d <- jmvcore::OptionNumber$new(
+                "high_eqbound_d",
+                high_eqbound_d,
                 default=0.5)
-            private$..eqbound_type <- jmvcore::OptionList$new(
-                "eqbound_type",
-                eqbound_type,
-                options=list(
-                    "d",
-                    "raw"),
-                default="d")
             private$..alpha <- jmvcore::OptionNumber$new(
                 "alpha",
                 alpha,
@@ -65,50 +55,31 @@ dataTOSToneOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "plots",
                 plots,
                 default=FALSE)
-            private$..low_eqbound_d <- jmvcore::OptionNumber$new(
-                "low_eqbound_d",
-                low_eqbound_d,
-                hidden=TRUE,
-                default=-999999999)
-            private$..high_eqbound_d <- jmvcore::OptionNumber$new(
-                "high_eqbound_d",
-                high_eqbound_d,
-                hidden=TRUE,
-                default=-999999999)
 
             self$.addOption(private$..vars)
             self$.addOption(private$..mu)
-            self$.addOption(private$..low_eqbound)
-            self$.addOption(private$..high_eqbound)
-            self$.addOption(private$..eqbound_type)
+            self$.addOption(private$..low_eqbound_d)
+            self$.addOption(private$..high_eqbound_d)
             self$.addOption(private$..alpha)
             self$.addOption(private$..desc)
             self$.addOption(private$..plots)
-            self$.addOption(private$..low_eqbound_d)
-            self$.addOption(private$..high_eqbound_d)
         }),
     active = list(
         vars = function() private$..vars$value,
         mu = function() private$..mu$value,
-        low_eqbound = function() private$..low_eqbound$value,
-        high_eqbound = function() private$..high_eqbound$value,
-        eqbound_type = function() private$..eqbound_type$value,
+        low_eqbound_d = function() private$..low_eqbound_d$value,
+        high_eqbound_d = function() private$..high_eqbound_d$value,
         alpha = function() private$..alpha$value,
         desc = function() private$..desc$value,
-        plots = function() private$..plots$value,
-        low_eqbound_d = function() private$..low_eqbound_d$value,
-        high_eqbound_d = function() private$..high_eqbound_d$value),
+        plots = function() private$..plots$value),
     private = list(
         ..vars = NA,
         ..mu = NA,
-        ..low_eqbound = NA,
-        ..high_eqbound = NA,
-        ..eqbound_type = NA,
+        ..low_eqbound_d = NA,
+        ..high_eqbound_d = NA,
         ..alpha = NA,
         ..desc = NA,
-        ..plots = NA,
-        ..low_eqbound_d = NA,
-        ..high_eqbound_d = NA)
+        ..plots = NA)
 )
 
 dataTOSToneResults <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -134,9 +105,8 @@ dataTOSToneResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "mu",
                     "alpha",
                     "var_equal",
-                    "low_eqbound",
-                    "high_eqbound",
-                    "eqbound_type"),
+                    "low_eqbound_d",
+                    "high_eqbound_d"),
                 columns=list(
                     list(
                         `name`="var", 
@@ -206,9 +176,8 @@ dataTOSToneResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "mu",
                     "alpha",
                     "var_equal",
-                    "low_eqbound",
-                    "high_eqbound",
-                    "eqbound_type"),
+                    "low_eqbound_d",
+                    "high_eqbound_d"),
                 columns=list(
                     list(
                         `name`="var", 
@@ -307,9 +276,8 @@ dataTOSToneResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                         "mu",
                         "alpha",
                         "var_equal",
-                        "low_eqbound",
-                        "high_eqbound",
-                        "eqbound_type"))))}))
+                        "low_eqbound_d",
+                        "high_eqbound_d"))))}))
 
 dataTOSToneBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "dataTOSToneBase",
@@ -337,24 +305,22 @@ dataTOSToneBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @examples
 #' library("TOSTER")
 #'
-#' dataTOSTone(data=iris, vars="Sepal.Width", mu=3, low_eqbound=-0.3, high_eqbound=0.3,
-#'             alpha=0.05, desc=TRUE, plots=TRUE)
+#' dataTOSTone(data = iris, vars = "Sepal.Width", mu = 3, low_eqbound_d = -0.3, high_eqbound_d = 0.3,
+#'             alpha = 0.05, desc = TRUE, plots = TRUE)
 #'
-#' TOSTone(m=3.05733, mu=3, sd=0.4358663, n=150, low_eqbound_d=-0.3, high_eqbound_d=0.3, alpha=0.05)
+#' TOSTone(m=3.05733,mu=3,sd=0.4358663,n=150,low_eqbound_d=-0.3, high_eqbound_d=0.3, alpha=0.05)
 #'
 #' @param data the data as a data frame
 #' @param vars a vector of strings naming variables of interest in \code{data}
 #' @param mu a number (default: 0) to compare against
-#' @param low_eqbound a number (default: -0.5) the lower equivalence bounds
-#' @param high_eqbound a number (default: 0.5) the upper equivalence bounds
-#' @param eqbound_type \code{'d'} (default) or \code{'raw'}; whether the
-#'   bounds are specified in Cohen's d or raw units respectively
+#' @param low_eqbound_d lower equivalence bounds (e.g., -0.5) expressed in
+#'   standardized mean difference (Cohen's d)
+#' @param high_eqbound_d upper equivalence bounds (e.g., 0.5) expressed in
+#'   standardized mean difference (Cohen's d)
 #' @param alpha alpha level (default = 0.05)
 #' @param desc \code{TRUE} or \code{FALSE} (default), provide descriptive
 #'   statistics
 #' @param plots \code{TRUE} or \code{FALSE} (default), provide plots
-#' @param low_eqbound_d deprecated
-#' @param high_eqbound_d deprecated
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$tost} \tab \tab \tab \tab \tab a table \cr
@@ -374,14 +340,11 @@ dataTOSTone <- function(
     data,
     vars,
     mu = 0,
-    low_eqbound = -0.5,
-    high_eqbound = 0.5,
-    eqbound_type = "d",
+    low_eqbound_d = -0.5,
+    high_eqbound_d = 0.5,
     alpha = 0.05,
     desc = FALSE,
-    plots = FALSE,
-    low_eqbound_d = -999999999,
-    high_eqbound_d = -999999999) {
+    plots = FALSE) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('dataTOSTone requires jmvcore to be installed (restart may be required)')
@@ -389,14 +352,11 @@ dataTOSTone <- function(
     options <- dataTOSToneOptions$new(
         vars = vars,
         mu = mu,
-        low_eqbound = low_eqbound,
-        high_eqbound = high_eqbound,
-        eqbound_type = eqbound_type,
+        low_eqbound_d = low_eqbound_d,
+        high_eqbound_d = high_eqbound_d,
         alpha = alpha,
         desc = desc,
-        plots = plots,
-        low_eqbound_d = low_eqbound_d,
-        high_eqbound_d = high_eqbound_d)
+        plots = plots)
 
     results <- dataTOSToneResults$new(
         options = options)

@@ -41,25 +41,10 @@ dataTOSToneClass <- R6::R6Class(
         t   <- unname(res$statistic)
         p   <- unname(res$p.value)
 
-        low_eqbound    <- self$options$low_eqbound
-        high_eqbound   <- self$options$high_eqbound
-        low_eqbound_d  <- self$options$low_eqbound_d  # deprecated
+        low_eqbound_d <- self$options$low_eqbound_d
         high_eqbound_d <- self$options$high_eqbound_d
-
-        if (low_eqbound_d != -999999999 && low_eqbound_d != -999999999) {
-          # low_eqbound_d and high_eqbound_d options are deprecated
-          low_eqbound  <- low_eqbound_d * sd
-          high_eqbound <- high_eqbound_d * sd
-        }
-        else if (self$options$eqbound_type == 'd') {
-          low_eqbound_d <- low_eqbound
-          high_eqbound_d <- high_eqbound
-          low_eqbound  <- low_eqbound * sd
-          high_eqbound <- high_eqbound * sd
-        } else {
-          low_eqbound_d <- low_eqbound / sd
-          high_eqbound_d <- high_eqbound / sd
-        }
+        low_eqbound <- low_eqbound_d * sd
+        high_eqbound <- high_eqbound_d * sd
 
         degree_f<-n-1
         t1<-(m-mu-low_eqbound)/(sd/sqrt(n))# t-test

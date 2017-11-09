@@ -1,7 +1,7 @@
 title: TOST Paired Samples T-Test
 name: dataTOSTpaired
 jus: '2.0'
-compilerMode: tame
+stage: 0
 children:
   - type: VariableSupplier
     persistentItems: true
@@ -38,18 +38,19 @@ children:
   - type: LayoutBox
     margin: large
     children:
-      - name: low_eqbound
+      - name: low_eqbound_dz
         type: TextBox
+        label: Lower equivalence bound (in Cohen's Dz)
         format: number
         inputPattern: '[0-9]+'
-      - name: high_eqbound
+      - name: high_eqbound_dz
         type: TextBox
+        label: Upper equivalence bound (in Cohen's Dz)
         format: number
         inputPattern: '[0-9]+'
-      - type: ComboBox
-        name: eqbound_type
       - name: alpha
         type: TextBox
+        label: Alpha level
         format: number
         inputPattern: '[0-9]+'
   - type: LayoutBox
@@ -61,3 +62,4 @@ children:
       - name: plots
         type: CheckBox
         label: Plots
+compilerMode: tame
