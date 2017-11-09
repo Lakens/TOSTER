@@ -1,7 +1,7 @@
 title: TOST One Sample T-Test
 name: dataTOSTone
 jus: '2.0'
-stage: 0
+compilerMode: tame
 children:
   - type: VariableSupplier
     persistentItems: false
@@ -35,16 +35,16 @@ children:
         label: mu
         format: number
         inputPattern: '[0-9]+'
-      - name: low_eqbound_d
-        type: TextBox
-        label: Lower equivalence bound (in Cohen's D)
+      - type: TextBox
+        name: low_eqbound
         format: number
         inputPattern: '[0-9]+'
-      - name: high_eqbound_d
-        type: TextBox
-        label: Upper equivalence bound (in Cohen's D)
+      - type: TextBox
+        name: high_eqbound
         format: number
         inputPattern: '[0-9]+'
+      - type: ComboBox
+        name: eqbound_type
       - name: alpha
         type: TextBox
         label: Alpha level
@@ -59,4 +59,3 @@ children:
       - name: plots
         type: CheckBox
         label: Plots
-compilerMode: tame

@@ -1,16 +1,17 @@
 ---
 title: TOSTER
 name: TOSTER
-version: 0.2.4
+version: 0.2.9
 jms: '1.0'
 authors:
   - Daniel Lakens <D.Lakens@tue.nl>
 maintainer: Daniel Lakens <D.Lakens@tue.nl>
-date: '2017-05-18'
+date: '2017-11-09'
 type: R
 description: >-
   Two one-sided tests (TOST) procedures to test equivalence for t-tests and
-  correlations.
+  correlations. <a href="https://psyarxiv.com/97gpc/" target="_blank"> More
+  information</a>.
 analyses:
   - title: TOST Independent Samples T-Test
     name: dataTOSTtwo
