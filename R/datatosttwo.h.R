@@ -9,14 +9,11 @@ dataTOSTtwoOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             deps = NULL,
             group = NULL,
             var_equal = FALSE,
-            low_eqbound = -0.5,
-            high_eqbound = 0.5,
-            eqbound_type = "d",
+            low_eqbound_d = -0.5,
+            high_eqbound_d = 0.5,
             alpha = 0.05,
             desc = FALSE,
-            plots = FALSE,
-            low_eqbound_d = -999999999,
-            high_eqbound_d = -999999999, ...) {
+            plots = FALSE, ...) {
 
             super$initialize(
                 package='TOSTER',
@@ -43,21 +40,14 @@ dataTOSTtwoOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "var_equal",
                 var_equal,
                 default=FALSE)
-            private$..low_eqbound <- jmvcore::OptionNumber$new(
-                "low_eqbound",
-                low_eqbound,
+            private$..low_eqbound_d <- jmvcore::OptionNumber$new(
+                "low_eqbound_d",
+                low_eqbound_d,
                 default=-0.5)
-            private$..high_eqbound <- jmvcore::OptionNumber$new(
-                "high_eqbound",
-                high_eqbound,
+            private$..high_eqbound_d <- jmvcore::OptionNumber$new(
+                "high_eqbound_d",
+                high_eqbound_d,
                 default=0.5)
-            private$..eqbound_type <- jmvcore::OptionList$new(
-                "eqbound_type",
-                eqbound_type,
-                options=list(
-                    "d",
-                    "raw"),
-                default="d")
             private$..alpha <- jmvcore::OptionNumber$new(
                 "alpha",
                 alpha,
@@ -70,53 +60,34 @@ dataTOSTtwoOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "plots",
                 plots,
                 default=FALSE)
-            private$..low_eqbound_d <- jmvcore::OptionNumber$new(
-                "low_eqbound_d",
-                low_eqbound_d,
-                default=-999999999,
-                hidden=TRUE)
-            private$..high_eqbound_d <- jmvcore::OptionNumber$new(
-                "high_eqbound_d",
-                high_eqbound_d,
-                default=-999999999,
-                hidden=TRUE)
 
             self$.addOption(private$..deps)
             self$.addOption(private$..group)
             self$.addOption(private$..var_equal)
-            self$.addOption(private$..low_eqbound)
-            self$.addOption(private$..high_eqbound)
-            self$.addOption(private$..eqbound_type)
+            self$.addOption(private$..low_eqbound_d)
+            self$.addOption(private$..high_eqbound_d)
             self$.addOption(private$..alpha)
             self$.addOption(private$..desc)
             self$.addOption(private$..plots)
-            self$.addOption(private$..low_eqbound_d)
-            self$.addOption(private$..high_eqbound_d)
         }),
     active = list(
         deps = function() private$..deps$value,
         group = function() private$..group$value,
         var_equal = function() private$..var_equal$value,
-        low_eqbound = function() private$..low_eqbound$value,
-        high_eqbound = function() private$..high_eqbound$value,
-        eqbound_type = function() private$..eqbound_type$value,
+        low_eqbound_d = function() private$..low_eqbound_d$value,
+        high_eqbound_d = function() private$..high_eqbound_d$value,
         alpha = function() private$..alpha$value,
         desc = function() private$..desc$value,
-        plots = function() private$..plots$value,
-        low_eqbound_d = function() private$..low_eqbound_d$value,
-        high_eqbound_d = function() private$..high_eqbound_d$value),
+        plots = function() private$..plots$value),
     private = list(
         ..deps = NA,
         ..group = NA,
         ..var_equal = NA,
-        ..low_eqbound = NA,
-        ..high_eqbound = NA,
-        ..eqbound_type = NA,
+        ..low_eqbound_d = NA,
+        ..high_eqbound_d = NA,
         ..alpha = NA,
         ..desc = NA,
-        ..plots = NA,
-        ..low_eqbound_d = NA,
-        ..high_eqbound_d = NA)
+        ..plots = NA)
 )
 
 dataTOSTtwoResults <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -141,9 +112,8 @@ dataTOSTtwoResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 clearWith=list(
                     "group",
                     "alpha",
-                    "low_eqbound",
-                    "high_eqbound",
-                    "eqbound_type",
+                    "low_eqbound_d",
+                    "high_eqbound_d",
                     "var_equal"),
                 columns=list(
                     list(
@@ -213,9 +183,8 @@ dataTOSTtwoResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 clearWith=list(
                     "group",
                     "alpha",
-                    "low_eqbound",
-                    "high_eqbound",
-                    "eqbound_type",
+                    "low_eqbound_d",
+                    "high_eqbound_d",
                     "var_equal"),
                 columns=list(
                     list(
@@ -338,9 +307,8 @@ dataTOSTtwoResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     clearWith=list(
                         "group",
                         "alpha",
-                        "low_eqbound",
-                        "high_eqbound",
-                        "eqbound_type",
+                        "low_eqbound_d",
+                        "high_eqbound_d",
                         "var_equal"))))}))
 
 dataTOSTtwoBase <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -375,8 +343,8 @@ dataTOSTtwoBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'
 #' ## TOST procedure on the raw data
 #'
-#' dataTOSTtwo(data, deps="Sepal.Width", group="Species", var_equal = TRUE, low_eqbound = -0.5,
-#'             high_eqbound = 0.5, alpha = 0.05, desc = TRUE, plots = TRUE)
+#' dataTOSTtwo(data, deps="Sepal.Width", group="Species", var_equal = TRUE, low_eqbound_d = -0.5,
+#'             high_eqbound_d = 0.5, alpha = 0.05, desc = TRUE, plots = TRUE)
 #'
 #' @section References:
 #' Berger, R. L., & Hsu, J. C. (1996). Bioequivalence Trials, Intersection-Union Tests and Equivalence Confidence Sets. Statistical Science, 11(4), 283-302.
@@ -389,16 +357,14 @@ dataTOSTtwoBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'   have two levels
 #' @param var_equal \code{TRUE} or \code{FALSE} (default), assume equal
 #'   variances
-#' @param low_eqbound a number (default: -0.5) the lower equivalence bounds
-#' @param high_eqbound a number (default: 0.5) the upper equivalence bounds
-#' @param eqbound_type \code{'d'} (default) or \code{'raw'}; whether the
-#'   bounds are specified in Cohen's d or raw units respectively
+#' @param low_eqbound_d lower equivalence bounds (e.g., -0.5) expressed in
+#'   standardized mean difference (Cohen's d)
+#' @param high_eqbound_d upper equivalence bounds (e.g., 0.5) expressed in
+#'   standardized mean difference (Cohen's d)
 #' @param alpha alpha level (default = 0.05)
 #' @param desc \code{TRUE} or \code{FALSE} (default), provide descriptive
 #'   statistics
 #' @param plots \code{TRUE} or \code{FALSE} (default), provide plots
-#' @param low_eqbound_d deprecated
-#' @param high_eqbound_d deprecated
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$tost} \tab \tab \tab \tab \tab a table \cr
@@ -419,14 +385,11 @@ dataTOSTtwo <- function(
     deps,
     group,
     var_equal = FALSE,
-    low_eqbound = -0.5,
-    high_eqbound = 0.5,
-    eqbound_type = "d",
+    low_eqbound_d = -0.5,
+    high_eqbound_d = 0.5,
     alpha = 0.05,
     desc = FALSE,
-    plots = FALSE,
-    low_eqbound_d = -999999999,
-    high_eqbound_d = -999999999) {
+    plots = FALSE) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('dataTOSTtwo requires jmvcore to be installed (restart may be required)')
@@ -435,14 +398,11 @@ dataTOSTtwo <- function(
         deps = deps,
         group = group,
         var_equal = var_equal,
-        low_eqbound = low_eqbound,
-        high_eqbound = high_eqbound,
-        eqbound_type = eqbound_type,
+        low_eqbound_d = low_eqbound_d,
+        high_eqbound_d = high_eqbound_d,
         alpha = alpha,
         desc = desc,
-        plots = plots,
-        low_eqbound_d = low_eqbound_d,
-        high_eqbound_d = high_eqbound_d)
+        plots = plots)
 
     results <- dataTOSTtwoResults$new(
         options = options)

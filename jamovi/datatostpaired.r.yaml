@@ -10,9 +10,8 @@ items:
       rows: (pairs)
       clearWith:
         - alpha
-        - low_eqbound
-        - high_eqbound
-        - eqbound_type
+        - low_eqbound_dz
+        - high_eqbound_dz
       columns:
         - name: i1
           title: ''
@@ -71,9 +70,8 @@ items:
       rows: (pairs)
       clearWith:
         - alpha
-        - low_eqbound
-        - high_eqbound
-        - eqbound_type
+        - low_eqbound_dz
+        - high_eqbound_dz
       columns:
         - name: i1
           title: ''
@@ -186,6 +184,5 @@ items:
         width: 180
         clearWith:
           - alpha
-          - low_eqbound
-          - high_eqbound
-          - eqbound_type
+          - low_eqbound_dz
+          - high_eqbound_dz

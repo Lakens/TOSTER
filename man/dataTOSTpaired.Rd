@@ -4,34 +4,27 @@
 \alias{dataTOSTpaired}
 \title{TOST Paired Samples T-Test}
 \usage{
-dataTOSTpaired(data, pairs, low_eqbound = -0.5, high_eqbound = 0.5,
-  eqbound_type = "d", alpha = 0.05, desc = FALSE, plots = FALSE,
-  low_eqbound_dz, high_eqbound_dz)
+dataTOSTpaired(data, pairs, low_eqbound_dz = -0.5, high_eqbound_dz = 0.5,
+  alpha = 0.05, desc = FALSE, plots = FALSE)
 }
 \arguments{
 \item{data}{the data as a data frame}
 
-\item{pairs}{a list of vectors of strings naming variables to pair from
+\item{pairs}{a list of vectors of strings naming variables to pair from 
 \code{data}}
 
-\item{low_eqbound}{a number (default: 0.5) the lower equivalence bounds}
+\item{low_eqbound_dz}{lower equivalence bounds (e.g., -0.5) expressed in 
+standardized mean difference (Cohen's dz)}
 
-\item{high_eqbound}{a number (default: 0.5) the upper equivalence bounds}
-
-\item{eqbound_type}{\code{'d'} (default) or \code{'raw'}; whether the
-bounds are specified in standardized mean difference (Cohen's dz) or raw
-units respectively}
+\item{high_eqbound_dz}{upper equivalence bounds (e.g., 0.5) expressed in 
+standardized mean difference (Cohen's dz)}
 
 \item{alpha}{alpha level (default = 0.05)}
 
-\item{desc}{\code{TRUE} or \code{FALSE} (default), provide descriptive
+\item{desc}{\code{TRUE} or \code{FALSE} (default), provide descriptive 
 statistics}
 
 \item{plots}{\code{TRUE} or \code{FALSE} (default), provide plots}
-
-\item{low_eqbound_dz}{deprecated}
-
-\item{high_eqbound_dz}{deprecated}
 }
 \value{
 A results object containing:
@@ -59,7 +52,7 @@ Mara, C. A., & Cribbie, R. A. (2012). Paired-Samples Tests of Equivalence. Commu
 \examples{
 library("TOSTER")
 
-dataTOSTpaired(data = randu, pairs = list(c(i1="x",i2="y")), low_eqbound = -0.3,
-               high_eqbound = 0.3, alpha = 0.05, desc = TRUE, plots = TRUE)
+dataTOSTpaired(data = randu, pairs = list(c(i1="x",i2="y")), low_eqbound_dz = -0.3,
+               high_eqbound_dz = 0.3, alpha = 0.05, desc = TRUE, plots = TRUE)
 
 }

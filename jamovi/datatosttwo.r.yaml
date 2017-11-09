@@ -11,9 +11,8 @@ items:
       clearWith:
         - group
         - alpha
-        - low_eqbound
-        - high_eqbound
-        - eqbound_type
+        - low_eqbound_d
+        - high_eqbound_d
         - var_equal
       columns:
         - name: var
@@ -70,9 +69,8 @@ items:
       clearWith:
         - group
         - alpha
-        - low_eqbound
-        - high_eqbound
-        - eqbound_type
+        - low_eqbound_d
+        - high_eqbound_d
         - var_equal
       columns:
         - name: var
@@ -184,7 +182,6 @@ items:
         clearWith:
           - group
           - alpha
-          - low_eqbound
-          - high_eqbound
-          - eqbound_type
+          - low_eqbound_d
+          - high_eqbound_d
           - var_equal

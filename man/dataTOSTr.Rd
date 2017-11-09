@@ -10,18 +10,18 @@ dataTOSTr(data, pairs, low_eqbound_r = -0.3, high_eqbound_r = 0.3,
 \arguments{
 \item{data}{the data as a data frame}
 
-\item{pairs}{a list of vectors of strings naming variables to correlate
+\item{pairs}{a list of vectors of strings naming variables to correlate 
 from \code{data}}
 
-\item{low_eqbound_r}{lower equivalence bounds (e.g., -0.3) expressed in a
+\item{low_eqbound_r}{lower equivalence bounds (e.g., -0.3) expressed in a 
 correlation effect size}
 
-\item{high_eqbound_r}{upper equivalence bounds (e.g., 0.3) expressed in a
+\item{high_eqbound_r}{upper equivalence bounds (e.g., 0.3) expressed in a 
 correlation effect size}
 
 \item{alpha}{alpha level (default = 0.05)}
 
-\item{desc}{\code{TRUE} or \code{FALSE} (default), provide descriptive
+\item{desc}{\code{TRUE} or \code{FALSE} (default), provide descriptive 
 statistics}
 
 \item{plots}{\code{TRUE} or \code{FALSE} (default), provide plots}

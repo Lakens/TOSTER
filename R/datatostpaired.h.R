@@ -7,14 +7,11 @@ dataTOSTpairedOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
     public = list(
         initialize = function(
             pairs = NULL,
-            low_eqbound = -0.5,
-            high_eqbound = 0.5,
-            eqbound_type = "d",
+            low_eqbound_dz = -0.5,
+            high_eqbound_dz = 0.5,
             alpha = 0.05,
             desc = FALSE,
-            plots = FALSE,
-            low_eqbound_dz = -999999999,
-            high_eqbound_dz = -999999999, ...) {
+            plots = FALSE, ...) {
 
             super$initialize(
                 package='TOSTER',
@@ -31,21 +28,14 @@ dataTOSTpairedOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "continuous",
                     "nominal",
                     "ordinal"))
-            private$..low_eqbound <- jmvcore::OptionNumber$new(
-                "low_eqbound",
-                low_eqbound,
+            private$..low_eqbound_dz <- jmvcore::OptionNumber$new(
+                "low_eqbound_dz",
+                low_eqbound_dz,
                 default=-0.5)
-            private$..high_eqbound <- jmvcore::OptionNumber$new(
-                "high_eqbound",
-                high_eqbound,
+            private$..high_eqbound_dz <- jmvcore::OptionNumber$new(
+                "high_eqbound_dz",
+                high_eqbound_dz,
                 default=0.5)
-            private$..eqbound_type <- jmvcore::OptionList$new(
-                "eqbound_type",
-                eqbound_type,
-                options=list(
-                    "d",
-                    "raw"),
-                default="d")
             private$..alpha <- jmvcore::OptionNumber$new(
                 "alpha",
                 alpha,
@@ -60,47 +50,28 @@ dataTOSTpairedOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "plots",
                 plots,
                 default=FALSE)
-            private$..low_eqbound_dz <- jmvcore::OptionNumber$new(
-                "low_eqbound_dz",
-                low_eqbound_dz,
-                default=-999999999,
-                hidden=TRUE)
-            private$..high_eqbound_dz <- jmvcore::OptionNumber$new(
-                "high_eqbound_dz",
-                high_eqbound_dz,
-                default=-999999999,
-                hidden=TRUE)
 
             self$.addOption(private$..pairs)
-            self$.addOption(private$..low_eqbound)
-            self$.addOption(private$..high_eqbound)
-            self$.addOption(private$..eqbound_type)
+            self$.addOption(private$..low_eqbound_dz)
+            self$.addOption(private$..high_eqbound_dz)
             self$.addOption(private$..alpha)
             self$.addOption(private$..desc)
             self$.addOption(private$..plots)
-            self$.addOption(private$..low_eqbound_dz)
-            self$.addOption(private$..high_eqbound_dz)
         }),
     active = list(
         pairs = function() private$..pairs$value,
-        low_eqbound = function() private$..low_eqbound$value,
-        high_eqbound = function() private$..high_eqbound$value,
-        eqbound_type = function() private$..eqbound_type$value,
+        low_eqbound_dz = function() private$..low_eqbound_dz$value,
+        high_eqbound_dz = function() private$..high_eqbound_dz$value,
         alpha = function() private$..alpha$value,
         desc = function() private$..desc$value,
-        plots = function() private$..plots$value,
-        low_eqbound_dz = function() private$..low_eqbound_dz$value,
-        high_eqbound_dz = function() private$..high_eqbound_dz$value),
+        plots = function() private$..plots$value),
     private = list(
         ..pairs = NA,
-        ..low_eqbound = NA,
-        ..high_eqbound = NA,
-        ..eqbound_type = NA,
+        ..low_eqbound_dz = NA,
+        ..high_eqbound_dz = NA,
         ..alpha = NA,
         ..desc = NA,
-        ..plots = NA,
-        ..low_eqbound_dz = NA,
-        ..high_eqbound_dz = NA)
+        ..plots = NA)
 )
 
 dataTOSTpairedResults <- if (requireNamespace('jmvcore')) R6::R6Class(
@@ -124,9 +95,8 @@ dataTOSTpairedResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 rows="(pairs)",
                 clearWith=list(
                     "alpha",
-                    "low_eqbound",
-                    "high_eqbound",
-                    "eqbound_type"),
+                    "low_eqbound_dz",
+                    "high_eqbound_dz"),
                 columns=list(
                     list(
                         `name`="i1", 
@@ -199,9 +169,8 @@ dataTOSTpairedResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 rows="(pairs)",
                 clearWith=list(
                     "alpha",
-                    "low_eqbound",
-                    "high_eqbound",
-                    "eqbound_type"),
+                    "low_eqbound_dz",
+                    "high_eqbound_dz"),
                 columns=list(
                     list(
                         `name`="i1", 
@@ -326,9 +295,8 @@ dataTOSTpairedResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                     width=180,
                     clearWith=list(
                         "alpha",
-                        "low_eqbound",
-                        "high_eqbound",
-                        "eqbound_type"))))}))
+                        "low_eqbound_dz",
+                        "high_eqbound_dz"))))}))
 
 dataTOSTpairedBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "dataTOSTpairedBase",
@@ -356,8 +324,8 @@ dataTOSTpairedBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @examples
 #' library("TOSTER")
 #'
-#' dataTOSTpaired(data = randu, pairs = list(c(i1="x",i2="y")), low_eqbound = -0.3,
-#'                high_eqbound = 0.3, alpha = 0.05, desc = TRUE, plots = TRUE)
+#' dataTOSTpaired(data = randu, pairs = list(c(i1="x",i2="y")), low_eqbound_dz = -0.3,
+#'                high_eqbound_dz = 0.3, alpha = 0.05, desc = TRUE, plots = TRUE)
 #'
 #' @section References:
 #' Mara, C. A., & Cribbie, R. A. (2012). Paired-Samples Tests of Equivalence. Communications in Statistics - Simulation and Computation, 41(10), 1928-1943. https://doi.org/10.1080/03610918.2011.626545, formula page 1932. Note there is a typo in the formula: n-1 should be n (personal communication, 31-08-2016)
@@ -365,17 +333,14 @@ dataTOSTpairedBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param data the data as a data frame
 #' @param pairs a list of vectors of strings naming variables to pair from
 #'   \code{data}
-#' @param low_eqbound a number (default: 0.5) the lower equivalence bounds
-#' @param high_eqbound a number (default: 0.5) the upper equivalence bounds
-#' @param eqbound_type \code{'d'} (default) or \code{'raw'}; whether the
-#'   bounds are specified in standardized mean difference (Cohen's dz) or raw
-#'   units respectively
+#' @param low_eqbound_dz lower equivalence bounds (e.g., -0.5) expressed in
+#'   standardized mean difference (Cohen's dz)
+#' @param high_eqbound_dz upper equivalence bounds (e.g., 0.5) expressed in
+#'   standardized mean difference (Cohen's dz)
 #' @param alpha alpha level (default = 0.05)
 #' @param desc \code{TRUE} or \code{FALSE} (default), provide descriptive
 #'   statistics
 #' @param plots \code{TRUE} or \code{FALSE} (default), provide plots
-#' @param low_eqbound_dz deprecated
-#' @param high_eqbound_dz deprecated
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$tost} \tab \tab \tab \tab \tab a table \cr
@@ -394,28 +359,22 @@ dataTOSTpairedBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 dataTOSTpaired <- function(
     data,
     pairs,
-    low_eqbound = -0.5,
-    high_eqbound = 0.5,
-    eqbound_type = "d",
+    low_eqbound_dz = -0.5,
+    high_eqbound_dz = 0.5,
     alpha = 0.05,
     desc = FALSE,
-    plots = FALSE,
-    low_eqbound_dz = -999999999,
-    high_eqbound_dz = -999999999) {
+    plots = FALSE) {
 
     if ( ! requireNamespace('jmvcore'))
         stop('dataTOSTpaired requires jmvcore to be installed (restart may be required)')
 
     options <- dataTOSTpairedOptions$new(
         pairs = pairs,
-        low_eqbound = low_eqbound,
-        high_eqbound = high_eqbound,
-        eqbound_type = eqbound_type,
+        low_eqbound_dz = low_eqbound_dz,
+        high_eqbound_dz = high_eqbound_dz,
         alpha = alpha,
         desc = desc,
-        plots = plots,
-        low_eqbound_dz = low_eqbound_dz,
-        high_eqbound_dz = high_eqbound_dz)
+        plots = plots)
 
     results <- dataTOSTpairedResults$new(
         options = options)
