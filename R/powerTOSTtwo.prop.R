@@ -12,12 +12,14 @@
 #' ## Sample size for alpha = 0.05, 90% power, assuming true effect prop1 = prop 2 = 0.5,
 #' ## equivalence bounds of 0.4 and 0.6 (so low_eqbound_prop = -0.1 and high_eqbound_prop = 0.1)
 #'
-#' powerTOSTtwo.prop(alpha=0.05, statistical_power=0.9, prop1 = 0.5, prop2 = 0.5, low_eqbound_prop=-0.1, high_eqbound_prop=0.1)
+#' powerTOSTtwo.prop(alpha = 0.05, statistical_power = 0.9, prop1 = 0.5, prop2 = 0.5,
+#'    + low_eqbound_prop = -0.1, high_eqbound_prop = 0.1)
 #'
 #' ## Power for alpha = 0.05, N 542 , assuming true effect prop1 = prop 2 = 0.5,
 #' ## equivalence bounds of 0.4 and 0.6 (so low_eqbound_prop = -0.1 and high_eqbound_prop = 0.1)
 #'
-#' powerTOSTtwo.prop(alpha=0.05, N=542, prop1 = 0.5, prop2 = 0.5, low_eqbound_prop=-0.1, high_eqbound_prop=0.1)
+#' powerTOSTtwo.prop(alpha = 0.05, N = 542, prop1 = 0.5, prop2 = 0.5,
+#'    + low_eqbound_prop = -0.1, high_eqbound_prop = 0.1)
 #'
 #' ## Equivalence bounds for alpha = 0.05, N 542 , assuming true effect prop1 = prop 2 = 0.5,
 #' ## and 90% power
@@ -25,14 +27,17 @@
 #' powerTOSTtwo.prop(alpha=0.05, statistical_power=0.9, N=542, prop1 = 0.5, prop2 = 0.5)
 #'
 #' #Example 4.2.4 from Chow, Wang, & Shao (2007, p. 93)
-#' powerTOSTtwo.prop(alpha=0.05, statistical_power=0.8, prop1 = 0.75, prop2 = 0.8, low_eqbound_prop=-0.2, high_eqbound_prop=0.2)
+#' powerTOSTtwo.prop(alpha=0.05, statistical_power=0.8, prop1 = 0.75, prop2 = 0.8,
+#'    + low_eqbound_prop = -0.2, high_eqbound_prop = 0.2)
 #'
 #' # Example 5 from Julious & Campbell (2012, p. 2932)
-#' powerTOSTtwo.prop(alpha=0.025, statistical_power=0.9, prop1 = 0.8, prop2 = 0.8, low_eqbound_prop=-0.1, high_eqbound_prop=0.1)
-#' # From Machin, D. (Ed.). (2008). Sample size tables for clinical studies (3rd ed). Hoboken, NJ: Wiley-Blackwell.
+#' powerTOSTtwo.prop(alpha=0.025, statistical_power=0.9, prop1 = 0.8, prop2 = 0.8,
+#'    + low_eqbound_prop=-0.1, high_eqbound_prop=0.1)
+#' # From Machin, D. (Ed.). (2008). Sample size tables for clinical studies (3rd ed).
 #'
 #' # Example 9.4b equivalence of two proportions (p. 113) #
-#' powerTOSTtwo.prop(alpha=0.010, statistical_power=0.8, prop1 = 0.5, prop2 = 0.5, low_eqbound_prop=-0.2, high_eqbound_prop=0.2)/2
+#' powerTOSTtwo.prop(alpha=0.010, statistical_power=0.8, prop1 = 0.5, prop2 = 0.5,
+#'    + low_eqbound_prop = -0.2, high_eqbound_prop = 0.2)/2
 #' @section References:
 #' Silva, G. T. da, Logan, B. R., & Klein, J. P. (2008). Methods for Equivalence and Noninferiority Testing. Biology of Blood and Marrow Transplantation: Journal of the American Society for Blood and Marrow Transplantation, 15(1 Suppl), 120-127. https://doi.org/10.1016/j.bbmt.2008.10.004
 #' Julious, S. A. & Campell, M. J. (2012). Tutorial in biostatistics: sample sizes for parallel group clinical trials with binary data. Statistics in Medicine, 31:2904-2936.

@@ -14,15 +14,15 @@ dataTOSTone(data, vars, mu = 0, low_eqbound_d = -0.5,
 
 \item{mu}{a number (default: 0) to compare against}
 
-\item{low_eqbound_d}{lower equivalence bounds (e.g., -0.5) expressed in 
+\item{low_eqbound_d}{lower equivalence bounds (e.g., -0.5) expressed in
 standardized mean difference (Cohen's d)}
 
-\item{high_eqbound_d}{upper equivalence bounds (e.g., 0.5) expressed in 
+\item{high_eqbound_d}{upper equivalence bounds (e.g., 0.5) expressed in
 standardized mean difference (Cohen's d)}
 
 \item{alpha}{alpha level (default = 0.05)}
 
-\item{desc}{\code{TRUE} or \code{FALSE} (default), provide descriptive 
+\item{desc}{\code{TRUE} or \code{FALSE} (default), provide descriptive
 statistics}
 
 \item{plots}{\code{TRUE} or \code{FALSE} (default), provide plots}

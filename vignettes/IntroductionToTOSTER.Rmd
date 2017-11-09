@@ -57,11 +57,14 @@ We see that indeed, all effect size estimates are measured with such high precis
 
 ##Independent Groups Student's Equivalence Test
 
-Eskine (2013) showed that participants who had been exposed to organic food were substantially harsher in their moral judgments relative to those exposed to control (d = 0.81, 95% CI: [0.19, 1.45]). A replication by Moery & Calin-Jageman (2016, Study 2) did not observe a significant effect (Control: n = 95, M = 5.25, SD = 0.95, Organic Food: n = 89, M = 5.22, SD = 0.83). Following Simonsohn's (2015) recommendation the equivalence bound was set to the effect size the original study had 33% power to detect (with n = 21 in each condition, this means the equivalence bound is d = 0.48, which equals a difference of 0.384 on a 7-point scale given the sample sizes and a pooled standard deviation of 0.894). Using a TOST equivalence test with alpha = 0.05, assuming equal variances, and equivalence bounds of d = -0.43 and d = 0.43 is significant, t(182) = -2.69, p = 0.004. We can reject effects larger than d = 0.43. 
+Eskine (2013) showed that participants who had been exposed to organic food were substantially harsher in their moral judgments relative to those exposed to control (d = 0.81, 95% CI: [0.19, 1.45]). A replication by Moery & Calin-Jageman (2016, Study 2) did not observe a significant effect (Control: n = 95, M = 5.25, SD = 0.91, Organic Food: n = 89, M = 5.22, SD = 0.83). Following Simonsohn's (2015) recommendation the equivalence bound was set to the effect size the original study had 33% power to detect (with n = 21 in each condition, this means the equivalence bound is d = 0.48, which equals a difference of 0.429 on a 7-point scale given the sample sizes and a pooled standard deviation of 0.894). Using a TOST equivalence test with alpha = 0.05, assuming equal variances, and equivalence bounds of d = -0.48 and d = 0.48 is significant, t(182) = -2.69, p = 0.004. We can reject effects larger than d = 0.48 (or a raw difference of 0.429. 
 
 ```{r, fig.width=6}
-TOSTtwo.raw(m1=5.25,m2=5.22,sd1=0.95,sd2=0.83,n1=95,n2=89,low_eqbound=-0.384, high_eqbound=0.384, alpha = 0.05, var.equal=TRUE)
+#TOSTtwo(m1=5.25,m2=5.22,sd1=0.95,sd2=0.83,n1=95,n2=89,low_eqbound_d=-0.48, high_eqbound=0.48, alpha = 0.05, var.equal=TRUE)
+TOSTtwo.raw(m1=5.25,m2=5.22,sd1=0.95,sd2=0.83,n1=95,n2=89,low_eqbound=-0.429, high_eqbound=0.429, alpha = 0.05, var.equal=TRUE)
 ```
+
+*Thanks to Brent Donnelan for pointing out the SD in the control condition in the replication was 0.91, not 0.95 as in an earlier version of this vignette, and the raw equivalence bound is 0.429, not 0.384 as in an earlier version. I mistook the n (95) and the SD, and originally calculated raw bounds for 0.43, not 0.48 by mistake.*
 
 *Moery, E., & Calin-Jageman, R. J. (2016). Direct and Conceptual Replications of Eskine (2013): Organic Food Exposure Has Little to No Effect on Moral Judgments and Prosocial Behavior. Social Psychological and Personality Science, 7(4), 312-319. https://doi.org/10.1177/1948550616639649 *
 
