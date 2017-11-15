@@ -1,6 +1,6 @@
 Package: TOSTER
 Version: 0.3
-Date: 2017-10-30
+Date: 2017-11-11
 Title: Two One-Sided Tests (TOST) Equivalence Testing
 Description: Two one-sided tests (TOST) procedure to test equivalence for t-tests, correlations,
     differences between proportions, and meta-analyses, including power analysis for t-tests and correlations. 
