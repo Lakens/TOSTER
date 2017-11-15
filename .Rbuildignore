@@ -1,9 +1,3 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^\.httr-oauth$
-^.git$
-^build$
-^temp$
-^jamovi$
-^.*\.jmo$
-^.*\.pdf$
