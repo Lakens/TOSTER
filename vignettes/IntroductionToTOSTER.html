@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Daniel Lakens" />
+
+<meta name="date" content="2017-11-15" />
+
+<title>Introduction to Equivalence Testing with TOSTER</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Introduction to Equivalence Testing with TOSTER</h1>
+<h4 class="author"><em>Daniel Lakens</em></h4>
+<h4 class="date"><em>2017-11-15</em></h4>
+
+
+
+<div id="introduction-to-equivalence-testing-with-toster" class="section level1">
+<h1>Introduction to Equivalence Testing with TOSTER</h1>
+<p>Scientists should be able to provide support for the absence of a meaningful effect. Currently researchers often incorrectly conclude an effect is absent based a non-significant result. It is statistically impossible to support the hypothesis that a true effect size is exactly zero. What is possible in a Frequentist hypothesis testing framework is to statistically reject effects large enough to be deemed worthwhile. When researchers want to argue for the absence of an effect that is large enough to be worthwhile to examine, they can test for equivalence.</p>
+<p>A widely recommended approach within a Frequentist framework is to test for equivalence using the TOST procedure (Schuirmann, 1987), because of its simplicity and widespread use in other scientific disciplines. The goal in the TOST approach is to specify a lower and upper bound, such that results falling within this range are deemed equivalent to the absence of an effect that is worthwhile to examine (e.g., <span class="math inline">\(\Delta\)</span>L = -0.3 to <span class="math inline">\(\Delta\)</span>U = 0.3, where <span class="math inline">\(\Delta\)</span> is a difference that can be defined by either standardized differences such as Cohen’s d, or raw differences such as 0.3 scale point on a 5-point scale). In the TOST procedure the null hypothesis is the presence of a true effect of <span class="math inline">\(\Delta\)</span>L or <span class="math inline">\(\Delta\)</span>U, and the alternative hypothesis is an effect that falls within the equivalence bounds, or the absence of an effect that is worthwhile to examine. The observed data is compared against <span class="math inline">\(\Delta\)</span>L and <span class="math inline">\(\Delta\)</span>U in two one-sided tests. If the p-value for both tests indicates the observed data is surprising, assuming <span class="math inline">\(\Delta\)</span>L or <span class="math inline">\(\Delta\)</span>U are true, we can follow a Neyman-Pearson approach to statistical inferences and reject effect sizes larger than the equivalence bounds. When making such a statement, we will not be wrong more often, in the long run, than our Type 1 error rate (e.g., 5%).</p>
+<p>In this document I will present a number of practical examples for equivalence tests for independent t-tests, dependent t-tests, one-sample t-tests, correlations, and meta-analyses.</p>
+<p> </p>
+<p> </p>
+</div>
+<div id="equivalence-test-for-meta-analysis" class="section level1">
+<h1>Equivalence test for Meta-analysis</h1>
+<p>Hyde, Lindberg, Linn, Ellis, and Williams (2008) report that effect sizes for gender differences in mathematics tests across the 7 million students in the US represent trivial differences, where a trivial difference is specified as an effect size smaller then d = 0.1. The present a table with Cohen’s d and se is reproduced below:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Grades</th>
+<th>d + se</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Grade 2</td>
+<td>0.06 +/- 0.003</td>
+</tr>
+<tr class="even">
+<td>Grade 3</td>
+<td>0.04 +/- 0.002</td>
+</tr>
+<tr class="odd">
+<td>Grade 4</td>
+<td>-0.01 +/- 0.002</td>
+</tr>
+<tr class="even">
+<td>Grade 5</td>
+<td>-0.01 +/- 0.002</td>
+</tr>
+<tr class="odd">
+<td>Grade 6</td>
+<td>-0.01 +/- 0.002</td>
+</tr>
+<tr class="even">
+<td>Grade 7</td>
+<td>-0.02 +/- 0.002</td>
+</tr>
+<tr class="odd">
+<td>Grade 8</td>
+<td>-0.02 +/- 0.002</td>
+</tr>
+<tr class="even">
+<td>Grade 9</td>
+<td>-0.01 +/- 0.003</td>
+</tr>
+<tr class="odd">
+<td>Grade 10</td>
+<td>0.04 +/- 0.003</td>
+</tr>
+<tr class="even">
+<td>Grade 11</td>
+<td>0.06 +/- 0.003</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(<span class="st">&quot;TOSTER&quot;</span>)
+<span class="kw">TOSTmeta</span>(<span class="dt">ES =</span> <span class="fl">0.06</span>, <span class="dt">se =</span> <span class="fl">0.003</span>, <span class="dt">low_eqbound_d=</span><span class="op">-</span><span class="fl">0.1</span>, <span class="dt">high_eqbound_d=</span><span class="fl">0.1</span>, <span class="dt">alpha=</span><span class="fl">0.05</span>)</code></pre></div>
+<pre><code>## Using alpha = 0.05 the meta-analysis was significant, Z = 20, p = 5.507248e-89</code></pre>
+<pre><code>## </code></pre>
+<pre><code>## 
+## Using alpha = 0.05 the equivalence test was significant, Z = -13.33333, p = 7.406413e-41</code></pre>
+<pre><code>## </code></pre>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<pre><code>## TOST results:
+##   Z-value 1 p-value 1 Z-value 2    p-value 2
+## 1  53.33333         0 -13.33333 7.406413e-41
+## 
+## Equivalence bounds (Cohen's d):
+##   low bound d high bound d
+## 1        -0.1          0.1
+## 
+## TOST confidence interval:
+##   Lower Limit 90% CI Upper Limit 90% CI
+## 1         0.05506544         0.06493456</code></pre>
+<p>We see that indeed, all effect size estimates are measured with such high precision, we can conclude that they fall within the equivalence bound of d = -0.1 and d = 0.1. However, note that all of the effects are also statistically significant - so, the the effects are statistically different from zero, and practically equivalent.</p>
+<p><em>Hyde, J. S., Lindberg, S. M., Linn, M. C., Ellis, A. B., &amp; Williams, C. C. (2008). Gender similarities characterize math performance. Science, 321(5888), 494-495.</em></p>
+<p> </p>
+<p> </p>
+</div>
+<div id="independent-groups-equivalence-test" class="section level1">
+<h1>Independent Groups Equivalence Test</h1>
+<p> </p>
+<div id="independent-groups-students-equivalence-test" class="section level2">
+<h2>Independent Groups Student’s Equivalence Test</h2>
+<p>Eskine (2013) showed that participants who had been exposed to organic food were substantially harsher in their moral judgments relative to those exposed to control (d = 0.81, 95% CI: [0.19, 1.45]). A replication by Moery &amp; Calin-Jageman (2016, Study 2) did not observe a significant effect (Control: n = 95, M = 5.25, SD = 0.95, Organic Food: n = 89, M = 5.22, SD = 0.83). Following Simonsohn’s (2015) recommendation the equivalence bound was set to the effect size the original study had 33% power to detect (with n = 21 in each condition, this means the equivalence bound is d = 0.48, which equals a difference of 0.384 on a 7-point scale given the sample sizes and a pooled standard deviation of 0.894). Using a TOST equivalence test with alpha = 0.05, assuming equal variances, and equivalence bounds of d = -0.43 and d = 0.43 is significant, t(182) = -2.69, p = 0.004. We can reject effects larger than d = 0.43.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">TOSTtwo.raw</span>(<span class="dt">m1=</span><span class="fl">5.25</span>,<span class="dt">m2=</span><span class="fl">5.22</span>,<span class="dt">sd1=</span><span class="fl">0.95</span>,<span class="dt">sd2=</span><span class="fl">0.83</span>,<span class="dt">n1=</span><span class="dv">95</span>,<span class="dt">n2=</span><span class="dv">89</span>,<span class="dt">low_eqbound=</span><span class="op">-</span><span class="fl">0.384</span>, <span class="dt">high_eqbound=</span><span class="fl">0.384</span>, <span class="dt">alpha =</span> <span class="fl">0.05</span>, <span class="dt">var.equal=</span><span class="ot">TRUE</span>)</code></pre></div>
+<pre><code>## Using alpha = 0.05 Student's t-test was non-significant, t(182) = 0.2274761, p = 0.8203089</code></pre>
+<pre><code>## </code></pre>
+<pre><code>## 
+## Using alpha = 0.05 the equivalence test based on Student's t-test was significant, t(182) = -2.684218, p = 0.003970479</code></pre>
+<pre><code>## </code></pre>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<pre><code>## TOST results:
+##   t-value 1    p-value 1 t-value 2   p-value 2  df
+## 1   3.13917 0.0009885653 -2.684218 0.003970479 182
+## 
+## Equivalence bounds (raw scores):
+##   low bound raw high bound raw
+## 1        -0.384          0.384
+## 
+## TOST confidence interval:
+##   Lower Limit 90% CI raw Upper Limit 90% CI raw
+## 1             -0.1880364              0.2480364</code></pre>
+<p><em>Moery, E., &amp; Calin-Jageman, R. J. (2016). Direct and Conceptual Replications of Eskine (2013): Organic Food Exposure Has Little to No Effect on Moral Judgments and Prosocial Behavior. Social Psychological and Personality Science, 7(4), 312-319. <a href="https://doi.org/10.1177/1948550616639649" class="uri">https://doi.org/10.1177/1948550616639649</a> </em></p>
+<p> </p>
+</div>
+<div id="independent-groups-welchs-equivalence-test" class="section level2">
+<h2>Independent Groups Welch’s Equivalence Test</h2>
+<p>Deary, Thorpe, Wilson, Starr, and Whally (2003) report the IQ scores of 79,376 children in Scotland (39,343 girls and 40,033 boys). The IQ score for girls (M = 100.64, SD = 14.1) girls and boys (100.48, SD = 14.9) was non-significant. With such a huge sample, we can examine whether the data is equivalent using very small equivalence bounds, such as -0.05 and 0.05. Because sample sizes are unequal, and variances are unequal, Welch’s t-test is used, and we can conclude IQ scores are indeed equivalent, based on equivalence bounds of -0.05 and 0.05.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">TOSTtwo</span>(<span class="dt">m1=</span><span class="fl">100.64</span>,<span class="dt">m2=</span><span class="fl">100.48</span>,<span class="dt">sd1=</span><span class="fl">14.1</span>,<span class="dt">sd2=</span><span class="fl">14.9</span>,<span class="dt">n1=</span><span class="dv">39343</span>,<span class="dt">n2=</span><span class="dv">40033</span>,<span class="dt">low_eqbound_d=</span><span class="op">-</span><span class="fl">0.05</span>, <span class="dt">high_eqbound_d=</span><span class="fl">0.05</span>, <span class="dt">alpha =</span> <span class="fl">0.05</span>, <span class="dt">var.equal=</span><span class="ot">FALSE</span>)</code></pre></div>
+<pre><code>## Using alpha = 0.05 Welch's t-test was non-significant, t(79260.94) = 1.554136, p = 0.1201559</code></pre>
+<pre><code>## </code></pre>
+<pre><code>## 
+## Using alpha = 0.05 the equivalence test based on Welch's t-test  was significant, t(79260.94) = -5.490723, p = 2.007585e-08</code></pre>
+<pre><code>## </code></pre>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<pre><code>## TOST results:
+##   t-value 1    p-value 1 t-value 2    p-value 2       df
+## 1  8.598995 4.092652e-18 -5.490723 2.007585e-08 79260.94
+## 
+## Equivalence bounds (Cohen's d):
+##   low bound d high bound d
+## 1       -0.05         0.05
+## 
+## Equivalence bounds (raw scores):
+##   low bound raw high bound raw
+## 1    -0.7252758      0.7252758
+## 
+## TOST confidence interval:
+##   Lower Limit 90% CI raw Upper Limit 90% CI raw
+## 1           -0.009341433              0.3293414</code></pre>
+<p><em>Deary, I. J., Thorpe, G., Wilson, V., Starr, J. M., &amp; Whalley, L. J. (2003). Population sex differences in IQ at age 11: The Scottish mental survey 1932. Intelligence, 31(6), 533-542.</em></p>
+<p> </p>
+<p> </p>
+</div>
+</div>
+<div id="one-sample-equivalence-test" class="section level1">
+<h1>One-Sample Equivalence Test</h1>
+<p> </p>
+<p>Lakens, Semin, &amp; Foroni (2012) examined whether the color of Chinese ideographs (white vs. black) would bias whether participants judged that the ideograph correctly translated positive, neutral, or negative words. In Study 4 the prediction was that participants would judge negative words to be correctly translated by black ideographs above guessing average, but no effects were predicted for translations in the other 5 between subject conditions in the 2 (ideograph color: white vs. black) x 3 (word meaning: positive, neutral, negative) design. The table below is a summary of the data in all 6 conditions:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Color</th>
+<th>Valence</th>
+<th>M</th>
+<th>%</th>
+<th>SD</th>
+<th>t</th>
+<th>df</th>
+<th>p</th>
+<th>d</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>White</td>
+<td>Positive</td>
+<td>6.05</td>
+<td>50.42</td>
+<td>1.50</td>
+<td>0.15</td>
+<td>20</td>
+<td>.89</td>
+<td>.03</td>
+</tr>
+<tr class="even">
+<td>White</td>
+<td>Negative</td>
+<td>6.68</td>
+<td>55.67</td>
+<td>1.70</td>
+<td>1.75</td>
+<td>18</td>
+<td>.10</td>
+<td>.40</td>
+</tr>
+<tr class="odd">
+<td>White</td>
+<td>Neutral</td>
+<td>5.95</td>
+<td>49.58</td>
+<td>1.40</td>
+<td>0.87</td>
+<td>19</td>
+<td>.87</td>
+<td>.04</td>
+</tr>
+<tr class="even">
+<td>Black</td>
+<td>Positive</td>
+<td>6.45</td>
+<td>53.75</td>
+<td>1.91</td>
+<td>1.06</td>
+<td>19</td>
+<td>.30</td>
+<td>.24</td>
+</tr>
+<tr class="odd">
+<td>Black</td>
+<td>Negative</td>
+<td>6.95</td>
+<td>57.92</td>
+<td>1.15</td>
+<td>3.71</td>
+<td>19</td>
+<td>.00</td>
+<td>.80</td>
+</tr>
+<tr class="even">
+<td>Black</td>
+<td>Neutral</td>
+<td>5.71</td>
+<td>47.58</td>
+<td>1.79</td>
+<td>0.73</td>
+<td>20</td>
+<td>.47</td>
+<td>.16</td>
+</tr>
+</tbody>
+</table>
+<p>With 19 to 21 participants in each between subject condition, the study had 80% power to detect equivalence with equivalence bounds of -0.68 to d = 0.68.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">powerTOSTone</span>(<span class="dt">alpha=</span><span class="fl">0.05</span>, <span class="dt">statistical_power=</span><span class="fl">0.8</span>, <span class="dt">low_eqbound_d=</span><span class="op">-</span><span class="fl">0.68</span>, <span class="dt">high_eqbound_d=</span><span class="fl">0.68</span>)</code></pre></div>
+<pre><code>## The required sample size to achieve 80 % power with equivalence bounds of -0.68 and 0.68 is 19</code></pre>
+<pre><code>## </code></pre>
+<pre><code>## [1] 18.52043</code></pre>
+<p>When we perform 5 equivalence tests using equivalence bounds of -0.68 and 0.68, using a Holm-Bonferroni sequential procedure to control error rates, we can conclude statistical equivalence for the data in row 1, 3, and 6, but the conclusion is undetermined for tests 2 and 4, where the data is neither significantly different from guessing average, nor statistically equivalent. For example, performing the test for the data in row 6:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">TOSTone</span>(<span class="dt">m=</span><span class="fl">5.71</span>,<span class="dt">mu=</span><span class="dv">6</span>,<span class="dt">sd=</span><span class="fl">1.79</span>,<span class="dt">n=</span><span class="dv">20</span>,<span class="dt">low_eqbound_d=</span><span class="op">-</span><span class="fl">0.68</span>, <span class="dt">high_eqbound_d=</span><span class="fl">0.68</span>, <span class="dt">alpha=</span><span class="fl">0.05</span>)</code></pre></div>
+<pre><code>## Using alpha = 0.05 the NHST one-sample t-test was non-significant, t(19) = -0.724536, p = 0.4775649</code></pre>
+<pre><code>## </code></pre>
+<pre><code>## 
+## Using alpha = 0.05 the equivalence test was significant, t(19) = 2.316516, p = 0.01592727</code></pre>
+<pre><code>## </code></pre>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<pre><code>## TOST results:
+##   t-value 1  p-value 1 t-value 2    p-value 2 df
+## 1  2.316516 0.01592727 -3.765588 0.0006543016 19
+## 
+## Equivalence bounds (Cohen's d):
+##   low bound d high bound d
+## 1       -0.68         0.68
+## 
+## Equivalence bounds (raw scores):
+##   low bound raw high bound raw
+## 1       -1.2172         1.2172
+## 
+## TOST confidence interval:
+##   Lower Limit 90% CI raw Upper Limit 90% CI raw
+## 1             -0.9820961              0.4020961</code></pre>
+<p>It is clear I should have been more tentative in my conclusions in this study. Not only can I not conclude equivalence in some of the conditions, the equivalence bound I had 80% power to detect is very large, meaning the possibility that there are theoretically interesting but smaller effects remains.</p>
+<p><em>Lakens, D., Semin, G. R., &amp; Foroni, F. (2012). But for the bad, there would not be good: Grounding valence in brightness through shared relational structures. Journal of Experimental Psychology: General, 141(3), 584-594. <a href="https://doi.org/10.1037/a0026468" class="uri">https://doi.org/10.1037/a0026468</a> </em></p>
+<p> </p>
+<p> </p>
+</div>
+<div id="equivalence-test-for-correlations" class="section level1">
+<h1>Equivalence test for correlations</h1>
+<p> </p>
+<p>Olson, Fazio, and Hermann (2007) reported correlations between implicit and explicit measures of self-esteem, such as the IAT, Rosenberg’s self-esteem scale, a feeling thermometer, and trait ratings. In Study 1 71 participants completed the self-esteem measures. Because no equivalence bounds are mentioned, we can see which equivalence bounds the researchers would have 80% power to detect.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">powerTOSTr</span>(<span class="dt">alpha=</span><span class="fl">0.05</span>, <span class="dt">statistical_power=</span><span class="fl">0.8</span>, <span class="dt">low_eqbound_r=</span><span class="op">-</span><span class="fl">0.24</span>, <span class="dt">high_eqbound_r=</span><span class="fl">0.24</span>)</code></pre></div>
+<pre><code>## The required sample size to achieve 80 % power with equivalence bounds of -0.24 and 0.24 is 71 pairs</code></pre>
+<pre><code>## </code></pre>
+<pre><code>## [1] 70.05703</code></pre>
+<p>With 71 pairs of observations between measures, the researchers have 80% power for equivalence bounds of r = -0.24 and r = 0.24.</p>
+<p>The correlations observed by Olson et al (2007), Study 1, are presented in the table below (significant correlations are flagged by an asteriks).</p>
+<table>
+<thead>
+<tr class="header">
+<th>Measure</th>
+<th>IAT</th>
+<th>Rosenberg</th>
+<th>Feeling thermometer</th>
+<th>Trait ratings</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>IAT</td>
+<td>-</td>
+<td>-.12</td>
+<td>-.09</td>
+<td>-.06</td>
+</tr>
+<tr class="even">
+<td>Rosenberg</td>
+<td></td>
+<td>-</td>
+<td>.62*</td>
+<td>.09</td>
+</tr>
+<tr class="odd">
+<td>Feeling thermometer</td>
+<td></td>
+<td></td>
+<td>-</td>
+<td>.29*</td>
+</tr>
+<tr class="even">
+<td>Trait ratings</td>
+<td></td>
+<td></td>
+<td></td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<p>We can test each correlation, for example the correlation between the IAT and the Rosenberg self-esteem scale of -0.12, given 71 participants, and using equivalence bounds of r_U = 0.24 and r_L = -0.24.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">TOSTr</span>(<span class="dt">n=</span><span class="dv">71</span>, <span class="dt">r=</span><span class="op">-</span><span class="fl">0.06</span>, <span class="dt">low_eqbound_r=</span><span class="op">-</span><span class="fl">0.24</span>, <span class="dt">high_eqbound_r=</span><span class="fl">0.24</span>, <span class="dt">alpha=</span><span class="fl">0.05</span>)</code></pre></div>
+<pre><code>## Using alpha = 0.05 the NHST t-test was non-significant, p = 0.6191585</code></pre>
+<pre><code>## </code></pre>
+<pre><code>## 
+## Using alpha = 0.05 the equivalence test was non-significant, p = 0.06386793</code></pre>
+<pre><code>## </code></pre>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<pre><code>## TOST results:
+##     p-value 1  p-value 2
+## 1 0.005971455 0.06386793
+## 
+## Equivalence bounds (r):
+##   low bound r high bound r
+## 1       -0.24         0.24
+## 
+## TOST confidence interval:
+##   Lower Limit 90% CI raw Upper Limit 90% CI raw
+## 1             -0.2538652              0.1384997</code></pre>
+<p>We see that none of the correlations can be declared to be statistically equivalent. Instead, the tests yield undetermined outcomes: the correlations are not significantly different from 0, nor statistically equivalent.</p>
+<p><em>Olson, M. A., Fazio, R. H., &amp; Hermann, A. D. (2007). Reporting tendencies underlie discrepancies between implicit and explicit measures of self-esteem. Psychological Science, 18(4), 287-291.</em></p>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
