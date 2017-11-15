@@ -267,7 +267,7 @@ opts_chunk<span class="op">$</span><span class="kw">set</span>(<span class="dt">
 <p>Test</p>
 <p>Null hypothesis: Difference &lt; or = -0,4 or Difference &gt; or = 0,4 Alternative hypothesis: -0,4 &lt; Difference &lt; 0,4 alpha level: 0,05</p>
 <p>Null Hypothesis DF T-Value P-Value Difference &lt; or = -0,4 186 3,4281 0,000 Difference &gt; or = 0,4 186 -1,1427 0,127</p>
-<p>The greater of the two P-Values is 0,127. Cannot claim equivalence.</p>
+<p>The greater of the two P-Values is 0.127. Cannot claim equivalence.</p>
 </div>
 <div id="reproducing-results-with-toster" class="section level3">
 <h3>Reproducing results with TOSTER</h3>
@@ -318,67 +318,26 @@ opts_chunk<span class="op">$</span><span class="kw">set</span>(<span class="dt">
 <div id="example-2.1" class="section level2">
 <h2><em>Example 2.1</em></h2>
 <p>We can compare the TOSTpaired.raw function against the equivalence package.</p>
-<p>Paired t-test in equivalence package (from example in tost function) and TOSTpaired.raw.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">require</span>(equivalence)</code></pre></div>
-<pre><code>## Loading required package: equivalence</code></pre>
-<pre><code>## Loading required package: lattice</code></pre>
-<pre><code>## Loading required package: boot</code></pre>
-<pre><code>## 
-## Attaching package: 'boot'</code></pre>
-<pre><code>## The following object is masked from 'package:lattice':
-## 
-##     melanoma</code></pre>
-<pre><code>## Loading required package: PairedData</code></pre>
-<pre><code>## Loading required package: MASS</code></pre>
-<pre><code>## Loading required package: gld</code></pre>
-<pre><code>## Loading required package: mvtnorm</code></pre>
-<pre><code>## Loading required package: ggplot2</code></pre>
-<pre><code>## 
-## Attaching package: 'PairedData'</code></pre>
-<pre><code>## The following object is masked from 'package:base':
-## 
-##     summary</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(ufc)
-<span class="co"># Remove missing data</span>
-ufc &lt;-<span class="st"> </span>ufc[<span class="kw">complete.cases</span>(ufc[, <span class="dv">9</span><span class="op">:</span><span class="dv">10</span>]), ]
-
-<span class="kw">tost</span>(ufc<span class="op">$</span>Height.m.p, ufc<span class="op">$</span>Height.m, <span class="dt">epsilon =</span> <span class="dv">1</span>, <span class="dt">paired =</span> <span class="ot">TRUE</span>)</code></pre></div>
-<pre><code>## 
-##  Paired TOST
-## 
-## data:  ufc$Height.m.p and ufc$Height.m
-## df = 376
-## sample estimates:
-## mean of the differences 
-##               0.6003913 
-## 
-## Epsilon: 1 
-## 95 percent two one-sided confidence interval (TOST interval):
-##  0.1916419 1.0091407
-## Null hypothesis of statistical difference is: not rejected 
-## TOST p-value: 0.05389588</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">TOSTpaired.raw</span>(<span class="dt">n =</span> <span class="kw">length</span>(ufc<span class="op">$</span>Height.m.p), <span class="dt">m1 =</span> <span class="kw">mean</span>(ufc<span class="op">$</span>Height.m.p, 
-    <span class="dt">na.rm =</span> <span class="ot">TRUE</span>), <span class="dt">m2 =</span> <span class="kw">mean</span>(ufc<span class="op">$</span>Height.m, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>), <span class="dt">sd1 =</span> <span class="kw">sd</span>(ufc<span class="op">$</span>Height.m.p, 
-    <span class="dt">na.rm =</span> <span class="ot">TRUE</span>), <span class="dt">sd2 =</span> <span class="kw">sd</span>(ufc<span class="op">$</span>Height.m, <span class="dt">na.rm =</span> <span class="ot">TRUE</span>), <span class="dt">r12 =</span> <span class="kw">cor</span>(ufc<span class="op">$</span>Height.m, 
-    ufc<span class="op">$</span>Height.m.p, <span class="dt">use =</span> <span class="st">&quot;pairwise.complete.obs&quot;</span>), <span class="dt">low_eqbound =</span> <span class="op">-</span><span class="dv">1</span>, 
-    <span class="dt">high_eqbound =</span> <span class="dv">1</span>, <span class="dt">alpha =</span> <span class="fl">0.05</span>)</code></pre></div>
-<pre><code>## Using alpha = 0.05 the NHST t-test was significant, t(376) = 2.42201, p = 0.01590709</code></pre>
-<pre><code>## </code></pre>
-<pre><code>## 
-## Using alpha = 0.05 the equivalence test was significant, t(376) = -16.99448, p = 9.130218e-49</code></pre>
-<pre><code>## </code></pre>
-<p><img src="data:image/png;base64,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" /><!-- --></p>
-<pre><code>## TOST results:
-##   t-value 1    p-value 1 t-value 2    p-value 2  df
-## 1   21.8385 3.655235e-69 -16.99448 9.130218e-49 376
-## 
-## Equivalence bounds (raw scores):
-##   low bound raw high bound raw
-## 1            -1              1
-## 
-## TOST confidence interval:
-##   Lower Limit 90% CI raw Upper Limit 90% CI raw
-## 1              0.1916419               1.009141</code></pre>
+<p>Paired t-test in equivalence package (from example in tost function) and TOSTpaired.raw. Note the code below does not run by default (to not require installing the package) but the output is provided:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># require(equivalence) data(ufc) #Remove missing data</span>
+<span class="co"># ufc&lt;-ufc[complete.cases(ufc[,9:10]),] tost(ufc$Height.m.p,</span>
+<span class="co"># ufc$Height.m, epsilon = 1, paired = TRUE)</span></code></pre></div>
+<pre><code>Paired TOST</code></pre>
+<p>df = 376 sample estimates: mean of the differences 0.6003913</p>
+<p>Epsilon: 1 95 percent two one-sided confidence interval (TOST interval): 0.1916419 1.0091407 Null hypothesis of statistical difference is: not rejected TOST p-value: 0.05389588</p>
+<p>We can reproduce this result using TOSTER using the TOSTpaired.raw function:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># require(equivalence) data(ufc) #Remove missing data</span>
+<span class="co"># ufc&lt;-ufc[complete.cases(ufc[,9:10]),]</span>
+<span class="co"># TOSTpaired.raw(n=length(ufc$Height.m.p),m1=mean(ufc$Height.m.p,na.rm</span>
+<span class="co"># = TRUE), m2=mean(ufc$Height.m,na.rm = TRUE),</span>
+<span class="co"># sd1=sd(ufc$Height.m.p,na.rm = TRUE),</span>
+<span class="co"># sd2=sd(ufc$Height.m,na.rm = TRUE),</span>
+<span class="co"># r12=cor(ufc$Height.m,ufc$Height.m.p,</span>
+<span class="co"># use='pairwise.complete.obs'),</span>
+<span class="co"># low_eqbound=-1,high_eqbound=1, alpha=0.05)</span></code></pre></div>
+<p>Using alpha = 0.05 the NHST t-test was significant, t(376) = 2.42201, p = 0.01590709 Using alpha = 0.05 the equivalence test was significant, t(376) = -16.99448, p = 9.130218e-49TOST results: t-value 1 p-value 1 t-value 2 p-value 2 df 1 21.8385 3.655235e-69 -16.99448 9.130218e-49 376</p>
+<p>Equivalence bounds (raw scores): low bound raw high bound raw 1 -1 1</p>
+<p>TOST confidence interval: Lower Limit 90% CI raw Upper Limit 90% CI raw 1 0.1916419 1.009141</p>
 </div>
 <div id="example-2.2" class="section level2">
 <h2><em>Example 2.2</em></h2>

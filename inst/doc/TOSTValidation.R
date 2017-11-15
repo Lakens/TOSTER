@@ -33,14 +33,19 @@ TOSTtwo.raw(m1=2.5,m2=2.3,sd1=1.3, sd2=1.1,n1=86,n2=102,low_eqbound=-0.4, high_e
 TOSTtwo.raw(m1=2.5,m2=2.3,sd1=1.3, sd2=1.1,n1=86,n2=102,low_eqbound=-0.4, high_eqbound=0.4,alpha=0.05)
 
 ## ------------------------------------------------------------------------
-require(equivalence)
-data(ufc)
-#Remove missing data
-ufc<-ufc[complete.cases(ufc[,9:10]),]
-      
-tost(ufc$Height.m.p, ufc$Height.m, epsilon = 1, paired = TRUE)
+# require(equivalence)
+# data(ufc)
+# #Remove missing data
+# ufc<-ufc[complete.cases(ufc[,9:10]),]
+#       
+# tost(ufc$Height.m.p, ufc$Height.m, epsilon = 1, paired = TRUE)
 
-TOSTpaired.raw(n=length(ufc$Height.m.p),m1=mean(ufc$Height.m.p,na.rm = TRUE), m2=mean(ufc$Height.m,na.rm = TRUE), sd1=sd(ufc$Height.m.p,na.rm = TRUE), sd2=sd(ufc$Height.m,na.rm = TRUE), r12=cor(ufc$Height.m,ufc$Height.m.p, use="pairwise.complete.obs"), low_eqbound=-1,high_eqbound=1, alpha=0.05)
+## ------------------------------------------------------------------------
+# require(equivalence)
+# data(ufc)
+# #Remove missing data
+# ufc<-ufc[complete.cases(ufc[,9:10]),]
+#TOSTpaired.raw(n=length(ufc$Height.m.p),m1=mean(ufc$Height.m.p,na.rm = TRUE), m2=mean(ufc$Height.m,na.rm = TRUE), sd1=sd(ufc$Height.m.p,na.rm = TRUE), sd2=sd(ufc$Height.m,na.rm = TRUE), r12=cor(ufc$Height.m,ufc$Height.m.p, use="pairwise.complete.obs"), low_eqbound=-1,high_eqbound=1, alpha=0.05)
 
 ## ------------------------------------------------------------------------
 morning<-c(3,4,4,5,4)
