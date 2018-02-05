@@ -1,0 +1,72 @@
+---
+name:  datatosttwoprop
+title: TOST Two Proportions
+menuGroup: TOSTER
+version: '1.0.0'
+jas: '1.1'
+
+options:
+    - name: data
+      type: Data
+
+    - name: var
+      title: Variable
+      type: Variable
+      suggested:
+        - nominal
+      permitted:
+        - nominal
+        - nominaltext
+        - ordinal
+
+    - name: level
+      title: Proportion
+      type: Level
+      variable: (var)
+
+    - name: group
+      title: Grouping Variable
+      type: Variable
+      suggested: [ nominal ]
+
+    - name: low_eqbound
+      title: Lower equivalence bounds
+      type: Number
+      default: -0.1
+      description:
+          R: >
+            a number (default: -0.1) the lower equivalence bounds
+
+    - name: high_eqbound
+      title: Upper equivalence bounds
+      type: Number
+      default: 0.1
+      description:
+          R: >
+            a number (default: 0.1) the upper equivalence bounds
+
+    - name: alpha
+      title: Alpha level
+      type: Number
+      min: 0
+      max: 1
+      default: 0.05
+      description:
+          R: alpha level (default = 0.05)
+
+    - name: desc
+      title: Descriptive statistics
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide descriptive statistics
+
+    - name: plot
+      title: Plot
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide plot
+...
