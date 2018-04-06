@@ -1,0 +1,7 @@
+TOSTER v0.3.1 (Release date: 2018-04-06)
+==============
+
+Changes:
+
+* Error in TOSTpaired.raw where t-test for TOST multiplied by sdiff (copied from TOSTpaired function) removed. CI were correct, but p-values did not match. Now tests are correct.
+* Changed text in TOSTr function (text copied from t-test script now changed to correlation)

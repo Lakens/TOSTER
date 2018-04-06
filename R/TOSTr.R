@@ -50,12 +50,12 @@ TOSTr<-function(n, r, low_eqbound_r, high_eqbound_r, alpha, plot = TRUE){
   title(main=paste("Equivalence bounds ",round(low_eqbound_r,digits=3)," and ",round(high_eqbound_r,digits=3),"\nr = ",round(r,digits=3)," \n TOST: ", 100*(1-alpha*2),"% CI [",round(LL90,digits=3),";",round(UL90,digits=3),"] ", TOSToutcome," \n NHST: ", 100*(1-alpha),"% CI [",round(LL95,digits=3),";",round(UL95,digits=3),"] ", testoutcome,sep=""), cex.main=1)
   }
 
-  # Print TOST and t-test results in message form
-  message(cat("Using alpha = ",alpha," the NHST t-test was ",testoutcome,", p = ",pttest,sep=""))
+  # Print TOST and correlation results in message form
+  message(cat("Using alpha = ",alpha," the NHST test for the correlation was ",testoutcome,", p = ",pttest,sep=""))
   cat("\n")
-  message(cat("Using alpha = ",alpha, " the equivalence test was ",TOSToutcome,", p = ",ptost,sep=""))
+  message(cat("Using alpha = ",alpha, " the equivalence test for the correlation was ",TOSToutcome,", p = ",ptost,sep=""))
 
-  # Print TOST and t-test results in table form
+  # Print TOST and correlation results in table form
   TOSTresults<-data.frame(p1,p2)
   colnames(TOSTresults) <- c("p-value 1","p-value 2")
   bound_r_results<-data.frame(low_eqbound_r,high_eqbound_r)
@@ -71,6 +71,6 @@ TOSTr<-function(n, r, low_eqbound_r, high_eqbound_r, alpha, plot = TRUE){
   cat("TOST confidence interval:\n")
   print(CIresults)
 
-  # Print TOST and t-test results in table form
+  # Print TOST and correlation results in table form
   invisible(list(r=r,TOST_p1=p1,TOST_p2=p2,alpha=alpha,low_eqbound_r=low_eqbound_r,high_eqbound_r=high_eqbound_r, LL_CI_TOST=LL90,UL_CI_TOST=UL90,LL_CI_TTEST=LL95, UL_CI_TTEST=UL95))
 }
