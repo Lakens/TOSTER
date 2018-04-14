@@ -37,8 +37,8 @@ powerTOSTpaired.raw<-function(alpha, statistical_power, N, sdif, low_eqbound, hi
   if(missing(N)) {
     NT1<-(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(low_eqbound/sdif)^2
     NT2<-(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(high_eqbound/sdif)^2
-    N<-ceiling(max(NT1,NT2))
-    message(cat("The required sample size to achieve",100*statistical_power,"% power with equivalence bounds of",low_eqbound,"and",high_eqbound,"is",N,"pairs"))
+    N<-max(NT1,NT2)
+    message(cat("The required sample size to achieve",100*statistical_power,"% power with equivalence bounds of",low_eqbound,"and",high_eqbound,"is",ceiling(N),"pairs"))
     return(N)
   }
   if(missing(statistical_power)) {
@@ -50,8 +50,8 @@ powerTOSTpaired.raw<-function(alpha, statistical_power, N, sdif, low_eqbound, hi
     return(statistical_power)
   }
   if(missing(low_eqbound) && missing(high_eqbound)) {
-    low_eqbound<--sqrt((qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/N)
-    high_eqbound<-sqrt((qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/N)
+    low_eqbound<--sqrt((qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/N)*sdif
+    high_eqbound<-sqrt((qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/N)*sdif
     message(cat("The equivalence bounds to achieve",100*statistical_power,"% power with N =",N,"are",round(low_eqbound,2),"and",round(high_eqbound,2),"."))
     bounds<-c(low_eqbound,high_eqbound)
     return(bounds)
