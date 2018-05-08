@@ -1,4 +1,14 @@
 ==============
+TOSTER v0.3.3 (Release date: 2018-05-08)
+==============
+
+Changes:
+
+* Error in order in which p-value 1 and p-value 2 were reported for TOSTr due to incorrect use of abs(r) in function. (thanks to Nils Kroemer and Dan Quintana)
+* Fixed error in powerTOSTr function - instead of based on conversion to d, new function calculates directly from r and is more accurate.
+* Added testthat folder and initial unit tests.
+
+==============
 TOSTER v0.3.2 (Release date: 2018-04-14)
 ==============
 
