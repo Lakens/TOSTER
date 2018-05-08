@@ -21,11 +21,18 @@ TOSTr<-function(n, r, low_eqbound_r, high_eqbound_r, alpha, plot = TRUE){
   }
 
   # Calculate TOST, t-test, 90% CIs and 95% CIs
-  z1<-((log((1+abs(r))/(1-abs(r)))/2)-(log((1+low_eqbound_r)/(1-low_eqbound_r))/2))/(sqrt(1/(n-3)))
-  z2<-((log((1+abs(r))/(1-abs(r)))/2)-(log((1+high_eqbound_r)/(1-high_eqbound_r))/2))/(sqrt(1/(n-3)))
-  p1<-ifelse(low_eqbound_r<r,pnorm(-abs(z1)),1-pnorm(-abs(z1)))
-  p2<-ifelse(high_eqbound_r>r,pnorm(-abs(z2)),1-pnorm(-abs(z2)))
+
+  #test against lower bound
+  z1<-((log((1+r)/(1-r))/2)-(log((1+low_eqbound_r)/(1-low_eqbound_r))/2))/(sqrt(1/(n-3)))
+  #test against upper bound
+  z2<-((log((1+r)/(1-r))/2)-(log((1+high_eqbound_r)/(1-high_eqbound_r))/2))/(sqrt(1/(n-3)))
+  #p-value for lower bound
+  p1 <- 1 - pnorm(z1)
+  #p-value for upper bound
+  p2 <- pnorm(z2)
+  #Typically, only the higest p-value is reported for an equivalence test - so get the max of both
   ptost<-max(p1,p2)
+  #Calculate the p-value for the NHST test
   pttest<-2*(1-pt(abs(r)*sqrt(n-2)/sqrt(1-abs(r)^2),n-2))
   zLL90<-(log((1+r)/(1-r))/2)-qnorm(1-alpha)*sqrt(1/(n-3))
   zUL90<-(log((1+r)/(1-r))/2)+qnorm(1-alpha)*sqrt(1/(n-3))
