@@ -1,0 +1,136 @@
+---
+name:  datatosttwoprop
+title: TOST Two Proportions
+jrs:   '1.1'
+
+items:
+    - name:  tost
+      title: TOST Results
+      type:  Table
+      rows: 1
+      clearWith:
+        - level
+        - alpha
+        - low_eqbound
+        - high_eqbound
+        - var
+        - group
+      columns:
+        - name: b[0]
+          title: ''
+          type: text
+          content: Z-test
+        - name: z[0]
+          title: Z
+          type: number
+        - name: p[0]
+          title: p
+          type: number
+          format: zto,pvalue
+        - name: b[1]
+          title: ''
+          type: text
+          content: TOST Upper
+        - name: z[1]
+          title: Z
+          type: number
+        - name: p[1]
+          title: p
+          type: number
+          format: zto,pvalue
+        - name: b[2]
+          title: ''
+          type: text
+          content: TOST Lower
+        - name: z[2]
+          title: Z
+          type: number
+        - name: p[2]
+          title: p
+          type: number
+          format: zto,pvalue
+
+    - name:  eqb
+      title: Equivalence Bounds
+      type:  Table
+      rows: 1
+      clearWith:
+        - level
+        - alpha
+        - low_eqbound
+        - high_eqbound
+        - var
+        - group
+      columns:
+        - name: low
+          title: Low
+          type: number
+        - name: high
+          title: High
+          type: number
+        - name: cil
+          title: Lower
+          superTitle: Confidence interval
+        - name: ciu
+          title: Upper
+          superTitle: Confidence interval
+
+    - name: desc
+      title: Descriptives
+      type: Table
+      visible: (desc)
+      rows: 1
+      clearWith:
+        - level
+        - var
+        - group
+
+      columns:
+        - name: name[1]
+          title: ""
+          type: text
+
+        - name: count[1]
+          title: "Count"
+          type: number
+
+        - name: n[1]
+          title: "Total"
+          type: number
+
+        - name: prop[1]
+          title: "Proportion"
+          type: number
+          format: zto
+
+        - name: name[2]
+          title: ""
+          type: text
+
+        - name: count[2]
+          title: "Count"
+          type: number
+
+        - name: n[2]
+          title: "Total"
+          type: number
+
+        - name: prop[2]
+          title: "Proportion"
+          type: number
+          format: zto
+
+    - name: plot
+      title: Plot
+      type: Image
+      width:  180
+      renderFun: .plot
+      visible: (plot)
+      clearWith:
+        - level
+        - alpha
+        - low_eqbound
+        - high_eqbound
+        - var
+        - group
+...
