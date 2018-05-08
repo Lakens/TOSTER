@@ -20,7 +20,7 @@
 #' ## Power for sample size of 121, alpha = 0.05, statistical power of
 #' ## 0.9, and assuming true effect = 0
 #'
-#' powerTOSTone.raw(alpha=0.05, N=121, statistical_power=.9)
+#' powerTOSTone.raw(alpha=0.05, N=121, statistical_power=.9, sd=1)
 #' @section References:
 #' Chow, S.-C., Wang, H., & Shao, J. (2007). Sample Size Calculations in Clinical Research, Second Edition - CRC Press Book. Formula 3.1.9
 #' @importFrom stats pnorm pt qnorm qt
@@ -40,8 +40,8 @@ powerTOSTone.raw<-function(alpha, statistical_power, N, sd, low_eqbound, high_eq
   if(missing(N)) {
     NT1<-(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(low_eqbound/sd)^2
     NT2<-(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(high_eqbound/sd)^2
-    N<-ceiling(max(NT1,NT2))
-    message(cat("The required sample size to achieve",100*statistical_power,"% power with equivalence bounds of",low_eqbound,"and",high_eqbound,"is",N))
+    N<-max(NT1,NT2)
+    message(cat("The required sample size to achieve",100*statistical_power,"% power with equivalence bounds of",low_eqbound,"and",high_eqbound,"is",ceiling(N)))
     return(N)
   }
   if(missing(statistical_power)) {
@@ -53,8 +53,8 @@ powerTOSTone.raw<-function(alpha, statistical_power, N, sd, low_eqbound, high_eq
     return(statistical_power)
   }
   if(missing(low_eqbound) && missing(high_eqbound)) {
-    low_eqbound<--sqrt((qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/N)
-    high_eqbound<-sqrt((qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/N)
+    low_eqbound<--sqrt((qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/N)*sd
+    high_eqbound<-sqrt((qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/N)*sd
     message(cat("The equivalence bounds to achieve",100*statistical_power,"% power with N =",N,"are",round(low_eqbound,2),"and",round(high_eqbound,2),"."))
     bounds<-c(low_eqbound,high_eqbound)
     return(bounds)
