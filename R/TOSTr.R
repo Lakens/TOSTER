@@ -79,5 +79,5 @@ TOSTr<-function(n, r, low_eqbound_r, high_eqbound_r, alpha, plot = TRUE){
   print(CIresults)
 
   # Print TOST and correlation results in table form
-  invisible(list(r=r,TOST_p1=p1,TOST_p2=p2,alpha=alpha,low_eqbound_r=low_eqbound_r,high_eqbound_r=high_eqbound_r, LL_CI_TOST=LL90,UL_CI_TOST=UL90,LL_CI_TTEST=LL95, UL_CI_TTEST=UL95))
+  invisible(list(TOST_p1=p1,TOST_p2=p2,alpha=alpha,low_eqbound_r=low_eqbound_r,high_eqbound_r=high_eqbound_r,LL_CI_TOST=LL90,UL_CI_TOST=UL90,LL_CI_TTEST=LL95,UL_CI_TTEST=UL95,r=r))
 }

@@ -73,5 +73,5 @@ TOSTone.raw<-function(m,mu,sd,n,low_eqbound, high_eqbound, alpha, plot = TRUE){
   cat("\n")
   cat("TOST confidence interval:\n")
   print(CIresults)
-  invisible(list(diff=dif,TOST_t1=t1,TOST_p1=p1,TOST_t2=t2,TOST_p2=p2, TOST_df=degree_f,alpha=alpha,low_eqbound=low_eqbound,high_eqbound=high_eqbound, LL_CI_TOST=LL90,UL_CI_TOST=UL90, LL_CI_TTEST=LL95, UL_CI_TTEST=UL95))
+  invisible(list(TOST_t1=t1,TOST_p1=p1,TOST_t2=t2,TOST_p2=p2,TOST_df=degree_f,alpha=alpha,low_eqbound=low_eqbound,high_eqbound=high_eqbound,LL_CI_TOST=LL90,UL_CI_TOST=UL90,LL_CI_TTEST=LL95,UL_CI_TTEST=UL95,diff=dif))
 }

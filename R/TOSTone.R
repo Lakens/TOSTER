@@ -80,5 +80,5 @@ TOSTone<-function(m,mu,sd,n,low_eqbound_d, high_eqbound_d, alpha, plot = TRUE){
   print(CIresults)
 
   # Return results in list()
-  invisible(list(diff=dif,TOST_t1=t1,TOST_p1=p1,TOST_t2=t2,TOST_p2=p2, TOST_df=degree_f,alpha=alpha,low_eqbound=low_eqbound,high_eqbound=high_eqbound,low_eqbound_d=low_eqbound_d,high_eqbound_d=high_eqbound_d, LL_CI_TOST=LL90,UL_CI_TOST=UL90, LL_CI_TTEST=LL95, UL_CI_TTEST=UL95))
+  invisible(list(TOST_t1=t1,TOST_p1=p1,TOST_t2=t2,TOST_p2=p2,TOST_df=degree_f,alpha=alpha,low_eqbound=low_eqbound,high_eqbound=high_eqbound,low_eqbound_d=low_eqbound_d,high_eqbound_d=high_eqbound_d,LL_CI_TOST=LL90,UL_CI_TOST=UL90,LL_CI_TTEST=LL95,UL_CI_TTEST=UL95,diff=dif))
 }

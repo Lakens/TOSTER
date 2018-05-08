@@ -84,5 +84,5 @@ TOSTtwo.prop <- function(prop1, prop2, n1, n2, low_eqbound, high_eqbound, alpha,
   print(CIresults)
 
   # Print TOST and t-test results in table form
-  invisible(list(dif=prop_dif,TOST_z1=z1,TOST_p1=p1,TOST_z2=z2,TOST_p2=p2, alpha=alpha,low_eqbound=low_eqbound,high_eqbound=high_eqbound, LL_CI_TOST=CI_lb,UL_CI_TOST=CI_ub, LL_CI_ZTEST=CI_lb95,UL_CI_ZTEST=CI_ub95, TOST_outcome = TOSToutcome, NHST_outcome = ZTESToutcome, NHST_z = z, NHST_p = (ztest * 2)))
+  invisible(list(TOST_z1=z1,TOST_p1=p1,TOST_z2=z2,TOST_p2=p2, alpha=alpha,low_eqbound=low_eqbound,high_eqbound=high_eqbound, LL_CI_TOST=CI_lb,UL_CI_TOST=CI_ub, LL_CI_ZTEST=CI_lb95,UL_CI_ZTEST=CI_ub95, TOST_outcome = TOSToutcome, NHST_outcome = ZTESToutcome, NHST_z = z, NHST_p = (ztest * 2), diff=prop_dif))
 }
