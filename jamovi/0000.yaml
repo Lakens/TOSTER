@@ -1,7 +1,7 @@
 ---
 title: TOSTER
 name: TOSTER
-version: 0.3
+version: 0.3.0
 jms: '1.0'
 authors:
   - Daniel Lakens <D.Lakens@tue.nl>
@@ -36,5 +36,10 @@ analyses:
     ns: TOSTER
     menuGroup: TOSTER
     menuTitle: TOST Correlation
+  - title: TOST Two Proportions
+    name: datatosttwoprop
+    ns: TOSTER
+    menuGroup: TOSTER
+    menuTitle: TOST Two Proportions
 
 ...
