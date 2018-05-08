@@ -1,0 +1,48 @@
+title: TOST Two Proportions
+name: datatosttwoprop
+jus: '2.0'
+stage: 0
+compilerMode: tame
+children:
+  - type: VariableSupplier
+    persistentItems: false
+    stretchFactor: 1
+    children:
+      - type: TargetLayoutBox
+        label: Variable
+        children:
+          - type: VariablesListBox
+            name: var
+            maxItemCount: 1
+            isTarget: true
+          - type: LevelSelector
+            name: level
+      - type: TargetLayoutBox
+        label: Grouping Variable
+        children:
+          - type: VariablesListBox
+            name: group
+            maxItemCount: 1
+            isTarget: true
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: TextBox
+        name: low_eqbound
+        format: number
+        inputPattern: '[0-9]+'
+      - type: TextBox
+        name: high_eqbound
+        format: number
+        inputPattern: '[0-9]+'
+      - type: TextBox
+        name: alpha
+        format: number
+        inputPattern: '[0-9]+'
+  - type: LayoutBox
+    margin: large
+    children:
+      - type: CheckBox
+        name: desc
+      - type: CheckBox
+        name: plot

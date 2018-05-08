@@ -44,5 +44,5 @@ powerTOSTone.raw(alpha=0.05, N=121, sd = 1, low_eqbound=-0.3, high_eqbound=0.3)
 ## Power for sample size of 121, alpha = 0.05, statistical power of
 ## 0.9, and assuming true effect = 0
 
-powerTOSTone.raw(alpha=0.05, N=121, statistical_power=.9)
+powerTOSTone.raw(alpha=0.05, N=121, statistical_power=.9, sd=1)
 }

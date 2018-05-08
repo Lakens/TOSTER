@@ -41,10 +41,25 @@ dataTOSToneClass <- R6::R6Class(
         t   <- unname(res$statistic)
         p   <- unname(res$p.value)
 
-        low_eqbound_d <- self$options$low_eqbound_d
+        low_eqbound    <- self$options$low_eqbound
+        high_eqbound   <- self$options$high_eqbound
+        low_eqbound_d  <- self$options$low_eqbound_d  # deprecated
         high_eqbound_d <- self$options$high_eqbound_d
-        low_eqbound <- low_eqbound_d * sd
-        high_eqbound <- high_eqbound_d * sd
+
+        if (low_eqbound_d != -999999999 && low_eqbound_d != -999999999) {
+          # low_eqbound_d and high_eqbound_d options are deprecated
+          low_eqbound  <- low_eqbound_d * sd
+          high_eqbound <- high_eqbound_d * sd
+        }
+        else if (self$options$eqbound_type == 'd') {
+          low_eqbound_d <- low_eqbound
+          high_eqbound_d <- high_eqbound
+          low_eqbound  <- low_eqbound * sd
+          high_eqbound <- high_eqbound * sd
+        } else {
+          low_eqbound_d <- low_eqbound / sd
+          high_eqbound_d <- high_eqbound / sd
+        }
 
         degree_f<-n-1
         t1<-(m-mu-low_eqbound)/(sd/sqrt(n))# t-test
@@ -63,8 +78,8 @@ dataTOSToneClass <- R6::R6Class(
 
         tt$setRow(rowKey=name, list(
           `t[0]`=t,  `df[0]`=degree_f, `p[0]`=p,
-          `t[1]`=t1, `df[1]`=degree_f, `p[1]`=p1,
-          `t[2]`=t2, `df[2]`=degree_f, `p[2]`=p2))
+          `t[1]`=t2, `df[1]`=degree_f, `p[1]`=p2,
+          `t[2]`=t1, `df[2]`=degree_f, `p[2]`=p1))
 
         eqb$setRow(rowKey=name, list(
           `low[raw]`=low_eqbound, `high[raw]`=high_eqbound, `cil[raw]`=LL90, `ciu[raw]`=UL90,

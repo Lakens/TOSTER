@@ -24,23 +24,33 @@
 
 powerTOSTr<-function(alpha, statistical_power, N, low_eqbound_r, high_eqbound_r){
   if(missing(N)) {
-    NT1<-2*(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(((2*low_eqbound_r)/sqrt(1-low_eqbound_r^2)))^2
-    NT2<-2*(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(((2*high_eqbound_r)/sqrt(1-high_eqbound_r^2)))^2
+    za <- qnorm(1-alpha) #one-sided, so alpha not alpha/2
+    zb <- qnorm(1-((1-statistical_power)/2)) #Note beta/2
+    C1 = 0.5 * log((1+low_eqbound_r)/(1-low_eqbound_r))
+    C2 = 0.5 * log((1+high_eqbound_r)/(1-high_eqbound_r))
+    NT1 <- ((za+zb)/C1)^2 + 3
+    NT2 <- ((za+zb)/C2)^2 + 3
     N<-max(NT1,NT2)
-    message(cat("The required sample size to achieve",100*statistical_power,"% power with equivalence bounds of",low_eqbound_r,"and",high_eqbound_r,"is",ceiling(N),"pairs"))
+    message(cat("The required sample size to achieve",100*statistical_power,"% power with equivalence bounds of",low_eqbound_r,"and",high_eqbound_r,"is",ceiling(N),"observations"))
     return(N)
   }
   if(missing(statistical_power)) {
-    statistical_power1<-2*(pnorm((abs((((2*low_eqbound_r)/sqrt(1-low_eqbound_r^2))))*sqrt(N/2))-qnorm(1-alpha))+pnorm(-(abs((((2*low_eqbound_r)/sqrt(1-low_eqbound_r^2))))*sqrt(N/2))-qnorm(1-alpha)))-1
-    statistical_power2<-2*(pnorm((abs(((2*high_eqbound_r)/sqrt(1-high_eqbound_r^2)))*sqrt(N/2))-qnorm(1-alpha))+pnorm(-(abs(((2*high_eqbound_r)/sqrt(1-high_eqbound_r^2)))*sqrt(N/2))-qnorm(1-alpha)))-1
-    statistical_power<-min(statistical_power1,statistical_power2)
+    se <- 1/sqrt(N-3)
+    C1 = 0.5 * log((1+low_eqbound_r)/(1-low_eqbound_r))
+    C2 = 0.5 * log((1+high_eqbound_r)/(1-high_eqbound_r))
+    statistical_power1 <- 2 * (pnorm((abs(C1)/se) - qnorm(1-alpha)) + pnorm(-(abs(C1)/se) - qnorm(1-alpha))) - 1
+    statistical_power2 <- 2 * (pnorm((abs(C2)/se) - qnorm(1-alpha)) + pnorm(-(abs(C2)/se) - qnorm(1-alpha))) - 1
+    statistical_power<-min(statistical_power1, statistical_power2)
     if(statistical_power<0) {statistical_power<-0}
     message(cat("The statistical power is",round(100*statistical_power,2),"% for equivalence bounds of",low_eqbound_r,"and",high_eqbound_r,"."))
     return(statistical_power)
   }
   if(missing(low_eqbound_r) && missing(high_eqbound_r)) {
-    low_eqbound_r<-(-sqrt(2*(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/N))/2
-    high_eqbound_r<-(sqrt(2*(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/N))/2
+    za <- qnorm(1-alpha) #one-sided, so alpha not alpha/2
+    zb <- qnorm(1-((1-statistical_power)/2)) #Note beta/2
+    C = (za+zb)/sqrt(N - 3)
+    low_eqbound_r <- -(exp(1)^(2*C)-1)/(exp(1)^(2*C) + 1)
+    high_eqbound_r <- (exp(1)^(2*C)-1)/(exp(1)^(2*C) + 1)
     message(cat("The equivalence bounds to achieve",100*statistical_power,"% power with N =",N,"are",round(low_eqbound_r,2),"and",round(high_eqbound_r,2),"."))
     bounds<-c(low_eqbound_r,high_eqbound_r)
     return(bounds)

@@ -4,8 +4,9 @@
 \alias{dataTOSTtwo}
 \title{TOST Independent Samples T-Test}
 \usage{
-dataTOSTtwo(data, deps, group, var_equal = FALSE, low_eqbound_d = -0.5,
-  high_eqbound_d = 0.5, alpha = 0.05, desc = FALSE, plots = FALSE)
+dataTOSTtwo(data, deps, group, var_equal = FALSE, low_eqbound = -0.5,
+  high_eqbound = 0.5, eqbound_type = "d", alpha = 0.05, desc = FALSE,
+  plots = FALSE, low_eqbound_d = -999999999, high_eqbound_d = -999999999)
 }
 \arguments{
 \item{data}{the data as a data frame}
@@ -18,11 +19,12 @@ have two levels}
 \item{var_equal}{\code{TRUE} or \code{FALSE} (default), assume equal
 variances}
 
-\item{low_eqbound_d}{lower equivalence bounds (e.g., -0.5) expressed in
-standardized mean difference (Cohen's d)}
+\item{low_eqbound}{a number (default: -0.5) the lower equivalence bounds}
 
-\item{high_eqbound_d}{upper equivalence bounds (e.g., 0.5) expressed in
-standardized mean difference (Cohen's d)}
+\item{high_eqbound}{a number (default: 0.5) the upper equivalence bounds}
+
+\item{eqbound_type}{\code{'d'} (default) or \code{'raw'}; whether the
+bounds are specified in Cohen's d or raw units respectively}
 
 \item{alpha}{alpha level (default = 0.05)}
 
@@ -30,6 +32,25 @@ standardized mean difference (Cohen's d)}
 statistics}
 
 \item{plots}{\code{TRUE} or \code{FALSE} (default), provide plots}
+
+\item{low_eqbound_d}{deprecated}
+
+\item{high_eqbound_d}{deprecated}
+}
+\value{
+A results object containing:
+\tabular{llllll}{
+  \code{results$tost} \tab \tab \tab \tab \tab a table \cr
+  \code{results$eqb} \tab \tab \tab \tab \tab a table \cr
+  \code{results$desc} \tab \tab \tab \tab \tab a table \cr
+  \code{results$plots} \tab \tab \tab \tab \tab an array of images \cr
+}
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$tost$asDF}
+
+\code{as.data.frame(results$tost)}
 }
 \description{
 TOST Independent Samples T-Test
@@ -50,7 +71,7 @@ data<-iris[which(iris$Species!="versicolor"),]
 
 ## TOST procedure on the raw data
 
-dataTOSTtwo(data, deps="Sepal.Width", group="Species", var_equal = TRUE, low_eqbound_d = -0.5,
-            high_eqbound_d = 0.5, alpha = 0.05, desc = TRUE, plots = TRUE)
+dataTOSTtwo(data, deps="Sepal.Width", group="Species", var_equal = TRUE, low_eqbound = -0.5,
+            high_eqbound = 0.5, alpha = 0.05, desc = TRUE, plots = TRUE)
 
 }

@@ -12,10 +12,10 @@ description:
         usage: |
             library("TOSTER")
 
-            dataTOSTone(data = iris, vars = "Sepal.Width", mu = 3, low_eqbound_d = -0.3, high_eqbound_d = 0.3,
-                        alpha = 0.05, desc = TRUE, plots = TRUE)
+            dataTOSTone(data=iris, vars="Sepal.Width", mu=3, low_eqbound=-0.3, high_eqbound=0.3,
+                        alpha=0.05, desc=TRUE, plots=TRUE)
 
-            TOSTone(m=3.05733,mu=3,sd=0.4358663,n=150,low_eqbound_d=-0.3, high_eqbound_d=0.3, alpha=0.05)
+            TOSTone(m=3.05733, mu=3, sd=0.4358663, n=150, low_eqbound_d=-0.3, high_eqbound_d=0.3, alpha=0.05)
 
 options:
     - name: data
@@ -43,23 +43,35 @@ options:
           R: >
             a number (default: 0) to compare against
 
-    - name: low_eqbound_d
-      title: Lower equivalence bound
+    - name: low_eqbound
+      title: Lower equivalence bounds
       type: Number
       default: -0.5
       description:
           R: >
-            lower equivalence bounds (e.g., -0.5) expressed in standardized
-            mean difference (Cohen's d)
+            a number (default: -0.5) the lower equivalence bounds
 
-    - name: high_eqbound_d
-      title: Upper equivalence bound
+    - name: high_eqbound
+      title: Upper equivalence bounds
       type: Number
       default: 0.5
       description:
           R: >
-            upper equivalence bounds (e.g., 0.5) expressed in standardized mean
-            difference (Cohen's d)
+            a number (default: 0.5) the upper equivalence bounds
+
+    - name: eqbound_type
+      title: Bounds type
+      type: List
+      options:
+        - name: d
+          title: Cohen's D
+        - name: raw
+          title: Raw
+      default: d
+      description:
+          R: >
+            `'d'` (default) or `'raw'`; whether the bounds are specified in
+            Cohen's d or raw units respectively
 
     - name: alpha
       title: Alpha level
@@ -85,3 +97,19 @@ options:
       description:
           R: >
             `TRUE` or `FALSE` (default), provide plots
+
+    - name: low_eqbound_d
+      type: Number
+      hidden: true
+      default: -999999999
+      description:
+          R: >
+            deprecated
+
+    - name: high_eqbound_d
+      type: Number
+      hidden: true
+      default: -999999999
+      description:
+          R: >
+            deprecated

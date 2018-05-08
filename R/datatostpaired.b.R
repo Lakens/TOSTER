@@ -61,13 +61,30 @@ dataTOSTpairedClass <- R6::R6Class(
         df <- unname(res$parameter)
 
         alpha <- self$options$alpha
-        low_eqbound_dz <- self$options$low_eqbound_dz
-        high_eqbound_dz <- self$options$high_eqbound_dz
-        r12 <- stats::cor(i1, i2)
+        low_eqbound    <- self$options$low_eqbound
+        high_eqbound   <- self$options$high_eqbound
 
+        low_eqbound_dz <- self$options$low_eqbound_dz  # deprecated
+        high_eqbound_dz <- self$options$high_eqbound_dz
+
+        r12 <- stats::cor(i1, i2)
         sdif<-sqrt(sd1^2+sd2^2-2*r12*sd1*sd2)
-        low_eqbound<-low_eqbound_dz*sdif
-        high_eqbound<-high_eqbound_dz*sdif
+
+        if (low_eqbound_dz != -999999999 && low_eqbound_dz != -999999999) {
+          # low_eqbound_dz and high_eqbound_dz options are deprecated
+          low_eqbound  <- low_eqbound_d * sdif
+          high_eqbound <- high_eqbound_d * sdif
+        }
+        else if (self$options$eqbound_type == 'd') {
+          low_eqbound_dz <- low_eqbound
+          high_eqbound_dz <- high_eqbound
+          low_eqbound  <- low_eqbound * sdif
+          high_eqbound <- high_eqbound * sdif
+        } else {
+          low_eqbound_dz <- low_eqbound / sdif
+          high_eqbound_dz <- high_eqbound / sdif
+        }
+
         se<-sdif/sqrt(n)
         t<-(m1-m2)/se
         degree_f<-n-1
@@ -86,8 +103,8 @@ dataTOSTpairedClass <- R6::R6Class(
 
         tt$setRow(rowKey=pair, list(
           `t[0]`=t,  `df[0]`=df,       `p[0]`=p,
-          `t[1]`=t1, `df[1]`=degree_f, `p[1]`=p1,
-          `t[2]`=t2, `df[2]`=degree_f, `p[2]`=p2))
+          `t[1]`=t2, `df[1]`=degree_f, `p[1]`=p2,
+          `t[2]`=t1, `df[2]`=degree_f, `p[2]`=p1))
 
         eqb$setRow(rowKey=pair, list(
           `low[raw]`=low_eqbound, `high[raw]`=high_eqbound, `cil[raw]`=LL90, `ciu[raw]`=UL90,

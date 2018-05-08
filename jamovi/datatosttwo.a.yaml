@@ -18,8 +18,8 @@ description:
 
             ## TOST procedure on the raw data
 
-            dataTOSTtwo(data, deps="Sepal.Width", group="Species", var_equal = TRUE, low_eqbound_d = -0.5,
-                        high_eqbound_d = 0.5, alpha = 0.05, desc = TRUE, plots = TRUE)
+            dataTOSTtwo(data, deps="Sepal.Width", group="Species", var_equal = TRUE, low_eqbound = -0.5,
+                        high_eqbound = 0.5, alpha = 0.05, desc = TRUE, plots = TRUE)
     references:
       - "Berger, R. L., & Hsu, J. C. (1996). Bioequivalence Trials, Intersection-Union Tests and Equivalence Confidence Sets. Statistical Science, 11(4), 283-302."
       - "Gruman, J. A., Cribbie, R. A., & Arpin-Cribbie, C. A. (2007). The effects of heteroscedasticity on tests of equivalence. Journal of Modern Applied Statistical Methods, 6(1), 133-140, formula for Welch's t-test on page 135"
@@ -61,23 +61,35 @@ options:
           R: >
             `TRUE` or `FALSE` (default), assume equal variances
 
-    - name: low_eqbound_d
-      title: Lower equivalence bound
+    - name: low_eqbound
+      title: Lower equivalence bounds
       type: Number
       default: -0.5
       description:
           R: >
-            lower equivalence bounds (e.g., -0.5) expressed in standardized
-            mean difference (Cohen's d)
+            a number (default: -0.5) the lower equivalence bounds
 
-    - name: high_eqbound_d
-      title: Upper equivalence bound
+    - name: high_eqbound
+      title: Upper equivalence bounds
       type: Number
       default: 0.5
       description:
           R: >
-            upper equivalence bounds (e.g., 0.5) expressed in standardized mean
-            difference (Cohen's d)
+            a number (default: 0.5) the upper equivalence bounds
+
+    - name: eqbound_type
+      title: Bounds type
+      type: List
+      options:
+        - name: d
+          title: Cohen's D
+        - name: raw
+          title: Raw
+      default: d
+      description:
+          R: >
+            `'d'` (default) or `'raw'`; whether the bounds are specified in
+            Cohen's d or raw units respectively
 
     - name: alpha
       title: Alpha level
@@ -101,3 +113,17 @@ options:
       description:
           R: >
             `TRUE` or `FALSE` (default), provide plots
+
+    - name: low_eqbound_d
+      type: Number
+      default: -999999999
+      hidden: true
+      description:
+          R: deprecated
+
+    - name: high_eqbound_d
+      type: Number
+      default: -999999999
+      hidden: true
+      description:
+          R: deprecated

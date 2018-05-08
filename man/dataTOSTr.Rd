@@ -26,6 +26,21 @@ statistics}
 
 \item{plots}{\code{TRUE} or \code{FALSE} (default), provide plots}
 }
+\value{
+A results object containing:
+\tabular{llllll}{
+  \code{results$tost} \tab \tab \tab \tab \tab a table \cr
+  \code{results$eqb} \tab \tab \tab \tab \tab a table \cr
+  \code{results$desc} \tab \tab \tab \tab \tab a table \cr
+  \code{results$plots} \tab \tab \tab \tab \tab an array of images \cr
+}
+
+Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
+
+\code{results$tost$asDF}
+
+\code{as.data.frame(results$tost)}
+}
 \description{
 TOST Correlation
 }

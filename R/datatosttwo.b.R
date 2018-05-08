@@ -84,7 +84,10 @@ dataTOSTtwoClass <- R6::R6Class(
 
         var.equal <- self$options$var_equal
         alpha <- self$options$alpha
-        low_eqbound_d <- self$options$low_eqbound_d
+
+        low_eqbound    <- self$options$low_eqbound
+        high_eqbound   <- self$options$high_eqbound
+        low_eqbound_d  <- self$options$low_eqbound_d  # deprecated
         high_eqbound_d <- self$options$high_eqbound_d
 
         tresult <- t.test(dep ~ group, dataTTest, var.equal=var.equal)
@@ -92,10 +95,28 @@ dataTOSTtwoClass <- R6::R6Class(
         p <- unname(tresult$p.value)
         df <- unname(tresult$parameter)
 
-        if(var.equal==TRUE) {
-          sdpooled<-sqrt((((n[1] - 1)*(sd[1]^2)) + (n[2] - 1)*(sd[2]^2))/((n[1]+n[2])-2)) #calculate sd pooled
-          low_eqbound<-low_eqbound_d*sdpooled
-          high_eqbound<-high_eqbound_d*sdpooled
+        if (var.equal) {
+          sdpooled <- sqrt((((n[1] - 1)*(sd[1]^2)) + (n[2] - 1)*(sd[2]^2))/((n[1]+n[2])-2)) #calculate sd pooled
+        } else {
+          sdpooled <- sqrt((sd[1]^2 + sd[2]^2)/2) #calculate sd root mean squared for Welch's t-test
+        }
+
+        if (low_eqbound_d != -999999999 && low_eqbound_d != -999999999) {
+          # low_eqbound_d and high_eqbound_d options are deprecated
+          low_eqbound  <- low_eqbound_d * sdpooled
+          high_eqbound <- high_eqbound_d * sdpooled
+        }
+        else if (self$options$eqbound_type == 'd') {
+          low_eqbound_d <- low_eqbound
+          high_eqbound_d <- high_eqbound
+          low_eqbound  <- low_eqbound * sdpooled
+          high_eqbound <- high_eqbound * sdpooled
+        } else {
+          low_eqbound_d <- low_eqbound / sdpooled
+          high_eqbound_d <- high_eqbound / sdpooled
+        }
+
+        if (var.equal) {
           degree_f<-n[1]+n[2]-2
           t1<-((m[1]-m[2])-low_eqbound)/(sdpooled*sqrt(1/n[1] + 1/n[2]))  #students t-test lower bound
           p1<-pt(t1, degree_f, lower.tail=FALSE)
@@ -108,9 +129,6 @@ dataTOSTtwoClass <- R6::R6Class(
           LL95<-(m[1]-m[2])-qt(1-(alpha/2), n[1]+n[2]-2)*(sdpooled*sqrt(1/n[1] + 1/n[2]))
           UL95<-(m[1]-m[2])+qt(1-(alpha/2), n[1]+n[2]-2)*(sdpooled*sqrt(1/n[1] + 1/n[2]))
         } else {
-          sdpooled<-sqrt((sd[1]^2 + sd[2]^2)/2) #calculate sd root mean squared for Welch's t-test
-          low_eqbound<-low_eqbound_d*sdpooled
-          high_eqbound<-high_eqbound_d*sdpooled
           degree_f<-(sd[1]^2/n[1]+sd[2]^2/n[2])^2/(((sd[1]^2/n[1])^2/(n[1]-1))+((sd[2]^2/n[2])^2/(n[2]-1))) #degrees of freedom for Welch's t-test
           t1<-((m[1]-m[2])-low_eqbound)/sqrt(sd[1]^2/n[1] + sd[2]^2/n[2]) #welch's t-test upper bound
           p1<-pt(t1, degree_f, lower.tail=FALSE) #p-value for Welch's TOST t-test
@@ -129,8 +147,8 @@ dataTOSTtwoClass <- R6::R6Class(
 
         tt$setRow(rowKey=depName, list(
           `t[0]`=t,  `df[0]`=df, `p[0]`=p,
-          `t[1]`=t1, `df[1]`=degree_f, `p[1]`=p1,
-          `t[2]`=t2, `df[2]`=degree_f, `p[2]`=p2))
+          `t[1]`=t2, `df[1]`=degree_f, `p[1]`=p2,
+          `t[2]`=t1, `df[2]`=degree_f, `p[2]`=p1))
 
         eqb$setRow(rowKey=depName, list(
           `low[raw]`=low_eqbound, `high[raw]`=high_eqbound, `cil[raw]`=LL90, `ciu[raw]`=UL90,
