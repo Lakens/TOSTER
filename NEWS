@@ -1,4 +1,12 @@
 ==============
+TOSTER v0.3.4 (Release date: 2018-08-05)
+==============
+* Added a verbose = FALSE option to all functions.
+* Added Fisher's z transformed CI to output of TOSTr.
+* Cleaned up the text and numeric output of the functions.
+* Renamed some variable names in the TOSTtwo.prop function for similarity with TOSTmeta.
+
+==============
 TOSTER v0.3.3 (Release date: 2018-05-08)
 ==============
 

@@ -4,7 +4,8 @@
 \alias{TOSTmeta}
 \title{TOST function for meta-analysis}
 \usage{
-TOSTmeta(ES, var, se, low_eqbound_d, high_eqbound_d, alpha, plot = TRUE)
+TOSTmeta(ES, var, se, low_eqbound_d, high_eqbound_d, alpha, plot = TRUE,
+  verbose = TRUE)
 }
 \arguments{
 \item{ES}{meta-analytic effect size}
@@ -20,6 +21,8 @@ TOSTmeta(ES, var, se, low_eqbound_d, high_eqbound_d, alpha, plot = TRUE)
 \item{alpha}{alpha level (default = 0.05)}
 
 \item{plot}{set whether results should be plotted (plot = TRUE) or not (plot = FALSE) - defaults to TRUE}
+
+\item{verbose}{logical variable indicating whether text output should be generated (verbose = TRUE) or not (verbose = FALSE) - default to TRUE}
 }
 \value{
 Returns TOST Z-value 1, TOST p-value 1, TOST Z-value 2, TOST p-value 2,  alpha, low equivalence bound d, high equivalence bound d, Lower limit confidence interval TOST, Upper limit confidence interval TOST

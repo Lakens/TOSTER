@@ -6,6 +6,7 @@
 #' @param high_eqbound_d upper equivalence bounds (e.g., 0.5) expressed in standardized mean difference (Cohen's d)
 #' @param alpha alpha level (default = 0.05)
 #' @param plot set whether results should be plotted (plot = TRUE) or not (plot = FALSE) - defaults to TRUE
+#' @param verbose logical variable indicating whether text output should be generated (verbose = TRUE) or not (verbose = FALSE) - default to TRUE
 #' @return Returns TOST Z-value 1, TOST p-value 1, TOST Z-value 2, TOST p-value 2,  alpha, low equivalence bound d, high equivalence bound d, Lower limit confidence interval TOST, Upper limit confidence interval TOST
 #' @examples
 #' ## Run TOSTmeta by specifying the standard error
@@ -19,7 +20,7 @@
 #' @export
 #'
 
-TOSTmeta<-function(ES,var,se,low_eqbound_d, high_eqbound_d, alpha, plot = TRUE){
+TOSTmeta<-function(ES,var,se,low_eqbound_d, high_eqbound_d, alpha, plot = TRUE, verbose = TRUE){
   if(missing(alpha)) {
     alpha<-0.05
   }
@@ -64,27 +65,48 @@ TOSTmeta<-function(ES,var,se,low_eqbound_d, high_eqbound_d, alpha, plot = TRUE){
   title(main=paste("Equivalence bounds ",round(low_eqbound_d,digits=3)," and ",round(high_eqbound_d,digits=3),"\nEffect size = ",round(ES,digits=3)," \n TOST: ", 100*(1-alpha*2),"% CI [",round(LL90,digits=3),";",round(UL90,digits=3),"] ", TOSToutcome," \n NHST: ", 100*(1-alpha),"% CI [",round(LL95,digits=3),";",round(UL95,digits=3),"] ", testoutcome,sep=""), cex.main=1)
   }
 
-  # Print TOST and z-test results in message form
-  message(cat("Using alpha = ",alpha," the meta-analysis was ",testoutcome,", Z = ",Z,", p = ",pttest,sep=""))
-  cat("\n")
-  message(cat("Using alpha = ",alpha," the equivalence test was ",TOSToutcome,", Z = ",Ztost,", p = ",ptost,sep=""))
 
-  # Print TOST and z test results in table form
-  TOSTresults<-data.frame(Z1,p1,Z2,p2)
-  colnames(TOSTresults) <- c("Z-value 1","p-value 1","Z-value 2","p-value 2")
-  bound_d_results<-data.frame(low_eqbound_d,high_eqbound_d)
-  colnames(bound_d_results) <- c("low bound d","high bound d")
-  CIresults<-data.frame(LL90,UL90)
-  colnames(CIresults) <- c(paste("Lower Limit ",100*(1-alpha*2),"% CI",sep=""),paste("Upper Limit ",100*(1-alpha*2),"% CI",sep=""))
-  cat("TOST results:\n")
-  print(TOSTresults)
-  cat("\n")
-  cat("Equivalence bounds (Cohen's d):\n")
-  print(bound_d_results)
-  cat("\n")
-  cat("TOST confidence interval:\n")
-  print(CIresults)
-
+  if(missing(verbose)) {
+    verbose <- TRUE
+  }
+  if(verbose == TRUE){
+    cat("TOST results:\n")
+    cat("Z-value lower bound:",format(Z1, digits = 3, nsmall = 2, scientific = FALSE),"\tp-value lower bound:",format(p1, digits = 1, nsmall = 3, scientific = FALSE))
+    cat("\n")
+    cat("Z-value upper bound:",format(Z2, digits = 3, nsmall = 2, scientific = FALSE),"\tp-value upper bound:",format(p2, digits = 1, nsmall = 3, scientific = FALSE))
+    cat("\n\n")
+    cat("Equivalence bounds (Cohen's d):")
+    cat("\n")
+    cat("low eqbound:", paste0(round(low_eqbound_d, digits = 4)),"\nhigh eqbound:",paste0(round(high_eqbound_d, digits = 4)))
+    cat("\n\n")
+    cat("TOST confidence interval:")
+    cat("\n")
+    cat("lower bound ",100*(1-alpha*2),"% CI: ", paste0(round(LL90, digits = 3)),"\nupper bound ",100*(1-alpha*2),"% CI:  ",paste0(round(UL90,digits = 3)), sep = "")
+    cat("\n\n")
+    cat("NHST confidence interval:")
+    cat("\n")
+    cat("lower bound ",100*(1-alpha),"% CI: ", paste0(round(LL95, digits = 3)),"\nupper bound ",100*(1-alpha),"% CI:  ",paste0(round(UL95,digits = 3)), sep = "")
+    cat("\n\n")
+    cat("Equivalence Test Result:\n")
+    message(cat("The equivalence test was ",TOSToutcome,", Z = ",format(Ztost, digits = 3, nsmall = 3, scientific = FALSE),", p = ",format(ptost, digits = 3, nsmall = 3, scientific = FALSE),", given equivalence bounds of ",format(low_eqbound_d, digits = 3, nsmall = 3, scientific = FALSE)," and ",format(high_eqbound_d, digits = 3, nsmall = 3, scientific = FALSE)," and an alpha of ",alpha,".",sep=""))
+    cat("\n")
+    cat("Null Hypothesis Test Result:\n")
+    message(cat("The null hypothesis test was ",testoutcome,", Z = ",format(Z, digits = 3, nsmall = 3, scientific = FALSE),", p = ",format(pttest, digits = 3, nsmall = 3, scientific = FALSE),", given an alpha of ",alpha,".",sep=""))
+    if(pttest <= alpha && ptost <= alpha){
+      combined_outcome <- "statistically different from zero and statistically equivalent to zero"
+    }
+    if(pttest < alpha && ptost > alpha){
+      combined_outcome <- "statistically different from zero and statistically not equivalent to zero"
+    }
+    if(pttest > alpha && ptost <= alpha){
+      combined_outcome <- "statistically not different from zero and statistically equivalent to zero"
+    }
+    if(pttest > alpha && ptost > alpha){
+      combined_outcome <- "statistically not different from zero and statistically not equivalent to zero"
+    }
+    cat("\n")
+    message(cat("Based on the equivalence test and the null-hypothesis test combined, we can conclude that the observed effect is ",combined_outcome,".",sep=""))
+  }
   # Return results in list()
   invisible(list(ES=ES,TOST_Z1=Z1,TOST_p1=p1,TOST_Z2=Z2,TOST_p2=p2,alpha=alpha,low_eqbound_d=low_eqbound_d,high_eqbound_d=high_eqbound_d, LL_CI_TOST=LL90,UL_CI_TOST=UL90,LL_CI_ZTEST=LL95,UL_CI_ZTEST=UL95))
 }

@@ -4,7 +4,8 @@
 \alias{TOSTone.raw}
 \title{TOST function for a one-sample t-test (raw scores)}
 \usage{
-TOSTone.raw(m, mu, sd, n, low_eqbound, high_eqbound, alpha, plot = TRUE)
+TOSTone.raw(m, mu, sd, n, low_eqbound, high_eqbound, alpha, plot = TRUE,
+  verbose = TRUE)
 }
 \arguments{
 \item{m}{mean}
@@ -22,6 +23,8 @@ TOSTone.raw(m, mu, sd, n, low_eqbound, high_eqbound, alpha, plot = TRUE)
 \item{alpha}{alpha level (default = 0.05)}
 
 \item{plot}{set whether results should be plotted (plot = TRUE) or not (plot = FALSE) - defaults to TRUE}
+
+\item{verbose}{logical variable indicating whether text output should be generated (verbose = TRUE) or not (verbose = FALSE) - default to TRUE}
 }
 \value{
 Returns TOST t-value 1, TOST p-value 1, TOST t-value 2, TOST p-value 2, degrees of freedom, low equivalence bound, high equivalence bound, Lower limit confidence interval TOST, Upper limit confidence interval TOST

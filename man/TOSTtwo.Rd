@@ -5,7 +5,7 @@
 \title{TOST function for an independent t-test (Cohen's d)}
 \usage{
 TOSTtwo(m1, m2, sd1, sd2, n1, n2, low_eqbound_d, high_eqbound_d, alpha,
-  var.equal, plot = TRUE)
+  var.equal, plot = TRUE, verbose = TRUE)
 }
 \arguments{
 \item{m1}{mean of group 1}
@@ -29,6 +29,8 @@ TOSTtwo(m1, m2, sd1, sd2, n1, n2, low_eqbound_d, high_eqbound_d, alpha,
 \item{var.equal}{logical variable indicating whether equal variances assumption is assumed to be TRUE or FALSE.  Defaults to FALSE.}
 
 \item{plot}{set whether results should be plotted (plot = TRUE) or not (plot = FALSE) - defaults to TRUE}
+
+\item{verbose}{logical variable indicating whether text output should be generated (verbose = TRUE) or not (verbose = FALSE) - default to TRUE}
 }
 \value{
 Returns TOST t-value 1, TOST p-value 1, TOST t-value 2, TOST p-value 2, degrees of freedom, low equivalence bound, high equivalence bound, low equivalence bound in Cohen's d, high equivalence bound in Cohen's d, Lower limit confidence interval TOST, Upper limit confidence interval TOST

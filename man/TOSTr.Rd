@@ -4,7 +4,8 @@
 \alias{TOSTr}
 \title{TOST function for a correlations}
 \usage{
-TOSTr(n, r, low_eqbound_r, high_eqbound_r, alpha, plot = TRUE)
+TOSTr(n, r, low_eqbound_r, high_eqbound_r, alpha, plot = TRUE,
+  verbose = TRUE)
 }
 \arguments{
 \item{n}{number of pairs of observations}
@@ -18,6 +19,8 @@ TOSTr(n, r, low_eqbound_r, high_eqbound_r, alpha, plot = TRUE)
 \item{alpha}{alpha level (default = 0.05)}
 
 \item{plot}{set whether results should be plotted (plot = TRUE) or not (plot = FALSE) - defaults to TRUE}
+
+\item{verbose}{logical variable indicating whether text output should be generated (verbose = TRUE) or not (verbose = FALSE) - default to TRUE}
 }
 \value{
 Returns TOST p-value 1, TOST p-value 2, alpha, low equivalence bound r, high equivalence bound r, Lower limit confidence interval TOST, Upper limit confidence interval TOST

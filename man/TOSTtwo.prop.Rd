@@ -5,7 +5,7 @@
 \title{TOST function for two proportions (raw scores)}
 \usage{
 TOSTtwo.prop(prop1, prop2, n1, n2, low_eqbound, high_eqbound, alpha,
-  plot = TRUE)
+  plot = TRUE, verbose = TRUE)
 }
 \arguments{
 \item{prop1}{proportion of group 1}
@@ -23,6 +23,8 @@ TOSTtwo.prop(prop1, prop2, n1, n2, low_eqbound, high_eqbound, alpha,
 \item{alpha}{alpha level (default = 0.05)}
 
 \item{plot}{set whether results should be plotted (plot = TRUE) or not (plot = FALSE) - defaults to TRUE}
+
+\item{verbose}{logical variable indicating whether text output should be generated (verbose = TRUE) or not (verbose = FALSE) - default to TRUE}
 }
 \value{
 Returns TOST z-value 1, TOST p-value 1, TOST z-value 2, TOST p-value 2, low equivalence bound, high equivalence bound, Lower limit confidence interval TOST, Upper limit confidence interval TOST
