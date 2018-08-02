@@ -4,8 +4,8 @@
 \alias{powerTOSTtwo.prop}
 \title{Power analysis for TOST for difference between two proportions using Z-test (pooled)}
 \usage{
-powerTOSTtwo.prop(alpha, statistical_power, prop1, prop2, N, low_eqbound_prop,
-  high_eqbound_prop)
+powerTOSTtwo.prop(alpha, statistical_power, prop1, prop2, N,
+  low_eqbound_prop, high_eqbound_prop)
 }
 \arguments{
 \item{alpha}{alpha used for the test (e.g., 0.05)}

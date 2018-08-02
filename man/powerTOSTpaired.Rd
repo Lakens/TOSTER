@@ -4,7 +4,8 @@
 \alias{powerTOSTpaired}
 \title{Power analysis for TOST for dependent t-test (Cohen's dz).}
 \usage{
-powerTOSTpaired(alpha, statistical_power, N, low_eqbound_dz, high_eqbound_dz)
+powerTOSTpaired(alpha, statistical_power, N, low_eqbound_dz,
+  high_eqbound_dz)
 }
 \arguments{
 \item{alpha}{alpha used for the test (e.g., 0.05)}
