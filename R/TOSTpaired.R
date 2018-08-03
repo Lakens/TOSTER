@@ -31,6 +31,7 @@ TOSTpaired<-function(n,m1,m2,sd1,sd2,r12,low_eqbound_dz, high_eqbound_dz, alpha,
   if(n < 2) stop("The sample size should be larger than 1.")
   if(1 <= alpha | alpha <= 0) stop("The alpha level should be a positive value between 0 and 1.")
   if(sd1 <= 0 | sd2 <= 0) stop("The standard deviation should be a positive value.")
+  if(1 < r12 | r12 < -1) stop("The correlation should be a value between -1 and 1.")
   # Calculate TOST, t-test, 90% CIs and 95% CIs
   sdif<-sqrt(sd1^2+sd2^2-2*r12*sd1*sd2)
   low_eqbound<-low_eqbound_dz*sdif
