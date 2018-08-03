@@ -23,7 +23,7 @@ powerTOSTtwo.prop(alpha, statistical_power, prop1, prop2, N,
 \item{high_eqbound_prop}{upper equivalence bounds (e.g., 0.05) expressed in proportion}
 }
 \value{
-Calculate either achieved power, equivalence bounds, or required N.
+Calculate either achieved power, equivalence bounds, or required N, assuming a true effect size of 0.
 Returns a string summarizing the power analysis, and a numeric variable for number of observations, equivalence bounds, or power.
 }
 \description{

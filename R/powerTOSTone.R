@@ -4,7 +4,7 @@
 #' @param N sample size (e.g., 108)
 #' @param low_eqbound_d lower equivalence bounds (e.g., -0.5) expressed in standardized mean difference (Cohen's d)
 #' @param high_eqbound_d upper equivalence bounds (e.g., 0.5) expressed in standardized mean difference (Cohen's d)
-#' @return Calculate either achieved power, equivalence bounds, or required N.
+#' @return Calculate either achieved power, equivalence bounds, or required N, assuming a true effect size of 0.
 #' Returns a string summarizing the power analysis, and a numeric variable for number of observations, equivalence bounds, or power.
 #' @examples
 #' ## Sample size for alpha = 0.05, 90% power, equivalence bounds of

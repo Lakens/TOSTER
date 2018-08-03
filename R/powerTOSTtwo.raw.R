@@ -5,7 +5,7 @@
 #' @param low_eqbound lower equivalence bounds (e.g., -0.5) expressed in raw scale units (e.g., scalepoints)
 #' @param high_eqbound upper equivalence bounds (e.g., 0.5) expressed in raw scale units (e.g., scalepoints)
 #' @param sdpooled specify the pooled standard deviation
-#' @return Calculate either achieved power, equivalence bounds, or required N.
+#' @return Calculate either achieved power, equivalence bounds, or required N, assuming a true effect size of 0.
 #' Returns a string summarizing the power analysis, and a numeric variable for number of observations, equivalence bounds, or power.
 #' @examples
 #' ## Sample size for alpha = 0.05, 80% power, equivalence bounds of -200 and 200 in raw

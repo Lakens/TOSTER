@@ -21,7 +21,7 @@ powerTOSTone.raw(alpha, statistical_power, N, sd, low_eqbound,
 \item{high_eqbound}{upper equivalence bounds (e.g., 0.5) expressed in raw scores}
 }
 \value{
-Calculate either achieved power, equivalence bounds, or required N.
+Calculate either achieved power, equivalence bounds, or required N, assuming a true effect size of 0.
 Returns a string summarizing the power analysis, and a numeric variable for number of observations, equivalence bounds, or power.
 }
 \description{

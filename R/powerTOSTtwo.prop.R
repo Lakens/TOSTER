@@ -6,7 +6,7 @@
 #' @param N sample size (e.g., 108)
 #' @param low_eqbound_prop lower equivalence bounds (e.g., -0.05) expressed in proportion
 #' @param high_eqbound_prop upper equivalence bounds (e.g., 0.05) expressed in proportion
-#' @return Calculate either achieved power, equivalence bounds, or required N.
+#' @return Calculate either achieved power, equivalence bounds, or required N, assuming a true effect size of 0.
 #' Returns a string summarizing the power analysis, and a numeric variable for number of observations, equivalence bounds, or power.
 #' @examples
 #' ## Sample size for alpha = 0.05, 90% power, assuming true effect prop1 = prop 2 = 0.5,

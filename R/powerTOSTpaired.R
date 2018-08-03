@@ -4,7 +4,7 @@
 #' @param N number of pairs (e.g., 96)
 #' @param low_eqbound_dz lower equivalence bounds (e.g., -0.5) expressed in standardized mean difference (Cohen's dz)
 #' @param high_eqbound_dz upper equivalence bounds (e.g., 0.5) expressed in standardized mean difference (Cohen's dz)
-#' @return Calculate either achieved power, equivalence bounds, or required N.
+#' @return Calculate either achieved power, equivalence bounds, or required N, assuming a true effect size of 0.
 #' Returns a string summarizing the power analysis, and a numeric variable for number of observations, equivalence bounds, or power.
 #' @examples
 #' ## Sample size for alpha = 0.05, 80% power, equivalence bounds of

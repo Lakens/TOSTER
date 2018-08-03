@@ -18,7 +18,7 @@ powerTOSTone(alpha, statistical_power, N, low_eqbound_d, high_eqbound_d)
 \item{high_eqbound_d}{upper equivalence bounds (e.g., 0.5) expressed in standardized mean difference (Cohen's d)}
 }
 \value{
-Calculate either achieved power, equivalence bounds, or required N.
+Calculate either achieved power, equivalence bounds, or required N, assuming a true effect size of 0.
 Returns a string summarizing the power analysis, and a numeric variable for number of observations, equivalence bounds, or power.
 }
 \description{
