@@ -83,7 +83,7 @@ TOSTr<-function(n, r, low_eqbound_r, high_eqbound_r, alpha, plot = TRUE, verbose
     cat("lower bound ",100*(1-alpha),"% CI: ", paste0(round(LL95, digits = 3)),"\nupper bound ",100*(1-alpha),"% CI:  ",paste0(round(UL95,digits = 3)), sep = "")
     cat("\n\n")
     cat("Equivalence Test Result:\n")
-    message(cat("The equivalence test was ",TOSToutcome,", p = ",format(ptost, digits = 3, nsmall = 3, scientific = FALSE),", given equivalence bounds of ",format(low_eqbound_r, digits = 3, nsmall = 3, scientific = FALSE)," and ",format(high_eqbound_r, digits = 3, nsmall = 3, scientific = FALSE)," an alpha of ",alpha,".",sep=""))
+    message(cat("The equivalence test was ",TOSToutcome,", p = ",format(ptost, digits = 3, nsmall = 3, scientific = FALSE),", given equivalence bounds of ",format(low_eqbound_r, digits = 3, nsmall = 3, scientific = FALSE)," and ",format(high_eqbound_r, digits = 3, nsmall = 3, scientific = FALSE)," and an alpha of ",alpha,".",sep=""))
     cat("\n")
     cat("Null Hypothesis Test Result:\n")
     message(cat("The null hypothesis test was ",testoutcome,", p = ",format(pttest, digits = 3, nsmall = 3, scientific = FALSE),", given an alpha of ",alpha,".",sep=""))
