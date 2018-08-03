@@ -27,7 +27,13 @@ TOSTtwo.prop <- function(prop1, prop2, n1, n2, low_eqbound, high_eqbound, alpha,
   if(missing(alpha)) {
     alpha <- 0.05
   }
-  prop_dif <- prop1 - prop2
+  if(low_eqbound >= high_eqbound) warning("The lower bound is equal to or larger than the upper bound. Check the plot and output to see if the bounds are specified as you intended.")
+  if(n1 < 2 | n2 < 2) stop("The sample size should be larger than 1.")
+  if(1 <= alpha | alpha <= 0) stop("The alpha level should be a positive value between 0 and 1.")
+  if(1 < prop1 | prop1 < 0) stop("The proportion should be a positive value between 0 and 1.")
+  if(1 < prop2 | prop2 < 0) stop("The proportion should be a positive value between 0 and 1.")
+
+    prop_dif <- prop1 - prop2
   prop_se <- sqrt((prop1*(1-prop1))/n1 + (prop2*(1-prop2))/n2)
 
   #calculating z-statistic

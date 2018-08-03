@@ -46,6 +46,10 @@ TOSTtwo.raw<-function(m1,m2,sd1,sd2,n1,n2,low_eqbound, high_eqbound, alpha, var.
   if(missing(var.equal)) {
     var.equal<-FALSE
   }
+  if(low_eqbound >= high_eqbound) warning("The lower bound is equal to or larger than the upper bound. Check the plot and output to see if the bounds are specified as you intended.")
+  if(n1 < 2 | n2 < 2) stop("The sample size should be larger than 1.")
+  if(1 <= alpha | alpha <= 0) stop("The alpha level should be a positive value between 0 and 1.")
+  if(sd1 <= 0 | sd2 <= 0) stop("The standard deviation should be a positive value.")
 
   # Calculate TOST, t-test, 90% CIs and 95% CIs
   if(var.equal==TRUE) {

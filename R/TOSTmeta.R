@@ -35,7 +35,8 @@ TOSTmeta<-function(ES,var,se,low_eqbound_d, high_eqbound_d, alpha, plot = TRUE, 
       stop("Need to specify variance (var) or standard error (se).")
     }
   }
-  # Calculate TOST, z-test, 90% CIs and 95% CIs
+  if(low_eqbound_d >= high_eqbound_d) warning("The lower bound is equal to or larger than the upper bound. Check the plot and output to see if the bounds are specified as you intended.")
+  if(1 <= alpha | alpha <= 0) stop("The alpha level should be a positive value between 0 and 1.")
   Z1<-(ES-low_eqbound_d)/se
   p1<-pnorm(Z1, lower.tail=FALSE)
   Z2<-(ES-high_eqbound_d)/se
