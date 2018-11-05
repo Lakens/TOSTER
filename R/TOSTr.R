@@ -103,5 +103,5 @@ TOSTr<-function(n, r, low_eqbound_r, high_eqbound_r, alpha, plot = TRUE, verbose
     message(cat("Based on the equivalence test and the null-hypothesis test combined, we can conclude that the observed effect is ",combined_outcome,".",sep=""))
   }
   # Return results in list()
-  invisible(list(r = r, TOST_p1 = p1, TOST_p2 = p2, alpha = alpha, low_eqbound_r = low_eqbound_r, high_eqbound_r = high_eqbound_r, LL_CI_TOST = LL90, UL_CI_TOST = UL90,LL_CI_TTEST = LL95, UL_CI_TTEST = UL95, z_LL_CI_TOST=zLL90, z_UL_CI_TOST = zUL90, z_LL_CI_TTEST = zLL95, z_UL_CI_TTEST = zUL95))
+  invisible(list(r = r, NHST_t = t, NHST_p = pttest, TOST_p1 = p1, TOST_p2 = p2, alpha = alpha, low_eqbound_r = low_eqbound_r, high_eqbound_r = high_eqbound_r, LL_CI_TOST = LL90, UL_CI_TOST = UL90,LL_CI_TTEST = LL95, UL_CI_TTEST = UL95, z_LL_CI_TOST=zLL90, z_UL_CI_TOST = zUL90, z_LL_CI_TTEST = zLL95, z_UL_CI_TTEST = zUL95))
 }
