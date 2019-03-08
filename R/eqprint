@@ -1,0 +1,38 @@
+eqprint <- function (x, markdown= TRUE)
+{
+  library(dplyr)
+  if("TOST_df" %in% names(x)){
+    options(scipen=10) #checking if TOST object in test. Also turning off scientific annotations}
+    if (missing(markdown)){
+      markdown <- TRUE #Default to true }
+    if (markdown == TRUE) #Rmarkdown annotation with italic enabled
+    {
+      if(x$TOST_p1>x$TOST_p2) # first case: p1>p2, so p1 reported
+      {
+        x$TOST_p1 <- x$TOST_p1 %>%  format.pval(digits = 3, eps = 0.001) #formatting p-values
+        cat("*t*","(",x$TOST_df,") = ",x$TOST_t1,", ","*p*",if(x$TOST_p1<0.001){""}else{"= "},x$TOST_p1, sep="")
+      }
+      else #p2 reported
+      {
+        x$TOST_p2 <- x$TOST_p2 %>%  format.pval(digits = 3, eps = 0.001)
+        cat("*t*","(",x$TOST_df,") = ",x$TOST_t2,", ","*p*",if(x$TOST_p2<0.0001){""}else{"= "},x$TOST_p2, sep="")
+      }
+    }
+    else #for other purposes than RMarkdown
+    {
+      if(x$TOST_p1>x$TOST_p2) #first case: p1 reported
+      {
+        x$TOST_p1 <- x$TOST_p1 %>%  format.pval(digits = 3, eps = 0.001)
+        cat("t","(",x$TOST_df,") = ",x$TOST_t1,", ","p",if(x$TOST_p1<0.001){""}else{"= "},x$TOST_p1, sep="")
+        
+      }
+      else #second case: p2 reported
+      {
+        x$TOST_p2 <- x$TOST_p2 %>%  format.pval(digits = 3, eps = 0.001)
+        cat("t","(",x$TOST_df,") = ",x$TOST_t2,", ","p",if(x$TOST_p2<0.001){""}else{"= "},x$TOST_p2, sep="")
+      }
+    }
+  }
+  else {
+    stop("No equivalence test object detected")} #in case no equivalence object was detected
+}
