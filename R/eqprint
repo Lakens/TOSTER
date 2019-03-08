@@ -4,7 +4,7 @@ eqprint <- function (x, markdown= TRUE)
   if("TOST_df" %in% names(x)){
     options(scipen=10) #checking if TOST object in test. Also turning off scientific annotations}
     if (missing(markdown)){
-      markdown <- TRUE #Default to true }
+      markdown <- TRUE} #Default to true }
     if (markdown == TRUE) #Rmarkdown annotation with italic enabled
     {
       if(x$TOST_p1>x$TOST_p2) # first case: p1>p2, so p1 reported
