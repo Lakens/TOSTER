@@ -3,7 +3,7 @@ name:  datatosttwoprop
 title: TOST Two Proportions
 menuGroup: TOSTER
 version: '1.0.0'
-jas: '1.1'
+jas: '1.2'
 
 options:
     - name: data
@@ -15,9 +15,7 @@ options:
       suggested:
         - nominal
       permitted:
-        - nominal
-        - nominaltext
-        - ordinal
+        - factor
 
     - name: level
       title: Proportion

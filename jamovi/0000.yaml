@@ -41,5 +41,7 @@ analyses:
     ns: TOSTER
     menuGroup: TOSTER
     menuTitle: TOST Two Proportions
+usesNative: true
+minApp: 1.0.8
 
 ...

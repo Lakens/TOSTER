@@ -10,7 +10,7 @@ RoxygenNote: 6.1.0
 Imports:
     stats,
     graphics,
-    jmvcore (>= 0.8),
+    jmvcore (>= 0.9.6.4),
     ggplot2,
     R6
 Suggests: knitr,

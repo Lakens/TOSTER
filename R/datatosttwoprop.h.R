@@ -27,9 +27,7 @@ datatosttwopropOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 suggested=list(
                     "nominal"),
                 permitted=list(
-                    "nominal",
-                    "nominaltext",
-                    "ordinal"))
+                    "factor"))
             private$..level <- jmvcore::OptionLevel$new(
                 "level",
                 level,
@@ -310,6 +308,16 @@ datatosttwoprop <- function(
     if ( ! requireNamespace('jmvcore'))
         stop('datatosttwoprop requires jmvcore to be installed (restart may be required)')
 
+    if ( ! missing(var)) var <- jmvcore::resolveQuo(jmvcore::enquo(var))
+    if ( ! missing(group)) group <- jmvcore::resolveQuo(jmvcore::enquo(group))
+    if (missing(data))
+        data <- jmvcore::marshalData(
+            parent.frame(),
+            `if`( ! missing(var), var, NULL),
+            `if`( ! missing(group), group, NULL))
+
+    for (v in var) if (v %in% names(data)) data[[v]] <- as.factor(data[[v]])
+
     options <- datatosttwopropOptions$new(
         var = var,
         level = level,
@@ -319,9 +327,6 @@ datatosttwoprop <- function(
         alpha = alpha,
         desc = desc,
         plot = plot)
-
-    results <- datatosttwopropResults$new(
-        options = options)
 
     analysis <- datatosttwopropClass$new(
         options = options,

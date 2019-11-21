@@ -9,9 +9,7 @@ children:
     suggested:
       - continuous
     permitted:
-      - continuous
-      - ordinal
-      - nominal
+      - numeric
     children:
       - type: TargetLayoutBox
         children:
@@ -41,17 +39,14 @@ children:
       - name: low_eqbound
         type: TextBox
         format: number
-        inputPattern: '[0-9]+'
       - name: high_eqbound
         type: TextBox
         format: number
-        inputPattern: '[0-9]+'
       - type: ComboBox
         name: eqbound_type
       - name: alpha
         type: TextBox
         format: number
-        inputPattern: '[0-9]+'
   - type: LayoutBox
     margin: large
     children:

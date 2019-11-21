@@ -27,9 +27,7 @@ dataTOSToneOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "vars",
                 vars,
                 permitted=list(
-                    "nominal",
-                    "ordinal",
-                    "continuous"),
+                    "numeric"),
                 suggested=list(
                     "continuous"))
             private$..mu <- jmvcore::OptionNumber$new(
@@ -386,6 +384,13 @@ dataTOSTone <- function(
     if ( ! requireNamespace('jmvcore'))
         stop('dataTOSTone requires jmvcore to be installed (restart may be required)')
 
+    if ( ! missing(vars)) vars <- jmvcore::resolveQuo(jmvcore::enquo(vars))
+    if (missing(data))
+        data <- jmvcore::marshalData(
+            parent.frame(),
+            `if`( ! missing(vars), vars, NULL))
+
+
     options <- dataTOSToneOptions$new(
         vars = vars,
         mu = mu,
@@ -397,9 +402,6 @@ dataTOSTone <- function(
         plots = plots,
         low_eqbound_d = low_eqbound_d,
         high_eqbound_d = high_eqbound_d)
-
-    results <- dataTOSToneResults$new(
-        options = options)
 
     analysis <- dataTOSToneClass$new(
         options = options,

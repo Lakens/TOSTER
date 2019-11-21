@@ -28,9 +28,7 @@ dataTOSTpairedOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "continuous",
-                    "nominal",
-                    "ordinal"))
+                    "numeric"))
             private$..low_eqbound <- jmvcore::OptionNumber$new(
                 "low_eqbound",
                 low_eqbound,
@@ -406,6 +404,11 @@ dataTOSTpaired <- function(
     if ( ! requireNamespace('jmvcore'))
         stop('dataTOSTpaired requires jmvcore to be installed (restart may be required)')
 
+    if (missing(data))
+        data <- jmvcore::marshalData(
+            parent.frame())
+
+
     options <- dataTOSTpairedOptions$new(
         pairs = pairs,
         low_eqbound = low_eqbound,
@@ -416,9 +419,6 @@ dataTOSTpaired <- function(
         plots = plots,
         low_eqbound_dz = low_eqbound_dz,
         high_eqbound_dz = high_eqbound_dz)
-
-    results <- dataTOSTpairedResults$new(
-        options = options)
 
     analysis <- dataTOSTpairedClass$new(
         options = options,

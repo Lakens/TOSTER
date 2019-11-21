@@ -9,9 +9,7 @@ children:
     suggested:
       - continuous
     permitted:
-      - continuous
-      - ordinal
-      - nominal
+      - numeric
     children:
       - type: TargetLayoutBox
         children:
@@ -42,17 +40,14 @@ children:
         type: TextBox
         label: Lower equivalence bound (in r)
         format: number
-        inputPattern: '[0-9]+'
       - name: high_eqbound_r
         type: TextBox
         label: Upper equivalence bound (in r)
         format: number
-        inputPattern: '[0-9]+'
       - name: alpha
         type: TextBox
         label: Alpha level
         format: number
-        inputPattern: '[0-9]+'
   - type: LayoutBox
     margin: large
     children:
