@@ -28,9 +28,7 @@ dataTOSTtwoOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 "deps",
                 deps,
                 permitted=list(
-                    "nominal",
-                    "ordinal",
-                    "continuous"),
+                    "numeric"),
                 suggested=list(
                     "continuous"))
             private$..group <- jmvcore::OptionVariable$new(
@@ -431,6 +429,15 @@ dataTOSTtwo <- function(
     if ( ! requireNamespace('jmvcore'))
         stop('dataTOSTtwo requires jmvcore to be installed (restart may be required)')
 
+    if ( ! missing(deps)) deps <- jmvcore::resolveQuo(jmvcore::enquo(deps))
+    if ( ! missing(group)) group <- jmvcore::resolveQuo(jmvcore::enquo(group))
+    if (missing(data))
+        data <- jmvcore::marshalData(
+            parent.frame(),
+            `if`( ! missing(deps), deps, NULL),
+            `if`( ! missing(group), group, NULL))
+
+
     options <- dataTOSTtwoOptions$new(
         deps = deps,
         group = group,
@@ -443,9 +450,6 @@ dataTOSTtwo <- function(
         plots = plots,
         low_eqbound_d = low_eqbound_d,
         high_eqbound_d = high_eqbound_d)
-
-    results <- dataTOSTtwoResults$new(
-        options = options)
 
     analysis <- dataTOSTtwoClass$new(
         options = options,

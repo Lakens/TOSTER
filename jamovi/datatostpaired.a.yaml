@@ -1,7 +1,7 @@
 ---
 name:  dataTOSTpaired
 title: TOST Paired Samples T-Test
-jas:     "1.1"
+jas:     "1.2"
 version: "1.0.0"
 menuGroup: TOSTER
 
@@ -29,9 +29,7 @@ options:
       suggested:
         - continuous
       permitted:
-        - continuous
-        - nominal
-        - ordinal
+        - numeric
       description:
           R: a list of vectors of strings naming variables to pair from `data`
 

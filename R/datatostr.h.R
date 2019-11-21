@@ -25,9 +25,7 @@ dataTOSTrOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 suggested=list(
                     "continuous"),
                 permitted=list(
-                    "continuous",
-                    "nominal",
-                    "ordinal"))
+                    "numeric"))
             private$..low_eqbound_r <- jmvcore::OptionNumber$new(
                 "low_eqbound_r",
                 low_eqbound_r,
@@ -318,6 +316,11 @@ dataTOSTr <- function(
     if ( ! requireNamespace('jmvcore'))
         stop('dataTOSTr requires jmvcore to be installed (restart may be required)')
 
+    if (missing(data))
+        data <- jmvcore::marshalData(
+            parent.frame())
+
+
     options <- dataTOSTrOptions$new(
         pairs = pairs,
         low_eqbound_r = low_eqbound_r,
@@ -325,9 +328,6 @@ dataTOSTr <- function(
         alpha = alpha,
         desc = desc,
         plots = plots)
-
-    results <- dataTOSTrResults$new(
-        options = options)
 
     analysis <- dataTOSTrClass$new(
         options = options,

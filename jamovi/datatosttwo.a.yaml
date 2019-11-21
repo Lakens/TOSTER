@@ -1,7 +1,7 @@
 ---
 name:  dataTOSTtwo
 title: TOST Independent Samples T-Test
-jas:     "1.1"
+jas:     "1.2"
 version: "1.0.0"
 menuGroup: TOSTER
 
@@ -34,9 +34,7 @@ options:
       title: Variables
       type: Variables
       permitted:
-        - nominal
-        - ordinal
-        - continuous
+        - numeric
       suggested:
         - continuous
       description:

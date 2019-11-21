@@ -30,15 +30,12 @@ children:
       - type: TextBox
         name: low_eqbound
         format: number
-        inputPattern: '[0-9]+'
       - type: TextBox
         name: high_eqbound
         format: number
-        inputPattern: '[0-9]+'
       - type: TextBox
         name: alpha
         format: number
-        inputPattern: '[0-9]+'
   - type: LayoutBox
     margin: large
     children:
