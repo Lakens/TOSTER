@@ -12,6 +12,7 @@ items:
         - mu
         - alpha
         - var_equal
+        - hypothesis
         - low_eqbound
         - high_eqbound
         - eqbound_type

@@ -72,10 +72,8 @@ options:
           ui: >
             the alternative hypothesis for equivlance or minimal effect testing.
           R: >
-            `'equivalence'` (default), `'oneGreater'` or
-            `'twoGreater'`, the alternative hypothesis; group 1 different
-            to group 2, group 1 greater than group 2, and group 2 greater than
-            group 1 respectively
+            `'EQU'` for equivalence (default), or
+            `'MET'` for minimal effects test, the alternative hypothesis.
 
     - name: low_eqbound
       title: Lower bound(s)

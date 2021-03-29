@@ -85,14 +85,31 @@ dataTOSTpairedClass <- R6::R6Class(
           high_eqbound_dz <- high_eqbound / sdif
         }
 
-        se<-sdif/sqrt(n)
-        t<-(m1-m2)/se
-        degree_f<-n-1
-        pttest<-2*pt(abs(t), degree_f, lower.tail=FALSE)
-        t1<-((m1-m2)-(low_eqbound_dz*sdif))/se
-        p1<-pt(t1, degree_f, lower.tail=FALSE)
-        t2<-((m1-m2)-(high_eqbound_dz*sdif))/se
-        p2<-pt(t2, degree_f, lower.tail=TRUE)
+        low_ttest <- t.test(dep ~ group,
+                            dataTTest,
+                            paired = FALSE,
+                            alternative = alt_low,
+                            mu = low_eqbound)
+        high_ttest <- t.test(dep ~ group,
+                             dataTTest,
+                             paired = FALSE,
+                             alternative = alt_high,
+                             mu = high_eqbound)
+
+        t1 = low_ttest$statistic
+        p1 = low_ttest$p.value
+        t2 = high_ttest$statistic
+        p2 = high_ttest$p.value
+
+        degree_f = res$parameter
+        pttest = res$p.value
+
+        se <- res$stderr
+        SE_val = res$stderr
+        t <- res$statistic
+
+        pttest <- res$p.value
+
         ttost<-ifelse(abs(t1) < abs(t2), t1, t2)
         LL90<-((m1-m2)-qt(1-alpha, degree_f)*se)
         UL90<-((m1-m2)+qt(1-alpha, degree_f)*se)
@@ -117,6 +134,8 @@ dataTOSTpairedClass <- R6::R6Class(
         plot <- plots$get(key=pair)
         points <- data.frame(
           m=dif,
+          degree_f = unname(degree_f),
+          SE= unname(SE_val),
           cil=LL90,
           ciu=UL90,
           low=low_eqbound,

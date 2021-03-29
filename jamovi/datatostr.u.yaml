@@ -36,6 +36,19 @@ children:
   - type: LayoutBox
     margin: large
     children:
+      - type: Label
+        label: Hypothesis
+        children:
+              - type: RadioButton
+                name: EQU
+                optionName: hypothesis
+                optionPart: EQU
+                label: Equivalence Test
+              - type: RadioButton
+                name: MET
+                optionName: hypothesis
+                optionPart: MET
+                label: Minimal Effects Test
       - name: low_eqbound_r
         type: TextBox
         label: Lower equivalence bound (in r)

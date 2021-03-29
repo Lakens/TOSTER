@@ -43,6 +43,7 @@ dataTOSTtwoClass <- R6::R6Class(
       eqb <- self$results$eqb
       desc <- self$results$desc
       plots <- self$results$plots
+      old = FALSE
 
       groupName <- self$options$group
       group <- self$data[[groupName]]
@@ -92,6 +93,9 @@ dataTOSTtwoClass <- R6::R6Class(
 
         tresult <- t.test(dep ~ group,
                           dataTTest,
+                          paired = FALSE,
+                          alternative = "two.sided",
+                          mu = 0,
                           var.equal=var.equal)
 
         t <- unname(tresult$statistic)
@@ -119,52 +123,40 @@ dataTOSTtwoClass <- R6::R6Class(
           high_eqbound_d <- high_eqbound / sdpooled
         }
 
-
-        if (var.equal) {
-          degree_f<-n[1]+n[2]-2
-
-          # Switch direction of test depending on EQU or MET hypothesis
-          if(self$options$hypothesis == "EQU"){
-            t1<-((m[1]-m[2])-low_eqbound)/(sdpooled*sqrt(1/n[1] + 1/n[2]))  #students t-test lower bound
-            p1<-pt(t1, degree_f, lower.tail=FALSE)
-            t2<-((m[1]-m[2])-high_eqbound)/(sdpooled*sqrt(1/n[1] + 1/n[2])) #students t-test upper bound
-            p2<-pt(t2, degree_f, lower.tail=TRUE)
-          } else{
-            t1<-((m[1]-m[2])-low_eqbound)/(sdpooled*sqrt(1/n[1] + 1/n[2]))  #students t-test lower bound
-            p1<-pt(t1, degree_f, lower.tail=TRUE)
-            t2<-((m[1]-m[2])-high_eqbound)/(sdpooled*sqrt(1/n[1] + 1/n[2])) #students t-test upper bound
-            p2<-pt(t2, degree_f, lower.tail=FALSE)
-            }
-
-          t<-(m[1]-m[2])/(sdpooled*sqrt(1/n[1] + 1/n[2]))
-          pttest<-2*pt(-abs(t), df=degree_f)
-          LL90<-(m[1]-m[2])-qt(1-alpha, n[1]+n[2]-2)*(sdpooled*sqrt(1/n[1] + 1/n[2]))
-          UL90<-(m[1]-m[2])+qt(1-alpha, n[1]+n[2]-2)*(sdpooled*sqrt(1/n[1] + 1/n[2]))
-          LL95<-(m[1]-m[2])-qt(1-(alpha/2), n[1]+n[2]-2)*(sdpooled*sqrt(1/n[1] + 1/n[2]))
-          UL95<-(m[1]-m[2])+qt(1-(alpha/2), n[1]+n[2]-2)*(sdpooled*sqrt(1/n[1] + 1/n[2]))
-        } else {
-          degree_f<-(sd[1]^2/n[1]+sd[2]^2/n[2])^2/(((sd[1]^2/n[1])^2/(n[1]-1))+((sd[2]^2/n[2])^2/(n[2]-1))) #degrees of freedom for Welch's t-test
-          if(self$options$hypothesis == "EQU"){
-          t1<-((m[1]-m[2])-low_eqbound)/sqrt(sd[1]^2/n[1] + sd[2]^2/n[2]) #welch's t-test upper bound
-          p1<-pt(t1, degree_f, lower.tail=FALSE) #p-value for Welch's TOST t-test
-          t2<-((m[1]-m[2])-high_eqbound)/sqrt(sd[1]^2/n[1] + sd[2]^2/n[2]) #welch's t-test lower bound
-          p2<-pt(t2, degree_f, lower.tail=TRUE) #p-value for Welch's TOST t-test
-          } else {
-            t1<-((m[1]-m[2])-low_eqbound)/sqrt(sd[1]^2/n[1] + sd[2]^2/n[2]) #welch's t-test upper bound
-            p1<-pt(t1, degree_f, lower.tail=TRUE) #p-value for Welch's TOST t-test
-            t2<-((m[1]-m[2])-high_eqbound)/sqrt(sd[1]^2/n[1] + sd[2]^2/n[2]) #welch's t-test lower bound
-            p2<-pt(t2, degree_f, lower.tail=FALSE) #p-value for Welch's TOST t-test
-          }
-
-          t<-(m[1]-m[2])/sqrt(sd[1]^2/n[1] + sd[2]^2/n[2]) #welch's t-test NHST
-          pttest<-2*pt(-abs(t), df=degree_f) #p-value for Welch's t-test
-          LL90<-(m[1]-m[2])-qt(1-alpha, degree_f)*sqrt(sd[1]^2/n[1] + sd[2]^2/n[2]) #Lower limit for CI Welch's t-test
-          UL90<-(m[1]-m[2])+qt(1-alpha, degree_f)*sqrt(sd[1]^2/n[1] + sd[2]^2/n[2]) #Upper limit for CI Welch's t-test
-          LL95<-(m[1]-m[2])-qt(1-(alpha/2), degree_f)*sqrt(sd[1]^2/n[1] + sd[2]^2/n[2]) #Lower limit for CI Welch's t-test
-          UL95<-(m[1]-m[2])+qt(1-(alpha/2), degree_f)*sqrt(sd[1]^2/n[1] + sd[2]^2/n[2]) #Upper limit for CI Welch's t-test
+        if(self$options$hypothesis == "EQU"){
+          alt_low = "greater"
+          alt_high = "less"
+        } else if(self$options$hypothesis == "MET"){
+          alt_low = "less"
+          alt_high = "greater"
         }
-        ptost<-max(p1,p2) #Get highest p-value for summary TOST result
-        ttost<-ifelse(abs(t1) < abs(t2), t1, t2) #Get lowest t-value for summary TOST result
+
+        low_ttest <- t.test(dep ~ group,
+                            dataTTest,
+                            paired = FALSE,
+                            var.equal = var.equal,
+                            alternative = alt_low,
+                            mu = low_eqbound)
+        high_ttest <- t.test(dep ~ group,
+                             dataTTest,
+                             paired = FALSE,
+                             var.equal = var.equal,
+                             alternative = alt_high,
+                             mu = high_eqbound)
+
+        t1 = low_ttest$statistic
+        p1 = low_ttest$p.value
+        t2 = high_ttest$statistic
+        p2 = high_ttest$p.value
+
+        degree_f = tresult$parameter
+        pttest = tresult$p.value
+
+        LL90 <- (m[1]-m[2])-qt(1-alpha, degree_f)*tresult$stderr
+        UL90 <- (m[1]-m[2])+qt(1-alpha, degree_f)*tresult$stderr
+        LL95 <- (m[1]-m[2])-qt(1-(alpha/2), degree_f)*tresult$stderr
+        UL95 <- (m[1]-m[2])+qt(1-(alpha/2), degree_f)*tresult$stderr
+
         dif<-(m[1]-m[2])
 
         tt$setRow(rowKey=depName, list(
@@ -181,19 +173,20 @@ dataTOSTtwoClass <- R6::R6Class(
           `n[2]`=n[2], `m[2]`=m[2], `med[2]`=med[2], `sd[2]`=sd[2], `se[2]`=se[2]))
 
         # Get SE value
-        SE_val = (sdpooled*sqrt(1/n[1] + 1/n[2]))
+        SE_val = tresult$stderr
 
         plot <- plots$get(key=depName)
         points <- data.frame(
           m=dif,
-          degree_f = degree_f,
-          SE=SE_val,
+          degree_f = unname(degree_f),
+          SE= unname(SE_val),
           cil=LL90,
           ciu=UL90,
           low=low_eqbound,
           high=high_eqbound,
           stringsAsFactors=FALSE)
         plot$setState(points)
+        print(points)
       }
     },
     .plot=function(image, ggtheme, theme, ...) {

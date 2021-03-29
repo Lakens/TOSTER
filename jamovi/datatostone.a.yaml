@@ -41,6 +41,22 @@ options:
           R: >
             a number (default: 0) to compare against
 
+    - name: hypothesis
+      title: Alternative hypothesis
+      type: List
+      options:
+        - name: EQU
+          title: "Equivalence Test"
+        - name: MET
+          title: "Minimal Effect Test"
+      default: EQU
+      description:
+          ui: >
+            the alternative hypothesis for equivlance or minimal effect testing.
+          R: >
+            `'EQU'` for equivalence (default), or
+            `'MET'` for minimal effects test, the alternative hypothesis;
+
     - name: low_eqbound
       title: Lower equivalence bounds
       type: Number

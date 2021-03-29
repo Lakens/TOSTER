@@ -185,6 +185,7 @@ items:
         clearWith:
           - group
           - alpha
+          - hypothesis
           - low_eqbound
           - high_eqbound
           - eqbound_type

@@ -72,8 +72,17 @@ datatosttwopropClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           ztest <- 1 - pnorm(abs(z))
 
           # calculating p-value for both one-sided tests
-          p1 <- 1 - pnorm(z1)
-          p2 <- pnorm(z2)
+          # Old just equivalence test
+          #p1 <- 1 - pnorm(z1)
+          #p2 <- pnorm(z2)
+
+          if(self$options$hypothesis == "EQU"){
+              p1 <- 1 - pnorm(z1)
+              p2 <- pnorm(z2)
+          } else if(self$options$hypothesis == "MET"){
+              p1 <- pnorm(z1)
+              p2 <- 1-pnorm(z2)
+          }
 
           # calculating CIs
           CI_lb <- prop_dif - (qnorm(1-alpha) * prop_se)

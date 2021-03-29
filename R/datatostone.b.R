@@ -39,7 +39,7 @@ dataTOSToneClass <- R6::R6Class(
         se  <- sd/sqrt(n)
         res <- t.test(var-mu)
         t   <- unname(res$statistic)
-        p   <- unname(res$p.value)
+        pttest   <- unname(res$p.value)
 
         low_eqbound    <- self$options$low_eqbound
         high_eqbound   <- self$options$high_eqbound
@@ -61,17 +61,40 @@ dataTOSToneClass <- R6::R6Class(
           high_eqbound_d <- high_eqbound / sd
         }
 
-        degree_f<-n-1
-        t1<-(m-mu-low_eqbound)/(sd/sqrt(n))# t-test
-        p1<-pt(t1, degree_f, lower.tail=FALSE)
-        t2<-(m-mu-high_eqbound)/(sd/sqrt(n)) #t-test
-        p2<-pt(t2, degree_f, lower.tail=TRUE)
-        t<-(m-mu)/(sd/sqrt(n))
-        pttest<-2*pt(-abs(t), df=degree_f)
-        LL90<-m-mu-qt(1-alpha, degree_f)*(sd/sqrt(n))
-        UL90<-m-mu+qt(1-alpha, degree_f)*(sd/sqrt(n))
-        LL95<-m-mu-qt(1-(alpha/2), degree_f)*(sd/sqrt(n))
-        UL95<-m-mu+qt(1-(alpha/2), degree_f)*(sd/sqrt(n))
+        if(self$options$hypothesis == "EQU"){
+          alt_low = "greater"
+          alt_high = "less"
+        } else if(self$options$hypothesis == "MET"){
+          alt_low = "less"
+          alt_high = "greater"
+        }
+
+        degree_f <- res$parameter
+        SE_val <- res$stderr
+
+        low_ttest <- t.test(x = var,
+                            alternative = alt_low,
+                            mu = low_eqbound)
+
+        t1 = low_ttest$statistic
+        p1 = low_ttest$p.value
+
+        high_ttest <- t.test(x = var,
+                             alternative = alt_high,
+                             mu = high_eqbound)
+        t2 = high_ttest$statistic
+        p2 = high_ttest$p.value
+
+        #t1<-(m-mu-low_eqbound)/(sd/sqrt(n))# t-test
+        #p1<-pt(t1, degree_f, lower.tail=FALSE)
+        #t2<-(m-mu-high_eqbound)/(sd/sqrt(n)) #t-test
+        #p2<-pt(t2, degree_f, lower.tail=TRUE)
+        #t<-(m-mu)/(sd/sqrt(n))
+        #pttest<-2*pt(-abs(t), df=degree_f)
+        LL90<-m-mu-qt(1-alpha, degree_f)*res$stderr
+        UL90<-m-mu+qt(1-alpha, degree_f)*res$stderr
+        LL95<-m-mu-qt(1-(alpha/2), degree_f)*res$stderr
+        UL95<-m-mu+qt(1-(alpha/2), degree_f)*res$stderr
         ptost<-max(p1,p2) #Get highest p-value for summary TOST result
         ttost<-ifelse(abs(t1) < abs(t2), t1, t2) #Get lowest t-value for summary TOST result
         dif<-(m-mu)
@@ -90,6 +113,8 @@ dataTOSToneClass <- R6::R6Class(
         plot <- plots$get(key=name)
         points <- data.frame(
           m=dif,
+          degree_f = unname(degree_f),
+          SE= unname(SE_val),
           cil=LL90,
           ciu=UL90,
           low=low_eqbound,
