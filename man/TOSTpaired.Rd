@@ -4,8 +4,19 @@
 \alias{TOSTpaired}
 \title{TOST function for a dependent t-test (Cohen's dz)}
 \usage{
-TOSTpaired(n, m1, m2, sd1, sd2, r12, low_eqbound_dz, high_eqbound_dz,
-  alpha, plot = TRUE, verbose = TRUE)
+TOSTpaired(
+  n,
+  m1,
+  m2,
+  sd1,
+  sd2,
+  r12,
+  low_eqbound_dz,
+  high_eqbound_dz,
+  alpha,
+  plot = TRUE,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{n}{sample size (pairs)}

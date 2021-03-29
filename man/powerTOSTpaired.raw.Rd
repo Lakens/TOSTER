@@ -4,8 +4,14 @@
 \alias{powerTOSTpaired.raw}
 \title{Power analysis for TOST for dependent t-test (raw scores).}
 \usage{
-powerTOSTpaired.raw(alpha, statistical_power, N, sdif, low_eqbound,
-  high_eqbound)
+powerTOSTpaired.raw(
+  alpha,
+  statistical_power,
+  N,
+  sdif,
+  low_eqbound,
+  high_eqbound
+)
 }
 \arguments{
 \item{alpha}{alpha used for the test (e.g., 0.05)}

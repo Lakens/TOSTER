@@ -4,8 +4,15 @@
 \alias{dataTOSTr}
 \title{TOST Correlation}
 \usage{
-dataTOSTr(data, pairs, low_eqbound_r = -0.3, high_eqbound_r = 0.3,
-  alpha = 0.05, desc = FALSE, plots = FALSE)
+dataTOSTr(
+  data,
+  pairs,
+  low_eqbound_r = -0.3,
+  high_eqbound_r = 0.3,
+  alpha = 0.05,
+  desc = FALSE,
+  plots = FALSE
+)
 }
 \arguments{
 \item{data}{the data as a data frame}

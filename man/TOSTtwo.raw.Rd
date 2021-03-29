@@ -4,8 +4,20 @@
 \alias{TOSTtwo.raw}
 \title{TOST function for an independent t-test (raw scores)}
 \usage{
-TOSTtwo.raw(m1, m2, sd1, sd2, n1, n2, low_eqbound, high_eqbound, alpha,
-  var.equal, plot = TRUE, verbose = TRUE)
+TOSTtwo.raw(
+  m1,
+  m2,
+  sd1,
+  sd2,
+  n1,
+  n2,
+  low_eqbound,
+  high_eqbound,
+  alpha,
+  var.equal,
+  plot = TRUE,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{m1}{mean of group 1}

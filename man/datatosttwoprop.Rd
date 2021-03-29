@@ -4,8 +4,17 @@
 \alias{datatosttwoprop}
 \title{TOST Two Proportions}
 \usage{
-datatosttwoprop(data, var, level, group, low_eqbound = -0.1,
-  high_eqbound = 0.1, alpha = 0.05, desc = FALSE, plot = FALSE)
+datatosttwoprop(
+  data,
+  var,
+  level,
+  group,
+  low_eqbound = -0.1,
+  high_eqbound = 0.1,
+  alpha = 0.05,
+  desc = FALSE,
+  plot = FALSE
+)
 }
 \arguments{
 \item{data}{.}

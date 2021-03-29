@@ -6,3 +6,4 @@
 ^build/R$
 ^build/js$
 ^.*\.jmo$
+^Shiny$

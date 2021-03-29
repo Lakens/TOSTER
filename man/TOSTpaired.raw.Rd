@@ -4,8 +4,19 @@
 \alias{TOSTpaired.raw}
 \title{TOST function for a dependent t-test (raw scores)}
 \usage{
-TOSTpaired.raw(n, m1, m2, sd1, sd2, r12, low_eqbound, high_eqbound, alpha,
-  plot = TRUE, verbose = TRUE)
+TOSTpaired.raw(
+  n,
+  m1,
+  m2,
+  sd1,
+  sd2,
+  r12,
+  low_eqbound,
+  high_eqbound,
+  alpha,
+  plot = TRUE,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{n}{sample size (pairs)}

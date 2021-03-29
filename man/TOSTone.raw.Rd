@@ -4,8 +4,17 @@
 \alias{TOSTone.raw}
 \title{TOST function for a one-sample t-test (raw scores)}
 \usage{
-TOSTone.raw(m, mu, sd, n, low_eqbound, high_eqbound, alpha, plot = TRUE,
-  verbose = TRUE)
+TOSTone.raw(
+  m,
+  mu,
+  sd,
+  n,
+  low_eqbound,
+  high_eqbound,
+  alpha,
+  plot = TRUE,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{m}{mean}

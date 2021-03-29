@@ -6,13 +6,15 @@ Description: Two one-sided tests (TOST) procedure to test equivalence for t-test
 Author: Daniel Lakens <D.Lakens@tue.nl>
 Maintainer: Daniel Lakens <D.Lakens@tue.nl>
 License: GPL-3
-RoxygenNote: 6.1.0
+RoxygenNote: 7.1.1
 Imports:
     stats,
     graphics,
     jmvcore (>= 0.9.6.4),
     ggplot2,
-    R6
+    R6,
+    ggdist,
+    distributional
 Suggests: knitr,
     rmarkdown
 VignetteBuilder: knitr

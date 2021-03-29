@@ -59,21 +59,39 @@ options:
           R: >
             `TRUE` or `FALSE` (default), assume equal variances
 
+    - name: hypothesis
+      title: Alternative hypothesis
+      type: List
+      options:
+        - name: EQU
+          title: "Equivalence Test"
+        - name: MET
+          title: "Minimal Effect Test"
+      default: EQU
+      description:
+          ui: >
+            the alternative hypothesis for equivlance or minimal effect testing.
+          R: >
+            `'equivalence'` (default), `'oneGreater'` or
+            `'twoGreater'`, the alternative hypothesis; group 1 different
+            to group 2, group 1 greater than group 2, and group 2 greater than
+            group 1 respectively
+
     - name: low_eqbound
-      title: Lower equivalence bounds
+      title: Lower bound(s)
       type: Number
       default: -0.5
       description:
           R: >
-            a number (default: -0.5) the lower equivalence bounds
+            a number (default: -0.5) the lower equivalence/MET bounds
 
     - name: high_eqbound
-      title: Upper equivalence bounds
+      title: Upper bound(s)
       type: Number
       default: 0.5
       description:
           R: >
-            a number (default: 0.5) the upper equivalence bounds
+            a number (default: 0.5) the upper equivalence/MET bounds
 
     - name: eqbound_type
       title: Bounds type

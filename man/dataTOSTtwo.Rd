@@ -4,10 +4,21 @@
 \alias{dataTOSTtwo}
 \title{TOST Independent Samples T-Test}
 \usage{
-dataTOSTtwo(data, deps, group, var_equal = FALSE, low_eqbound = -0.5,
-  high_eqbound = 0.5, eqbound_type = "d", alpha = 0.05,
-  desc = FALSE, plots = FALSE, low_eqbound_d = -999999999,
-  high_eqbound_d = -999999999)
+dataTOSTtwo(
+  data,
+  deps,
+  group,
+  var_equal = FALSE,
+  hypothesis = "EQU",
+  low_eqbound = -0.5,
+  high_eqbound = 0.5,
+  eqbound_type = "d",
+  alpha = 0.05,
+  desc = FALSE,
+  plots = FALSE,
+  low_eqbound_d = -999999999,
+  high_eqbound_d = -999999999
+)
 }
 \arguments{
 \item{data}{the data as a data frame}
@@ -20,9 +31,16 @@ have two levels}
 \item{var_equal}{\code{TRUE} or \code{FALSE} (default), assume equal
 variances}
 
-\item{low_eqbound}{a number (default: -0.5) the lower equivalence bounds}
+\item{hypothesis}{\code{'equivalence'} (default), \code{'oneGreater'} or
+\code{'twoGreater'}, the alternative hypothesis; group 1 different to group
+2, group 1 greater than group 2, and group 2 greater than group 1
+respectively}
 
-\item{high_eqbound}{a number (default: 0.5) the upper equivalence bounds}
+\item{low_eqbound}{a number (default: -0.5) the lower equivalence/MET
+bounds}
+
+\item{high_eqbound}{a number (default: 0.5) the upper equivalence/MET
+bounds}
 
 \item{eqbound_type}{\code{'d'} (default) or \code{'raw'}; whether the
 bounds are specified in Cohen's d or raw units respectively}

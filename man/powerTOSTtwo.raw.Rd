@@ -4,8 +4,14 @@
 \alias{powerTOSTtwo.raw}
 \title{Power analysis for TOST for independent t-test (raw scores).}
 \usage{
-powerTOSTtwo.raw(alpha, statistical_power, N, sdpooled, low_eqbound,
-  high_eqbound)
+powerTOSTtwo.raw(
+  alpha,
+  statistical_power,
+  N,
+  sdpooled,
+  low_eqbound,
+  high_eqbound
+)
 }
 \arguments{
 \item{alpha}{alpha used for the test (e.g., 0.05)}
