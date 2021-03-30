@@ -7,6 +7,7 @@
 dataTOSTpaired(
   data,
   pairs,
+  hypothesis = "EQU",
   low_eqbound = -0.5,
   high_eqbound = 0.5,
   eqbound_type = "d",
@@ -22,6 +23,9 @@ dataTOSTpaired(
 
 \item{pairs}{a list of vectors of strings naming variables to pair from
 \code{data}}
+
+\item{hypothesis}{\code{'EQU'} for equivalence (default), or \code{'MET'}
+for minimal effects test, the alternative hypothesis.}
 
 \item{low_eqbound}{a number (default: 0.5) the lower equivalence bounds}
 

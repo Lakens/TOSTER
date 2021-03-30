@@ -7,6 +7,7 @@ dataTOSTrOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     public = list(
         initialize = function(
             pairs = NULL,
+            hypothesis = "EQU",
             low_eqbound_r = -0.3,
             high_eqbound_r = 0.3,
             alpha = 0.05,
@@ -26,6 +27,13 @@ dataTOSTrOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "continuous"),
                 permitted=list(
                     "numeric"))
+            private$..hypothesis <- jmvcore::OptionList$new(
+                "hypothesis",
+                hypothesis,
+                options=list(
+                    "EQU",
+                    "MET"),
+                default="EQU")
             private$..low_eqbound_r <- jmvcore::OptionNumber$new(
                 "low_eqbound_r",
                 low_eqbound_r,
@@ -50,6 +58,7 @@ dataTOSTrOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=FALSE)
 
             self$.addOption(private$..pairs)
+            self$.addOption(private$..hypothesis)
             self$.addOption(private$..low_eqbound_r)
             self$.addOption(private$..high_eqbound_r)
             self$.addOption(private$..alpha)
@@ -58,6 +67,7 @@ dataTOSTrOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         }),
     active = list(
         pairs = function() private$..pairs$value,
+        hypothesis = function() private$..hypothesis$value,
         low_eqbound_r = function() private$..low_eqbound_r$value,
         high_eqbound_r = function() private$..high_eqbound_r$value,
         alpha = function() private$..alpha$value,
@@ -65,6 +75,7 @@ dataTOSTrOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         plots = function() private$..plots$value),
     private = list(
         ..pairs = NA,
+        ..hypothesis = NA,
         ..low_eqbound_r = NA,
         ..high_eqbound_r = NA,
         ..alpha = NA,
@@ -94,6 +105,7 @@ dataTOSTrResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 rows="(pairs)",
                 clearWith=list(
                     "alpha",
+                    "hypothesis",
                     "low_eqbound_r",
                     "high_eqbound_r"),
                 columns=list(
@@ -283,6 +295,8 @@ dataTOSTrBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param data the data as a data frame
 #' @param pairs a list of vectors of strings naming variables to correlate
 #'   from \code{data}
+#' @param hypothesis \code{'EQU'} for equivalence (default), or \code{'MET'}
+#'   for minimal effects test, the alternative hypothesis.
 #' @param low_eqbound_r lower equivalence bounds (e.g., -0.3) expressed in a
 #'   correlation effect size
 #' @param high_eqbound_r upper equivalence bounds (e.g., 0.3) expressed in a
@@ -309,6 +323,7 @@ dataTOSTrBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 dataTOSTr <- function(
     data,
     pairs,
+    hypothesis = "EQU",
     low_eqbound_r = -0.3,
     high_eqbound_r = 0.3,
     alpha = 0.05,
@@ -325,6 +340,7 @@ dataTOSTr <- function(
 
     options <- dataTOSTrOptions$new(
         pairs = pairs,
+        hypothesis = hypothesis,
         low_eqbound_r = low_eqbound_r,
         high_eqbound_r = high_eqbound_r,
         alpha = alpha,

@@ -31,10 +31,8 @@ have two levels}
 \item{var_equal}{\code{TRUE} or \code{FALSE} (default), assume equal
 variances}
 
-\item{hypothesis}{\code{'equivalence'} (default), \code{'oneGreater'} or
-\code{'twoGreater'}, the alternative hypothesis; group 1 different to group
-2, group 1 greater than group 2, and group 2 greater than group 1
-respectively}
+\item{hypothesis}{\code{'EQU'} for equivalence (default), or \code{'MET'}
+for minimal effects test, the alternative hypothesis.}
 
 \item{low_eqbound}{a number (default: -0.5) the lower equivalence/MET
 bounds}

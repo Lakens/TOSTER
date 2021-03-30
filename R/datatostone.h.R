@@ -8,6 +8,7 @@ dataTOSToneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         initialize = function(
             vars = NULL,
             mu = 0,
+            hypothesis = "EQU",
             low_eqbound = -0.5,
             high_eqbound = 0.5,
             eqbound_type = "d",
@@ -34,6 +35,13 @@ dataTOSToneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "mu",
                 mu,
                 default=0)
+            private$..hypothesis <- jmvcore::OptionList$new(
+                "hypothesis",
+                hypothesis,
+                options=list(
+                    "EQU",
+                    "MET"),
+                default="EQU")
             private$..low_eqbound <- jmvcore::OptionNumber$new(
                 "low_eqbound",
                 low_eqbound,
@@ -76,6 +84,7 @@ dataTOSToneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 
             self$.addOption(private$..vars)
             self$.addOption(private$..mu)
+            self$.addOption(private$..hypothesis)
             self$.addOption(private$..low_eqbound)
             self$.addOption(private$..high_eqbound)
             self$.addOption(private$..eqbound_type)
@@ -88,6 +97,7 @@ dataTOSToneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     active = list(
         vars = function() private$..vars$value,
         mu = function() private$..mu$value,
+        hypothesis = function() private$..hypothesis$value,
         low_eqbound = function() private$..low_eqbound$value,
         high_eqbound = function() private$..high_eqbound$value,
         eqbound_type = function() private$..eqbound_type$value,
@@ -99,6 +109,7 @@ dataTOSToneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     private = list(
         ..vars = NA,
         ..mu = NA,
+        ..hypothesis = NA,
         ..low_eqbound = NA,
         ..high_eqbound = NA,
         ..eqbound_type = NA,
@@ -133,6 +144,7 @@ dataTOSToneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     "mu",
                     "alpha",
                     "var_equal",
+                    "hypothesis",
                     "low_eqbound",
                     "high_eqbound",
                     "eqbound_type"),
@@ -345,6 +357,8 @@ dataTOSToneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param data the data as a data frame
 #' @param vars a vector of strings naming variables of interest in \code{data}
 #' @param mu a number (default: 0) to compare against
+#' @param hypothesis \code{'EQU'} for equivalence (default), or \code{'MET'}
+#'   for minimal effects test, the alternative hypothesis;
 #' @param low_eqbound a number (default: -0.5) the lower equivalence bounds
 #' @param high_eqbound a number (default: 0.5) the upper equivalence bounds
 #' @param eqbound_type \code{'d'} (default) or \code{'raw'}; whether the
@@ -374,6 +388,7 @@ dataTOSTone <- function(
     data,
     vars,
     mu = 0,
+    hypothesis = "EQU",
     low_eqbound = -0.5,
     high_eqbound = 0.5,
     eqbound_type = "d",
@@ -396,6 +411,7 @@ dataTOSTone <- function(
     options <- dataTOSToneOptions$new(
         vars = vars,
         mu = mu,
+        hypothesis = hypothesis,
         low_eqbound = low_eqbound,
         high_eqbound = high_eqbound,
         eqbound_type = eqbound_type,

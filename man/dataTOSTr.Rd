@@ -7,6 +7,7 @@
 dataTOSTr(
   data,
   pairs,
+  hypothesis = "EQU",
   low_eqbound_r = -0.3,
   high_eqbound_r = 0.3,
   alpha = 0.05,
@@ -19,6 +20,9 @@ dataTOSTr(
 
 \item{pairs}{a list of vectors of strings naming variables to correlate
 from \code{data}}
+
+\item{hypothesis}{\code{'EQU'} for equivalence (default), or \code{'MET'}
+for minimal effects test, the alternative hypothesis.}
 
 \item{low_eqbound_r}{lower equivalence bounds (e.g., -0.3) expressed in a
 correlation effect size}

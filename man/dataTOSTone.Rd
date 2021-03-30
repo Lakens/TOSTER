@@ -8,6 +8,7 @@ dataTOSTone(
   data,
   vars,
   mu = 0,
+  hypothesis = "EQU",
   low_eqbound = -0.5,
   high_eqbound = 0.5,
   eqbound_type = "d",
@@ -24,6 +25,9 @@ dataTOSTone(
 \item{vars}{a vector of strings naming variables of interest in \code{data}}
 
 \item{mu}{a number (default: 0) to compare against}
+
+\item{hypothesis}{\code{'EQU'} for equivalence (default), or \code{'MET'}
+for minimal effects test, the alternative hypothesis;}
 
 \item{low_eqbound}{a number (default: -0.5) the lower equivalence bounds}
 

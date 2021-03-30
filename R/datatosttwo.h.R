@@ -345,10 +345,11 @@ dataTOSTtwoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     options=options,
                     title="$key",
                     renderFun=".plot",
-                    width=180,
+                    width=250,
                     clearWith=list(
                         "group",
                         "alpha",
+                        "hypothesis",
                         "low_eqbound",
                         "high_eqbound",
                         "eqbound_type",
@@ -401,10 +402,8 @@ dataTOSTtwoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   have two levels
 #' @param var_equal \code{TRUE} or \code{FALSE} (default), assume equal
 #'   variances
-#' @param hypothesis \code{'equivalence'} (default), \code{'oneGreater'} or
-#'   \code{'twoGreater'}, the alternative hypothesis; group 1 different to group
-#'   2, group 1 greater than group 2, and group 2 greater than group 1
-#'   respectively
+#' @param hypothesis \code{'EQU'} for equivalence (default), or \code{'MET'}
+#'   for minimal effects test, the alternative hypothesis.
 #' @param low_eqbound a number (default: -0.5) the lower equivalence/MET
 #'   bounds
 #' @param high_eqbound a number (default: 0.5) the upper equivalence/MET

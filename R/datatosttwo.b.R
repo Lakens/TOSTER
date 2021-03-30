@@ -1,5 +1,8 @@
 
 #' @import ggplot2
+#' @import ggdist
+#' @import distributional
+#'
 dataTOSTtwoClass <- R6::R6Class(
   "dataTOSTtwoClass",
   inherit = dataTOSTtwoBase,
@@ -177,16 +180,17 @@ dataTOSTtwoClass <- R6::R6Class(
 
         plot <- plots$get(key=depName)
         points <- data.frame(
-          m=dif,
-          degree_f = unname(degree_f),
-          SE= unname(SE_val),
+          mu = dif,
+          param = round(unname(tresult$parameter),0),
+          sigma = unname(tresult$stderr),
           cil=LL90,
           ciu=UL90,
           low=low_eqbound,
           high=high_eqbound,
+          alpha = alpha,
           stringsAsFactors=FALSE)
         plot$setState(points)
-        print(points)
+        #print(points)
       }
     },
     .plot=function(image, ggtheme, theme, ...) {
@@ -194,7 +198,44 @@ dataTOSTtwoClass <- R6::R6Class(
       if (is.null(image$state))
         return(FALSE)
 
-      tostplot(image, ggtheme, theme)
+      cut_cdf_qi = function(p, .width = c(.66, .95, 1), labels = NULL) {
+        .width = sort(.width)
+
+        if (is.function(labels)) {
+          labels = labels(.width)
+        } else if (is.null(labels)) {
+          labels = .width
+        }
+
+        cut(abs(1 - p*2), labels = labels, breaks = c(0, .width), include.lowest = TRUE, ordered_result = TRUE)
+      }
+
+      points <- image$state
+      c1 = 1-points$alpha
+      c2 = 1-points$alpha*2
+      if(c1 < .999){
+        sets = c(.5,c2,c1,.999)
+      } else {
+        sets = c(.5,c2,c1)
+      }
+      plot = ggplot(data = points,
+                    aes_string(y = 0)) +
+        stat_dist_halfeye(aes(
+          dist = dist_student_t(
+            mu = points$mu,
+            df = points$param,
+            sigma = points$sigma,
+          ),
+          fill = stat(cut_cdf_qi(p=cdf,
+                                 .width = sets))
+        ),
+        .width = c(c2, c1)) +
+        scale_fill_viridis_d(direction = -1,
+                          option = "plasma",
+                          na.translate = FALSE) +
+        labs(x = 'Mean Difference', y = 'Density',
+             fill = "Interval")
+      print(plot)
 
       return(TRUE)
     })

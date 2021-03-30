@@ -32,25 +32,20 @@ tostplot <- function(image, ggtheme = NULL, theme = NULL) {
   #    axis.ticks.x=element_blank(),
   #    axis.title.y=element_blank(),)
 
-  plot2 <- ggplot(data=data2,
+  plot2 <- ggplot(data=data,
                  aes_string(y=0)) +
-  #geom_hline(yintercept=data$low,  colour=theme$color[1]) +
-  #geom_hline(yintercept=data$high, colour=theme$color[1]) +
-  #geom_text(aes(5, data$low,  vjust=-.9, hjust=1),
-  #          label='Lower bound', colour=theme$color[1]) +
-  #geom_text(aes(5, data$high, vjust=1.9, hjust=1),
-  #          label='Upper bound', colour=theme$color[1]) +
-  #geom_errorbar(aes_string(x=0, ymin='cil', ymax='ciu', width=.4),
-  #              size=.8, colour=theme$color[1]) +
-  #geom_point(aes_string(x=0, y='m'), shape=21, fill=theme$fill[1],
-  #           size=3, colour=theme$color[1]) +
-    ggdist::stat_dist_halfeye(aes(
+    ggdist::stat_dist_halfeye(aes_string(
       dist = distributional::dist_student_t(
-        df = data$degree_f,
-        mu = data$m,
-        sigma = data$SE
+        df = "degree_f",
+        mu = "m",
+        sigma = "SE"
       )
     ))
 
-  suppressWarnings(print(plot))
+  plot3 = ggplot(data=data) +
+    geom_point(aes_string(x=1,y="degree_f")) +
+    geom_point(aes_string(x=2,y="m")) +
+    geom_point(aes_string(x=3,y="SE"))
+
+  suppressWarnings(print(plot2))
 }

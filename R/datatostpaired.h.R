@@ -7,6 +7,7 @@ dataTOSTpairedOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
     public = list(
         initialize = function(
             pairs = NULL,
+            hypothesis = "EQU",
             low_eqbound = -0.5,
             high_eqbound = 0.5,
             eqbound_type = "d",
@@ -29,6 +30,13 @@ dataTOSTpairedOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "continuous"),
                 permitted=list(
                     "numeric"))
+            private$..hypothesis <- jmvcore::OptionList$new(
+                "hypothesis",
+                hypothesis,
+                options=list(
+                    "EQU",
+                    "MET"),
+                default="EQU")
             private$..low_eqbound <- jmvcore::OptionNumber$new(
                 "low_eqbound",
                 low_eqbound,
@@ -70,6 +78,7 @@ dataTOSTpairedOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 hidden=TRUE)
 
             self$.addOption(private$..pairs)
+            self$.addOption(private$..hypothesis)
             self$.addOption(private$..low_eqbound)
             self$.addOption(private$..high_eqbound)
             self$.addOption(private$..eqbound_type)
@@ -81,6 +90,7 @@ dataTOSTpairedOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         }),
     active = list(
         pairs = function() private$..pairs$value,
+        hypothesis = function() private$..hypothesis$value,
         low_eqbound = function() private$..low_eqbound$value,
         high_eqbound = function() private$..high_eqbound$value,
         eqbound_type = function() private$..eqbound_type$value,
@@ -91,6 +101,7 @@ dataTOSTpairedOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         high_eqbound_dz = function() private$..high_eqbound_dz$value),
     private = list(
         ..pairs = NA,
+        ..hypothesis = NA,
         ..low_eqbound = NA,
         ..high_eqbound = NA,
         ..eqbound_type = NA,
@@ -365,6 +376,8 @@ dataTOSTpairedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param data the data as a data frame
 #' @param pairs a list of vectors of strings naming variables to pair from
 #'   \code{data}
+#' @param hypothesis \code{'EQU'} for equivalence (default), or \code{'MET'}
+#'   for minimal effects test, the alternative hypothesis.
 #' @param low_eqbound a number (default: 0.5) the lower equivalence bounds
 #' @param high_eqbound a number (default: 0.5) the upper equivalence bounds
 #' @param eqbound_type \code{'d'} (default) or \code{'raw'}; whether the
@@ -394,6 +407,7 @@ dataTOSTpairedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 dataTOSTpaired <- function(
     data,
     pairs,
+    hypothesis = "EQU",
     low_eqbound = -0.5,
     high_eqbound = 0.5,
     eqbound_type = "d",
@@ -413,6 +427,7 @@ dataTOSTpaired <- function(
 
     options <- dataTOSTpairedOptions$new(
         pairs = pairs,
+        hypothesis = hypothesis,
         low_eqbound = low_eqbound,
         high_eqbound = high_eqbound,
         eqbound_type = eqbound_type,

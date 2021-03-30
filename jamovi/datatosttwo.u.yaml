@@ -48,16 +48,16 @@ children:
       - type: Label
         label: Hypothesis
         children:
-              - type: RadioButton
-                name: EQU
-                optionName: hypothesis
-                optionPart: EQU
-                label: Equivalence Test
-              - type: RadioButton
-                name: MET
-                optionName: hypothesis
-                optionPart: MET
-                label: Minimal Effects Test
+          - type: RadioButton
+            name: EQU
+            optionName: hypothesis
+            optionPart: EQU
+            label: Equivalence Test
+          - type: RadioButton
+            name: MET
+            optionName: hypothesis
+            optionPart: MET
+            label: Minimal Effects Test
       - name: low_eqbound
         type: TextBox
         format: number
@@ -76,6 +76,5 @@ children:
       - name: desc
         type: CheckBox
         label: Descriptive statistics
-      - name: plots
-        type: CheckBox
-        label: Plots
+      - type: CheckBox
+        name: plots
