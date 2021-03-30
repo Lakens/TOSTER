@@ -14,7 +14,8 @@ Imports:
     ggplot2,
     R6,
     ggdist,
-    distributional
+    distributional,
+    psych
 Suggests: knitr,
     rmarkdown
 VignetteBuilder: knitr

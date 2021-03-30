@@ -140,6 +140,7 @@ dataTOSTtwoClass <- R6::R6Class(
                             var.equal = var.equal,
                             alternative = alt_low,
                             mu = low_eqbound)
+
         high_ttest <- t.test(dep ~ group,
                              dataTTest,
                              paired = FALSE,
@@ -213,8 +214,10 @@ dataTOSTtwoClass <- R6::R6Class(
       points <- image$state
       c1 = 1-points$alpha
       c2 = 1-points$alpha*2
-      if(c1 < .999){
+      if(c1 < .999 && c2 > .5){
         sets = c(.5,c2,c1,.999)
+      } else if(c2 <=.5 && c1 < .999) {
+        sets = c(c2,c1,.999)
       } else {
         sets = c(.5,c2,c1)
       }
@@ -230,11 +233,19 @@ dataTOSTtwoClass <- R6::R6Class(
                                  .width = sets))
         ),
         .width = c(c2, c1)) +
-        scale_fill_viridis_d(direction = -1,
-                          option = "plasma",
+        scale_fill_brewer(direction = -1,
                           na.translate = FALSE) +
         labs(x = 'Mean Difference', y = 'Density',
-             fill = "Interval")
+             fill = "Confidence Interval") +
+        geom_vline(xintercept = low,linetype="dashed") +
+        geom_vline(xintercept = high,linetype="dashed") +
+        geom_text(aes(y=1.55, x=low,  vjust=-.9, hjust=1),
+                  angle = 90,
+                  label='Lower Bound') +
+        geom_text(aes(y=1.55, x=high, vjust=1.5, hjust=1),
+                  angle = 90,
+                  label='Upper Bound') +
+        theme_bw()
       print(plot)
 
       return(TRUE)
