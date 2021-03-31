@@ -38,43 +38,75 @@ children:
             isTarget: true
   - type: LayoutBox
     margin: large
+    stretchFactor: 1
     children:
-      - name: var_equal
-        type: CheckBox
-        label: Assume equal variances
-  - type: LayoutBox
-    margin: large
-    children:
-      - type: Label
-        label: Hypothesis
+      - type: LayoutBox
+        cell:
+          column: 0
+          row: 0
+        stretchFactor: 1
         children:
-          - type: RadioButton
-            name: EQU
-            optionName: hypothesis
-            optionPart: EQU
-            label: Equivalence Test
-          - type: RadioButton
-            name: MET
-            optionName: hypothesis
-            optionPart: MET
-            label: Minimal Effects Test
-      - name: low_eqbound
-        type: TextBox
-        format: number
-      - name: high_eqbound
-        type: TextBox
-        format: number
-      - type: ComboBox
-        name: eqbound_type
-      - name: alpha
-        type: TextBox
-        label: Alpha level
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - name: desc
-        type: CheckBox
-        label: Descriptive statistics
-      - type: CheckBox
-        name: plots
+          - type: LayoutBox
+            margin: large
+            children:
+              - name: var_equal
+                type: CheckBox
+                label: Assume equal variances
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: Label
+                label: Hypothesis
+                children:
+                  - type: RadioButton
+                    name: EQU
+                    optionName: hypothesis
+                    optionPart: EQU
+                    label: Equivalence Test
+                  - type: RadioButton
+                    name: MET
+                    optionName: hypothesis
+                    optionPart: MET
+                    label: Minimal Effects Test
+              - name: low_eqbound
+                type: TextBox
+                format: number
+              - name: high_eqbound
+                type: TextBox
+                format: number
+              - type: ComboBox
+                name: eqbound_type
+              - name: alpha
+                type: TextBox
+                label: Alpha level
+                format: number
+      - type: LayoutBox
+        cell:
+          column: 1
+          row: 0
+        stretchFactor: 1
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - name: desc
+                type: CheckBox
+                label: Descriptive statistics
+              - type: CheckBox
+                name: plots
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: Label
+                label: Standardized Effect Size
+                children:
+                  - type: RadioButton
+                    name: d
+                    optionName: smd_type
+                    optionPart: d
+                    label: Cohen's d
+                  - type: RadioButton
+                    name: g
+                    optionName: smd_type
+                    optionPart: g
+                    label: Hedges' g

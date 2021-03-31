@@ -17,7 +17,8 @@ dataTOSTtwoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             desc = FALSE,
             plots = FALSE,
             low_eqbound_d = -999999999,
-            high_eqbound_d = -999999999, ...) {
+            high_eqbound_d = -999999999,
+            smd_type = "d", ...) {
 
             super$initialize(
                 package="TOSTER",
@@ -86,6 +87,13 @@ dataTOSTtwoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 high_eqbound_d,
                 default=-999999999,
                 hidden=TRUE)
+            private$..smd_type <- jmvcore::OptionList$new(
+                "smd_type",
+                smd_type,
+                options=list(
+                    "d",
+                    "g"),
+                default="d")
 
             self$.addOption(private$..deps)
             self$.addOption(private$..group)
@@ -99,6 +107,7 @@ dataTOSTtwoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..plots)
             self$.addOption(private$..low_eqbound_d)
             self$.addOption(private$..high_eqbound_d)
+            self$.addOption(private$..smd_type)
         }),
     active = list(
         deps = function() private$..deps$value,
@@ -112,7 +121,8 @@ dataTOSTtwoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         desc = function() private$..desc$value,
         plots = function() private$..plots$value,
         low_eqbound_d = function() private$..low_eqbound_d$value,
-        high_eqbound_d = function() private$..high_eqbound_d$value),
+        high_eqbound_d = function() private$..high_eqbound_d$value,
+        smd_type = function() private$..smd_type$value),
     private = list(
         ..deps = NA,
         ..group = NA,
@@ -125,7 +135,8 @@ dataTOSTtwoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..desc = NA,
         ..plots = NA,
         ..low_eqbound_d = NA,
-        ..high_eqbound_d = NA)
+        ..high_eqbound_d = NA,
+        ..smd_type = NA)
 )
 
 dataTOSTtwoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -134,6 +145,7 @@ dataTOSTtwoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     active = list(
         tost = function() private$.items[["tost"]],
         eqb = function() private$.items[["eqb"]],
+        effsize = function() private$.items[["effsize"]],
         desc = function() private$.items[["desc"]],
         plots = function() private$.items[["plots"]]),
     private = list(),
@@ -237,8 +249,7 @@ dataTOSTtwoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     list(
                         `name`="stat[cohen]", 
                         `title`="", 
-                        `type`="text", 
-                        `content`="Cohen's d"),
+                        `type`="text"),
                     list(
                         `name`="low[cohen]", 
                         `title`="Low", 
@@ -248,20 +259,9 @@ dataTOSTtwoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                         `title`="High", 
                         `type`="number"),
                     list(
-                        `name`="cil[cohen]", 
-                        `title`="Lower", 
-                        `superTitle`="Confidence interval", 
-                        `content`=""),
-                    list(
-                        `name`="ciu[cohen]", 
-                        `title`="Upper", 
-                        `superTitle`="Confidence interval", 
-                        `content`=""),
-                    list(
                         `name`="stat[raw]", 
                         `title`="", 
-                        `type`="text", 
-                        `content`="Raw"),
+                        `type`="text"),
                     list(
                         `name`="low[raw]", 
                         `title`="Low", 
@@ -269,6 +269,49 @@ dataTOSTtwoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     list(
                         `name`="high[raw]", 
                         `title`="High", 
+                        `type`="number"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="effsize",
+                title="Effect Sizes",
+                rows="(deps)",
+                clearWith=list(
+                    "group",
+                    "alpha",
+                    "low_eqbound",
+                    "high_eqbound",
+                    "eqbound_type",
+                    "var_equal"),
+                columns=list(
+                    list(
+                        `name`="var", 
+                        `title`="", 
+                        `type`="text", 
+                        `content`="($key)"),
+                    list(
+                        `name`="stat[cohen]", 
+                        `title`="", 
+                        `type`="text"),
+                    list(
+                        `name`="est[cohen]", 
+                        `title`="Estimate", 
+                        `type`="number"),
+                    list(
+                        `name`="cil[cohen]", 
+                        `title`="Lower", 
+                        `superTitle`="Confidence interval"),
+                    list(
+                        `name`="ciu[cohen]", 
+                        `title`="Upper", 
+                        `superTitle`="Confidence interval"),
+                    list(
+                        `name`="stat[raw]", 
+                        `title`="", 
+                        `type`="text", 
+                        `content`="Raw"),
+                    list(
+                        `name`="est[raw]", 
+                        `title`="Estimate", 
                         `type`="number"),
                     list(
                         `name`="cil[raw]", 
@@ -345,11 +388,13 @@ dataTOSTtwoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     options=options,
                     title="$key",
                     renderFun=".plot",
-                    width=250,
+                    width=400,
+                    height=400,
                     clearWith=list(
                         "group",
                         "alpha",
                         "hypothesis",
+                        "smd_type",
                         "low_eqbound",
                         "high_eqbound",
                         "eqbound_type",
@@ -416,10 +461,13 @@ dataTOSTtwoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param plots \code{TRUE} or \code{FALSE} (default), provide plots
 #' @param low_eqbound_d deprecated
 #' @param high_eqbound_d deprecated
+#' @param smd_type \code{'d'} (default) or \code{'g'}; whether the calculated
+#'   effect size is biased (d) or bias-corrected (g).
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$tost} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$eqb} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$effsize} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$desc} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plots} \tab \tab \tab \tab \tab an array of images \cr
 #' }
@@ -444,7 +492,8 @@ dataTOSTtwo <- function(
     desc = FALSE,
     plots = FALSE,
     low_eqbound_d = -999999999,
-    high_eqbound_d = -999999999) {
+    high_eqbound_d = -999999999,
+    smd_type = "d") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("dataTOSTtwo requires jmvcore to be installed (restart may be required)")
@@ -470,7 +519,8 @@ dataTOSTtwo <- function(
         desc = desc,
         plots = plots,
         low_eqbound_d = low_eqbound_d,
-        high_eqbound_d = high_eqbound_d)
+        high_eqbound_d = high_eqbound_d,
+        smd_type = smd_type)
 
     analysis <- dataTOSTtwoClass$new(
         options = options,

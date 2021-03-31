@@ -96,7 +96,7 @@ options:
       type: List
       options:
         - name: d
-          title: Cohen's D
+          title: Standardized
         - name: raw
           title: Raw
       default: d
@@ -141,3 +141,17 @@ options:
       hidden: true
       description:
           R: deprecated
+
+    - name: smd_type
+      title: Standardized Effect Size
+      type: List
+      options:
+        - name: d
+          title: Cohen's d
+        - name: g
+          title: Hedges' g
+      default: d
+      description:
+          R: >
+            `'d'` (default) or `'g'`;
+            whether the calculated effect size is biased (d) or bias-corrected (g).

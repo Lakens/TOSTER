@@ -2,7 +2,7 @@
 #' @import ggplot2
 #' @import ggdist
 #' @import distributional
-#'
+#' @importFrom psych harmonic.mean
 dataTOSTtwoClass <- R6::R6Class(
   "dataTOSTtwoClass",
   inherit = dataTOSTtwoBase,
@@ -13,12 +13,13 @@ dataTOSTtwoClass <- R6::R6Class(
 
       tt <- self$results$tost
       eqb <- self$results$eqb
+      effsize <- self$results$effsize
       desc <- self$results$desc
 
-      eqb$getColumn('cil[cohen]')$setSuperTitle(jmvcore::format('{}% Confidence interval', ci))
-      eqb$getColumn('ciu[cohen]')$setSuperTitle(jmvcore::format('{}% Confidence interval', ci))
-      eqb$getColumn('cil[raw]')$setSuperTitle(jmvcore::format('{}% Confidence interval', ci))
-      eqb$getColumn('ciu[raw]')$setSuperTitle(jmvcore::format('{}% Confidence interval', ci))
+      effsize$getColumn('cil[cohen]')$setSuperTitle(jmvcore::format('{}% Confidence interval', ci))
+      effsize$getColumn('ciu[cohen]')$setSuperTitle(jmvcore::format('{}% Confidence interval', ci))
+      effsize$getColumn('cil[raw]')$setSuperTitle(jmvcore::format('{}% Confidence interval', ci))
+      effsize$getColumn('ciu[raw]')$setSuperTitle(jmvcore::format('{}% Confidence interval', ci))
 
       groupName <- self$options$group
       groups <- NULL
@@ -44,6 +45,7 @@ dataTOSTtwoClass <- R6::R6Class(
 
       tt <- self$results$tost
       eqb <- self$results$eqb
+      effsize <- self$results$effsize
       desc <- self$results$desc
       plots <- self$results$plots
       old = FALSE
@@ -73,17 +75,13 @@ dataTOSTtwoClass <- R6::R6Class(
 
         sediff <- jmvcore::tryNaN(sqrt((v[1]/n[1])+(v[2]/n[2])))
 
-        pooledSD <- jmvcore::tryNaN(sqrt(((n[1]-1)*v[1]+(n[2]-1)*v[2])/(n[1]+n[2]-2)))
-        d <- (m[1]-m[2])/pooledSD # Cohen's d
-
         n[is.na(n)] <- 0
         m[is.na(m)] <- NaN
         med[is.na(med)] <- NaN
         se[is.na(se)] <- NaN
         sd[is.na(sd)] <- NaN
         sediff[is.na(sediff)] <- NaN
-        pooledSD[is.na(pooledSD)] <- NaN
-        d[is.na(d)] <- NaN
+
 
 
         var.equal <- self$options$var_equal
@@ -106,24 +104,71 @@ dataTOSTtwoClass <- R6::R6Class(
         df <- unname(tresult$parameter)
 
         if (var.equal) {
-          sdpooled <- sqrt((((n[1] - 1)*(sd[1]^2)) + (n[2] - 1)*(sd[2]^2))/((n[1]+n[2])-2)) #calculate sd pooled
+          denomSD <- sqrt((((n[1] - 1)*(sd[1]^2)) + (n[2] - 1)*(sd[2]^2))/((n[1]+n[2])-2)) #calculate sd pooled
         } else {
-          sdpooled <- sqrt((sd[1]^2 + sd[2]^2)/2) #calculate sd root mean squared for Welch's t-test
+          denomSD <- sqrt((sd[1]^2 + sd[2]^2)/2) #calculate sd root mean squared for Welch's t-test
         }
+
+        denomSD[is.na(denomSD)] <- NaN
+
+        #denomSD <- jmvcore::tryNaN(sqrt(((n[1]-1)*v[1]+(n[2]-1)*v[2])/(n[1]+n[2]-2)))
+        d <- abs(m[1]-m[2])/denomSD # Cohen's d
+
+        d[is.na(d)] <- NaN
+
+        cohend = d
+        ntilde <- harmonic.mean(c(n[1],n[2]))
+
+        # Compute unbiased Hedges' g
+        # Use the lgamma function, and update to what Goulet-Pelletier & cousineau used; works with larger inputs
+        J <- gamma(df/2)/(sqrt(df/2)*gamma((df-1)/2))
+
+        if(self$options$smd_type == 'g') {
+          cohend <-  cohend * J
+          smd_label = "Hedges' g"
+        } else {
+          smd_label = "Cohen's d"
+        }
+
+        # add options for cohend here
+        d_lambda <- cohend * sqrt(ntilde/2)
+        d_sigma = sqrt((n[1]+n[2])/(n[1]*n[2])+(cohend^2/(2*(n[1]+n[2]))))
+
+        # Confidence interval of the SMD from Goulet-Pelletier & Cousineau
+        tlow <- qt(1 / 2 - (1-alpha*2) / 2, df = df, ncp = d_lambda)
+        thigh <- qt(1 / 2 + (1-alpha*2) / 2, df = df, ncp = d_lambda)
+        if(m[1] == m[2]) {
+          dlow <- (tlow*(n[1]+n[2])) / (sqrt(df) * sqrt(n[1]*n[2]))
+          dhigh <- (thigh*(n[1]+n[2])) / (sqrt(df) * sqrt(n[1]*n[2]))
+        } else {
+          dlow <- tlow / d_lambda * cohend
+          dhigh <- thigh / d_lambda * cohend
+        }
+
+        # The function provided by Goulet-Pelletier & Cousineau works with +mdiff.
+        # Now we fix the signs and directions for negative differences
+        if ((m[1]-m[2]) < 0) {
+          cohend <- cohend * -1
+          tdlow <- dlow
+          dlow <- dhigh * -1
+          dhigh <- tdlow * -1
+        }
+
+
 
         if (low_eqbound_d != -999999999 && low_eqbound_d != -999999999) {
           # low_eqbound_d and high_eqbound_d options are deprecated
-          low_eqbound  <- low_eqbound_d * sdpooled
-          high_eqbound <- high_eqbound_d * sdpooled
+          low_eqbound  <- low_eqbound_d * denomSD
+          high_eqbound <- high_eqbound_d * denomSD
         }
         else if (self$options$eqbound_type == 'd') {
           low_eqbound_d <- low_eqbound
           high_eqbound_d <- high_eqbound
-          low_eqbound  <- low_eqbound * sdpooled
-          high_eqbound <- high_eqbound * sdpooled
+          low_eqbound  <- low_eqbound * denomSD
+          high_eqbound <- high_eqbound * denomSD
         } else {
-          low_eqbound_d <- low_eqbound / sdpooled
-          high_eqbound_d <- high_eqbound / sdpooled
+          low_eqbound_d <- low_eqbound / denomSD
+          high_eqbound_d <- high_eqbound / denomSD
         }
 
         if(self$options$hypothesis == "EQU"){
@@ -168,27 +213,64 @@ dataTOSTtwoClass <- R6::R6Class(
           `t[1]`=t2, `df[1]`=degree_f, `p[1]`=p2,
           `t[2]`=t1, `df[2]`=degree_f, `p[2]`=p1))
 
-        eqb$setRow(rowKey=depName, list(
-          `low[raw]`=low_eqbound, `high[raw]`=high_eqbound, `cil[raw]`=LL90, `ciu[raw]`=UL90,
-          `low[cohen]`=low_eqbound_d, `high[cohen]`=high_eqbound_d))
+        eqb$setRow(
+          rowKey = depName,
+          list(
+            `stat[cohen]` = smd_label,
+            `low[cohen]` = low_eqbound_d,
+            `high[cohen]` = high_eqbound_d,
+            `stat[raw]` = "Raw",
+            `low[raw]` = low_eqbound,
+            `high[raw]` = high_eqbound
+          )
+        )
 
-        desc$setRow(rowKey=depName, list(
-          `n[1]`=n[1], `m[1]`=m[1], `med[1]`=med[1], `sd[1]`=sd[1], `se[1]`=se[1],
-          `n[2]`=n[2], `m[2]`=m[2], `med[2]`=med[2], `sd[2]`=sd[2], `se[2]`=se[2]))
+        effsize$setRow(
+          rowKey = depName,
+          list(
+            `stat[cohen]` = smd_label,
+            `est[cohen]` = cohend,
+            `cil[cohen]` = dlow,
+            `ciu[cohen]` = dhigh,
+            `est[raw]` = dif,
+            `cil[raw]` = LL90,
+            `ciu[raw]` = UL90
+          )
+        )
+
+        desc$setRow(
+          rowKey = depName,
+          list(
+            `n[1]` = n[1],
+            `m[1]` = m[1],
+            `med[1]` = med[1],
+            `sd[1]` = sd[1],
+            `se[1]` = se[1],
+            `n[2]` = n[2],
+            `m[2]` = m[2],
+            `med[2]` = med[2],
+            `sd[2]` = sd[2],
+            `se[2]` = se[2]
+          )
+        )
 
         # Get SE value
         SE_val = tresult$stderr
 
         plot <- plots$get(key=depName)
         points <- data.frame(
-          mu = dif,
-          param = round(unname(tresult$parameter),0),
-          sigma = unname(tresult$stderr),
-          cil=LL90,
-          ciu=UL90,
-          low=low_eqbound,
-          high=high_eqbound,
-          alpha = alpha,
+          type = c("Mean Difference", smd_label),
+          mu = c(dif,0),
+          #param = c(round(unname(tresult$parameter),round(n[1]+n[2]-2,0))),
+          param = c(round(unname(tresult$parameter),0),round((n[1]+n[2]-2),0)),
+          #param = c(60,90),
+          sigma = c(unname(tresult$stderr), d_sigma),
+          lambda = c(0, d_lambda),
+          #cil=LL90,
+          #ciu=UL90,
+          low=c(low_eqbound, low_eqbound_d),
+          high=c(high_eqbound, high_eqbound_d),
+          alpha = c(alpha, alpha),
           stringsAsFactors=FALSE)
         plot$setState(points)
         #print(points)
@@ -212,8 +294,8 @@ dataTOSTtwoClass <- R6::R6Class(
       }
 
       points <- image$state
-      c1 = 1-points$alpha
-      c2 = 1-points$alpha*2
+      c1 = 1-points$alpha[1]
+      c2 = 1-points$alpha[1]*2
       if(c1 < .999 && c2 > .5){
         sets = c(.5,c2,c1,.999)
       } else if(c2 <=.5 && c1 < .999) {
@@ -225,9 +307,10 @@ dataTOSTtwoClass <- R6::R6Class(
                     aes_string(y = 0)) +
         stat_dist_halfeye(aes(
           dist = dist_student_t(
-            mu = points$mu,
-            df = points$param,
-            sigma = points$sigma,
+            mu = mu,
+            df = param,
+            sigma = sigma,
+            ncp = lambda
           ),
           fill = stat(cut_cdf_qi(p=cdf,
                                  .width = sets))
@@ -235,17 +318,27 @@ dataTOSTtwoClass <- R6::R6Class(
         .width = c(c2, c1)) +
         scale_fill_brewer(direction = -1,
                           na.translate = FALSE) +
-        labs(x = 'Mean Difference', y = 'Density',
+        labs(x = '', y = '',
              fill = "Confidence Interval") +
-        geom_vline(xintercept = low,linetype="dashed") +
-        geom_vline(xintercept = high,linetype="dashed") +
-        geom_text(aes(y=1.55, x=low,  vjust=-.9, hjust=1),
+        geom_vline(aes(xintercept = low),
+                   linetype="dashed") +
+        geom_vline(aes(xintercept = high),
+                   linetype="dashed") +
+        geom_text(aes(y=1.5, x=low,
+                      vjust=-.9, hjust=1),
                   angle = 90,
                   label='Lower Bound') +
-        geom_text(aes(y=1.55, x=high, vjust=1.5, hjust=1),
+        geom_text(aes(y=1.5, x=high, vjust=1.5, hjust=1),
                   angle = 90,
                   label='Upper Bound') +
-        theme_bw()
+        theme_tidybayes() +
+        theme(legend.position="top",
+              strip.text = element_text(face="bold", size=10),
+              axis.text.y = element_blank(),
+              axis.ticks.y = element_blank()) +
+        facet_wrap(~type,
+                   ncol = 1,
+                   scales = "free")
       print(plot)
 
       return(TRUE)
