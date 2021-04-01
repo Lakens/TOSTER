@@ -1,5 +1,8 @@
 
 #' @import ggplot2
+#' @import ggdist
+#' @import distributional
+#' @importFrom psych harmonic.mean
 dataTOSTpairedClass <- R6::R6Class(
   "dataTOSTpairedClass",
   inherit = dataTOSTpairedBase,
@@ -69,6 +72,32 @@ dataTOSTpairedClass <- R6::R6Class(
 
         r12 <- stats::cor(i1, i2)
         sdif<-sqrt(sd1^2+sd2^2-2*r12*sd1*sd2)
+
+        cohend = abs(m1-m2) / sdif
+
+        J <- gamma(df/2)/(sqrt(df/2)*gamma((df-1)/2))
+
+
+
+        if(self$options$smd_type == 'g') {
+          cohend <-  cohend * J
+          smd_label = "Hedges' g(z)"
+        } else {
+          smd_label = "Cohen's d(z)"
+        }
+
+        d_lambda <- cohend * sqrt(n/(2(1-r12)))
+        d_sigma = sqrt((df + 1)/(df - 1)*(2/n)*(1 + cohend^2/8))
+
+        tlow <- qt(1 / 2 - (1-alpha*2) / 2, df = df, ncp = d_lambda)
+        thigh <- qt(1 / 2 + (1-alpha*2) / 2, df = df, ncp = d_lambda)
+        if(m1 == m2) {
+          dlow <- (tlow*(2*n)) / (sqrt(df) * sqrt(2*n))
+          dhigh <- (thigh*(2*n)) / (sqrt(df) * sqrt(2*n))
+        } else {
+          dlow <- tlow / d_lambda * cohend
+          dhigh <- thigh / d_lambda * cohend
+        }
 
         if (low_eqbound_dz != -999999999 && low_eqbound_dz != -999999999) {
           # low_eqbound_dz and high_eqbound_dz options are deprecated
