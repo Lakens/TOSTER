@@ -12,6 +12,7 @@ children:
           - type: VariablesListBox
             name: deps
             label: Variables
+            maxItemCount: 1
             showColumnHeaders: false
             fullRowSelect: true
             columns:
@@ -94,6 +95,10 @@ children:
                 label: Descriptive statistics
               - type: CheckBox
                 name: plots
+                label: Plot Effect Sizes
+              - type: CheckBox
+                name: descplot
+                label: Plot Data
           - type: LayoutBox
             margin: large
             children:

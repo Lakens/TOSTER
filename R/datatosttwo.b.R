@@ -261,13 +261,9 @@ dataTOSTtwoClass <- R6::R6Class(
         points <- data.frame(
           type = c("Mean Difference", smd_label),
           mu = c(dif,0),
-          #param = c(round(unname(tresult$parameter),round(n[1]+n[2]-2,0))),
-          param = c(round(unname(tresult$parameter),0),round((n[1]+n[2]-2),0)),
-          #param = c(60,90),
+          param = c(round(unname(tresult$parameter),0),round(unname(tresult$parameter),0)),
           sigma = c(unname(tresult$stderr), d_sigma),
           lambda = c(0, d_lambda),
-          #cil=LL90,
-          #ciu=UL90,
           low=c(low_eqbound, low_eqbound_d),
           high=c(high_eqbound, high_eqbound_d),
           alpha = c(alpha, alpha),
@@ -280,18 +276,6 @@ dataTOSTtwoClass <- R6::R6Class(
 
       if (is.null(image$state))
         return(FALSE)
-
-      cut_cdf_qi = function(p, .width = c(.66, .95, 1), labels = NULL) {
-        .width = sort(.width)
-
-        if (is.function(labels)) {
-          labels = labels(.width)
-        } else if (is.null(labels)) {
-          labels = .width
-        }
-
-        cut(abs(1 - p*2), labels = labels, breaks = c(0, .width), include.lowest = TRUE, ordered_result = TRUE)
-      }
 
       points <- image$state
       c1 = 1-points$alpha[1]
@@ -342,5 +326,46 @@ dataTOSTtwoClass <- R6::R6Class(
       print(plot)
 
       return(TRUE)
+    },
+    .descplot = function(image, ggtheme, theme, ...) {
+
+      if (is.null(image$state))
+        return(FALSE)
+
+      dep <- self$data[[depName]]
+      dep <- jmvcore::toNumeric(dep)
+      dataTTest <- data.frame(dep=dep, group=group)
+      dataTTest <- na.omit(dataTTest)
+
+      pos_1 <- position_jitterdodge(
+        jitter.width  = 0.25,
+        jitter.height = 0,
+        dodge.width   = 0.9
+      )
+
+      data_summary <- function(x) {
+        m <- mean(x)
+        ymin <- m-sd(x)
+        ymax <- m+sd(x)
+        return(c(y=m,ymin=ymin,ymax=ymax))
+      }
+
+      p = ggplot(dataTTest,
+             aes(x=group,
+                 y=dep,
+                 color = group)) +
+        geom_jitter(alpha = 0.5, position = pos_1) +
+        stat_slab(aes(x=as.numeric(group)-.2),
+                  fill="lightgrey",
+                  side = "left") +
+        stat_summary(aes(x=as.numeric(group)-.2),
+                     fun.data=data_summary) +
+        theme_tidybayes() +
+        labs(x="Group",
+             y="",
+             color = "Group")  +
+        scale_colour_manual(values=c("red2","dodgerblue"))
+
+      return(p)
     })
 )

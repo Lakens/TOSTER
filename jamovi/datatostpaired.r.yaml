@@ -65,6 +65,7 @@ items:
           type: number
           format: zto,pvalue
 
+
     - name:  eqb
       title: Equivalence Bounds
       type:  Table
@@ -75,41 +76,61 @@ items:
         - high_eqbound
         - eqbound_type
       columns:
-        - name: i1
-          title: ''
-          type: text
-          content: ($key)
-        - name: i2
+        - name: var
           title: ''
           type: text
           content: ($key)
         - name: stat[cohen]
           title: ''
           type: text
-          content: Cohen's d
         - name: low[cohen]
           title: Low
           type: number
         - name: high[cohen]
           title: High
           type: number
-        - name: cil[cohen]
-          title: Lower
-          superTitle: Confidence interval
-          content: ''
-        - name: ciu[cohen]
-          title: Upper
-          superTitle: Confidence interval
-          content: ''
         - name: stat[raw]
           title: ''
           type: text
-          content: Raw
         - name: low[raw]
           title: Low
           type: number
         - name: high[raw]
           title: High
+          type: number
+
+    - name:  effsize
+      title: Effect Sizes
+      type:  Table
+      rows: (pairs)
+      clearWith:
+        - alpha
+        - low_eqbound
+        - high_eqbound
+        - eqbound_type
+      columns:
+        - name: var
+          title: ''
+          type: text
+          content: ($key)
+        - name: stat[cohen]
+          title: ''
+          type: text
+        - name: est[cohen]
+          title: Estimate
+          type: number
+        - name: cil[cohen]
+          title: Lower
+          superTitle: Confidence interval
+        - name: ciu[cohen]
+          title: Upper
+          superTitle: Confidence interval
+        - name: stat[raw]
+          title: ''
+          type: text
+          content: Raw
+        - name: est[raw]
+          title: Estimate
           type: number
         - name: cil[raw]
           title: Lower
@@ -117,6 +138,7 @@ items:
         - name: ciu[raw]
           title: Upper
           superTitle: Confidence interval
+
 
     - name: desc
       title: Descriptives
