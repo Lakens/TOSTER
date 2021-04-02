@@ -116,5 +116,10 @@ TOSTpaired<-function(n,m1,m2,sd1,sd2,r12,low_eqbound_dz, high_eqbound_dz, alpha,
     message(cat("Based on the equivalence test and the null-hypothesis test combined, we can conclude that the observed effect is ",combined_outcome,".",sep=""))
   }
   # Return results in list()
-  invisible(list(diff=dif,TOST_t1=t1,TOST_p1=p1,TOST_t2=t2,TOST_p2=p2, TOST_df=degree_f,alpha=alpha,low_eqbound=low_eqbound,high_eqbound=high_eqbound,low_eqbound_dz=low_eqbound_dz,high_eqbound_dz=high_eqbound_dz, LL_CI_TOST=LL90,UL_CI_TOST=UL90, LL_CI_TTEST=LL95, UL_CI_TTEST=UL95))
+  invisible(list(diff=dif,TOST_t1=t1,TOST_p1=p1,TOST_t2=t2,TOST_p2=p2,
+                 TOST_df=degree_f,alpha=alpha,
+                 low_eqbound=low_eqbound,
+                 high_eqbound=high_eqbound,
+                 low_eqbound_dz=low_eqbound_dz,high_eqbound_dz=high_eqbound_dz,
+                 LL_CI_TOST=LL90,UL_CI_TOST=UL90, LL_CI_TTEST=LL95, UL_CI_TTEST=UL95))
 }

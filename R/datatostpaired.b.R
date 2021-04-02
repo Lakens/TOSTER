@@ -104,6 +104,14 @@ dataTOSTpairedClass <- R6::R6Class(
           dhigh <- thigh / d_lambda * cohend
         }
 
+        if ((m[1]-m[2]) < 0) {
+          cohend <- cohend * -1
+          tdlow <- dlow
+          dlow <- dhigh * -1
+          dhigh <- tdlow * -1
+        }
+
+
         if (low_eqbound_dz != -999999999 && low_eqbound_dz != -999999999) {
           # low_eqbound_dz and high_eqbound_dz options are deprecated
           low_eqbound  <- low_eqbound_d * sdif
@@ -189,8 +197,6 @@ dataTOSTpairedClass <- R6::R6Class(
           param = c(round(unname(res$parameter),0),round(unname(res$parameter),0)),
           sigma = c(unname(res$stderr), d_sigma),
           lambda = c(0, d_lambda),
-          #cil=LL90,
-          #ciu=UL90,
           low=c(low_eqbound, low_eqbound_d),
           high=c(high_eqbound, high_eqbound_d),
           alpha = c(alpha, alpha),
@@ -306,24 +312,33 @@ dataTOSTpairedClass <- R6::R6Class(
       dat_i1 = data$i1
       colnames(dat_i1) = c("val")
       dat_i1$pair = pair$key[1]
+      dat_i1$id = row.names(dat_i1$id)
       dat_i2 = data$i2
       colnames(dat_i2) = c("val")
       dat_i2$pair = pair$key[2]
+      dat_i2$id = row.names(dat_i2$id)
+
+      dat = rbind(dat_i1,dat_i2)
 
       data_summary <- function(x) {
         m <- mean(x)
         ymin <- m-sd(x)
         ymax <- m+sd(x)
-        return(c(y=m,ymin=ymin,ymax=ymax))
+        return(c(y=m, ymin=ymin, ymax=ymax))
       }
 
-      data$xj <- jitter(data$x, amount=.03)
-      ggplot(data=d, aes(y=y)) +
-        geom_boxplot(aes(x=x, group=x), width=0.2, outlier.shape = NA) +
+      dat$xj <- jitter(dat$pair, amount=.03)
+
+      ggplot(data=dat, aes(y=val)) +
+        geom_boxplot(aes(x=pair,
+                         group=pair),
+                     width=0.2,
+                     outlier.shape = NA) +
         geom_point(aes(x=xj)) +
-        geom_line(aes(x=xj, group=id)) +
+        geom_line(aes(x=xj,
+                      group=id)) +
         xlab("Condition") + ylab("Value") +
-        scale_x_continuous(breaks=c(1,2), labels=c("Before", "After"), limits=c(0.5, 2.5)) +
+        #scale_x_continuous(breaks=c(1,2), labels=c("Before", "After"), limits=c(0.5, 2.5)) +
         theme_bw()
 
       return(p)
