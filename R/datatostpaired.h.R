@@ -6,7 +6,8 @@ dataTOSTpairedOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
     inherit = jmvcore::Options,
     public = list(
         initialize = function(
-            pairs = NULL,
+            pair1 = NULL,
+            pair2 = NULL,
             hypothesis = "EQU",
             low_eqbound = -0.5,
             high_eqbound = 0.5,
@@ -15,7 +16,10 @@ dataTOSTpairedOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             desc = FALSE,
             plots = FALSE,
             low_eqbound_dz = -999999999,
-            high_eqbound_dz = -999999999, ...) {
+            high_eqbound_dz = -999999999,
+            indplot = FALSE,
+            diffplot = FALSE,
+            smd_type = "d", ...) {
 
             super$initialize(
                 package="TOSTER",
@@ -23,13 +27,20 @@ dataTOSTpairedOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 requiresData=TRUE,
                 ...)
 
-            private$..pairs <- jmvcore::OptionPairs$new(
-                "pairs",
-                pairs,
-                suggested=list(
-                    "continuous"),
+            private$..pair1 <- jmvcore::OptionVariable$new(
+                "pair1",
+                pair1,
                 permitted=list(
-                    "numeric"))
+                    "numeric"),
+                suggested=list(
+                    "continuous"))
+            private$..pair2 <- jmvcore::OptionVariable$new(
+                "pair2",
+                pair2,
+                permitted=list(
+                    "numeric"),
+                suggested=list(
+                    "continuous"))
             private$..hypothesis <- jmvcore::OptionList$new(
                 "hypothesis",
                 hypothesis,
@@ -76,8 +87,24 @@ dataTOSTpairedOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 high_eqbound_dz,
                 default=-999999999,
                 hidden=TRUE)
+            private$..indplot <- jmvcore::OptionBool$new(
+                "indplot",
+                indplot,
+                default=FALSE)
+            private$..diffplot <- jmvcore::OptionBool$new(
+                "diffplot",
+                diffplot,
+                default=FALSE)
+            private$..smd_type <- jmvcore::OptionList$new(
+                "smd_type",
+                smd_type,
+                options=list(
+                    "d",
+                    "g"),
+                default="d")
 
-            self$.addOption(private$..pairs)
+            self$.addOption(private$..pair1)
+            self$.addOption(private$..pair2)
             self$.addOption(private$..hypothesis)
             self$.addOption(private$..low_eqbound)
             self$.addOption(private$..high_eqbound)
@@ -87,9 +114,13 @@ dataTOSTpairedOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             self$.addOption(private$..plots)
             self$.addOption(private$..low_eqbound_dz)
             self$.addOption(private$..high_eqbound_dz)
+            self$.addOption(private$..indplot)
+            self$.addOption(private$..diffplot)
+            self$.addOption(private$..smd_type)
         }),
     active = list(
-        pairs = function() private$..pairs$value,
+        pair1 = function() private$..pair1$value,
+        pair2 = function() private$..pair2$value,
         hypothesis = function() private$..hypothesis$value,
         low_eqbound = function() private$..low_eqbound$value,
         high_eqbound = function() private$..high_eqbound$value,
@@ -98,9 +129,13 @@ dataTOSTpairedOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         desc = function() private$..desc$value,
         plots = function() private$..plots$value,
         low_eqbound_dz = function() private$..low_eqbound_dz$value,
-        high_eqbound_dz = function() private$..high_eqbound_dz$value),
+        high_eqbound_dz = function() private$..high_eqbound_dz$value,
+        indplot = function() private$..indplot$value,
+        diffplot = function() private$..diffplot$value,
+        smd_type = function() private$..smd_type$value),
     private = list(
-        ..pairs = NA,
+        ..pair1 = NA,
+        ..pair2 = NA,
         ..hypothesis = NA,
         ..low_eqbound = NA,
         ..high_eqbound = NA,
@@ -109,7 +144,10 @@ dataTOSTpairedOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
         ..desc = NA,
         ..plots = NA,
         ..low_eqbound_dz = NA,
-        ..high_eqbound_dz = NA)
+        ..high_eqbound_dz = NA,
+        ..indplot = NA,
+        ..diffplot = NA,
+        ..smd_type = NA)
 )
 
 dataTOSTpairedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -118,8 +156,11 @@ dataTOSTpairedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
     active = list(
         tost = function() private$.items[["tost"]],
         eqb = function() private$.items[["eqb"]],
+        effsize = function() private$.items[["effsize"]],
         desc = function() private$.items[["desc"]],
-        plots = function() private$.items[["plots"]]),
+        plots = function() private$.items[["plots"]],
+        indplot = function() private$.items[["indplot"]],
+        diffplot = function() private$.items[["diffplot"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -131,7 +172,8 @@ dataTOSTpairedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="tost",
                 title="TOST Results",
-                rows="(pairs)",
+                visible=TRUE,
+                rows=3,
                 clearWith=list(
                     "alpha",
                     "low_eqbound",
@@ -141,64 +183,25 @@ dataTOSTpairedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     list(
                         `name`="i1", 
                         `title`="", 
-                        `type`="text", 
-                        `content`="($key)"),
+                        `type`="text"),
                     list(
                         `name`="i2", 
                         `title`="", 
-                        `type`="text", 
-                        `content`="($key)"),
+                        `type`="text"),
                     list(
-                        `name`="b[0]", 
+                        `name`="b", 
                         `title`="", 
-                        `type`="text", 
-                        `content`="t-test"),
+                        `type`="text"),
                     list(
-                        `name`="t[0]", 
+                        `name`="t", 
                         `title`="t", 
                         `type`="number"),
                     list(
-                        `name`="df[0]", 
+                        `name`="df", 
                         `title`="df", 
                         `type`="integer"),
                     list(
-                        `name`="p[0]", 
-                        `title`="p", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
-                    list(
-                        `name`="b[1]", 
-                        `title`="", 
-                        `type`="text", 
-                        `content`="TOST Upper"),
-                    list(
-                        `name`="t[1]", 
-                        `title`="t", 
-                        `type`="number"),
-                    list(
-                        `name`="df[1]", 
-                        `title`="df", 
-                        `type`="integer"),
-                    list(
-                        `name`="p[1]", 
-                        `title`="p", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
-                    list(
-                        `name`="b[2]", 
-                        `title`="", 
-                        `type`="text", 
-                        `content`="TOST Lower"),
-                    list(
-                        `name`="t[2]", 
-                        `title`="t", 
-                        `type`="number"),
-                    list(
-                        `name`="df[2]", 
-                        `title`="df", 
-                        `type`="integer"),
-                    list(
-                        `name`="p[2]", 
+                        `name`="p", 
                         `title`="p", 
                         `type`="number", 
                         `format`="zto,pvalue"))))
@@ -206,7 +209,7 @@ dataTOSTpairedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=options,
                 name="eqb",
                 title="Equivalence Bounds",
-                rows="(pairs)",
+                rows=2,
                 clearWith=list(
                     "alpha",
                     "low_eqbound",
@@ -214,57 +217,42 @@ dataTOSTpairedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "eqbound_type"),
                 columns=list(
                     list(
-                        `name`="i1", 
+                        `name`="stat", 
                         `title`="", 
-                        `type`="text", 
-                        `content`="($key)"),
+                        `type`="text"),
                     list(
-                        `name`="i2", 
-                        `title`="", 
-                        `type`="text", 
-                        `content`="($key)"),
-                    list(
-                        `name`="stat[cohen]", 
-                        `title`="", 
-                        `type`="text", 
-                        `content`="Cohen's d"),
-                    list(
-                        `name`="low[cohen]", 
+                        `name`="low", 
                         `title`="Low", 
                         `type`="number"),
                     list(
-                        `name`="high[cohen]", 
+                        `name`="high", 
                         `title`="High", 
-                        `type`="number"),
+                        `type`="number"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="effsize",
+                title="Effect Sizes",
+                rows=2,
+                clearWith=list(
+                    "alpha",
+                    "low_eqbound",
+                    "high_eqbound",
+                    "eqbound_type"),
+                columns=list(
                     list(
-                        `name`="cil[cohen]", 
-                        `title`="Lower", 
-                        `superTitle`="Confidence interval", 
-                        `content`=""),
-                    list(
-                        `name`="ciu[cohen]", 
-                        `title`="Upper", 
-                        `superTitle`="Confidence interval", 
-                        `content`=""),
-                    list(
-                        `name`="stat[raw]", 
+                        `name`="stat", 
                         `title`="", 
-                        `type`="text", 
-                        `content`="Raw"),
+                        `type`="text"),
                     list(
-                        `name`="low[raw]", 
-                        `title`="Low", 
+                        `name`="est", 
+                        `title`="Estimate", 
                         `type`="number"),
                     list(
-                        `name`="high[raw]", 
-                        `title`="High", 
-                        `type`="number"),
-                    list(
-                        `name`="cil[raw]", 
+                        `name`="cil", 
                         `title`="Lower", 
                         `superTitle`="Confidence interval"),
                     list(
-                        `name`="ciu[raw]", 
+                        `name`="ciu", 
                         `title`="Upper", 
                         `superTitle`="Confidence interval"))))
             self$add(jmvcore::Table$new(
@@ -272,73 +260,75 @@ dataTOSTpairedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 name="desc",
                 title="Descriptives",
                 visible="(desc)",
-                rows="(pairs)",
+                rows=2,
                 clearWith=NULL,
                 columns=list(
                     list(
-                        `name`="name[1]", 
+                        `name`="name", 
                         `title`="", 
                         `type`="text"),
                     list(
-                        `name`="n[1]", 
+                        `name`="n", 
                         `title`="N", 
                         `type`="integer"),
                     list(
-                        `name`="m[1]", 
+                        `name`="m", 
                         `title`="Mean", 
                         `type`="number"),
                     list(
-                        `name`="med[1]", 
+                        `name`="med", 
                         `title`="Median", 
                         `type`="number"),
                     list(
-                        `name`="sd[1]", 
+                        `name`="sd", 
                         `title`="SD", 
                         `type`="number"),
                     list(
-                        `name`="se[1]", 
-                        `title`="SE", 
-                        `type`="number"),
-                    list(
-                        `name`="name[2]", 
-                        `title`="", 
-                        `type`="text"),
-                    list(
-                        `name`="n[2]", 
-                        `title`="N", 
-                        `type`="integer"),
-                    list(
-                        `name`="m[2]", 
-                        `title`="Mean", 
-                        `type`="number"),
-                    list(
-                        `name`="med[2]", 
-                        `title`="Median", 
-                        `type`="number"),
-                    list(
-                        `name`="sd[2]", 
-                        `title`="SD", 
-                        `type`="number"),
-                    list(
-                        `name`="se[2]", 
+                        `name`="se", 
                         `title`="SE", 
                         `type`="number"))))
-            self$add(jmvcore::Array$new(
+            self$add(jmvcore::Image$new(
                 options=options,
                 name="plots",
-                title="Plots",
-                items="(pairs)",
+                title="Effect Size Plot",
                 visible="(plots)",
-                template=jmvcore::Image$new(
-                    options=options,
-                    title="$key",
-                    renderFun=".plot",
-                    width=180,
-                    clearWith=list(
-                        "alpha",
-                        "low_eqbound",
-                        "high_eqbound",
-                        "eqbound_type"))))}))
+                renderFun=".plot",
+                width=400,
+                height=400,
+                clearWith=list(
+                    "alpha",
+                    "low_eqbound",
+                    "high_eqbound",
+                    "eqbound_type",
+                    "smd_type")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="indplot",
+                title="Data Plot",
+                visible="(indplot)",
+                renderFun=".indplot",
+                width=400,
+                height=375,
+                clearWith=list(
+                    "alpha",
+                    "low_eqbound",
+                    "high_eqbound",
+                    "eqbound_type",
+                    "smd_type")))
+            self$add(jmvcore::Image$new(
+                options=options,
+                name="diffplot",
+                title="Plot Difference",
+                visible="(diffplot)",
+                renderFun=".diffplot",
+                width=400,
+                height=375,
+                clearWith=list(
+                    "alpha",
+                    "low_eqbound",
+                    "high_eqbound",
+                    "eqbound_type",
+                    "smd_type")))}))
 
 dataTOSTpairedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "dataTOSTpairedBase",
@@ -374,8 +364,8 @@ dataTOSTpairedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' Mara, C. A., & Cribbie, R. A. (2012). Paired-Samples Tests of Equivalence. Communications in Statistics - Simulation and Computation, 41(10), 1928-1943. https://doi.org/10.1080/03610918.2011.626545, formula page 1932. Note there is a typo in the formula: n-1 should be n (personal communication, 31-08-2016)
 #'
 #' @param data the data as a data frame
-#' @param pairs a list of vectors of strings naming variables to pair from
-#'   \code{data}
+#' @param pair1 A string naming the first part of the pair
+#' @param pair2 A string naming the second part of the pair
 #' @param hypothesis \code{'EQU'} for equivalence (default), or \code{'MET'}
 #'   for minimal effects test, the alternative hypothesis.
 #' @param low_eqbound a number (default: 0.5) the lower equivalence bounds
@@ -389,12 +379,21 @@ dataTOSTpairedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @param plots \code{TRUE} or \code{FALSE} (default), provide plots
 #' @param low_eqbound_dz deprecated
 #' @param high_eqbound_dz deprecated
+#' @param indplot \code{TRUE} or \code{FALSE} (default), provide plot of
+#'   paired data.
+#' @param diffplot \code{TRUE} or \code{FALSE} (default), provide plot of
+#'   difference scores.
+#' @param smd_type \code{'d'} (default) or \code{'g'}; whether the calculated
+#'   effect size is biased (d) or bias-corrected (g).
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$tost} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$eqb} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$effsize} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$desc} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$plots} \tab \tab \tab \tab \tab an array of images \cr
+#'   \code{results$plots} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$indplot} \tab \tab \tab \tab \tab an image \cr
+#'   \code{results$diffplot} \tab \tab \tab \tab \tab an image \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -406,7 +405,8 @@ dataTOSTpairedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' @export
 dataTOSTpaired <- function(
     data,
-    pairs,
+    pair1,
+    pair2,
     hypothesis = "EQU",
     low_eqbound = -0.5,
     high_eqbound = 0.5,
@@ -415,18 +415,26 @@ dataTOSTpaired <- function(
     desc = FALSE,
     plots = FALSE,
     low_eqbound_dz = -999999999,
-    high_eqbound_dz = -999999999) {
+    high_eqbound_dz = -999999999,
+    indplot = FALSE,
+    diffplot = FALSE,
+    smd_type = "d") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("dataTOSTpaired requires jmvcore to be installed (restart may be required)")
 
+    if ( ! missing(pair1)) pair1 <- jmvcore::resolveQuo(jmvcore::enquo(pair1))
+    if ( ! missing(pair2)) pair2 <- jmvcore::resolveQuo(jmvcore::enquo(pair2))
     if (missing(data))
         data <- jmvcore::marshalData(
-            parent.frame())
+            parent.frame(),
+            `if`( ! missing(pair1), pair1, NULL),
+            `if`( ! missing(pair2), pair2, NULL))
 
 
     options <- dataTOSTpairedOptions$new(
-        pairs = pairs,
+        pair1 = pair1,
+        pair2 = pair2,
         hypothesis = hypothesis,
         low_eqbound = low_eqbound,
         high_eqbound = high_eqbound,
@@ -435,7 +443,10 @@ dataTOSTpaired <- function(
         desc = desc,
         plots = plots,
         low_eqbound_dz = low_eqbound_dz,
-        high_eqbound_dz = high_eqbound_dz)
+        high_eqbound_dz = high_eqbound_dz,
+        indplot = indplot,
+        diffplot = diffplot,
+        smd_type = smd_type)
 
     analysis <- dataTOSTpairedClass$new(
         options = options,

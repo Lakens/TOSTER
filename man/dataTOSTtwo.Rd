@@ -16,6 +16,7 @@ dataTOSTtwo(
   alpha = 0.05,
   desc = FALSE,
   plots = FALSE,
+  descplots = FALSE,
   low_eqbound_d = -999999999,
   high_eqbound_d = -999999999,
   smd_type = "d"
@@ -49,7 +50,10 @@ bounds are specified in Cohen's d or raw units respectively}
 \item{desc}{\code{TRUE} or \code{FALSE} (default), provide descriptive
 statistics}
 
-\item{plots}{\code{TRUE} or \code{FALSE} (default), provide plots}
+\item{plots}{\code{TRUE} or \code{FALSE} (default), provide effect size
+plots}
+
+\item{descplots}{\code{TRUE} or \code{FALSE} (default), provide plots}
 
 \item{low_eqbound_d}{deprecated}
 
@@ -66,6 +70,7 @@ A results object containing:
   \code{results$effsize} \tab \tab \tab \tab \tab a table \cr
   \code{results$desc} \tab \tab \tab \tab \tab a table \cr
   \code{results$plots} \tab \tab \tab \tab \tab an array of images \cr
+  \code{results$descplots} \tab \tab \tab \tab \tab an array of images \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

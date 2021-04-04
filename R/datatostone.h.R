@@ -126,6 +126,7 @@ dataTOSToneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     active = list(
         tost = function() private$.items[["tost"]],
         eqb = function() private$.items[["eqb"]],
+        effsize = function() private$.items[["effsize"]],
         desc = function() private$.items[["desc"]],
         plots = function() private$.items[["plots"]]),
     private = list(),
@@ -240,16 +241,6 @@ dataTOSToneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                         `title`="High", 
                         `type`="number"),
                     list(
-                        `name`="cil[cohen]", 
-                        `title`="Lower", 
-                        `superTitle`="Confidence interval", 
-                        `content`=""),
-                    list(
-                        `name`="ciu[cohen]", 
-                        `title`="Upper", 
-                        `superTitle`="Confidence interval", 
-                        `content`=""),
-                    list(
                         `name`="stat[raw]", 
                         `title`="", 
                         `type`="text", 
@@ -261,6 +252,47 @@ dataTOSToneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     list(
                         `name`="high[raw]", 
                         `title`="High", 
+                        `type`="number"))))
+            self$add(jmvcore::Table$new(
+                options=options,
+                name="effsize",
+                title="Effect Sizes",
+                rows="(vars)",
+                clearWith=list(
+                    "alpha",
+                    "low_eqbound",
+                    "high_eqbound",
+                    "eqbound_type"),
+                columns=list(
+                    list(
+                        `name`="var", 
+                        `title`="", 
+                        `type`="text", 
+                        `content`="($key)"),
+                    list(
+                        `name`="stat[cohen]", 
+                        `title`="", 
+                        `type`="text"),
+                    list(
+                        `name`="est[cohen]", 
+                        `title`="Estimate", 
+                        `type`="number"),
+                    list(
+                        `name`="cil[cohen]", 
+                        `title`="Lower", 
+                        `superTitle`="Confidence interval"),
+                    list(
+                        `name`="ciu[cohen]", 
+                        `title`="Upper", 
+                        `superTitle`="Confidence interval"),
+                    list(
+                        `name`="stat[raw]", 
+                        `title`="", 
+                        `type`="text", 
+                        `content`="Raw"),
+                    list(
+                        `name`="est[raw]", 
+                        `title`="Estimate", 
                         `type`="number"),
                     list(
                         `name`="cil[raw]", 
@@ -373,6 +405,7 @@ dataTOSToneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' \tabular{llllll}{
 #'   \code{results$tost} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$eqb} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$effsize} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$desc} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plots} \tab \tab \tab \tab \tab an array of images \cr
 #' }

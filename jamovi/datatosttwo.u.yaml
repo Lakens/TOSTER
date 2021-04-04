@@ -10,21 +10,6 @@ children:
       - type: TargetLayoutBox
         children:
           - type: VariablesListBox
-            name: deps
-            label: Variables
-            maxItemCount: 1
-            showColumnHeaders: false
-            fullRowSelect: true
-            columns:
-              - name: column1
-                label: ''
-                stretchFactor: 1
-                template:
-                  type: VariableLabel
-            isTarget: true
-      - type: TargetLayoutBox
-        children:
-          - type: VariablesListBox
             name: group
             label: Grouping Variable
             maxItemCount: 1
@@ -36,6 +21,13 @@ children:
                 stretchFactor: 1
                 template:
                   type: VariableLabel
+            isTarget: true
+      - type: TargetLayoutBox
+        label: Variable
+        children:
+          - type: VariablesListBox
+            name: deps
+            maxItemCount: 1
             isTarget: true
   - type: LayoutBox
     margin: large
@@ -97,8 +89,7 @@ children:
                 name: plots
                 label: Plot Effect Sizes
               - type: CheckBox
-                name: descplot
-                label: Plot Data
+                name: descplots
           - type: LayoutBox
             margin: large
             children:

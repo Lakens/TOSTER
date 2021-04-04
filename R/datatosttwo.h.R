@@ -16,6 +16,7 @@ dataTOSTtwoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             alpha = 0.05,
             desc = FALSE,
             plots = FALSE,
+            descplots = FALSE,
             low_eqbound_d = -999999999,
             high_eqbound_d = -999999999,
             smd_type = "d", ...) {
@@ -26,7 +27,7 @@ dataTOSTtwoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 requiresData=TRUE,
                 ...)
 
-            private$..deps <- jmvcore::OptionVariables$new(
+            private$..deps <- jmvcore::OptionVariable$new(
                 "deps",
                 deps,
                 permitted=list(
@@ -77,6 +78,10 @@ dataTOSTtwoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "plots",
                 plots,
                 default=FALSE)
+            private$..descplots <- jmvcore::OptionBool$new(
+                "descplots",
+                descplots,
+                default=FALSE)
             private$..low_eqbound_d <- jmvcore::OptionNumber$new(
                 "low_eqbound_d",
                 low_eqbound_d,
@@ -105,6 +110,7 @@ dataTOSTtwoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..alpha)
             self$.addOption(private$..desc)
             self$.addOption(private$..plots)
+            self$.addOption(private$..descplots)
             self$.addOption(private$..low_eqbound_d)
             self$.addOption(private$..high_eqbound_d)
             self$.addOption(private$..smd_type)
@@ -120,6 +126,7 @@ dataTOSTtwoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         alpha = function() private$..alpha$value,
         desc = function() private$..desc$value,
         plots = function() private$..plots$value,
+        descplots = function() private$..descplots$value,
         low_eqbound_d = function() private$..low_eqbound_d$value,
         high_eqbound_d = function() private$..high_eqbound_d$value,
         smd_type = function() private$..smd_type$value),
@@ -134,6 +141,7 @@ dataTOSTtwoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..alpha = NA,
         ..desc = NA,
         ..plots = NA,
+        ..descplots = NA,
         ..low_eqbound_d = NA,
         ..high_eqbound_d = NA,
         ..smd_type = NA)
@@ -147,7 +155,8 @@ dataTOSTtwoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         eqb = function() private$.items[["eqb"]],
         effsize = function() private$.items[["effsize"]],
         desc = function() private$.items[["desc"]],
-        plots = function() private$.items[["plots"]]),
+        plots = function() private$.items[["plots"]],
+        descplots = function() private$.items[["descplots"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -381,7 +390,7 @@ dataTOSTtwoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$add(jmvcore::Array$new(
                 options=options,
                 name="plots",
-                title="Plots",
+                title="Effect Size Plot",
                 items="(deps)",
                 visible="(plots)",
                 template=jmvcore::Image$new(
@@ -390,6 +399,27 @@ dataTOSTtwoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     renderFun=".plot",
                     width=400,
                     height=400,
+                    clearWith=list(
+                        "group",
+                        "alpha",
+                        "hypothesis",
+                        "smd_type",
+                        "low_eqbound",
+                        "high_eqbound",
+                        "eqbound_type",
+                        "var_equal"))))
+            self$add(jmvcore::Array$new(
+                options=options,
+                name="descplots",
+                title="Data Plot",
+                items="(deps)",
+                visible="(descplots)",
+                template=jmvcore::Image$new(
+                    options=options,
+                    title="$key",
+                    renderFun=".descplot",
+                    width=400,
+                    height=375,
                     clearWith=list(
                         "group",
                         "alpha",
@@ -458,7 +488,9 @@ dataTOSTtwoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param alpha alpha level (default = 0.05)
 #' @param desc \code{TRUE} or \code{FALSE} (default), provide descriptive
 #'   statistics
-#' @param plots \code{TRUE} or \code{FALSE} (default), provide plots
+#' @param plots \code{TRUE} or \code{FALSE} (default), provide effect size
+#'   plots
+#' @param descplots \code{TRUE} or \code{FALSE} (default), provide plots
 #' @param low_eqbound_d deprecated
 #' @param high_eqbound_d deprecated
 #' @param smd_type \code{'d'} (default) or \code{'g'}; whether the calculated
@@ -470,6 +502,7 @@ dataTOSTtwoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   \code{results$effsize} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$desc} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plots} \tab \tab \tab \tab \tab an array of images \cr
+#'   \code{results$descplots} \tab \tab \tab \tab \tab an array of images \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -491,6 +524,7 @@ dataTOSTtwo <- function(
     alpha = 0.05,
     desc = FALSE,
     plots = FALSE,
+    descplots = FALSE,
     low_eqbound_d = -999999999,
     high_eqbound_d = -999999999,
     smd_type = "d") {
@@ -518,6 +552,7 @@ dataTOSTtwo <- function(
         alpha = alpha,
         desc = desc,
         plots = plots,
+        descplots = descplots,
         low_eqbound_d = low_eqbound_d,
         high_eqbound_d = high_eqbound_d,
         smd_type = smd_type)

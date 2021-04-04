@@ -23,15 +23,25 @@ options:
       description:
           R: the data as a data frame
 
-    - name: pairs
-      title: Paired Variables
-      type: Pairs
-      suggested:
-        - continuous
+    - name: pair1
+      title: Variable
+      type: Variable
       permitted:
         - numeric
+      suggested:
+        - continuous
       description:
-          R: a list of vectors of strings naming variables to pair from `data`
+          R: A string naming the first part of the pair
+
+    - name: pair2
+      title: Variable
+      type: Variable
+      permitted:
+        - numeric
+      suggested:
+        - continuous
+      description:
+          R: A string naming the second part of the pair
 
     - name: hypothesis
       title: Alternative hypothesis
@@ -50,7 +60,7 @@ options:
             `'MET'` for minimal effects test, the alternative hypothesis.
 
     - name: low_eqbound
-      title: Lower equivalence bounds
+      title: Lower bound
       type: Number
       default: -0.5
       description:
@@ -58,7 +68,7 @@ options:
             a number (default: 0.5) the lower equivalence bounds
 
     - name: high_eqbound
-      title: Upper equivalence bounds
+      title: Upper bound
       type: Number
       default: 0.5
       description:
@@ -70,7 +80,7 @@ options:
       type: List
       options:
         - name: d
-          title: Cohen's Dz
+          title: Standardized
         - name: raw
           title: Raw
       default: d
@@ -117,3 +127,33 @@ options:
       hidden: true
       description:
           R: deprecated
+
+    - name: indplot
+      title: Plot Pairs
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide plot of paired data.
+
+    - name: diffplot
+      title: Plot Differences
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide plot of difference scores.
+
+    - name: smd_type
+      title: Standardized Effect Size
+      type: List
+      options:
+        - name: d
+          title: Cohen's d(z)
+        - name: g
+          title: Hedges' g(z)
+      default: d
+      description:
+          R: >
+            `'d'` (default) or `'g'`;
+            whether the calculated effect size is biased (d) or bias-corrected (g).

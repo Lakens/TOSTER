@@ -6,7 +6,8 @@
 \usage{
 dataTOSTpaired(
   data,
-  pairs,
+  pair1,
+  pair2,
   hypothesis = "EQU",
   low_eqbound = -0.5,
   high_eqbound = 0.5,
@@ -15,14 +16,17 @@ dataTOSTpaired(
   desc = FALSE,
   plots = FALSE,
   low_eqbound_dz = -999999999,
-  high_eqbound_dz = -999999999
+  high_eqbound_dz = -999999999,
+  indplot = FALSE,
+  smd_type = "d"
 )
 }
 \arguments{
 \item{data}{the data as a data frame}
 
-\item{pairs}{a list of vectors of strings naming variables to pair from
-\code{data}}
+\item{pair1}{A string naming the first part of the pair}
+
+\item{pair2}{A string naming the second part of the pair}
 
 \item{hypothesis}{\code{'EQU'} for equivalence (default), or \code{'MET'}
 for minimal effects test, the alternative hypothesis.}
@@ -45,14 +49,22 @@ statistics}
 \item{low_eqbound_dz}{deprecated}
 
 \item{high_eqbound_dz}{deprecated}
+
+\item{indplot}{\code{TRUE} or \code{FALSE} (default), provide plot of
+paired data.}
+
+\item{smd_type}{\code{'d'} (default) or \code{'g'}; whether the calculated
+effect size is biased (d) or bias-corrected (g).}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
   \code{results$tost} \tab \tab \tab \tab \tab a table \cr
   \code{results$eqb} \tab \tab \tab \tab \tab a table \cr
+  \code{results$effsize} \tab \tab \tab \tab \tab a table \cr
   \code{results$desc} \tab \tab \tab \tab \tab a table \cr
   \code{results$plots} \tab \tab \tab \tab \tab an array of images \cr
+  \code{results$indplot} \tab \tab \tab \tab \tab an array of images \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

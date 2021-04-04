@@ -31,8 +31,8 @@ options:
           R: the data as a data frame
 
     - name: deps
-      title: Variables
-      type: Variables
+      title: Variable
+      type: Variable
       permitted:
         - numeric
       suggested:
@@ -76,7 +76,7 @@ options:
             `'MET'` for minimal effects test, the alternative hypothesis.
 
     - name: low_eqbound
-      title: Lower bound(s)
+      title: Lower bound
       type: Number
       default: -0.5
       description:
@@ -84,7 +84,7 @@ options:
             a number (default: -0.5) the lower equivalence/MET bounds
 
     - name: high_eqbound
-      title: Upper bound(s)
+      title: Upper bound
       type: Number
       default: 0.5
       description:
@@ -121,7 +121,15 @@ options:
             `TRUE` or `FALSE` (default), provide descriptive statistics
 
     - name: plots
-      title: Plots
+      title: Plot Effect Size
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide effect size plots
+
+    - name: descplots
+      title: Plot Data
       type: Bool
       default: false
       description:

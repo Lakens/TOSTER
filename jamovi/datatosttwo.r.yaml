@@ -200,7 +200,7 @@ items:
 
     - name: plots
       type: Array
-      title: Plots
+      title: Effect Size Plot
       items: (deps)
       visible: (plots)
       template:
@@ -209,6 +209,27 @@ items:
         renderFun: .plot
         width: 400
         height: 400
+        clearWith:
+          - group
+          - alpha
+          - hypothesis
+          - smd_type
+          - low_eqbound
+          - high_eqbound
+          - eqbound_type
+          - var_equal
+
+    - name: descplots
+      type: Array
+      title: Data Plot
+      items: (deps)
+      visible: (descplots)
+      template:
+        title: $key
+        type: Image
+        renderFun: .descplot
+        width: 400
+        height: 375
         clearWith:
           - group
           - alpha

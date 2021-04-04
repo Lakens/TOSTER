@@ -16,10 +16,10 @@ dataTOSTtwoClass <- R6::R6Class(
       effsize <- self$results$effsize
       desc <- self$results$desc
 
-      effsize$getColumn('cil[cohen]')$setSuperTitle(jmvcore::format('{}% Confidence interval', ci))
-      effsize$getColumn('ciu[cohen]')$setSuperTitle(jmvcore::format('{}% Confidence interval', ci))
-      effsize$getColumn('cil[raw]')$setSuperTitle(jmvcore::format('{}% Confidence interval', ci))
-      effsize$getColumn('ciu[raw]')$setSuperTitle(jmvcore::format('{}% Confidence interval', ci))
+      effsize$getColumn('cil[cohen]')$setSuperTitle(jmvcore::format('{}% Confidence Interval', ci))
+      effsize$getColumn('ciu[cohen]')$setSuperTitle(jmvcore::format('{}% Confidence Interval', ci))
+      effsize$getColumn('cil[raw]')$setSuperTitle(jmvcore::format('{}% Confidence Interval', ci))
+      effsize$getColumn('ciu[raw]')$setSuperTitle(jmvcore::format('{}% Confidence Interval', ci))
 
       groupName <- self$options$group
       groups <- NULL
@@ -48,6 +48,7 @@ dataTOSTtwoClass <- R6::R6Class(
       effsize <- self$results$effsize
       desc <- self$results$desc
       plots <- self$results$plots
+      descplot <- self$results$descplots
       old = FALSE
 
       groupName <- self$options$group
@@ -152,6 +153,7 @@ dataTOSTtwoClass <- R6::R6Class(
           tdlow <- dlow
           dlow <- dhigh * -1
           dhigh <- tdlow * -1
+          d_lambda <- cohend * sqrt(ntilde/2)
         }
 
 
@@ -269,6 +271,10 @@ dataTOSTtwoClass <- R6::R6Class(
           alpha = c(alpha, alpha),
           stringsAsFactors=FALSE)
         plot$setState(points)
+
+        descplot <- descplot$get(key=depName)
+
+        descplot$setState(dataTTest)
         #print(points)
       }
     },
@@ -332,10 +338,8 @@ dataTOSTtwoClass <- R6::R6Class(
       if (is.null(image$state))
         return(FALSE)
 
-      dep <- self$data[[depName]]
-      dep <- jmvcore::toNumeric(dep)
-      dataTTest <- data.frame(dep=dep, group=group)
-      dataTTest <- na.omit(dataTTest)
+      dataTTest = image$state
+
 
       pos_1 <- position_jitterdodge(
         jitter.width  = 0.25,
@@ -351,21 +355,24 @@ dataTOSTtwoClass <- R6::R6Class(
       }
 
       p = ggplot(dataTTest,
-             aes(x=group,
-                 y=dep,
+             aes(x = group,
+                 y = dep,
                  color = group)) +
         geom_jitter(alpha = 0.5, position = pos_1) +
-        stat_slab(aes(x=as.numeric(group)-.2),
+        stat_slab(aes(x=as.numeric(group)+.2),
                   fill="lightgrey",
-                  side = "left") +
-        stat_summary(aes(x=as.numeric(group)-.2),
+                  side = "right") +
+        stat_summary(aes(x=as.numeric(group)+.2),
                      fun.data=data_summary) +
         theme_tidybayes() +
         labs(x="Group",
              y="",
              color = "Group")  +
-        scale_colour_manual(values=c("red2","dodgerblue"))
+        scale_colour_manual(values=c("red2","dodgerblue")) +
+        theme(legend.position="top")
 
-      return(p)
+      print(p)
+
+      return(TRUE)
     })
 )
