@@ -135,6 +135,7 @@ dataTOSToneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
     "dataTOSToneResults",
     inherit = jmvcore::Group,
     active = list(
+        text = function() private$.items[["text"]],
         tost = function() private$.items[["tost"]],
         eqb = function() private$.items[["eqb"]],
         effsize = function() private$.items[["effsize"]],
@@ -147,6 +148,9 @@ dataTOSToneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 options=options,
                 name="",
                 title="TOST One Sample T-Test")
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="text"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="tost",
@@ -418,6 +422,7 @@ dataTOSToneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   effect size is biased (d) or bias-corrected (g).
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$tost} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$eqb} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$effsize} \tab \tab \tab \tab \tab a table \cr

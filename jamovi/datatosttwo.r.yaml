@@ -4,6 +4,9 @@ title: TOST Independent Samples T-Test
 jrs:   "1.0"
 
 items:
+    - name:  text
+      type:  Preformatted
+
     - name:  tost
       title: TOST Results
       type:  Table

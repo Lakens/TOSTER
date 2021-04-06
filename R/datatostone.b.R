@@ -66,9 +66,23 @@ dataTOSToneClass <- R6::R6Class(
         if(self$options$hypothesis == "EQU"){
           alt_low = "greater"
           alt_high = "less"
+          test_hypothesis = "Hypothesis Tested: Equivalence"
+          null_hyp = paste0(round(low_eqbound,2),
+                            " >= (Mean - mu) or (Mean - mu) >= ",
+                            round(high_eqbound,2))
+          alt_hyp = paste0(round(low_eqbound,2),
+                           " < (Mean - mu) < ",
+                           round(high_eqbound,2))
         } else if(self$options$hypothesis == "MET"){
           alt_low = "less"
           alt_high = "greater"
+          test_hypothesis = "Hypothesis Tested: Minimal Effect"
+          null_hyp = paste0(round(low_eqbound,2),
+                            " <= (Mean - mu)  <= ",
+                            round(high_eqbound,2))
+          alt_hyp = paste0(round(low_eqbound,2),
+                           " > (Mean - mu) or (Mean - mu)  > ",
+                           round(high_eqbound,2))
         }
 
         degree_f <- res$parameter
@@ -101,45 +115,23 @@ dataTOSToneClass <- R6::R6Class(
         ttost<-ifelse(abs(t1) < abs(t2), t1, t2) #Get lowest t-value for summary TOST result
         dif <- unname(res$estimate)
 
-        cohend <- abs(dif)/sd # Cohen's d
-        df <- res$parameter
-        # Compute unbiased Hedges' g
-        # Use the lgamma function, and update to what Goulet-Pelletier & cousineau used; works with larger inputs
-        J <- gamma(df/2)/(sqrt(df/2)*gamma((df-1)/2))
+        cohen_res = d_est_one(
+          n = n,
+          mu = m,
+          sd = sd,
+          testValue = mu,
+          type = self$options$smd_type,
+          alpha = alpha
+        )
 
-        if(self$options$smd_type == 'g') {
-          cohend <-  cohend * J
-          smd_label = "Hedges' g"
-        } else {
-          smd_label = "Cohen's d"
-        }
-
-        d_lambda <- cohend * sqrt(n)
-        #d_sigma = sqrt((df + 1)/(df - 1)*(2/n)*(1 + cohend^2/8))
-        d_sigma = sqrt((df/(df-2)) * (1/n) *(1+cohend^2*(n/1)) - cohend^2/J^2)
-
-        # Confidence interval of the SMD from Goulet-Pelletier & Cousineau
-        tlow <- suppressWarnings(qt(alpha,
-                                    df = df,
-                                    ncp = d_lambda))
-        thigh <- suppressWarnings(qt(alpha,
-                                     df = df,
-                                     ncp = d_lambda))
-        if(dif == 0) {
-          dlow <- (tlow*(2*n)) / (sqrt(df) * sqrt(2*n))
-          dhigh <- (thigh*(2*n)) / (sqrt(df) * sqrt(2*n))
-        } else {
-          dlow <- tlow / d_lambda * cohend
-          dhigh <- thigh / d_lambda * cohend
-        }
-
-        if ((dif) < 0) {
-          cohend <- cohend * -1
-          tdlow <- dlow
-          dlow <- dhigh * -1
-          dhigh <- tdlow * -1
-        }
-
+        cohend = cohen_res$cohend
+        cohen_df = cohen_res$cohen_df
+        dlow = cohen_res$dlow
+        dhigh = cohen_res$dhigh
+        d_sigma = cohen_res$d_sigma
+        d_lambda = cohen_res$d_lambda
+        smd_label = cohen_res$smd_label
+        J = cohen_res$J
 
         tt$setRow(rowKey=name, list(
           `t[0]`=t,  `df[0]`=degree_f, `p[0]`= unname(res$p.value),
@@ -167,7 +159,18 @@ dataTOSToneClass <- R6::R6Class(
           )
         )
 
-        desc$setRow(rowKey=name, list(n=n, m=m, med=med, sd=sd, se=se))
+        text_res = paste0("Two One-Sided Tests: One Sample t-tests \n \n",
+                          test_hypothesis,
+                          "\n \n",
+                          "Null Hypothesis: ", null_hyp,"\n",
+                          "Alternative: ", alt_hyp)
+        self$results$text$setContent(text_res)
+
+        desc$setRow(rowKey=name, list(n = n,
+                                      m = m,
+                                      med = med,
+                                      sd = sd,
+                                      se = se))
 
         plot <- plots$get(key=name)
         points <- data.frame(

@@ -35,8 +35,17 @@ dataTOSTtwoClass <- R6::R6Class(
           `name[2]`=groups[2]))
       }
 
-      if ( ! self$options$var_equal)
+      if ( ! self$options$var_equal){
         tt$setNote('var_equal', "Welch's t-test")
+      }
+
+
+      if ( ! self$options$var_equal){
+        effsize$setNote('var_equal', "Denominator set to the average SD")
+      } else {
+        effsize$setNote('var_equal', "Denominator set to the pooled SD")
+      }
+
     },
     .run = function() {
 
@@ -104,81 +113,63 @@ dataTOSTtwoClass <- R6::R6Class(
         p <- unname(tresult$p.value)
         df <- unname(tresult$parameter)
 
-        if (var.equal) {
-          denomSD <- sqrt((((n[1] - 1)*(sd[1]^2)) + (n[2] - 1)*(sd[2]^2))/((n[1]+n[2])-2)) #calculate sd pooled
-        } else {
-          denomSD <- sqrt((sd[1]^2 + sd[2]^2)/2) #calculate sd root mean squared for Welch's t-test
-        }
+        cohen_res = d_est_ind(
+          n1 = n[1],
+          n2 = n[2],
+          m1 = m[1],
+          m2 = m[2],
+          sd1 = sd[1],
+          sd2 = sd[2],
+          type = self$options$smd_type,
+          var.equal = var.equal,
+          alpha = alpha
+        )
 
-        denomSD[is.na(denomSD)] <- NaN
-
-        #denomSD <- jmvcore::tryNaN(sqrt(((n[1]-1)*v[1]+(n[2]-1)*v[2])/(n[1]+n[2]-2)))
-        d <- abs(m[1]-m[2])/denomSD # Cohen's d
-
-        d[is.na(d)] <- NaN
-
-        cohend = d
-        ntilde <- harmonic.mean(c(n[1],n[2]))
-
-        # Compute unbiased Hedges' g
-        # Use the lgamma function, and update to what Goulet-Pelletier & cousineau used; works with larger inputs
-        J <- gamma(df/2)/(sqrt(df/2)*gamma((df-1)/2))
-
-        if(self$options$smd_type == 'g') {
-          cohend <-  cohend * J
-          smd_label = "Hedges' g"
-        } else {
-          smd_label = "Cohen's d"
-        }
-
-        # add options for cohend here
-        d_lambda <- cohend * sqrt(ntilde/2)
-        d_sigma = sqrt((n[1]+n[2])/(n[1]*n[2])+(cohend^2/(2*(n[1]+n[2]))))
-
-        # Confidence interval of the SMD from Goulet-Pelletier & Cousineau
-        tlow <- qt(1 / 2 - (1-alpha*2) / 2, df = df, ncp = d_lambda)
-        thigh <- qt(1 / 2 + (1-alpha*2) / 2, df = df, ncp = d_lambda)
-        if(m[1] == m[2]) {
-          dlow <- (tlow*(n[1]+n[2])) / (sqrt(df) * sqrt(n[1]*n[2]))
-          dhigh <- (thigh*(n[1]+n[2])) / (sqrt(df) * sqrt(n[1]*n[2]))
-        } else {
-          dlow <- tlow / d_lambda * cohend
-          dhigh <- thigh / d_lambda * cohend
-        }
-
-        # The function provided by Goulet-Pelletier & Cousineau works with +mdiff.
-        # Now we fix the signs and directions for negative differences
-        if ((m[1]-m[2]) < 0) {
-          cohend <- cohend * -1
-          tdlow <- dlow
-          dlow <- dhigh * -1
-          dhigh <- tdlow * -1
-          d_lambda <- cohend * sqrt(ntilde/2)
-        }
-
-
+        cohend = cohen_res$cohend
+        cohen_df = cohen_res$cohen_df
+        dlow = cohen_res$dlow
+        dhigh = cohen_res$dhigh
+        d_sigma = cohen_res$d_sigma
+        d_lambda = cohen_res$d_lambda
+        smd_label = cohen_res$smd_label
+        J = cohen_res$J
+        d_denom = cohen_res$d_denom
 
         if (low_eqbound_d != -999999999 && low_eqbound_d != -999999999) {
           # low_eqbound_d and high_eqbound_d options are deprecated
-          low_eqbound  <- low_eqbound_d * denomSD
-          high_eqbound <- high_eqbound_d * denomSD
+          low_eqbound  <- low_eqbound_d * d_denom
+          high_eqbound <- high_eqbound_d * d_denom
         }
         else if (self$options$eqbound_type == 'd') {
           low_eqbound_d <- low_eqbound
           high_eqbound_d <- high_eqbound
-          low_eqbound  <- low_eqbound * denomSD
-          high_eqbound <- high_eqbound * denomSD
+          low_eqbound  <- low_eqbound * d_denom
+          high_eqbound <- high_eqbound * d_denom
         } else {
-          low_eqbound_d <- low_eqbound / denomSD
-          high_eqbound_d <- high_eqbound / denomSD
+          low_eqbound_d <- low_eqbound / d_denom
+          high_eqbound_d <- high_eqbound / d_denom
         }
 
         if(self$options$hypothesis == "EQU"){
           alt_low = "greater"
           alt_high = "less"
+          test_hypothesis = "Hypothesis Tested: Equivalence"
+          null_hyp = paste0(round(low_eqbound,2),
+                            " >= (Mean1 - Mean2) or (Mean1 - Mean2) >= ",
+                            round(high_eqbound,2))
+          alt_hyp = paste0(round(low_eqbound,2),
+                           " < (Mean1 - Mean2) < ",
+                           round(high_eqbound,2))
         } else if(self$options$hypothesis == "MET"){
           alt_low = "less"
           alt_high = "greater"
+          test_hypothesis = "Hypothesis Tested: Minimal Effect"
+          null_hyp = paste0(round(low_eqbound,2),
+                            " <= (Mean1 - Mean2)  <= ",
+                            round(high_eqbound,2))
+          alt_hyp = paste0(round(low_eqbound,2),
+                           " > (Mean1 - Mean2) or (Mean1 - Mean2)  > ",
+                           round(high_eqbound,2))
         }
 
         low_ttest <- t.test(dep ~ group,
@@ -256,20 +247,32 @@ dataTOSTtwoClass <- R6::R6Class(
           )
         )
 
+        text_res = paste0("Two One-Sided Tests: Two Independent Sample t-tests \n \n",
+                          test_hypothesis,
+                          "\n \n",
+                          "Null Hypothesis: ", null_hyp,"\n",
+                          "Alternative: ", alt_hyp)
+        self$results$text$setContent(text_res)
+
         # Get SE value
         SE_val = tresult$stderr
 
         plot <- plots$get(key=depName)
         points <- data.frame(
-          type = c("Mean Difference", smd_label),
-          mu = c(dif,0),
-          param = c(round(unname(tresult$parameter),0),round(unname(tresult$parameter),0)),
-          sigma = c(unname(tresult$stderr), d_sigma),
+          type = c("Mean Difference",
+                   smd_label),
+          mu = c(dif, 0),
+          param = c(round(unname(tresult$parameter),0),
+                    round(unname(tresult$parameter),0)),
+          sigma = c(unname(tresult$stderr),
+                    d_sigma),
           lambda = c(0, d_lambda),
-          low=c(low_eqbound, low_eqbound_d),
-          high=c(high_eqbound, high_eqbound_d),
+          low = c(low_eqbound,
+                low_eqbound_d),
+          high = c(high_eqbound,
+                 high_eqbound_d),
           alpha = c(alpha, alpha),
-          stringsAsFactors=FALSE)
+          stringsAsFactors = FALSE)
         plot$setState(points)
 
         descplot <- descplot$get(key=depName)

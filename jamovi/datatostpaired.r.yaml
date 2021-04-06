@@ -4,6 +4,9 @@ title: TOST Paired Samples T-Test
 jrs:   "1.0"
 
 items:
+    - name:  text
+      type:  Preformatted
+
     - name:  tost
       title: TOST Results
       visible: TRUE

@@ -85,72 +85,67 @@ dataTOSTpairedClass <- R6::R6Class(
 
 
       r12 <- stats::cor(i1, i2)
-      sdif <- sqrt(sd1 ^ 2 + sd2 ^ 2 - 2 * r12 * sd1 * sd2)
 
-      cohend = abs(unname(res$estimate)) / sdif
-      cohen_df = 2*(n)-2
-      #J <- gamma(df / 2) / (sqrt(df / 2) * gamma((df - 1) / 2))
-      J = gamma(cohen_df / 2) / (sqrt(cohen_df / 2) * gamma((cohen_df - 1) / 2))
+      # Calculate Cohen's d
+      cohen_res = d_est_pair(
+        n = n,
+        m1 = m1,
+        m2 = m2,
+        sd1 = sd1,
+        sd2 = sd2,
+        r12 = r12,
+        type = self$options$smd_type,
+        denom = "z",
+        alpha = alpha
+      )
 
-      if (self$options$smd_type == 'g') {
-        cohend <-  cohend * J
-        smd_label = "Hedges' g(z)"
-      } else {
-        smd_label = "Cohen's d(z)"
-      }
+      cohend = cohen_res$cohend
+      cohen_df = cohen_res$cohen_df
+      dlow = cohen_res$dlow
+      dhigh = cohen_res$dhigh
+      d_sigma = cohen_res$d_sigma
+      d_lambda = cohen_res$d_lambda
+      smd_label = cohen_res$smd_label
+      J = cohen_res$J
+      d_denom = cohen_res$d_denom
 
-      d_lambda <- cohend * sqrt(n / (2*(1 - r12)))
-
-      # Equation 4b Goulet-Pelletier and Cousineau, 2018
-      # ((2*(1-r12))/n)
-      #d_sigma = sqrt((df + 1) / (df - 1) * ((2*(1-r12))/n) * (1 + cohend ^ 2 /8))
-      d_sigma = sqrt((cohen_df/(cohen_df-2)) * ((2*(1-r12))/n)  *(1+cohend^2*(n/(2*(1-r12)))) - cohend^2/J^2) * sqrt(2*(1-r12))
-
-      # Get cohend confidence interval
-      tlow <- suppressWarnings(qt(alpha,
-                                  df = df,
-                                  ncp = d_lambda))
-      thigh <- suppressWarnings(qt(alpha,
-                                   df = df,
-                                   ncp = d_lambda))
-      if (m1 == m2) {
-        dlow <- (tlow * (2 * n)) / (sqrt(df) * sqrt(2 * n))
-        dhigh <- (thigh * (2 * n)) / (sqrt(df) * sqrt(2 * n))
-      } else {
-        dlow <- tlow / d_lambda * cohend
-        dhigh <- thigh / d_lambda * cohend
-      }
-
-      if (unname(res$estimate) < 0) {
-        cohend <- cohend * -1
-        tdlow <- dlow
-        dlow <- dhigh * -1
-        dhigh <- tdlow * -1
-        d_lambda <- cohend * sqrt(n / (2*(1 - r12)))
-      }
 
       if (low_eqbound_dz != -999999999 &&
           low_eqbound_dz != -999999999) {
         # low_eqbound_dz and high_eqbound_dz options are deprecated
-        low_eqbound  <- low_eqbound_d * sdif
-        high_eqbound <- high_eqbound_d * sdif
+        low_eqbound  <- low_eqbound_d * d_denom
+        high_eqbound <- high_eqbound_d * d_denom
       }
       else if (self$options$eqbound_type == 'd') {
         low_eqbound_dz <- low_eqbound
         high_eqbound_dz <- high_eqbound
-        low_eqbound  <- low_eqbound * sdif
-        high_eqbound <- high_eqbound * sdif
+        low_eqbound  <- low_eqbound * d_denom
+        high_eqbound <- high_eqbound * d_denom
       } else {
-        low_eqbound_dz <- low_eqbound / sdif
-        high_eqbound_dz <- high_eqbound / sdif
+        low_eqbound_dz <- low_eqbound / d_denom
+        high_eqbound_dz <- high_eqbound / d_denom
       }
 
-      if (self$options$hypothesis == "EQU") {
+      if(self$options$hypothesis == "EQU"){
         alt_low = "greater"
         alt_high = "less"
-      } else if (self$options$hypothesis == "MET") {
+        test_hypothesis = "Hypothesis Tested: Equivalence"
+        null_hyp = paste0(round(low_eqbound,2),
+                          " >= (Mean1 - Mean2) or (Mean1 - Mean2) >= ",
+                          round(high_eqbound,2))
+        alt_hyp = paste0(round(low_eqbound,2),
+                         " < (Mean1 - Mean2) < ",
+                         round(high_eqbound,2))
+      } else if(self$options$hypothesis == "MET"){
         alt_low = "less"
         alt_high = "greater"
+        test_hypothesis = "Hypothesis Tested: Minimal Effect"
+        null_hyp = paste0(round(low_eqbound,2),
+                          " <= (Mean1 - Mean2)  <= ",
+                          round(high_eqbound,2))
+        alt_hyp = paste0(round(low_eqbound,2),
+                         " > (Mean1 - Mean2) or (Mean1 - Mean2)  > ",
+                         round(high_eqbound,2))
       }
 
       low_ttest <- t.test(
@@ -288,6 +283,13 @@ dataTOSTpairedClass <- R6::R6Class(
           `se` = se2
         )
       )
+
+      text_res = paste0("Two One-Sided Tests: Paired Samples t-tests \n \n",
+                        test_hypothesis,
+                        "\n \n",
+                        "Null Hypothesis: ", null_hyp,"\n",
+                        "Alternative: ", alt_hyp)
+      self$results$text$setContent(text_res)
 
       #plot <- plots$get(key = 1)
       points <- data.frame(
