@@ -14,6 +14,8 @@ items:
         - low_eqbound
         - high_eqbound
         - eqbound_type
+        - pair1
+        - pair2
       columns:
         - name: i1
           title: ''
@@ -46,6 +48,8 @@ items:
         - low_eqbound
         - high_eqbound
         - eqbound_type
+        - pair1
+        - pair2
       columns:
         - name: stat
           title: ''
@@ -64,9 +68,9 @@ items:
       rows: 2
       clearWith:
         - alpha
-        - low_eqbound
-        - high_eqbound
-        - eqbound_type
+        - smd_type
+        - pair1
+        - pair2
       columns:
         - name: stat
           title: ''
@@ -87,6 +91,8 @@ items:
       visible: (desc)
       rows: 2
       clearWith:
+        - pair1
+        - pair2
       columns:
         - name: name
           title: ""
@@ -125,6 +131,8 @@ items:
         - high_eqbound
         - eqbound_type
         - smd_type
+        - pair1
+        - pair2
 
     - name: indplot
       type: Image
@@ -139,6 +147,8 @@ items:
         - high_eqbound
         - eqbound_type
         - smd_type
+        - pair1
+        - pair2
 
     - name: diffplot
       type: Image
@@ -153,3 +163,5 @@ items:
         - high_eqbound
         - eqbound_type
         - smd_type
+        - pair1
+        - pair2

@@ -178,7 +178,9 @@ dataTOSTpairedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "alpha",
                     "low_eqbound",
                     "high_eqbound",
-                    "eqbound_type"),
+                    "eqbound_type",
+                    "pair1",
+                    "pair2"),
                 columns=list(
                     list(
                         `name`="i1", 
@@ -214,7 +216,9 @@ dataTOSTpairedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "alpha",
                     "low_eqbound",
                     "high_eqbound",
-                    "eqbound_type"),
+                    "eqbound_type",
+                    "pair1",
+                    "pair2"),
                 columns=list(
                     list(
                         `name`="stat", 
@@ -235,9 +239,9 @@ dataTOSTpairedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 rows=2,
                 clearWith=list(
                     "alpha",
-                    "low_eqbound",
-                    "high_eqbound",
-                    "eqbound_type"),
+                    "smd_type",
+                    "pair1",
+                    "pair2"),
                 columns=list(
                     list(
                         `name`="stat", 
@@ -261,7 +265,9 @@ dataTOSTpairedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 title="Descriptives",
                 visible="(desc)",
                 rows=2,
-                clearWith=NULL,
+                clearWith=list(
+                    "pair1",
+                    "pair2"),
                 columns=list(
                     list(
                         `name`="name", 
@@ -300,7 +306,9 @@ dataTOSTpairedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "low_eqbound",
                     "high_eqbound",
                     "eqbound_type",
-                    "smd_type")))
+                    "smd_type",
+                    "pair1",
+                    "pair2")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="indplot",
@@ -314,7 +322,9 @@ dataTOSTpairedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "low_eqbound",
                     "high_eqbound",
                     "eqbound_type",
-                    "smd_type")))
+                    "smd_type",
+                    "pair1",
+                    "pair2")))
             self$add(jmvcore::Image$new(
                 options=options,
                 name="diffplot",
@@ -328,7 +338,9 @@ dataTOSTpairedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                     "low_eqbound",
                     "high_eqbound",
                     "eqbound_type",
-                    "smd_type")))}))
+                    "smd_type",
+                    "pair1",
+                    "pair2")))}))
 
 dataTOSTpairedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "dataTOSTpairedBase",

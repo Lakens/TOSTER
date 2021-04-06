@@ -184,7 +184,8 @@ items:
         title: $key
         type: Image
         renderFun: .plot
-        width: 180
+        width: 400
+        height: 375
         clearWith:
           - mu
           - alpha
@@ -192,3 +193,4 @@ items:
           - low_eqbound
           - high_eqbound
           - eqbound_type
+          - smd_type

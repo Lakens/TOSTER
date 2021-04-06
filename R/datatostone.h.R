@@ -16,7 +16,8 @@ dataTOSToneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             desc = FALSE,
             plots = FALSE,
             low_eqbound_d = -999999999,
-            high_eqbound_d = -999999999, ...) {
+            high_eqbound_d = -999999999,
+            smd_type = "d", ...) {
 
             super$initialize(
                 package="TOSTER",
@@ -81,6 +82,13 @@ dataTOSToneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 high_eqbound_d,
                 hidden=TRUE,
                 default=-999999999)
+            private$..smd_type <- jmvcore::OptionList$new(
+                "smd_type",
+                smd_type,
+                options=list(
+                    "d",
+                    "g"),
+                default="d")
 
             self$.addOption(private$..vars)
             self$.addOption(private$..mu)
@@ -93,6 +101,7 @@ dataTOSToneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             self$.addOption(private$..plots)
             self$.addOption(private$..low_eqbound_d)
             self$.addOption(private$..high_eqbound_d)
+            self$.addOption(private$..smd_type)
         }),
     active = list(
         vars = function() private$..vars$value,
@@ -105,7 +114,8 @@ dataTOSToneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         desc = function() private$..desc$value,
         plots = function() private$..plots$value,
         low_eqbound_d = function() private$..low_eqbound_d$value,
-        high_eqbound_d = function() private$..high_eqbound_d$value),
+        high_eqbound_d = function() private$..high_eqbound_d$value,
+        smd_type = function() private$..smd_type$value),
     private = list(
         ..vars = NA,
         ..mu = NA,
@@ -117,7 +127,8 @@ dataTOSToneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
         ..desc = NA,
         ..plots = NA,
         ..low_eqbound_d = NA,
-        ..high_eqbound_d = NA)
+        ..high_eqbound_d = NA,
+        ..smd_type = NA)
 )
 
 dataTOSToneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
@@ -345,14 +356,16 @@ dataTOSToneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     options=options,
                     title="$key",
                     renderFun=".plot",
-                    width=180,
+                    width=400,
+                    height=375,
                     clearWith=list(
                         "mu",
                         "alpha",
                         "var_equal",
                         "low_eqbound",
                         "high_eqbound",
-                        "eqbound_type"))))}))
+                        "eqbound_type",
+                        "smd_type"))))}))
 
 dataTOSToneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "dataTOSToneBase",
@@ -401,6 +414,8 @@ dataTOSToneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param plots \code{TRUE} or \code{FALSE} (default), provide plots
 #' @param low_eqbound_d deprecated
 #' @param high_eqbound_d deprecated
+#' @param smd_type \code{'d'} (default) or \code{'g'}; whether the calculated
+#'   effect size is biased (d) or bias-corrected (g).
 #' @return A results object containing:
 #' \tabular{llllll}{
 #'   \code{results$tost} \tab \tab \tab \tab \tab a table \cr
@@ -429,7 +444,8 @@ dataTOSTone <- function(
     desc = FALSE,
     plots = FALSE,
     low_eqbound_d = -999999999,
-    high_eqbound_d = -999999999) {
+    high_eqbound_d = -999999999,
+    smd_type = "d") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("dataTOSTone requires jmvcore to be installed (restart may be required)")
@@ -452,7 +468,8 @@ dataTOSTone <- function(
         desc = desc,
         plots = plots,
         low_eqbound_d = low_eqbound_d,
-        high_eqbound_d = high_eqbound_d)
+        high_eqbound_d = high_eqbound_d,
+        smd_type = smd_type)
 
     analysis <- dataTOSToneClass$new(
         options = options,

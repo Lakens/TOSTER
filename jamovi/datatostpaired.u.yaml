@@ -92,9 +92,9 @@ children:
                     name: d
                     optionName: smd_type
                     optionPart: d
-                    label: Cohen's d
+                    label: Cohen's d(z)
                   - type: RadioButton
                     name: g
                     optionName: smd_type
                     optionPart: g
-                    label: Hedges' g
+                    label: Hedges' g(z)

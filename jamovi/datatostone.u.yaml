@@ -27,14 +27,21 @@ children:
             isTarget: true
   - type: LayoutBox
     margin: large
+    stretchFactor: 1
     children:
-      - name: mu
-        type: TextBox
-        label: mu
-        format: number
-      - type: Label
-        label: Hypothesis
+      - type: LayoutBox
+        cell:
+          column: 0
+          row: 0
+        stretchFactor: 1
         children:
+          - name: mu
+            type: TextBox
+            label: mu
+            format: number
+          - type: Label
+            label: Hypothesis
+            children:
               - type: RadioButton
                 name: EQU
                 optionName: hypothesis
@@ -45,24 +52,46 @@ children:
                 optionName: hypothesis
                 optionPart: MET
                 label: Minimal Effects Test
-      - type: TextBox
-        name: low_eqbound
-        format: number
-      - type: TextBox
-        name: high_eqbound
-        format: number
-      - type: ComboBox
-        name: eqbound_type
-      - name: alpha
-        type: TextBox
-        label: Alpha level
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - name: desc
-        type: CheckBox
-        label: Descriptive statistics
-      - name: plots
-        type: CheckBox
-        label: Plots
+          - type: TextBox
+            name: low_eqbound
+            format: number
+          - type: TextBox
+            name: high_eqbound
+            format: number
+          - type: ComboBox
+            name: eqbound_type
+          - name: alpha
+            type: TextBox
+            label: Alpha level
+            format: number
+      - type: LayoutBox
+        cell:
+          column: 1
+          row: 0
+        stretchFactor: 1
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - name: desc
+                type: CheckBox
+                label: Descriptive statistics
+              - name: plots
+                type: CheckBox
+                label: Plots
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: Label
+                label: Standardized Effect Size
+                children:
+                  - type: RadioButton
+                    name: d
+                    optionName: smd_type
+                    optionPart: d
+                    label: Cohen's d
+                  - type: RadioButton
+                    name: g
+                    optionName: smd_type
+                    optionPart: g
+                    label: Hedges' g

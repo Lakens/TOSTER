@@ -65,8 +65,8 @@ dataTOSTpairedClass <- R6::R6Class(
       se2  <- sd2 / sqrt(n)
 
       res <- t.test(
-        x = data$i1,
-        y = data$i2,
+        y = data$i1,
+        x = data$i2,
         paired = TRUE,
         mu = 0,
         alternative = "two.sided"
@@ -88,8 +88,9 @@ dataTOSTpairedClass <- R6::R6Class(
       sdif <- sqrt(sd1 ^ 2 + sd2 ^ 2 - 2 * r12 * sd1 * sd2)
 
       cohend = abs(unname(res$estimate)) / sdif
-      cohen_df = 2*(n-1)
-      J <- gamma(df / 2) / (sqrt(df / 2) * gamma((df - 1) / 2))
+      cohen_df = 2*(n)-2
+      #J <- gamma(df / 2) / (sqrt(df / 2) * gamma((df - 1) / 2))
+      J = gamma(cohen_df / 2) / (sqrt(cohen_df / 2) * gamma((cohen_df - 1) / 2))
 
       if (self$options$smd_type == 'g') {
         cohend <-  cohend * J
@@ -102,11 +103,16 @@ dataTOSTpairedClass <- R6::R6Class(
 
       # Equation 4b Goulet-Pelletier and Cousineau, 2018
       # ((2*(1-r12))/n)
-      d_sigma = sqrt((df + 1) / (df - 1) * ((2*(1-r12))/n) * (1 + cohend ^ 2 /8))
+      #d_sigma = sqrt((df + 1) / (df - 1) * ((2*(1-r12))/n) * (1 + cohend ^ 2 /8))
+      d_sigma = sqrt((cohen_df/(cohen_df-2)) * ((2*(1-r12))/n)  *(1+cohend^2*(n/(2*(1-r12)))) - cohend^2/J^2) * sqrt(2*(1-r12))
 
       # Get cohend confidence interval
-      tlow <- suppressWarnings(qt(1 / 2 - (1 - alpha * 2) / 2, df = df, ncp = d_lambda))
-      thigh <- suppressWarnings(qt(1 / 2 + (1 - alpha * 2) / 2, df = df, ncp = d_lambda))
+      tlow <- suppressWarnings(qt(alpha,
+                                  df = df,
+                                  ncp = d_lambda))
+      thigh <- suppressWarnings(qt(alpha,
+                                   df = df,
+                                   ncp = d_lambda))
       if (m1 == m2) {
         dlow <- (tlow * (2 * n)) / (sqrt(df) * sqrt(2 * n))
         dhigh <- (thigh * (2 * n)) / (sqrt(df) * sqrt(2 * n))
@@ -115,7 +121,7 @@ dataTOSTpairedClass <- R6::R6Class(
         dhigh <- thigh / d_lambda * cohend
       }
 
-      if ((m1 - m2) < 0) {
+      if (unname(res$estimate) < 0) {
         cohend <- cohend * -1
         tdlow <- dlow
         dlow <- dhigh * -1
@@ -148,16 +154,16 @@ dataTOSTpairedClass <- R6::R6Class(
       }
 
       low_ttest <- t.test(
-        x = data$i1,
-        y = data$i2,
+        y = data$i1,
+        x = data$i2,
         paired = TRUE,
         alternative = alt_low,
         mu = low_eqbound
       )
 
       high_ttest <- t.test(
-        x = data$i1,
-        y = data$i2,
+        y = data$i1,
+        x = data$i2,
         paired = TRUE,
         alternative = alt_high,
         mu = high_eqbound
@@ -178,12 +184,12 @@ dataTOSTpairedClass <- R6::R6Class(
       pttest <- res$p.value
 
       ttost <- ifelse(abs(t1) < abs(t2), t1, t2)
-      LL90 <- ((m1 - m2) - qt(1 - alpha, degree_f) * se)
-      UL90 <- ((m1 - m2) + qt(1 - alpha, degree_f) * se)
+      LL90 <- (unname(res$estimate) - qt(1 - alpha, degree_f) * se)
+      UL90 <- (unname(res$estimate) + qt(1 - alpha, degree_f) * se)
       ptost <- max(p1, p2)
-      dif <- (m1 - m2)
-      LL95 <- ((m1 - m2) - qt(1 - (alpha / 2), degree_f) * se)
-      UL95 <- ((m1 - m2) + qt(1 - (alpha / 2), degree_f) * se)
+      dif <- unname(res$estimate)
+      LL95 <- (unname(res$estimate) - qt(1 - (alpha / 2), degree_f) * se)
+      UL95 <- (unname(res$estimate) + qt(1 - (alpha / 2), degree_f) * se)
 
       tt$setRow(
         rowNo=1,
@@ -191,9 +197,9 @@ dataTOSTpairedClass <- R6::R6Class(
           `i1` = pair1Name,
           `i2` = pair2Name,
           `b` = "t-test",
-          `t` = t,
-          `df` = df,
-          `p` = p
+          `t` = unname(res$statistic),
+          `df` = unname(res$parameter),
+          `p` = unname(res$p.value)
         )
       )
 
@@ -304,7 +310,11 @@ dataTOSTpairedClass <- R6::R6Class(
 
       indplot$setState(data)
 
-      diffplot$setState(data2)
+
+
+      diffplot$setState(list(data2 = data2,
+                             low_eqbound = low_eqbound,
+                             high_eqbound = high_eqbound))
 
 
       #}
@@ -369,45 +379,62 @@ dataTOSTpairedClass <- R6::R6Class(
       if (is.null(image$state))
         return(FALSE)
 
-      data2 = image$state
+      dats = image$state
 
-      pos_1 <- position_jitterdodge(
-        jitter.width  = 0,
-        jitter.height = 0.25,
-        dodge.width   = 0.9
-      )
+      data2 = dats$data2
 
-      data_summary <- function(y) {
-        m <- mean(y)
-        ymin <- m-sd(y)
-        ymax <- m+sd(y)
-        return(c(x=m,xmin=xmin,xmax=xmax))
+      data_summary <- function(x) {
+        m <- mean(x)
+        ymin <- m-sd(x)
+        ymax <- m+sd(x)
+        return(c(y=m,ymin=ymin,ymax=ymax))
       }
+
 
       p2 = ggplot(data2,
                   aes(x = 1,
                       y = diff)) +
-        geom_jitter(aes(x = .5),
+        geom_jitter(aes(x = .75),
                     alpha = 0.5,
                     height = 0,
-                    width = 0.1) +
+                    width = 0.125) +
         stat_slab(
           fill = "steelblue2",
           side = "top",
           alpha = 0.5,
           color = "black"
         ) +
-        stat_summary(aes(x = 0.9),
-                     fun.data = data_summary,
-                     size = 1.5) +
-        theme_tidybayes() +
+        stat_summary(aes(x=0.5),
+                     fun.data=data_summary,
+                     size = 1.5)  +
         labs(y = "Difference (Mean ± SD)",
              x = "") +
         theme(axis.text.y = element_blank(),
               axis.ticks.y = element_blank()) +
         coord_flip()
 
-      print(p2)
+      p3 = p2 +
+        geom_hline(yintercept = dats$low_eqbound[1],
+                   linetype="dashed",
+                   alpha = .5,
+                   size = 1.5) +
+        geom_hline(yintercept = dats$high_eqbound[1],
+                   linetype="dashed",
+                   alpha = .5,
+                   size = 1.5) +
+        geom_text(aes(x=2.5, y = dats$low_eqbound[1],
+                   hjust="outward"),
+                  vjust=-1.0,
+                  angle = 90,
+                  label='Lower Bound') +
+        geom_text(aes(x=2.5, y = dats$high_eqbound[1],
+                   hjust="outward"),
+                  vjust=1.5,
+                  angle = 90,
+                  label='Upper Bound') +
+        theme_tidybayes()
+
+      print(p3)
       return(TRUE)
     },
     .indplot = function(image, ggtheme, theme, ...) {
@@ -427,7 +454,9 @@ dataTOSTpairedClass <- R6::R6Class(
       dat_i2$id = row.names(dat_i2)
 
       dat = rbind(dat_i1,dat_i2)
-      dat$pair = as.factor(dat$pair)
+      dat$pair = factor(dat$pair,
+                        levels = c(pairnames[1], pairnames[2]),
+                        ordered = TRUE)
 
 
       data_summary <- function(x) {

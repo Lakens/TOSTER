@@ -12,10 +12,10 @@ dataTOSToneClass <- R6::R6Class(
       eqb <- self$results$eqb
       effsize <- self$results$effsize
 
-      eqb$getColumn('cil[cohen]')$setSuperTitle(jmvcore::format('{}% Confidence interval', ci))
-      eqb$getColumn('ciu[cohen]')$setSuperTitle(jmvcore::format('{}% Confidence interval', ci))
-      eqb$getColumn('cil[raw]')$setSuperTitle(jmvcore::format('{}% Confidence interval', ci))
-      eqb$getColumn('ciu[raw]')$setSuperTitle(jmvcore::format('{}% Confidence interval', ci))
+      effsize$getColumn('cil[cohen]')$setSuperTitle(jmvcore::format('{}% Confidence interval', ci))
+      effsize$getColumn('ciu[cohen]')$setSuperTitle(jmvcore::format('{}% Confidence interval', ci))
+      effsize$getColumn('cil[raw]')$setSuperTitle(jmvcore::format('{}% Confidence interval', ci))
+      effsize$getColumn('ciu[raw]')$setSuperTitle(jmvcore::format('{}% Confidence interval', ci))
 
       for (key in eqb$rowKeys)
         eqb$setRow(rowKey=key, values=list(`cil[cohen]`='', `ciu[cohen]`=''))
@@ -99,7 +99,7 @@ dataTOSToneClass <- R6::R6Class(
         UL95<-m-mu+qt(1-(alpha/2), degree_f)*res$stderr
         ptost<-max(p1,p2) #Get highest p-value for summary TOST result
         ttost<-ifelse(abs(t1) < abs(t2), t1, t2) #Get lowest t-value for summary TOST result
-        dif<-(m-mu)
+        dif <- unname(res$estimate)
 
         cohend <- abs(dif)/sd # Cohen's d
         df <- res$parameter
@@ -109,17 +109,22 @@ dataTOSToneClass <- R6::R6Class(
 
         if(self$options$smd_type == 'g') {
           cohend <-  cohend * J
-          smd_label = "Hedges' g(z)"
+          smd_label = "Hedges' g"
         } else {
-          smd_label = "Cohen's d(z)"
+          smd_label = "Cohen's d"
         }
 
-        d_lambda <- cohend * sqrt(n/2)
-        d_sigma = sqrt((df + 1)/(df - 1)*(2/n)*(1 + cohend^2/8))
+        d_lambda <- cohend * sqrt(n)
+        #d_sigma = sqrt((df + 1)/(df - 1)*(2/n)*(1 + cohend^2/8))
+        d_sigma = sqrt((df/(df-2)) * (1/n) *(1+cohend^2*(n/1)) - cohend^2/J^2)
 
         # Confidence interval of the SMD from Goulet-Pelletier & Cousineau
-        tlow <- qt(1 / 2 - (1-alpha*2) / 2, df = df, ncp = d_lambda)
-        thigh <- qt(1 / 2 + (1-alpha*2) / 2, df = df, ncp = d_lambda)
+        tlow <- suppressWarnings(qt(alpha,
+                                    df = df,
+                                    ncp = d_lambda))
+        thigh <- suppressWarnings(qt(alpha,
+                                     df = df,
+                                     ncp = d_lambda))
         if(dif == 0) {
           dlow <- (tlow*(2*n)) / (sqrt(df) * sqrt(2*n))
           dhigh <- (thigh*(2*n)) / (sqrt(df) * sqrt(2*n))
@@ -137,9 +142,9 @@ dataTOSToneClass <- R6::R6Class(
 
 
         tt$setRow(rowKey=name, list(
-          `t[0]`=t,  `df[0]`=degree_f, `p[0]`=p,
-          `t[1]`=t2, `df[1]`=degree_f, `p[1]`=p2,
-          `t[2]`=t1, `df[2]`=degree_f, `p[2]`=p1))
+          `t[0]`=t,  `df[0]`=degree_f, `p[0]`= unname(res$p.value),
+          `t[1]`=t2, `df[1]`=degree_f, `p[1]`= p2,
+          `t[2]`=t1, `df[2]`=degree_f, `p[2]`= p1))
 
         eqb$setRow(rowKey=name, list(
           `low[raw]` = low_eqbound,
@@ -150,7 +155,7 @@ dataTOSToneClass <- R6::R6Class(
           `high[cohen]` = high_eqbound_d))
 
         effsize$setRow(
-          rowKey = pair,
+          rowKey = name,
           list(
             `stat[cohen]` = smd_label,
             `est[cohen]` = cohend,
