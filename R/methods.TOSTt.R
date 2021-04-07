@@ -5,7 +5,7 @@
 #' @param x object of class \code{TOSTt} as returned from the reli_stats function
 #' @param ... further arguments passed through, see description of return value
 #'   for details.
-#'   \code{\link{reli_stats}}.
+#'   \code{\link{TOSTt}}.
 #' @return
 #' \describe{
 #'   \item{\code{print}}{Prints short summary of the Limits of Agreement}
@@ -21,21 +21,19 @@
 #' @method print TOSTt
 #' @export
 
-print.TOSTt <- function(x,...){
+print.TOSTt <- function(x,digits = getOption("digits"), prefix = "\t",...){
   cat("\n")
-  cat("Coefficient of Variation (%): ",round(x$cv*100,2))
+  cat(strwrap(x$method, prefix = prefix), sep = "\n")
   cat("\n")
-  cat("Standard Error of Measurement (SEM): ",round(x$SEM,4))
+  cat(x$hypothesis$test_hypothesis, "\n", sep = "")
   cat("\n")
-  cat("Standard Error of the Estimate (SEE): ",round(x$SEE,4))
+  cat("TOST Results \n")
+  print(x$TOST)
   cat("\n")
-  cat("Standard Error of Prediction (SEP): ",round(x$SEP,4))
+  cat("Effect Sizes \n")
+  print(x$effsize)
   cat("\n")
-  cat("\n")
-  cat("Intraclass Correlation Coefficients")
-  cat("\n")
-  print(x$icc,digits=4)
-  cat("\n")
+
 }
 
 #' @rdname TOSTt-methods

@@ -1,4 +1,4 @@
-#' TOST function for t-tests
+#' TOST function for all t-tests types
 #' @param x a (non-empty) numeric vector of data values.
 #' @param y an optional (non-empty) numeric vector of data values.
 #' @param formula a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.
@@ -8,25 +8,267 @@
 #' @param high_eqbound upper equivalence bounds
 #' @param eqbound_type Type of equivalance bound. Can be set to "SMD" for standardized mean difference (i.e., Cohen's d) or  "raw" for the mean difference. Default is "raw".
 #' @param alpha alpha level (default = 0.05)
+#' @param bias_correction Apply Hedges' correction for bias (default is TRUE).
+#' @param rm_correction Repeated measures correction to make standardized mean difference Cohen's d(rm). This only applies to repeated/paired samples. Default is FALSE.
 #' @param ...  further arguments to be passed to or from methods.
 #' @return Returns TOSTt result object
 #' @examples
 #' ## TO BE ADDED
-#' @importFrom stats pnorm pt qnorm qt
-#' @importFrom graphics abline plot points segments title
+#' @importFrom stats sd cor
 #' @export
 
+t.TOST <- function(x, ...) UseMethod('t.TOST')
 
-TOSTt = function(x, y = NULL,
-                 formula,
-                 data,
-                 hypothesis = "EQU",
-                 paired = FALSE,
-                 var.equal = FALSE,
-                 low_eqbound,
-                 high_eqbound,
-                 eqbound_type = "raw",
-                 alpha = 0.05, ...){
+t.TOST.default = function(x,
+                          y = NULL,
+                          hypothesis = "EQU",
+                          paired = FALSE,
+                          var.equal = FALSE,
+                          low_eqbound,
+                          high_eqbound,
+                          eqbound_type = "raw",
+                          alpha = 0.05,
+                          bias_correction = TRUE,
+                          rm_correction = FALSE,
+                          ...) {
+
+  if(bias_correction){
+    smd_type = 'g'
+  } else {
+    smd_type = 'd'
+  }
+
+  if(rm_correction){
+    denom = "rm"
+  } else {
+    denom = "z"
+  }
+
+  if(is.null(y)){
+    sample_type = "One Sample"
+  } else if(paired == TRUE) {
+    sample_type = "Paired Sample"
+  } else {
+    sample_type = "Two Sample"
+  }
+
+  if(hypothesis == "EQU"){
+    alt_low = "greater"
+    alt_high = "less"
+    test_hypothesis = "Hypothesis Tested: Equivalence"
+
+  } else if(hypothesis == "MET"){
+    alt_low = "less"
+    alt_high = "greater"
+    test_hypothesis = "Hypothesis Tested: Minimal Effect"
+
+  }
+
+
+  tresult = t.test(x = x,
+                   y = y,
+                   paired = paired,
+                   var.equal = var.equal,
+                   conf.level = 1 - alpha*2,
+                   alternative = "two.sided")
+
+  if(paired == TRUE && !is.missing(y)){
+    i1 <- x
+    i2 <- y
+    data <- data.frame(i1 = i1, i2 = i2)
+    data <- na.omit(data)
+    colnames(data) = c("i1", "i2")
+    data2 =  data
+    data2$diff = data2$i2 - data2$i1
+
+    n <- nrow(data)
+    i1 <- data$i1
+    i2 <- data$i2
+    m1 <- mean(i1)
+    m2 <- mean(i2)
+    sd1  <- sd(i1)
+    sd2  <- sd(i2)
+    r12 <- cor(i1, i2)
+
+    # Calculate Cohens d
+    cohen_res = d_est_pair(
+      n = n,
+      m1 = m1,
+      m2 = m2,
+      sd1 = sd1,
+      sd2 = sd2,
+      r12 = r12,
+      type = smd_type,
+      denom = denom,
+      alpha = alpha
+    )
+
+  } else if(!is.missing(y)){
+
+    x1 = na.omit(x)
+    y1 = na.omit(y)
+
+    n1 = length(x1)
+    n2 = length(y1)
+
+    m1 = mean(x1)
+    m2 = mean(y1)
+
+    sd1 = sd(x1)
+    sd2 = sd(y1)
+
+    cohen_res = d_est_ind(
+      n1 = n1,
+      n2 = n2,
+      m1 = m1,
+      m2 = m2,
+      sd1 = sd1,
+      sd2 = sd2,
+      type = smd_type,
+      var.equal = var.equal,
+      alpha = alpha
+    )
+
+  } else {
+
+    x1 = na.omit(x)
+    n1 = length(x1)
+    m1 = mean(x1)
+    sd = sd(x1)
+
+    cohen_res = d_est_one(
+      n = n1,
+      mu = m1,
+      sd = sd1,
+      type = smd_type,
+      alpha = alpha
+    )
+
+  }
+
+  if (eqbound_type == 'd') {
+    low_eqbound_d <- low_eqbound
+    high_eqbound_d <- high_eqbound
+    low_eqbound  <- low_eqbound * cohen_res$d_denom
+    high_eqbound <- high_eqbound * cohen_res$d_denom
+  } else {
+    low_eqbound_d <- low_eqbound / cohen_res$d_denom
+    high_eqbound_d <- high_eqbound / cohen_res$d_denom
+  }
+
+  if(hypothesis == "EQU"){
+    null_hyp = paste0(round(low_eqbound,2),
+                      " >= (Mean1 - Mean2) or (Mean1 - Mean2) >= ",
+                      round(high_eqbound,2))
+    alt_hyp = paste0(round(low_eqbound,2),
+                     " < (Mean1 - Mean2) < ",
+                     round(high_eqbound,2))
+  } else if(hypothesis == "MET"){
+    null_hyp = paste0(round(low_eqbound,2),
+                      " <= (Mean1 - Mean2)  <= ",
+                      round(high_eqbound,2))
+    alt_hyp = paste0(round(low_eqbound,2),
+                     " > (Mean1 - Mean2) or (Mean1 - Mean2)  > ",
+                     round(high_eqbound,2))
+  }
+
+  low_ttest <- t.test(
+    y = y,
+    x = x,
+    paired = paired,
+    var.equal = var.equal,
+    alternative = alt_low,
+    mu = low_eqbound,
+    conf.level = 1-alpha*2
+  )
+
+  high_ttest <- t.test(
+    y = y,
+    x = x,
+    paired = paired,
+    var.equal = var.equal,
+    alternative = alt_high,
+    mu = high_eqbound,
+    conf.level = 1-alpha*2
+  )
+
+  pTOST = max(low_ttest$p.value,high_ttest$p.value)
+
+  TOST = data.frame(
+    t = c(tresult$statistic,
+          low_ttest$statistic,
+          high_ttest$statistic),
+    SE = c(tresult$stderr,
+           low_ttest$stderr,
+           high_ttest$stderr),
+    df = c(tresult$parameter,
+           low_ttest$parameter,
+           high_ttest$parameter),
+    p.value = c(tresult$p.value,
+                low_ttest$p.value,
+                high_ttest$p.value),
+    row.names = c("t-test","TOST Lower","TOST Upper")
+  )
+
+  eqb = data.frame(
+    type = c("Raw",cohen_res$smd_label),
+    low_eq = c(low_eqbound,low_eqbound_d),
+    high_eq = c(high_eqbound,high_eqbound_d)
+  )
+
+  effsize = data.frame(
+    estimate = c(tresult$statistic * tresult$stderr,
+                 cohen_res$cohend),
+    SE = c(tresult$stderr,cohen_res$d_sigma),
+    lower.ci = c(test$conf.int[1], cohen_res$dlow),
+    upper.ci = c(test$conf.int[2], cohen_res$dhigh),
+    CI = c((1-alpha*2),(1-alpha*2)),
+    row.names = c("Raw",cohen_res$smd_label)
+  )
+
+  rval = list(
+    TOST = TOST,
+    eqb = eqb,
+    alpha = alpha,
+    method = tresult$method,
+    hypothesis = test_hypothesis,
+    effsize = effsize,
+    smd = cohen_res
+  )
+
+  class(rval) = "TOSTt"
+
+  return(rval)
+
+}
+
+
+t.TOST.formula = function(formula,
+                          data,
+                          subset,
+                          na.action, ...) {
+
+  if(missing(formula)
+     || (length(formula) != 3L)
+     || (length(attr(terms(formula[-2L]), "term.labels")) != 1L))
+    stop("'formula' missing or incorrect")
+  m <- match.call(expand.dots = FALSE)
+  if(is.matrix(eval(m$data, parent.frame())))
+    m$data <- as.data.frame(data)
+  ## need stats:: for non-standard evaluation
+  m[[1L]] <- quote(stats::model.frame)
+  m$... <- NULL
+  mf <- eval(m, parent.frame())
+  DNAME <- paste(names(mf), collapse = " by ")
+  names(mf) <- NULL
+  response <- attr(attr(mf, "terms"), "response")
+  g <- factor(mf[[-response]])
+  if(nlevels(g) != 2L)
+    stop("grouping factor must have exactly 2 levels")
+  DATA <- setNames(split(mf[[response]], g), c("x", "y"))
+  y <- do.call("TOSTt", c(DATA, list(...)))
+
+  y
 
 }
 

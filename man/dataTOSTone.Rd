@@ -16,7 +16,8 @@ dataTOSTone(
   desc = FALSE,
   plots = FALSE,
   low_eqbound_d = -999999999,
-  high_eqbound_d = -999999999
+  high_eqbound_d = -999999999,
+  smd_type = "d"
 )
 }
 \arguments{
@@ -46,10 +47,14 @@ statistics}
 \item{low_eqbound_d}{deprecated}
 
 \item{high_eqbound_d}{deprecated}
+
+\item{smd_type}{\code{'d'} (default) or \code{'g'}; whether the calculated
+effect size is biased (d) or bias-corrected (g).}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
+  \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
   \code{results$tost} \tab \tab \tab \tab \tab a table \cr
   \code{results$eqb} \tab \tab \tab \tab \tab a table \cr
   \code{results$effsize} \tab \tab \tab \tab \tab a table \cr

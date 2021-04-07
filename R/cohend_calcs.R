@@ -235,6 +235,7 @@ d_est_one <- function(n,
     d_sigma = d_sigma,
     d_lambda = d_lambda,
     smd_label = smd_label,
-    J = J
+    J = J,
+    d_denom = sd
   ))
 }

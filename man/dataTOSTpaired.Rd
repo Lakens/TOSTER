@@ -18,6 +18,7 @@ dataTOSTpaired(
   low_eqbound_dz = -999999999,
   high_eqbound_dz = -999999999,
   indplot = FALSE,
+  diffplot = FALSE,
   smd_type = "d"
 )
 }
@@ -53,18 +54,23 @@ statistics}
 \item{indplot}{\code{TRUE} or \code{FALSE} (default), provide plot of
 paired data.}
 
+\item{diffplot}{\code{TRUE} or \code{FALSE} (default), provide plot of
+difference scores.}
+
 \item{smd_type}{\code{'d'} (default) or \code{'g'}; whether the calculated
 effect size is biased (d) or bias-corrected (g).}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
+  \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
   \code{results$tost} \tab \tab \tab \tab \tab a table \cr
   \code{results$eqb} \tab \tab \tab \tab \tab a table \cr
   \code{results$effsize} \tab \tab \tab \tab \tab a table \cr
   \code{results$desc} \tab \tab \tab \tab \tab a table \cr
-  \code{results$plots} \tab \tab \tab \tab \tab an array of images \cr
-  \code{results$indplot} \tab \tab \tab \tab \tab an array of images \cr
+  \code{results$plots} \tab \tab \tab \tab \tab an image \cr
+  \code{results$indplot} \tab \tab \tab \tab \tab an image \cr
+  \code{results$diffplot} \tab \tab \tab \tab \tab an image \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
