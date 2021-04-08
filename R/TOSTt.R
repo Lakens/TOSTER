@@ -19,6 +19,9 @@
 
 t.TOST <- function(x, ...) UseMethod('t.TOST')
 
+#' @describeIn t.TOST default method for t.TOST wherein two numeric vectors are supplied.
+#' @method t.TOST default
+#' @exportS3Method
 t.TOST.default = function(x,
                           y = NULL,
                           hypothesis = "EQU",
@@ -72,9 +75,9 @@ t.TOST.default = function(x,
                    conf.level = 1 - alpha*2,
                    alternative = "two.sided")
 
-  if(paired == TRUE && !is.missing(y)){
-    i1 <- x
-    i2 <- y
+  if(paired == TRUE && !missing(y)){
+    i1 <- y
+    i2 <- x
     data <- data.frame(i1 = i1, i2 = i2)
     data <- na.omit(data)
     colnames(data) = c("i1", "i2")
@@ -103,7 +106,7 @@ t.TOST.default = function(x,
       alpha = alpha
     )
 
-  } else if(!is.missing(y)){
+  } else if(!missing(y)){
 
     x1 = na.omit(x)
     y1 = na.omit(y)
@@ -134,13 +137,14 @@ t.TOST.default = function(x,
     x1 = na.omit(x)
     n1 = length(x1)
     m1 = mean(x1)
-    sd = sd(x1)
+    sd1 = sd(x1)
 
     cohen_res = d_est_one(
       n = n1,
       mu = m1,
       sd = sd1,
       type = smd_type,
+      testValue = 0,
       alpha = alpha
     )
 
@@ -192,7 +196,20 @@ t.TOST.default = function(x,
     conf.level = 1-alpha*2
   )
 
-  pTOST = max(low_ttest$p.value,high_ttest$p.value)
+  if(hypothesis == "EQU"){
+    pTOST = max(low_ttest$p.value,
+                high_ttest$p.value) # get highest p value for TOST result
+    tTOST = ifelse(abs(low_ttest$statistic) < abs(high_ttest$statistic),
+                   low_ttest$statistic,
+                   high_ttest$statistic) #Get lowest t-value for summary TOST result
+  } else {
+    pTOST = min(low_ttest$p.value,
+                high_ttest$p.value) # get highest p value for TOST result
+    tTOST = ifelse(abs(low_ttest$statistic) > abs(high_ttest$statistic),
+                   low_ttest$statistic,
+                   high_ttest$statistic) #Get lowest t-value for summary TOST result
+  }
+
 
   TOST = data.frame(
     t = c(tresult$statistic,
@@ -220,11 +237,57 @@ t.TOST.default = function(x,
     estimate = c(tresult$statistic * tresult$stderr,
                  cohen_res$cohend),
     SE = c(tresult$stderr,cohen_res$d_sigma),
-    lower.ci = c(test$conf.int[1], cohen_res$dlow),
-    upper.ci = c(test$conf.int[2], cohen_res$dhigh),
-    CI = c((1-alpha*2),(1-alpha*2)),
+    lower.ci = c(tresult$conf.int[1], cohen_res$dlow),
+    upper.ci = c(tresult$conf.int[2], cohen_res$dhigh),
+    conf.level = c((1-alpha*2),(1-alpha*2)),
     row.names = c("Raw",cohen_res$smd_label)
   )
+  TOSToutcome<-ifelse(pTOST<alpha,"significant","non-significant")
+  testoutcome<-ifelse(tresult$p.value<alpha,"significant","non-significant")
+  if(hypothesis == "EQU"){
+    TOST_restext = paste0("The equivalence test was ",TOSToutcome,", t(",round(tresult$parameter, digits=2),") = ",format(tTOST, digits = 3, nsmall = 3, scientific = FALSE),", p = ",format(pTOST, digits = 3, nsmall = 3, scientific = FALSE),", given equivalence bounds of ",format(low_eqbound, digits = 3, nsmall = 3, scientific = FALSE)," and ",format(high_eqbound, digits = 3, nsmall = 3, scientific = FALSE)," (on a raw scale) and an alpha of ",alpha,".",sep="")
+  } else {
+    TOST_restext = paste0("The minimal effect test was ",TOSToutcome,", t(",round(tresult$parameter, digits=2),") = ",format(tTOST, digits = 3, nsmall = 3, scientific = FALSE),", p = ",format(pTOST, digits = 3, nsmall = 3, scientific = FALSE),", given equivalence bounds of ",format(low_eqbound, digits = 3, nsmall = 3, scientific = FALSE)," and ",format(high_eqbound, digits = 3, nsmall = 3, scientific = FALSE)," (on a raw scale) and an alpha of ",alpha,".",sep="")
+  }
+
+  ttest_restext = paste0("The null hypothesis test was ",testoutcome,", t(",round(tresult$parameter, digits=2),") = ",format(tresult$statistic, digits = 3, nsmall = 3, scientific = FALSE),", p = ",format(tresult$p.value, digits = 3, nsmall = 3, scientific = FALSE),", given an alpha of ",alpha,".",sep="")
+  if (hypothesis == "EQU"){
+    if(tresult$p.value <= alpha && pTOST <= alpha){
+      combined_outcome <- "statistically different from zero but statistically equivalent"
+    }
+    if(tresult$p.value < alpha && pTOST > alpha){
+      combined_outcome <- "statistically different from zero and not statistically equivalent"
+    }
+    if(tresult$p.value > alpha && pTOST <= alpha){
+      combined_outcome <- "statistically not different from zero and statistically equivalent"
+    }
+    if(tresult$p.value > alpha && pTOST > alpha){
+      combined_outcome <- "statistically not different from zero and not statistically equivalent"
+    }
+  } else {
+    if(tresult$p.value <= alpha && pTOST <= alpha){
+      combined_outcome <- "statistically different from zero and statistically greater than the minimal effect threshold"
+    }
+    if(tresult$p.value < alpha && pTOST > alpha){
+      combined_outcome <- "statistically different from zero but not statistically greater than the minimal effect threshold"
+    }
+    if(tresult$p.value > alpha && pTOST <= alpha){
+      combined_outcome <- "statistically not different from zero and statistically greater than the minimal effect threshold"
+    }
+    if(tresult$p.value > alpha && pTOST > alpha){
+      combined_outcome <- "statistically not different from zero and not statistically greater than the minimal effect threshold"
+    }
+  }
+
+
+  decision = list(
+    TOST = TOST_restext,
+    ttest = ttest_restext,
+    combined = combined_outcome
+  )
+
+  #message(cat("Based on the equivalence test and the null-hypothesis test combined, we can conclude that the observed effect is ",combined_outcome,".",sep=""))
+
 
   rval = list(
     TOST = TOST,
@@ -233,7 +296,8 @@ t.TOST.default = function(x,
     method = tresult$method,
     hypothesis = test_hypothesis,
     effsize = effsize,
-    smd = cohen_res
+    smd = cohen_res,
+    decision = decision
   )
 
   class(rval) = "TOSTt"
@@ -242,7 +306,9 @@ t.TOST.default = function(x,
 
 }
 
-
+#' @describeIn t.TOST alternative method wherein formula and data are supplied instead of vectors.
+#' @method t.TOST formula
+#' @exportS3Method
 t.TOST.formula = function(formula,
                           data,
                           subset,
@@ -266,7 +332,7 @@ t.TOST.formula = function(formula,
   if(nlevels(g) != 2L)
     stop("grouping factor must have exactly 2 levels")
   DATA <- setNames(split(mf[[response]], g), c("x", "y"))
-  y <- do.call("TOSTt", c(DATA, list(...)))
+  y <- do.call("t.TOST", c(DATA, list(...)))
 
   y
 

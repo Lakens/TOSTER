@@ -99,7 +99,7 @@ d_est_ind <- function(n1,
 
   if (var.equal) {
     denomSD <- sqrt((((n1 - 1)*(sd1^2)) + (n2 - 1)*(sd2^2))/((n1+n2)-2)) #calculate sd pooled
-    cohen_df = n1 + n1 - 2
+    cohen_df = n1 + n2 - 2
   } else {
     denomSD <- sqrt((sd1^2 + sd2^2)/2) #calculate sd root mean squared for Welch's t-test
     cohen_df1 = (n1 - 1)*(n2 - 1)*(sd1^2+sd2^2)^2
@@ -205,14 +205,14 @@ d_est_one <- function(n,
 
   # Confidence interval of the SMD from Goulet-Pelletier & Cousineau
   tlow <- suppressWarnings(qt(1 / 2 - (1-alpha*2) / 2,
-                              df = df,
+                              df =   cohen_df,
                               ncp = d_lambda))
   thigh <- suppressWarnings(qt(1 / 2 + (1-alpha*2) / 2,
-                               df = df,
+                               df =   cohen_df,
                                ncp = d_lambda))
   if((mu-testValue) == 0) {
-    dlow <- (tlow*(2*n)) / (sqrt(df) * sqrt(2*n))
-    dhigh <- (thigh*(2*n)) / (sqrt(df) * sqrt(2*n))
+    dlow <- (tlow*(2*n)) / (sqrt(cohen_df) * sqrt(2*n))
+    dhigh <- (thigh*(2*n)) / (sqrt(cohen_df) * sqrt(2*n))
   } else {
     dlow <- tlow / d_lambda * cohend
     dhigh <- thigh / d_lambda * cohend

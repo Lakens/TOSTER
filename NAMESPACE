@@ -2,6 +2,8 @@
 
 S3method(plot,TOSTt)
 S3method(print,TOSTt)
+S3method(t.TOST,default)
+S3method(t.TOST,formula)
 export(TOSTmeta)
 export(TOSTone)
 export(TOSTone.raw)

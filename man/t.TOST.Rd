@@ -2,9 +2,28 @@
 % Please edit documentation in R/TOSTt.R
 \name{t.TOST}
 \alias{t.TOST}
+\alias{t.TOST.default}
+\alias{t.TOST.formula}
 \title{TOST function for all t-tests types}
 \usage{
 t.TOST(x, ...)
+
+\method{t.TOST}{default}(
+  x,
+  y = NULL,
+  hypothesis = "EQU",
+  paired = FALSE,
+  var.equal = FALSE,
+  low_eqbound,
+  high_eqbound,
+  eqbound_type = "raw",
+  alpha = 0.05,
+  bias_correction = TRUE,
+  rm_correction = FALSE,
+  ...
+)
+
+\method{t.TOST}{formula}(formula, data, subset, na.action, ...)
 }
 \arguments{
 \item{x}{a (non-empty) numeric vector of data values.}
@@ -12,10 +31,6 @@ t.TOST(x, ...)
 \item{...}{further arguments to be passed to or from methods.}
 
 \item{y}{an optional (non-empty) numeric vector of data values.}
-
-\item{formula}{a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.}
-
-\item{data}{an optional matrix or data frame (or similar: see model.frame) containing the variables in the formula formula. By default the variables are taken from environment(formula).}
 
 \item{paired}{a logical indicating whether you want a paired t-test.}
 
@@ -30,6 +45,10 @@ t.TOST(x, ...)
 \item{bias_correction}{Apply Hedges' correction for bias (default is TRUE).}
 
 \item{rm_correction}{Repeated measures correction to make standardized mean difference Cohen's d(rm). This only applies to repeated/paired samples. Default is FALSE.}
+
+\item{formula}{a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.}
+
+\item{data}{an optional matrix or data frame (or similar: see model.frame) containing the variables in the formula formula. By default the variables are taken from environment(formula).}
 }
 \value{
 Returns TOSTt result object
@@ -37,6 +56,13 @@ Returns TOSTt result object
 \description{
 TOST function for all t-tests types
 }
+\section{Methods (by class)}{
+\itemize{
+\item \code{default}: default method for t.TOST wherein two numeric vectors are supplied.
+
+\item \code{formula}: alternative method wherein formula and data are supplied instead of vectors.
+}}
+
 \examples{
 ## TO BE ADDED
 }
