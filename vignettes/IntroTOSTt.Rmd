@@ -1,0 +1,286 @@
+---
+title: "An Introduction to t.TOST"
+subtitle: "A new function for TOST with t-tests"
+author: "Aaron R. Caldwell"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: True
+vignette: >
+  %\VignetteIndexEntry{An Introduction to t.TOST}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+bibliography: references.bib
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(TOSTER)
+library(ggplot2)
+library(ggdist)
+```
+
+In an effort to make `TOSTER` more informative and easier to use, a new function `t.TOST` has been created. This function operates very similarly to base R's `t.test` function, but just performs 3 t-tests (one two-tailed and two one-tailed tests). In addition, this function has a generic method where two vectors can be supplied or a formula can be given (e.g.,`y ~ group`). This function also makes it easier to switch between types of t-tests. All three types (two sample, one sample, and paired samples) can be performed/calculated from the same function.Moreover, the summary information and visualizations have been upgraded. This should make the decisions derived from the function more informative and user-friendly. Lastly, `t.TOST` is not limited to equivalence tests. Minimal effects testing (MET) is now possible. MET is useful for situations where the hypothesis is about a minimal effect and the null hypothesis *is* equivalence.
+
+```{r echo=FALSE, warning = FALSE, fig.show='hold'}
+
+ggplot() +
+  geom_vline(aes(xintercept = -.5),
+             linetype = "dashed") +
+  geom_vline(aes(xintercept = .5),
+             linetype = "dashed") +
+  geom_text(aes(
+    y = 1,
+    x = -0.5,
+    vjust = -.9,
+    hjust = "middle"
+  ),
+  angle = 90,
+  label = 'Lower Bound') +
+  geom_text(aes(
+    y = 1,
+    x = 0.5,
+    vjust = 1.5,
+    hjust = "middle"
+  ),
+  angle = 90,
+  label = 'Upper Bound') +
+  geom_text(aes(
+    y = 1,
+    x = 0,
+    vjust = 1.5,
+    hjust = "middle"
+  ),
+  #alignment = "center",
+  label = expression('H'[0])) +
+  geom_text(aes(
+    y = 1,
+    x = 1.5,
+    vjust = 1.5,
+    hjust = "middle"
+  ),
+  #alignment = "center",
+  label = expression('H'["A"])) +
+  geom_text(aes(
+    y = 1,
+    x = -1.5,
+    vjust = 1.5,
+    hjust = "middle"
+  ),
+  #alignment = "center",
+  label = expression('H'["A"])) +
+theme_tidybayes() + 
+  scale_y_continuous(limits = c(0,1.75)) +
+  scale_x_continuous(limits = c(-2,2)) +
+  labs(x = "", y = "",title="Minimal Effect Test") +
+  theme(
+    strip.text = element_text(face = "bold", size = 10),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank() 
+  )
+
+ggplot() +
+  geom_vline(aes(xintercept = -.5),
+             linetype = "dashed") +
+  geom_vline(aes(xintercept = .5),
+             linetype = "dashed") +
+  geom_text(aes(
+    y = 1,
+    x = -0.5,
+    vjust = -.9,
+    hjust = "middle"
+  ),
+  angle = 90,
+  label = 'Lower Bound') +
+  geom_text(aes(
+    y = 1,
+    x = 0.5,
+    vjust = 1.5,
+    hjust = "middle"
+  ),
+  angle = 90,
+  label = 'Upper Bound') +
+  geom_text(aes(
+    y = 1,
+    x = 0,
+    vjust = 1.5,
+    hjust = "middle"
+  ),
+  #alignment = "center",
+  label = expression('H'["A"])) +
+  geom_text(aes(
+    y = 1,
+    x = 1.5,
+    vjust = 1.5,
+    hjust = "middle"
+  ),
+  #alignment = "center",
+  label = expression('H'["0"])) +
+  geom_text(aes(
+    y = 1,
+    x = -1.5,
+    vjust = 1.5,
+    hjust = "middle"
+  ),
+  #alignment = "center",
+  label = expression('H'["0"])) +
+theme_tidybayes() + 
+  scale_y_continuous(limits = c(0,1.75)) +
+  scale_x_continuous(limits = c(-2,2)) +
+  labs(x = "", y = "",title="Equivalence Test") +
+  theme(
+    strip.text = element_text(face = "bold", size = 10),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank() 
+  )
+```
+
+In the general introduction to this package we detailed how to look at *old* results and how to apply TOST to interpreting those results. However, in many cases, users may have new data that needs to be analyzed. Therefore, `t.TOST` can be applied to new data. This vignette will use the `bugs` data from the `jmv` R package and the `sleep` dataset.
+
+```{r}
+data('sleep')
+library(jmv)
+data('bugs')
+```
+
+# Independent Groups
+
+For this example, we will use the sleep data. In this data there is a `group` variable and an outcome `extra`.
+
+```{r}
+head(sleep)
+```
+
+We will assume the data are independent, and that we have equivalence bounds of +/- 0.5. All we need to do is provide the `formula`, `data`, and eqbound arguments for the function to run appropriately. In addition, we can set the `var.equal` argument (to assume equal variance), and the `paired` argument (sets if the data is paired or not). Both are logical indicators that can be set to TRUE or FALSE. The `alpha` is automatically set to 0.05 but this can also be adjusted by the user. The Hedges correction is also automatically calculated, but this can be overridden with the `bias_correction` argument. The `hypothesis` is automatically set to "EQU" for equivalence but if a minimal effect is of interest then "MET" can be supplied
+
+```{r}
+res1 = t.TOST(formula = extra ~ group,
+              data = sleep,
+              low_eqbound = -.5,
+              high_eqbound = .5)
+
+res1a = t.TOST(x = subset(sleep,group==1)$extra,
+               y = subset(sleep,group==2)$extra,
+               low_eqbound = -.5,
+               high_eqbound = .5)
+```
+
+Once the function has run, we can print the results with the `print` command. This provides a verbose summary of the results.
+
+```{r}
+print(res1)
+```
+
+Another nice feature is the generic `plot` method that can provide a visual summary of the results.
+
+```{r fig.width=6, fig.height=6}
+plot(res1)
+```
+
+# Paired Samples
+
+To perform a paired samples TOST, the process does not change much. We could process the test the same way by providing a formula. All we would need to then is change `paired` to TRUE.
+
+```{r}
+res2 = t.TOST(formula = extra ~ group,
+              data = sleep,
+              paired = TRUE,
+              low_eqbound = -.5,
+              high_eqbound = .5)
+res2
+```
+
+However, we may have two vectors of data that are paired. So instead we may want to just provide those separately rather than using a data set and setting the formula. This can be demonstrated with the "bugs" data.
+
+```{r}
+res3 = t.TOST(x = bugs$LDHF,
+              y = bugs$LDLF,
+              paired = TRUE,
+              low_eqbound = -1,
+              high_eqbound = 1)
+res3
+```
+
+We may want to perform a Minimal Effect Test with the `hypothesis` argument set to "MET".
+
+```{r}
+res3a = t.TOST(x = bugs$LDHF,
+               y = bugs$LDLF,
+               paired = TRUE,
+               hypothesis = "MET",
+               low_eqbound = -1,
+               high_eqbound = 1)
+res3a
+```
+
+Again, we can plot the effects from the `t.TOST` result.
+
+```{r fig.width=6, fig.height=6}
+plot(res3a)
+```
+
+# One Sample t-test
+
+In other cases we may just have a one sample test. If that is the case all we have to do is supply the `x` argument for the data. For this test we may hypothesis that the mean of LDHF is not more than 1.5 points greater or less than 7.
+
+```{r}
+res4 = t.TOST(x = bugs$LDHF,
+              hypothesis = "EQU",
+              low_eqbound = 5.5,
+              high_eqbound = 8.5)
+res4
+```
+
+```{r fig.width=6, fig.height=6}
+plot(res4)
+```
+
+# Standardized Mean Difference
+
+The calculation of standardized mean differences (SMDs) can be helpful in interpreting data and are essential for meta-analysis. In psychology, effect sizes are very often reported as an SMD. In most papers the SMD is reported as Cohen's d. In it's simplest form it is reported as the mean difference (or mean in the case of a one-sample test) divided by the standard deviation.
+
+$$
+Cohen's \space d = \frac{Mean}{SD}
+$$ 
+
+However, two major problems arise: bias and the calculation of the denominator. First, the Cohen's d calculation is biased (meaning the effect is inflated), and a bias correction (often referred to as Hedges' g) is applied to provide an unbiased estimate. Second, the denominator can obviously influence the estimate of the SMD, and there are a multitude of choices for how to calculate the denominator. To make matters worse, the calculation (in most cases an approximation) of the confidence intervals involves the noncentral *t* distribution. This requires calculating a non-centrality parameter (lambda: $\lambda$), degrees of freedom (df), and variance (sigma: $\sigma$) for the SMD. None of these are easy to determine and these calculations are hotly debated in the statistics literature.
+
+In this package we have opted to the (mostly) use the approaches outlined by @Goulet_2018. We found that that these calculations were straight forward and provided fairly accurate coverage for the confidence intervals. In this section however we will detail on the calculations that are involved in calculating the SMD, their associated degrees of freedom, noncentrality parameter, and variance.
+
+## Bias Correction (Hedges)
+
+For all SMD calculative approaches the bias corrected SMD was calculated as the following:
+
+$$
+g = d \cdot \frac{\Gamma(\frac{df}{2})}{\sqrt{\frac{df}{2}} \cdot \Gamma(\frac{df-1}{2})} 
+$$
+
+The correction factor is calculated in R as the following:
+
+
+    J <- gamma(cohen_df/2)/(sqrt(cohen_df/2)\*gamma((cohen_df-1)/2))
+
+## Independent Samples
+
+For independent samples there are two calculative approaches supported by `TOSTER`. One the denominator is the pooled standard deviation (Cohen's d) and the other is the average standard deviation (Cohen's d(av)). Currently, the choice is made by the function based on whether or not the variance can assumed to be equal. If the variances are not assumed to be equal then Cohen's d(av) will be returned, and if variances are assumed to be equal then Cohen's d is returned. 
+
+### Variances Equal: Cohen's d
+
+For this calculation, the denominator is simply the pooled standard deviation.
+
+$$
+s_{p} = \sqrt \frac {(n_{1} - 1)s_{1}^2 + (n_{2} - 1)s_{2}^2}{n_{1} + n_{2} - 2}
+$$
+The SMD, Cohen's d, is then calculated as the following:
+
+$$
+d = \frac {\bar{x}_1 - \bar{x}_2} {s_{p}}
+$$
+Note: the x with the bar above it (pronouced "x-bar") refers the the means of group 1 and 2 respectively.
+
+# References

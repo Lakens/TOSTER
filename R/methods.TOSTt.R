@@ -21,16 +21,19 @@
 #' @method print TOSTt
 #' @export
 
-print.TOSTt <- function(x,digits = getOption("digits"), prefix = "\t",...){
+print.TOSTt <- function(x,digits = getOption("digits"),...){
   cat("\n")
-  cat(strwrap(x$method, prefix = prefix), sep = "\n")
+  cat(strwrap(x$method), sep = "\n")
   cat(x$hypothesis, "\n", sep = "")
+  cat("Equivalence Bounds (raw):",format(x$eqb$low_eq[1], digits = 3, nsmall = 3, scientific = FALSE)," & ",format(x$eqb$high_eq[1], digits = 3, nsmall = 3, scientific = FALSE), sep="")
+  cat("\n")
+  cat("Alpha Level:", x$alpha, sep="")
   cat("\n")
   cat(x$decision$TOST)
   cat("\n")
   cat(x$decision$ttest)
   cat("\n")
-  cat("We can conclude that the observed effect is ",x$decision$combined,".",sep="")
+  cat("Conclusion: The effect is ",x$decision$combined,".",sep="")
   cat("\n")
   cat("\n")
   cat("TOST Results \n")
@@ -45,6 +48,8 @@ print.TOSTt <- function(x,digits = getOption("digits"), prefix = "\t",...){
 #' @rdname TOSTt-methods
 #' @method plot TOSTt
 #' @import ggplot2
+#' @import ggdist
+#' @import distributional
 #' @export
 
 plot.TOSTt <- function(x,  ...){

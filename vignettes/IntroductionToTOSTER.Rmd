@@ -11,6 +11,8 @@ vignette: >
 
 For an open access tutorial paper explaining how to set equivalence bounds, and how to perform and report equivalence tests, see Lakens, D., Scheel, A. M., & Isager, P. M. (2018). Equivalence Testing for Psychological Research: A Tutorial. *Advances in Methods and Practices in Psychological Science*, 1(2), 259-269.  https://doi.org/10.1177/2515245918770963
 
+*Note*: For situations where 
+
 #Equivalence Testing with TOSTER
 
 Scientists should be able to provide support for the absence of a meaningful effect. Currently researchers often incorrectly conclude an effect is absent based a non-significant result. It is statistically impossible to support the hypothesis that a true effect size is exactly zero. What is possible in a Frequentist hypothesis testing framework is to statistically reject effects large enough to be deemed worthwhile. When researchers want to argue for the absence of an effect that is large enough to be worthwhile to examine, they can test for equivalence.
