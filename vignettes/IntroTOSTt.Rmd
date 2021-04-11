@@ -254,33 +254,203 @@ In this package we have opted to the (mostly) use the approaches outlined by @Go
 
 ## Bias Correction (Hedges)
 
-For all SMD calculative approaches the bias corrected SMD was calculated as the following:
+For all SMD calculative approaches the bias correction was calculated as the following:
 
 $$
-g = d \cdot \frac{\Gamma(\frac{df}{2})}{\sqrt{\frac{df}{2}} \cdot \Gamma(\frac{df-1}{2})} 
+J = \frac{\Gamma(\frac{df}{2})}{\sqrt{\frac{df}{2}} \cdot \Gamma(\frac{df-1}{2})} 
 $$
 
 The correction factor is calculated in R as the following:
 
 
-    J <- gamma(cohen_df/2)/(sqrt(cohen_df/2)\*gamma((cohen_df-1)/2))
+    J <- gamma(cohen_df/2)/(sqrt(cohen_df/2)*gamma((cohen_df-1)/2))
+    
+Hedges g (bias corrected Cohen's d) can then be calculated by multiplying d by J
+
+$$
+g = d \cdot J
+$$
 
 ## Independent Samples
 
 For independent samples there are two calculative approaches supported by `TOSTER`. One the denominator is the pooled standard deviation (Cohen's d) and the other is the average standard deviation (Cohen's d(av)). Currently, the choice is made by the function based on whether or not the variance can assumed to be equal. If the variances are not assumed to be equal then Cohen's d(av) will be returned, and if variances are assumed to be equal then Cohen's d is returned. 
 
-### Variances Equal: Cohen's d
+### Variances Assumed Unequal: Cohen's d(av)
 
 For this calculation, the denominator is simply the pooled standard deviation.
 
 $$
-s_{p} = \sqrt \frac {(n_{1} - 1)s_{1}^2 + (n_{2} - 1)s_{2}^2}{n_{1} + n_{2} - 2}
+s_{av} =  \frac {s_{1} + s_{2}}{2}
 $$
-The SMD, Cohen's d, is then calculated as the following:
+
+The SMD, Cohen's d(av), is then calculated as the following:
+
+$$
+d_{av} = \frac {\bar{x}_1 - \bar{x}_2} {s_{av}}
+$$
+Note: the x with the bar above it (pronounced as "x-bar") refers the the means of group 1 and 2 respectively.
+
+The degrees of freedom for Cohen's d(av) is the following:
+
+$$
+df = \frac{(n_1-1)(n_2-1)(s_1^2+s_2^2)^2}{(n_2-1) \cdot s_1^4+(n_1-1) \cdot s_2^4}
+$$
+
+The non-centrality parameter ($\lambda$) is calculated as the following:
+
+$$
+\lambda = d_{av} \cdot \sqrt \frac{\tilde n}{2}
+$$
+wherein, $\tilde n$ is the harmonic mean of the 2 sample sizes which is calculated as the following:
+
+$$
+\tilde n = \frac{2 \cdot n_1 \cdot n_2}{n_1 + n_2}
+$$
+
+The standard error ($\sigma$) of Cohen's d(av) is calculated as the following:
+
+$$
+\sigma = \sqrt{\frac{df}{df-2} \cdot \frac{2}{\tilde n} (1+d^2 \cdot \frac{\tilde n}{2}) -\frac{d^2}{J^2}}
+$$
+wherein $J$ represents the Hedges correction (calculation above).
+
+### Variances Assumed Equal: Cohen's d
+
+For this calculation, the denominator is simply the pooled standard deviation.
+
+$$s_{p} = \sqrt \frac {(n_{1} - 1)s_{1}^2 + (n_{2} - 1)s_{2}^2}{n_{1} + n_{2} - 2}$$
+
 
 $$
 d = \frac {\bar{x}_1 - \bar{x}_2} {s_{p}}
 $$
-Note: the x with the bar above it (pronouced "x-bar") refers the the means of group 1 and 2 respectively.
+
+The degrees of freedom for Cohen's d is the following:
+
+$$
+df = n_1 + n_2 - 2
+$$
+
+The non-centrality parameter ($\lambda$) is calculated as the following:
+
+$$
+\lambda = d \cdot \sqrt \frac{\tilde n}{2}
+$$
+wherein, $\tilde n$ is the harmonic mean of the 2 sample sizes which is calculated as the following:
+
+$$
+\tilde n = \frac{2 \cdot n_1 \cdot n_2}{n_1 + n_2}
+$$
+
+The standard error ($\sigma$) of Cohen's d is calculated as the following:
+
+
+$$
+\sigma = \sqrt{\frac{df}{df-2} \cdot \frac{2}{\tilde n} (1+d^2 \cdot \frac{\tilde n}{2}) -\frac{d^2}{J}}
+$$
+wherein $J$ represents the Hedges correction (calculation above).
+
+## Paired Samples
+
+For paired samples there are two calculative approaches supported by `TOSTER`. One the denominator is the standard deviation of the change score (Cohen's d(z)) and the other is the correlation corrected effect sie (Cohen's d(av)). Currently, the choice is made by the function based on whether or not the user sets `rm_correction` to TRUE. If `rm_correction` is set to t TRUE then Cohen's d(rm) will be returned, and otherwise Cohen's d(z) is returned. 
+
+### Cohen's d(z): Change Scores
+
+For this calculation, the denominator is the standard deviation of the difference scores which can be calculated from the standard deviations of the samples and the correlation between the paired samples.
+
+$$
+s_{diff} =  \sqrt{sd_1^2 + sd_2^2 - 2 \cdot r_{12} \cdot sd_1 \cdot sd_2}
+$$
+
+The SMD, Cohen's d(z), is then calculated as the following:
+
+$$
+d_{z} = \frac {\bar{x}_1 - \bar{x}_2} {s_{diff}}
+$$
+
+The degrees of freedom for Cohen's d(z) is the following:
+
+$$
+df = 2 \cdot (N_{pairs}-1)
+$$
+
+The non-centrality parameter ($\lambda$) is calculated as the following:
+
+$$
+\lambda = d_{z} \cdot \sqrt \frac{N_{pairs}}{2 \cdot (1-r_{12})}
+$$
+
+The standard error ($\sigma$) of Cohen's d(z) is calculated as the following:
+
+$$
+\sigma = \sqrt{\frac{df}{df-2} \cdot \frac{2 \cdot (1-r_{12})}{n} \cdot (1+d^2 \cdot \frac{n}{2 \cdot (1-r_{12})}) -\frac{d^2}{J^2}} \space \times \space \sqrt {2 \cdot (1-r_{12})}
+$$
+
+### Cohen's d(rm): Correlation Corrected
+
+For this calculation, the same values for the same calculations above is adjusted for the correlation between measures. As @Goulet_2018 mention, this is useful for when effect sizes are being compared for studies that involve between and within subjects designs.
+
+First, the standard deviation of the difference scores are calculated
+
+$$
+s_{diff} =  \sqrt{sd_1^2 + sd_2^2 - 2 \cdot r_{12} \cdot sd_1 \cdot sd_2}
+$$
+
+The SMD, Cohen's d(rm), is then calculated with a small change to the denominator:
+
+$$
+d_{rm} = \frac {\bar{x}_1 - \bar{x}_2} {s_{diff} \cdot \sqrt {2 \cdot (1-r_{12})} }
+$$
+
+The degrees of freedom for Cohen's d(rm) is the following:
+
+$$
+df = 2 \cdot (N_{pairs}-1)
+$$
+
+The non-centrality parameter ($\lambda$) is calculated as the following:
+
+$$
+\lambda = d_{rm} \cdot \sqrt \frac{N_{pairs}}{2 \cdot (1-r_{12})}
+$$
+
+The standard error ($\sigma$) of Cohen's d(rm) is calculated as the following:
+
+$$
+\sigma = \sqrt{\frac{df}{df-2} \cdot \frac{2 \cdot (1-r_{12})}{n} \cdot (1+d^2 \cdot \frac{n}{2 \cdot (1-r_{12})}) -\frac{d^2}{J^2}}
+$$
+
+## One Sample
+
+For a one-sample situation, the calculations are very straight forward
+
+For this calculation, the denominator is simply the standard deviation of the sample.
+
+$$s={\sqrt {{\frac {1}{N-1}}\sum _{i=1}^{N}\left(x_{i}-{\bar {x}}\right)^{2}}}$$
+The SMD is then the mean of X divided by the standard deviation.
+
+$$
+d = \frac {\bar{x}} {s}
+$$
+
+The degrees of freedom for Cohen's d is the following:
+
+$$
+df = N - 1
+$$
+
+The non-centrality parameter ($\lambda$) is calculated as the following:
+
+$$
+\lambda = d \cdot \sqrt N
+$$
+
+The standard error ($\sigma$) of Cohen's d is calculated as the following:
+
+$$
+\sigma = \sqrt{\frac{df}{df-2} \cdot \frac{1}{N} (1+d^2 \cdot N) -\frac{d^2}{J^2}}
+$$
+wherein $J$ represents the Hedges correction (calculation above).
+
 
 # References

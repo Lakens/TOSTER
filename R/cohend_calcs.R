@@ -140,7 +140,8 @@ d_est_ind <- function(n1,
 
   # add options for cohend here
   d_lambda <- cohend * sqrt(ntilde/2)
-  d_sigma = sqrt((n1+n2)/(n1*n2)+(cohend^2/(2*(n1+n2))))
+  #d_sigma = sqrt((n1+n2)/(n1*n2)+(cohend^2/(2*(n1+n2))))
+  d_sigma = sqrt((cohen_df/(cohen_df-2)) * (2/ntilde) *(1+cohend^2*(ntilde/2)) - cohend^2/J^2)
 
   # Confidence interval of the SMD from Goulet-Pelletier & Cousineau
   tlow <- qt(1 / 2 - (1-alpha*2) / 2, df = cohen_df, ncp = d_lambda)
