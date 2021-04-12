@@ -92,63 +92,28 @@ dataTOSTtwoClass <- R6::R6Class(
         sd[is.na(sd)] <- NaN
         sediff[is.na(sediff)] <- NaN
 
-
-
         var.equal <- self$options$var_equal
         alpha <- self$options$alpha
 
+        if(self$options$smd_type == "g"){
+          bias_c = TRUE
+        } else {
+          bias_c = FALSE
+        }
+
         low_eqbound    <- self$options$low_eqbound
         high_eqbound   <- self$options$high_eqbound
-        low_eqbound_d  <- self$options$low_eqbound_d  # deprecated
-        high_eqbound_d <- self$options$high_eqbound_d
 
-        tresult <- t.test(dep ~ group,
-                          dataTTest,
-                          paired = FALSE,
-                          alternative = "two.sided",
-                          mu = 0,
-                          var.equal=var.equal)
+        TOSTres = t.TOST(formula = dep ~ group,
+                         data = dataTTest,
+                         paired = FALSE,
+                         eqbound_type = self$options$eqbound_type,
+                         var.equal = var.equal,
+                         alpha = alpha,
+                         bias_correction = bias_c,
+                         low_eqbound = low_eqbound,
+                         high_eqbound = high_eqbound)
 
-        t <- unname(tresult$statistic)
-        p <- unname(tresult$p.value)
-        df <- unname(tresult$parameter)
-
-        cohen_res = d_est_ind(
-          n1 = n[1],
-          n2 = n[2],
-          m1 = m[1],
-          m2 = m[2],
-          sd1 = sd[1],
-          sd2 = sd[2],
-          type = self$options$smd_type,
-          var.equal = var.equal,
-          alpha = alpha
-        )
-
-        cohend = cohen_res$cohend
-        cohen_df = cohen_res$cohen_df
-        dlow = cohen_res$dlow
-        dhigh = cohen_res$dhigh
-        d_sigma = cohen_res$d_sigma
-        d_lambda = cohen_res$d_lambda
-        smd_label = cohen_res$smd_label
-        J = cohen_res$J
-        d_denom = cohen_res$d_denom
-
-        if (low_eqbound_d != -999999999 && low_eqbound_d != -999999999) {
-          # low_eqbound_d and high_eqbound_d options are deprecated
-          low_eqbound  <- low_eqbound_d * d_denom
-          high_eqbound <- high_eqbound_d * d_denom
-        }
-        else if (self$options$eqbound_type == 'd') {
-          low_eqbound_d <- low_eqbound
-          high_eqbound_d <- high_eqbound
-          low_eqbound  <- low_eqbound * d_denom
-          high_eqbound <- high_eqbound * d_denom
-        } else {
-          low_eqbound_d <- low_eqbound / d_denom
-          high_eqbound_d <- high_eqbound / d_denom
-        }
 
         if(self$options$hypothesis == "EQU"){
           alt_low = "greater"
@@ -172,62 +137,44 @@ dataTOSTtwoClass <- R6::R6Class(
                            round(high_eqbound,2))
         }
 
-        low_ttest <- t.test(dep ~ group,
-                            dataTTest,
-                            paired = FALSE,
-                            var.equal = var.equal,
-                            alternative = alt_low,
-                            mu = low_eqbound)
 
-        high_ttest <- t.test(dep ~ group,
-                             dataTTest,
-                             paired = FALSE,
-                             var.equal = var.equal,
-                             alternative = alt_high,
-                             mu = high_eqbound)
-
-        t1 = low_ttest$statistic
-        p1 = low_ttest$p.value
-        t2 = high_ttest$statistic
-        p2 = high_ttest$p.value
-
-        degree_f = tresult$parameter
-        pttest = tresult$p.value
-
-        LL90 <- (m[1]-m[2])-qt(1-alpha, degree_f)*tresult$stderr
-        UL90 <- (m[1]-m[2])+qt(1-alpha, degree_f)*tresult$stderr
-        LL95 <- (m[1]-m[2])-qt(1-(alpha/2), degree_f)*tresult$stderr
-        UL95 <- (m[1]-m[2])+qt(1-(alpha/2), degree_f)*tresult$stderr
-
-        dif<-(m[1]-m[2])
-
-        tt$setRow(rowKey=depName, list(
-          `t[0]`=t,  `df[0]`=df, `p[0]`=p,
-          `t[1]`=t2, `df[1]`=degree_f, `p[1]`=p2,
-          `t[2]`=t1, `df[2]`=degree_f, `p[2]`=p1))
+        tt$setRow(
+          rowKey = depName,
+          list(
+            `t[0]` = TOSTres$TOST$t[1],
+            `df[0]` = TOSTres$TOST$df[1],
+            `p[0]` = TOSTres$TOST$p.value[1],
+            `t[1]` = TOSTres$TOST$t[2],
+            `df[1]` = TOSTres$TOST$df[2],
+            `p[1]` = TOSTres$TOST$p.value[2],
+            `t[2]` = TOSTres$TOST$t[3],
+            `df[2]` = TOSTres$TOST$df[3],
+            `p[2]` = TOSTres$TOST$p.value[3]
+          )
+        )
 
         eqb$setRow(
           rowKey = depName,
           list(
-            `stat[cohen]` = smd_label,
-            `low[cohen]` = low_eqbound_d,
-            `high[cohen]` = high_eqbound_d,
+            `stat[cohen]` = TOSTres$smd$smd_label,
+            `low[cohen]` = TOSTres$eqb$low_eq[2],
+            `high[cohen]` = TOSTres$eqb$high_eq[2],
             `stat[raw]` = "Raw",
-            `low[raw]` = low_eqbound,
-            `high[raw]` = high_eqbound
+            `low[raw]` = TOSTres$eqb$low_eq[1],
+            `high[raw]` = TOSTres$eqb$high_eq[1]
           )
         )
 
         effsize$setRow(
           rowKey = depName,
           list(
-            `stat[cohen]` = smd_label,
-            `est[cohen]` = cohend,
-            `cil[cohen]` = dlow,
-            `ciu[cohen]` = dhigh,
-            `est[raw]` = dif,
-            `cil[raw]` = LL90,
-            `ciu[raw]` = UL90
+            `stat[cohen]` = TOSTres$smd$smd_label,
+            `est[cohen]` = TOSTres$smd$cohend,
+            `cil[cohen]` = TOSTres$smd$dlow,
+            `ciu[cohen]` = TOSTres$smd$dhigh,
+            `est[raw]` = TOSTres$effsize$estimate[1],
+            `cil[raw]` = TOSTres$effsize$lower.ci[1],
+            `ciu[raw]` = TOSTres$effsize$upper.ci[1]
           )
         )
 
@@ -255,25 +202,11 @@ dataTOSTtwoClass <- R6::R6Class(
         self$results$text$setContent(text_res)
 
         # Get SE value
-        SE_val = tresult$stderr
+        #SE_val = tresult$stderr
 
         plot <- plots$get(key=depName)
-        points <- data.frame(
-          type = c("Mean Difference",
-                   smd_label),
-          mu = c(dif, 0),
-          param = c(round(unname(tresult$parameter),0),
-                    round(unname(tresult$parameter),0)),
-          sigma = c(unname(tresult$stderr),
-                    d_sigma),
-          lambda = c(0, d_lambda),
-          low = c(low_eqbound,
-                low_eqbound_d),
-          high = c(high_eqbound,
-                 high_eqbound_d),
-          alpha = c(alpha, alpha),
-          stringsAsFactors = FALSE)
-        plot$setState(points)
+
+        plot$setState(TOSTres)
 
         descplot <- descplot$get(key=depName)
 
@@ -286,53 +219,10 @@ dataTOSTtwoClass <- R6::R6Class(
       if (is.null(image$state))
         return(FALSE)
 
-      points <- image$state
-      c1 = 1-points$alpha[1]
-      c2 = 1-points$alpha[1]*2
-      if(c1 < .999 && c2 > .5){
-        sets = c(.5,c2,c1,.999)
-      } else if(c2 <=.5 && c1 < .999) {
-        sets = c(c2,c1,.999)
-      } else {
-        sets = c(.5,c2,c1)
-      }
-      plot = ggplot(data = points,
-                    aes_string(y = 0)) +
-        stat_dist_halfeye(aes(
-          dist = dist_student_t(
-            mu = mu,
-            df = param,
-            sigma = sigma,
-            ncp = lambda
-          ),
-          fill = stat(cut_cdf_qi(p=cdf,
-                                 .width = sets))
-        ),
-        .width = c(c2, c1)) +
-        scale_fill_brewer(direction = -1,
-                          na.translate = FALSE) +
-        labs(x = '', y = '',
-             fill = "Confidence Interval") +
-        geom_vline(aes(xintercept = low),
-                   linetype="dashed") +
-        geom_vline(aes(xintercept = high),
-                   linetype="dashed") +
-        geom_text(aes(y=1.5, x=low,
-                      vjust=-.9, hjust=1),
-                  angle = 90,
-                  label='Lower Bound') +
-        geom_text(aes(y=1.5, x=high, vjust=1.5, hjust=1),
-                  angle = 90,
-                  label='Upper Bound') +
-        theme_tidybayes() +
-        theme(legend.position="top",
-              strip.text = element_text(face="bold", size=10),
-              axis.text.y = element_blank(),
-              axis.ticks.y = element_blank()) +
-        facet_wrap(~type,
-                   ncol = 1,
-                   scales = "free")
-      print(plot)
+      TOSTres <- image$state
+
+      plotTOSTr = plot(TOSTres)
+      print(plotTOSTr)
 
       return(TRUE)
     },

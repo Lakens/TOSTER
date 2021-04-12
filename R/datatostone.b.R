@@ -43,6 +43,7 @@ dataTOSToneClass <- R6::R6Class(
         t   <- unname(res$statistic)
         pttest   <- unname(res$p.value)
 
+
         low_eqbound    <- self$options$low_eqbound
         high_eqbound   <- self$options$high_eqbound
         low_eqbound_d  <- self$options$low_eqbound_d  # deprecated
