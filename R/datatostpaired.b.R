@@ -64,67 +64,18 @@ dataTOSTpairedClass <- R6::R6Class(
       se1  <- sd1 / sqrt(n)
       se2  <- sd2 / sqrt(n)
 
-      res <- t.test(
-        y = data$i1,
-        x = data$i2,
-        paired = TRUE,
-        mu = 0,
-        alternative = "two.sided"
-      )
-
-      t <- unname(res$statistic)
-      p <- unname(res$p.value)
-      df <- unname(res$parameter)
-
       alpha <- self$options$alpha
       low_eqbound    <- self$options$low_eqbound
       high_eqbound   <- self$options$high_eqbound
 
-      low_eqbound_dz <- self$options$low_eqbound_dz  # deprecated
-      high_eqbound_dz <- self$options$high_eqbound_dz
-
-
-      r12 <- stats::cor(i1, i2)
-
-      # Calculate Cohen's d
-      cohen_res = d_est_pair(
-        n = n,
-        m1 = m1,
-        m2 = m2,
-        sd1 = sd1,
-        sd2 = sd2,
-        r12 = r12,
-        type = self$options$smd_type,
-        denom = "z",
-        alpha = alpha
-      )
-
-      cohend = cohen_res$cohend
-      cohen_df = cohen_res$cohen_df
-      dlow = cohen_res$dlow
-      dhigh = cohen_res$dhigh
-      d_sigma = cohen_res$d_sigma
-      d_lambda = cohen_res$d_lambda
-      smd_label = cohen_res$smd_label
-      J = cohen_res$J
-      d_denom = cohen_res$d_denom
-
-
-      if (low_eqbound_dz != -999999999 &&
-          low_eqbound_dz != -999999999) {
-        # low_eqbound_dz and high_eqbound_dz options are deprecated
-        low_eqbound  <- low_eqbound_d * d_denom
-        high_eqbound <- high_eqbound_d * d_denom
-      }
-      else if (self$options$eqbound_type == 'd') {
-        low_eqbound_dz <- low_eqbound
-        high_eqbound_dz <- high_eqbound
-        low_eqbound  <- low_eqbound * d_denom
-        high_eqbound <- high_eqbound * d_denom
-      } else {
-        low_eqbound_dz <- low_eqbound / d_denom
-        high_eqbound_dz <- high_eqbound / d_denom
-      }
+      TOSTres = t.TOST(x = data$i2,
+                       y = data$i1,
+                       paired = TRUE,
+                       eqbound_type = self$options$eqbound_type,
+                       alpha = alpha,
+                       bias_correction = bias_c,
+                       low_eqbound = low_eqbound,
+                       high_eqbound = high_eqbound)
 
       if(self$options$hypothesis == "EQU"){
         alt_low = "greater"
@@ -148,43 +99,6 @@ dataTOSTpairedClass <- R6::R6Class(
                          round(high_eqbound,2))
       }
 
-      low_ttest <- t.test(
-        y = data$i1,
-        x = data$i2,
-        paired = TRUE,
-        alternative = alt_low,
-        mu = low_eqbound
-      )
-
-      high_ttest <- t.test(
-        y = data$i1,
-        x = data$i2,
-        paired = TRUE,
-        alternative = alt_high,
-        mu = high_eqbound
-      )
-
-      t1 = low_ttest$statistic
-      p1 = low_ttest$p.value
-      t2 = high_ttest$statistic
-      p2 = high_ttest$p.value
-
-      degree_f = res$parameter
-      pttest = res$p.value
-
-      se <- res$stderr
-      SE_val = res$stderr
-      t <- res$statistic
-
-      pttest <- res$p.value
-
-      ttost <- ifelse(abs(t1) < abs(t2), t1, t2)
-      LL90 <- (unname(res$estimate) - qt(1 - alpha, degree_f) * se)
-      UL90 <- (unname(res$estimate) + qt(1 - alpha, degree_f) * se)
-      ptost <- max(p1, p2)
-      dif <- unname(res$estimate)
-      LL95 <- (unname(res$estimate) - qt(1 - (alpha / 2), degree_f) * se)
-      UL95 <- (unname(res$estimate) + qt(1 - (alpha / 2), degree_f) * se)
 
       tt$setRow(
         rowNo=1,
@@ -192,9 +106,9 @@ dataTOSTpairedClass <- R6::R6Class(
           `i1` = pair1Name,
           `i2` = pair2Name,
           `b` = "t-test",
-          `t` = unname(res$statistic),
-          `df` = unname(res$parameter),
-          `p` = unname(res$p.value)
+          `t` = TOSTres$TOST$t[1],
+          `df` = TOSTres$TOST$df[1],
+          `p` = TOSTres$TOST$p.value[1]
         )
       )
 
@@ -204,9 +118,9 @@ dataTOSTpairedClass <- R6::R6Class(
           `i1` = "",
           `i2` = "",
           `b` = "TOST Lower",
-          `t` = t2,
-          `df` = degree_f,
-          `p` = p2
+          `t` = TOSTres$TOST$t[2],
+          `df` = TOSTres$TOST$df[2],
+          `p` = TOSTres$TOST$p.value[2]
         )
       )
 
@@ -216,18 +130,18 @@ dataTOSTpairedClass <- R6::R6Class(
           `i1` = "",
           `i2` = "",
           `b` = "TOST Upper",
-          `t` = t1,
-          `df` = degree_f,
-          `p` = p1
+          `t` = TOSTres$TOST$t[3],
+          `df` = TOSTres$TOST$df[3],
+          `p` = TOSTres$TOST$p.value[3]
         )
       )
 
       eqb$setRow(
         rowNo=1,
         values = list(
-          `stat` = smd_label,
-          `low` = low_eqbound_dz,
-          `high` = high_eqbound_dz
+          `stat` = TOSTres$smd$smd_label,
+          `low` = TOSTres$eqb$low_eq[2],
+          `high` = TOSTres$eqb$high_eq[2]
         )
       )
 
@@ -235,18 +149,18 @@ dataTOSTpairedClass <- R6::R6Class(
         rowNo=2,
         values = list(
           `stat` = "Raw",
-          `low` = low_eqbound,
-          `high` = high_eqbound
+          `low` = TOSTres$eqb$low_eq[1],
+          `high` = TOSTres$eqb$high_eq[1]
         )
       )
 
       effsize$setRow(
         rowNo = 1,
         values = list(
-          `stat` = smd_label,
-          `est` = cohend,
-          `cil` = dlow,
-          `ciu` = dhigh
+          `stat` = TOSTres$smd$smd_label,
+          `est` = TOSTres$smd$cohend,
+          `cil` = TOSTres$smd$dlow,
+          `ciu` = TOSTres$smd$dhigh
         )
       )
 
@@ -254,9 +168,9 @@ dataTOSTpairedClass <- R6::R6Class(
         rowNo = 2,
         values = list(
           `stat` = "Raw",
-          `est` = dif,
-          `cil` = LL90,
-          `ciu` = UL90
+          `est` = TOSTres$effsize$estimate[1],
+          `cil` = TOSTres$effsize$lower.ci[1],
+          `ciu` = TOSTres$effsize$upper.ci[1]
         )
       )
 
@@ -288,31 +202,17 @@ dataTOSTpairedClass <- R6::R6Class(
                         test_hypothesis,
                         "\n \n",
                         "Null Hypothesis: ", null_hyp,"\n",
-                        "Alternative: ", alt_hyp)
+                        "Alternative: ", alt_hyp,"\n",
+                        "Conclusion: The effect is ",TOSTres$decision$combined)
       self$results$text$setContent(text_res)
 
-      #plot <- plots$get(key = 1)
-      points <- data.frame(
-        type = c("Mean Difference", smd_label),
-        mu = c(dif, 0),
-        param = c(round(unname(res$parameter), 0), round(unname(res$parameter), 0)),
-        sigma = c(unname(res$stderr), d_sigma),
-        lambda = c(0, d_lambda),
-        low = c(low_eqbound, low_eqbound_dz),
-        high = c(high_eqbound, high_eqbound_dz),
-        alpha = c(alpha, alpha),
-        stringsAsFactors = FALSE
-      )
-
       #print(points)
-      plots$setState(points)
+      plots$setState(TOSTres)
 
       #indplot <- indplot$get(key = 1)
       colnames(data) = c(pair1Name,pair2Name)
 
       indplot$setState(data)
-
-
 
       diffplot$setState(list(data2 = data2,
                              low_eqbound = low_eqbound,
@@ -326,53 +226,10 @@ dataTOSTpairedClass <- R6::R6Class(
       if (is.null(image$state))
         return(FALSE)
 
-      points <- image$state
-      c1 = 1-points$alpha[1]
-      c2 = 1-points$alpha[1]*2
-      if(c1 < .999 && c2 > .5){
-        sets = c(.5,c2,c1,.999)
-      } else if(c2 <=.5 && c1 < .999) {
-        sets = c(c2,c1,.999)
-      } else {
-        sets = c(.5,c2,c1)
-      }
-      plot = ggplot(data = points,
-                    aes_string(y = 0)) +
-        stat_dist_halfeye(aes(
-          dist = dist_student_t(
-            mu = mu,
-            df = param,
-            sigma = sigma,
-            ncp = lambda
-          ),
-          fill = stat(cut_cdf_qi(p=cdf,
-                                 .width = sets))
-        ),
-        .width = c(c2, c1)) +
-        scale_fill_brewer(direction = -1,
-                          na.translate = FALSE) +
-        labs(x = '', y = '',
-             fill = "Confidence Interval") +
-        geom_vline(aes(xintercept = low),
-                   linetype="dashed") +
-        geom_vline(aes(xintercept = high),
-                   linetype="dashed") +
-        geom_text(aes(y=1.5, x=low,
-                      vjust=-.9, hjust=1),
-                  angle = 90,
-                  label='Lower Bound') +
-        geom_text(aes(y=1.5, x=high, vjust=1.5, hjust=1),
-                  angle = 90,
-                  label='Upper Bound') +
-        theme_tidybayes() +
-        theme(legend.position="top",
-              strip.text = element_text(face="bold", size=10),
-              axis.text.y = element_blank(),
-              axis.ticks.y = element_blank()) +
-        facet_wrap(~type,
-                   ncol = 1,
-                   scales = "free")
-      print(plot)
+      TOSTres <- image$state
+
+      plotTOSTr = plot(TOSTres)
+      print(plotTOSTr)
 
       return(TRUE)
     },

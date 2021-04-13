@@ -198,11 +198,9 @@ dataTOSTtwoClass <- R6::R6Class(
                           test_hypothesis,
                           "\n \n",
                           "Null Hypothesis: ", null_hyp,"\n",
-                          "Alternative: ", alt_hyp)
+                          "Alternative: ", alt_hyp,"\n",
+                          "Conclusion: The effect is ",TOSTres$decision$combined)
         self$results$text$setContent(text_res)
-
-        # Get SE value
-        #SE_val = tresult$stderr
 
         plot <- plots$get(key=depName)
 
