@@ -21,7 +21,7 @@ tostplot <- function(image, ggtheme = NULL, theme = NULL) {
       axis.ticks.x=element_blank(),
       axis.title.y=element_blank(),)
 
-  suppressWarnings(print(plot2))
+  suppressWarnings(print(plot))
 }
 
 

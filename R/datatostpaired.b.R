@@ -68,6 +68,12 @@ dataTOSTpairedClass <- R6::R6Class(
       low_eqbound    <- self$options$low_eqbound
       high_eqbound   <- self$options$high_eqbound
 
+      if(self$options$smd_type == 'g'){
+        bias_c = TRUE
+      } else {
+        bias_c = FALSE
+      }
+
       TOSTres = t.TOST(x = data$i2,
                        y = data$i1,
                        paired = TRUE,
@@ -215,8 +221,7 @@ dataTOSTpairedClass <- R6::R6Class(
       indplot$setState(data)
 
       diffplot$setState(list(data2 = data2,
-                             low_eqbound = low_eqbound,
-                             high_eqbound = high_eqbound))
+                             TOSTres = TOSTres))
 
 
       #}
@@ -241,6 +246,10 @@ dataTOSTpairedClass <- R6::R6Class(
       dats = image$state
 
       data2 = dats$data2
+
+      TOSTres = dats$TOSTres
+
+      eqb = TOSTres$eqb
 
       data_summary <- function(x) {
         m <- mean(x)
@@ -273,24 +282,25 @@ dataTOSTpairedClass <- R6::R6Class(
         coord_flip()
 
       p3 = p2 +
-        geom_hline(yintercept = dats$low_eqbound[1],
+        geom_hline(yintercept = eqb$low_eq[1],
                    linetype="dashed",
                    alpha = .5,
                    size = 1.5) +
-        geom_hline(yintercept = dats$high_eqbound[1],
+        geom_hline(yintercept = eqb$high_eq[1],
                    linetype="dashed",
                    alpha = .5,
                    size = 1.5) +
-        geom_text(aes(x=2.5, y = dats$low_eqbound[1],
-                   hjust="outward"),
-                  vjust=-1.0,
-                  angle = 90,
-                  label='Lower Bound') +
-        geom_text(aes(x=2.5, y = dats$high_eqbound[1],
-                   hjust="outward"),
-                  vjust=1.5,
-                  angle = 90,
-                  label='Upper Bound') +
+        #issues with placement of text
+       # geom_text(aes(x=2.5, y = dats$low_eqbound[1]),
+      #            hjust = "outward",
+      #            vjust=-1.0,
+      #            angle = 90,
+      #            label='Lower Bound') +
+      #  geom_text(aes(x=2.5, y = dats$high_eqbound[1]),
+      #            hjust = "inward",
+      #            vjust=1.25,
+      #            angle = 90,
+      #            label='Upper Bound') +
         theme_tidybayes()
 
       print(p3)
