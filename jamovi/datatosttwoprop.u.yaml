@@ -24,7 +24,6 @@ children:
             name: group
             maxItemCount: 1
             isTarget: true
-
   - type: LayoutBox
     margin: large
     children:
@@ -37,22 +36,19 @@ children:
       - type: TextBox
         name: alpha
         format: number
-  - type: LayoutBox
-    margin: large
+  - type: Label
+    label: Hypothesis
     children:
-      - type: Label
-        label: Hypothesis
-        children:
-          - type: RadioButton
-            name: EQU
-            optionName: hypothesis
-            optionPart: EQU
-            label: Equivalence Test
-          - type: RadioButton
-            name: MET
-            optionName: hypothesis
-            optionPart: MET
-            label: Minimal Effects Test
+      - type: RadioButton
+        name: EQU
+        optionName: hypothesis
+        optionPart: EQU
+        label: Equivalence Test
+      - type: RadioButton
+        name: MET
+        optionName: hypothesis
+        optionPart: MET
+        label: Minimal Effects Test
   - type: LayoutBox
     margin: large
     children:

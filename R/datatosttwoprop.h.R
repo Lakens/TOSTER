@@ -9,6 +9,7 @@ datatosttwopropOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             var = NULL,
             level = NULL,
             group = NULL,
+            hypothesis = "EQU",
             low_eqbound = -0.1,
             high_eqbound = 0.1,
             alpha = 0.05,
@@ -37,6 +38,13 @@ datatosttwopropOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 group,
                 suggested=list(
                     "nominal"))
+            private$..hypothesis <- jmvcore::OptionList$new(
+                "hypothesis",
+                hypothesis,
+                options=list(
+                    "EQU",
+                    "MET"),
+                default="EQU")
             private$..low_eqbound <- jmvcore::OptionNumber$new(
                 "low_eqbound",
                 low_eqbound,
@@ -63,6 +71,7 @@ datatosttwopropOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
             self$.addOption(private$..var)
             self$.addOption(private$..level)
             self$.addOption(private$..group)
+            self$.addOption(private$..hypothesis)
             self$.addOption(private$..low_eqbound)
             self$.addOption(private$..high_eqbound)
             self$.addOption(private$..alpha)
@@ -73,6 +82,7 @@ datatosttwopropOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         var = function() private$..var$value,
         level = function() private$..level$value,
         group = function() private$..group$value,
+        hypothesis = function() private$..hypothesis$value,
         low_eqbound = function() private$..low_eqbound$value,
         high_eqbound = function() private$..high_eqbound$value,
         alpha = function() private$..alpha$value,
@@ -82,6 +92,7 @@ datatosttwopropOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
         ..var = NA,
         ..level = NA,
         ..group = NA,
+        ..hypothesis = NA,
         ..low_eqbound = NA,
         ..high_eqbound = NA,
         ..alpha = NA,
@@ -275,6 +286,8 @@ datatosttwopropBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param var .
 #' @param level .
 #' @param group .
+#' @param hypothesis \code{'EQU'} for equivalence (default), or \code{'MET'}
+#'   for minimal effects test, the alternative hypothesis.
 #' @param low_eqbound a number (default: -0.1) the lower equivalence bounds
 #' @param high_eqbound a number (default: 0.1) the upper equivalence bounds
 #' @param alpha alpha level (default = 0.05)
@@ -301,6 +314,7 @@ datatosttwoprop <- function(
     var,
     level,
     group,
+    hypothesis = "EQU",
     low_eqbound = -0.1,
     high_eqbound = 0.1,
     alpha = 0.05,
@@ -324,6 +338,7 @@ datatosttwoprop <- function(
         var = var,
         level = level,
         group = group,
+        hypothesis = hypothesis,
         low_eqbound = low_eqbound,
         high_eqbound = high_eqbound,
         alpha = alpha,

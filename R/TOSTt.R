@@ -235,7 +235,7 @@ t.TOST.default = function(x,
 
   effsize = data.frame(
     estimate = c(tresult$statistic * tresult$stderr,
-                 cohen_res$cohend),
+                 cohen_res$d),
     SE = c(tresult$stderr,cohen_res$d_sigma),
     lower.ci = c(tresult$conf.int[1], cohen_res$dlow),
     upper.ci = c(tresult$conf.int[2], cohen_res$dhigh),

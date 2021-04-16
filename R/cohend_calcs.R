@@ -73,7 +73,7 @@ d_est_pair <- function(n,
   }
 
   return(list(
-    cohend = cohend,
+    d = cohend,
     cohen_df = cohen_df,
     dlow = dlow,
     dhigh = dhigh,
@@ -166,7 +166,7 @@ d_est_ind <- function(n1,
 
 
   return(list(
-    cohend = cohend,
+    d = cohend,
     cohen_df = cohen_df,
     dlow = dlow,
     dhigh = dhigh,
@@ -229,7 +229,7 @@ d_est_one <- function(n,
 
 
   return(list(
-    cohend = cohend,
+    d = cohend,
     cohen_df = cohen_df,
     dlow = dlow,
     dhigh = dhigh,

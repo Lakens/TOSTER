@@ -1,4 +1,15 @@
 ==============
+TOSTER v0.4.0 (Release date: NA)
+==============
+
+Changes:
+
+* Added t.TOST function
+* Updated all jamovi functions to allow minimal effect tests
+* jamovi functions using t-test also have more plots
+
+
+==============
 TOSTER v0.3.4 (Release date: 2018-08-05)
 ==============
 
