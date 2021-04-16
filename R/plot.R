@@ -5,7 +5,7 @@ tostplot <- function(image, ggtheme = NULL, theme = NULL) {
   # something wrong with what is being passed in the points dataframe
   data <- image$state
 
-  plot <- ggplot(data=data, aes_string(x=0, y='m')) +
+  p1 <- ggplot(data=data, aes_string(x=0, y='m')) +
     geom_hline(yintercept=data$low,  colour=theme$color[1]) +
     geom_hline(yintercept=data$high, colour=theme$color[1]) +
     geom_text(aes(5, data$low,  vjust=-.9, hjust=1), label='Lower bound', colour=theme$color[1]) +
@@ -21,7 +21,7 @@ tostplot <- function(image, ggtheme = NULL, theme = NULL) {
       axis.ticks.x=element_blank(),
       axis.title.y=element_blank(),)
 
-  suppressWarnings(print(plot))
+  suppressWarnings(print(p1))
 }
 
 
