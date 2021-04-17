@@ -74,7 +74,7 @@ dataTOSTpairedClass <- R6::R6Class(
         bias_c = FALSE
       }
 
-      TOSTres = t.TOST(x = data$i2,
+      TOSTres = t_TOST(x = data$i2,
                        y = data$i1,
                        paired = TRUE,
                        eqbound_type = self$options$eqbound_type,
@@ -164,7 +164,7 @@ dataTOSTpairedClass <- R6::R6Class(
         rowNo = 1,
         values = list(
           `stat` = TOSTres$smd$smd_label,
-          `est` = TOSTres$smd$cohend,
+          `est` = TOSTres$smd$d,
           `cil` = TOSTres$smd$dlow,
           `ciu` = TOSTres$smd$dhigh
         )
@@ -275,8 +275,9 @@ dataTOSTpairedClass <- R6::R6Class(
         stat_summary(aes(x=0.5),
                      fun.data=data_summary,
                      size = 1.5)  +
-        labs(y = "Difference (Mean ± SD)",
-             x = "") +
+        labs(y = "Difference",
+             x = "",
+             caption = "Dot and Line represent Mean and SD respectively") +
         theme(axis.text.y = element_blank(),
               axis.ticks.y = element_blank()) +
         coord_flip()

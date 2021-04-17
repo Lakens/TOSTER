@@ -3,9 +3,10 @@
 #' Methods defined for objects returned from the agree functions.
 #'
 #' @param x object of class \code{TOSTt} as returned from the reli_stats function
+#' @param digits Number of digits to print for p-values
 #' @param ... further arguments passed through, see description of return value
 #'   for details.
-#'   \code{\link{TOSTt}}.
+#'   \code{\link{TOSTt-methods}}.
 #' @return
 #' \describe{
 #'   \item{\code{print}}{Prints short summary of the Limits of Agreement}
@@ -21,7 +22,9 @@
 #' @method print TOSTt
 #' @export
 
-print.TOSTt <- function(x,digits = getOption("digits"),...){
+print.TOSTt <- function(x,
+                        digits = getOption("digits"),
+                        ...){
   cat("\n")
   cat(strwrap(x$method), sep = "\n")
   cat(x$hypothesis, "\n", sep = "")

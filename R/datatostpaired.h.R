@@ -371,13 +371,14 @@ dataTOSTpairedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' TOST Paired Samples T-Test
 #'
 #' @examples
+#' \dontrun{
 #' library("TOSTER")
 #'
-#' dataTOSTpaired(data = randu, pairs = list(c(i1="x",i2="y")), low_eqbound = -0.3,
+#' dataTOSTpaired(data = randu, pair1 = "x", pair2="y", low_eqbound = -0.3,
 #'                high_eqbound = 0.3, alpha = 0.05, desc = TRUE, plots = TRUE)
-#'
+#'}
 #' @section References:
-#' Mara, C. A., & Cribbie, R. A. (2012). Paired-Samples Tests of Equivalence. Communications in Statistics - Simulation and Computation, 41(10), 1928-1943. https://doi.org/10.1080/03610918.2011.626545, formula page 1932. Note there is a typo in the formula: n-1 should be n (personal communication, 31-08-2016)
+#' Mara, C. A., & Cribbie, R. A. (2012). Paired-Samples Tests of Equivalence. Communications in Statistics - Simulation and Computation, 41(10), 1928-1943. <https://doi.org/10.1080/03610918.2011.626545>, formula page 1932. Note there is a typo in the formula: n-1 should be n (personal communication, 31-08-2016)
 #'
 #' @param data the data as a data frame
 #' @param pair1 A string naming the first part of the pair

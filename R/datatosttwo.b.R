@@ -104,7 +104,7 @@ dataTOSTtwoClass <- R6::R6Class(
         low_eqbound    <- self$options$low_eqbound
         high_eqbound   <- self$options$high_eqbound
 
-        TOSTres = t.TOST(formula = dep ~ group,
+        TOSTres = t_TOST(formula = dep ~ group,
                          data = dataTTest,
                          paired = FALSE,
                          eqbound_type = self$options$eqbound_type,
@@ -169,7 +169,7 @@ dataTOSTtwoClass <- R6::R6Class(
           rowKey = depName,
           list(
             `stat[cohen]` = TOSTres$smd$smd_label,
-            `est[cohen]` = TOSTres$smd$cohend,
+            `est[cohen]` = TOSTres$smd$d,
             `cil[cohen]` = TOSTres$smd$dlow,
             `ciu[cohen]` = TOSTres$smd$dhigh,
             `est[raw]` = TOSTres$effsize$estimate[1],

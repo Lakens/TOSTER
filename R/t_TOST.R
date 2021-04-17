@@ -1,4 +1,5 @@
-#' TOST function for all t-tests types
+#' @title TOST with t-tests
+#' TOST function for all t-tests types.
 #' @param x a (non-empty) numeric vector of data values.
 #' @param y an optional (non-empty) numeric vector of data values.
 #' @param formula a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.
@@ -15,19 +16,31 @@
 #' @param subset an optional vector specifying a subset of observations to be used.
 #' @param na.action a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").
 #' @param ...  further arguments to be passed to or from methods.
-#' @return Returns TOSTt result object
-#' @examples
-#' ## TO BE ADDED
+#' @return Returns TOSTt result object. See vignettes for examples.
+#' @name t_TOST
+#' @export t_TOST
+
+#t_TOST <- setClass("t_TOST")
+t_TOST <- function(x, ...,
+                   hypothesis = "EQU",
+                   paired = FALSE,
+                   var.equal = FALSE,
+                   low_eqbound,
+                   high_eqbound,
+                   eqbound_type = "raw",
+                   alpha = 0.05,
+                   bias_correction = TRUE,
+                   rm_correction = FALSE){
+  UseMethod("t_TOST")
+}
+
+#' @rdname t_TOST
+#' @importFrom stats sd cor na.omit setNames t.test terms
+#' @method t_TOST default
 #' @export
 
-
-t.TOST <- function(x, ...) UseMethod('t.TOST')
-
-#' @describeIn t.TOST default method for t.TOST wherein two numeric vectors are supplied.
-#' @method t.TOST default
-#' @importFrom stats sd cor na.omit setNames t.test terms
-#' @exportS3Method
-t.TOST.default = function(x,
+# @method t_TOST default
+t_TOST.default = function(x,
                           y = NULL,
                           hypothesis = "EQU",
                           paired = FALSE,
@@ -312,11 +325,11 @@ t.TOST.default = function(x,
 
 }
 
-#' @describeIn t.TOST alternative method wherein formula and data are supplied instead of vectors.
-#' @method t.TOST formula
-#' @exportS3Method
+#' @rdname t_TOST
+#' @method t_TOST formula
+#' @export
 
-t.TOST.formula = function(formula,
+t_TOST.formula = function(formula,
                           data,
                           subset,
                           na.action, ...) {
@@ -339,7 +352,7 @@ t.TOST.formula = function(formula,
   if(nlevels(g) != 2L)
     stop("grouping factor must have exactly 2 levels")
   DATA <- setNames(split(mf[[response]], g), c("x", "y"))
-  y <- do.call("t.TOST", c(DATA, list(...)))
+  y <- do.call("t_TOST", c(DATA, list(...)))
 
   y
 

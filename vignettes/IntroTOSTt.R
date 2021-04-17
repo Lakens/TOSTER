@@ -129,12 +129,12 @@ data('bugs')
 head(sleep)
 
 ## -----------------------------------------------------------------------------
-res1 = t.TOST(formula = extra ~ group,
+res1 = t_TOST(formula = extra ~ group,
               data = sleep,
               low_eqbound = -.5,
               high_eqbound = .5)
 
-res1a = t.TOST(x = subset(sleep,group==1)$extra,
+res1a = t_TOST(x = subset(sleep,group==1)$extra,
                y = subset(sleep,group==2)$extra,
                low_eqbound = -.5,
                high_eqbound = .5)
@@ -146,7 +146,7 @@ print(res1)
 plot(res1)
 
 ## -----------------------------------------------------------------------------
-res2 = t.TOST(formula = extra ~ group,
+res2 = t_TOST(formula = extra ~ group,
               data = sleep,
               paired = TRUE,
               low_eqbound = -.5,
@@ -154,7 +154,7 @@ res2 = t.TOST(formula = extra ~ group,
 res2
 
 ## -----------------------------------------------------------------------------
-res3 = t.TOST(x = bugs$LDHF,
+res3 = t_TOST(x = bugs$LDHF,
               y = bugs$LDLF,
               paired = TRUE,
               low_eqbound = -1,
@@ -162,7 +162,7 @@ res3 = t.TOST(x = bugs$LDHF,
 res3
 
 ## -----------------------------------------------------------------------------
-res3a = t.TOST(x = bugs$LDHF,
+res3a = t_TOST(x = bugs$LDHF,
                y = bugs$LDLF,
                paired = TRUE,
                hypothesis = "MET",
@@ -174,7 +174,7 @@ res3a
 plot(res3a)
 
 ## -----------------------------------------------------------------------------
-res4 = t.TOST(x = bugs$LDHF,
+res4 = t_TOST(x = bugs$LDHF,
               hypothesis = "EQU",
               low_eqbound = 5.5,
               high_eqbound = 8.5)

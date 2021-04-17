@@ -1,5 +1,5 @@
 ---
-title: "An Introduction to t.TOST"
+title: "An Introduction to t_TOST"
 subtitle: "A new function for TOST with t-tests"
 author: "Aaron R. Caldwell"
 date: "`r Sys.Date()`"
@@ -7,7 +7,7 @@ output:
   rmarkdown::html_vignette:
     toc: True
 vignette: >
-  %\VignetteIndexEntry{An Introduction to t.TOST}
+  %\VignetteIndexEntry{An Introduction to t_TOST}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
@@ -26,9 +26,9 @@ library(ggdist)
 
 ```
 
-In an effort to make `TOSTER` more informative and easier to use, a new function `t.TOST` has been created. This function operates very similarly to base R's `t.test` function, but just performs 3 t-tests (one two-tailed and two one-tailed tests). In addition, this function has a generic method where two vectors can be supplied or a formula can be given (e.g.,`y ~ group`). This function also makes it easier to switch between types of t-tests. All three types (two sample, one sample, and paired samples) can be performed/calculated from the same function.Moreover, the summary information and visualizations have been upgraded. This should make the decisions derived from the function more informative and user-friendly. Lastly, `t.TOST` is not limited to equivalence tests. Minimal effects testing (MET) is now possible. MET is useful for situations where the hypothesis is about a minimal effect and the null hypothesis *is* equivalence.
+In an effort to make `TOSTER` more informative and easier to use, a new function `t_TOST` has been created. This function operates very similarly to base R's `t.test` function, but just performs 3 t-tests (one two-tailed and two one-tailed tests). In addition, this function has a generic method where two vectors can be supplied or a formula can be given (e.g.,`y ~ group`). This function also makes it easier to switch between types of t-tests. All three types (two sample, one sample, and paired samples) can be performed/calculated from the same function.Moreover, the summary information and visualizations have been upgraded. This should make the decisions derived from the function more informative and user-friendly. Lastly, `t_TOST` is not limited to equivalence tests. Minimal effects testing (MET) is now possible. MET is useful for situations where the hypothesis is about a minimal effect and the null hypothesis *is* equivalence.
 
-```{r echo=FALSE, warning = FALSE, fig.show='hold'}
+```{r echo=FALSE, message = FALSE, warning = FALSE, fig.show='hold'}
 
 ggplot() +
   geom_vline(aes(xintercept = -.5),
@@ -58,7 +58,7 @@ ggplot() +
     hjust = "middle"
   ),
   #alignment = "center",
-  label = expression('H'[0])) +
+  label = expression("H"["0"])) +
   geom_text(aes(
     y = 1,
     x = 1.5,
@@ -66,7 +66,7 @@ ggplot() +
     hjust = "middle"
   ),
   #alignment = "center",
-  label = expression('H'["A"])) +
+  label = expression("H"["A"])) +
   geom_text(aes(
     y = 1,
     x = -1.5,
@@ -74,7 +74,7 @@ ggplot() +
     hjust = "middle"
   ),
   #alignment = "center",
-  label = expression('H'["A"])) +
+  label = expression("H"["A"])) +
 theme_tidybayes() + 
   scale_y_continuous(limits = c(0,1.75)) +
   scale_x_continuous(limits = c(-2,2)) +
@@ -113,7 +113,7 @@ ggplot() +
     hjust = "middle"
   ),
   #alignment = "center",
-  label = expression('H'["A"])) +
+  label = expression("H"["A"])) +
   geom_text(aes(
     y = 1,
     x = 1.5,
@@ -121,7 +121,7 @@ ggplot() +
     hjust = "middle"
   ),
   #alignment = "center",
-  label = expression('H'["0"])) +
+  label = expression("H"["0"])) +
   geom_text(aes(
     y = 1,
     x = -1.5,
@@ -129,7 +129,7 @@ ggplot() +
     hjust = "middle"
   ),
   #alignment = "center",
-  label = expression('H'["0"])) +
+  label = expression("H"["0"])) +
 theme_tidybayes() + 
   scale_y_continuous(limits = c(0,1.75)) +
   scale_x_continuous(limits = c(-2,2)) +
@@ -141,7 +141,7 @@ theme_tidybayes() +
   )
 ```
 
-In the general introduction to this package we detailed how to look at *old* results and how to apply TOST to interpreting those results. However, in many cases, users may have new data that needs to be analyzed. Therefore, `t.TOST` can be applied to new data. This vignette will use the `bugs` data from the `jmv` R package and the `sleep` dataset.
+In the general introduction to this package we detailed how to look at *old* results and how to apply TOST to interpreting those results. However, in many cases, users may have new data that needs to be analyzed. Therefore, `t_TOST` can be applied to new data. This vignette will use the `bugs` data from the `jmv` R package and the `sleep` dataset.
 
 ```{r}
 data('sleep')
@@ -160,12 +160,12 @@ head(sleep)
 We will assume the data are independent, and that we have equivalence bounds of +/- 0.5. All we need to do is provide the `formula`, `data`, and eqbound arguments for the function to run appropriately. In addition, we can set the `var.equal` argument (to assume equal variance), and the `paired` argument (sets if the data is paired or not). Both are logical indicators that can be set to TRUE or FALSE. The `alpha` is automatically set to 0.05 but this can also be adjusted by the user. The Hedges correction is also automatically calculated, but this can be overridden with the `bias_correction` argument. The `hypothesis` is automatically set to "EQU" for equivalence but if a minimal effect is of interest then "MET" can be supplied
 
 ```{r}
-res1 = t.TOST(formula = extra ~ group,
+res1 = t_TOST(formula = extra ~ group,
               data = sleep,
               low_eqbound = -.5,
               high_eqbound = .5)
 
-res1a = t.TOST(x = subset(sleep,group==1)$extra,
+res1a = t_TOST(x = subset(sleep,group==1)$extra,
                y = subset(sleep,group==2)$extra,
                low_eqbound = -.5,
                high_eqbound = .5)
@@ -188,7 +188,7 @@ plot(res1)
 To perform a paired samples TOST, the process does not change much. We could process the test the same way by providing a formula. All we would need to then is change `paired` to TRUE.
 
 ```{r}
-res2 = t.TOST(formula = extra ~ group,
+res2 = t_TOST(formula = extra ~ group,
               data = sleep,
               paired = TRUE,
               low_eqbound = -.5,
@@ -199,7 +199,7 @@ res2
 However, we may have two vectors of data that are paired. So instead we may want to just provide those separately rather than using a data set and setting the formula. This can be demonstrated with the "bugs" data.
 
 ```{r}
-res3 = t.TOST(x = bugs$LDHF,
+res3 = t_TOST(x = bugs$LDHF,
               y = bugs$LDLF,
               paired = TRUE,
               low_eqbound = -1,
@@ -210,7 +210,7 @@ res3
 We may want to perform a Minimal Effect Test with the `hypothesis` argument set to "MET".
 
 ```{r}
-res3a = t.TOST(x = bugs$LDHF,
+res3a = t_TOST(x = bugs$LDHF,
                y = bugs$LDLF,
                paired = TRUE,
                hypothesis = "MET",
@@ -219,7 +219,7 @@ res3a = t.TOST(x = bugs$LDHF,
 res3a
 ```
 
-Again, we can plot the effects from the `t.TOST` result.
+Again, we can plot the effects from the `t_TOST` result.
 
 ```{r fig.width=6, fig.height=6}
 plot(res3a)
@@ -230,7 +230,7 @@ plot(res3a)
 In other cases we may just have a one sample test. If that is the case all we have to do is supply the `x` argument for the data. For this test we may hypothesis that the mean of LDHF is not more than 1.5 points greater or less than 7.
 
 ```{r}
-res4 = t.TOST(x = bugs$LDHF,
+res4 = t_TOST(x = bugs$LDHF,
               hypothesis = "EQU",
               low_eqbound = 5.5,
               high_eqbound = 8.5)

@@ -125,7 +125,7 @@ dataTOSToneClass <- R6::R6Class(
           alpha = alpha
         )
 
-        cohend = cohen_res$cohend
+        cohend = cohen_res$d
         cohen_df = cohen_res$cohen_df
         dlow = cohen_res$dlow
         dhigh = cohen_res$dhigh

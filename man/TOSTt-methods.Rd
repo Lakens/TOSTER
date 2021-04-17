@@ -13,9 +13,11 @@
 \arguments{
 \item{x}{object of class \code{TOSTt} as returned from the reli_stats function}
 
+\item{digits}{Number of digits to print for p-values}
+
 \item{...}{further arguments passed through, see description of return value
 for details.
-\code{\link{TOSTt}}.}
+\code{\link{TOSTt-methods}}.}
 }
 \value{
 \describe{
