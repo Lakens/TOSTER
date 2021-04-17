@@ -9,6 +9,7 @@ datatosttwoprop(
   var,
   level,
   group,
+  hypothesis = "EQU",
   low_eqbound = -0.1,
   high_eqbound = 0.1,
   alpha = 0.05,
@@ -24,6 +25,9 @@ datatosttwoprop(
 \item{level}{.}
 
 \item{group}{.}
+
+\item{hypothesis}{\code{'EQU'} for equivalence (default), or \code{'MET'}
+for minimal effects test, the alternative hypothesis.}
 
 \item{low_eqbound}{a number (default: -0.1) the lower equivalence bounds}
 

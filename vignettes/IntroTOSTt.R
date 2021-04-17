@@ -7,6 +7,7 @@ library(TOSTER)
 library(ggplot2)
 library(ggdist)
 
+
 ## ----echo=FALSE, warning = FALSE, fig.show='hold'-----------------------------
 
 ggplot() +

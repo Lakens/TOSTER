@@ -32,7 +32,11 @@ t.TOST(x, ...)
 
 \item{y}{an optional (non-empty) numeric vector of data values.}
 
+\item{hypothesis}{'EQU' for equivalence (default), or 'MET' for minimal effects test, the alternative hypothesis.}
+
 \item{paired}{a logical indicating whether you want a paired t-test.}
+
+\item{var.equal}{a logical variable indicating whether to treat the two variances as being equal. If TRUE then the pooled variance is used to estimate the variance otherwise the Welch (or Satterthwaite) approximation to the degrees of freedom is used.}
 
 \item{low_eqbound}{lower equivalence bounds}
 
@@ -49,6 +53,10 @@ t.TOST(x, ...)
 \item{formula}{a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.}
 
 \item{data}{an optional matrix or data frame (or similar: see model.frame) containing the variables in the formula formula. By default the variables are taken from environment(formula).}
+
+\item{subset}{an optional vector specifying a subset of observations to be used.}
+
+\item{na.action}{a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").}
 }
 \value{
 Returns TOSTt result object

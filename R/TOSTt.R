@@ -4,23 +4,28 @@
 #' @param formula a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.
 #' @param data an optional matrix or data frame (or similar: see model.frame) containing the variables in the formula formula. By default the variables are taken from environment(formula).
 #' @param paired a logical indicating whether you want a paired t-test.
+#' @param var.equal  a logical variable indicating whether to treat the two variances as being equal. If TRUE then the pooled variance is used to estimate the variance otherwise the Welch (or Satterthwaite) approximation to the degrees of freedom is used.
 #' @param low_eqbound lower equivalence bounds
 #' @param high_eqbound upper equivalence bounds
+#' @param hypothesis 'EQU' for equivalence (default), or 'MET' for minimal effects test, the alternative hypothesis.
 #' @param eqbound_type Type of equivalance bound. Can be set to "SMD" for standardized mean difference (i.e., Cohen's d) or  "raw" for the mean difference. Default is "raw".
 #' @param alpha alpha level (default = 0.05)
 #' @param bias_correction Apply Hedges' correction for bias (default is TRUE).
 #' @param rm_correction Repeated measures correction to make standardized mean difference Cohen's d(rm). This only applies to repeated/paired samples. Default is FALSE.
+#' @param subset an optional vector specifying a subset of observations to be used.
+#' @param na.action a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").
 #' @param ...  further arguments to be passed to or from methods.
 #' @return Returns TOSTt result object
 #' @examples
 #' ## TO BE ADDED
-#' @importFrom stats sd cor
 #' @export
+
 
 t.TOST <- function(x, ...) UseMethod('t.TOST')
 
 #' @describeIn t.TOST default method for t.TOST wherein two numeric vectors are supplied.
 #' @method t.TOST default
+#' @importFrom stats sd cor na.omit setNames t.test terms
 #' @exportS3Method
 t.TOST.default = function(x,
                           y = NULL,
@@ -310,6 +315,7 @@ t.TOST.default = function(x,
 #' @describeIn t.TOST alternative method wherein formula and data are supplied instead of vectors.
 #' @method t.TOST formula
 #' @exportS3Method
+
 t.TOST.formula = function(formula,
                           data,
                           subset,

@@ -1,4 +1,8 @@
 
+harm_mean = function(n1,n2){
+ntilde = (2*n1*n2)/(n1+n2)
+return(ntilde)
+}
 
 d_est_pair <- function(n,
                        m1,
@@ -115,7 +119,7 @@ d_est_ind <- function(n1,
   d[is.na(d)] <- NaN
 
   cohend = d
-  ntilde <- harmonic.mean(c(n1,n2))
+  ntilde <- harm_mean(n1,n2)
 
   # Compute unbiased Hedges' g
   # Use the lgamma function, and update to what Goulet-Pelletier & Cousineau used; works with larger inputs

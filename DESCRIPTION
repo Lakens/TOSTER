@@ -18,6 +18,7 @@ Imports:
     stats,
     graphics,
     jmvcore (>= 0.9.6.4),
+    jmv,
     ggplot2,
     R6,
     ggdist,

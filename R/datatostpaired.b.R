@@ -2,7 +2,7 @@
 #' @import ggplot2
 #' @import ggdist
 #' @import distributional
-#' @importFrom psych harmonic.mean
+
 dataTOSTpairedClass <- R6::R6Class(
   "dataTOSTpairedClass",
   inherit = dataTOSTpairedBase,
