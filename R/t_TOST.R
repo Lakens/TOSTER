@@ -13,10 +13,23 @@
 #' @param alpha alpha level (default = 0.05)
 #' @param bias_correction Apply Hedges' correction for bias (default is TRUE).
 #' @param rm_correction Repeated measures correction to make standardized mean difference Cohen's d(rm). This only applies to repeated/paired samples. Default is FALSE.
+#' @param mu a number indicating the true value of the mean for the two tailed test (or difference in means if you are performing a two sample test).
 #' @param subset an optional vector specifying a subset of observations to be used.
 #' @param na.action a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").
 #' @param ...  further arguments to be passed to or from methods.
-#' @return Returns TOSTt result object. See vignettes for examples.
+#' @return An S3 object of class
+#'   \code{"TOSTt"} is returned containing the following slots: S
+#' \describe{
+#'   \item{\code{"TOST"}}{A table of class \code{data.frame"} containing two-tailed t-test and both one-tailed results.}
+#'   \item{\code{"eqb"}}{A table of class \code{data.frame"} containing equivalence bound settings.}
+#'   \item{\code{"effsize"}}{ table of class \code{data.frame"} containing effect size estimates}
+#'   \item{\code{"hypothesis"}}{String stating the hypothesis being tested}
+#'   \item{\code{"smd"}}{List containing the results of the standardized mean difference calculations (e.g., Cohen's d).
+#'   Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation)}
+#'   \item{\code{"alpha"}}{Alpha level set for the analysis.}
+#'   \item{\code{"method"}}{Type of t-test.}
+#'   \item{\code{"decision"}}{List included text regarding the decisions for statistical inference.}
+#' }
 #' @name t_TOST
 #' @export t_TOST
 
@@ -49,6 +62,7 @@ t_TOST.default = function(x,
                           high_eqbound,
                           eqbound_type = "raw",
                           alpha = 0.05,
+                          mu = 0,
                           bias_correction = TRUE,
                           rm_correction = FALSE,
                           ...) {
@@ -90,6 +104,7 @@ t_TOST.default = function(x,
                    y = y,
                    paired = paired,
                    var.equal = var.equal,
+                   mu = mu,
                    conf.level = 1 - alpha*2,
                    alternative = "two.sided")
 

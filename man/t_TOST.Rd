@@ -31,6 +31,7 @@ t_TOST(
   high_eqbound,
   eqbound_type = "raw",
   alpha = 0.05,
+  mu = 0,
   bias_correction = TRUE,
   rm_correction = FALSE,
   ...
@@ -63,6 +64,8 @@ t_TOST(
 
 \item{y}{an optional (non-empty) numeric vector of data values.}
 
+\item{mu}{a number indicating the true value of the mean for the two tailed test (or difference in means if you are performing a two sample test).}
+
 \item{formula}{a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.}
 
 \item{data}{an optional matrix or data frame (or similar: see model.frame) containing the variables in the formula formula. By default the variables are taken from environment(formula).}
@@ -72,7 +75,19 @@ t_TOST(
 \item{na.action}{a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").}
 }
 \value{
-Returns TOSTt result object. See vignettes for examples.
+An S3 object of class
+  \code{"TOSTt"} is returned containing the following slots: S
+\describe{
+  \item{\code{"TOST"}}{A table of class \code{data.frame"} containing two-tailed t-test and both one-tailed results.}
+  \item{\code{"eqb"}}{A table of class \code{data.frame"} containing equivalence bound settings.}
+  \item{\code{"effsize"}}{ table of class \code{data.frame"} containing effect size estimates}
+  \item{\code{"hypothesis"}}{String stating the hypothesis being tested}
+  \item{\code{"smd"}}{List containing the results of the standardized mean difference calculations (e.g., Cohen's d).
+  Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation)}
+  \item{\code{"alpha"}}{Alpha level set for the analysis.}
+  \item{\code{"method"}}{Type of t-test.}
+  \item{\code{"decision"}}{List included text regarding the decisions for statistical inference.}
+}
 }
 \description{
 TOST with t-tests
