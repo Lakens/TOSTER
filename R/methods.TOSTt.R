@@ -60,7 +60,7 @@ plot.TOSTt <- function(x,  ...){
   points = data.frame(
     type = c("Mean Difference", x$smd$smd_label),
     mu = c(x$effsize$estimate[1], 0),
-    param = c(round(unname(x$TOST$df[1]), 0), round(unname(x$smd$cohen_df), 0)),
+    param = c(round(unname(x$TOST$df[1]), 0), round(unname(x$smd$d_df), 0)),
     sigma = c(x$TOST$SE[1], x$smd$d_sigma),
     lambda = c(0, x$smd$d_lambda),
     low = c(x$eqb$low_eq[1], x$eqb$low_eq[2]),

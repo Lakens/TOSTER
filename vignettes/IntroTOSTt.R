@@ -8,7 +8,7 @@ library(ggplot2)
 library(ggdist)
 
 
-## ----echo=FALSE, warning = FALSE, fig.show='hold'-----------------------------
+## ----echo=FALSE, message = FALSE, warning = FALSE, fig.show='hold'------------
 
 ggplot() +
   geom_vline(aes(xintercept = -.5),
@@ -38,7 +38,7 @@ ggplot() +
     hjust = "middle"
   ),
   #alignment = "center",
-  label = expression('H'[0])) +
+  label = expression("H"["0"])) +
   geom_text(aes(
     y = 1,
     x = 1.5,
@@ -46,7 +46,7 @@ ggplot() +
     hjust = "middle"
   ),
   #alignment = "center",
-  label = expression('H'["A"])) +
+  label = expression("H"["A"])) +
   geom_text(aes(
     y = 1,
     x = -1.5,
@@ -54,7 +54,7 @@ ggplot() +
     hjust = "middle"
   ),
   #alignment = "center",
-  label = expression('H'["A"])) +
+  label = expression("H"["A"])) +
 theme_tidybayes() + 
   scale_y_continuous(limits = c(0,1.75)) +
   scale_x_continuous(limits = c(-2,2)) +
@@ -93,7 +93,7 @@ ggplot() +
     hjust = "middle"
   ),
   #alignment = "center",
-  label = expression('H'["A"])) +
+  label = expression("H"["A"])) +
   geom_text(aes(
     y = 1,
     x = 1.5,
@@ -101,7 +101,7 @@ ggplot() +
     hjust = "middle"
   ),
   #alignment = "center",
-  label = expression('H'["0"])) +
+  label = expression("H"["0"])) +
   geom_text(aes(
     y = 1,
     x = -1.5,
@@ -109,7 +109,7 @@ ggplot() +
     hjust = "middle"
   ),
   #alignment = "center",
-  label = expression('H'["0"])) +
+  label = expression("H"["0"])) +
 theme_tidybayes() + 
   scale_y_continuous(limits = c(0,1.75)) +
   scale_x_continuous(limits = c(-2,2)) +

@@ -25,9 +25,9 @@ d_est_pair <- function(n,
 
   cohend = abs(m2-m1) / d_denom
 
-  cohen_df = 2*(n)-2
+  d_df = 2*(n)-2
   #J <- gamma(df / 2) / (sqrt(df / 2) * gamma((df - 1) / 2))
-  J = gamma(cohen_df / 2) / (sqrt(cohen_df / 2) * gamma((cohen_df - 1) / 2))
+  J = gamma(d_df / 2) / (sqrt(d_df / 2) * gamma((d_df - 1) / 2))
 
   if(denom == "z"){
     if (type == 'g') {
@@ -49,20 +49,20 @@ d_est_pair <- function(n,
 
   # Equation 4b Goulet-Pelletier and Cousineau, 2018
   # ((2*(1-r12))/n)
-  d_sigma = sqrt((cohen_df/(cohen_df-2)) * ((2*(1-r12))/n)*(1+cohend^2*(n/(2*(1-r12)))) - cohend^2/J^2)
+  d_sigma = sqrt((d_df/(d_df-2)) * ((2*(1-r12))/n)*(1+cohend^2*(n/(2*(1-r12)))) - cohend^2/J^2)
   if(denom == "z"){
     d_sigma = d_sigma * sqrt(2*(1-r12))
   }
   # Get cohend confidence interval
   tlow <- suppressWarnings(qt(1 / 2 - (1-alpha*2) / 2,
-                              df = cohen_df,
+                              df = d_df,
                               ncp = d_lambda))
   thigh <- suppressWarnings(qt(1 / 2 + (1-alpha*2) / 2,
-                               df = cohen_df,
+                               df = d_df,
                                ncp = d_lambda))
   if (m1 == m2) {
-    dlow <- (tlow * (2 * n)) / (sqrt(cohen_df) * sqrt(2 * n))
-    dhigh <- (thigh * (2 * n)) / (sqrt(cohen_df) * sqrt(2 * n))
+    dlow <- (tlow * (2 * n)) / (sqrt(d_df) * sqrt(2 * n))
+    dhigh <- (thigh * (2 * n)) / (sqrt(d_df) * sqrt(2 * n))
   } else {
     dlow <- tlow / d_lambda * cohend
     dhigh <- thigh / d_lambda * cohend
@@ -78,7 +78,7 @@ d_est_pair <- function(n,
 
   return(list(
     d = cohend,
-    cohen_df = cohen_df,
+    d_df = d_df,
     dlow = dlow,
     dhigh = dhigh,
     d_sigma = d_sigma,
@@ -103,12 +103,12 @@ d_est_ind <- function(n1,
 
   if (var.equal) {
     denomSD <- sqrt((((n1 - 1)*(sd1^2)) + (n2 - 1)*(sd2^2))/((n1+n2)-2)) #calculate sd pooled
-    cohen_df = n1 + n2 - 2
+    d_df = n1 + n2 - 2
   } else {
     denomSD <- sqrt((sd1^2 + sd2^2)/2) #calculate sd root mean squared for Welch's t-test
-    cohen_df1 = (n1 - 1)*(n2 - 1)*(sd1^2+sd2^2)^2
-    cohen_df2 = (n2-1)*sd1^4+(n1-1)*sd2^4
-    cohen_df = cohen_df1/cohen_df2
+    d_df1 = (n1 - 1)*(n2 - 1)*(sd1^2+sd2^2)^2
+    d_df2 = (n2-1)*sd1^4+(n1-1)*sd2^4
+    d_df = d_df1/d_df2
   }
 
   denomSD[is.na(denomSD)] <- NaN
@@ -123,7 +123,7 @@ d_est_ind <- function(n1,
 
   # Compute unbiased Hedges' g
   # Use the lgamma function, and update to what Goulet-Pelletier & Cousineau used; works with larger inputs
-  J <- gamma(cohen_df/2)/(sqrt(cohen_df/2)*gamma((cohen_df-1)/2))
+  J <- gamma(d_df/2)/(sqrt(d_df/2)*gamma((d_df-1)/2))
 
   if(var.equal == TRUE){
     if(type == 'g') {
@@ -145,14 +145,14 @@ d_est_ind <- function(n1,
   # add options for cohend here
   d_lambda <- cohend * sqrt(ntilde/2)
   #d_sigma = sqrt((n1+n2)/(n1*n2)+(cohend^2/(2*(n1+n2))))
-  d_sigma = sqrt((cohen_df/(cohen_df-2)) * (2/ntilde) *(1+cohend^2*(ntilde/2)) - cohend^2/J^2)
+  d_sigma = sqrt((d_df/(d_df-2)) * (2/ntilde) *(1+cohend^2*(ntilde/2)) - cohend^2/J^2)
 
   # Confidence interval of the SMD from Goulet-Pelletier & Cousineau
-  tlow <- qt(1 / 2 - (1-alpha*2) / 2, df = cohen_df, ncp = d_lambda)
-  thigh <- qt(1 / 2 + (1-alpha*2) / 2, df = cohen_df, ncp = d_lambda)
+  tlow <- qt(1 / 2 - (1-alpha*2) / 2, df = d_df, ncp = d_lambda)
+  thigh <- qt(1 / 2 + (1-alpha*2) / 2, df = d_df, ncp = d_lambda)
   if(m1 == m2) {
-    dlow <- (tlow*(n1+n2)) / (sqrt(cohen_df) * sqrt(n1*n2))
-    dhigh <- (thigh*(n1+n2)) / (sqrt(cohen_df) * sqrt(n1*n2))
+    dlow <- (tlow*(n1+n2)) / (sqrt(d_df) * sqrt(n1*n2))
+    dhigh <- (thigh*(n1+n2)) / (sqrt(d_df) * sqrt(n1*n2))
   } else {
     dlow <- tlow / d_lambda * cohend
     dhigh <- thigh / d_lambda * cohend
@@ -171,7 +171,7 @@ d_est_ind <- function(n1,
 
   return(list(
     d = cohend,
-    cohen_df = cohen_df,
+    d_df = d_df,
     dlow = dlow,
     dhigh = dhigh,
     d_sigma = d_sigma,
@@ -192,7 +192,7 @@ d_est_one <- function(n,
 
   cohend <- abs(mu-testValue)/sd # Cohen's d
   df <- n-1
-  cohen_df = df
+  d_df = df
   # Compute unbiased Hedges' g
   # Use the lgamma function, and update to what Goulet-Pelletier & cousineau used; works with larger inputs
   J <- gamma(df/2)/(sqrt(df/2)*gamma((df-1)/2))
@@ -210,14 +210,14 @@ d_est_one <- function(n,
 
   # Confidence interval of the SMD from Goulet-Pelletier & Cousineau
   tlow <- suppressWarnings(qt(1 / 2 - (1-alpha*2) / 2,
-                              df =   cohen_df,
+                              df =   d_df,
                               ncp = d_lambda))
   thigh <- suppressWarnings(qt(1 / 2 + (1-alpha*2) / 2,
-                               df =   cohen_df,
+                               df =   d_df,
                                ncp = d_lambda))
   if((mu-testValue) == 0) {
-    dlow <- (tlow*(2*n)) / (sqrt(cohen_df) * sqrt(2*n))
-    dhigh <- (thigh*(2*n)) / (sqrt(cohen_df) * sqrt(2*n))
+    dlow <- (tlow*(2*n)) / (sqrt(d_df) * sqrt(2*n))
+    dhigh <- (thigh*(2*n)) / (sqrt(d_df) * sqrt(2*n))
   } else {
     dlow <- tlow / d_lambda * cohend
     dhigh <- thigh / d_lambda * cohend
@@ -234,7 +234,7 @@ d_est_one <- function(n,
 
   return(list(
     d = cohend,
-    cohen_df = cohen_df,
+    d_df = d_df,
     dlow = dlow,
     dhigh = dhigh,
     d_sigma = d_sigma,
