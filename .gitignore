@@ -6,3 +6,4 @@ build/
 temp/
 *.jmo
 .httr-oauth
+docs

@@ -4,8 +4,7 @@
 \alias{t_TOST}
 \alias{t_TOST.default}
 \alias{t_TOST.formula}
-\title{TOST with t-tests
-TOST function for all t-tests types.}
+\title{TOST with t-tests}
 \usage{
 t_TOST(
   x,
@@ -54,7 +53,7 @@ t_TOST(
 
 \item{high_eqbound}{upper equivalence bounds}
 
-\item{eqbound_type}{Type of equivalance bound. Can be set to "SMD" for standardized mean difference (i.e., Cohen's d) or  "raw" for the mean difference. Default is "raw".}
+\item{eqbound_type}{Type of equivalence bound. Can be set to "SMD" for standardized mean difference (i.e., Cohen's d) or  "raw" for the mean difference. Default is "raw".}
 
 \item{alpha}{alpha level (default = 0.05)}
 
@@ -76,20 +75,20 @@ t_TOST(
 }
 \value{
 An S3 object of class
-  \code{"TOSTt"} is returned containing the following slots: S
+  \code{"TOSTt"} is returned containing the following slots:
 \describe{
-  \item{\code{"TOST"}}{A table of class \code{data.frame"} containing two-tailed t-test and both one-tailed results.}
-  \item{\code{"eqb"}}{A table of class \code{data.frame"} containing equivalence bound settings.}
-  \item{\code{"effsize"}}{ table of class \code{data.frame"} containing effect size estimates}
+\describe{
+  \item{\code{"TOST"}}{A table of class \code{"data.frame"} containing two-tailed t-test and both one-tailed results.}
+  \item{\code{"eqb"}}{A table of class \code{"data.frame"} containing equivalence bound settings.}
+  \item{\code{"effsize"}}{ table of class \code{"data.frame"} containing effect size estimates}
   \item{\code{"hypothesis"}}{String stating the hypothesis being tested}
-  \item{\code{"smd"}}{List containing the results of the standardized mean difference calculations (e.g., Cohen's d).
-  Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation)}
+  \item{\code{"smd"}}{List containing the results of the standardized mean difference calculations (e.g., Cohen's d).Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation)}
   \item{\code{"alpha"}}{Alpha level set for the analysis.}
   \item{\code{"method"}}{Type of t-test.}
   \item{\code{"decision"}}{List included text regarding the decisions for statistical inference.}
 }
 }
+}
 \description{
-TOST with t-tests
-TOST function for all t-tests types.
+A function for TOST with all types of t-tests.
 }

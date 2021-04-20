@@ -1,5 +1,5 @@
 #' @title TOST with t-tests
-#' TOST function for all t-tests types.
+#' @description A function for TOST with all types of t-tests.
 #' @param x a (non-empty) numeric vector of data values.
 #' @param y an optional (non-empty) numeric vector of data values.
 #' @param formula a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.
@@ -9,7 +9,7 @@
 #' @param low_eqbound lower equivalence bounds
 #' @param high_eqbound upper equivalence bounds
 #' @param hypothesis 'EQU' for equivalence (default), or 'MET' for minimal effects test, the alternative hypothesis.
-#' @param eqbound_type Type of equivalance bound. Can be set to "SMD" for standardized mean difference (i.e., Cohen's d) or  "raw" for the mean difference. Default is "raw".
+#' @param eqbound_type Type of equivalence bound. Can be set to "SMD" for standardized mean difference (i.e., Cohen's d) or  "raw" for the mean difference. Default is "raw".
 #' @param alpha alpha level (default = 0.05)
 #' @param bias_correction Apply Hedges' correction for bias (default is TRUE).
 #' @param rm_correction Repeated measures correction to make standardized mean difference Cohen's d(rm). This only applies to repeated/paired samples. Default is FALSE.
@@ -18,17 +18,18 @@
 #' @param na.action a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").
 #' @param ...  further arguments to be passed to or from methods.
 #' @return An S3 object of class
-#'   \code{"TOSTt"} is returned containing the following slots: S
+#'   \code{"TOSTt"} is returned containing the following slots:
 #' \describe{
-#'   \item{\code{"TOST"}}{A table of class \code{data.frame"} containing two-tailed t-test and both one-tailed results.}
-#'   \item{\code{"eqb"}}{A table of class \code{data.frame"} containing equivalence bound settings.}
-#'   \item{\code{"effsize"}}{ table of class \code{data.frame"} containing effect size estimates}
+#' \describe{
+#'   \item{\code{"TOST"}}{A table of class \code{"data.frame"} containing two-tailed t-test and both one-tailed results.}
+#'   \item{\code{"eqb"}}{A table of class \code{"data.frame"} containing equivalence bound settings.}
+#'   \item{\code{"effsize"}}{ table of class \code{"data.frame"} containing effect size estimates}
 #'   \item{\code{"hypothesis"}}{String stating the hypothesis being tested}
-#'   \item{\code{"smd"}}{List containing the results of the standardized mean difference calculations (e.g., Cohen's d).
-#'   Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation)}
+#'   \item{\code{"smd"}}{List containing the results of the standardized mean difference calculations (e.g., Cohen's d).Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation)}
 #'   \item{\code{"alpha"}}{Alpha level set for the analysis.}
 #'   \item{\code{"method"}}{Type of t-test.}
 #'   \item{\code{"decision"}}{List included text regarding the decisions for statistical inference.}
+#' }
 #' }
 #' @name t_TOST
 #' @export t_TOST
@@ -277,6 +278,14 @@ t_TOST.default = function(x,
   )
   TOSToutcome<-ifelse(pTOST<alpha,"significant","non-significant")
   testoutcome<-ifelse(tresult$p.value<alpha,"significant","non-significant")
+
+  # Change text based on two tailed t test if mu is not zero
+  if(mu == 0){
+    mu_text = "zero"
+  } else {
+    mu_text = mu
+  }
+
   if(hypothesis == "EQU"){
     #format(low_eqbound, digits = 3, nsmall = 3, scientific = FALSE)
     TOST_restext = paste0("The equivalence test was ",TOSToutcome,", t(",round(tresult$parameter, digits=2),") = ",format(tTOST, digits = 3, nsmall = 3, scientific = FALSE),", p = ",format(pTOST, digits = 3, nsmall = 3, scientific = FALSE),sep="")
@@ -287,29 +296,29 @@ t_TOST.default = function(x,
   ttest_restext = paste0("The null hypothesis test was ",testoutcome,", t(",round(tresult$parameter, digits=2),") = ",format(tresult$statistic, digits = 3, nsmall = 3, scientific = FALSE),", p = ",format(tresult$p.value, digits = 3, nsmall = 3, scientific = FALSE),sep="")
   if (hypothesis == "EQU"){
     if(tresult$p.value <= alpha && pTOST <= alpha){
-      combined_outcome <- "statistically different from zero but statistically equivalent"
+      combined_outcome <- paste0("statistically different from ",mu_text," but statistically equivalent")
     }
     if(tresult$p.value < alpha && pTOST > alpha){
-      combined_outcome <- "statistically different from zero and not statistically equivalent"
+      combined_outcome <- paste0("statistically different from ",mu_text," and not statistically equivalent")
     }
     if(tresult$p.value > alpha && pTOST <= alpha){
-      combined_outcome <- "statistically not different from zero and statistically equivalent"
+      combined_outcome <- paste0("statistically not different from ",mu_text," and statistically equivalent")
     }
     if(tresult$p.value > alpha && pTOST > alpha){
-      combined_outcome <- "statistically not different from zero and not statistically equivalent"
+      combined_outcome <- paste0("statistically not different from ",mu_text," and not statistically equivalent")
     }
   } else {
     if(tresult$p.value <= alpha && pTOST <= alpha){
-      combined_outcome <- "statistically different from zero and statistically greater than the minimal effect threshold"
+      combined_outcome <- paste0("statistically different from ",mu_text," and statistically greater than the minimal effect threshold")
     }
     if(tresult$p.value < alpha && pTOST > alpha){
-      combined_outcome <- "statistically different from zero but not statistically greater than the minimal effect threshold"
+      combined_outcome <- paste0("statistically different from ",mu_text," but not statistically greater than the minimal effect threshold")
     }
     if(tresult$p.value > alpha && pTOST <= alpha){
-      combined_outcome <- "statistically not different from zero and statistically greater than the minimal effect threshold"
+      combined_outcome <- paste0("statistically not different from ",mu_text," and statistically greater than the minimal effect threshold")
     }
     if(tresult$p.value > alpha && pTOST > alpha){
-      combined_outcome <- "statistically not different from zero and not statistically greater than the minimal effect threshold"
+      combined_outcome <- paste0("statistically not different from ",mu_text," and not statistically greater than the minimal effect threshold")
     }
   }
 

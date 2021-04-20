@@ -8,3 +8,6 @@
 ^.*\.jmo$
 ^Shiny$
 ^build$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$

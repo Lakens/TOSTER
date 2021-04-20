@@ -7,7 +7,7 @@ authors:
   - Daniel Lakens <D.Lakens@tue.nl>
   - Aaron Caldwell <arcaldwell49@gmail.com>
 maintainer: Daniel Lakens <D.Lakens@tue.nl>
-date: '2021-04-16'
+date: '2021-04-30'
 type: R
 description: >-
   Two one-sided tests (TOST) procedures to test equivalence for t-tests and
