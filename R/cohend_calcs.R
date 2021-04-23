@@ -192,8 +192,16 @@ d_CI = function(d,
   d_lambda = lambda
   d_df = df
   cohend = d
-  tlow <- qt(1 / 2 - (1-alpha) / 2, df = d_df, ncp = d_lambda)
-  thigh <- qt(1 / 2 + (1-alpha) / 2, df = d_df, ncp = d_lambda)
+  tlow <- suppressWarnings({
+    qt(1 / 2 - (1 - alpha) / 2,
+       df = d_df,
+       ncp = d_lambda)
+  })
+  thigh <- suppressWarnings({
+    qt(1 / 2 + (1 - alpha) / 2,
+       df = d_df,
+       ncp = d_lambda)
+  })
 
   dlow <- tlow / d_lambda * cohend
   dhigh <- thigh / d_lambda * cohend

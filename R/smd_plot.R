@@ -18,8 +18,8 @@ plot_smd <- function(lambda,
                      df,
                      SE,
                      smd_label,
-                     ci_shade = c(.5,.90,.95,.999),
-                     ci_lines = c(.90,.95)){
+                     ci_shade = c(0.5,0.90,0.95,0.999),
+                     ci_lines = 0.90){
 
   if (!missing(smd_label)){
     points = data.frame(mu = 0,

@@ -59,36 +59,72 @@ print.TOSTt <- function(x,
 #' @export
 
 plot.TOSTt <- function(x, type = "c",  ...){
+
+  low_eqd = x$eqb$low_eq[2]
+  high_eqd = x$eqb$high_eq[2]
+
+  low_eqt = x$eqb$low_eq[1]
+  high_eqt = x$eqb$high_eq[1]
+
+  lenst = c(length(low_eqt),
+            length(high_eqt))
+  round_t = max(lenst)
+
   if(type == "c"){
     d_res = d_curv(x)
-    d_plot <- ggcurve(data = d_res[[1]], type = "c", nullvalue = NULL,
-                         title = "",
-                         subtitle = "",
-                         levels = 1-x$alpha*2,
-                         xaxis = paste0(x$smd$smd_label),
-                         yaxis1 = expression(paste("two-tailed ",italic(p),
-                                                   "-value")),
-                         fill = "steelblue2") +
+    d_plot <-
+      ggcurve(
+        data = d_res[[1]],
+        type = "c",
+        nullvalue = c(low_eqd,high_eqd),
+        title = "",
+        subtitle = "",
+        levels = 1 - x$alpha * 2,
+        xaxis = "",
+        yaxis2 = "Confidence Interval (%)",
+        yaxis1 = expression(paste("two-tailed ", italic(p),
+                                  "-value")),
+        fill = "steelblue2"
+      ) +
       theme_tidybayes()
-    t_res = d_curv(x)
+
+
+    t_res = t_curv(x)
     if(grepl("one",x$method, ignore.case=TRUE)){
       x_label = "Mean"
     } else {
       x_label = "Mean Difference"
     }
 
-    t_plot <- ggcurve(data = t_res[[1]], type = "c", nullvalue = NULL,
-                         title = "",
-                         subtitle = "",
-                         levels = 1-x$alpha*2,
-                         xaxis = x_label,
-                         yaxis1 = expression(paste("two-tailed ",italic(p),
-                                                   "-value")),
-                         fill = "steelblue2") +
+    t_plot <-
+      ggcurve(
+        data = t_res[[1]],
+        type = "c",
+        nullvalue = c(low_eqt,high_eqt),
+        title = "",
+        subtitle = "",
+        levels = 1 - x$alpha * 2,
+        xaxis = "",
+        yaxis2 = "Confidence Interval (%)",
+        yaxis1 = expression(paste("two-tailed ", italic(p),
+                                  "-value")),
+        fill = "steelblue2"
+      ) +
       theme_tidybayes()
 
-    plts = ggarrange(t_plot,
-                     d_plot,
+    # Add facet lables
+    d_plot = d_plot +
+      facet_wrap( ~ paste0(x$smd$smd_label)) +
+      theme(strip.text = element_text(face = "bold", size = 10))
+
+    t_plot = t_plot +
+      facet_wrap( ~ paste0(x_label)) +
+      theme(strip.text = element_text(face = "bold", size = 10))
+
+
+
+    plts = plot_grid(d_plot,
+                     t_plot,
                      ncol = 1)
     return(plts)
   }
@@ -109,6 +145,7 @@ plot.TOSTt <- function(x, type = "c",  ...){
     } else {
       sets = c(.5,c2,c1)
     }
+
 
     if(grepl("paired",x$method, ignore.case=TRUE)){
       d_plot = plot_smd_curv(d = x$smd$d,
@@ -144,77 +181,87 @@ plot.TOSTt <- function(x, type = "c",  ...){
                              ci_line = c2)
     }
 
+    d_plot = d_plot +
+      geom_vline(aes(xintercept = low_eqd),
+                 linetype="dashed") +
+      geom_vline(aes(xintercept = high_eqd),
+                 linetype="dashed") +
+      scale_x_continuous(sec.axis = dup_axis(breaks=c(round(low_eqd,2),
+                                                      round(high_eqd,2))))
 
-  points = data.frame(
-    type = x_label,
-    mu = c(x$effsize$estimate[1]),
-    param = c(round(unname(x$TOST$df[1]), 0)),
-    sigma = c(x$TOST$SE[1]),
-    lambda = c(0),
-    est = c(x$effsize$estimate[1]),
-    low = c(x$eqb$low_eq[1]),
-    high = c(x$eqb$high_eq[1]),
-    alpha = c(x$alpha),
-    stringsAsFactors = FALSE
-  )
 
-  #sets = ci.cuts
-  t_plot = ggplot(data = points,
-                aes_string(y = 0)) +
-    stat_dist_halfeye(aes(
-      dist = dist_student_t(
-        mu = mu,
-        df = param,
-        sigma = sigma,
-        ncp = lambda
+    points = data.frame(
+      type = x_label,
+      mu = c(x$effsize$estimate[1]),
+      param = c(round(unname(x$TOST$df[1]), 0)),
+      sigma = c(x$TOST$SE[1]),
+      lambda = c(0),
+      est = c(x$effsize$estimate[1]),
+      low = c(x$eqb$low_eq[1]),
+      high = c(x$eqb$high_eq[1]),
+      alpha = c(x$alpha),
+      stringsAsFactors = FALSE
+    )
+
+    #sets = ci.cuts
+    t_plot = ggplot(data = points,
+                    aes_string(y = 0)) +
+      stat_dist_halfeye(aes(
+        dist = dist_student_t(
+          mu = mu,
+          df = param,
+          sigma = sigma,
+          ncp = lambda
+        ),
+        fill = stat(cut_cdf_qi(p = cdf,
+                               .width = sets))
       ),
-      fill = stat(cut_cdf_qi(p=cdf,
-                             .width = sets))
-    ),
-    .width = c2) +
-    scale_fill_brewer(direction = -1,
-                      na.translate = FALSE) +
-    labs(x = '', y = '',
-         fill = "Confidence Interval") +
-    geom_vline(aes(xintercept = low),
-               linetype="dashed") +
-    geom_vline(aes(xintercept = high),
-               linetype="dashed") +
-    #geom_text(aes(y=1.5, x=low,
-    #              vjust=-.9, hjust=1),
-    #          angle = 90,
-    #          label='Lower Bound') +
-    #geom_text(aes(y=1.5, x=high, vjust=1.5, hjust=1),
-    #          angle = 90,
-    #         label='Upper Bound') +
-    facet_wrap(~type) +
-    theme_tidybayes() +
-    theme(legend.position="top",
-          strip.text = element_text(face="bold", size=10),
-          axis.text.y = element_blank(),
-          axis.ticks.y = element_blank())
+      .width = c2) +
+      scale_fill_brewer(direction = -1,
+                        na.translate = FALSE) +
+      labs(x = '', y = '',
+           fill = "Confidence Interval") +
+      geom_vline(aes(xintercept = low),
+                 linetype = "dashed") +
+      geom_vline(aes(xintercept = high),
+                 linetype = "dashed") +
+      #geom_text(aes(y=1.5, x=low,
+      #              vjust=-.9, hjust=1),
+      #          angle = 90,
+      #          label='Lower Bound') +
+      #geom_text(aes(y=1.5, x=high, vjust=1.5, hjust=1),
+      #          angle = 90,
+      #         label='Upper Bound') +
+      facet_wrap( ~ type) +
+      theme_tidybayes() +
+      theme(
+        legend.position = "top",
+        strip.text = element_text(face = "bold", size = 10),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank()
+      ) +
+      scale_x_continuous(sec.axis = dup_axis(breaks = c(
+        round(low_eqt, round_t),
+        round(high_eqt, round_t)
+      )))
 
-  # extract the legend from one of the plots
-  legend <- get_legend(
-    # create some space to the left of the legend
-    #p1 + theme(legend.box.margin = margin(0, 0, 0, 12))
-    t_plot
-  )
+    # extract the legend from one of the plots
+    legend <- get_legend(t_plot)
 
-  prow <- plot_grid(
-    d_plot + theme(legend.position="none"),
-    t_plot + theme(legend.position="none"),
-    ncol = 1
-  )
+    prow <- plot_grid(
+      d_plot + theme(legend.position = "none"),
+      t_plot + theme(legend.position = "none"),
+      ncol = 1
+    )
 
-  # add the legend to the row we made earlier. Give it one-third of
-  # the width of one plot (via rel_widths).
+    # add the legend to the row we made earlier. Give it one-third of
+    # the width of one plot (via rel_widths).
 
 
-  plts = plot_grid(legend, prow, ncol=1,
-                   rel_heights = c(.1, 1))
+    plts = plot_grid(legend, prow, ncol = 1,
+                     rel_heights = c(.1, 1))
 
-  return(plts)
+    return(plts)
   }
 
 }

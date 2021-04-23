@@ -77,8 +77,10 @@ plot_smd_curv = function(d,
   }
 
   ci_shade1 = sort(ci_shades, decreasing = TRUE)
-  x_dt <- seq(qt(.0001, df, lambda), qt(.9999, df, lambda), by = 0.001)
-  y_dt <- dt(x_dt, df = df, ncp = lambda)
+  x_dt <- suppressWarnings({seq(suppressWarnings({qt(.0001, df, lambda)}),
+                                suppressWarnings({qt(.9999, df, lambda)}),
+                               by = 0.001)})
+  y_dt <- suppressWarnings({dt(x_dt, df = df, ncp = lambda)})
   x <- mult * x_dt # mult = sqrt(1/n1+1/n2) for Cohen's d
   y <- y_dt / mult # mult = sqrt(1/n1+1/n2) Cohen's d
 
