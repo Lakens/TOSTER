@@ -8,7 +8,7 @@
 \usage{
 \method{print}{TOSTt}(x, digits = getOption("digits"), ...)
 
-\method{plot}{TOSTt}(x, ...)
+\method{plot}{TOSTt}(x, type = "c", ...)
 }
 \arguments{
 \item{x}{object of class \code{TOSTt} as returned from the reli_stats function}
@@ -18,6 +18,8 @@
 \item{...}{further arguments passed through, see description of return value
 for details.
 \code{\link{TOSTt-methods}}.}
+
+\item{type}{Type of plot to produce. Default is a consonance plot "c" but sampling distribution plot can be produced with "s".}
 }
 \value{
 \describe{

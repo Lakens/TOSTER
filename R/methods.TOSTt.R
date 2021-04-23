@@ -4,6 +4,7 @@
 #'
 #' @param x object of class \code{TOSTt} as returned from the reli_stats function
 #' @param digits Number of digits to print for p-values
+#' @param type Type of plot to produce. Default is a consonance plot "c" but sampling distribution plot can be produced with "s".
 #' @param ... further arguments passed through, see description of return value
 #'   for details.
 #'   \code{\link{TOSTt-methods}}.
@@ -53,34 +54,112 @@ print.TOSTt <- function(x,
 #' @import ggplot2
 #' @import ggdist
 #' @import distributional
+#' @import concurve
+#' @importFrom cowplot plot_grid get_legend
 #' @export
 
-plot.TOSTt <- function(x,  ...){
+plot.TOSTt <- function(x, type = "c",  ...){
+  if(type == "c"){
+    d_res = d_curv(x)
+    d_plot <- ggcurve(data = d_res[[1]], type = "c", nullvalue = NULL,
+                         title = "",
+                         subtitle = "",
+                         levels = 1-x$alpha*2,
+                         xaxis = paste0(x$smd$smd_label),
+                         yaxis1 = expression(paste("two-tailed ",italic(p),
+                                                   "-value")),
+                         fill = "steelblue2") +
+      theme_tidybayes()
+    t_res = d_curv(x)
+    if(grepl("one",x$method, ignore.case=TRUE)){
+      x_label = "Mean"
+    } else {
+      x_label = "Mean Difference"
+    }
+
+    t_plot <- ggcurve(data = t_res[[1]], type = "c", nullvalue = NULL,
+                         title = "",
+                         subtitle = "",
+                         levels = 1-x$alpha*2,
+                         xaxis = x_label,
+                         yaxis1 = expression(paste("two-tailed ",italic(p),
+                                                   "-value")),
+                         fill = "steelblue2") +
+      theme_tidybayes()
+
+    plts = ggarrange(t_plot,
+                     d_plot,
+                     ncol = 1)
+    return(plts)
+  }
+
+  if(type == "s"){
+
+    if(grepl("one",x$method, ignore.case=TRUE)){
+      x_label = "Mean"
+    } else {
+      x_label = "Mean Difference"
+    }
+    c1 = 1-x$alpha
+    c2 = 1-x$alpha*2
+    if(c1 < .999 && c2 > .5){
+      sets = c(.5,c2,c1,.999)
+    } else if(c2 <=.5 && c1 < .999) {
+      sets = c(c2,c1,.999)
+    } else {
+      sets = c(.5,c2,c1)
+    }
+
+    if(grepl("paired",x$method, ignore.case=TRUE)){
+      d_plot = plot_smd_curv(d = x$smd$d,
+                             df = x$smd$d_df,
+                             lambda = x$smd$d_lambda,
+                             ntilde = x$smd$ntilde,
+                             r12 = x$smd$r12,
+                             smd_label = x$smd$smd_label,
+                             type = "paired",
+                             ci_shades = sets,
+                             ci_line = c2)
+    }
+
+    if(grepl("two",x$method, ignore.case=TRUE)){
+      d_plot = plot_smd_curv(d = x$smd$d,
+                             df = x$smd$d_df,
+                             lambda = x$smd$d_lambda,
+                             ntilde = x$smd$ntilde,
+                             smd_label = x$smd$smd_label,
+                             type = "two",
+                             ci_shades = sets,
+                             ci_line = c2)
+    }
+
+    if(grepl("one",x$method, ignore.case=TRUE)){
+      d_plot = plot_smd_curv(d = x$smd$d,
+                             df = x$smd$d_df,
+                             lambda = x$smd$d_lambda,
+                             ntilde = x$smd$ntilde,
+                             smd_label = x$smd$smd_label,
+                             type = "one",
+                             ci_shades = sets,
+                             ci_line = c2)
+    }
+
 
   points = data.frame(
-    type = c("Mean Difference", x$smd$smd_label),
-    mu = c(x$effsize$estimate[1], 0),
-    param = c(round(unname(x$TOST$df[1]), 0), round(unname(x$smd$d_df), 0)),
-    sigma = c(x$TOST$SE[1], x$smd$d_sigma),
-    lambda = c(0, x$smd$d_lambda),
-    low = c(x$eqb$low_eq[1], x$eqb$low_eq[2]),
-    high = c(x$eqb$high_eq[1], x$eqb$high_eq[2]),
-    alpha = c(x$alpha, x$alpha),
+    type = x_label,
+    mu = c(x$effsize$estimate[1]),
+    param = c(round(unname(x$TOST$df[1]), 0)),
+    sigma = c(x$TOST$SE[1]),
+    lambda = c(0),
+    est = c(x$effsize$estimate[1]),
+    low = c(x$eqb$low_eq[1]),
+    high = c(x$eqb$high_eq[1]),
+    alpha = c(x$alpha),
     stringsAsFactors = FALSE
   )
 
-  c1 = 1-x$alpha
-  c2 = 1-x$alpha*2
-  if(c1 < .999 && c2 > .5){
-    sets = c(.5,c2,c1,.999)
-  } else if(c2 <=.5 && c1 < .999) {
-    sets = c(c2,c1,.999)
-  } else {
-    sets = c(.5,c2,c1)
-  }
-  #if
   #sets = ci.cuts
-  p1 = ggplot(data = points,
+  t_plot = ggplot(data = points,
                 aes_string(y = 0)) +
     stat_dist_halfeye(aes(
       dist = dist_student_t(
@@ -92,7 +171,7 @@ plot.TOSTt <- function(x,  ...){
       fill = stat(cut_cdf_qi(p=cdf,
                              .width = sets))
     ),
-    .width = c(c2, c1)) +
+    .width = c2) +
     scale_fill_brewer(direction = -1,
                       na.translate = FALSE) +
     labs(x = '', y = '',
@@ -101,22 +180,41 @@ plot.TOSTt <- function(x,  ...){
                linetype="dashed") +
     geom_vline(aes(xintercept = high),
                linetype="dashed") +
-    geom_text(aes(y=1.5, x=low,
-                  vjust=-.9, hjust=1),
-              angle = 90,
-              label='Lower Bound') +
-    geom_text(aes(y=1.5, x=high, vjust=1.5, hjust=1),
-              angle = 90,
-              label='Upper Bound') +
+    #geom_text(aes(y=1.5, x=low,
+    #              vjust=-.9, hjust=1),
+    #          angle = 90,
+    #          label='Lower Bound') +
+    #geom_text(aes(y=1.5, x=high, vjust=1.5, hjust=1),
+    #          angle = 90,
+    #         label='Upper Bound') +
+    facet_wrap(~type) +
     theme_tidybayes() +
     theme(legend.position="top",
           strip.text = element_text(face="bold", size=10),
           axis.text.y = element_blank(),
-          axis.ticks.y = element_blank()) +
-    facet_wrap(~type,
-               ncol = 1,
-               scales = "free")
+          axis.ticks.y = element_blank())
 
-  return(p1)
+  # extract the legend from one of the plots
+  legend <- get_legend(
+    # create some space to the left of the legend
+    #p1 + theme(legend.box.margin = margin(0, 0, 0, 12))
+    t_plot
+  )
+
+  prow <- plot_grid(
+    d_plot + theme(legend.position="none"),
+    t_plot + theme(legend.position="none"),
+    ncol = 1
+  )
+
+  # add the legend to the row we made earlier. Give it one-third of
+  # the width of one plot (via rel_widths).
+
+
+  plts = plot_grid(legend, prow, ncol=1,
+                   rel_heights = c(.1, 1))
+
+  return(plts)
+  }
 
 }

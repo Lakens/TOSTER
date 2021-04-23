@@ -20,7 +20,6 @@
 #' @return An S3 object of class
 #'   \code{"TOSTt"} is returned containing the following slots:
 #' \describe{
-#' \describe{
 #'   \item{\code{"TOST"}}{A table of class \code{"data.frame"} containing two-tailed t-test and both one-tailed results.}
 #'   \item{\code{"eqb"}}{A table of class \code{"data.frame"} containing equivalence bound settings.}
 #'   \item{\code{"effsize"}}{ table of class \code{"data.frame"} containing effect size estimates}
@@ -29,7 +28,6 @@
 #'   \item{\code{"alpha"}}{Alpha level set for the analysis.}
 #'   \item{\code{"method"}}{Type of t-test.}
 #'   \item{\code{"decision"}}{List included text regarding the decisions for statistical inference.}
-#' }
 #' }
 #' @name t_TOST
 #' @export t_TOST

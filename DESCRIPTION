@@ -22,7 +22,9 @@ Imports:
     ggplot2,
     R6,
     ggdist,
-    distributional
+    distributional,
+    concurve,
+    cowplot
 Suggests: knitr,
     rmarkdown
 VignetteBuilder: knitr

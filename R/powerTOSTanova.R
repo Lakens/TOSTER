@@ -1,9 +1,9 @@
-#' Power analysis for TOST for between subjects ANOVA.
+#' Power analysis for TOST for an F-test
 #' @param alpha alpha used for the test (e.g., 0.05)
 #' @param power desired power (e.g., 0.8)
 #' @param df1 Degrees of freedom for the numerator
 #' @param df2 Degrees of freedom for the denominator
-#' @param eqbound Equivalence bound in partial eta-squared
+#' @param eqbound Equivalence bound for the partial eta-squared
 #' @return Object of class '"power.htest"
 #' @examples
 #' ## Statistical power for alpha = 0.05, 3 groups, n = 80 per group, equivalence bound of
@@ -12,19 +12,23 @@
 #' ## df2 = Total N - number of groups = 240 - 3 = 237.
 #' #' powerTOSToneway(alpha=0.05, df1=3, df2 = 237, eqbound = 0.01)
 #' @section References:
-#' TOO BE ADDED
+#' Campbell, H., & Lakens, D. (2021). Can we disregard the whole model? Omnibus non‐inferiority testing for R2 in multi‐variable linear regression and in ANOVA. British Journal of Mathematical and Statistical Psychology, 74(1), 64-89. doi: 10.1111/bmsp.12201
 #' @importFrom stats pf qf
 #' @export
 
-powerTOSToneway <- function(alpha = 0.05, df1, df2, eqbound){
-  N <- df2 + df1 + 1
+powerTOSToneway <- function(alpha = 0.05,
+                            df1,
+                            df2,
+                            eqbound){
+  f2 = eqbound/(1 - eqbound)
+  lambda = (f2 * (df1 + df2 + 1))
 
 
   Fstatstar = qf(
     alpha,
     df1 = df1,
     df2 = df2,
-    ncp = (N * eqbound) / (1 - eqbound),
+    ncp = lambda,
     lower.tail = TRUE
   )
 
@@ -42,7 +46,7 @@ powerTOSToneway <- function(alpha = 0.05, df1, df2, eqbound){
       eqbound = eqbound,
       sig.level = alpha,
       power = statistical_power,
-      method = "Equivalence Test for one-way ANOVA"
+      method = "Equivalence Test for an F-test"
     ),
     class = "power.htest"
   )
