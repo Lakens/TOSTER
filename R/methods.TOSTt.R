@@ -4,7 +4,7 @@
 #'
 #' @param x object of class \code{TOSTt} as returned from the reli_stats function
 #' @param digits Number of digits to print for p-values
-#' @param type Type of plot to produce. Default is a consonance plot "c" but sampling distribution plot can be produced with "s".
+#' @param type Type of plot to produce. Default is a consonance plot "c" but consonance distribution plot can be produced with "cd".
 #' @param ... further arguments passed through, see description of return value
 #'   for details.
 #'   \code{\link{TOSTt-methods}}.
@@ -58,7 +58,11 @@ print.TOSTt <- function(x,
 #' @importFrom cowplot plot_grid get_legend
 #' @export
 
-plot.TOSTt <- function(x, type = "c",  ...){
+plot.TOSTt <- function(x,
+                       type = "c",
+                       ci_lines,
+                       ci_shades,
+                       ...){
 
   low_eqd = x$eqb$low_eq[2]
   high_eqd = x$eqb$high_eq[2]
@@ -70,72 +74,7 @@ plot.TOSTt <- function(x, type = "c",  ...){
             length(high_eqt))
   round_t = max(lenst)
 
-  if(type == "c"){
-    d_res = d_curv(x)
-    d_plot <-
-      ggcurve(
-        data = d_res[[1]],
-        type = "c",
-        nullvalue = c(low_eqd,high_eqd),
-        title = "",
-        subtitle = "",
-        levels = 1 - x$alpha * 2,
-        xaxis = "",
-        yaxis2 = "Confidence Interval (%)",
-        yaxis1 = expression(paste("two-tailed ", italic(p),
-                                  "-value")),
-        fill = "steelblue2"
-      ) +
-      theme_tidybayes()
-
-
-    t_res = t_curv(x)
-    if(grepl("one",x$method, ignore.case=TRUE)){
-      x_label = "Mean"
-    } else {
-      x_label = "Mean Difference"
-    }
-
-    t_plot <-
-      ggcurve(
-        data = t_res[[1]],
-        type = "c",
-        nullvalue = c(low_eqt,high_eqt),
-        title = "",
-        subtitle = "",
-        levels = 1 - x$alpha * 2,
-        xaxis = "",
-        yaxis2 = "Confidence Interval (%)",
-        yaxis1 = expression(paste("two-tailed ", italic(p),
-                                  "-value")),
-        fill = "steelblue2"
-      ) +
-      theme_tidybayes()
-
-    # Add facet lables
-    d_plot = d_plot +
-      facet_wrap( ~ paste0(x$smd$smd_label)) +
-      theme(strip.text = element_text(face = "bold", size = 10))
-
-    t_plot = t_plot +
-      facet_wrap( ~ paste0(x_label)) +
-      theme(strip.text = element_text(face = "bold", size = 10))
-
-
-
-    plts = plot_grid(d_plot,
-                     t_plot,
-                     ncol = 1)
-    return(plts)
-  }
-
-  if(type == "s"){
-
-    if(grepl("one",x$method, ignore.case=TRUE)){
-      x_label = "Mean"
-    } else {
-      x_label = "Mean Difference"
-    }
+  if(missing(ci_shades)){
     c1 = 1-x$alpha
     c2 = 1-x$alpha*2
     if(c1 < .999 && c2 > .5){
@@ -145,43 +84,80 @@ plot.TOSTt <- function(x, type = "c",  ...){
     } else {
       sets = c(.5,c2,c1)
     }
+  }
+
+  if(missing(ci_lines)){
+    ci_levs = 1-x$alpha*2
+  } else{
+    ci_levs = ci_lines
+  }
+  # Get x-axis label
+  if(grepl("one",x$method, ignore.case=TRUE)){
+    x_label = "Mean"
+  } else {
+    x_label = "Mean Difference"
+  }
 
 
-    if(grepl("paired",x$method, ignore.case=TRUE)){
-      d_plot = plot_smd_curv(d = x$smd$d,
-                             df = x$smd$d_df,
-                             lambda = x$smd$d_lambda,
-                             ntilde = x$smd$ntilde,
-                             r12 = x$smd$r12,
-                             smd_label = x$smd$smd_label,
-                             type = "paired",
-                             ci_shades = sets,
-                             ci_line = c2)
+  if(type == "c"){
+
+    d_res = d_curv(x)
+
+    d_plot <-
+      gg_curv_t(
+        data = d_res[[1]],
+        type = "c",
+        levels = ci_levs
+      ) +
+      geom_vline(xintercept = low_eqd,linetype = "dashed")+
+      geom_vline(xintercept = high_eqd, linetype ="dashed")+
+      scale_x_continuous(sec.axis = dup_axis(breaks=c(round(low_eqd,2),
+                                                      round(high_eqd,2)),
+                                             name = "")) +
+      facet_grid(~as.character(x$smd$smd_label)) +
+      theme_tidybayes() +
+      theme(strip.text = element_text(face = "bold",
+                                      size = 10),
+            axis.title.x = element_blank())
+
+    t_res = t_curv(x)
+
+    t_plot <-
+      gg_curv_t(
+        data = t_res[[1]],
+        type = "c",
+        levels = ci_levs
+      ) +
+      geom_vline(xintercept = low_eqt,linetype = "dashed")+
+      geom_vline(xintercept = high_eqt, linetype ="dashed")+
+      scale_x_continuous(sec.axis = dup_axis(breaks=c(round(low_eqt,round_t),
+                                                      round(high_eqt,round_t)),
+                                             name = "")) +
+      facet_grid(~as.character(x_label)) +
+      theme_tidybayes() +
+      theme(strip.text = element_text(face = "bold",
+                                      size = 10),
+            axis.title.x = element_blank())
+
+    plts = plot_grid(d_plot,
+                     t_plot,
+                     ncol = 1)
+    return(plts)
+  }
+
+  if(type == "cd"){
+
+    if(!missing(ci_lines) && length(ci_lines)>1){
+      warning("Multiple CI lines provided only first element will be used.")
     }
 
-    if(grepl("two",x$method, ignore.case=TRUE)){
-      d_plot = plot_smd_curv(d = x$smd$d,
-                             df = x$smd$d_df,
-                             lambda = x$smd$d_lambda,
-                             ntilde = x$smd$ntilde,
-                             smd_label = x$smd$smd_label,
-                             type = "two",
-                             ci_shades = sets,
-                             ci_line = c2)
-    }
 
-    if(grepl("one",x$method, ignore.case=TRUE)){
-      d_plot = plot_smd_curv(d = x$smd$d,
-                             df = x$smd$d_df,
-                             lambda = x$smd$d_lambda,
-                             ntilde = x$smd$ntilde,
-                             smd_label = x$smd$smd_label,
-                             type = "one",
-                             ci_shades = sets,
-                             ci_line = c2)
-    }
-
-    d_plot = d_plot +
+    d_res = d_curv(x)
+    d_plot <- ggplot(data = d_res[[2]]) +
+      theme_tidybayes() +
+      geom_density(aes(x = x, y = ..density..)) +
+      scale_fill_brewer(direction = -1,
+                        na.translate = FALSE) +
       geom_vline(aes(xintercept = low_eqd),
                  linetype="dashed") +
       geom_vline(aes(xintercept = high_eqd),

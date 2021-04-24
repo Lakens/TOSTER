@@ -10,7 +10,7 @@ plot_smd(
   SE,
   smd_label,
   ci_shade = c(0.5, 0.9, 0.95, 0.999),
-  ci_lines = c(0.9, 0.95)
+  ci_lines = 0.9
 )
 }
 \arguments{

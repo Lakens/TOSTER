@@ -1,4 +1,4 @@
-
+#' @importFrom tidyr pivot_longer
 
 gg_curv_t <- function(data,
                       type = "c",

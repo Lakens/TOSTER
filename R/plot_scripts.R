@@ -84,6 +84,9 @@ plot_smd_curv = function(d,
   x <- mult * x_dt # mult = sqrt(1/n1+1/n2) for Cohen's d
   y <- y_dt / mult # mult = sqrt(1/n1+1/n2) Cohen's d
 
+  x.dens  <- density(x)
+  df.dens <- data.frame(x=x.dens$x, y=x.dens$y)
+
   ci_linerange = d_CI(d = d,
                       df = df,
                       lambda = lambda,
