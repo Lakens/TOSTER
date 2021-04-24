@@ -34,5 +34,6 @@ cut_cdf_qi = function(p, .width = c(.66, .95, 1), labels = NULL) {
     labels = .width
   }
 
-  cut(abs(1 - p*2), labels = labels, breaks = c(0, .width), include.lowest = TRUE, ordered_result = TRUE)
+  cut(abs(1 - p*2), labels = labels,
+      breaks = c(0, .width), include.lowest = TRUE, ordered_result = TRUE)
 }

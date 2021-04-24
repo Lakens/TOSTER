@@ -99,10 +99,7 @@ plot_smd_curv = function(d,
   p1 = ggplot(df_xy,
               aes(x = x, y = y)) +
     #geom_line(color="white") +
-    geom_area(data = data.frame(x = seq(ci_shaderange1[1], ci_shaderange1[2], len = length(df_xy$y[which(df_xy$x > ci_shaderange1[1] &
-                                                                                                           df_xy$x < ci_shaderange1[2])])),
-                                y = df_xy$y[which(df_xy$x > ci_shaderange1[1] &
-                                                    df_xy$x < ci_shaderange1[2])]),
+    geom_area(subset(df.dens, x >= ci_shaderange1[1] & x <= ci_shaderange1[2]),
               aes(x = x, y = y, fill = as.character(ci_shade1[1]))) +
     labs(x = '', y = '',
          fill = "Confidence Interval")
@@ -113,10 +110,7 @@ plot_smd_curv = function(d,
                           lambda = lambda,
                           alpha = 1-ci_shade1[2])
     p2 = p1 +
-      geom_area(data = data.frame(x = seq(ci_shaderange2[1], ci_shaderange2[2], len = length(df_xy$y[which(df_xy$x > ci_shaderange2[1] &
-                                                                                                             df_xy$x < ci_shaderange2[2])])),
-                                  y = df_xy$y[which(df_xy$x > ci_shaderange2[1] &
-                                                      df_xy$x < ci_shaderange2[2])]),
+      geom_area(data = subset(df.dens, x >= ci_shaderange2[1] & x <= ci_shaderange2[2]),
                 aes(x = x, y = y, fill = as.character(ci_shade1[2])))
   } else {
     p2 = p1
@@ -128,10 +122,7 @@ plot_smd_curv = function(d,
                           lambda = lambda,
                           alpha = 1-ci_shade1[3])
     p2 = p2 +
-      geom_area(data = data.frame(x = seq(ci_shaderange3[1], ci_shaderange3[2], len = length(df_xy$y[which(df_xy$x > ci_shaderange3[1] &
-                                                                                                             df_xy$x < ci_shaderange3[2])])),
-                                  y = df_xy$y[which(df_xy$x > ci_shaderange3[1] &
-                                                      df_xy$x < ci_shaderange3[2])]),
+      geom_area(data = subset(df.dens, x >= ci_shaderange3[1] & x <= ci_shaderange3[2]),
                 aes(x = x, y = y, fill = as.character(ci_shade1[3])))
   }
 
@@ -141,10 +132,7 @@ plot_smd_curv = function(d,
                           lambda = lambda,
                           alpha = 1-ci_shade1[4])
     p2 = p2 +
-      geom_area(data = data.frame(x = seq(ci_shaderange4[1], ci_shaderange4[2], len = length(df_xy$y[which(df_xy$x > ci_shaderange4[1] &
-                                                                                                             df_xy$x < ci_shaderange4[2])])),
-                                  y = df_xy$y[which(df_xy$x > ci_shaderange4[1] &
-                                                      df_xy$x < ci_shaderange4[2])]),
+      geom_area(data = subset(df.dens, x >= ci_shaderange4[1] & x <= ci_shaderange4[2]),
                 aes(x = x, y = y, fill = as.character(ci_shade1[4])))
   }
 
