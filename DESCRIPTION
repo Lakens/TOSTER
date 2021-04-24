@@ -24,7 +24,8 @@ Imports:
     ggdist,
     distributional,
     concurve,
-    cowplot
+    cowplot,
+    tidyr
 Suggests: knitr,
     rmarkdown
 VignetteBuilder: knitr
