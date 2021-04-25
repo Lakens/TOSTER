@@ -179,8 +179,14 @@ plot_smd_cdf = function(cdf_dat,
                         lambda = lambda,
                         alpha = 1-ci_shade1[1])
 
+  cdf_dat2 = cdf_dat$x
+
+  x.dens  <- density(cdf_dat2)
+  df.dens <- data.frame(x=x.dens$x, y=x.dens$y)
+
   p1 = ggplot(data = cdf_dat) +
-    geom_density(aes(x = x, y = ..density..)) +
+    geom_density(aes(x = x, y = ..density..),
+                 color = "white") +
     scale_fill_brewer(direction = -1,
                       na.translate = FALSE) +
     labs(x = '', y = '',
@@ -222,7 +228,13 @@ plot_smd_cdf = function(cdf_dat,
     geom_point(data = data.frame(y = 0,
                                  x = d),
                aes(x = x, y = y),
-               size = 3)
+               size = 3) +
+    annotate("segment",
+             x = ci_linerange[1],
+             xend = ci_linerange[2],
+             y = 0, yend = 0,
+             size = 1.5,
+             colour = "black")
 
 
   return(p2)
