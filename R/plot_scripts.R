@@ -161,3 +161,69 @@ plot_smd_curv = function(d,
           axis.ticks.y = element_blank())
   return(p2)
 }
+
+plot_smd_cdf = function(cdf_dat,
+                        d,
+                        df,
+                        lambda ,
+                        ci_shades = c(.5, .90, .95, .99),
+                        ci_line = .90){
+  ci_shade1 = sort(ci_shades, decreasing = TRUE)
+
+  ci_linerange = d_CI(d = d,
+                      df = df,
+                      lambda = lambda,
+                      alpha = 1-ci_line)
+  ci_shaderange1 = d_CI(d = d,
+                        df = df,
+                        lambda = lambda,
+                        alpha = 1-ci_shade1[1])
+
+  p1 = ggplot(data = cdf_dat) +
+    geom_density(aes(x = x, y = ..density..)) +
+    scale_fill_brewer(direction = -1,
+                      na.translate = FALSE) +
+    labs(x = '', y = '',
+         fill = "Confidence Interval")
+
+  if(length(ci_shade1 > 1)){
+    ci_shaderange2 = d_CI(d = d,
+                          df = df,
+                          lambda = lambda,
+                          alpha = 1-ci_shade1[2])
+    p2 = p1 +
+      geom_area(data = subset(df.dens, x >= ci_shaderange2[1] & x <= ci_shaderange2[2]),
+                aes(x = x, y = y, fill = as.character(ci_shade1[2])))
+  } else {
+    p2 = p1
+  }
+
+  if(length(ci_shade1 > 2)){
+    ci_shaderange3 = d_CI(d = d,
+                          df = df,
+                          lambda = lambda,
+                          alpha = 1-ci_shade1[3])
+    p2 = p2 +
+      geom_area(data = subset(df.dens, x >= ci_shaderange3[1] & x <= ci_shaderange3[2]),
+                aes(x = x, y = y, fill = as.character(ci_shade1[3])))
+  }
+
+  if(length(ci_shade1 > 3)){
+    ci_shaderange4 = d_CI(d = d,
+                          df = df,
+                          lambda = lambda,
+                          alpha = 1-ci_shade1[4])
+    p2 = p2 +
+      geom_area(data = subset(df.dens, x >= ci_shaderange4[1] & x <= ci_shaderange4[2]),
+                aes(x = x, y = y, fill = as.character(ci_shade1[4])))
+  }
+
+  p2 = p2 +
+    geom_point(data = data.frame(y = 0,
+                                 x = d),
+               aes(x = x, y = y),
+               size = 3)
+
+
+  return(p2)
+}

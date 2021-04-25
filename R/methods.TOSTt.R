@@ -73,6 +73,7 @@ plot.TOSTt <- function(x,
   lenst = c(length(low_eqt),
             length(high_eqt))
   round_t = max(lenst)
+  smd_type = x$smd$smd_label
 
   if(missing(ci_shades)){
     c1 = 1-x$alpha
@@ -153,17 +154,24 @@ plot.TOSTt <- function(x,
 
 
     d_res = d_curv(x)
-    d_plot <- ggplot(data = d_res[[2]]) +
-      theme_tidybayes() +
-      geom_density(aes(x = x, y = ..density..)) +
-      scale_fill_brewer(direction = -1,
-                        na.translate = FALSE) +
+    d_plot <- plot_smd_cdf(d_res[[2]],
+                           d = x$smd$d,
+                           df = x$smd$d_df,
+                           lambda = x$smd$d_lambda) +
       geom_vline(aes(xintercept = low_eqd),
                  linetype="dashed") +
       geom_vline(aes(xintercept = high_eqd),
                  linetype="dashed") +
       scale_x_continuous(sec.axis = dup_axis(breaks=c(round(low_eqd,2),
-                                                      round(high_eqd,2))))
+                                                      round(high_eqd,2)))) +
+      facet_grid(~as.character(smd_type)) +
+      theme_tidybayes() +
+      theme(
+        legend.position = "top",
+        strip.text = element_text(face = "bold", size = 10),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank()
+      )
 
 
     points = data.frame(
