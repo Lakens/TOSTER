@@ -187,6 +187,8 @@ plot_smd_cdf = function(cdf_dat,
   p1 = ggplot(data = cdf_dat) +
     geom_density(aes(x = x, y = ..density..),
                  color = "white") +
+    geom_area(data = subset(df.dens, x >= ci_shaderange1[1] & x <= ci_shaderange1[2]),
+              aes(x = x, y = y, fill = as.character(ci_shade1[1]))) +
     scale_fill_brewer(direction = -1,
                       na.translate = FALSE) +
     labs(x = '', y = '',
@@ -239,3 +241,8 @@ plot_smd_cdf = function(cdf_dat,
 
   return(p2)
 }
+
+
+# RMD Check
+
+utils::globalVariables(c("y","subtitle","..density.."))

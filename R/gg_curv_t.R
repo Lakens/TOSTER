@@ -79,9 +79,6 @@ gg_curv_t <- function(data,
         text = element_text(size = 11)
       ) +
       {
-        if (measure == "ratio") scale_x_log10(breaks = scales::pretty_breaks(n = 5))
-      } +
-      {
         if (position == "inverted") {
           scale_y_reverse(
             expand = expansion(mult = c(0.01, 0.025)),
@@ -133,7 +130,7 @@ gg_curv_t <- function(data,
         axis.title.y = element_text(size = 13),
         text = element_text(size = 15)
       ) +
-      scale_y_continuous(expand = expansion(mult = c(0.01, 0.05)), breaks = scales::pretty_breaks(n = 10))
+      scale_y_continuous(expand = expansion(mult = c(0.01, 0.05)))
 
 
     # Relative Likelihood Function -----------------------------------------------------

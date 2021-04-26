@@ -58,7 +58,8 @@ ggplot() +
     hjust = "middle"
   ),
   #alignment = "center",
-  label = expression("H"["0"])) +
+  label = "H0"
+  ) +
   geom_text(aes(
     y = 1,
     x = 1.5,
@@ -66,7 +67,8 @@ ggplot() +
     hjust = "middle"
   ),
   #alignment = "center",
-  label = expression("H"["A"])) +
+  label = "H1"
+  ) +
   geom_text(aes(
     y = 1,
     x = -1.5,
@@ -74,11 +76,14 @@ ggplot() +
     hjust = "middle"
   ),
   #alignment = "center",
-  label = expression("H"["A"])) +
+  label = "H1"
+  ) +
 theme_tidybayes() + 
   scale_y_continuous(limits = c(0,1.75)) +
   scale_x_continuous(limits = c(-2,2)) +
-  labs(x = "", y = "",title="Minimal Effect Test") +
+  labs(x = "", y = "",
+       title="Minimal Effect Test",
+       caption = "H1 = Alternative Hypothesis \n H0 = Null Hypothesis") +
   theme(
     strip.text = element_text(face = "bold", size = 10),
     axis.text.y = element_blank(),
@@ -113,7 +118,8 @@ ggplot() +
     hjust = "middle"
   ),
   #alignment = "center",
-  label = expression("H"["A"])) +
+  label = "H1"
+  ) +
   geom_text(aes(
     y = 1,
     x = 1.5,
@@ -121,7 +127,8 @@ ggplot() +
     hjust = "middle"
   ),
   #alignment = "center",
-  label = expression("H"["0"])) +
+  label = "H0"
+  ) +
   geom_text(aes(
     y = 1,
     x = -1.5,
@@ -129,11 +136,15 @@ ggplot() +
     hjust = "middle"
   ),
   #alignment = "center",
-  label = expression("H"["0"])) +
+  label = "H0"
+  ) +
 theme_tidybayes() + 
   scale_y_continuous(limits = c(0,1.75)) +
   scale_x_continuous(limits = c(-2,2)) +
-  labs(x = "", y = "",title="Equivalence Test") +
+  labs(x = "", 
+       y = "",
+       title="Equivalence Test",
+       caption = "H1 = Alternative Hypothesis \n H0 = Null Hypothesis") +
   theme(
     strip.text = element_text(face = "bold", size = 10),
     axis.text.y = element_blank(),
@@ -141,7 +152,7 @@ theme_tidybayes() +
   )
 ```
 
-In the general introduction to this package we detailed how to look at *old* results and how to apply TOST to interpreting those results. However, in many cases, users may have new data that needs to be analyzed. Therefore, `t_TOST` can be applied to new data. This vignette will use the `bugs` data from the `jmv` R package and the `sleep` dataset.
+In the general introduction to this package we detailed how to look at *old* results and how to apply TOST to interpreting those results. However, in many cases, users may have new data that needs to be analyzed. Therefore, `t_TOST` can be applied to new data. This vignette will use the `bugs` data from the `jmv` R package and the `sleep` data.
 
 ```{r}
 data('sleep')
@@ -177,10 +188,17 @@ Once the function has run, we can print the results with the `print` command. Th
 print(res1)
 ```
 
-Another nice feature is the generic `plot` method that can provide a visual summary of the results.
+Another nice feature is the generic `plot` method that can provide a visual summary of the results. All of the plots in this package were inspired by the [concurve](https://cran.r-project.org/web/packages/concurve/index.html) R package. There are two types of plots that can be produced. The first, and default, is the consonance density plot (`type = "cd"`).
 
 ```{r fig.width=6, fig.height=6}
-plot(res1)
+plot(res1, type = "cd")
+```
+
+Consonance plots, where all confidence intervals can be simultaneous plotted, can also be produced. The advantage here is multiple confidence interval lines can plotted at once.
+
+```{r fig.width=6, fig.height=6}
+plot(res1, type = "c",
+     ci_lines = c(.9,.95))
 ```
 
 # Paired Samples

@@ -23,9 +23,10 @@ Imports:
     R6,
     ggdist,
     distributional,
-    concurve,
     cowplot,
-    tidyr
+    tidyr,
+    utils,
+    rstatix
 Suggests: knitr,
     rmarkdown
 VignetteBuilder: knitr

@@ -5,6 +5,8 @@
 #' @param x object of class \code{TOSTt} as returned from the reli_stats function
 #' @param digits Number of digits to print for p-values
 #' @param type Type of plot to produce. Default is a consonance plot "c" but consonance distribution plot can be produced with "cd".
+#' @param ci_lines Confidence interval lines for plots. Default is 1-alpha*2 (e.g., alpha = 0.05 is 90\%)
+#' @param ci_shades Confidence interval shades when plot type is "cd".
 #' @param ... further arguments passed through, see description of return value
 #'   for details.
 #'   \code{\link{TOSTt-methods}}.
@@ -54,12 +56,13 @@ print.TOSTt <- function(x,
 #' @import ggplot2
 #' @import ggdist
 #' @import distributional
-#' @import concurve
 #' @importFrom cowplot plot_grid get_legend
+#' @importFrom stats density dt
+#' @importFrom utils head
 #' @export
 
 plot.TOSTt <- function(x,
-                       type = "c",
+                       type = "cd",
                        ci_lines,
                        ci_shades,
                        ...){
@@ -157,7 +160,9 @@ plot.TOSTt <- function(x,
     d_plot <- plot_smd_cdf(d_res[[2]],
                            d = x$smd$d,
                            df = x$smd$d_df,
-                           lambda = x$smd$d_lambda) +
+                           lambda = x$smd$d_lambda,
+                           ci_shades = sets,
+                           ci_line = .90) +
       geom_vline(aes(xintercept = low_eqd),
                  linetype="dashed") +
       geom_vline(aes(xintercept = high_eqd),

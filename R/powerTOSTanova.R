@@ -1,6 +1,5 @@
 #' Power analysis for TOST for an F-test
 #' @param alpha alpha used for the test (e.g., 0.05)
-#' @param power desired power (e.g., 0.8)
 #' @param df1 Degrees of freedom for the numerator
 #' @param df2 Degrees of freedom for the denominator
 #' @param eqbound Equivalence bound for the partial eta-squared
@@ -16,10 +15,10 @@
 #' @importFrom stats pf qf
 #' @export
 
-powerTOSToneway <- function(alpha = 0.05,
-                            df1,
-                            df2,
-                            eqbound){
+powerTOST_f <- function(alpha = 0.05,
+                        df1,
+                        df2,
+                        eqbound){
   f2 = eqbound/(1 - eqbound)
   lambda = (f2 * (df1 + df2 + 1))
 

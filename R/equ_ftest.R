@@ -33,10 +33,10 @@ equ_ftest <- function(Fstat,
 
   pes = Fstat * df1 / (Fstat*df1+df2)
 
-  F_limits <- conf.limits.ncf(F=Fstat,
-                              df.1=df1,
-                              df.2=df2,
-                              conf.level=conf_level)
+  F_limits <- conf.limits.ncf(F.value = Fstat,
+                              df.1 = df1,
+                              df.2 = df2,
+                              conf.level = conf_level)
   LL_lambda <- F_limits$Lower.Limit
   UL_lambda <- F_limits$Upper.Limit
 

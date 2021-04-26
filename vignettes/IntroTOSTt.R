@@ -38,7 +38,8 @@ ggplot() +
     hjust = "middle"
   ),
   #alignment = "center",
-  label = expression("H"["0"])) +
+  label = "H0"
+  ) +
   geom_text(aes(
     y = 1,
     x = 1.5,
@@ -46,7 +47,8 @@ ggplot() +
     hjust = "middle"
   ),
   #alignment = "center",
-  label = expression("H"["A"])) +
+  label = "H1"
+  ) +
   geom_text(aes(
     y = 1,
     x = -1.5,
@@ -54,11 +56,14 @@ ggplot() +
     hjust = "middle"
   ),
   #alignment = "center",
-  label = expression("H"["A"])) +
+  label = "H1"
+  ) +
 theme_tidybayes() + 
   scale_y_continuous(limits = c(0,1.75)) +
   scale_x_continuous(limits = c(-2,2)) +
-  labs(x = "", y = "",title="Minimal Effect Test") +
+  labs(x = "", y = "",
+       title="Minimal Effect Test",
+       caption = "H1 = Alternative Hypothesis \n H0 = Null Hypothesis") +
   theme(
     strip.text = element_text(face = "bold", size = 10),
     axis.text.y = element_blank(),
@@ -93,7 +98,8 @@ ggplot() +
     hjust = "middle"
   ),
   #alignment = "center",
-  label = expression("H"["A"])) +
+  label = "H1"
+  ) +
   geom_text(aes(
     y = 1,
     x = 1.5,
@@ -101,7 +107,8 @@ ggplot() +
     hjust = "middle"
   ),
   #alignment = "center",
-  label = expression("H"["0"])) +
+  label = "H0"
+  ) +
   geom_text(aes(
     y = 1,
     x = -1.5,
@@ -109,11 +116,15 @@ ggplot() +
     hjust = "middle"
   ),
   #alignment = "center",
-  label = expression("H"["0"])) +
+  label = "H0"
+  ) +
 theme_tidybayes() + 
   scale_y_continuous(limits = c(0,1.75)) +
   scale_x_continuous(limits = c(-2,2)) +
-  labs(x = "", y = "",title="Equivalence Test") +
+  labs(x = "", 
+       y = "",
+       title="Equivalence Test",
+       caption = "H1 = Alternative Hypothesis \n H0 = Null Hypothesis") +
   theme(
     strip.text = element_text(face = "bold", size = 10),
     axis.text.y = element_blank(),
@@ -143,7 +154,11 @@ res1a = t_TOST(x = subset(sleep,group==1)$extra,
 print(res1)
 
 ## ----fig.width=6, fig.height=6------------------------------------------------
-plot(res1)
+plot(res1, type = "cd")
+
+## ----fig.width=6, fig.height=6------------------------------------------------
+plot(res1, type = "c",
+     ci_lines = c(.9,.95))
 
 ## -----------------------------------------------------------------------------
 res2 = t_TOST(formula = extra ~ group,
