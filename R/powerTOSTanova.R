@@ -9,7 +9,7 @@
 #' ## partial eta squared = 0.01, assuming true effect = 0.
 #' ## df1 = number of groups - 1 = 3 - 1 = 2.
 #' ## df2 = Total N - number of groups = 240 - 3 = 237.
-#' #' powerTOSToneway(alpha=0.05, df1=3, df2 = 237, eqbound = 0.01)
+#' # powerTOST_f(alpha=0.05, df1=3, df2 = 237, eqbound = 0.01)
 #' @section References:
 #' Campbell, H., & Lakens, D. (2021). Can we disregard the whole model? Omnibus non‐inferiority testing for R2 in multi‐variable linear regression and in ANOVA. British Journal of Mathematical and Statistical Psychology, 74(1), 64-89. doi: 10.1111/bmsp.12201
 #' @importFrom stats pf qf

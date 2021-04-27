@@ -31,5 +31,5 @@ Campbell, H., & Lakens, D. (2021). Can we disregard the whole model? Omnibus non
 ## partial eta squared = 0.01, assuming true effect = 0.
 ## df1 = number of groups - 1 = 3 - 1 = 2.
 ## df2 = Total N - number of groups = 240 - 3 = 237.
-#' powerTOSToneway(alpha=0.05, df1=3, df2 = 237, eqbound = 0.01)
+# powerTOST_f(alpha=0.05, df1=3, df2 = 237, eqbound = 0.01)
 }

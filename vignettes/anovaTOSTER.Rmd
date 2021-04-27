@@ -1,12 +1,12 @@
 ---
-title: "Extension of Equivalence Testing to F-tests"
+title: "Equivalence Testing for F-tests"
 author: "Aaron R. Caldwell"
 date: "`r Sys.Date()`"
 output: 
   rmarkdown::html_vignette:
     toc: True
 vignette: >
-  %\VignetteIndexEntry{Extension of Equivalence Testing to F-tests}
+  %\VignetteIndexEntry{Equivalence Testing for F-tests}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
@@ -56,6 +56,7 @@ Using the `InsectSprays` data set in R and the base R `aov` function we can demo
 From the initial analysis we an see a clear "significant" effect (the p-value listed is zero but it just very small) of the factor spray. However, we *may* be interested in testing if the effect is practically equivalent. I will arbitrarily set the equivalence bound to a partial eta-squared of 0.35 ($H_0: \eta^2_p > 0.35$)
 
 ```{r warning=FALSE, message=FALSE}
+library(TOSTER)
 # Get Data
 data("InsectSprays")
 # Build ANOVA
@@ -79,7 +80,7 @@ equ_ftest(Fstat = 34.70228,
 
 Based on the results above we would conclude there is a significant effect of "spray" and the differences due to spray are *not* statistically equivalent. In essence, we reject the traditional null hypothesis of "no effect" but accept the null hypothesis of the equivalence test.
 
-The `equ_ftest` is very useful because all you need is very basic summary statistics. However, if you are doing all your analyses in R then you can use the `equ_anova` function. This function accepts objects produced from `stats::aov`, `car::Anova` and `afex::aov_car`.
+The `equ_ftest` is very useful because all you need is very basic summary statistics. However, if you are doing all your analyses in R then you can use the `equ_anova` function. This function accepts objects produced from `stats::aov`, `car::Anova` and `afex::aov_car` (or any anova from `afex`).
 
 ```{r}
 equ_anova(aovtest,
@@ -87,6 +88,15 @@ equ_anova(aovtest,
 ```
 
 
-# Power Analysis for 
+# Power Analysis for F-tests
+
+Power for an equivalence F-test can be calculated with the same equations supplied by @Campbell_2021. I have included these within the `powerTOST_f` function.
+
+```{r}
+powerTOST_f(df1 = 2, 
+            df2 = 60,
+            eqbound = .15)
+```
+
 
 # References
