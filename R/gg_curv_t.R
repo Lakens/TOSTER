@@ -68,7 +68,7 @@ gg_curv_t <- function(data_list,
         x = xaxis,
         y = yaxis1
       ) +
-      theme_minimal() +
+      theme_bw() +
       theme(
         axis.title.x = element_text(size = 12),
         axis.title.y = element_text(size = 12),
@@ -154,7 +154,7 @@ gg_curv_t <- function(data_list,
         x = xaxis,
         y = "Density"
       ) +
-      theme_minimal() +
+      theme_bw() +
       theme(
         legend.position="top",
         axis.title.x = element_text(size = 12),

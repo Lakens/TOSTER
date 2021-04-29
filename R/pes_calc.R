@@ -1,9 +1,9 @@
 # pes calculations
 
 pes_ci <- function(Fstat,
-                      df1,
-                      df2,
-                      conf.level = .95){
+                   df1,
+                   df2,
+                   conf.level = .95){
 
   pes = Fstat * df1 / (Fstat*df1+df2)
 
@@ -169,4 +169,47 @@ conf.limits.ncf = function (F.value = NULL,
   if (!is.null(alpha.lower) & is.null(alpha.upper))
     return(list(Lower.Limit = LL, Prob.Less.Lower = 1 - pf(q = F.value,
                                                            df1 = df.1, df2 = df.2, ncp = LL)))
+}
+
+pes_curv = function (Fstat,
+                     df1,
+                     df2,
+                     steps = 5000) {
+  intrvls <- (0:steps)/steps
+  intrvls = subset(intrvls,intrvls>0 & intrvls<1)
+
+  # Confidence interval of the SMD from Goulet-Pelletier & Cousineau
+  results <-
+    suppressWarnings({
+      lapply(
+        intrvls,
+        FUN = function(i)
+          pes_ci(
+            Fstat = Fstat,
+            df1 =
+              df1,
+            df2 =
+              df2,
+            conf.level = i
+          )
+      )
+    })
+
+  df <- data.frame(do.call(rbind, results))
+  intrvl.limit <- c("lower.limit", "upper.limit")
+  colnames(df) <- intrvl.limit
+  df$intrvl.width <- (abs((df$upper.limit) - (df$lower.limit)))
+  df$intrvl.level <- intrvls
+  df$cdf <- (abs(df$intrvl.level/2)) + 0.5
+  df$pvalue <- 1 - intrvls
+  df$svalue <- -log2(df$pvalue)
+  df <- head(df, -1)
+  class(df) <- c("data.frame", "concurve")
+  densdf <- data.frame(c(df$lower.limit, df$upper.limit))
+  colnames(densdf) <- "x"
+  densdf <- head(densdf, -1)
+  class(densdf) <- c("data.frame", "concurve")
+
+  return(list(df, densdf))
+
 }
