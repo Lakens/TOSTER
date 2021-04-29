@@ -88,9 +88,9 @@ equ_anova(aovtest,
 ```
 
 
-# Power Analysis for F-tests
+# Power Analysis for *F*-tests
 
-Power for an equivalence F-test can be calculated with the same equations supplied by @Campbell_2021. I have included these within the `powerTOST_f` function.
+Power for an equivalence *F*-test can be calculated with the same equations supplied by @Campbell_2021. I have included these within the `powerTOST_f` function.
 
 ```{r}
 powerTOST_f(df1 = 2, 
