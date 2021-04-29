@@ -1,4 +1,5 @@
 ## ----warning=FALSE, message=FALSE---------------------------------------------
+library(TOSTER)
 # Get Data
 data("InsectSprays")
 # Build ANOVA

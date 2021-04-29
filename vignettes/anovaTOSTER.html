@@ -12,9 +12,9 @@
 
 <meta name="author" content="Aaron R. Caldwell" />
 
-<meta name="date" content="2021-04-26" />
+<meta name="date" content="2021-04-29" />
 
-<title>Extension of Equivalence Testing to F-tests</title>
+<title>Equivalence Testing for F-tests</title>
 
 <script src="data:application/javascript;base64,Ly8gUGFuZG9jIDIuOSBhZGRzIGF0dHJpYnV0ZXMgb24gYm90aCBoZWFkZXIgYW5kIGRpdi4gV2UgcmVtb3ZlIHRoZSBmb3JtZXIgKHRvCi8vIGJlIGNvbXBhdGlibGUgd2l0aCB0aGUgYmVoYXZpb3Igb2YgUGFuZG9jIDwgMi44KS4KZG9jdW1lbnQuYWRkRXZlbnRMaXN0ZW5lcignRE9NQ29udGVudExvYWRlZCcsIGZ1bmN0aW9uKGUpIHsKICB2YXIgaHMgPSBkb2N1bWVudC5xdWVyeVNlbGVjdG9yQWxsKCJkaXYuc2VjdGlvbltjbGFzcyo9J2xldmVsJ10gPiA6Zmlyc3QtY2hpbGQiKTsKICB2YXIgaSwgaCwgYTsKICBmb3IgKGkgPSAwOyBpIDwgaHMubGVuZ3RoOyBpKyspIHsKICAgIGggPSBoc1tpXTsKICAgIGlmICghL15oWzEtNl0kL2kudGVzdChoLnRhZ05hbWUpKSBjb250aW51ZTsgIC8vIGl0IHNob3VsZCBiZSBhIGhlYWRlciBoMS1oNgogICAgYSA9IGguYXR0cmlidXRlczsKICAgIHdoaWxlIChhLmxlbmd0aCA+IDApIGgucmVtb3ZlQXR0cmlidXRlKGFbMF0ubmFtZSk7CiAgfQp9KTsK"></script>
 
@@ -161,9 +161,9 @@ div.csl-indent {
 
 
 
-<h1 class="title toc-ignore">Extension of Equivalence Testing to F-tests</h1>
+<h1 class="title toc-ignore">Equivalence Testing for F-tests</h1>
 <h4 class="author">Aaron R. Caldwell</h4>
-<h4 class="date">2021-04-26</h4>
+<h4 class="date">2021-04-29</h4>
 
 
 <div id="TOC">
@@ -204,15 +204,16 @@ p_{eq} = p_f(F; df_1, df_2, \lambda_{eq})
 <h2>An Example</h2>
 <p>Using the <code>InsectSprays</code> data set in R and the base R <code>aov</code> function we can demonstrate how this omnibus equivalence testing can be applied with <code>TOSTER</code>.</p>
 <p>From the initial analysis we an see a clear “significant” effect (the p-value listed is zero but it just very small) of the factor spray. However, we <em>may</em> be interested in testing if the effect is practically equivalent. I will arbitrarily set the equivalence bound to a partial eta-squared of 0.35 (<span class="math inline">\(H_0: \eta^2_p &gt; 0.35\)</span>)</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get Data</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;InsectSprays&quot;</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Build ANOVA</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>aovtest <span class="ot">=</span> <span class="fu">aov</span>(count <span class="sc">~</span> spray,</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>              <span class="at">data =</span> InsectSprays)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Display overall results</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(broom<span class="sc">::</span><span class="fu">tidy</span>(aovtest),</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>            <span class="at">caption =</span> <span class="st">&quot;Traditional ANOVA Test&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(TOSTER)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Get Data</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;InsectSprays&quot;</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Build ANOVA</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>aovtest <span class="ot">=</span> <span class="fu">aov</span>(count <span class="sc">~</span> spray,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>              <span class="at">data =</span> InsectSprays)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Display overall results</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(broom<span class="sc">::</span><span class="fu">tidy</span>(aovtest),</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">caption =</span> <span class="st">&quot;Traditional ANOVA Test&quot;</span>)</span></code></pre></div>
 <table>
 <caption>Traditional ANOVA Test</caption>
 <thead>

@@ -1,7 +1,7 @@
 # Plot scripts
 
 t_curv = function (TOST_res,
-                   steps = 10000) {
+                   steps = 5000) {
   intrvls <- (0:steps)/steps
 
   # Confidence interval of the SMD from Goulet-Pelletier & Cousineau
@@ -27,7 +27,7 @@ t_curv = function (TOST_res,
 }
 
 d_curv = function (TOST_res,
-                   steps = 10000) {
+                   steps = 5000) {
   intrvls <- (0:steps)/steps
 
   # Confidence interval of the SMD from Goulet-Pelletier & Cousineau
@@ -55,6 +55,117 @@ d_curv = function (TOST_res,
 
 }
 
+d_curv_raw = function (d,
+                       df,
+                       lambda,
+                       steps = 5000) {
+  intrvls <- (0:steps)/steps
+
+  # Confidence interval of the SMD from Goulet-Pelletier & Cousineau
+  results <- suppressWarnings({lapply(intrvls, FUN = function(i) d_CI(d = d,
+                                                                      df = df,
+                                                                      lambda = lambda,
+                                                                      1-i))})
+
+  df <- data.frame(do.call(rbind, results))
+  intrvl.limit <- c("lower.limit", "upper.limit")
+  colnames(df) <- intrvl.limit
+  df$intrvl.width <- (abs((df$upper.limit) - (df$lower.limit)))
+  df$intrvl.level <- intrvls
+  df$cdf <- (abs(df$intrvl.level/2)) + 0.5
+  df$pvalue <- 1 - intrvls
+  df$svalue <- -log2(df$pvalue)
+  df <- head(df, -1)
+  class(df) <- c("data.frame", "concurve")
+  densdf <- data.frame(c(df$lower.limit, df$upper.limit))
+  colnames(densdf) <- "x"
+  densdf <- head(densdf, -1)
+  class(densdf) <- c("data.frame", "concurve")
+
+  return(list(df, densdf))
+
+}
+
+plot_smd_cdf = function(cdf_dat,
+                        d,
+                        df,
+                        lambda ,
+                        ci_shades = c(.5, .90, .95, .99),
+                        ci_line = .90){
+  ci_shade1 = sort(ci_shades, decreasing = TRUE)
+
+  ci_linerange = d_CI(d = d,
+                      df = df,
+                      lambda = lambda,
+                      alpha = 1-ci_line)
+  ci_shaderange1 = d_CI(d = d,
+                        df = df,
+                        lambda = lambda,
+                        alpha = 1-ci_shade1[1])
+
+  cdf_dat2 = cdf_dat$x
+
+  x.dens  <- density(cdf_dat2)
+  df.dens <- data.frame(x=x.dens$x, y=x.dens$y)
+
+  p1 = ggplot(data = cdf_dat) +
+    geom_density(aes(x = x, y = ..density..),
+                 color = "white") +
+    geom_area(data = subset(df.dens, x >= ci_shaderange1[1] & x <= ci_shaderange1[2]),
+              aes(x = x, y = y, fill = as.character(ci_shade1[1]))) +
+    scale_fill_brewer(direction = -1,
+                      na.translate = FALSE) +
+    labs(x = '', y = '',
+         fill = "Confidence Interval")
+
+  if(length(ci_shade1 > 1)){
+    ci_shaderange2 = d_CI(d = d,
+                          df = df,
+                          lambda = lambda,
+                          alpha = 1-ci_shade1[2])
+    p2 = p1 +
+      geom_area(data = subset(df.dens, x >= ci_shaderange2[1] & x <= ci_shaderange2[2]),
+                aes(x = x, y = y, fill = as.character(ci_shade1[2])))
+  } else {
+    p2 = p1
+  }
+
+  if(length(ci_shade1 > 2)){
+    ci_shaderange3 = d_CI(d = d,
+                          df = df,
+                          lambda = lambda,
+                          alpha = 1-ci_shade1[3])
+    p2 = p2 +
+      geom_area(data = subset(df.dens, x >= ci_shaderange3[1] & x <= ci_shaderange3[2]),
+                aes(x = x, y = y, fill = as.character(ci_shade1[3])))
+  }
+
+  if(length(ci_shade1 > 3)){
+    ci_shaderange4 = d_CI(d = d,
+                          df = df,
+                          lambda = lambda,
+                          alpha = 1-ci_shade1[4])
+    p2 = p2 +
+      geom_area(data = subset(df.dens, x >= ci_shaderange4[1] & x <= ci_shaderange4[2]),
+                aes(x = x, y = y, fill = as.character(ci_shade1[4])))
+  }
+
+  p2 = p2 +
+    geom_point(data = data.frame(y = 0,
+                                 x = d),
+               aes(x = x, y = y),
+               size = 3) +
+    annotate("segment",
+             x = ci_linerange[1],
+             xend = ci_linerange[2],
+             y = 0, yend = 0,
+             size = 1.5,
+             colour = "black")
+
+
+  return(p2)
+}
+# old code not functional
 plot_smd_curv = function(d,
                          df,
                          lambda,
@@ -161,87 +272,6 @@ plot_smd_curv = function(d,
           axis.ticks.y = element_blank())
   return(p2)
 }
-
-plot_smd_cdf = function(cdf_dat,
-                        d,
-                        df,
-                        lambda ,
-                        ci_shades = c(.5, .90, .95, .99),
-                        ci_line = .90){
-  ci_shade1 = sort(ci_shades, decreasing = TRUE)
-
-  ci_linerange = d_CI(d = d,
-                      df = df,
-                      lambda = lambda,
-                      alpha = 1-ci_line)
-  ci_shaderange1 = d_CI(d = d,
-                        df = df,
-                        lambda = lambda,
-                        alpha = 1-ci_shade1[1])
-
-  cdf_dat2 = cdf_dat$x
-
-  x.dens  <- density(cdf_dat2)
-  df.dens <- data.frame(x=x.dens$x, y=x.dens$y)
-
-  p1 = ggplot(data = cdf_dat) +
-    geom_density(aes(x = x, y = ..density..),
-                 color = "white") +
-    geom_area(data = subset(df.dens, x >= ci_shaderange1[1] & x <= ci_shaderange1[2]),
-              aes(x = x, y = y, fill = as.character(ci_shade1[1]))) +
-    scale_fill_brewer(direction = -1,
-                      na.translate = FALSE) +
-    labs(x = '', y = '',
-         fill = "Confidence Interval")
-
-  if(length(ci_shade1 > 1)){
-    ci_shaderange2 = d_CI(d = d,
-                          df = df,
-                          lambda = lambda,
-                          alpha = 1-ci_shade1[2])
-    p2 = p1 +
-      geom_area(data = subset(df.dens, x >= ci_shaderange2[1] & x <= ci_shaderange2[2]),
-                aes(x = x, y = y, fill = as.character(ci_shade1[2])))
-  } else {
-    p2 = p1
-  }
-
-  if(length(ci_shade1 > 2)){
-    ci_shaderange3 = d_CI(d = d,
-                          df = df,
-                          lambda = lambda,
-                          alpha = 1-ci_shade1[3])
-    p2 = p2 +
-      geom_area(data = subset(df.dens, x >= ci_shaderange3[1] & x <= ci_shaderange3[2]),
-                aes(x = x, y = y, fill = as.character(ci_shade1[3])))
-  }
-
-  if(length(ci_shade1 > 3)){
-    ci_shaderange4 = d_CI(d = d,
-                          df = df,
-                          lambda = lambda,
-                          alpha = 1-ci_shade1[4])
-    p2 = p2 +
-      geom_area(data = subset(df.dens, x >= ci_shaderange4[1] & x <= ci_shaderange4[2]),
-                aes(x = x, y = y, fill = as.character(ci_shade1[4])))
-  }
-
-  p2 = p2 +
-    geom_point(data = data.frame(y = 0,
-                                 x = d),
-               aes(x = x, y = y),
-               size = 3) +
-    annotate("segment",
-             x = ci_linerange[1],
-             xend = ci_linerange[2],
-             y = 0, yend = 0,
-             size = 1.5,
-             colour = "black")
-
-
-  return(p2)
-}
-
 
 # RMD Check
 
