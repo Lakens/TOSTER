@@ -78,6 +78,7 @@ plot.TOSTt <- function(x,
   round_t = max(lenst)
   smd_type = x$smd$smd_label
 
+
   if(missing(ci_shades)){
     c1 = 1-x$alpha
     c2 = 1-x$alpha*2
@@ -109,7 +110,7 @@ plot.TOSTt <- function(x,
 
     d_plot <-
       gg_curv_t(
-        data = d_res[[1]],
+        data = d_res,
         type = "c",
         levels = ci_levs
       ) +
@@ -128,7 +129,7 @@ plot.TOSTt <- function(x,
 
     t_plot <-
       gg_curv_t(
-        data = t_res[[1]],
+        data = t_res,
         type = "c",
         levels = ci_levs
       ) +
@@ -205,7 +206,9 @@ plot.TOSTt <- function(x,
         fill = stat(cut_cdf_qi(p = cdf,
                                .width = sets))
       ),
-      .width = c2) +
+      .width = c2,
+      slab_color = "skyblue4",
+      slab_size = .5) +
       scale_fill_brewer(direction = -1,
                         na.translate = FALSE) +
       labs(x = '', y = '',

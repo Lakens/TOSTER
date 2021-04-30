@@ -96,6 +96,21 @@ t_TOST.default = function(x,
     alt_high = "greater"
     test_hypothesis = "Hypothesis Tested: Minimal Effect"
 
+  } else{
+    stop("hypothesis must be set to EQU or MET")
+  }
+
+  if(eqbound_type != "raw" && eqbound_type != "SMD"){
+    stop("eqbound_type must be set to raw or SMD")
+  }
+
+  if(missing(low_eqbound) ||
+     missing(high_eqbound)){
+    stop("Equivalence bounds missing and must be enterered")
+  }
+
+  if(!is.numeric(alpha) || alpha <=0 || alpha >=1){
+    stop("The alpha must be a numeric value between 0 and 1")
   }
 
 
@@ -182,7 +197,7 @@ t_TOST.default = function(x,
 
   }
 
-  if (eqbound_type == 'd') {
+  if (eqbound_type == 'SMD') {
     low_eqbound_d <- low_eqbound
     high_eqbound_d <- high_eqbound
     low_eqbound  <- low_eqbound * cohen_res$d_denom

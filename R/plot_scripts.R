@@ -109,8 +109,6 @@ plot_smd_cdf = function(cdf_dat,
   df.dens <- data.frame(x=x.dens$x, y=x.dens$y)
 
   p1 = ggplot(data = cdf_dat) +
-    geom_density(aes(x = x, y = ..density..),
-                 color = "white") +
     geom_area(data = subset(df.dens, x >= ci_shaderange1[1] & x <= ci_shaderange1[2]),
               aes(x = x, y = y, fill = as.character(ci_shade1[1]))) +
     scale_fill_brewer(direction = -1,
@@ -151,6 +149,8 @@ plot_smd_cdf = function(cdf_dat,
   }
 
   p2 = p2 +
+    geom_density(aes(x = x, y = ..density..),
+                 color = "skyblue4") +
     geom_point(data = data.frame(y = 0,
                                  x = d),
                aes(x = x, y = y),

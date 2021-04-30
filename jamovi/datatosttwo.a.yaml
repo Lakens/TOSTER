@@ -95,14 +95,14 @@ options:
       title: Bounds type
       type: List
       options:
-        - name: d
+        - name: SMD
           title: Standardized
         - name: raw
           title: Raw
-      default: d
+      default: SMD
       description:
           R: >
-            `'d'` (default) or `'raw'`; whether the bounds are specified in
+            `'SMD'` (default) or `'raw'`; whether the bounds are specified in
             Cohen's d or raw units respectively
 
     - name: alpha

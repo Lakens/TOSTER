@@ -87,6 +87,18 @@ equ_anova(aovtest,
           eqbound = 0.35)
 ```
 
+### Visualize partial $\eta^2$
+
+Just like the standardized mean differences, `TOSTER` also has a function to visualize $\eta^2_p$. 
+
+The function, `plot_pes`, operates in a fashion very similar to `equ_ftest`. In essence, all you have to do is provide the F-statistic, numerator degrees of freedom, and denominator degrees of freedom. We can also select the type of plot with the `type` argument. Users have the option of producing a consonance plot (`type = "c"`), a consonance density plot (`type = "cd"`), or both (`type = c("cd","c")`). By default, `plot_pes` will produce both plots.
+
+```{r, fig.width=6, fig.height=6}
+plot_pes(Fstat = 34.70228,
+         df1 = 5,
+         df2 = 66)
+```
+
 
 # Power Analysis for *F*-tests
 

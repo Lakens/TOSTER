@@ -11,7 +11,7 @@ dataTOSToneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             hypothesis = "EQU",
             low_eqbound = -0.5,
             high_eqbound = 0.5,
-            eqbound_type = "d",
+            eqbound_type = "SMD",
             alpha = 0.05,
             desc = FALSE,
             plots = FALSE,
@@ -55,9 +55,9 @@ dataTOSToneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 "eqbound_type",
                 eqbound_type,
                 options=list(
-                    "d",
+                    "SMD",
                     "raw"),
-                default="d")
+                default="SMD")
             private$..alpha <- jmvcore::OptionNumber$new(
                 "alpha",
                 alpha,
@@ -410,7 +410,7 @@ dataTOSToneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #'   for minimal effects test, the alternative hypothesis;
 #' @param low_eqbound a number (default: -0.5) the lower equivalence bounds
 #' @param high_eqbound a number (default: 0.5) the upper equivalence bounds
-#' @param eqbound_type \code{'d'} (default) or \code{'raw'}; whether the
+#' @param eqbound_type \code{'SMD'} (default) or \code{'raw'}; whether the
 #'   bounds are specified in Cohen's d or raw units respectively
 #' @param alpha alpha level (default = 0.05)
 #' @param desc \code{TRUE} or \code{FALSE} (default), provide descriptive
@@ -444,7 +444,7 @@ dataTOSTone <- function(
     hypothesis = "EQU",
     low_eqbound = -0.5,
     high_eqbound = 0.5,
-    eqbound_type = "d",
+    eqbound_type = "SMD",
     alpha = 0.05,
     desc = FALSE,
     plots = FALSE,

@@ -11,7 +11,7 @@ dataTOSTpairedOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             hypothesis = "EQU",
             low_eqbound = -0.5,
             high_eqbound = 0.5,
-            eqbound_type = "d",
+            eqbound_type = "SMD",
             alpha = 0.05,
             desc = FALSE,
             plots = FALSE,
@@ -60,9 +60,9 @@ dataTOSTpairedOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 "eqbound_type",
                 eqbound_type,
                 options=list(
-                    "d",
+                    "SMD",
                     "raw"),
-                default="d")
+                default="SMD")
             private$..alpha <- jmvcore::OptionNumber$new(
                 "alpha",
                 alpha,
@@ -387,7 +387,7 @@ dataTOSTpairedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #'   for minimal effects test, the alternative hypothesis.
 #' @param low_eqbound a number (default: 0.5) the lower equivalence bounds
 #' @param high_eqbound a number (default: 0.5) the upper equivalence bounds
-#' @param eqbound_type \code{'d'} (default) or \code{'raw'}; whether the
+#' @param eqbound_type \code{'SMD'} (default) or \code{'raw'}; whether the
 #'   bounds are specified in standardized mean difference (Cohen's dz) or raw
 #'   units respectively
 #' @param alpha alpha level (default = 0.05)
@@ -428,7 +428,7 @@ dataTOSTpaired <- function(
     hypothesis = "EQU",
     low_eqbound = -0.5,
     high_eqbound = 0.5,
-    eqbound_type = "d",
+    eqbound_type = "SMD",
     alpha = 0.05,
     desc = FALSE,
     plots = FALSE,

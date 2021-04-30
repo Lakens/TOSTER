@@ -21,13 +21,11 @@ Returns a data frame containing the ANOVA results with equivalence tests added.
 
  The following abbreviations are used in the table:
 
- \itemize{ \item DFn	Degrees of Freedom in the numerator (i.e. DF effect).
- \item DFd	Degrees of Freedom in the denominator (i.e., DF error). \item
- SSn	Sum of Squares in the numerator (i.e., SS effect). \item SSd	Sum of
- Squares in the denominator (i.e.,SS error). \item F	F-value. \item p	p-value
- (probability of the data given the null hypothesis). \item p<.05	Highlights
- p-values less than the traditional alpha level of .05. \item pes	partial
- Eta-Squared measure of effect size. }
+ \itemize{ \item effect name of the effect. \item df1	Degrees of Freedom in the numerator (i.e. DF effect).
+ \item df2	Degrees of Freedom in the denominator (i.e., DF error). \item F	F-value. \item p.null	p-value
+ (probability of the data given the null hypothesis).  \item pes	partial
+ Eta-Squared measure of effect size. \item eqbound equivalence bound. \item p.equ p-value
+ (probability of the data given the equivalence hypothesis) }
 }
 \description{
 Performs equivalence test on the partial eta-squared (pes) value from ANOVA results.

@@ -9,13 +9,11 @@
 #'
 #'  The following abbreviations are used in the table:
 #'
-#'  \itemize{ \item DFn	Degrees of Freedom in the numerator (i.e. DF effect).
-#'  \item DFd	Degrees of Freedom in the denominator (i.e., DF error). \item
-#'  SSn	Sum of Squares in the numerator (i.e., SS effect). \item SSd	Sum of
-#'  Squares in the denominator (i.e.,SS error). \item F	F-value. \item p	p-value
-#'  (probability of the data given the null hypothesis). \item p<.05	Highlights
-#'  p-values less than the traditional alpha level of .05. \item pes	partial
-#'  Eta-Squared measure of effect size. }
+#'  \itemize{ \item effect name of the effect. \item df1	Degrees of Freedom in the numerator (i.e. DF effect).
+#'  \item df2	Degrees of Freedom in the denominator (i.e., DF error). \item F	F-value. \item p.null	p-value
+#'  (probability of the data given the null hypothesis).  \item pes	partial
+#'  Eta-Squared measure of effect size. \item eqbound equivalence bound. \item p.equ p-value
+#'  (probability of the data given the equivalence hypothesis) }
 #'
 #' @section References:
 #' Campbell, H., & Lakens, D. (2021). Can we disregard the whole model? Omnibus non‐inferiority testing for R2 in multi‐variable linear regression and in ANOVA. British Journal of Mathematical and Statistical Psychology, 74(1), 64-89. doi: 10.1111/bmsp.12201

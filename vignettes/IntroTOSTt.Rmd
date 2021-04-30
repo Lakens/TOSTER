@@ -198,7 +198,7 @@ Consonance plots, where all confidence intervals can be simultaneous plotted, ca
 
 ```{r fig.width=6, fig.height=6}
 plot(res1, type = "c",
-     ci_lines = c(.9,.95))
+     ci_lines =  c(.9,.95))
 ```
 
 # Paired Samples
@@ -282,7 +282,7 @@ $$
 The correction factor is calculated in R as the following:
 
 
-    J <- gamma(cohen_df/2)/(sqrt(cohen_df/2)*gamma((cohen_df-1)/2))
+    J <- exp ( lgamma(df/2) - log(sqrt(df/2)) - lgamma((df-1)/2) )
     
 Hedges g (bias corrected Cohen's d) can then be calculated by multiplying d by J
 
@@ -296,10 +296,10 @@ For independent samples there are two calculative approaches supported by `TOSTE
 
 ### Variances Assumed Unequal: Cohen's d(av)
 
-For this calculation, the denominator is simply the pooled standard deviation.
+For this calculation, the denominator is simply the square root of the average variance.
 
 $$
-s_{av} =  \frac {s_{1} + s_{2}}{2}
+s_{av} = \sqrt \frac {s_{1}^2 + s_{2}^2}{2}
 $$
 
 The SMD, Cohen's d(av), is then calculated as the following:
@@ -318,12 +318,7 @@ $$
 The non-centrality parameter ($\lambda$) is calculated as the following:
 
 $$
-\lambda = d_{av} \cdot \sqrt \frac{\tilde n}{2}
-$$
-wherein, $\tilde n$ is the harmonic mean of the 2 sample sizes which is calculated as the following:
-
-$$
-\tilde n = \frac{2 \cdot n_1 \cdot n_2}{n_1 + n_2}
+\lambda =  d_{av} \times \sqrt{\frac{n_1 \cdot n_2(\sigma^2_1+\sigma^2_2)}{2 \cdot (n_2 \cdot \sigma^2_1+n_1 \cdot \sigma^2_2)}}
 $$
 
 The standard error ($\sigma$) of Cohen's d(av) is calculated as the following:
@@ -471,5 +466,24 @@ $$
 $$
 wherein $J$ represents the Hedges correction (calculation above).
 
+## Confidence Intervals
+
+For the SMDs calculated in this package we use the non-central *t* method outlined by @Goulet_2018. These calculations are only approximations and newer formulations may provide better coverage [@Cousineau2021]. In any case, if the calculation of confidence intervals for SMDs is of the utmost importance then I would strongly recommend, when possible, using bootstrapping techniques rather than any calculative approach [@Kirby2013].
+
+In any case, the calculations of the confidence intervals in this package involve a two step process: 1) using the noncentral *t*-distribution to calculate the lower and upper bounds of $\lambda$, and 2) transforming this back to the effect size estimate.
+
+Calculate confidence intervals around $\lambda$.
+
+$$
+t_L = t_{(1-2-(1-\alpha)/2,\space df, \space \lambda)} \\
+t_U = t_{(1-2+(1-\alpha)/2,\space df, \space \lambda)}
+$$
+
+Then transform back to the SMD.
+
+$$
+d_L = \frac{t_L}{\lambda} \cdot d \\
+d_U = \frac{t_U}{\lambda} \cdot d 
+$$
 
 # References

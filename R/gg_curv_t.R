@@ -118,8 +118,6 @@ gg_curv_t <- function(data_list,
     #interval <- pivot_longer(interval, X2:X3, names_to = "levels", values_to = "limits")
 
     p_cd1 = ggplot(data = cdf_dat, mapping = aes(x = x)) +
-      geom_density(color = color,
-                   alpha = 0.20) +
       geom_area(data = subset(df.dens, x >= interval2$li[1]  & x <= interval2$ui[1]),
                 aes(x = x, y = y, fill = as.character(ci_shade1[1]))) +
       scale_fill_brewer(direction = -1,
@@ -150,6 +148,8 @@ gg_curv_t <- function(data_list,
                   aes(x = x, y = y, fill = as.character(ci_shade1[4])))
     }
     p_cd2 = p_cd2 +
+      geom_density(color = "skyblue4",
+                   alpha = 0.20) +
       labs(
         x = xaxis,
         y = "Density"

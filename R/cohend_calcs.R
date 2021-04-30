@@ -27,7 +27,7 @@ d_est_pair <- function(n,
 
   d_df = 2*(n)-2
   #J <- gamma(df / 2) / (sqrt(df / 2) * gamma((df - 1) / 2))
-  J = gamma(d_df / 2) / (sqrt(d_df / 2) * gamma((d_df - 1) / 2))
+  J = hedge_J(d_df)
 
   if(denom == "z"){
     if (type == 'g') {
@@ -118,14 +118,15 @@ d_est_ind <- function(n1,
   #denomSD <- jmvcore::tryNaN(sqrt(((n1-1)*v[1]+(n2-1)*v[2])/(n1+n2-2)))
   d <- abs(m1-m2)/denomSD # Cohen's d
 
-  d[is.na(d)] <- NaN
+  #d[is.na(d)] <- NaN
 
   cohend = d
   ntilde <- harm_mean(n1,n2)
 
   # Compute unbiased Hedges' g
   # Use the lgamma function, and update to what Goulet-Pelletier & Cousineau used; works with larger inputs
-  J <- gamma(d_df/2)/(sqrt(d_df/2)*gamma((d_df-1)/2))
+  J = hedge_J(d_df)
+
 
   if(var.equal == TRUE){
     if(type == 'g') {
@@ -143,9 +144,15 @@ d_est_ind <- function(n1,
     }
   }
 
+  if(var.equal == TRUE){
+    mult_lamb = sqrt((n1*n2*(sd1^2 + sd2^2))/(2*(n2*sd1^2 + n1*sd2^2)))
+    d_lambda = cohend * mult_lamb
+  } else {
+    d_lambda <- cohend * sqrt(ntilde/2)
+  }
 
   # add options for cohend here
-  d_lambda <- cohend * sqrt(ntilde/2)
+
   #d_sigma = sqrt((n1+n2)/(n1*n2)+(cohend^2/(2*(n1+n2))))
   d_sigma = sqrt((d_df/(d_df-2)) * (2/ntilde) *(1+cohend^2*(ntilde/2)) - cohend^2/J^2)
 
@@ -221,7 +228,7 @@ d_est_one <- function(n,
   d_df = df
   # Compute unbiased Hedges' g
   # Use the lgamma function, and update to what Goulet-Pelletier & cousineau used; works with larger inputs
-  J <- gamma(df/2)/(sqrt(df/2)*gamma((df-1)/2))
+  J = hedge_J(d_df)
 
   if(type == 'g') {
     cohend <-  cohend * J
@@ -284,4 +291,9 @@ t_CI = function(TOST_res,
   return(c(tlow,thigh))
 }
 
-
+hedge_J <- function(df) {
+  # compute unbiasing factor; works for small or large df;
+  # thanks to Robert Calin-Jageman
+  # Source: https://doi.org/10.31234/osf.io/s2597
+  exp ( lgamma(df/2) - log(sqrt(df/2)) - lgamma((df-1)/2) )
+  }
