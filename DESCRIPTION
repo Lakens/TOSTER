@@ -28,6 +28,7 @@ Imports:
     utils,
     rstatix
 Suggests: knitr,
-    rmarkdown
+    rmarkdown,
+    broom
 VignetteBuilder: knitr
 Encoding: UTF-8

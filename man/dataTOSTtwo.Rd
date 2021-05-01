@@ -12,7 +12,7 @@ dataTOSTtwo(
   hypothesis = "EQU",
   low_eqbound = -0.5,
   high_eqbound = 0.5,
-  eqbound_type = "d",
+  eqbound_type = "SMD",
   alpha = 0.05,
   desc = FALSE,
   plots = FALSE,
@@ -42,7 +42,7 @@ bounds}
 \item{high_eqbound}{a number (default: 0.5) the upper equivalence/MET
 bounds}
 
-\item{eqbound_type}{\code{'d'} (default) or \code{'raw'}; whether the
+\item{eqbound_type}{\code{'SMD'} (default) or \code{'raw'}; whether the
 bounds are specified in Cohen's d or raw units respectively}
 
 \item{alpha}{alpha level (default = 0.05)}

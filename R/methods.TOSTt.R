@@ -110,7 +110,7 @@ plot.TOSTt <- function(x,
 
     d_plot <-
       gg_curv_t(
-        data = d_res,
+        data_list = d_res,
         type = "c",
         levels = ci_levs
       ) +
@@ -129,7 +129,7 @@ plot.TOSTt <- function(x,
 
     t_plot <-
       gg_curv_t(
-        data = t_res,
+        data_list = t_res,
         type = "c",
         levels = ci_levs
       ) +
