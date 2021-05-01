@@ -1,11 +1,31 @@
 # TOSTER
 
+*~An R package and jamovi module for equivalence testing~*
+
+**Background**
+
 Scientists should be able to provide support for the absence of a meaningful effect. Currently, researchers often incorrectly
-conclude an effect is absent based a nonsignificant result. A widely recommended approach within a frequentist framework is to
-test for equivalence. In equivalence tests, such as the two one-sided tests (TOST) procedure impemented in this package, an upper and
+conclude an effect is absent based a non-significant result. A widely recommended approach within a frequentist framework is to
+test for equivalence. In equivalence tests, such as the two one-sided tests (TOST) procedure implemented in this package, an upper and
 lower equivalence bound is specified based on the smallest effect size of interest. The TOST procedure can be used to statistically
 reject the presence of effects large enough to be considered worthwhile. Extending your statistical tool kit
 with equivalence tests is an easy way to improve your statistical and theoretical inferences.
+
+# Installation
+
+The developmental version, and most up-to-date, can be installed from [GitHub](https://github.com/Lakens/TOSTER):
+
+```
+devtools::install_github("Lakens/TOSTER")
+```
+
+The stable release can be downloaded from [CRAN](https://cran.r-project.org/web/packages/TOSTER/index.html):
+
+```
+install.packages("TOSTER")
+```
+
+## Educational Material
 
 For educational material on setting the smallest effect size of interest and equivalence tests, see week 2 of my MOOC "Improving Your Statistical Questions". https://www.coursera.org/teach/improving-statistical-questions. 
 

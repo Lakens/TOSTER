@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Aaron R. Caldwell" />
+
+<meta name="date" content="2021-05-01" />
+
+<title>Standardized Mean Differences</title>
+
+<script>// Hide empty <a> tag within highlighted CodeBlock for screen reader accessibility (see https://github.com/jgm/pandoc/issues/6352#issuecomment-626106786) -->
+// v0.0.1
+// Written by JooYoung Seo (jooyoung@psu.edu) and Atsushi Yasumoto on June 1st, 2020.
+
+document.addEventListener('DOMContentLoaded', function() {
+  const codeList = document.getElementsByClassName("sourceCode");
+  for (var i = 0; i < codeList.length; i++) {
+    var linkList = codeList[i].getElementsByTagName('a');
+    for (var j = 0; j < linkList.length; j++) {
+      if (linkList[j].innerHTML === "") {
+        linkList[j].setAttribute('aria-hidden', 'true');
+      }
+    }
+  }
+});
+</script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Standardized Mean Differences</h1>
+<h3 class="subtitle">The calculation of Cohen’s d type effect sizes</h3>
+<h4 class="author">Aaron R. Caldwell</h4>
+<h4 class="date">2021-05-01</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#bias-correction-hedges">Bias Correction (Hedges)</a></li>
+<li><a href="#independent-samples">Independent Samples</a><ul>
+<li><a href="#variances-assumed-unequal-cohens-dav">Variances Assumed Unequal: Cohen’s d(av)</a></li>
+<li><a href="#variances-assumed-equal-cohens-d">Variances Assumed Equal: Cohen’s d</a></li>
+</ul></li>
+<li><a href="#paired-samples">Paired Samples</a><ul>
+<li><a href="#cohens-dz-change-scores">Cohen’s d(z): Change Scores</a></li>
+<li><a href="#cohens-drm-correlation-corrected">Cohen’s d(rm): Correlation Corrected</a></li>
+</ul></li>
+<li><a href="#one-sample">One Sample</a></li>
+<li><a href="#confidence-intervals">Confidence Intervals</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+</div>
+
+<p>The calculation of standardized mean differences (SMDs) can be helpful in interpreting data and are essential for meta-analysis. In psychology, effect sizes are very often reported as an SMD. In most papers the SMD is reported as Cohen’s d. In it’s simplest form it is reported as the mean difference (or mean in the case of a one-sample test) divided by the standard deviation.</p>
+<p><span class="math display">\[
+Cohen&#39;s \space d = \frac{Mean}{SD}
+\]</span></p>
+<p>However, two major problems arise: bias and the calculation of the denominator. First, the Cohen’s d calculation is biased (meaning the effect is inflated), and a bias correction (often referred to as Hedges’ g) is applied to provide an unbiased estimate. Second, the denominator can obviously influence the estimate of the SMD, and there are a multitude of choices for how to calculate the denominator. To make matters worse, the calculation (in most cases an approximation) of the confidence intervals involves the noncentral <em>t</em> distribution. This requires calculating a non-centrality parameter (lambda: <span class="math inline">\(\lambda\)</span>), degrees of freedom (df), and variance (sigma: <span class="math inline">\(\sigma\)</span>) for the SMD. None of these are easy to determine and these calculations are hotly debated in the statistics literature.</p>
+<p>In this package we have opted to the (mostly) use the approaches outlined by <span class="citation">Goulet-Pelletier and Cousineau (2018)</span>. We found that that these calculations were straight forward and provided fairly accurate coverage for the confidence intervals. In this section however we will detail on the calculations that are involved in calculating the SMD, their associated degrees of freedom, noncentrality parameter, and variance.</p>
+<div id="bias-correction-hedges" class="section level2">
+<h2>Bias Correction (Hedges)</h2>
+<p>For all SMD calculative approaches the bias correction was calculated as the following:</p>
+<p><span class="math display">\[
+J = \frac{\Gamma(\frac{df}{2})}{\sqrt{\frac{df}{2}} \cdot \Gamma(\frac{df-1}{2})} 
+\]</span></p>
+<p>The correction factor is calculated in R as the following:</p>
+<pre><code>J &lt;- exp ( lgamma(df/2) - log(sqrt(df/2)) - lgamma((df-1)/2) )</code></pre>
+<p>Hedges g (bias corrected Cohen’s d) can then be calculated by multiplying d by J</p>
+<p><span class="math display">\[
+g = d \cdot J
+\]</span></p>
+</div>
+<div id="independent-samples" class="section level2">
+<h2>Independent Samples</h2>
+<p>For independent samples there are two calculative approaches supported by <code>TOSTER</code>. One the denominator is the pooled standard deviation (Cohen’s d) and the other is the average standard deviation (Cohen’s d(av)). Currently, the choice is made by the function based on whether or not the variance can assumed to be equal. If the variances are not assumed to be equal then Cohen’s d(av) will be returned, and if variances are assumed to be equal then Cohen’s d is returned.</p>
+<div id="variances-assumed-unequal-cohens-dav" class="section level3">
+<h3>Variances Assumed Unequal: Cohen’s d(av)</h3>
+<p>For this calculation, the denominator is simply the square root of the average variance.</p>
+<p><span class="math display">\[
+s_{av} = \sqrt \frac {s_{1}^2 + s_{2}^2}{2}
+\]</span></p>
+<p>The SMD, Cohen’s d(av), is then calculated as the following:</p>
+<p><span class="math display">\[
+d_{av} = \frac {\bar{x}_1 - \bar{x}_2} {s_{av}}
+\]</span> Note: the x with the bar above it (pronounced as “x-bar”) refers the the means of group 1 and 2 respectively.</p>
+<p>The degrees of freedom for Cohen’s d(av) is the following:</p>
+<p><span class="math display">\[
+df = \frac{(n_1-1)(n_2-1)(s_1^2+s_2^2)^2}{(n_2-1) \cdot s_1^4+(n_1-1) \cdot s_2^4}
+\]</span></p>
+<p>The non-centrality parameter (<span class="math inline">\(\lambda\)</span>) is calculated as the following:</p>
+<p><span class="math display">\[
+\lambda =  d_{av} \times \sqrt{\frac{n_1 \cdot n_2(\sigma^2_1+\sigma^2_2)}{2 \cdot (n_2 \cdot \sigma^2_1+n_1 \cdot \sigma^2_2)}}
+\]</span></p>
+<p>The standard error (<span class="math inline">\(\sigma\)</span>) of Cohen’s d(av) is calculated as the following:</p>
+<p><span class="math display">\[
+\sigma = \sqrt{\frac{df}{df-2} \cdot \frac{2}{\tilde n} (1+d^2 \cdot \frac{\tilde n}{2}) -\frac{d^2}{J^2}}
+\]</span> wherein <span class="math inline">\(J\)</span> represents the Hedges correction (calculation above).</p>
+</div>
+<div id="variances-assumed-equal-cohens-d" class="section level3">
+<h3>Variances Assumed Equal: Cohen’s d</h3>
+<p>For this calculation, the denominator is simply the pooled standard deviation.</p>
+<p><span class="math display">\[s_{p} = \sqrt \frac {(n_{1} - 1)s_{1}^2 + (n_{2} - 1)s_{2}^2}{n_{1} + n_{2} - 2}\]</span></p>
+<p><span class="math display">\[
+d = \frac {\bar{x}_1 - \bar{x}_2} {s_{p}}
+\]</span></p>
+<p>The degrees of freedom for Cohen’s d is the following:</p>
+<p><span class="math display">\[
+df = n_1 + n_2 - 2
+\]</span></p>
+<p>The non-centrality parameter (<span class="math inline">\(\lambda\)</span>) is calculated as the following:</p>
+<p><span class="math display">\[
+\lambda = d \cdot \sqrt \frac{\tilde n}{2}
+\]</span> wherein, <span class="math inline">\(\tilde n\)</span> is the harmonic mean of the 2 sample sizes which is calculated as the following:</p>
+<p><span class="math display">\[
+\tilde n = \frac{2 \cdot n_1 \cdot n_2}{n_1 + n_2}
+\]</span></p>
+<p>The standard error (<span class="math inline">\(\sigma\)</span>) of Cohen’s d is calculated as the following:</p>
+<p><span class="math display">\[
+\sigma = \sqrt{\frac{df}{df-2} \cdot \frac{2}{\tilde n} (1+d^2 \cdot \frac{\tilde n}{2}) -\frac{d^2}{J}}
+\]</span> wherein <span class="math inline">\(J\)</span> represents the Hedges correction (calculation above).</p>
+</div>
+</div>
+<div id="paired-samples" class="section level2">
+<h2>Paired Samples</h2>
+<p>For paired samples there are two calculative approaches supported by <code>TOSTER</code>. One the denominator is the standard deviation of the change score (Cohen’s d(z)) and the other is the correlation corrected effect sie (Cohen’s d(av)). Currently, the choice is made by the function based on whether or not the user sets <code>rm_correction</code> to TRUE. If <code>rm_correction</code> is set to t TRUE then Cohen’s d(rm) will be returned, and otherwise Cohen’s d(z) is returned.</p>
+<div id="cohens-dz-change-scores" class="section level3">
+<h3>Cohen’s d(z): Change Scores</h3>
+<p>For this calculation, the denominator is the standard deviation of the difference scores which can be calculated from the standard deviations of the samples and the correlation between the paired samples.</p>
+<p><span class="math display">\[
+s_{diff} =  \sqrt{sd_1^2 + sd_2^2 - 2 \cdot r_{12} \cdot sd_1 \cdot sd_2}
+\]</span></p>
+<p>The SMD, Cohen’s d(z), is then calculated as the following:</p>
+<p><span class="math display">\[
+d_{z} = \frac {\bar{x}_1 - \bar{x}_2} {s_{diff}}
+\]</span></p>
+<p>The degrees of freedom for Cohen’s d(z) is the following:</p>
+<p><span class="math display">\[
+df = 2 \cdot (N_{pairs}-1)
+\]</span></p>
+<p>The non-centrality parameter (<span class="math inline">\(\lambda\)</span>) is calculated as the following:</p>
+<p><span class="math display">\[
+\lambda = d_{z} \cdot \sqrt \frac{N_{pairs}}{2 \cdot (1-r_{12})}
+\]</span></p>
+<p>The standard error (<span class="math inline">\(\sigma\)</span>) of Cohen’s d(z) is calculated as the following:</p>
+<p><span class="math display">\[
+\sigma = \sqrt{\frac{df}{df-2} \cdot \frac{2 \cdot (1-r_{12})}{n} \cdot (1+d^2 \cdot \frac{n}{2 \cdot (1-r_{12})}) -\frac{d^2}{J^2}} \space \times \space \sqrt {2 \cdot (1-r_{12})}
+\]</span></p>
+</div>
+<div id="cohens-drm-correlation-corrected" class="section level3">
+<h3>Cohen’s d(rm): Correlation Corrected</h3>
+<p>For this calculation, the same values for the same calculations above is adjusted for the correlation between measures. As <span class="citation">Goulet-Pelletier and Cousineau (2018)</span> mention, this is useful for when effect sizes are being compared for studies that involve between and within subjects designs.</p>
+<p>First, the standard deviation of the difference scores are calculated</p>
+<p><span class="math display">\[
+s_{diff} =  \sqrt{sd_1^2 + sd_2^2 - 2 \cdot r_{12} \cdot sd_1 \cdot sd_2}
+\]</span></p>
+<p>The SMD, Cohen’s d(rm), is then calculated with a small change to the denominator:</p>
+<p><span class="math display">\[
+d_{rm} = \frac {\bar{x}_1 - \bar{x}_2} {s_{diff} \cdot \sqrt {2 \cdot (1-r_{12})} }
+\]</span></p>
+<p>The degrees of freedom for Cohen’s d(rm) is the following:</p>
+<p><span class="math display">\[
+df = 2 \cdot (N_{pairs}-1)
+\]</span></p>
+<p>The non-centrality parameter (<span class="math inline">\(\lambda\)</span>) is calculated as the following:</p>
+<p><span class="math display">\[
+\lambda = d_{rm} \cdot \sqrt \frac{N_{pairs}}{2 \cdot (1-r_{12})}
+\]</span></p>
+<p>The standard error (<span class="math inline">\(\sigma\)</span>) of Cohen’s d(rm) is calculated as the following:</p>
+<p><span class="math display">\[
+\sigma = \sqrt{\frac{df}{df-2} \cdot \frac{2 \cdot (1-r_{12})}{n} \cdot (1+d^2 \cdot \frac{n}{2 \cdot (1-r_{12})}) -\frac{d^2}{J^2}}
+\]</span></p>
+</div>
+</div>
+<div id="one-sample" class="section level2">
+<h2>One Sample</h2>
+<p>For a one-sample situation, the calculations are very straight forward</p>
+<p>For this calculation, the denominator is simply the standard deviation of the sample.</p>
+<p><span class="math display">\[s={\sqrt {{\frac {1}{N-1}}\sum _{i=1}^{N}\left(x_{i}-{\bar {x}}\right)^{2}}}\]</span> The SMD is then the mean of X divided by the standard deviation.</p>
+<p><span class="math display">\[
+d = \frac {\bar{x}} {s}
+\]</span></p>
+<p>The degrees of freedom for Cohen’s d is the following:</p>
+<p><span class="math display">\[
+df = N - 1
+\]</span></p>
+<p>The non-centrality parameter (<span class="math inline">\(\lambda\)</span>) is calculated as the following:</p>
+<p><span class="math display">\[
+\lambda = d \cdot \sqrt N
+\]</span></p>
+<p>The standard error (<span class="math inline">\(\sigma\)</span>) of Cohen’s d is calculated as the following:</p>
+<p><span class="math display">\[
+\sigma = \sqrt{\frac{df}{df-2} \cdot \frac{1}{N} (1+d^2 \cdot N) -\frac{d^2}{J^2}}
+\]</span> wherein <span class="math inline">\(J\)</span> represents the Hedges correction (calculation above).</p>
+</div>
+<div id="confidence-intervals" class="section level2">
+<h2>Confidence Intervals</h2>
+<p>For the SMDs calculated in this package we use the non-central <em>t</em> method outlined by <span class="citation">Goulet-Pelletier and Cousineau (2018)</span>. These calculations are only approximations and newer formulations may provide better coverage <span class="citation">(Cousineau and Goulet-Pelletier 2021)</span>. In any case, if the calculation of confidence intervals for SMDs is of the utmost importance then I would strongly recommend, when possible, using bootstrapping techniques rather than any calculative approach <span class="citation">(Kirby and Gerlanc 2013)</span>.</p>
+<p>In any case, the calculations of the confidence intervals in this package involve a two step process: 1) using the noncentral <em>t</em>-distribution to calculate the lower and upper bounds of <span class="math inline">\(\lambda\)</span>, and 2) transforming this back to the effect size estimate.</p>
+<p>Calculate confidence intervals around <span class="math inline">\(\lambda\)</span>.</p>
+<p><span class="math display">\[
+t_L = t_{(1-2-(1-\alpha)/2,\space df, \space \lambda)} \\
+t_U = t_{(1-2+(1-\alpha)/2,\space df, \space \lambda)}
+\]</span></p>
+<p>Then transform back to the SMD.</p>
+<p><span class="math display">\[
+d_L = \frac{t_L}{\lambda} \cdot d \\
+d_U = \frac{t_U}{\lambda} \cdot d 
+\]</span></p>
+</div>
+<div id="references" class="section level1 unnumbered">
+<h1>References</h1>
+<div id="refs" class="references">
+<div id="ref-Cousineau2021">
+<p>Cousineau, Denis, and Jean-Christophe Goulet-Pelletier. 2021. “A Study of Confidence Intervals for Cohens Dp in Within-Subject Designs with New Proposals.” <em>The Quantitative Methods for Psychology</em> 17 (1): 51–75. <a href="https://doi.org/10.20982/tqmp.17.1.p051">https://doi.org/10.20982/tqmp.17.1.p051</a>.</p>
+</div>
+<div id="ref-Goulet_2018">
+<p>Goulet-Pelletier, Jean-Christophe, and Denis Cousineau. 2018. “A Review of Effect Sizes and Their Confidence Intervals, Part I: The Cohen’s d Family.” <em>The Quantitative Methods for Psychology</em> 14 (4): 242–65. <a href="https://doi.org/10.20982/tqmp.14.4.p242">https://doi.org/10.20982/tqmp.14.4.p242</a>.</p>
+</div>
+<div id="ref-Kirby2013">
+<p>Kirby, Kris N., and Daniel Gerlanc. 2013. “BootES: An R Package for Bootstrap Confidence Intervals on Effect Sizes.” <em>Behavior Research Methods</em> 45 (4): 905–27. <a href="https://doi.org/10.3758/s13428-013-0330-5">https://doi.org/10.3758/s13428-013-0330-5</a>.</p>
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
