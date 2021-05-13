@@ -154,7 +154,7 @@ res1a = t_TOST(x = subset(sleep,group==1)$extra,
 print(res1)
 
 ## ----fig.width=6, fig.height=6------------------------------------------------
-plot(res1, type = "cd")
+plot(res1, type = "cd") 
 
 ## ----fig.width=6, fig.height=6------------------------------------------------
 plot(res1, type = "c",

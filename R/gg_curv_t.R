@@ -124,7 +124,9 @@ gg_curv_t <- function(data_list,
                 aes(x = x, y = y, fill = as.character(ci_shade1[1]))) +
       #scale_fill_brewer(direction = -1,
       #                  na.translate = FALSE) +
-      scale_fill_viridis_d(option = "D") +
+      scale_fill_viridis_d(option = "D",
+                           direction = -1,
+                           na.translate = FALSE) +
       labs(x = '', y = '',
            fill = "Confidence Interval")
 
@@ -161,8 +163,8 @@ gg_curv_t <- function(data_list,
         axis.title.x = element_text(size = 12),
         axis.title.y = element_text(size = 12),
         text = element_text(size = 11)
-      ) +
-      scale_y_continuous(expand = expansion(mult = c(0.01, 0.05)))
+      ) #+
+      #scale_y_continuous(expand = expansion(mult = c(0.01, 0.05)))
 
 
     # Relative Likelihood Function -----------------------------------------------------

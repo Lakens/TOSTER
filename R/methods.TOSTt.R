@@ -82,7 +82,7 @@ plot.TOSTt <- function(x,
   if(missing(ci_shades)){
     c1 = 1-x$alpha
     c2 = 1-x$alpha*2
-    if(c1 < .999 && c2 > .68){
+    if(c1 > .68 && c2 > .68){
       sets = c(.68,c2,c1,.999)
     } else if(c2 <=.68 && c1 < .999) {
       sets = c(c2,c1,.999)
@@ -218,11 +218,13 @@ plot.TOSTt <- function(x,
                                .width = sets))
       ),
       .width = c2,
-      slab_color = "skyblue4",
+      slab_color = "black",
       slab_size = .5) +
       #scale_fill_brewer(direction = -1,
       #                  na.translate = FALSE) +
-      scale_fill_viridis_d(option = "D") +
+      scale_fill_viridis_d(option = "D",
+                           direction = -1,
+                           na.translate = FALSE) +
       labs(x = '', y = '',
            fill = "Confidence Interval") +
       geom_vline(aes(xintercept = low),

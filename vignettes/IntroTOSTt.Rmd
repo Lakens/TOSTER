@@ -191,7 +191,7 @@ print(res1)
 Another nice feature is the generic `plot` method that can provide a visual summary of the results. All of the plots in this package were inspired by the [concurve](https://cran.r-project.org/web/packages/concurve/index.html) R package. There are two types of plots that can be produced. The first, and default, is the consonance density plot (`type = "cd"`).
 
 ```{r fig.width=6, fig.height=6}
-plot(res1, type = "cd")
+plot(res1, type = "cd") 
 ```
 
 Consonance plots, where all confidence intervals can be simultaneous plotted, can also be produced. The advantage here is multiple confidence interval lines can plotted at once.

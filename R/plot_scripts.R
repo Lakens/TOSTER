@@ -114,7 +114,9 @@ plot_smd_cdf = function(cdf_dat,
               aes(x = x, y = y, fill = as.character(ci_shade1[1]))) +
     #scale_fill_brewer(direction = -1,
     #                  na.translate = FALSE) +
-    scale_fill_viridis_d(option = "D") +
+    scale_fill_viridis_d(option = "D",
+                         direction = -1,
+                         na.translate = F) +
     labs(x = '', y = '',
          fill = "Confidence Interval")
 
@@ -263,8 +265,8 @@ plot_smd_curv = function(d,
                                  x = d),
                aes(x = x, y = y),
                size = 3) +
-    scale_fill_brewer(direction = -1,
-                      na.translate = FALSE) +
+    #scale_fill_brewer(direction = -1,
+    #                  na.translate = FALSE) +
     theme_tidybayes() +
     facet_grid(~smd_label) +
     labs(x = "") +
