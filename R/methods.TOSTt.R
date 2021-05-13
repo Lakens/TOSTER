@@ -82,12 +82,12 @@ plot.TOSTt <- function(x,
   if(missing(ci_shades)){
     c1 = 1-x$alpha
     c2 = 1-x$alpha*2
-    if(c1 < .999 && c2 > .5){
-      sets = c(.5,c2,c1,.999)
-    } else if(c2 <=.5 && c1 < .999) {
+    if(c1 < .999 && c2 > .68){
+      sets = c(.68,c2,c1,.999)
+    } else if(c2 <=.68 && c1 < .999) {
       sets = c(c2,c1,.999)
     } else {
-      sets = c(.5,c2,c1)
+      sets = c(.68,c2,c1)
     }
   }
 
@@ -158,12 +158,22 @@ plot.TOSTt <- function(x,
 
 
     d_res = d_curv(x)
-    d_plot <- plot_smd_cdf(d_res[[2]],
-                           d = x$smd$d,
-                           df = x$smd$d_df,
-                           lambda = x$smd$d_lambda,
-                           ci_shades = sets,
-                           ci_line = .90) +
+    d_plot <- gg_curv_t(
+      data_list = d_res,
+      type = "cd",
+      levels = sets,
+      xaxis = ""
+    ) +
+      geom_point(data = data.frame(y = 0,
+                                   x = x$effsize$estimate[2]),
+                 aes(x = x, y = y),
+                 size = 3) +
+      annotate("segment",
+               x = x$effsize$lower.ci[2],
+               xend = x$effsize$upper.ci[2],
+               y = 0, yend = 0,
+               size = 1.5,
+               colour = "black")+
       geom_vline(aes(xintercept = low_eqd),
                  linetype="dashed") +
       geom_vline(aes(xintercept = high_eqd),
@@ -171,6 +181,7 @@ plot.TOSTt <- function(x,
       scale_x_continuous(sec.axis = dup_axis(breaks=c(round(low_eqd,2),
                                                       round(high_eqd,2)))) +
       facet_grid(~as.character(smd_type)) +
+      labs(y = "")+
       theme_tidybayes() +
       theme(
         legend.position = "top",
@@ -209,8 +220,9 @@ plot.TOSTt <- function(x,
       .width = c2,
       slab_color = "skyblue4",
       slab_size = .5) +
-      scale_fill_brewer(direction = -1,
-                        na.translate = FALSE) +
+      #scale_fill_brewer(direction = -1,
+      #                  na.translate = FALSE) +
+      scale_fill_viridis_d(option = "D") +
       labs(x = '', y = '',
            fill = "Confidence Interval") +
       geom_vline(aes(xintercept = low),

@@ -9,7 +9,7 @@ plot_pes(
   df1,
   df2,
   type = c("c", "cd"),
-  levels = c(0.5, 0.9, 0.95, 0.999)
+  levels = c(0.68, 0.9, 0.95, 0.999)
 )
 }
 \arguments{

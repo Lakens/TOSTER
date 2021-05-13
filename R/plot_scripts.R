@@ -86,6 +86,7 @@ d_curv_raw = function (d,
 
 }
 
+# old code not functional ----
 plot_smd_cdf = function(cdf_dat,
                         d,
                         df,
@@ -111,8 +112,9 @@ plot_smd_cdf = function(cdf_dat,
   p1 = ggplot(data = cdf_dat) +
     geom_area(data = subset(df.dens, x >= ci_shaderange1[1] & x <= ci_shaderange1[2]),
               aes(x = x, y = y, fill = as.character(ci_shade1[1]))) +
-    scale_fill_brewer(direction = -1,
-                      na.translate = FALSE) +
+    #scale_fill_brewer(direction = -1,
+    #                  na.translate = FALSE) +
+    scale_fill_viridis_d(option = "D") +
     labs(x = '', y = '',
          fill = "Confidence Interval")
 
@@ -165,7 +167,7 @@ plot_smd_cdf = function(cdf_dat,
 
   return(p2)
 }
-# old code not functional
+
 plot_smd_curv = function(d,
                          df,
                          lambda,

@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_smd.R
 \name{plot_smd}
 \alias{plot_smd}
-\title{Function to produce plots of the distribution of the standardized mean difference}
+\title{plot_smd}
 \usage{
 plot_smd(
   d,

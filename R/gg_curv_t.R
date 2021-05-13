@@ -2,7 +2,7 @@
 
 gg_curv_t <- function(data_list,
                       type = c("c","cd"),
-                      levels = c(.5,.90,.95,.999),
+                      levels = c(.68,.90,.95,.999),
                       position = "pyramid",
                       xaxis = expression(theta == ~ "Range of Values"),
                       yaxis1 = expression(paste("two-tailed ", italic(p),
@@ -118,14 +118,17 @@ gg_curv_t <- function(data_list,
     #interval <- pivot_longer(interval, X2:X3, names_to = "levels", values_to = "limits")
 
     p_cd1 = ggplot(data = cdf_dat, mapping = aes(x = x)) +
+      geom_density(color = "black",
+                   fill = "white") +
       geom_area(data = subset(df.dens, x >= interval2$li[1]  & x <= interval2$ui[1]),
                 aes(x = x, y = y, fill = as.character(ci_shade1[1]))) +
-      scale_fill_brewer(direction = -1,
-                        na.translate = FALSE) +
+      #scale_fill_brewer(direction = -1,
+      #                  na.translate = FALSE) +
+      scale_fill_viridis_d(option = "D") +
       labs(x = '', y = '',
            fill = "Confidence Interval")
 
-    if(length(ci_shade1 > 1)){
+    if(length(ci_shade1) > 1){
 
       p_cd2 = p_cd1 +
         geom_area(data = subset(df.dens, x >= interval2$li[2]  & x <= interval2$ui[2]),
@@ -134,22 +137,20 @@ gg_curv_t <- function(data_list,
       p_cd2 = p_cd1
     }
 
-    if(length(ci_shade1 > 2)){
+    if(length(ci_shade1) > 2){
 
       p_cd2 = p_cd2 +
         geom_area(data = subset(df.dens, x >= interval2$li[3]  & x <= interval2$ui[3]),
                   aes(x = x, y = y, fill = as.character(ci_shade1[3])))
     }
 
-    if(length(ci_shade1 > 3)){
+    if(length(ci_shade1 )> 3){
 
       p_cd2 = p_cd2 +
         geom_area(data = subset(df.dens, x >= interval2$li[4]  & x <= interval2$ui[4]),
                   aes(x = x, y = y, fill = as.character(ci_shade1[4])))
     }
     p_cd2 = p_cd2 +
-      geom_density(color = "skyblue4",
-                   alpha = 0.20) +
       labs(
         x = xaxis,
         y = "Density"

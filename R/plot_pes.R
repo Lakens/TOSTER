@@ -14,7 +14,7 @@ plot_pes <- function(Fstat,
                      df1,
                      df2,
                      type = c("c","cd"),
-                     levels = c(.5,.9,.95,.999)){
+                     levels = c(.68,.9,.95,.999)){
 
 
 
