@@ -24,6 +24,7 @@
 #'
 
 TOSTpaired.raw<-function(n,m1,m2,sd1,sd2,r12,low_eqbound, high_eqbound, alpha, plot = TRUE, verbose = TRUE){
+  message("Note: this function is defunct. Please use tsum_TOST instead")
   if(missing(alpha)) {
     alpha <- 0.05
   }

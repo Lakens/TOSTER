@@ -19,6 +19,7 @@ powerTOST_f <- function(alpha = 0.05,
                         df1,
                         df2,
                         eqbound){
+  message("Note: equ_anova only validated for one-way ANOVA; use with caution")
   f2 = eqbound/(1 - eqbound)
   lambda = (f2 * (df1 + df2 + 1))
 
@@ -45,7 +46,7 @@ powerTOST_f <- function(alpha = 0.05,
       eqbound = eqbound,
       sig.level = alpha,
       power = statistical_power,
-      method = "Equivalence Test for an F-test"
+      method = "Power for Non-Inferiority F-test"
     ),
     class = "power.htest"
   )

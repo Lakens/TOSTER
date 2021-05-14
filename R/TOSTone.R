@@ -19,6 +19,7 @@
 #'
 
 TOSTone<-function(m,mu,sd,n,low_eqbound_d, high_eqbound_d, alpha, plot = TRUE, verbose = TRUE){
+  message("Note: this function is defunct. Please use tsum_TOST instead")
   if(missing(alpha)) {
     alpha<-0.05
   }

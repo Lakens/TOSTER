@@ -16,8 +16,6 @@ plot_pes <- function(Fstat,
                      type = c("c","cd"),
                      levels = c(.68,.9,.95,.999)){
 
-
-
   dat = pes_curv(Fstat,
                  df1,
                  df2,

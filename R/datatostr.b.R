@@ -93,21 +93,22 @@ dataTOSTrClass <- R6::R6Class(
 
         plot <- plots$get(key=pair)
         points <- data.frame(
-          m=r,
-          cil=LL90,
-          ciu=UL90,
-          low=low_eqbound_r,
-          high=high_eqbound_r,
+          r=r,
+          n=n,
           stringsAsFactors=FALSE)
         plot$setState(points)
       }
     },
-    .plot=function(image, ggtheme, theme, ...) {
+    .plot=function(image, ...) {
 
       if (is.null(image$state))
         return(FALSE)
 
-      tostplot(image, ggtheme, theme)
+      dats = image$state
+
+      plot_corr(r = dats$r,
+                n = dats$r,
+                type = "cd")
 
       return(TRUE)
     })
