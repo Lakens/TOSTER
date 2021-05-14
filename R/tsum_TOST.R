@@ -1,22 +1,22 @@
-#' @title TOST with t-tests
-#' @description A function for TOST with all types of t-tests.
-#' @param x a (non-empty) numeric vector of data values.
-#' @param y an optional (non-empty) numeric vector of data values.
-#' @param formula a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.
-#' @param data an optional matrix or data frame (or similar: see model.frame) containing the variables in the formula formula. By default the variables are taken from environment(formula).
+#' @title TOSTt with Summary Statistics
+#' @description A function for TOST with all types of t-tests from summary statistics.
+#' @param m1 mean of group 1
+#' @param m2 mean of group 2
+#' @param sd1 standard deviation of group 1
+#' @param sd2 standard deviation of group 2
+#' @param n1 sample size in group 1
+#' @param n2 sample size in group 2
+#' @param r12 correlation of dependent variable between group 1 and group 2
 #' @param paired a logical indicating whether you want a paired t-test.
 #' @param var.equal  a logical variable indicating whether to treat the two variances as being equal. If TRUE then the pooled variance is used to estimate the variance otherwise the Welch (or Satterthwaite) approximation to the degrees of freedom is used.
 #' @param low_eqbound lower equivalence bounds
 #' @param high_eqbound upper equivalence bounds
 #' @param hypothesis 'EQU' for equivalence (default), or 'MET' for minimal effects test, the alternative hypothesis.
-#' @param eqbound_type Type of equivalence bound. Can be set to "SMD" for standardized mean difference (i.e., Cohen's d) or  "raw" for the mean difference. Default is "raw". Raw is strongly recommended as SMD bounds will produce biased results.
+#' @param eqbound_type Type of equivalence bound. Can be set to "SMD" for standardized mean difference (i.e., Cohen's d) or  "raw" for the mean difference. Default is "raw".
 #' @param alpha alpha level (default = 0.05)
 #' @param bias_correction Apply Hedges' correction for bias (default is TRUE).
 #' @param rm_correction Repeated measures correction to make standardized mean difference Cohen's d(rm). This only applies to repeated/paired samples. Default is FALSE.
 #' @param mu a number indicating the true value of the mean for the two tailed test (or difference in means if you are performing a two sample test).
-#' @param subset an optional vector specifying a subset of observations to be used.
-#' @param na.action a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").
-#' @param ...  further arguments to be passed to or from methods.
 #' @return An S3 object of class
 #'   \code{"TOSTt"} is returned containing the following slots:
 #' \describe{
@@ -29,43 +29,28 @@
 #'   \item{\code{"method"}}{Type of t-test.}
 #'   \item{\code{"decision"}}{List included text regarding the decisions for statistical inference.}
 #' }
-#' @name t_TOST
-#' @export t_TOST
+#' @importFrom stats na.omit setNames terms
+#' @name tsum_TOST
+#' @export tsum_TOST
 
 #t_TOST <- setClass("t_TOST")
-t_TOST <- function(x, ...,
-                   hypothesis = "EQU",
-                   paired = FALSE,
-                   var.equal = FALSE,
-                   low_eqbound,
-                   high_eqbound,
-                   eqbound_type = "raw",
-                   alpha = 0.05,
-                   bias_correction = TRUE,
-                   rm_correction = FALSE){
-  UseMethod("t_TOST")
-}
-
-#' @rdname t_TOST
-#' @importFrom stats sd cor na.omit setNames t.test terms
-#' @method t_TOST default
-#' @export
-
-# @method t_TOST default
-t_TOST.default = function(x,
-                          y = NULL,
-                          hypothesis = "EQU",
-                          paired = FALSE,
-                          var.equal = FALSE,
-                          low_eqbound,
-                          high_eqbound,
-                          eqbound_type = "raw",
-                          alpha = 0.05,
-                          mu = 0,
-                          bias_correction = TRUE,
-                          rm_correction = FALSE,
-                          ...) {
-
+tsum_TOST <- function(m1,
+                      sd1,
+                      n1,
+                      m2 = NULL,
+                      sd2 = NULL,
+                      n2 = NULL,
+                      r12 = NULL,
+                      hypothesis = "EQU",
+                      paired = FALSE,
+                      var.equal = FALSE,
+                      low_eqbound,
+                      high_eqbound,
+                      mu = 0,
+                      eqbound_type = "raw",
+                      alpha = 0.05,
+                      bias_correction = TRUE,
+                      rm_correction = FALSE){
   if(bias_correction){
     smd_type = 'g'
   } else {
@@ -78,10 +63,12 @@ t_TOST.default = function(x,
     denom = "z"
   }
 
-  if(is.null(y)){
+  if(is.null(n2) || is.null(m2) || is.null()){
     sample_type = "One Sample"
-  } else if(paired == TRUE) {
+  } else if(paired == TRUE && !is.null(r12)) {
     sample_type = "Paired Sample"
+  } else if (paired == TRUE && is.null(r12)){
+    stop("paired == TRUE but r12 not provided. Must provide correlation.")
   } else {
     sample_type = "Two Sample"
   }
@@ -117,34 +104,16 @@ t_TOST.default = function(x,
     stop("The alpha must be a numeric value between 0 and 1")
   }
 
+  tresult = tsum_test(m1 = m1, sd1 = sd1, n1 = n1,
+                      m2 = m2, sd2 = sd2, n2 = n2,
+                      paired = paired,
+                      var.equal = var.equal,
+                      mu = mu,
+                      conf.level = 1 - alpha * 2,
+                      alternative = "two.sided")
 
-  tresult = t.test(x = x,
-                   y = y,
-                   paired = paired,
-                   var.equal = var.equal,
-                   mu = mu,
-                   conf.level = 1 - alpha*2,
-                   alternative = "two.sided")
+  if(paired == TRUE && !missing(r12)){
 
-  if(paired == TRUE && !missing(y)){
-    i1 <- y
-    i2 <- x
-    data <- data.frame(i1 = i1, i2 = i2)
-    data <- na.omit(data)
-    colnames(data) = c("i1", "i2")
-    data2 =  data
-    data2$diff = data2$i2 - data2$i1
-
-    n <- nrow(data)
-    i1 <- data$i1
-    i2 <- data$i2
-    m1 <- mean(i1)
-    m2 <- mean(i2)
-    sd1  <- sd(i1)
-    sd2  <- sd(i2)
-    r12 <- cor(i1, i2)
-
-    # Calculate Cohens d
     cohen_res = d_est_pair(
       n = n,
       m1 = m1,
@@ -157,19 +126,7 @@ t_TOST.default = function(x,
       alpha = alpha
     )
 
-  } else if(!missing(y)){
-
-    x1 = na.omit(x)
-    y1 = na.omit(y)
-
-    n1 = length(x1)
-    n2 = length(y1)
-
-    m1 = mean(x1)
-    m2 = mean(y1)
-
-    sd1 = sd(x1)
-    sd2 = sd(y1)
+  } else if(sample_type == "Two Sample"){
 
     cohen_res = d_est_ind(
       n1 = n1,
@@ -184,21 +141,14 @@ t_TOST.default = function(x,
     )
 
   } else {
-
-    x1 = na.omit(x)
-    n1 = length(x1)
-    m1 = mean(x1)
-    sd1 = sd(x1)
-
     cohen_res = d_est_one(
       n = n1,
       mu = m1,
       sd = sd1,
       type = smd_type,
-      testValue = 0,
+      testValue = mu,
       alpha = alpha
     )
-
   }
 
   if (eqbound_type == 'SMD') {
@@ -227,9 +177,9 @@ t_TOST.default = function(x,
                      round(high_eqbound,2))
   }
 
-  low_ttest <- t.test(
-    y = y,
-    x = x,
+  low_ttest <- tsum_test(
+    m1 = m1, sd1 = sd1, n1 = n1,
+    m2 = m2, sd2 = sd2, n2 = n2,
     paired = paired,
     var.equal = var.equal,
     alternative = alt_low,
@@ -237,9 +187,9 @@ t_TOST.default = function(x,
     conf.level = 1-alpha*2
   )
 
-  high_ttest <- t.test(
-    y = y,
-    x = x,
+  high_ttest <- tsum_test(
+    m1 = m1, sd1 = sd1, n1 = n1,
+    m2 = m2, sd2 = sd2, n2 = n2,
     paired = paired,
     var.equal = var.equal,
     alternative = alt_high,
@@ -339,15 +289,11 @@ t_TOST.default = function(x,
     }
   }
 
-
   decision = list(
     TOST = TOST_restext,
     ttest = ttest_restext,
     combined = combined_outcome
   )
-
-  #message(cat("Based on the equivalence test and the null-hypothesis test combined, we can conclude that the observed effect is ",combined_outcome,".",sep=""))
-
 
   rval = list(
     TOST = TOST,
@@ -363,39 +309,4 @@ t_TOST.default = function(x,
   class(rval) = "TOSTt"
 
   return(rval)
-
 }
-
-#' @rdname t_TOST
-#' @method t_TOST formula
-#' @export
-
-t_TOST.formula = function(formula,
-                          data,
-                          subset,
-                          na.action, ...) {
-
-  if(missing(formula)
-     || (length(formula) != 3L)
-     || (length(attr(terms(formula[-2L]), "term.labels")) != 1L))
-    stop("'formula' missing or incorrect")
-  m <- match.call(expand.dots = FALSE)
-  if(is.matrix(eval(m$data, parent.frame())))
-    m$data <- as.data.frame(data)
-  ## need stats:: for non-standard evaluation
-  m[[1L]] <- quote(stats::model.frame)
-  m$... <- NULL
-  mf <- eval(m, parent.frame())
-  DNAME <- paste(names(mf), collapse = " by ")
-  names(mf) <- NULL
-  response <- attr(attr(mf, "terms"), "response")
-  g <- factor(mf[[-response]])
-  if(nlevels(g) != 2L)
-    stop("grouping factor must have exactly 2 levels")
-  DATA <- setNames(split(mf[[response]], g), c("x", "y"))
-  y <- do.call("t_TOST", c(DATA, list(...)))
-
-  y
-
-}
-

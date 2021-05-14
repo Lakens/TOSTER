@@ -28,6 +28,7 @@ equ_ftest <- function(Fstat,
                       eqbound,
                       MET = FALSE,
                       alpha = 0.05){
+  message("Note: equ_ftest only validated for one-way ANOVA; use with caution")
 
   conf_level = 1 - alpha
 

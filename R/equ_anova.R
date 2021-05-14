@@ -26,6 +26,8 @@ equ_anova <- function(object,
                       MET = FALSE,
                       alpha = 0.05){
 
+  message("Note: equ_anova only validated for one-way ANOVA; use with caution")
+
   if(inherits(object, "Anova.mlm")){
     results <- anova_summary(object,
                              detailed = FALSE,
