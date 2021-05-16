@@ -83,7 +83,7 @@ options:
           title: Standardized
         - name: raw
           title: Raw
-      default: SMD
+      default: raw
       description:
           R: >
             `'SMD'` (default) or `'raw'`; whether the bounds are specified in
@@ -152,7 +152,7 @@ options:
           title: Cohen's d(z)
         - name: g
           title: Hedges' g(z)
-      default: d
+      default: g
       description:
           R: >
             `'d'` (default) or `'g'`;

@@ -17,7 +17,7 @@ dataTOSToneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             plots = FALSE,
             low_eqbound_d = -999999999,
             high_eqbound_d = -999999999,
-            smd_type = "d", ...) {
+            smd_type = "g", ...) {
 
             super$initialize(
                 package="TOSTER",
@@ -88,7 +88,7 @@ dataTOSToneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 options=list(
                     "d",
                     "g"),
-                default="d")
+                default="g")
 
             self$.addOption(private$..vars)
             self$.addOption(private$..mu)
@@ -150,7 +150,15 @@ dataTOSToneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 title="TOST One Sample T-Test")
             self$add(jmvcore::Preformatted$new(
                 options=options,
-                name="text"))
+                name="text",
+                clearWith=list(
+                    "mu",
+                    "alpha",
+                    "var_equal",
+                    "hypothesis",
+                    "low_eqbound",
+                    "high_eqbound",
+                    "eqbound_type")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="tost",
@@ -450,7 +458,7 @@ dataTOSTone <- function(
     plots = FALSE,
     low_eqbound_d = -999999999,
     high_eqbound_d = -999999999,
-    smd_type = "d") {
+    smd_type = "g") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("dataTOSTone requires jmvcore to be installed (restart may be required)")

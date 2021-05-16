@@ -7,6 +7,7 @@ dataTOSTrOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     public = list(
         initialize = function(
             pairs = NULL,
+            cor_type = "pearson",
             hypothesis = "EQU",
             low_eqbound_r = -0.3,
             high_eqbound_r = 0.3,
@@ -27,6 +28,14 @@ dataTOSTrOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     "continuous"),
                 permitted=list(
                     "numeric"))
+            private$..cor_type <- jmvcore::OptionList$new(
+                "cor_type",
+                cor_type,
+                options=list(
+                    "pearson",
+                    "spearman",
+                    "kendall"),
+                default="pearson")
             private$..hypothesis <- jmvcore::OptionList$new(
                 "hypothesis",
                 hypothesis,
@@ -58,6 +67,7 @@ dataTOSTrOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 default=FALSE)
 
             self$.addOption(private$..pairs)
+            self$.addOption(private$..cor_type)
             self$.addOption(private$..hypothesis)
             self$.addOption(private$..low_eqbound_r)
             self$.addOption(private$..high_eqbound_r)
@@ -67,6 +77,7 @@ dataTOSTrOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         }),
     active = list(
         pairs = function() private$..pairs$value,
+        cor_type = function() private$..cor_type$value,
         hypothesis = function() private$..hypothesis$value,
         low_eqbound_r = function() private$..low_eqbound_r$value,
         high_eqbound_r = function() private$..high_eqbound_r$value,
@@ -75,6 +86,7 @@ dataTOSTrOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
         plots = function() private$..plots$value),
     private = list(
         ..pairs = NA,
+        ..cor_type = NA,
         ..hypothesis = NA,
         ..low_eqbound_r = NA,
         ..high_eqbound_r = NA,
@@ -87,8 +99,8 @@ dataTOSTrResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
     "dataTOSTrResults",
     inherit = jmvcore::Group,
     active = list(
+        text = function() private$.items[["text"]],
         tost = function() private$.items[["tost"]],
-        eqb = function() private$.items[["eqb"]],
         desc = function() private$.items[["desc"]],
         plots = function() private$.items[["plots"]]),
     private = list(),
@@ -98,6 +110,9 @@ dataTOSTrResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 options=options,
                 name="",
                 title="TOST Correlation")
+            self$add(jmvcore::Preformatted$new(
+                options=options,
+                name="text"))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="tost",
@@ -120,83 +135,30 @@ dataTOSTrResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                         `type`="text", 
                         `content`="($key)"),
                     list(
-                        `name`="b[0]", 
-                        `title`="", 
-                        `type`="text", 
-                        `content`="Pearson's r"),
-                    list(
-                        `name`="r[0]", 
+                        `name`="r", 
                         `title`="r", 
                         `type`="number"),
                     list(
-                        `name`="p[0]", 
+                        `name`="p", 
                         `title`="p", 
                         `type`="number", 
                         `format`="zto,pvalue"),
-                    list(
-                        `name`="b[1]", 
-                        `title`="", 
-                        `type`="text", 
-                        `content`="TOST Upper"),
-                    list(
-                        `name`="r[1]", 
-                        `title`="r", 
-                        `type`="number"),
-                    list(
-                        `name`="p[1]", 
-                        `title`="p", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
-                    list(
-                        `name`="b[2]", 
-                        `title`="", 
-                        `type`="text", 
-                        `content`="TOST Lower"),
-                    list(
-                        `name`="r[2]", 
-                        `title`="r", 
-                        `type`="number"),
-                    list(
-                        `name`="p[2]", 
-                        `title`="p", 
-                        `type`="number", 
-                        `format`="zto,pvalue"))))
-            self$add(jmvcore::Table$new(
-                options=options,
-                name="eqb",
-                title="Equivalence Bounds",
-                rows="(pairs)",
-                clearWith=list(
-                    "alpha",
-                    "low_eqbound_r",
-                    "high_eqbound_r"),
-                columns=list(
-                    list(
-                        `name`="i1", 
-                        `title`="", 
-                        `type`="text", 
-                        `content`="($key)"),
-                    list(
-                        `name`="i2", 
-                        `title`="", 
-                        `type`="text", 
-                        `content`="($key)"),
-                    list(
-                        `name`="low", 
-                        `title`="Low", 
-                        `type`="number"),
-                    list(
-                        `name`="high", 
-                        `title`="High", 
-                        `type`="number"),
                     list(
                         `name`="cil", 
                         `title`="Lower", 
-                        `superTitle`="Confidence interval"),
+                        `superTitle`="Confidence Interval"),
                     list(
                         `name`="ciu", 
                         `title`="Upper", 
-                        `superTitle`="Confidence interval"))))
+                        `superTitle`="Confidence Interval"),
+                    list(
+                        `name`="sig", 
+                        `title`="Sig. Result", 
+                        `type`="Text"),
+                    list(
+                        `name`="tost", 
+                        `title`="TOST Result", 
+                        `type`="Text"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="desc",
@@ -263,9 +225,11 @@ dataTOSTrResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                     options=options,
                     title="$key",
                     renderFun=".plot",
-                    width=180,
+                    width=425,
+                    height=300,
                     clearWith=list(
                         "alpha",
+                        "cor_type",
                         "low_eqbound_r",
                         "high_eqbound_r"))))}))
 
@@ -295,6 +259,9 @@ dataTOSTrBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param data the data as a data frame
 #' @param pairs a list of vectors of strings naming variables to correlate
 #'   from \code{data}
+#' @param cor_type a character string indicating which correlation coefficient
+#'   is to be used for the test. One of "pearson", "kendall", or "spearman", can
+#'   be abbreviated.
 #' @param hypothesis \code{'EQU'} for equivalence (default), or \code{'MET'}
 #'   for minimal effects test, the alternative hypothesis.
 #' @param low_eqbound_r lower equivalence bounds (e.g., -0.3) expressed in a
@@ -307,8 +274,8 @@ dataTOSTrBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 #' @param plots \code{TRUE} or \code{FALSE} (default), provide plots
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
 #'   \code{results$tost} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$eqb} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$desc} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$plots} \tab \tab \tab \tab \tab an array of images \cr
 #' }
@@ -323,6 +290,7 @@ dataTOSTrBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 dataTOSTr <- function(
     data,
     pairs,
+    cor_type = "pearson",
     hypothesis = "EQU",
     low_eqbound_r = -0.3,
     high_eqbound_r = 0.3,
@@ -340,6 +308,7 @@ dataTOSTr <- function(
 
     options <- dataTOSTrOptions$new(
         pairs = pairs,
+        cor_type = cor_type,
         hypothesis = hypothesis,
         low_eqbound_r = low_eqbound_r,
         high_eqbound_r = high_eqbound_r,

@@ -11,7 +11,7 @@ dataTOSTpaired(
   hypothesis = "EQU",
   low_eqbound = -0.5,
   high_eqbound = 0.5,
-  eqbound_type = "SMD",
+  eqbound_type = "raw",
   alpha = 0.05,
   desc = FALSE,
   plots = FALSE,
@@ -19,7 +19,7 @@ dataTOSTpaired(
   high_eqbound_dz = -999999999,
   indplot = FALSE,
   diffplot = FALSE,
-  smd_type = "d"
+  smd_type = "g"
 )
 }
 \arguments{

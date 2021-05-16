@@ -23,6 +23,21 @@ options:
             a list of vectors of strings naming variables to correlate from
             `data`
 
+    - name: cor_type
+      title: Correlation type
+      type: List
+      options:
+        - name: pearson
+          title: Pearson's r
+        - name: spearman
+          title: Spearman's rho
+        - name: kendall
+          title: Kendall's tau
+      default: pearson
+      description:
+          R: >
+            a character string indicating which correlation coefficient is to be used for the test. One of "pearson", "kendall", or "spearman", can be abbreviated.
+
     - name: hypothesis
       title: Alternative hypothesis
       type: List
@@ -81,3 +96,5 @@ options:
       description:
           R: >
             `TRUE` or `FALSE` (default), provide plots
+
+

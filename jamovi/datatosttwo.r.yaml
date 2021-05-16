@@ -126,10 +126,10 @@ items:
           type: number
         - name: cil[cohen]
           title: Lower
-          superTitle: Confidence interval
+          superTitle: Confidence Interval
         - name: ciu[cohen]
           title: Upper
-          superTitle: Confidence interval
+          superTitle: Confidence Interval
         - name: stat[raw]
           title: ''
           type: text
@@ -139,10 +139,10 @@ items:
           type: number
         - name: cil[raw]
           title: Lower
-          superTitle: Confidence interval
+          superTitle: Confidence Interval
         - name: ciu[raw]
           title: Upper
-          superTitle: Confidence interval
+          superTitle: Confidence Interval
 
     - name: desc
       title: Descriptives
@@ -210,8 +210,8 @@ items:
         title: $key
         type: Image
         renderFun: .plot
-        width: 400
-        height: 400
+        width: 425
+        height: 425
         clearWith:
           - group
           - alpha

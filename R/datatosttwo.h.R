@@ -12,14 +12,14 @@ dataTOSTtwoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             hypothesis = "EQU",
             low_eqbound = -0.5,
             high_eqbound = 0.5,
-            eqbound_type = "SMD",
+            eqbound_type = "raw",
             alpha = 0.05,
             desc = FALSE,
             plots = FALSE,
             descplots = FALSE,
             low_eqbound_d = -999999999,
             high_eqbound_d = -999999999,
-            smd_type = "d", ...) {
+            smd_type = "g", ...) {
 
             super$initialize(
                 package="TOSTER",
@@ -65,7 +65,7 @@ dataTOSTtwoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 options=list(
                     "SMD",
                     "raw"),
-                default="SMD")
+                default="raw")
             private$..alpha <- jmvcore::OptionNumber$new(
                 "alpha",
                 alpha,
@@ -98,7 +98,7 @@ dataTOSTtwoOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 options=list(
                     "d",
                     "g"),
-                default="d")
+                default="g")
 
             self$.addOption(private$..deps)
             self$.addOption(private$..group)
@@ -312,11 +312,11 @@ dataTOSTtwoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     list(
                         `name`="cil[cohen]", 
                         `title`="Lower", 
-                        `superTitle`="Confidence interval"),
+                        `superTitle`="Confidence Interval"),
                     list(
                         `name`="ciu[cohen]", 
                         `title`="Upper", 
-                        `superTitle`="Confidence interval"),
+                        `superTitle`="Confidence Interval"),
                     list(
                         `name`="stat[raw]", 
                         `title`="", 
@@ -329,11 +329,11 @@ dataTOSTtwoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     list(
                         `name`="cil[raw]", 
                         `title`="Lower", 
-                        `superTitle`="Confidence interval"),
+                        `superTitle`="Confidence Interval"),
                     list(
                         `name`="ciu[raw]", 
                         `title`="Upper", 
-                        `superTitle`="Confidence interval"))))
+                        `superTitle`="Confidence Interval"))))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="desc",
@@ -401,8 +401,8 @@ dataTOSTtwoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     options=options,
                     title="$key",
                     renderFun=".plot",
-                    width=400,
-                    height=400,
+                    width=425,
+                    height=425,
                     clearWith=list(
                         "group",
                         "alpha",
@@ -525,14 +525,14 @@ dataTOSTtwo <- function(
     hypothesis = "EQU",
     low_eqbound = -0.5,
     high_eqbound = 0.5,
-    eqbound_type = "SMD",
+    eqbound_type = "raw",
     alpha = 0.05,
     desc = FALSE,
     plots = FALSE,
     descplots = FALSE,
     low_eqbound_d = -999999999,
     high_eqbound_d = -999999999,
-    smd_type = "d") {
+    smd_type = "g") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("dataTOSTtwo requires jmvcore to be installed (restart may be required)")

@@ -11,7 +11,7 @@ dataTOSTpairedOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             hypothesis = "EQU",
             low_eqbound = -0.5,
             high_eqbound = 0.5,
-            eqbound_type = "SMD",
+            eqbound_type = "raw",
             alpha = 0.05,
             desc = FALSE,
             plots = FALSE,
@@ -19,7 +19,7 @@ dataTOSTpairedOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
             high_eqbound_dz = -999999999,
             indplot = FALSE,
             diffplot = FALSE,
-            smd_type = "d", ...) {
+            smd_type = "g", ...) {
 
             super$initialize(
                 package="TOSTER",
@@ -62,7 +62,7 @@ dataTOSTpairedOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=list(
                     "SMD",
                     "raw"),
-                default="SMD")
+                default="raw")
             private$..alpha <- jmvcore::OptionNumber$new(
                 "alpha",
                 alpha,
@@ -101,7 +101,7 @@ dataTOSTpairedOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 options=list(
                     "d",
                     "g"),
-                default="d")
+                default="g")
 
             self$.addOption(private$..pair1)
             self$.addOption(private$..pair2)
@@ -171,7 +171,15 @@ dataTOSTpairedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 title="TOST Paired Samples T-Test")
             self$add(jmvcore::Preformatted$new(
                 options=options,
-                name="text"))
+                name="text",
+                clearWith=list(
+                    "mu",
+                    "alpha",
+                    "var_equal",
+                    "hypothesis",
+                    "low_eqbound",
+                    "high_eqbound",
+                    "eqbound_type")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="tost",
@@ -428,7 +436,7 @@ dataTOSTpaired <- function(
     hypothesis = "EQU",
     low_eqbound = -0.5,
     high_eqbound = 0.5,
-    eqbound_type = "SMD",
+    eqbound_type = "raw",
     alpha = 0.05,
     desc = FALSE,
     plots = FALSE,
@@ -436,7 +444,7 @@ dataTOSTpaired <- function(
     high_eqbound_dz = -999999999,
     indplot = FALSE,
     diffplot = FALSE,
-    smd_type = "d") {
+    smd_type = "g") {
 
     if ( ! requireNamespace("jmvcore", quietly=TRUE))
         stop("dataTOSTpaired requires jmvcore to be installed (restart may be required)")

@@ -185,9 +185,17 @@ plot.TOSTt <- function(x,
       theme_tidybayes() +
       theme(
         legend.position = "top",
-        strip.text = element_text(face = "bold", size = 10),
+        strip.text = element_text(face = "bold", size = 11),
+        legend.text = element_text(face = "bold", size = 11),
+        legend.title = element_text(face = "bold", size = 11),
         axis.text.y = element_blank(),
-        axis.ticks.y = element_blank()
+        axis.ticks.y = element_blank(),
+        axis.text.x = element_text(face = "bold", size = 11),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent",colour = NA),
+        plot.background = element_rect(fill = "transparent",colour = NA),
+        legend.background = element_rect(fill = "transparent",colour = NA)
       )
 
 
@@ -242,9 +250,17 @@ plot.TOSTt <- function(x,
       theme_tidybayes() +
       theme(
         legend.position = "top",
-        strip.text = element_text(face = "bold", size = 10),
+        strip.text = element_text(face = "bold", size = 11),
+        legend.text = element_text(face = "bold", size = 11),
+        legend.title = element_text(face = "bold", size = 11),
         axis.text.y = element_blank(),
-        axis.ticks.y = element_blank()
+        axis.ticks.y = element_blank(),
+        axis.text.x = element_text(face = "bold", size = 11),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent",colour = NA),
+        plot.background = element_rect(fill = "transparent",colour = NA),
+        legend.background = element_rect(fill = "transparent",colour = NA)
       ) +
       scale_x_continuous(sec.axis = dup_axis(breaks = c(
         round(low_eqt, round_t),

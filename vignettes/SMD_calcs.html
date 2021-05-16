@@ -12,7 +12,7 @@
 
 <meta name="author" content="Aaron R. Caldwell" />
 
-<meta name="date" content="2021-05-01" />
+<meta name="date" content="2021-05-14" />
 
 <title>Standardized Mean Differences</title>
 
@@ -43,6 +43,101 @@ document.addEventListener('DOMContentLoaded', function() {
     </style>
 
 
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
+<style type="text/css" data-origin="pandoc">
+code.sourceCode > span { display: inline-block; line-height: 1.25; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
 
 
 
@@ -242,7 +337,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <h1 class="title toc-ignore">Standardized Mean Differences</h1>
 <h3 class="subtitle">The calculation of Cohen’s d type effect sizes</h3>
 <h4 class="author">Aaron R. Caldwell</h4>
-<h4 class="date">2021-05-01</h4>
+<h4 class="date">2021-05-14</h4>
 
 
 <div id="TOC">
@@ -258,34 +353,37 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 </ul></li>
 <li><a href="#one-sample">One Sample</a></li>
 <li><a href="#confidence-intervals">Confidence Intervals</a></li>
+<li><a href="#plotting-smds">Plotting SMDs</a></li>
 <li><a href="#references">References</a></li>
 </ul>
 </div>
 
-<p>The calculation of standardized mean differences (SMDs) can be helpful in interpreting data and are essential for meta-analysis. In psychology, effect sizes are very often reported as an SMD. In most papers the SMD is reported as Cohen’s d. In it’s simplest form it is reported as the mean difference (or mean in the case of a one-sample test) divided by the standard deviation.</p>
+<p>The calculation of standardized mean differences (SMDs) can be helpful in interpreting data and are essential for meta-analysis. In psychology, effect sizes are very often reported as an SMD rather than raw units (though either is fine: see <span class="citation">Caldwell and Vigotsky (2020)</span>). In most papers the SMD is reported as Cohen’s d. In it’s simplest form it is reported as the mean difference (or mean in the case of a one-sample test) divided by the standard deviation.</p>
 <p><span class="math display">\[
 Cohen&#39;s \space d = \frac{Mean}{SD}
 \]</span></p>
-<p>However, two major problems arise: bias and the calculation of the denominator. First, the Cohen’s d calculation is biased (meaning the effect is inflated), and a bias correction (often referred to as Hedges’ g) is applied to provide an unbiased estimate. Second, the denominator can obviously influence the estimate of the SMD, and there are a multitude of choices for how to calculate the denominator. To make matters worse, the calculation (in most cases an approximation) of the confidence intervals involves the noncentral <em>t</em> distribution. This requires calculating a non-centrality parameter (lambda: <span class="math inline">\(\lambda\)</span>), degrees of freedom (df), and variance (sigma: <span class="math inline">\(\sigma\)</span>) for the SMD. None of these are easy to determine and these calculations are hotly debated in the statistics literature.</p>
-<p>In this package we have opted to the (mostly) use the approaches outlined by <span class="citation">Goulet-Pelletier and Cousineau (2018)</span>. We found that that these calculations were straight forward and provided fairly accurate coverage for the confidence intervals. In this section however we will detail on the calculations that are involved in calculating the SMD, their associated degrees of freedom, noncentrality parameter, and variance.</p>
-<div id="bias-correction-hedges" class="section level2">
-<h2>Bias Correction (Hedges)</h2>
+<p>However, two major problems arise: bias and the calculation of the denominator. First, the Cohen’s d calculation is biased (meaning the effect is inflated), and a bias correction (often referred to as Hedges’ g) is applied to provide an unbiased estimate. Second, the denominator can influence the estimate of the SMD, and there are a multitude of choices for how to calculate the denominator. To make matters worse, the calculation (in most cases an approximation) of the confidence intervals involves the noncentral <em>t</em> distribution. This requires calculating a non-centrality parameter (lambda: <span class="math inline">\(\lambda\)</span>), degrees of freedom (<span class="math inline">\(df\)</span>), or even the standard error (sigma: <span class="math inline">\(\sigma\)</span>) for the SMD. None of these are easy to determine and these calculations are hotly debated in the statistics literature <span class="citation">(Cousineau and Goulet-Pelletier 2021)</span>.</p>
+<p>In this package we have opted to the (mostly) use the approaches outlined by <span class="citation">Goulet-Pelletier and Cousineau (2018)</span>. We found that that these calculations were simple to implement and provided fairly accurate coverage for the confidence intervals for any type of SMD (independent, paired, or one sample). However, even the authors have outlined some issues with the method in a newer publication <span class="citation">(Cousineau and Goulet-Pelletier 2021)</span>. It is my belief that SMDs provide another interesting description of the sample, and have very limited inferential utility. You may disagree, and if you are basing your inferences on the SMD, and the associated confidence intervals, we recommend you go with a boostrapping approach <span class="citation">(Kirby and Gerlanc 2013)</span>.</p>
+<p>In this section we will detail on the calculations that are involved in calculating the SMD, their associated degrees of freedom, noncentrality parameter, and variance. If these SMDs are being reported in a scientific manuscript, we <strong>strongly</strong> recommend that the formulas for the SMDs you report be included in the methods section.</p>
+<div id="bias-correction-hedges" class="section level1">
+<h1>Bias Correction (Hedges)</h1>
 <p>For all SMD calculative approaches the bias correction was calculated as the following:</p>
 <p><span class="math display">\[
 J = \frac{\Gamma(\frac{df}{2})}{\sqrt{\frac{df}{2}} \cdot \Gamma(\frac{df-1}{2})} 
 \]</span></p>
 <p>The correction factor is calculated in R as the following:</p>
 <pre><code>J &lt;- exp ( lgamma(df/2) - log(sqrt(df/2)) - lgamma((df-1)/2) )</code></pre>
+<p>This calculation was derived from the supplementary material of <span class="citation">Cousineau and Goulet-Pelletier (2021)</span>.</p>
 <p>Hedges g (bias corrected Cohen’s d) can then be calculated by multiplying d by J</p>
 <p><span class="math display">\[
 g = d \cdot J
 \]</span></p>
 </div>
-<div id="independent-samples" class="section level2">
-<h2>Independent Samples</h2>
+<div id="independent-samples" class="section level1">
+<h1>Independent Samples</h1>
 <p>For independent samples there are two calculative approaches supported by <code>TOSTER</code>. One the denominator is the pooled standard deviation (Cohen’s d) and the other is the average standard deviation (Cohen’s d(av)). Currently, the choice is made by the function based on whether or not the variance can assumed to be equal. If the variances are not assumed to be equal then Cohen’s d(av) will be returned, and if variances are assumed to be equal then Cohen’s d is returned.</p>
-<div id="variances-assumed-unequal-cohens-dav" class="section level3">
-<h3>Variances Assumed Unequal: Cohen’s d(av)</h3>
+<div id="variances-assumed-unequal-cohens-dav" class="section level2">
+<h2>Variances Assumed Unequal: Cohen’s d(av)</h2>
 <p>For this calculation, the denominator is simply the square root of the average variance.</p>
 <p><span class="math display">\[
 s_{av} = \sqrt \frac {s_{1}^2 + s_{2}^2}{2}
@@ -307,8 +405,8 @@ df = \frac{(n_1-1)(n_2-1)(s_1^2+s_2^2)^2}{(n_2-1) \cdot s_1^4+(n_1-1) \cdot s_2^
 \sigma = \sqrt{\frac{df}{df-2} \cdot \frac{2}{\tilde n} (1+d^2 \cdot \frac{\tilde n}{2}) -\frac{d^2}{J^2}}
 \]</span> wherein <span class="math inline">\(J\)</span> represents the Hedges correction (calculation above).</p>
 </div>
-<div id="variances-assumed-equal-cohens-d" class="section level3">
-<h3>Variances Assumed Equal: Cohen’s d</h3>
+<div id="variances-assumed-equal-cohens-d" class="section level2">
+<h2>Variances Assumed Equal: Cohen’s d</h2>
 <p>For this calculation, the denominator is simply the pooled standard deviation.</p>
 <p><span class="math display">\[s_{p} = \sqrt \frac {(n_{1} - 1)s_{1}^2 + (n_{2} - 1)s_{2}^2}{n_{1} + n_{2} - 2}\]</span></p>
 <p><span class="math display">\[
@@ -331,11 +429,11 @@ df = n_1 + n_2 - 2
 \]</span> wherein <span class="math inline">\(J\)</span> represents the Hedges correction (calculation above).</p>
 </div>
 </div>
-<div id="paired-samples" class="section level2">
-<h2>Paired Samples</h2>
+<div id="paired-samples" class="section level1">
+<h1>Paired Samples</h1>
 <p>For paired samples there are two calculative approaches supported by <code>TOSTER</code>. One the denominator is the standard deviation of the change score (Cohen’s d(z)) and the other is the correlation corrected effect sie (Cohen’s d(av)). Currently, the choice is made by the function based on whether or not the user sets <code>rm_correction</code> to TRUE. If <code>rm_correction</code> is set to t TRUE then Cohen’s d(rm) will be returned, and otherwise Cohen’s d(z) is returned.</p>
-<div id="cohens-dz-change-scores" class="section level3">
-<h3>Cohen’s d(z): Change Scores</h3>
+<div id="cohens-dz-change-scores" class="section level2">
+<h2>Cohen’s d(z): Change Scores</h2>
 <p>For this calculation, the denominator is the standard deviation of the difference scores which can be calculated from the standard deviations of the samples and the correlation between the paired samples.</p>
 <p><span class="math display">\[
 s_{diff} =  \sqrt{sd_1^2 + sd_2^2 - 2 \cdot r_{12} \cdot sd_1 \cdot sd_2}
@@ -357,8 +455,8 @@ df = 2 \cdot (N_{pairs}-1)
 \sigma = \sqrt{\frac{df}{df-2} \cdot \frac{2 \cdot (1-r_{12})}{n} \cdot (1+d^2 \cdot \frac{n}{2 \cdot (1-r_{12})}) -\frac{d^2}{J^2}} \space \times \space \sqrt {2 \cdot (1-r_{12})}
 \]</span></p>
 </div>
-<div id="cohens-drm-correlation-corrected" class="section level3">
-<h3>Cohen’s d(rm): Correlation Corrected</h3>
+<div id="cohens-drm-correlation-corrected" class="section level2">
+<h2>Cohen’s d(rm): Correlation Corrected</h2>
 <p>For this calculation, the same values for the same calculations above is adjusted for the correlation between measures. As <span class="citation">Goulet-Pelletier and Cousineau (2018)</span> mention, this is useful for when effect sizes are being compared for studies that involve between and within subjects designs.</p>
 <p>First, the standard deviation of the difference scores are calculated</p>
 <p><span class="math display">\[
@@ -382,8 +480,8 @@ df = 2 \cdot (N_{pairs}-1)
 \]</span></p>
 </div>
 </div>
-<div id="one-sample" class="section level2">
-<h2>One Sample</h2>
+<div id="one-sample" class="section level1">
+<h1>One Sample</h1>
 <p>For a one-sample situation, the calculations are very straight forward</p>
 <p>For this calculation, the denominator is simply the standard deviation of the sample.</p>
 <p><span class="math display">\[s={\sqrt {{\frac {1}{N-1}}\sum _{i=1}^{N}\left(x_{i}-{\bar {x}}\right)^{2}}}\]</span> The SMD is then the mean of X divided by the standard deviation.</p>
@@ -403,8 +501,8 @@ df = N - 1
 \sigma = \sqrt{\frac{df}{df-2} \cdot \frac{1}{N} (1+d^2 \cdot N) -\frac{d^2}{J^2}}
 \]</span> wherein <span class="math inline">\(J\)</span> represents the Hedges correction (calculation above).</p>
 </div>
-<div id="confidence-intervals" class="section level2">
-<h2>Confidence Intervals</h2>
+<div id="confidence-intervals" class="section level1">
+<h1>Confidence Intervals</h1>
 <p>For the SMDs calculated in this package we use the non-central <em>t</em> method outlined by <span class="citation">Goulet-Pelletier and Cousineau (2018)</span>. These calculations are only approximations and newer formulations may provide better coverage <span class="citation">(Cousineau and Goulet-Pelletier 2021)</span>. In any case, if the calculation of confidence intervals for SMDs is of the utmost importance then I would strongly recommend, when possible, using bootstrapping techniques rather than any calculative approach <span class="citation">(Kirby and Gerlanc 2013)</span>.</p>
 <p>In any case, the calculations of the confidence intervals in this package involve a two step process: 1) using the noncentral <em>t</em>-distribution to calculate the lower and upper bounds of <span class="math inline">\(\lambda\)</span>, and 2) transforming this back to the effect size estimate.</p>
 <p>Calculate confidence intervals around <span class="math inline">\(\lambda\)</span>.</p>
@@ -418,9 +516,23 @@ d_L = \frac{t_L}{\lambda} \cdot d \\
 d_U = \frac{t_U}{\lambda} \cdot d 
 \]</span></p>
 </div>
+<div id="plotting-smds" class="section level1">
+<h1>Plotting SMDs</h1>
+<p>Sometimes you may take a different approach to calculating the SMD, or you may only have the summary statistics from another study. For this reason, I have included a way to plot the SMD based on just three values: the estimate of the SMD, the degrees of freedom, and the non-centrality parameter. So long as all three are reported, or can be estimated, then a plot of the SMD can be produced.</p>
+<p>Two types of plots can be produced: consonance (<code>type = &quot;c&quot;</code>), consonance density (<code>type = &quot;cd&quot;</code>), or both (the default option; (<code>type = c(&quot;c&quot;,&quot;cd&quot;)</code>))</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw">plot_smd</span>(<span class="dt">d =</span> <span class="fl">.43</span>,</span>
+<span id="cb2-2"><a href="#cb2-2"></a>         <span class="dt">df =</span> <span class="dv">58</span>,</span>
+<span id="cb2-3"><a href="#cb2-3"></a>         <span class="dt">lambda =</span> <span class="fl">1.66</span>,</span>
+<span id="cb2-4"><a href="#cb2-4"></a>         <span class="dt">smd_label =</span> <span class="st">&quot;Cohen&#39;s d&quot;</span></span>
+<span id="cb2-5"><a href="#cb2-5"></a>         )</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
 <div id="references" class="section level1 unnumbered">
 <h1>References</h1>
 <div id="refs" class="references">
+<div id="ref-Caldwell2020">
+<p>Caldwell, Aaron, and Andrew D. Vigotsky. 2020. “A Case Against Default Effect Sizes in Sport and Exercise Science.” <em>PeerJ</em> 8 (November): e10314. <a href="https://doi.org/10.7717/peerj.10314">https://doi.org/10.7717/peerj.10314</a>.</p>
+</div>
 <div id="ref-Cousineau2021">
 <p>Cousineau, Denis, and Jean-Christophe Goulet-Pelletier. 2021. “A Study of Confidence Intervals for Cohens Dp in Within-Subject Designs with New Proposals.” <em>The Quantitative Methods for Psychology</em> 17 (1): 51–75. <a href="https://doi.org/10.20982/tqmp.17.1.p051">https://doi.org/10.20982/tqmp.17.1.p051</a>.</p>
 </div>

@@ -61,14 +61,27 @@ children:
                     optionName: hypothesis
                     optionPart: MET
                     label: Minimal Effects Test
+              #- type: ComboBox
+              #  name: eqbound_type
+              - type: Label
+                label: Bound type
+                children:
+                  - type: RadioButton
+                    name: raw
+                    optionName: eqbound_type
+                    optionPart: raw
+                    label: Raw
+                  - type: RadioButton
+                    name: SMD
+                    optionName: eqbound_type
+                    optionPart: SMD
+                    label: Standardized
               - name: low_eqbound
                 type: TextBox
                 format: number
               - name: high_eqbound
                 type: TextBox
                 format: number
-              - type: ComboBox
-                name: eqbound_type
               - name: alpha
                 type: TextBox
                 label: Alpha level
@@ -97,12 +110,13 @@ children:
                 label: Standardized Effect Size
                 children:
                   - type: RadioButton
-                    name: d
-                    optionName: smd_type
-                    optionPart: d
-                    label: Cohen's d
-                  - type: RadioButton
                     name: g
                     optionName: smd_type
                     optionPart: g
                     label: Hedges' g
+                  - type: RadioButton
+                    name: d
+                    optionName: smd_type
+                    optionPart: d
+                    label: Cohen's d
+

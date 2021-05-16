@@ -67,6 +67,7 @@ dataTOSTpairedClass <- R6::R6Class(
       alpha <- self$options$alpha
       low_eqbound    <- self$options$low_eqbound
       high_eqbound   <- self$options$high_eqbound
+      eqbound_type = self$options$eqbound_type
 
       if(self$options$smd_type == 'g'){
         bias_c = TRUE
@@ -77,34 +78,11 @@ dataTOSTpairedClass <- R6::R6Class(
       TOSTres = t_TOST(x = data$i2,
                        y = data$i1,
                        paired = TRUE,
-                       eqbound_type = self$options$eqbound_type,
+                       eqbound_type = eqbound_type,
                        alpha = alpha,
                        bias_correction = bias_c,
                        low_eqbound = low_eqbound,
                        high_eqbound = high_eqbound)
-
-      if(self$options$hypothesis == "EQU"){
-        alt_low = "greater"
-        alt_high = "less"
-        test_hypothesis = "Hypothesis Tested: Equivalence"
-        null_hyp = paste0(round(low_eqbound,2),
-                          " >= (Mean1 - Mean2) or (Mean1 - Mean2) >= ",
-                          round(high_eqbound,2))
-        alt_hyp = paste0(round(low_eqbound,2),
-                         " < (Mean1 - Mean2) < ",
-                         round(high_eqbound,2))
-      } else if(self$options$hypothesis == "MET"){
-        alt_low = "less"
-        alt_high = "greater"
-        test_hypothesis = "Hypothesis Tested: Minimal Effect"
-        null_hyp = paste0(round(low_eqbound,2),
-                          " <= (Mean1 - Mean2)  <= ",
-                          round(high_eqbound,2))
-        alt_hyp = paste0(round(low_eqbound,2),
-                         " > (Mean1 - Mean2) or (Mean1 - Mean2)  > ",
-                         round(high_eqbound,2))
-      }
-
 
       tt$setRow(
         rowNo=1,
@@ -204,12 +182,45 @@ dataTOSTpairedClass <- R6::R6Class(
         )
       )
 
-      text_res = paste0("Two One-Sided Tests: Paired Samples t-tests \n \n",
-                        test_hypothesis,
+      if (eqbound_type == 'SMD') {
+
+        pr_l_eqb = low_eqbound * TOSTres$smd$d_denom
+        pr_h_eqb = high_eqbound * TOSTres$smd$d_denom
+      } else if(eqbound_type == "raw") {
+
+        pr_l_eqb = low_eqbound
+        pr_h_eqb = high_eqbound
+      }
+
+      if(self$options$hypothesis == "EQU"){
+        alt_low = "greater"
+        alt_high = "less"
+        test_hypothesis = "Hypothesis Tested: Equivalence"
+        null_hyp = paste0(round(pr_l_eqb,2),
+                          " >= (Mean1 - Mean2) or (Mean1 - Mean2) >= ",
+                          round(pr_h_eqb,2))
+        alt_hyp = paste0(round(pr_l_eqb,2),
+                         " < (Mean1 - Mean2) < ",
+                         round(pr_h_eqb,2))
+      } else if(self$options$hypothesis == "MET"){
+        alt_low = "less"
+        alt_high = "greater"
+        test_hypothesis = "Hypothesis Tested: Minimal Effect"
+        null_hyp = paste0(round(pr_l_eqb,2),
+                          " <= (Mean1 - Mean2)  <= ",
+                          round(pr_h_eqb,2))
+        alt_hyp = paste0(round(pr_l_eqb,2),
+                         " > (Mean1 - Mean2) or (Mean1 - Mean2)  > ",
+                         round(pr_h_eqb,2))
+      }
+
+      text_res = paste0(test_hypothesis,
                         "\n \n",
                         "Null Hypothesis: ", null_hyp,"\n",
                         "Alternative: ", alt_hyp,"\n",
-                        "Conclusion: The effect is ",TOSTres$decision$combined)
+                        "Conclusion: The effect is ",TOSTres$decision$combined,
+                        ifelse(self$options$eqbound_type == 'SMD',
+                               "\n Warning: standardized bounds produce biased results. \n Consider setting bounds in raw units", ""))
       self$results$text$setContent(text_res)
 
       #print(points)
@@ -302,7 +313,21 @@ dataTOSTpairedClass <- R6::R6Class(
       #            vjust=1.25,
       #            angle = 90,
       #            label='Upper Bound') +
-        theme_tidybayes()
+        theme_tidybayes() +
+        theme(
+          legend.position = "top",
+          strip.text = element_text(face = "bold", size = 11),
+          legend.text = element_text(face = "bold", size = 11),
+          legend.title = element_text(face = "bold", size = 11),
+          axis.text.x = element_text(face = "bold", size = 11),
+          axis.text.y = element_text(face = "bold", size = 11),
+          axis.title.x = element_text(face = "bold", size = 11),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.background = element_rect(fill = "transparent",colour = NA),
+          plot.background = element_rect(fill = "transparent",colour = NA),
+          legend.background = element_rect(fill = "transparent",colour = NA)
+        )
 
       print(p3)
       return(TRUE)
@@ -355,7 +380,21 @@ dataTOSTpairedClass <- R6::R6Class(
                   alpha = .5) +
         xlab("Condition") + ylab("") +
         #scale_x_continuous(breaks=c(1,2), labels=c("Before", "After"), limits=c(0.5, 2.5)) +
-        theme_tidybayes()
+        theme_tidybayes() +
+        theme(
+          legend.position = "top",
+          strip.text = element_text(face = "bold", size = 11),
+          legend.text = element_text(face = "bold", size = 11),
+          legend.title = element_text(face = "bold", size = 11),
+          axis.text.x = element_text(face = "bold", size = 11),
+          axis.text.y = element_text(face = "bold", size = 11),
+          axis.title.x = element_text(face = "bold", size = 11),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.background = element_rect(fill = "transparent",colour = NA),
+          plot.background = element_rect(fill = "transparent",colour = NA),
+          legend.background = element_rect(fill = "transparent",colour = NA)
+        )
 
       print(p)
       return(TRUE)

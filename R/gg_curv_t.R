@@ -121,7 +121,8 @@ gg_curv_t <- function(data_list,
       geom_density(color = "black",
                    fill = "white") +
       geom_area(data = subset(df.dens, x >= interval2$li[1]  & x <= interval2$ui[1]),
-                aes(x = x, y = y, fill = as.character(ci_shade1[1]))) +
+                aes(x = x, y = y, fill = as.character(ci_shade1[1])),
+                color = "black") +
       #scale_fill_brewer(direction = -1,
       #                  na.translate = FALSE) +
       scale_fill_viridis_d(option = "D",
@@ -134,7 +135,8 @@ gg_curv_t <- function(data_list,
 
       p_cd2 = p_cd1 +
         geom_area(data = subset(df.dens, x >= interval2$li[2]  & x <= interval2$ui[2]),
-                  aes(x = x, y = y, fill = as.character(ci_shade1[2])))
+                  aes(x = x, y = y, fill = as.character(ci_shade1[2])),
+                  color = "black")
     } else {
       p_cd2 = p_cd1
     }
@@ -143,14 +145,16 @@ gg_curv_t <- function(data_list,
 
       p_cd2 = p_cd2 +
         geom_area(data = subset(df.dens, x >= interval2$li[3]  & x <= interval2$ui[3]),
-                  aes(x = x, y = y, fill = as.character(ci_shade1[3])))
+                  aes(x = x, y = y, fill = as.character(ci_shade1[3])),
+                  color = "black")
     }
 
     if(length(ci_shade1 )> 3){
 
       p_cd2 = p_cd2 +
         geom_area(data = subset(df.dens, x >= interval2$li[4]  & x <= interval2$ui[4]),
-                  aes(x = x, y = y, fill = as.character(ci_shade1[4])))
+                  aes(x = x, y = y, fill = as.character(ci_shade1[4])),
+                  color = "black")
     }
     p_cd2 = p_cd2 +
       labs(

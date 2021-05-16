@@ -136,7 +136,7 @@ options:
           title: Cohen's d
         - name: g
           title: Hedges' g
-      default: d
+      default: g
       description:
           R: >
             `'d'` (default) or `'g'`;

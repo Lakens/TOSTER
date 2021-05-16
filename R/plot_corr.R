@@ -1,6 +1,7 @@
-#' Function to produce plots of the distribution of Pearson's correlation coefficient
+#' Function to produce plots of the distribution of standard correlation coefficients
 #' @param r The observed correlation coefficient.
 #' @param n Total number of observations (sample size).
+#' @param method The method by which the coefficient was calculated: pearson, spearman, or kendall (default is "pearson")
 #' @param type Choose whether to plot a "consonance" function ("c"), consonance density ("cd"), or both (c("c","cd"); defualt option).
 #' @param levels Numeric vector of confidence levels to display
 #' @details
@@ -9,20 +10,22 @@
 #' @return Returns plot of the distribution of the correlation coefficient.
 #' @export
 
-plot_corr <- function(r,
-                      n,
-                      type = c("c","cd"),
-                      levels = c(.68,.9,.95,.999)){
+plot_cor <- function(r,
+                     n,
+                     method = "pearson",
+                     type = c("c", "cd"),
+                     levels = c(.68, .9, .95, .999)){
   dat = corr_curv(r = r,
-                 n = n,
-                 steps = 5000)
+                  n = n,
+                  type = method,
+                  steps = 5000)
 
   resplot = gg_curv_t(
     dat,
     type = type,
     levels = levels,
     position = "pyramid",
-    xaxis = "Pearson's Correlation Coefficent (r)",
+    xaxis = "Correlation Coefficent",
     yaxis1 = expression(paste(italic(p),
                               "-value")),
     yaxis2 = "Confidence Interval (%)",

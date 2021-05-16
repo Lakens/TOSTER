@@ -17,7 +17,7 @@ dataTOSTone(
   plots = FALSE,
   low_eqbound_d = -999999999,
   high_eqbound_d = -999999999,
-  smd_type = "d"
+  smd_type = "g"
 )
 }
 \arguments{

@@ -6,6 +6,14 @@ jrs:   "1.0"
 items:
     - name:  text
       type:  Preformatted
+      clearWith:
+        - mu
+        - alpha
+        - var_equal
+        - hypothesis
+        - low_eqbound
+        - high_eqbound
+        - eqbound_type
 
     - name:  tost
       title: TOST Results

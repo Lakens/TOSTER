@@ -12,14 +12,14 @@ dataTOSTtwo(
   hypothesis = "EQU",
   low_eqbound = -0.5,
   high_eqbound = 0.5,
-  eqbound_type = "SMD",
+  eqbound_type = "raw",
   alpha = 0.05,
   desc = FALSE,
   plots = FALSE,
   descplots = FALSE,
   low_eqbound_d = -999999999,
   high_eqbound_d = -999999999,
-  smd_type = "d"
+  smd_type = "g"
 )
 }
 \arguments{
