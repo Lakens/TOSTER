@@ -10,7 +10,8 @@ powerTOSTtwo.raw(
   N,
   sdpooled,
   low_eqbound,
-  high_eqbound
+  high_eqbound,
+  delta
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ powerTOSTtwo.raw(
 \item{low_eqbound}{lower equivalence bounds (e.g., -0.5) expressed in raw scale units (e.g., scalepoints)}
 
 \item{high_eqbound}{upper equivalence bounds (e.g., 0.5) expressed in raw scale units (e.g., scalepoints)}
+
+\item{delta}{hypothesized true value for the difference between the 2 means.}
 }
 \value{
 Calculate either achieved power, equivalence bounds, or required N, assuming a true effect size of 0.

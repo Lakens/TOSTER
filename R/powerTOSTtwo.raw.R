@@ -5,6 +5,7 @@
 #' @param low_eqbound lower equivalence bounds (e.g., -0.5) expressed in raw scale units (e.g., scalepoints)
 #' @param high_eqbound upper equivalence bounds (e.g., 0.5) expressed in raw scale units (e.g., scalepoints)
 #' @param sdpooled specify the pooled standard deviation
+#' @param delta hypothesized true value for the difference between the 2 means. Default is zero.
 #' @return Calculate either achieved power, equivalence bounds, or required N, assuming a true effect size of 0.
 #' Returns a string summarizing the power analysis, and a numeric variable for number of observations, equivalence bounds, or power.
 #' @examples
@@ -26,10 +27,16 @@
 #' @importFrom graphics abline plot points segments title
 #' @export
 
-powerTOSTtwo.raw<-function(alpha, statistical_power, N, sdpooled, low_eqbound, high_eqbound){
+powerTOSTtwo.raw<-function(alpha,
+                           statistical_power,
+                           N,
+                           sdpooled,
+                           low_eqbound,
+                           high_eqbound,
+                           delta = 0){
   if(missing(N)) {
-    NT1<-2*sdpooled^2*(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(low_eqbound)^2
-    NT2<-2*sdpooled^2*(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(high_eqbound)^2
+    NT1<-2*sdpooled^2*(qnorm(1-alpha)+qnorm(1-((1-statistical_power))))^2/(delta - low_eqbound)^2
+    NT2<-2*sdpooled^2*(qnorm(1-alpha)+qnorm(1-((1-statistical_power))))^2/(delta - high_eqbound)^2
     N<-max(NT1,NT2)
     message(cat("The required sample size to achieve",100*statistical_power,"% power with equivalence bounds of",low_eqbound,"and",high_eqbound,"is",N,"per group, or", 2*ceiling(N),"in total."))
     return(N)
