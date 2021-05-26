@@ -23,13 +23,17 @@ pow_tTOST = function (alpha = 0.05,
     }
   }
 
-  nc <- sum(1/n)
+
   if (type == "two.sample"){
     df = ifelse(length(n) > 1 , sum(n)-2, 2*n-2)
+    #nc <- sum(1/n)
+    nc = ifelse(length(n) > 1 , sum(1/n), 2*(1/(n)))
+
   } else {
     df = n-1
+    nc <- sum(1/n)
   }
-  se.fac <- ifelse(type == "two.sample" , sqrt(1 * nc), sqrt(2 * nc)) sqrt(ades$bkni * nc)
+  se.fac <- sqrt(1 * nc) #sqrt(ades$bkni * nc) ** error for power.TOST
 
 
   if (any(df < 1))
@@ -37,12 +41,11 @@ pow_tTOST = function (alpha = 0.05,
   pow <- calc_power_theta(alpha,
                           ltheta1 = theta1,
                           ltheta2 = theta2,
-                          ldiff = theta0,
+                          diffm = theta0,
                           sem = sd * se.fac,
                           df = df)
   return(pow)
 }
-
 
 calc_power_theta = function (alpha = 0.05,
                              ltheta1,
@@ -150,5 +153,145 @@ OwensQ = function (nu, t, delta, a = 0, b)
   dens
 }
 
+OwensQOwen =  function (nu, t, delta, a = 0, b)
+{
+  if (nu < 1)
+    stop("nu must be >=1!")
+  if (a != 0)
+    stop("Only a=0 implemented!")
+  if (!is.finite(b))
+    return(pt(t, df = nu, ncp = delta))
+  if (!is.finite(delta))
+    delta <- sign(delta) * 1e+20
+  A <- t/sqrt(nu)
+  B <- nu/(nu + t * t)
+  upr <- nu - 2
+  av <- vector(mode = "numeric", length = nu)
+  for (k in seq_along(av)) {
+    if (k == 1 | k == 2)
+      av[k] <- 1
+    else av[k] <- 1/((k - 2) * av[k - 1])
+  }
+  ll <- ifelse((upr - 1) > 0, upr - 1, 0)
+  L <- vector(mode = "numeric", length = ll)
+  if (is.finite(b)) {
+    for (k in seq_along(L)) {
+      if (k == 1)
+        L[1] <- 0.5 * A * B * b * dnorm(b) * dnorm(A *
+                                                     b - delta)
+      else L[k] <- av[k + 3] * b * L[k - 1]
+    }
+  }
+  ll <- ifelse((upr + 1) > 0, upr + 1, 0)
+  H <- vector(mode = "numeric", length = ll)
+  if (is.finite(b)) {
+    for (k in seq_along(H)) {
+      if (k == 1)
+        H[1] <- -dnorm(b) * pnorm(A * b - delta)
+      else H[k] <- av[k + 1] * b * H[k - 1]
+    }
+  }
+  M <- vector(mode = "numeric", length = ll)
+  sB <- sqrt(B)
+  for (k in seq_along(M)) {
+    if (k == 1)
+      M[1] <- A * sB * dnorm(delta * sB) * (pnorm(delta *
+                                                    A * sB) - pnorm((delta * A * B - b)/sB))
+    if (k == 2)
+      M[2] <- B * (delta * A * M[1] + A * dnorm(delta *
+                                                  sB) * (dnorm(delta * A * sB) - dnorm((delta *
+                                                                                          A * B - b)/sB)))
+    if (k > 2)
+      M[k] <- ((k - 2)/(k - 1)) * B * (av[k - 1] * delta *
+                                         A * M[k - 1] + M[k - 2]) - L[k - 2]
+  }
+  sumt <- 0
+  if (2 * (nu%/%2) != nu) {
+    if (upr >= 1) {
+      k <- seq(1, upr, by = 2)
+      sumt <- sum(M[k + 1]) + sum(H[k + 1])
+    }
+    qv <- pnorm(b) - 2 * OwensT(b, A - delta/b) - 2 * OwensT(delta *
+                                                               sB, (delta * A * B - b)/B/delta) + 2 * OwensT(delta *
+                                                                                                               sB, A) - (delta >= 0) + 2 * sumt
+  }
+  else {
+    if (upr >= 0) {
+      k <- seq(0, upr, by = 2)
+      sumt <- sum(M[k + 1]) + sum(H[k + 1])
+    }
+    qv <- pnorm(-delta) + sqrt(2 * pi) * sumt
+  }
+  return(qv)
+}
 
+OwensT = function (h, a)
+{
+  eps <- .Machine$double.eps
+  if (abs(a) < eps | !is.finite(h) | abs(1 - abs(a)) < eps |
+      abs(h) < eps | !is.finite(abs(a))) {
+    if (abs(a) < eps)
+      return(0)
+    if (!is.finite(h))
+      return(0)
+    if (abs(1 - abs(a)) < eps)
+      return(sign(a) * 0.5 * pnorm(h) * (1 - pnorm(h)))
+    if (abs(h) < eps)
+      return(atan(a)/2/pi)
+    if (!is.finite(abs(a))) {
+      if (h < 0)
+        tha <- pnorm(h)/2
+      else tha <- (1 - pnorm(h))/2
+      return(sign(a) * tha)
+    }
+  }
+  aa <- abs(a)
+  if (aa <= 1) {
+    tha <- tfn(h, a)
+    return(tha)
+  }
+  else {
+    ah <- aa * h
+    gh <- pnorm(h)
+    gah <- pnorm(ah)
+    tha <- 0.5 * (gh + gah) - gh * gah - tfn(ah, 1/aa)
+  }
+  if (a < 0)
+    tha <- -tha
+  return(tha)
+}
+
+tfn = function (x, fx)
+{
+  ng <- 5
+  r <- c(0.1477621, 0.1346334, 0.1095432, 0.0747257, 0.0333357)
+  u <- c(0.0744372, 0.2166977, 0.3397048, 0.4325317, 0.4869533)
+  tp <- 1/(2 * pi)
+  tv1 <- .Machine$double.eps
+  tv2 <- 15
+  tv3 <- 15
+  tv4 <- 1e-05
+  if (tv2 < abs(x))
+    return(0)
+  xs <- -0.5 * x * x
+  x2 <- fx
+  fxs <- fx * fx
+  if (tv3 <= log(1 + fxs) - xs * fxs) {
+    x1 <- 0.5 * fx
+    fxs <- 0.25 * fxs
+    while (1) {
+      rt <- fxs + 1
+      x2 <- x1 + (xs * fxs + tv3 - log(rt))/(2 * x1 *
+                                               (1/rt - xs))
+      fxs <- x2 * x2
+      if (abs(x2 - x1) < tv4)
+        break
+      x1 <- x2
+    }
+  }
+  r1 <- 1 + fxs * (0.5 + u)^2
+  r2 <- 1 + fxs * (0.5 - u)^2
+  rt <- sum(r * (exp(xs * r1)/r1 + exp(xs * r2)/r2))
+  return(rt * x2 * tp)
+}
 
