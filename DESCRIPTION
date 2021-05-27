@@ -12,6 +12,7 @@ Authors@R: c(
            role = c("aut"),
            email = "arcaldwell49@gmail.com"))
 Maintainer: Daniel Lakens <D.Lakens@tue.nl>
+URL: https://aaroncaldwell.us/TOSTERpkg/
 License: GPL-3
 RoxygenNote: 7.1.1
 Imports:
