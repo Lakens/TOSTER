@@ -36,8 +36,8 @@ powerTOSTtwo.raw<-function(alpha,
                            delta = 0){
   message("Note: this function is defunct. Please use power_t_TOST instead")
   if(missing(N)) {
-    NT1<-2*sdpooled^2*(qnorm(1-alpha)+qnorm(1-((1-statistical_power))))^2/(delta - low_eqbound)^2
-    NT2<-2*sdpooled^2*(qnorm(1-alpha)+qnorm(1-((1-statistical_power))))^2/(delta - high_eqbound)^2
+    NT1<-2*sdpooled^2*(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(delta - low_eqbound)^2
+    NT2<-2*sdpooled^2*(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(delta - high_eqbound)^2
     N<-max(NT1,NT2)
     message(cat("The required sample size to achieve",100*statistical_power,"% power with equivalence bounds of",low_eqbound,"and",high_eqbound,"is",N,"per group, or", 2*ceiling(N),"in total."))
     return(N)
