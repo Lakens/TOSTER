@@ -91,13 +91,26 @@ plot.TOSTt <- function(x,
     } else {
       sets = c(.68,c2,c1)
     }
+  }else{
+    sets = ci_shades
+    if(length(sets) > 4){
+      stop("ci_shades cannot have a length greater than 4")
+    }
+  }
+
+  if(!missing(ci_lines)&& length(ci_lines >1) && type == "cd"){
+    stop("ci_lines cannot be greater than 1 if type = \"cd\" ")
   }
 
   if(missing(ci_lines)){
     ci_levs = 1-x$alpha*2
+    c2 = ci_levs
   } else{
     ci_levs = ci_lines
+    c2 = ci_lines
   }
+
+
   # Get x-axis label
   if(grepl("one",x$method, ignore.case=TRUE)){
     x_label = "Mean"
