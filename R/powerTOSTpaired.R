@@ -25,6 +25,7 @@
 #' @export
 
 powerTOSTpaired<-function(alpha, statistical_power, N, low_eqbound_dz, high_eqbound_dz){
+  message("Note: this function is defunct. Please use power_t_TOST instead")
   if(missing(N)) {
     NT1<-(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(low_eqbound_dz)^2
     NT2<-(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(high_eqbound_dz)^2

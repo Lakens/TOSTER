@@ -11,9 +11,9 @@ vignette: >
 
 For an open access tutorial paper explaining how to set equivalence bounds, and how to perform and report equivalence tests, see Lakens, D., Scheel, A. M., & Isager, P. M. (2018). Equivalence Testing for Psychological Research: A Tutorial. *Advances in Methods and Practices in Psychological Science*, 1(2), 259-269.  https://doi.org/10.1177/2515245918770963
 
-**Warning: many of these functions are deprecated.**
+**Warning: many of these functions are defunct and outdated. Please see the other vignettes for details on the new functions.**
 
-Please see the "Introduction to t_TOST" vignette for details on the up-to-date functions. This vignette, and the functions used, will continue to be in the package for continuity purposes.
+The "Introduction to t_TOST" vignette, in particular, will be helpful. This vignette, and the functions used, will continue to be in the package for continuity purposes.
 
 # Equivalence Testing with TOSTER
 
@@ -135,6 +135,7 @@ Olson, Fazio, and Hermann (2007) reported correlations between implicit and expl
 ```{r, fig.width=6}
 powerTOSTr(alpha=0.05, statistical_power=0.8, low_eqbound_r=-0.24, high_eqbound_r=0.24)
 ```
+
 With 71 pairs of observations between measures, the researchers have 80% power for equivalence bounds of r = -0.24 and r = 0.24. 
 
 The correlations observed by Olson et al (2007), Study 1, are presented in the table below (significant correlations are flagged by an asteriks). 
@@ -151,6 +152,7 @@ We can test each correlation, for example the correlation between the IAT and th
 ```{r, fig.width=6}
 TOSTr(n=71, r=-0.12, low_eqbound_r=-0.24, high_eqbound_r=0.24, alpha=0.05)
 ```
+
 We see that none of the correlations can be declared to be statistically equivalent. Instead, the tests yield undetermined outcomes: the correlations are not significantly different from 0, nor statistically equivalent.  
 
 *Olson, M. A., Fazio, R. H., & Hermann, A. D. (2007). Reporting tendencies underlie discrepancies between implicit and explicit measures of self-esteem. Psychological Science, 18(4), 287-291.*

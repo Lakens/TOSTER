@@ -96,6 +96,7 @@ dataTOSToneClass <- R6::R6Class(
                             "\n \n",
                             "Null Hypothesis: ", null_hyp,"\n",
                             "Alternative: ", alt_hyp,
+                            "Note: SMD confidence intervals are an approximation. See vignette(\"SMD_calcs\") \n",
                             "\n Warning: standardized bounds produce biased results. \n Consider setting bounds in raw units")
 
         } else{
@@ -103,7 +104,8 @@ dataTOSToneClass <- R6::R6Class(
                             test_hypothesis,
                             "\n \n",
                             "Null Hypothesis: ", null_hyp,"\n",
-                            "Alternative: ", alt_hyp)
+                            "Alternative: ", alt_hyp, "\n",
+                            "Note: SMD confidence intervals are an approximation. See vignette(\"SMD_calcs\") \n")
         }
 
         tt$setRow(rowKey=name,

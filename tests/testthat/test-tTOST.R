@@ -17,6 +17,8 @@ test_that("Run examples for one sample", {
 
   expect_error(t_TOST())
 
+  # Normal one sample ----
+
   test1 = t_TOST(x = samp1,
                  low_eqbound = -.5,
                  high_eqbound = .5)
@@ -31,11 +33,11 @@ test_that("Run examples for one sample", {
                  high_eqbound = .5,
                  hypothesis = "MET")
 
-  test4 = t_TOST(x = samp1,
+  test4 =suppressWarnings({ t_TOST(x = samp1,
                  low_eqbound = -.5,
                  high_eqbound = .5,
                  eqbound_type = "SMD",
-                 hypothesis = "MET")
+                 hypothesis = "MET")})
 
   expect_equal(1-test1$TOST$p.value[2],
                test3$TOST$p.value[2])
@@ -49,18 +51,61 @@ test_that("Run examples for one sample", {
   expect_equal(1-test2$TOST$p.value[3],
                test4$TOST$p.value[3])
 
+  # Compare to tsum --------
 
-  # Re-run with bias correction not run
+  tsum1 = tsum_TOST(m1 = mean(samp1),
+                    sd1 = sd(samp1),
+                    n1 = length(samp1),
+                    low_eqbound = -.5,
+                    high_eqbound = .5)
+
+  tsum2 = suppressWarnings({ tsum_TOST(m1 = mean(samp1),
+                    sd1 = sd(samp1),
+                    n1 = length(samp1),
+                    low_eqbound = -.5,
+                    high_eqbound = .5,
+                    eqbound_type = "SMD") })
+
+  tsum3 = tsum_TOST(m1 = mean(samp1),
+                    sd1 = sd(samp1),
+                    n1 = length(samp1),
+                    low_eqbound = -.5,
+                    high_eqbound = .5,
+                    hypothesis = "MET")
+
+  tsum4 = suppressWarnings({tsum_TOST(m1 = mean(samp1),
+                    sd1 = sd(samp1),
+                    n1 = length(samp1),
+                    low_eqbound = -.5,
+                    high_eqbound = .5,
+                    eqbound_type = "SMD",
+                    hypothesis = "MET") })
+  # Check internal consistency
+  expect_equivalent(test1$TOST$p.value,
+                    tsum1$TOST$p.value)
+
+  expect_equivalent(test2$TOST$p.value,
+                    tsum2$TOST$p.value)
+
+  expect_equivalent(test3$TOST$p.value,
+                    tsum3$TOST$p.value)
+
+  expect_equivalent(test4$TOST$p.value,
+                    tsum4$TOST$p.value)
+
+
+  # Re-run with bias correction not run -----
   test1 = t_TOST(x = samp1,
                  low_eqbound = -.5,
                  high_eqbound = .5,
                  bias_correction = FALSE)
 
-  test2 = t_TOST(x = samp1,
+  test2 = suppressWarnings({  t_TOST(x = samp1,
                  low_eqbound = -.5,
                  high_eqbound = .5,
                  eqbound_type = "SMD",
                  bias_correction = FALSE)
+  })
 
   test3 = t_TOST(x = samp1,
                  low_eqbound = -.5,
@@ -68,12 +113,13 @@ test_that("Run examples for one sample", {
                  hypothesis = "MET",
                  bias_correction = FALSE)
 
-  test4 = t_TOST(x = samp1,
+  test4 = suppressWarnings({ t_TOST(x = samp1,
                  low_eqbound = -.5,
                  high_eqbound = .5,
                  eqbound_type = "SMD",
                  hypothesis = "MET",
                  bias_correction = FALSE)
+  })
 
   expect_equal(1-test1$TOST$p.value[2],
                test3$TOST$p.value[2])
@@ -86,6 +132,50 @@ test_that("Run examples for one sample", {
 
   expect_equal(1-test2$TOST$p.value[3],
                test4$TOST$p.value[3])
+
+  tsum1 = tsum_TOST(m1 = mean(samp1),
+                    sd1 = sd(samp1),
+                    n1 = length(samp1),
+                    low_eqbound = -.5,
+                    high_eqbound = .5,
+                    bias_correction = FALSE)
+
+  tsum2 = tsum_TOST(m1 = mean(samp1),
+                    sd1 = sd(samp1),
+                    n1 = length(samp1),
+                    low_eqbound = -.5,
+                    high_eqbound = .5,
+                    eqbound_type = "SMD",
+                    bias_correction = FALSE)
+
+  tsum3 = tsum_TOST(m1 = mean(samp1),
+                    sd1 = sd(samp1),
+                    n1 = length(samp1),
+                    low_eqbound = -.5,
+                    high_eqbound = .5,
+                    hypothesis = "MET",
+                    bias_correction = FALSE)
+
+  tsum4 = tsum_TOST(m1 = mean(samp1),
+                    sd1 = sd(samp1),
+                    n1 = length(samp1),
+                    low_eqbound = -.5,
+                    high_eqbound = .5,
+                    eqbound_type = "SMD",
+                    hypothesis = "MET",
+                    bias_correction = FALSE)
+  # Check internal consistency
+  expect_equivalent(test1$TOST$p.value,
+                    tsum1$TOST$p.value)
+
+  expect_equivalent(test2$TOST$p.value,
+                    tsum2$TOST$p.value)
+
+  expect_equivalent(test3$TOST$p.value,
+                    tsum3$TOST$p.value)
+
+  expect_equivalent(test4$TOST$p.value,
+                    tsum4$TOST$p.value)
 
   prtest = hush(print(test4))
   p1 = plot(test4)
@@ -142,7 +232,65 @@ test_that("Run examples for two sample", {
   expect_equal(1-test2$TOST$p.value[3],
                test4$TOST$p.value[3])
 
-  # Re-run with bias correction not run and non-Welch
+  # t_sum comparison var.equal = FALSE ----
+
+  tsum1 = tsum_TOST(m1 = mean(samp1),
+                    sd1 = sd(samp1),
+                    n1 = length(samp1),
+                    m2 = mean(samp2),
+                    sd2 = sd(samp2),
+                    n2 = length(samp2),
+                    low_eqbound = -.5,
+                    high_eqbound = .5,
+                    bias_correction = FALSE)
+
+  tsum2 = suppressWarnings({  tsum_TOST(m1 = mean(samp1),
+                                        sd1 = sd(samp1),
+                                        n1 = length(samp1),
+                                        m2 = mean(samp2),
+                                        sd2 = sd(samp2),
+                                        n2 = length(samp2),
+                    low_eqbound = -.5,
+                    high_eqbound = .5,
+                    eqbound_type = "SMD",
+                    bias_correction = FALSE) })
+
+  tsum3 = tsum_TOST(m1 = mean(samp1),
+                     sd1 = sd(samp1),
+                     n1 = length(samp1),
+                     m2 = mean(samp2),
+                     sd2 = sd(samp2),
+                     n2 = length(samp2),
+                    low_eqbound = -.5,
+                    high_eqbound = .5,
+                    hypothesis = "MET",
+                    bias_correction = FALSE)
+
+  tsum4 = suppressWarnings({ tsum_TOST(m1 = mean(samp1),
+                    sd1 = sd(samp1),
+                    n1 = length(samp1),
+                    m2 = mean(samp2),
+                    sd2 = sd(samp2),
+                    n2 = length(samp2),
+                    low_eqbound = -.5,
+                    high_eqbound = .5,
+                    eqbound_type = "SMD",
+                    hypothesis = "MET",
+                    bias_correction = FALSE)})
+  # Check internal consistency
+  expect_equivalent(test1$TOST$p.value,
+                    tsum1$TOST$p.value)
+
+  expect_equivalent(test2$TOST$p.value,
+                    tsum2$TOST$p.value)
+
+  expect_equivalent(test3$TOST$p.value,
+                    tsum3$TOST$p.value)
+
+  expect_equivalent(test4$TOST$p.value,
+                    tsum4$TOST$p.value)
+
+  # Re-run with bias correction not run and non-Welch ----
   test1 = t_TOST(x = samp1,
                  y = samp2,
                  var.equal = TRUE,
@@ -186,6 +334,68 @@ test_that("Run examples for two sample", {
 
   expect_equal(1-test2$TOST$p.value[3],
                test4$TOST$p.value[3])
+
+  # t_sum comparison var.equal = TRUE ----
+
+  tsum1 = tsum_TOST(m1 = mean(samp1),
+                    sd1 = sd(samp1),
+                    n1 = length(samp1),
+                    m2 = mean(samp2),
+                    sd2 = sd(samp2),
+                    n2 = length(samp2),
+                    var.equal = TRUE,
+                    low_eqbound = -.5,
+                    high_eqbound = .5,
+                    bias_correction = FALSE)
+
+  tsum2 = suppressWarnings({  tsum_TOST(m1 = mean(samp1),
+                                        sd1 = sd(samp1),
+                                        n1 = length(samp1),
+                                        m2 = mean(samp2),
+                                        sd2 = sd(samp2),
+                                        n2 = length(samp2),
+                                        var.equal = TRUE,
+                                        low_eqbound = -.5,
+                                        high_eqbound = .5,
+                                        eqbound_type = "SMD",
+                                        bias_correction = FALSE) })
+
+  tsum3 = tsum_TOST(m1 = mean(samp1),
+                    sd1 = sd(samp1),
+                    n1 = length(samp1),
+                    m2 = mean(samp2),
+                    sd2 = sd(samp2),
+                    n2 = length(samp2),
+                    var.equal = TRUE,
+                    low_eqbound = -.5,
+                    high_eqbound = .5,
+                    hypothesis = "MET",
+                    bias_correction = FALSE)
+
+  tsum4 = suppressWarnings({ tsum_TOST(m1 = mean(samp1),
+                                       sd1 = sd(samp1),
+                                       n1 = length(samp1),
+                                       m2 = mean(samp2),
+                                       sd2 = sd(samp2),
+                                       n2 = length(samp2),
+                                       var.equal = TRUE,
+                                       low_eqbound = -.5,
+                                       high_eqbound = .5,
+                                       eqbound_type = "SMD",
+                                       hypothesis = "MET",
+                                       bias_correction = FALSE)})
+  # Check internal consistency
+  expect_equivalent(test1$TOST$p.value,
+                    tsum1$TOST$p.value)
+
+  expect_equivalent(test2$TOST$p.value,
+                    tsum2$TOST$p.value)
+
+  expect_equivalent(test3$TOST$p.value,
+                    tsum3$TOST$p.value)
+
+  expect_equivalent(test4$TOST$p.value,
+                    tsum4$TOST$p.value)
 
   # Run with formula
   test1 = t_TOST(formula = y ~ group,
@@ -232,6 +442,19 @@ test_that("Run examples for two sample", {
   expect_equal(1-test2$TOST$p.value[3],
                test4$TOST$p.value[3])
 
+  # Check internal consistency
+  expect_equivalent(test1$TOST$p.value,
+                    tsum1$TOST$p.value)
+
+  expect_equivalent(test2$TOST$p.value,
+                    tsum2$TOST$p.value)
+
+  expect_equivalent(test3$TOST$p.value,
+                    tsum3$TOST$p.value)
+
+  expect_equivalent(test4$TOST$p.value,
+                    tsum4$TOST$p.value)
+
   prtest = hush(print(test4))
   p1 = plot(test4)
 
@@ -244,6 +467,8 @@ test_that("Run examples for paired samples", {
 
   samp1 = rnorm(25)
   samp2 = rnorm(25)
+
+  cor12 = stats::cor(samp1,samp2)
 
   df_samp = data.frame(y = c(samp1,samp2),
                        group = c(rep("g1",25),
@@ -290,6 +515,70 @@ test_that("Run examples for paired samples", {
 
   expect_equal(1-test2$TOST$p.value[3],
                test4$TOST$p.value[3])
+
+  # t_sum paired ----
+
+  tsum1 = tsum_TOST(m1 = mean(samp1),
+                    sd1 = sd(samp1),
+                    n1 = length(samp1),
+                    m2 = mean(samp2),
+                    sd2 = sd(samp2),
+                    n2 = length(samp2),
+                    r12 = cor12, paired = TRUE,
+                    low_eqbound = -.5,
+                    high_eqbound = .5,
+                    bias_correction = FALSE)
+
+
+  tsum2 = suppressWarnings({  tsum_TOST(m1 = mean(samp1),
+                                        sd1 = sd(samp1),
+                                        n1 = length(samp1),
+                                        m2 = mean(samp2),
+                                        sd2 = sd(samp2),
+                                        n2 = length(samp2),
+                                        r12 = cor12, paired = TRUE,
+                                        low_eqbound = -.5,
+                                        high_eqbound = .5,
+                                        eqbound_type = "SMD",
+                                        bias_correction = FALSE) })
+
+  tsum3 = tsum_TOST(m1 = mean(samp1),
+                    sd1 = sd(samp1),
+                    n1 = length(samp1),
+                    m2 = mean(samp2),
+                    sd2 = sd(samp2),
+                    n2 = length(samp2),
+                    r12 = cor12,
+                    paired = TRUE,
+                    low_eqbound = -.5,
+                    high_eqbound = .5,
+                    hypothesis = "MET",
+                    bias_correction = FALSE)
+
+  tsum4 = suppressWarnings({ tsum_TOST(m1 = mean(samp1),
+                                       sd1 = sd(samp1),
+                                       n1 = length(samp1),
+                                       m2 = mean(samp2),
+                                       sd2 = sd(samp2),
+                                       n2 = length(samp2),
+                                       r12 = cor12, paired = TRUE,
+                                       low_eqbound = -.5,
+                                       high_eqbound = .5,
+                                       eqbound_type = "SMD",
+                                       hypothesis = "MET",
+                                       bias_correction = FALSE)})
+
+  expect_equivalent(test1$TOST$p.value,
+                    tsum1$TOST$p.value)
+
+  expect_equivalent(test2$TOST$p.value,
+                    tsum2$TOST$p.value)
+
+  expect_equivalent(test3$TOST$p.value,
+                    tsum3$TOST$p.value)
+
+  expect_equivalent(test4$TOST$p.value,
+                    tsum4$TOST$p.value)
 
   # Re-run with bias correction not run and rm_correction
   # rm_correction = TRUE
@@ -340,6 +629,74 @@ test_that("Run examples for paired samples", {
 
   expect_equal(1-test2$TOST$p.value[3],
                test4$TOST$p.value[3])
+
+  # t_sum paired ----
+
+  tsum1 = tsum_TOST(m1 = mean(samp1),
+                    sd1 = sd(samp1),
+                    n1 = length(samp1),
+                    m2 = mean(samp2),
+                    sd2 = sd(samp2),
+                    n2 = length(samp2),
+                    r12 = cor12, paired = TRUE,
+                    low_eqbound = -.5,
+                    high_eqbound = .5,
+                    rm_correction = TRUE,
+                    bias_correction = FALSE)
+
+
+  tsum2 = suppressWarnings({  tsum_TOST(m1 = mean(samp1),
+                                        sd1 = sd(samp1),
+                                        n1 = length(samp1),
+                                        m2 = mean(samp2),
+                                        sd2 = sd(samp2),
+                                        n2 = length(samp2),
+                                        r12 = cor12, paired = TRUE,
+                                        low_eqbound = -.5,
+                                        high_eqbound = .5,
+                                        eqbound_type = "SMD",
+                                        rm_correction = TRUE,
+                                        bias_correction = FALSE) })
+
+  tsum3 = tsum_TOST(m1 = mean(samp1),
+                    sd1 = sd(samp1),
+                    n1 = length(samp1),
+                    m2 = mean(samp2),
+                    sd2 = sd(samp2),
+                    n2 = length(samp2),
+                    r12 = cor12,
+                    paired = TRUE,
+                    low_eqbound = -.5,
+                    high_eqbound = .5,
+                    hypothesis = "MET",
+                    rm_correction = TRUE,
+                    bias_correction = FALSE)
+
+  tsum4 = suppressWarnings({ tsum_TOST(m1 = mean(samp1),
+                                       sd1 = sd(samp1),
+                                       n1 = length(samp1),
+                                       m2 = mean(samp2),
+                                       sd2 = sd(samp2),
+                                       n2 = length(samp2),
+                                       r12 = cor12, paired = TRUE,
+                                       low_eqbound = -.5,
+                                       high_eqbound = .5,
+                                       eqbound_type = "SMD",
+                                       hypothesis = "MET",
+                                       rm_correction = TRUE,
+                                       bias_correction = FALSE)})
+
+  expect_equivalent(test1$TOST$p.value,
+                    tsum1$TOST$p.value)
+
+  expect_equivalent(test2$TOST$p.value,
+                    tsum2$TOST$p.value)
+
+  expect_equivalent(test3$TOST$p.value,
+                    tsum3$TOST$p.value)
+
+  expect_equivalent(test4$TOST$p.value,
+                    tsum4$TOST$p.value)
 
   # Run with formula
   test1 = t_TOST(formula = y ~ group,

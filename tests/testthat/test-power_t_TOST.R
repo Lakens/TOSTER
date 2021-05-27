@@ -1,6 +1,5 @@
- sqrt(1*1/30)*sd(x1)
-tst1$stderr
-library(testthat)
+
+#library(testthat)
 
 test_that("PASS ex#1 pg 460-8", {
   # Solve for power
@@ -14,6 +13,31 @@ test_that("PASS ex#1 pg 460-8", {
     type = "two.sample"
   )
   expect_equal(round(t1$power,5),0.0386)
+  # solve n
+  t1 = power_t_TOST(
+    power = 0.0386,
+    delta = -4,
+    sd = 18,
+    low_eqbound = -19.2,
+    high_eqbound = 19.2,
+    alpha = 0.05,
+    type = "two.sample"
+  )
+  expect_equal(round(t1$n,0),3)
+
+  # solve alpha
+
+  t1 = power_t_TOST(
+    power = 0.0386,
+    n = 3,
+    delta = -4,
+    sd = 18,
+    low_eqbound = -19.2,
+    high_eqbound = 19.2,
+    type = "two.sample"
+  )
+  expect_equal(round(t1$alpha,2),.05)
+
 
   t2 = power_t_TOST(
     n = 8,
@@ -242,5 +266,65 @@ test_that("PASS ex#7 pg 519-8", {
   )
 
   expect_equal(ceiling(t4$n),152)
+
+  t4 = power_t_TOST(
+    n = 152,
+    delta = -15,
+    sd = 28.284,
+    low_eqbound = -20,
+    high_eqbound = 20,
+    alpha = 0.05,
+    type = "paired"
+  )
+
+  expect_equal(round(t4$power,1),.7)
+
+  t4 = power_t_TOST(
+    n = 152,
+    power = .7,
+    delta = -15,
+    sd = 28.284,
+    low_eqbound = -20,
+    high_eqbound = 20,
+    type = "paired"
+  )
+
+  expect_equal(round(t4$alpha,2),.05)
+})
+
+test_that("errors",{
+
+  expect_error(  t4 = power_t_TOST(
+    n = 152,
+    power = .7,
+    delta = -15,
+    sd = 28.284,
+    low_eqbound = -20,
+    high_eqbound = 20,
+    type = "paired",
+    alpha = .05
+  )
+  )
+
+  expect_error(  t4 = power_t_TOST(
+    n = 152,
+    delta = -15,
+    sd = 28.284,
+    low_eqbound = -20,
+    high_eqbound = 20,
+    type = "paired",
+    alpha = 1
+  )
+  )
+
+  expect_error(  t4 = power_t_TOST(
+    n = 152,
+    delta = -15,
+    sd = 28.284,
+    type = "paired",
+    alpha = .05
+  )
+  )
+
 })
 

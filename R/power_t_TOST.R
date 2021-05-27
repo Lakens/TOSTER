@@ -1,5 +1,5 @@
 #' @title Power calculations for TOST for t-tests
-#' Calculates the exact power of two one sided t-tests (TOST) for one, two, and paired samples.
+#' @description  Calculates the exact power of two one sided t-tests (TOST) for one, two, and paired samples.
 #' @param n number of observations per group. 2 sample sizes, in a vector, can be provided for the two sample case.
 #' @param delta true difference in means (default is 0)
 #' @param sd population standard deviation. Standard deviation of the differences for paired samples
@@ -15,6 +15,7 @@
 #' The power function in this package is limited. Please see the PowerTOST R package for more options.
 #' @references
 #' Phillips KF. Power of the Two One-Sided Tests Procedure in Bioequivalence. J Pharmacokin Biopharm. 1990;18(2):137–44. doi: 10.1007/BF01063556
+#'
 #' Diletti D, Hauschke D, Steinijans VW. Sample Size Determination for Bioequivalence Assessment by Means of Confidence Intervals. Int J Clin Pharmacol Ther Toxicol. 1991;29(1):1–8.
 #' @importFrom stats integrate uniroot qnorm pnorm dnorm
 #' @export

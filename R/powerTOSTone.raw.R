@@ -29,6 +29,7 @@
 
 
 powerTOSTone.raw<-function(alpha, statistical_power, sd, low_eqbound, high_eqbound){
+  message("Note: this function is defunct. Please use power_t_TOST instead")
   NT1<-(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(low_eqbound/sd)^2
   NT2<-(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(high_eqbound/sd)^2
   N<-ceiling(max(NT1,NT2))

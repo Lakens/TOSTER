@@ -12,12 +12,16 @@ Changes:
 -   *New* t\_TOST function
     -   Generalized function for TOST for *any* type of t-test
     -   S3 generic methods to print and plot results
+-   *New* power\_t\_TOST function
+    -   Generalized function for t_TOST power analysis
+    -   Outputs the an object of `power.htest` class
 -   Updated all jamovi functions to allow minimal effect tests
     -   Direction of one-sided tests now allows
 -   Added equ\_anova and equ\_ftest
     -   Now allows equivalence (also called non-inferiority)
 -   jamovi functions using t-test have more plotting options
 -   Error in powerTOSTtwo fixed when determining N
+-   All old t-test based TOST functions now have message telling users they are defunct
 
 # TOSTER v0.3.4
 

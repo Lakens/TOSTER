@@ -48,6 +48,8 @@ print.TOSTt <- function(x,
   cat("Effect Sizes \n")
   print(x$effsize)
   cat("\n")
+  cat("Note: SMD confidence intervals are an approximation. See vignette(\"SMD_calcs\")")
+  cat("\n")
 
 }
 

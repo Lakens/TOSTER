@@ -2,8 +2,7 @@
 % Please edit documentation in R/power_t_TOST.R
 \name{power_t_TOST}
 \alias{power_t_TOST}
-\title{Power calculations for TOST for t-tests
-Calculates the exact power of two one sided t-tests (TOST) for one, two, and paired samples.}
+\title{Power calculations for TOST for t-tests}
 \usage{
 power_t_TOST(
   n = NULL,
@@ -34,7 +33,6 @@ power_t_TOST(
 \item{type}{string specifying the type of t-test.}
 }
 \description{
-Power calculations for TOST for t-tests
 Calculates the exact power of two one sided t-tests (TOST) for one, two, and paired samples.
 }
 \details{
@@ -46,5 +44,6 @@ The power function in this package is limited. Please see the PowerTOST R packag
 }
 \references{
 Phillips KF. Power of the Two One-Sided Tests Procedure in Bioequivalence. J Pharmacokin Biopharm. 1990;18(2):137–44. doi: 10.1007/BF01063556
+
 Diletti D, Hauschke D, Steinijans VW. Sample Size Determination for Bioequivalence Assessment by Means of Confidence Intervals. Int J Clin Pharmacol Ther Toxicol. 1991;29(1):1–8.
 }

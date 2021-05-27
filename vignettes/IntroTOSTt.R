@@ -198,3 +198,18 @@ res4
 ## ----fig.width=6, fig.height=6------------------------------------------------
 plot(res4)
 
+## -----------------------------------------------------------------------------
+res_tsum = tsum_TOST(
+  m1 = mean(bugs$LDHF, na.rm=TRUE),
+  sd1 = sd(bugs$LDHF, na.rm=TRUE),
+  n1 = length(na.omit(bugs$LDHF)),
+  hypothesis = "EQU",
+  low_eqbound = 5.5,
+  high_eqbound = 8.5
+)
+
+res_tsum
+
+## ----fig.width=6, fig.height=6------------------------------------------------
+plot(res_tsum)
+

@@ -63,7 +63,11 @@ tsum_TOST <- function(m1,
     denom = "z"
   }
 
-  if(is.null(n2) || is.null(m2) || is.null()){
+  if(!(paired)){
+    r12 = NULL
+  }
+
+  if(is.null(n2) || is.null(m2) || is.null(sd2)){
     sample_type = "One Sample"
   } else if(paired == TRUE && !is.null(r12)) {
     sample_type = "Paired Sample"
@@ -106,6 +110,7 @@ tsum_TOST <- function(m1,
 
   tresult = tsum_test(m1 = m1, sd1 = sd1, n1 = n1,
                       m2 = m2, sd2 = sd2, n2 = n2,
+                      r12 = r12,
                       paired = paired,
                       var.equal = var.equal,
                       mu = mu,
@@ -115,7 +120,7 @@ tsum_TOST <- function(m1,
   if(paired == TRUE && !missing(r12)){
 
     cohen_res = d_est_pair(
-      n = n,
+      n = n1,
       m1 = m1,
       m2 = m2,
       sd1 = sd1,
@@ -180,6 +185,7 @@ tsum_TOST <- function(m1,
   low_ttest <- tsum_test(
     m1 = m1, sd1 = sd1, n1 = n1,
     m2 = m2, sd2 = sd2, n2 = n2,
+    r12 = r12,
     paired = paired,
     var.equal = var.equal,
     alternative = alt_low,
@@ -190,6 +196,7 @@ tsum_TOST <- function(m1,
   high_ttest <- tsum_test(
     m1 = m1, sd1 = sd1, n1 = n1,
     m2 = m2, sd2 = sd2, n2 = n2,
+    r12 = r12,
     paired = paired,
     var.equal = var.equal,
     alternative = alt_high,

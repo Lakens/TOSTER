@@ -26,6 +26,7 @@
 #' @export
 
 powerTOSTpaired.raw<-function(alpha, statistical_power, low_eqbound, high_eqbound, sdif){
+  message("Note: this function is defunct. Please use power_t_TOST instead")
   NT1<-(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(low_eqbound/sdif)^2
   NT2<-(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(high_eqbound/sdif)^2
   N<-ceiling(max(NT1,NT2))

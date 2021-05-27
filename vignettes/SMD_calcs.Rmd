@@ -78,7 +78,7 @@ d_{av} = \frac {\bar{x}_1 - \bar{x}_2} {s_{av}}
 $$
 Note: the x with the bar above it (pronounced as "x-bar") refers the the means of group 1 and 2 respectively.
 
-The degrees of freedom for Cohen's d(av) is the following:
+The degrees of freedom for Cohen's d(av), derived from @delacre2021, is the following:
 
 $$
 df = \frac{(n_1-1)(n_2-1)(s_1^2+s_2^2)^2}{(n_2-1) \cdot s_1^4+(n_1-1) \cdot s_2^4}
