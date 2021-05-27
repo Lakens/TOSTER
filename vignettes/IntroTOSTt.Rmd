@@ -194,6 +194,13 @@ Another nice feature is the generic `plot` method that can provide a visual summ
 plot(res1, type = "cd") 
 ```
 
+The shading pattern can be modified with the `ci_shades`.
+
+```{r fig.width=6, fig.height=6}
+plot(res1, type = "cd",
+     ci_shades = c(.9,.95)) 
+```
+
 Consonance plots, where all confidence intervals can be simultaneous plotted, can also be produced. The advantage here is multiple confidence interval lines can plotted at once.
 
 ```{r fig.width=6, fig.height=6}

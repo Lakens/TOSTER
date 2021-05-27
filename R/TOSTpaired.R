@@ -122,5 +122,5 @@ TOSTpaired<-function(n,m1,m2,sd1,sd2,r12,low_eqbound_dz, high_eqbound_dz, alpha,
                  low_eqbound=low_eqbound,
                  high_eqbound=high_eqbound,
                  low_eqbound_dz=low_eqbound_dz,high_eqbound_dz=high_eqbound_dz,
-                 LL_CI_TOST=LL90,UL_CI_TOST=UL90, LL_CI_TTEST=LL95, UL_CI_TTEST=UL95))
+                 LL_CI_TOST=LL90,UL_CI_TOST=UL90, LL_CI_TTEST=LL95, UL_CI_TTEST=UL95,NHST_t = t, NHST_p = pttest))
 }
