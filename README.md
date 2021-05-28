@@ -1,6 +1,6 @@
 # TOSTER
 
-*~An R package and jamovi module for equivalence testing~*
+*An R package and jamovi module for equivalence testing*
 
 **Background**
 
