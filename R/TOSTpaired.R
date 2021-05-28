@@ -102,20 +102,23 @@ TOSTpaired<-function(n,m1,m2,sd1,sd2,r12,low_eqbound_dz, high_eqbound_dz, alpha,
     cat("Null Hypothesis Test Result:\n")
     message(cat("The null hypothesis test was ",testoutcome,", t(",round(degree_f, digits=2),") = ",format(t, digits = 3, nsmall = 3, scientific = FALSE),", p = ",format(pttest, digits = 3, nsmall = 3, scientific = FALSE),", given an alpha of ",alpha,".",sep=""))
     if(pttest <= alpha && ptost <= alpha){
-      combined_outcome <- "statistically different from zero and statistically equivalent to zero"
+      combined_outcome <- paste0("NHST: reject null significance hypothesis that the effect is equal to ", 0," \n",
+                                 "TOST: reject null equivalence hypothesis")
     }
     if(pttest < alpha && ptost > alpha){
-      combined_outcome <- "statistically different from zero and statistically not equivalent to zero"
+      combined_outcome <- paste0("NHST: reject null significance hypothesis that the effect is equal to ",0," \n",
+                                 "TOST: don't reject null equivalence hypothesis")
     }
     if(pttest > alpha && ptost <= alpha){
-      combined_outcome <- "statistically not different from zero and statistically equivalent to zero"
+      combined_outcome <- paste0("NHST: don't reject null significance hypothesis that the effect is equal to ",0," \n",
+                                 "TOST: reject null equivalence hypothesis")
     }
     if(pttest > alpha && ptost > alpha){
-      combined_outcome <- "statistically not different from zero and statistically not equivalent to zero"
+      combined_outcome <-  paste0("NHST: don't reject null significance hypothesis that the effect is equal to ",0," \n",
+                                  "TOST: don't reject null equivalence hypothesis")
     }
     cat("\n")
-    message(cat("Based on the equivalence test and the null-hypothesis test combined, we can conclude that the observed effect is ",combined_outcome,".",sep=""))
-  }
+    message(combined_outcome)}
   # Return results in list()
   invisible(list(diff=dif,TOST_t1=t1,TOST_p1=p1,TOST_t2=t2,TOST_p2=p2,
                  TOST_df=degree_f,alpha=alpha,

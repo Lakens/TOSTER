@@ -96,19 +96,26 @@ TOSTtwo.prop <- function(prop1, prop2, n1, n2, low_eqbound, high_eqbound, alpha,
     cat("Null-Hypothesis Fisher's exact z-test Result:\n")
     message(cat("The null hypothesis test was ",testoutcome,", Z = ",format(z, digits = 3, nsmall = 3, scientific = FALSE),", p = ",format((ztest * 2), digits = 3, nsmall = 3, scientific = FALSE),", given an alpha of ",alpha,".",sep=""))
     if((ztest * 2) <= alpha && ptost <= alpha){
-      combined_outcome <- "statistically different from zero and statistically equivalent to zero"
+      combined_outcome <- paste0("NHST: reject null significance hypothesis\n",
+                                 "TOST: reject null equivalence hypothesis")
+      #"statistically different from zero and statistically equivalent to zero"
     }
     if((ztest * 2) < alpha && ptost > alpha){
-      combined_outcome <- "statistically different from zero and statistically not equivalent to zero"
+      combined_outcome <- paste0("NHST: reject null significance hypothesis \n",
+                                 "TOST: don't reject null equivalence hypothesis")
+      #"statistically different from zero and statistically not equivalent to zero"
     }
     if((ztest * 2) > alpha && ptost <= alpha){
-      combined_outcome <- "statistically not different from zero and statistically equivalent to zero"
+      combined_outcome <- paste0("NHST: don't reject null significance hypothesis that the effect is equal to ",0," \n",
+                                 "TOST: reject null equivalence hypothesis")
+      #"statistically not different from zero and statistically equivalent to zero"
     }
     if((ztest * 2) > alpha && ptost > alpha){
-      combined_outcome <- "statistically not different from zero and statistically not equivalent to zero"
+      combined_outcome <- paste0("NHST: don't reject null significance hypothesis that the effect is equal to ",0," \n",
+                                 "TOST: don't reject null equivalence hypothesis")#"statistically not different from zero and statistically not equivalent to zero"
     }
     cat("\n")
-    message(cat("Based on the equivalence test and the null-hypothesis test combined, we can conclude that the observed effect is ",combined_outcome,".",sep=""))
+    message(combined_outcome)
   }
   # Return results in list()
   invisible(list(dif = prop_dif, TOST_z1 = z1, TOST_p1 = p1,TOST_z2 = z2,TOST_p2 = p2, alpha = alpha, low_eqbound = low_eqbound, high_eqbound = high_eqbound, LL_CI_TOST = LL90, UL_CI_TOST = UL90, LL_CI_ZTEST = LL95, UL_CI_ZTEST = UL95, NHST_z = z, NHST_p = (ztest * 2)))
