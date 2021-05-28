@@ -22,6 +22,7 @@ Changes:
 -   jamovi functions using t-test have more plotting options
 -   Error in powerTOSTtwo fixed when determining N
 -   All old t-test based TOST functions now have message telling users they are defunct
+-   All TOST procedures have text results changed to provide more appropriate feedback.
 
 # TOSTER v0.3.4
 
