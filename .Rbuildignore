@@ -13,3 +13,4 @@
 ^pkgdown$
 ^R/dist_smd_ind\.R*
 ^R/dist_smd_ind2\.R*
+^\.github$
