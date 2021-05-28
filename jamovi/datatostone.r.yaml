@@ -50,7 +50,7 @@ items:
         - name: b[1]
           title: ''
           type: text
-          content: TOST Upper
+          content: TOST Lower
         - name: t[1]
           title: t
           type: number
@@ -64,7 +64,7 @@ items:
         - name: b[2]
           title: ''
           type: text
-          content: TOST Lower
+          content: TOST Upper
         - name: t[2]
           title: t
           type: number

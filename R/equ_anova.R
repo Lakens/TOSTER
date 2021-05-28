@@ -57,7 +57,7 @@ equ_anova <- function(object,
   res2 = results[c("Effect","DFn","DFd","F","p","pes")]
   colnames(res2) = c("effect","df1","df2","F.value","p.null","pes")
 
-  res2$p.equ = equ_ftest(
+  res2$p.equ = suppressMessages({equ_ftest(
     Fstat = res2$F.value,
     df1 = res2$df1,
     df2 = res2$df2,
@@ -65,6 +65,8 @@ equ_anova <- function(object,
     MET = MET,
     alpha = alpha
   )$p.value
+
+  })
 
   res2$eqbound = eqbound
 

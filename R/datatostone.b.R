@@ -112,7 +112,7 @@ dataTOSToneClass <- R6::R6Class(
                   list(
                     `t[0]` = TOSTres$TOST$t[1],
                     `df[0]` = TOSTres$TOST$df[1],
-                    `p[0]` = TOSTres$TOST$p.value[3],
+                    `p[0]` = TOSTres$TOST$p.value[1],
                     `t[1]` = TOSTres$TOST$t[2],
                     `df[1]` = TOSTres$TOST$df[2],
                     `p[1]` = TOSTres$TOST$p.value[2],

@@ -108,6 +108,7 @@ dataTOSTtwoClass <- R6::R6Class(
                          data = dataTTest,
                          paired = FALSE,
                          eqbound_type = self$options$eqbound_type,
+                         hypothesis = self$options$hypothesis,
                          var.equal = var.equal,
                          alpha = alpha,
                          bias_correction = bias_c,
@@ -208,8 +209,8 @@ dataTOSTtwoClass <- R6::R6Class(
                           "\n \n",
                           "Null Hypothesis: ", null_hyp,"\n",
                           "Alternative: ", alt_hyp,"\n",
-                          "Conclusion: The effect is ",TOSTres$decision$combined,
-                          "Note: SMD confidence intervals are an approximation. See vignette(\"SMD_calcs\") \n",
+                          TOSTres$decision$combined,
+                          "\n Note: SMD confidence intervals are an approximation. See vignette(\"SMD_calcs\") \n",
                           ifelse(self$options$eqbound_type == 'SMD',
                                  "\n Warning: standardized bounds produce biased results. \n Consider setting bounds in raw units", ""))
         self$results$text$setContent(text_res)

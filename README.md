@@ -1,5 +1,9 @@
 # TOSTER
 
+ <!-- badges: start -->
+  [![R-CMD-check](https://github.com/Lakens/TOSTER/workflows/R-CMD-check/badge.svg)](https://github.com/Lakens/TOSTER/actions)
+  <!-- badges: end -->
+
 *An R package and jamovi module for equivalence testing*
 
 **Background**

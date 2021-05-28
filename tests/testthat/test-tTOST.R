@@ -81,17 +81,21 @@ test_that("Run examples for one sample", {
                     eqbound_type = "SMD",
                     hypothesis = "MET") })
   # Check internal consistency
-  expect_equivalent(test1$TOST$p.value,
-                    tsum1$TOST$p.value)
+  expect_equal(test1$TOST$p.value,
+                    tsum1$TOST$p.value,
+                    ignore_attr = TRUE)
 
-  expect_equivalent(test2$TOST$p.value,
-                    tsum2$TOST$p.value)
+  expect_equal(test2$TOST$p.value,
+                    tsum2$TOST$p.value,
+                    ignore_attr = TRUE)
 
-  expect_equivalent(test3$TOST$p.value,
-                    tsum3$TOST$p.value)
+  expect_equal(test3$TOST$p.value,
+                    tsum3$TOST$p.value,
+                    ignore_attr = TRUE)
 
-  expect_equivalent(test4$TOST$p.value,
-                    tsum4$TOST$p.value)
+  expect_equal(test4$TOST$p.value,
+                    tsum4$TOST$p.value,
+                    ignore_attr = TRUE)
 
 
   # Re-run with bias correction not run -----
@@ -165,17 +169,21 @@ test_that("Run examples for one sample", {
                     hypothesis = "MET",
                     bias_correction = FALSE)
   # Check internal consistency
-  expect_equivalent(test1$TOST$p.value,
-                    tsum1$TOST$p.value)
+  expect_equal(test1$TOST$p.value,
+                    tsum1$TOST$p.value,
+                    ignore_attr = TRUE)
 
-  expect_equivalent(test2$TOST$p.value,
-                    tsum2$TOST$p.value)
+  expect_equal(test2$TOST$p.value,
+                    tsum2$TOST$p.value,
+                    ignore_attr = TRUE)
 
-  expect_equivalent(test3$TOST$p.value,
-                    tsum3$TOST$p.value)
+  expect_equal(test3$TOST$p.value,
+                    tsum3$TOST$p.value,
+                    ignore_attr = TRUE)
 
-  expect_equivalent(test4$TOST$p.value,
-                    tsum4$TOST$p.value)
+  expect_equal(test4$TOST$p.value,
+                    tsum4$TOST$p.value,
+                    ignore_attr = TRUE)
 
   prtest = hush(print(test4))
   p1 = plot(test4)
@@ -278,17 +286,21 @@ test_that("Run examples for two sample", {
                     hypothesis = "MET",
                     bias_correction = FALSE)})
   # Check internal consistency
-  expect_equivalent(test1$TOST$p.value,
-                    tsum1$TOST$p.value)
+  expect_equal(test1$TOST$p.value,
+                    tsum1$TOST$p.value,
+                    ignore_attr = TRUE)
 
-  expect_equivalent(test2$TOST$p.value,
-                    tsum2$TOST$p.value)
+  expect_equal(test2$TOST$p.value,
+                    tsum2$TOST$p.value,
+                    ignore_attr = TRUE)
 
-  expect_equivalent(test3$TOST$p.value,
-                    tsum3$TOST$p.value)
+  expect_equal(test3$TOST$p.value,
+                    tsum3$TOST$p.value,
+                    ignore_attr = TRUE)
 
-  expect_equivalent(test4$TOST$p.value,
-                    tsum4$TOST$p.value)
+  expect_equal(test4$TOST$p.value,
+                    tsum4$TOST$p.value,
+                    ignore_attr = TRUE)
 
   # Re-run with bias correction not run and non-Welch ----
   test1 = t_TOST(x = samp1,
@@ -385,17 +397,21 @@ test_that("Run examples for two sample", {
                                        hypothesis = "MET",
                                        bias_correction = FALSE)})
   # Check internal consistency
-  expect_equivalent(test1$TOST$p.value,
-                    tsum1$TOST$p.value)
+  expect_equal(test1$TOST$p.value,
+               tsum1$TOST$p.value,
+               ignore_attr = TRUE)
 
-  expect_equivalent(test2$TOST$p.value,
-                    tsum2$TOST$p.value)
+  expect_equal(test2$TOST$p.value,
+               tsum2$TOST$p.value,
+               ignore_attr = TRUE)
 
-  expect_equivalent(test3$TOST$p.value,
-                    tsum3$TOST$p.value)
+  expect_equal(test3$TOST$p.value,
+               tsum3$TOST$p.value,
+               ignore_attr = TRUE)
 
-  expect_equivalent(test4$TOST$p.value,
-                    tsum4$TOST$p.value)
+  expect_equal(test4$TOST$p.value,
+               tsum4$TOST$p.value,
+               ignore_attr = TRUE)
 
   # Run with formula
   test1 = t_TOST(formula = y ~ group,
@@ -443,17 +459,21 @@ test_that("Run examples for two sample", {
                test4$TOST$p.value[3])
 
   # Check internal consistency
-  expect_equivalent(test1$TOST$p.value,
-                    tsum1$TOST$p.value)
+  expect_equal(test1$TOST$p.value,
+               tsum1$TOST$p.value,
+               ignore_attr = TRUE)
 
-  expect_equivalent(test2$TOST$p.value,
-                    tsum2$TOST$p.value)
+  expect_equal(test2$TOST$p.value,
+               tsum2$TOST$p.value,
+               ignore_attr = TRUE)
 
-  expect_equivalent(test3$TOST$p.value,
-                    tsum3$TOST$p.value)
+  expect_equal(test3$TOST$p.value,
+               tsum3$TOST$p.value,
+               ignore_attr = TRUE)
 
-  expect_equivalent(test4$TOST$p.value,
-                    tsum4$TOST$p.value)
+  expect_equal(test4$TOST$p.value,
+               tsum4$TOST$p.value,
+               ignore_attr = TRUE)
 
   prtest = hush(print(test4))
   p1 = plot(test4)
@@ -568,17 +588,21 @@ test_that("Run examples for paired samples", {
                                        hypothesis = "MET",
                                        bias_correction = FALSE)})
 
-  expect_equivalent(test1$TOST$p.value,
-                    tsum1$TOST$p.value)
+  expect_equal(test1$TOST$p.value,
+               tsum1$TOST$p.value,
+               ignore_attr = TRUE)
 
-  expect_equivalent(test2$TOST$p.value,
-                    tsum2$TOST$p.value)
+  expect_equal(test2$TOST$p.value,
+               tsum2$TOST$p.value,
+               ignore_attr = TRUE)
 
-  expect_equivalent(test3$TOST$p.value,
-                    tsum3$TOST$p.value)
+  expect_equal(test3$TOST$p.value,
+               tsum3$TOST$p.value,
+               ignore_attr = TRUE)
 
-  expect_equivalent(test4$TOST$p.value,
-                    tsum4$TOST$p.value)
+  expect_equal(test4$TOST$p.value,
+               tsum4$TOST$p.value,
+               ignore_attr = TRUE)
 
   # Re-run with bias correction not run and rm_correction
   # rm_correction = TRUE
@@ -686,17 +710,21 @@ test_that("Run examples for paired samples", {
                                        rm_correction = TRUE,
                                        bias_correction = FALSE)})
 
-  expect_equivalent(test1$TOST$p.value,
-                    tsum1$TOST$p.value)
+  expect_equal(test1$TOST$p.value,
+               tsum1$TOST$p.value,
+               ignore_attr = TRUE)
 
-  expect_equivalent(test2$TOST$p.value,
-                    tsum2$TOST$p.value)
+  expect_equal(test2$TOST$p.value,
+               tsum2$TOST$p.value,
+               ignore_attr = TRUE)
 
-  expect_equivalent(test3$TOST$p.value,
-                    tsum3$TOST$p.value)
+  expect_equal(test3$TOST$p.value,
+               tsum3$TOST$p.value,
+               ignore_attr = TRUE)
 
-  expect_equivalent(test4$TOST$p.value,
-                    tsum4$TOST$p.value)
+  expect_equal(test4$TOST$p.value,
+               tsum4$TOST$p.value,
+               ignore_attr = TRUE)
 
   # Run with formula
   test1 = t_TOST(formula = y ~ group,
@@ -750,7 +778,7 @@ test_that("Run examples for paired samples", {
 
 test_that("Run examples for plot_smd", {
 
-  set.seed(777641421991)
+  set.seed(1776)
 
   samp1 = rnorm(25)
   samp2 = rnorm(25)
@@ -789,26 +817,28 @@ test_that("Run examples for plot_smd", {
                  eqbound_type = "SMD",
                  hypothesis = "MET")
 
-  p1 = plot_smd(lambda = c(test1$smd$d_lambda,
-                           test2$smd$d_lambda,
-                           test3$smd$d_lambda,
-                           test4$smd$d_lambda),
-                df = c(test1$smd$d_df,
-                       test2$smd$d_df,
-                       test3$smd$d_df,
-                       test4$smd$d_df),
-                SE = c(test1$smd$d_sigma,
-                       test2$smd$d_sigma,
-                       test3$smd$d_sigma,
-                       test4$smd$d_sigma),
-                smd_label = c("Study #1",
-                              "Study #2",
-                              "Study #3",
-                              "Study #4"))
 
-  p2 = plot_smd(lambda = c(test1$smd$d_lambda),
+
+  p1 = plot_smd(lambda = c(test1$smd$d_lambda),
                 df = c(test1$smd$d_df),
-                SE = c(test1$smd$d_sigma))
+                d = c(test1$smd$d),
+                type = "cd")
+
+  p1 = plot_smd(lambda = c(test1$smd$d_lambda),
+                df = c(test1$smd$d_df),
+                d = c(test1$smd$d),
+                type = "c")
+
+  p2 = plot_smd(lambda = c(test2$smd$d_lambda),
+                df = c(test2$smd$d_df),
+                d = c(test2$smd$d),
+                 type = "cd")
+
+  p2 = plot_smd(lambda = c(test2$smd$d_lambda),
+                df = c(test2$smd$d_df),
+                d = c(test2$smd$d),
+                type = "c")
+
 
   expect_error(plot_smd(df = c(test1$smd$d_df),
                         SE = c(test1$smd$d_sigma)))

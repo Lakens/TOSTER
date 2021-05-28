@@ -28,8 +28,13 @@ Imports:
     tidyr,
     utils,
     rstatix
-Suggests: knitr,
+Suggests: 
+    knitr,
     rmarkdown,
-    broom
+    broom,
+    testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Encoding: UTF-8
+Config/testthat/edition: 3
+Depends: 
+    R (>= 3.5)

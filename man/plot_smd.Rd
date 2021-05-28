@@ -8,7 +8,7 @@ plot_smd(
   d,
   df,
   lambda,
-  smd_label,
+  smd_label = "SMD",
   type = c("c", "cd"),
   levels = c(0.5, 0.9, 0.95, 0.999)
 )

@@ -17,29 +17,14 @@
 plot_smd <- function(d,
                      df,
                      lambda,
-                     smd_label,
+                     smd_label = "SMD",
                      type = c("c","cd"),
                      levels = c(.5,.9,.95,.999)){
 
-  if (missing(smd_label)){
+  if(length(d) > 1 || length(df) >1 || length(lambda) >1 || length(smd_label) >1){
+    stop("length of d, df, lambda, and smd_label arguments can only be 1")
+  }
 
-    dat = d_curv_raw(d = d,
-                      df = df,
-                      lambda=lambda)
-
-    resplot = gg_curv_t(dat,
-                        type = type,
-                        levels = levels,
-                        position = "pyramid",
-                        xaxis = "SMD",
-                        yaxis1 = expression(paste("two-tailed ", italic(p),
-                                                  "-value")),
-                        yaxis2 = "Confidence Interval (%)",
-                        color = "black",
-                        fill = "skyblue",
-                        alpha_shade = .5)
-
-  } else {
     dat = d_curv_raw(d = d,
                       df = df,
                       lambda=lambda)
@@ -55,8 +40,6 @@ plot_smd <- function(d,
                         color = "black",
                         fill = "skyblue",
                         alpha_shade = .5)
-
-  }
 
   return(resplot)
 

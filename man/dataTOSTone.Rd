@@ -11,7 +11,7 @@ dataTOSTone(
   hypothesis = "EQU",
   low_eqbound = -0.5,
   high_eqbound = 0.5,
-  eqbound_type = "SMD",
+  eqbound_type = "raw",
   alpha = 0.05,
   desc = FALSE,
   plots = FALSE,

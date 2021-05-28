@@ -11,7 +11,7 @@ dataTOSToneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
             hypothesis = "EQU",
             low_eqbound = -0.5,
             high_eqbound = 0.5,
-            eqbound_type = "SMD",
+            eqbound_type = "raw",
             alpha = 0.05,
             desc = FALSE,
             plots = FALSE,
@@ -57,7 +57,7 @@ dataTOSToneOptions <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 options=list(
                     "SMD",
                     "raw"),
-                default="SMD")
+                default="raw")
             private$..alpha <- jmvcore::OptionNumber$new(
                 "alpha",
                 alpha,
@@ -200,7 +200,7 @@ dataTOSToneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                         `name`="b[1]", 
                         `title`="", 
                         `type`="text", 
-                        `content`="TOST Upper"),
+                        `content`="TOST Lower"),
                     list(
                         `name`="t[1]", 
                         `title`="t", 
@@ -218,7 +218,7 @@ dataTOSToneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                         `name`="b[2]", 
                         `title`="", 
                         `type`="text", 
-                        `content`="TOST Lower"),
+                        `content`="TOST Upper"),
                     list(
                         `name`="t[2]", 
                         `title`="t", 
@@ -452,7 +452,7 @@ dataTOSTone <- function(
     hypothesis = "EQU",
     low_eqbound = -0.5,
     high_eqbound = 0.5,
-    eqbound_type = "SMD",
+    eqbound_type = "raw",
     alpha = 0.05,
     desc = FALSE,
     plots = FALSE,

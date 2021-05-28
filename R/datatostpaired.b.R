@@ -79,6 +79,7 @@ dataTOSTpairedClass <- R6::R6Class(
                        y = data$i1,
                        paired = TRUE,
                        eqbound_type = eqbound_type,
+                       hypothesis = self$options$hypothesis,
                        alpha = alpha,
                        bias_correction = bias_c,
                        low_eqbound = low_eqbound,
@@ -139,7 +140,7 @@ dataTOSTpairedClass <- R6::R6Class(
       )
 
       effsize$setRow(
-        rowNo = 1,
+        rowNo = 2,
         values = list(
           `stat` = TOSTres$smd$smd_label,
           `est` = TOSTres$smd$d,
@@ -149,7 +150,7 @@ dataTOSTpairedClass <- R6::R6Class(
       )
 
       effsize$setRow(
-        rowNo = 2,
+        rowNo = 1,
         values = list(
           `stat` = "Raw",
           `est` = TOSTres$effsize$estimate[1],
@@ -218,7 +219,7 @@ dataTOSTpairedClass <- R6::R6Class(
                         "\n \n",
                         "Null Hypothesis: ", null_hyp,"\n",
                         "Alternative: ", alt_hyp,"\n",
-                        "Conclusion: The effect is ",TOSTres$decision$combined,
+                        TOSTres$decision$combined,
                         "\n",
                         "Note: SMD confidence intervals are an approximation. See vignette(\"SMD_calcs\") \n",
                         ifelse(self$options$eqbound_type == 'SMD',
