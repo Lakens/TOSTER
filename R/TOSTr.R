@@ -88,20 +88,24 @@ TOSTr<-function(n, r, low_eqbound_r, high_eqbound_r, alpha, plot = TRUE, verbose
     cat("Null Hypothesis Test Result:\n")
     message(cat("The null hypothesis test was ",testoutcome,", p = ",format(pttest, digits = 3, nsmall = 3, scientific = FALSE),", given an alpha of ",alpha,".",sep=""))
     if(pttest <= alpha && ptost <= alpha){
-      combined_outcome <- "statistically different from zero and statistically equivalent to zero"
+      combined_outcome <- paste0("NHST: reject null significance hypothesis that the correlation is equal to 0 \n",
+                                 "TOST: reject null equivalence hypothesis")
     }
     if(pttest < alpha && ptost > alpha){
-      combined_outcome <- "statistically different from zero and statistically not equivalent to zero"
+      combined_outcome <- paste0("NHST: reject null significance hypothesis that the correlation is equal to 0 \n",
+                                 "TOST: don't reject null equivalence hypothesis")
     }
     if(pttest > alpha && ptost <= alpha){
-      combined_outcome <- "statistically not different from zero and statistically equivalent to zero"
+      combined_outcome <- paste0("NHST: don't reject null significance hypothesis that the correlation is equal to 0 \n",
+                                 "TOST: reject null equivalence hypothesis")
     }
     if(pttest > alpha && ptost > alpha){
-      combined_outcome <- "statistically not different from zero and statistically not equivalent to zero"
+      combined_outcome <- paste0("NHST: don't reject null significance hypothesis that the correlation is equal to 0 \n",
+                                 "TOST: don't reject null equivalence hypothesis")
     }
     cat("\n")
-    message(cat("Based on the equivalence test and the null-hypothesis test combined, we can conclude that the observed effect is ",combined_outcome,".",sep=""))
+    message(combined_outcome)
   }
   # Return results in list()
-  invisible(list(r = r, TOST_p1 = p1, TOST_p2 = p2, alpha = alpha, low_eqbound_r = low_eqbound_r, high_eqbound_r = high_eqbound_r, LL_CI_TOST = LL90, UL_CI_TOST = UL90,LL_CI_TTEST = LL95, UL_CI_TTEST = UL95, z_LL_CI_TOST=zLL90, z_UL_CI_TOST = zUL90, z_LL_CI_TTEST = zLL95, z_UL_CI_TTEST = zUL95))
+  invisible(list(r = r, TOST_p1 = p1, TOST_p2 = p2, alpha = alpha, low_eqbound_r = low_eqbound_r, high_eqbound_r = high_eqbound_r, LL_CI_TOST = LL90, UL_CI_TOST = UL90,LL_CI_TTEST = LL95, UL_CI_TTEST = UL95, z_LL_CI_TOST=zLL90, z_UL_CI_TOST = zUL90, z_LL_CI_TTEST = zLL95, z_UL_CI_TTEST = zUL95,NHST_p = pttest))
 }

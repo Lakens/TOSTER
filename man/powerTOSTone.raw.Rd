@@ -4,8 +4,7 @@
 \alias{powerTOSTone.raw}
 \title{Power analysis for TOST for one-sample t-test (raw scores).}
 \usage{
-powerTOSTone.raw(alpha, statistical_power, N, sd, low_eqbound,
-  high_eqbound)
+powerTOSTone.raw(alpha, statistical_power, N, sd, low_eqbound, high_eqbound)
 }
 \arguments{
 \item{alpha}{alpha used for the test (e.g., 0.05)}

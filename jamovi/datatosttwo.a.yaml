@@ -31,8 +31,8 @@ options:
           R: the data as a data frame
 
     - name: deps
-      title: Variables
-      type: Variables
+      title: Variable
+      type: Variable
       permitted:
         - numeric
       suggested:
@@ -59,34 +59,50 @@ options:
           R: >
             `TRUE` or `FALSE` (default), assume equal variances
 
+    - name: hypothesis
+      title: Alternative hypothesis
+      type: List
+      options:
+        - name: EQU
+          title: "Equivalence Test"
+        - name: MET
+          title: "Minimal Effect Test"
+      default: EQU
+      description:
+          ui: >
+            the alternative hypothesis for equivlance or minimal effect testing.
+          R: >
+            `'EQU'` for equivalence (default), or
+            `'MET'` for minimal effects test, the alternative hypothesis.
+
     - name: low_eqbound
-      title: Lower equivalence bounds
+      title: Lower bound
       type: Number
       default: -0.5
       description:
           R: >
-            a number (default: -0.5) the lower equivalence bounds
+            a number (default: -0.5) the lower equivalence/MET bounds
 
     - name: high_eqbound
-      title: Upper equivalence bounds
+      title: Upper bound
       type: Number
       default: 0.5
       description:
           R: >
-            a number (default: 0.5) the upper equivalence bounds
+            a number (default: 0.5) the upper equivalence/MET bounds
 
     - name: eqbound_type
       title: Bounds type
       type: List
       options:
-        - name: d
-          title: Cohen's D
+        - name: SMD
+          title: Standardized
         - name: raw
           title: Raw
-      default: d
+      default: raw
       description:
           R: >
-            `'d'` (default) or `'raw'`; whether the bounds are specified in
+            `'SMD'` (default) or `'raw'`; whether the bounds are specified in
             Cohen's d or raw units respectively
 
     - name: alpha
@@ -105,7 +121,15 @@ options:
             `TRUE` or `FALSE` (default), provide descriptive statistics
 
     - name: plots
-      title: Plots
+      title: Plot Effect Size
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide effect size plots
+
+    - name: descplots
+      title: Plot Data
       type: Bool
       default: false
       description:
@@ -125,3 +149,17 @@ options:
       hidden: true
       description:
           R: deprecated
+
+    - name: smd_type
+      title: Standardized Effect Size
+      type: List
+      options:
+        - name: d
+          title: Cohen's d
+        - name: g
+          title: Hedges' g
+      default: g
+      description:
+          R: >
+            `'d'` (default) or `'g'`;
+            whether the calculated effect size is biased (d) or bias-corrected (g).

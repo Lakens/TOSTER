@@ -4,8 +4,15 @@
 \alias{powerTOSTtwo.raw}
 \title{Power analysis for TOST for independent t-test (raw scores).}
 \usage{
-powerTOSTtwo.raw(alpha, statistical_power, N, sdpooled, low_eqbound,
-  high_eqbound)
+powerTOSTtwo.raw(
+  alpha,
+  statistical_power,
+  N,
+  sdpooled,
+  low_eqbound,
+  high_eqbound,
+  delta = 0
+)
 }
 \arguments{
 \item{alpha}{alpha used for the test (e.g., 0.05)}
@@ -19,6 +26,8 @@ powerTOSTtwo.raw(alpha, statistical_power, N, sdpooled, low_eqbound,
 \item{low_eqbound}{lower equivalence bounds (e.g., -0.5) expressed in raw scale units (e.g., scalepoints)}
 
 \item{high_eqbound}{upper equivalence bounds (e.g., 0.5) expressed in raw scale units (e.g., scalepoints)}
+
+\item{delta}{hypothesized true value for the difference between the 2 means. Default is zero.}
 }
 \value{
 Calculate either achieved power, equivalence bounds, or required N, assuming a true effect size of 0.

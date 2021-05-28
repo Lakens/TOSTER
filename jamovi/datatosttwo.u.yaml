@@ -10,20 +10,6 @@ children:
       - type: TargetLayoutBox
         children:
           - type: VariablesListBox
-            name: deps
-            label: Variables
-            showColumnHeaders: false
-            fullRowSelect: true
-            columns:
-              - name: column1
-                label: ''
-                stretchFactor: 1
-                template:
-                  type: VariableLabel
-            isTarget: true
-      - type: TargetLayoutBox
-        children:
-          - type: VariablesListBox
             name: group
             label: Grouping Variable
             maxItemCount: 1
@@ -36,33 +22,101 @@ children:
                 template:
                   type: VariableLabel
             isTarget: true
+      - type: TargetLayoutBox
+        label: Variable
+        children:
+          - type: VariablesListBox
+            name: deps
+            maxItemCount: 1
+            isTarget: true
   - type: LayoutBox
     margin: large
+    stretchFactor: 1
     children:
-      - name: var_equal
-        type: CheckBox
-        label: Assume equal variances
-  - type: LayoutBox
-    margin: large
-    children:
-      - name: low_eqbound
-        type: TextBox
-        format: number
-      - name: high_eqbound
-        type: TextBox
-        format: number
-      - type: ComboBox
-        name: eqbound_type
-      - name: alpha
-        type: TextBox
-        label: Alpha level
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - name: desc
-        type: CheckBox
-        label: Descriptive statistics
-      - name: plots
-        type: CheckBox
-        label: Plots
+      - type: LayoutBox
+        cell:
+          column: 0
+          row: 0
+        stretchFactor: 1
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - name: var_equal
+                type: CheckBox
+                label: Assume equal variances
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: Label
+                label: Hypothesis
+                children:
+                  - type: RadioButton
+                    name: EQU
+                    optionName: hypothesis
+                    optionPart: EQU
+                    label: Equivalence Test
+                  - type: RadioButton
+                    name: MET
+                    optionName: hypothesis
+                    optionPart: MET
+                    label: Minimal Effects Test
+              #- type: ComboBox
+              #  name: eqbound_type
+              - type: Label
+                label: Bound type
+                children:
+                  - type: RadioButton
+                    name: raw
+                    optionName: eqbound_type
+                    optionPart: raw
+                    label: Raw
+                  - type: RadioButton
+                    name: SMD
+                    optionName: eqbound_type
+                    optionPart: SMD
+                    label: Standardized
+              - name: low_eqbound
+                type: TextBox
+                format: number
+              - name: high_eqbound
+                type: TextBox
+                format: number
+              - name: alpha
+                type: TextBox
+                label: Alpha level
+                format: number
+      - type: LayoutBox
+        cell:
+          column: 1
+          row: 0
+        stretchFactor: 1
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - name: desc
+                type: CheckBox
+                label: Descriptive statistics
+              - type: CheckBox
+                name: plots
+                label: Plot Effect Sizes
+              - type: CheckBox
+                name: descplots
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: Label
+                label: Standardized Effect Size
+                children:
+                  - type: RadioButton
+                    name: g
+                    optionName: smd_type
+                    optionPart: g
+                    label: Hedges' g
+                  - type: RadioButton
+                    name: d
+                    optionName: smd_type
+                    optionPart: d
+                    label: Cohen's d
+

@@ -1,5 +1,8 @@
 
 #' @import ggplot2
+#' @import ggdist
+#' @import distributional
+
 dataTOSTtwoClass <- R6::R6Class(
   "dataTOSTtwoClass",
   inherit = dataTOSTtwoBase,
@@ -10,12 +13,13 @@ dataTOSTtwoClass <- R6::R6Class(
 
       tt <- self$results$tost
       eqb <- self$results$eqb
+      effsize <- self$results$effsize
       desc <- self$results$desc
 
-      eqb$getColumn('cil[cohen]')$setSuperTitle(jmvcore::format('{}% Confidence interval', ci))
-      eqb$getColumn('ciu[cohen]')$setSuperTitle(jmvcore::format('{}% Confidence interval', ci))
-      eqb$getColumn('cil[raw]')$setSuperTitle(jmvcore::format('{}% Confidence interval', ci))
-      eqb$getColumn('ciu[raw]')$setSuperTitle(jmvcore::format('{}% Confidence interval', ci))
+      effsize$getColumn('cil[cohen]')$setSuperTitle(jmvcore::format('{}% Confidence Interval', ci))
+      effsize$getColumn('ciu[cohen]')$setSuperTitle(jmvcore::format('{}% Confidence Interval', ci))
+      effsize$getColumn('cil[raw]')$setSuperTitle(jmvcore::format('{}% Confidence Interval', ci))
+      effsize$getColumn('ciu[raw]')$setSuperTitle(jmvcore::format('{}% Confidence Interval', ci))
 
       groupName <- self$options$group
       groups <- NULL
@@ -31,8 +35,17 @@ dataTOSTtwoClass <- R6::R6Class(
           `name[2]`=groups[2]))
       }
 
-      if ( ! self$options$var_equal)
+      if ( ! self$options$var_equal){
         tt$setNote('var_equal', "Welch's t-test")
+      }
+
+
+      if ( ! self$options$var_equal){
+        effsize$setNote('var_equal', "Denominator set to the average SD")
+      } else {
+        effsize$setNote('var_equal', "Denominator set to the pooled SD")
+      }
+
     },
     .run = function() {
 
@@ -41,8 +54,11 @@ dataTOSTtwoClass <- R6::R6Class(
 
       tt <- self$results$tost
       eqb <- self$results$eqb
+      effsize <- self$results$effsize
       desc <- self$results$desc
       plots <- self$results$plots
+      descplot <- self$results$descplots
+      old = FALSE
 
       groupName <- self$options$group
       group <- self$data[[groupName]]
@@ -69,104 +85,143 @@ dataTOSTtwoClass <- R6::R6Class(
 
         sediff <- jmvcore::tryNaN(sqrt((v[1]/n[1])+(v[2]/n[2])))
 
-        pooledSD <- jmvcore::tryNaN(sqrt(((n[1]-1)*v[1]+(n[2]-1)*v[2])/(n[1]+n[2]-2)))
-        d <- (m[1]-m[2])/pooledSD # Cohen's d
-
         n[is.na(n)] <- 0
         m[is.na(m)] <- NaN
         med[is.na(med)] <- NaN
         se[is.na(se)] <- NaN
         sd[is.na(sd)] <- NaN
         sediff[is.na(sediff)] <- NaN
-        pooledSD[is.na(pooledSD)] <- NaN
-        d[is.na(d)] <- NaN
-
 
         var.equal <- self$options$var_equal
         alpha <- self$options$alpha
 
+        if(self$options$smd_type == "g"){
+          bias_c = TRUE
+        } else {
+          bias_c = FALSE
+        }
+
         low_eqbound    <- self$options$low_eqbound
         high_eqbound   <- self$options$high_eqbound
-        low_eqbound_d  <- self$options$low_eqbound_d  # deprecated
-        high_eqbound_d <- self$options$high_eqbound_d
 
-        tresult <- t.test(dep ~ group, dataTTest, var.equal=var.equal)
-        t <- unname(tresult$statistic)
-        p <- unname(tresult$p.value)
-        df <- unname(tresult$parameter)
+        TOSTres = t_TOST(formula = dep ~ group,
+                         data = dataTTest,
+                         paired = FALSE,
+                         eqbound_type = self$options$eqbound_type,
+                         var.equal = var.equal,
+                         alpha = alpha,
+                         bias_correction = bias_c,
+                         low_eqbound = low_eqbound,
+                         high_eqbound = high_eqbound)
 
-        if (var.equal) {
-          sdpooled <- sqrt((((n[1] - 1)*(sd[1]^2)) + (n[2] - 1)*(sd[2]^2))/((n[1]+n[2])-2)) #calculate sd pooled
-        } else {
-          sdpooled <- sqrt((sd[1]^2 + sd[2]^2)/2) #calculate sd root mean squared for Welch's t-test
+        if (self$options$eqbound_type == 'SMD') {
+
+          pr_l_eqb = low_eqbound * TOSTres$smd$d_denom
+          pr_h_eqb = high_eqbound * TOSTres$smd$d_denom
+        } else if(self$options$eqbound_type == 'raw') {
+
+          pr_l_eqb = low_eqbound
+          pr_h_eqb = high_eqbound
         }
 
-        if (low_eqbound_d != -999999999 && low_eqbound_d != -999999999) {
-          # low_eqbound_d and high_eqbound_d options are deprecated
-          low_eqbound  <- low_eqbound_d * sdpooled
-          high_eqbound <- high_eqbound_d * sdpooled
+
+        if(self$options$hypothesis == "EQU"){
+          alt_low = "greater"
+          alt_high = "less"
+          test_hypothesis = "Hypothesis Tested: Equivalence"
+          null_hyp = paste0(round(pr_l_eqb,2),
+                            " >= (Mean1 - Mean2) or (Mean1 - Mean2) >= ",
+                            round(pr_h_eqb,2))
+          alt_hyp = paste0(round(pr_l_eqb,2),
+                           " < (Mean1 - Mean2) < ",
+                           round(pr_h_eqb,2))
+        } else if(self$options$hypothesis == "MET"){
+          alt_low = "less"
+          alt_high = "greater"
+          test_hypothesis = "Hypothesis Tested: Minimal Effect"
+          null_hyp = paste0(round( pr_l_eqb,2),
+                            " <= (Mean1 - Mean2)  <= ",
+                            round(pr_h_eqb,2))
+          alt_hyp = paste0(round( pr_l_eqb,2),
+                           " > (Mean1 - Mean2) or (Mean1 - Mean2)  > ",
+                           round(pr_h_eqb,2))
         }
-        else if (self$options$eqbound_type == 'd') {
-          low_eqbound_d <- low_eqbound
-          high_eqbound_d <- high_eqbound
-          low_eqbound  <- low_eqbound * sdpooled
-          high_eqbound <- high_eqbound * sdpooled
-        } else {
-          low_eqbound_d <- low_eqbound / sdpooled
-          high_eqbound_d <- high_eqbound / sdpooled
-        }
 
-        if (var.equal) {
-          degree_f<-n[1]+n[2]-2
-          t1<-((m[1]-m[2])-low_eqbound)/(sdpooled*sqrt(1/n[1] + 1/n[2]))  #students t-test lower bound
-          p1<-pt(t1, degree_f, lower.tail=FALSE)
-          t2<-((m[1]-m[2])-high_eqbound)/(sdpooled*sqrt(1/n[1] + 1/n[2])) #students t-test upper bound
-          p2<-pt(t2, degree_f, lower.tail=TRUE)
-          t<-(m[1]-m[2])/(sdpooled*sqrt(1/n[1] + 1/n[2]))
-          pttest<-2*pt(-abs(t), df=degree_f)
-          LL90<-(m[1]-m[2])-qt(1-alpha, n[1]+n[2]-2)*(sdpooled*sqrt(1/n[1] + 1/n[2]))
-          UL90<-(m[1]-m[2])+qt(1-alpha, n[1]+n[2]-2)*(sdpooled*sqrt(1/n[1] + 1/n[2]))
-          LL95<-(m[1]-m[2])-qt(1-(alpha/2), n[1]+n[2]-2)*(sdpooled*sqrt(1/n[1] + 1/n[2]))
-          UL95<-(m[1]-m[2])+qt(1-(alpha/2), n[1]+n[2]-2)*(sdpooled*sqrt(1/n[1] + 1/n[2]))
-        } else {
-          degree_f<-(sd[1]^2/n[1]+sd[2]^2/n[2])^2/(((sd[1]^2/n[1])^2/(n[1]-1))+((sd[2]^2/n[2])^2/(n[2]-1))) #degrees of freedom for Welch's t-test
-          t1<-((m[1]-m[2])-low_eqbound)/sqrt(sd[1]^2/n[1] + sd[2]^2/n[2]) #welch's t-test upper bound
-          p1<-pt(t1, degree_f, lower.tail=FALSE) #p-value for Welch's TOST t-test
-          t2<-((m[1]-m[2])-high_eqbound)/sqrt(sd[1]^2/n[1] + sd[2]^2/n[2]) #welch's t-test lower bound
-          p2<-pt(t2, degree_f, lower.tail=TRUE) #p-value for Welch's TOST t-test
-          t<-(m[1]-m[2])/sqrt(sd[1]^2/n[1] + sd[2]^2/n[2]) #welch's t-test NHST
-          pttest<-2*pt(-abs(t), df=degree_f) #p-value for Welch's t-test
-          LL90<-(m[1]-m[2])-qt(1-alpha, degree_f)*sqrt(sd[1]^2/n[1] + sd[2]^2/n[2]) #Lower limit for CI Welch's t-test
-          UL90<-(m[1]-m[2])+qt(1-alpha, degree_f)*sqrt(sd[1]^2/n[1] + sd[2]^2/n[2]) #Upper limit for CI Welch's t-test
-          LL95<-(m[1]-m[2])-qt(1-(alpha/2), degree_f)*sqrt(sd[1]^2/n[1] + sd[2]^2/n[2]) #Lower limit for CI Welch's t-test
-          UL95<-(m[1]-m[2])+qt(1-(alpha/2), degree_f)*sqrt(sd[1]^2/n[1] + sd[2]^2/n[2]) #Upper limit for CI Welch's t-test
-        }
-        ptost<-max(p1,p2) #Get highest p-value for summary TOST result
-        ttost<-ifelse(abs(t1) < abs(t2), t1, t2) #Get lowest t-value for summary TOST result
-        dif<-(m[1]-m[2])
 
-        tt$setRow(rowKey=depName, list(
-          `t[0]`=t,  `df[0]`=df, `p[0]`=p,
-          `t[1]`=t2, `df[1]`=degree_f, `p[1]`=p2,
-          `t[2]`=t1, `df[2]`=degree_f, `p[2]`=p1))
+        tt$setRow(
+          rowKey = depName,
+          list(
+            `t[0]` = TOSTres$TOST$t[1],
+            `df[0]` = TOSTres$TOST$df[1],
+            `p[0]` = TOSTres$TOST$p.value[1],
+            `t[1]` = TOSTres$TOST$t[2],
+            `df[1]` = TOSTres$TOST$df[2],
+            `p[1]` = TOSTres$TOST$p.value[2],
+            `t[2]` = TOSTres$TOST$t[3],
+            `df[2]` = TOSTres$TOST$df[3],
+            `p[2]` = TOSTres$TOST$p.value[3]
+          )
+        )
 
-        eqb$setRow(rowKey=depName, list(
-          `low[raw]`=low_eqbound, `high[raw]`=high_eqbound, `cil[raw]`=LL90, `ciu[raw]`=UL90,
-          `low[cohen]`=low_eqbound_d, `high[cohen]`=high_eqbound_d))
+        eqb$setRow(
+          rowKey = depName,
+          list(
+            `stat[cohen]` = TOSTres$smd$smd_label,
+            `low[cohen]` = TOSTres$eqb$low_eq[2],
+            `high[cohen]` = TOSTres$eqb$high_eq[2],
+            `stat[raw]` = "Raw",
+            `low[raw]` = TOSTres$eqb$low_eq[1],
+            `high[raw]` = TOSTres$eqb$high_eq[1]
+          )
+        )
 
-        desc$setRow(rowKey=depName, list(
-          `n[1]`=n[1], `m[1]`=m[1], `med[1]`=med[1], `sd[1]`=sd[1], `se[1]`=se[1],
-          `n[2]`=n[2], `m[2]`=m[2], `med[2]`=med[2], `sd[2]`=sd[2], `se[2]`=se[2]))
+        effsize$setRow(
+          rowKey = depName,
+          list(
+            `stat[cohen]` = TOSTres$smd$smd_label,
+            `est[cohen]` = TOSTres$smd$d,
+            `cil[cohen]` = TOSTres$smd$dlow,
+            `ciu[cohen]` = TOSTres$smd$dhigh,
+            `est[raw]` = TOSTres$effsize$estimate[1],
+            `cil[raw]` = TOSTres$effsize$lower.ci[1],
+            `ciu[raw]` = TOSTres$effsize$upper.ci[1]
+          )
+        )
+
+        desc$setRow(
+          rowKey = depName,
+          list(
+            `n[1]` = n[1],
+            `m[1]` = m[1],
+            `med[1]` = med[1],
+            `sd[1]` = sd[1],
+            `se[1]` = se[1],
+            `n[2]` = n[2],
+            `m[2]` = m[2],
+            `med[2]` = med[2],
+            `sd[2]` = sd[2],
+            `se[2]` = se[2]
+          )
+        )
+
+        text_res = paste0(test_hypothesis,
+                          "\n \n",
+                          "Null Hypothesis: ", null_hyp,"\n",
+                          "Alternative: ", alt_hyp,"\n",
+                          "Conclusion: The effect is ",TOSTres$decision$combined,
+                          "Note: SMD confidence intervals are an approximation. See vignette(\"SMD_calcs\") \n",
+                          ifelse(self$options$eqbound_type == 'SMD',
+                                 "\n Warning: standardized bounds produce biased results. \n Consider setting bounds in raw units", ""))
+        self$results$text$setContent(text_res)
 
         plot <- plots$get(key=depName)
-        points <- data.frame(
-          m=dif,
-          cil=LL90,
-          ciu=UL90,
-          low=low_eqbound,
-          high=high_eqbound,
-          stringsAsFactors=FALSE)
-        plot$setState(points)
+
+        plot$setState(TOSTres)
+
+        descplot <- descplot$get(key=depName)
+
+        descplot$setState(dataTTest)
+        #print(points)
       }
     },
     .plot=function(image, ggtheme, theme, ...) {
@@ -174,7 +229,65 @@ dataTOSTtwoClass <- R6::R6Class(
       if (is.null(image$state))
         return(FALSE)
 
-      tostplot(image, ggtheme, theme)
+      TOSTres <- image$state
+
+      plotTOSTr = plot(TOSTres)
+      print(plotTOSTr)
+
+      return(TRUE)
+    },
+    .descplot = function(image, ggtheme, theme, ...) {
+
+      if (is.null(image$state))
+        return(FALSE)
+
+      dataTTest = image$state
+
+
+      pos_1 <- position_jitterdodge(
+        jitter.width  = 0.25,
+        jitter.height = 0,
+        dodge.width   = 0.9
+      )
+
+      data_summary <- function(x) {
+        m <- mean(x)
+        ymin <- m-sd(x)
+        ymax <- m+sd(x)
+        return(c(y=m,ymin=ymin,ymax=ymax))
+      }
+
+      p = ggplot(dataTTest,
+             aes(x = group,
+                 y = dep,
+                 color = group)) +
+        geom_jitter(alpha = 0.5, position = pos_1) +
+        stat_slab(aes(x=as.numeric(group)+.2),
+                  fill="lightgrey",
+                  side = "right") +
+        stat_summary(aes(x=as.numeric(group)+.2),
+                     fun.data=data_summary) +
+        theme_tidybayes() +
+        labs(x="Group",
+             y="",
+             color = "Group")  +
+        scale_colour_manual(values=c("red2","dodgerblue")) +
+        theme(
+          legend.position = "top",
+          strip.text = element_text(face = "bold", size = 11),
+          legend.text = element_text(face = "bold", size = 11),
+          legend.title = element_text(face = "bold", size = 11),
+          axis.text.x = element_text(face = "bold", size = 11),
+          axis.text.y = element_text(face = "bold", size = 11),
+          axis.title.x = element_text(face = "bold", size = 11),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.background = element_rect(fill = "transparent",colour = NA),
+          plot.background = element_rect(fill = "transparent",colour = NA),
+          legend.background = element_rect(fill = "transparent",colour = NA)
+        )
+
+      print(p)
 
       return(TRUE)
     })

@@ -8,14 +8,14 @@ menuGroup: TOSTER
 description:
     main: TOST Paired Samples T-Test
     R:
-        dontrun: false
+        dontrun: true
         usage: |
             library("TOSTER")
 
-            dataTOSTpaired(data = randu, pairs = list(c(i1="x",i2="y")), low_eqbound = -0.3,
+            dataTOSTpaired(data = randu, pair1 = "x", pair2="y", low_eqbound = -0.3,
                            high_eqbound = 0.3, alpha = 0.05, desc = TRUE, plots = TRUE)
     references:
-      - "Mara, C. A., & Cribbie, R. A. (2012). Paired-Samples Tests of Equivalence. Communications in Statistics - Simulation and Computation, 41(10), 1928-1943. https://doi.org/10.1080/03610918.2011.626545, formula page 1932. Note there is a typo in the formula: n-1 should be n (personal communication, 31-08-2016)"
+      - "Mara, C. A., & Cribbie, R. A. (2012). Paired-Samples Tests of Equivalence. Communications in Statistics - Simulation and Computation, 41(10), 1928-1943. <https://doi.org/10.1080/03610918.2011.626545>, formula page 1932. Note there is a typo in the formula: n-1 should be n (personal communication, 31-08-2016)"
 
 options:
     - name: data
@@ -23,18 +23,44 @@ options:
       description:
           R: the data as a data frame
 
-    - name: pairs
-      title: Paired Variables
-      type: Pairs
-      suggested:
-        - continuous
+    - name: pair1
+      title: Variable
+      type: Variable
       permitted:
         - numeric
+      suggested:
+        - continuous
       description:
-          R: a list of vectors of strings naming variables to pair from `data`
+          R: A string naming the first part of the pair
+
+    - name: pair2
+      title: Variable
+      type: Variable
+      permitted:
+        - numeric
+      suggested:
+        - continuous
+      description:
+          R: A string naming the second part of the pair
+
+    - name: hypothesis
+      title: Alternative hypothesis
+      type: List
+      options:
+        - name: EQU
+          title: "Equivalence Test"
+        - name: MET
+          title: "Minimal Effect Test"
+      default: EQU
+      description:
+          ui: >
+            the alternative hypothesis for equivlance or minimal effect testing.
+          R: >
+            `'EQU'` for equivalence (default), or
+            `'MET'` for minimal effects test, the alternative hypothesis.
 
     - name: low_eqbound
-      title: Lower equivalence bounds
+      title: Lower bound
       type: Number
       default: -0.5
       description:
@@ -42,7 +68,7 @@ options:
             a number (default: 0.5) the lower equivalence bounds
 
     - name: high_eqbound
-      title: Upper equivalence bounds
+      title: Upper bound
       type: Number
       default: 0.5
       description:
@@ -53,14 +79,14 @@ options:
       title: Bounds type
       type: List
       options:
-        - name: d
-          title: Cohen's Dz
+        - name: SMD
+          title: Standardized
         - name: raw
           title: Raw
-      default: d
+      default: raw
       description:
           R: >
-            `'d'` (default) or `'raw'`; whether the bounds are specified in
+            `'SMD'` (default) or `'raw'`; whether the bounds are specified in
             standardized mean difference (Cohen's dz) or raw units respectively
 
     - name: alpha
@@ -101,3 +127,33 @@ options:
       hidden: true
       description:
           R: deprecated
+
+    - name: indplot
+      title: Plot Pairs
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide plot of paired data.
+
+    - name: diffplot
+      title: Plot Differences
+      type: Bool
+      default: false
+      description:
+          R: >
+            `TRUE` or `FALSE` (default), provide plot of difference scores.
+
+    - name: smd_type
+      title: Standardized Effect Size
+      type: List
+      options:
+        - name: d
+          title: Cohen's d(z)
+        - name: g
+          title: Hedges' g(z)
+      default: g
+      description:
+          R: >
+            `'d'` (default) or `'g'`;
+            whether the calculated effect size is biased (d) or bias-corrected (g).

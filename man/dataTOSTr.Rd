@@ -4,14 +4,30 @@
 \alias{dataTOSTr}
 \title{TOST Correlation}
 \usage{
-dataTOSTr(data, pairs, low_eqbound_r = -0.3, high_eqbound_r = 0.3,
-  alpha = 0.05, desc = FALSE, plots = FALSE)
+dataTOSTr(
+  data,
+  pairs,
+  cor_type = "pearson",
+  hypothesis = "EQU",
+  low_eqbound_r = -0.3,
+  high_eqbound_r = 0.3,
+  alpha = 0.05,
+  desc = FALSE,
+  plots = FALSE
+)
 }
 \arguments{
 \item{data}{the data as a data frame}
 
 \item{pairs}{a list of vectors of strings naming variables to correlate
 from \code{data}}
+
+\item{cor_type}{a character string indicating which correlation coefficient
+is to be used for the test. One of "pearson", "kendall", or "spearman", can
+be abbreviated.}
+
+\item{hypothesis}{\code{'EQU'} for equivalence (default), or \code{'MET'}
+for minimal effects test, the alternative hypothesis.}
 
 \item{low_eqbound_r}{lower equivalence bounds (e.g., -0.3) expressed in a
 correlation effect size}
@@ -29,8 +45,8 @@ statistics}
 \value{
 A results object containing:
 \tabular{llllll}{
+  \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
   \code{results$tost} \tab \tab \tab \tab \tab a table \cr
-  \code{results$eqb} \tab \tab \tab \tab \tab a table \cr
   \code{results$desc} \tab \tab \tab \tab \tab a table \cr
   \code{results$plots} \tab \tab \tab \tab \tab an array of images \cr
 }

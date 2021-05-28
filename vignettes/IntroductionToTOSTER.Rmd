@@ -4,14 +4,18 @@ author: "Daniel Lakens"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Introduction To TOSTER}
+  %\VignetteIndexEntry{Introduction to Equivalence Testing with TOSTER}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 For an open access tutorial paper explaining how to set equivalence bounds, and how to perform and report equivalence tests, see Lakens, D., Scheel, A. M., & Isager, P. M. (2018). Equivalence Testing for Psychological Research: A Tutorial. *Advances in Methods and Practices in Psychological Science*, 1(2), 259-269.  https://doi.org/10.1177/2515245918770963
 
-#Equivalence Testing with TOSTER
+**Warning: many of these functions are defunct and outdated. Please see the other vignettes for details on the new functions.**
+
+The "Introduction to t_TOST" vignette, in particular, will be helpful. This vignette, and the functions used, will continue to be in the package for continuity purposes.
+
+# Equivalence Testing with TOSTER
 
 Scientists should be able to provide support for the absence of a meaningful effect. Currently researchers often incorrectly conclude an effect is absent based a non-significant result. It is statistically impossible to support the hypothesis that a true effect size is exactly zero. What is possible in a Frequentist hypothesis testing framework is to statistically reject effects large enough to be deemed worthwhile. When researchers want to argue for the absence of an effect that is large enough to be worthwhile to examine, they can test for equivalence.
 
@@ -23,7 +27,7 @@ In this document I will present a number of practical examples for equivalence t
 
 &nbsp;
 
-#Equivalence test for Meta-analysis
+# Equivalence test for Meta-analysis
 
 Hyde, Lindberg, Linn, Ellis, and Williams (2008) report that effect sizes for gender differences in mathematics tests across the 7 million students in the US represent trivial differences, where a trivial difference is specified as an effect size smaller then d = 0.1. The present a table with Cohen's d and se is reproduced below:
 
@@ -53,11 +57,11 @@ We see that indeed, all effect size estimates are measured with such high precis
 
 &nbsp;
 
-#Independent Groups Equivalence Test
+# Independent Groups Equivalence Test
 
 &nbsp;
 
-##Independent Groups Student's Equivalence Test
+## Independent Groups Student's Equivalence Test
 
 Eskine (2013) showed that participants who had been exposed to organic food were substantially harsher in their moral judgments relative to those exposed to control (d = 0.81, 95% CI: [0.19, 1.45]). A replication by Moery & Calin-Jageman (2016, Study 2) did not observe a significant effect (Control: n = 95, M = 5.25, SD = 0.91, Organic Food: n = 89, M = 5.22, SD = 0.83). Following Simonsohn's (2015) recommendation the equivalence bound was set to the effect size the original study had 33% power to detect (with n = 21 in each condition, this means the equivalence bound is d = 0.48, which equals a difference of 0.429 on a 7-point scale given the sample sizes and a pooled standard deviation of 0.894). Using a TOST equivalence test with alpha = 0.05, assuming equal variances, and equivalence bounds of d = -0.48 and d = 0.48 is significant, t(182) = -3.03, p = 0.001. We can reject effects more extreme than d = 0.48 (or a raw difference of 0.429 scalepoints). 
 
@@ -72,7 +76,7 @@ TOSTtwo.raw(m1=5.25,m2=5.22,sd1=0.95,sd2=0.83,n1=95,n2=89,low_eqbound=-0.429, hi
 
 &nbsp;
 
-##Independent Groups Welch's Equivalence Test
+## Independent Groups Welch's Equivalence Test
 
 Deary, Thorpe, Wilson, Starr, and Whally (2003) report the IQ scores of 79,376 children in Scotland (39,343 girls and 40,033 boys). The IQ score for girls (M = 100.64, SD = 14.1) girls and boys (100.48, SD = 14.9) was non-significant. With such a huge sample, we can examine whether the data is equivalent using very small equivalence bounds, such as -0.05 and 0.05. Because sample sizes are unequal, and variances are unequal, Welch's t-test is used, and we can conclude IQ scores are indeed equivalent, based on equivalence bounds of -0.05 and 0.05.  
 
@@ -87,7 +91,7 @@ TOSTtwo(m1=100.64,m2=100.48,sd1=14.1,sd2=14.9,n1=39343,n2=40033,low_eqbound_d=-0
 
 &nbsp;
 
-#One-Sample Equivalence Test
+# One-Sample Equivalence Test
 
 &nbsp;
 
@@ -122,7 +126,7 @@ It is clear I should have been more tentative in my conclusions in this study. N
 
 &nbsp;
 
-#Equivalence test for correlations
+# Equivalence test for correlations
 
 &nbsp;
 
@@ -131,6 +135,7 @@ Olson, Fazio, and Hermann (2007) reported correlations between implicit and expl
 ```{r, fig.width=6}
 powerTOSTr(alpha=0.05, statistical_power=0.8, low_eqbound_r=-0.24, high_eqbound_r=0.24)
 ```
+
 With 71 pairs of observations between measures, the researchers have 80% power for equivalence bounds of r = -0.24 and r = 0.24. 
 
 The correlations observed by Olson et al (2007), Study 1, are presented in the table below (significant correlations are flagged by an asteriks). 
@@ -147,6 +152,7 @@ We can test each correlation, for example the correlation between the IAT and th
 ```{r, fig.width=6}
 TOSTr(n=71, r=-0.12, low_eqbound_r=-0.24, high_eqbound_r=0.24, alpha=0.05)
 ```
+
 We see that none of the correlations can be declared to be statistically equivalent. Instead, the tests yield undetermined outcomes: the correlations are not significantly different from 0, nor statistically equivalent.  
 
 *Olson, M. A., Fazio, R. H., & Hermann, A. D. (2007). Reporting tendencies underlie discrepancies between implicit and explicit measures of self-esteem. Psychological Science, 18(4), 287-291.*

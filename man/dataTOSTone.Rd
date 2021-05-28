@@ -4,10 +4,21 @@
 \alias{dataTOSTone}
 \title{TOST One Sample T-Test}
 \usage{
-dataTOSTone(data, vars, mu = 0, low_eqbound = -0.5,
-  high_eqbound = 0.5, eqbound_type = "d", alpha = 0.05,
-  desc = FALSE, plots = FALSE, low_eqbound_d = -999999999,
-  high_eqbound_d = -999999999)
+dataTOSTone(
+  data,
+  vars,
+  mu = 0,
+  hypothesis = "EQU",
+  low_eqbound = -0.5,
+  high_eqbound = 0.5,
+  eqbound_type = "SMD",
+  alpha = 0.05,
+  desc = FALSE,
+  plots = FALSE,
+  low_eqbound_d = -999999999,
+  high_eqbound_d = -999999999,
+  smd_type = "g"
+)
 }
 \arguments{
 \item{data}{the data as a data frame}
@@ -16,11 +27,14 @@ dataTOSTone(data, vars, mu = 0, low_eqbound = -0.5,
 
 \item{mu}{a number (default: 0) to compare against}
 
+\item{hypothesis}{\code{'EQU'} for equivalence (default), or \code{'MET'}
+for minimal effects test, the alternative hypothesis;}
+
 \item{low_eqbound}{a number (default: -0.5) the lower equivalence bounds}
 
 \item{high_eqbound}{a number (default: 0.5) the upper equivalence bounds}
 
-\item{eqbound_type}{\code{'d'} (default) or \code{'raw'}; whether the
+\item{eqbound_type}{\code{'SMD'} (default) or \code{'raw'}; whether the
 bounds are specified in Cohen's d or raw units respectively}
 
 \item{alpha}{alpha level (default = 0.05)}
@@ -33,12 +47,17 @@ statistics}
 \item{low_eqbound_d}{deprecated}
 
 \item{high_eqbound_d}{deprecated}
+
+\item{smd_type}{\code{'d'} (default) or \code{'g'}; whether the calculated
+effect size is biased (d) or bias-corrected (g).}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
+  \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
   \code{results$tost} \tab \tab \tab \tab \tab a table \cr
   \code{results$eqb} \tab \tab \tab \tab \tab a table \cr
+  \code{results$effsize} \tab \tab \tab \tab \tab a table \cr
   \code{results$desc} \tab \tab \tab \tab \tab a table \cr
   \code{results$plots} \tab \tab \tab \tab \tab an array of images \cr
 }

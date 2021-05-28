@@ -4,117 +4,95 @@ title: TOST Paired Samples T-Test
 jrs:   "1.0"
 
 items:
+    - name:  text
+      type:  Preformatted
+      clearWith:
+        - mu
+        - alpha
+        - var_equal
+        - hypothesis
+        - low_eqbound
+        - high_eqbound
+        - eqbound_type
+
     - name:  tost
       title: TOST Results
-      type:  Table
-      rows: (pairs)
+      visible: TRUE
+      type: Table
+      rows:  3
       clearWith:
         - alpha
         - low_eqbound
         - high_eqbound
         - eqbound_type
+        - pair1
+        - pair2
       columns:
         - name: i1
           title: ''
           type: text
-          content: ($key)
         - name: i2
           title: ''
           type: text
-          content: ($key)
-        - name: b[0]
+        - name: b
           title: ''
           type: text
-          content: t-test
-        - name: t[0]
+        - name: t
           title: t
           type: number
-        - name: df[0]
+        - name: df
           title: df
           type: integer
-        - name: p[0]
-          title: p
-          type: number
-          format: zto,pvalue
-        - name: b[1]
-          title: ''
-          type: text
-          content: TOST Upper
-        - name: t[1]
-          title: t
-          type: number
-        - name: df[1]
-          title: df
-          type: integer
-        - name: p[1]
-          title: p
-          type: number
-          format: zto,pvalue
-        - name: b[2]
-          title: ''
-          type: text
-          content: TOST Lower
-        - name: t[2]
-          title: t
-          type: number
-        - name: df[2]
-          title: df
-          type: integer
-        - name: p[2]
+        - name: p
           title: p
           type: number
           format: zto,pvalue
 
+
+
     - name:  eqb
       title: Equivalence Bounds
       type:  Table
-      rows: (pairs)
+      rows: 2
       clearWith:
         - alpha
         - low_eqbound
         - high_eqbound
         - eqbound_type
+        - pair1
+        - pair2
       columns:
-        - name: i1
+        - name: stat
           title: ''
           type: text
-          content: ($key)
-        - name: i2
-          title: ''
-          type: text
-          content: ($key)
-        - name: stat[cohen]
-          title: ''
-          type: text
-          content: Cohen's d
-        - name: low[cohen]
+        - name: low
           title: Low
           type: number
-        - name: high[cohen]
+        - name: high
           title: High
           type: number
-        - name: cil[cohen]
-          title: Lower
-          superTitle: Confidence interval
-          content: ''
-        - name: ciu[cohen]
-          title: Upper
-          superTitle: Confidence interval
-          content: ''
-        - name: stat[raw]
+
+
+    - name:  effsize
+      title: Effect Sizes
+      type:  Table
+      rows: 2
+      clearWith:
+        - alpha
+        - smd_type
+        - pair1
+        - pair2
+      columns:
+        - name: stat
           title: ''
           type: text
-          content: Raw
-        - name: low[raw]
-          title: Low
+        - name: est
+          title: Estimate
           type: number
-        - name: high[raw]
-          title: High
-          type: number
-        - name: cil[raw]
+        - name: cil
           title: Lower
           superTitle: Confidence interval
-        - name: ciu[raw]
+        - name: ciu
           title: Upper
           superTitle: Confidence interval
 
@@ -122,70 +100,79 @@ items:
       title: Descriptives
       type: Table
       visible: (desc)
-      rows: (pairs)
+      rows: 2
       clearWith:
-
+        - pair1
+        - pair2
       columns:
-        - name: name[1]
+        - name: name
           title: ""
           type: text
 
-        - name: n[1]
+        - name: n
           title: "N"
           type: integer
 
-        - name: m[1]
+        - name: m
           title: Mean
           type: number
 
-        - name: med[1]
+        - name: med
           title: Median
           type: number
 
-        - name: sd[1]
+        - name: sd
           title: SD
           type: number
 
-        - name: se[1]
-          title: SE
-          type: number
-
-        - name: name[2]
-          title: ""
-          type: text
-
-        - name: n[2]
-          title: "N"
-          type: integer
-
-        - name: m[2]
-          title: Mean
-          type: number
-
-        - name: med[2]
-          title: Median
-          type: number
-
-        - name: sd[2]
-          title: SD
-          type: number
-
-        - name: se[2]
+        - name: se
           title: SE
           type: number
 
     - name: plots
-      type: Array
-      title: Plots
-      items: (pairs)
+      title: Effect Size Plot
+      type: Image
       visible: (plots)
-      template:
-        title: $key
-        type: Image
-        renderFun: .plot
-        width: 180
-        clearWith:
-          - alpha
-          - low_eqbound
-          - high_eqbound
-          - eqbound_type
+      renderFun: .plot
+      width: 400
+      height: 400
+      clearWith:
+        - alpha
+        - low_eqbound
+        - high_eqbound
+        - eqbound_type
+        - smd_type
+        - pair1
+        - pair2
+
+    - name: indplot
+      type: Image
+      title: Data Plot
+      visible: (indplot)
+      renderFun: .indplot
+      width: 400
+      height: 375
+      clearWith:
+        - alpha
+        - low_eqbound
+        - high_eqbound
+        - eqbound_type
+        - smd_type
+        - pair1
+        - pair2
+
+    - name: diffplot
+      type: Image
+      title: Plot Difference
+      visible: (diffplot)
+      renderFun: .diffplot
+      width: 400
+      height: 375
+      clearWith:
+        - alpha
+        - low_eqbound
+        - high_eqbound
+        - eqbound_type
+        - smd_type
+        - pair1
+        - pair2

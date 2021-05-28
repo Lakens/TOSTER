@@ -6,3 +6,5 @@ build/
 temp/
 *.jmo
 .httr-oauth
+docs
+*.DS_Store

@@ -35,26 +35,58 @@ children:
             isTarget: true
   - type: LayoutBox
     margin: large
+    stretchFactor: 1
     children:
-      - name: low_eqbound_r
-        type: TextBox
-        label: Lower equivalence bound (in r)
-        format: number
-      - name: high_eqbound_r
-        type: TextBox
-        label: Upper equivalence bound (in r)
-        format: number
-      - name: alpha
-        type: TextBox
-        label: Alpha level
-        format: number
-  - type: LayoutBox
-    margin: large
-    children:
-      - name: desc
-        type: CheckBox
-        label: Descriptive statistics
-      - name: plots
-        type: CheckBox
-        label: Plots
+      - type: LayoutBox
+        cell:
+          column: 0
+          row: 0
+        stretchFactor: 1
+        children:
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: ComboBox
+                name: cor_type
+          - type: LayoutBox
+            margin: large
+            children:
+              - type: Label
+                label: Hypothesis
+                children:
+                  - type: RadioButton
+                    name: EQU
+                    optionName: hypothesis
+                    optionPart: EQU
+                    label: Equivalence Test
+                  - type: RadioButton
+                    name: MET
+                    optionName: hypothesis
+                    optionPart: MET
+                    label: Minimal Effects Test
+              - name: low_eqbound_r
+                type: TextBox
+                label: Lower equivalence bound (in r)
+                format: number
+              - name: high_eqbound_r
+                type: TextBox
+                label: Upper equivalence bound (in r)
+                format: number
+              - name: alpha
+                type: TextBox
+                label: Alpha level
+                format: number
+      - type: LayoutBox
+        cell:
+          column: 1
+          row: 0
+        stretchFactor: 1
+        margin: large
+        children:
+          - name: desc
+            type: CheckBox
+            label: Descriptive statistics
+          - name: plots
+            type: CheckBox
+            label: Plots
 compilerMode: tame

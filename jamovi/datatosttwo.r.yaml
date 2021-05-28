@@ -4,6 +4,9 @@ title: TOST Independent Samples T-Test
 jrs:   "1.0"
 
 items:
+    - name:  text
+      type:  Preformatted
+
     - name:  tost
       title: TOST Results
       type:  Table
@@ -11,6 +14,7 @@ items:
       clearWith:
         - group
         - alpha
+        - hypothesis
         - low_eqbound
         - high_eqbound
         - eqbound_type
@@ -82,37 +86,63 @@ items:
         - name: stat[cohen]
           title: ''
           type: text
-          content: Cohen's d
         - name: low[cohen]
           title: Low
           type: number
         - name: high[cohen]
           title: High
           type: number
-        - name: cil[cohen]
-          title: Lower
-          superTitle: Confidence interval
-          content: ''
-        - name: ciu[cohen]
-          title: Upper
-          superTitle: Confidence interval
-          content: ''
         - name: stat[raw]
           title: ''
           type: text
-          content: Raw
         - name: low[raw]
           title: Low
           type: number
         - name: high[raw]
           title: High
           type: number
+
+    - name:  effsize
+      title: Effect Sizes
+      type:  Table
+      rows: (deps)
+      clearWith:
+        - group
+        - alpha
+        - low_eqbound
+        - high_eqbound
+        - eqbound_type
+        - var_equal
+      columns:
+        - name: var
+          title: ''
+          type: text
+          content: ($key)
+        - name: stat[cohen]
+          title: ''
+          type: text
+        - name: est[cohen]
+          title: Estimate
+          type: number
+        - name: cil[cohen]
+          title: Lower
+          superTitle: Confidence Interval
+        - name: ciu[cohen]
+          title: Upper
+          superTitle: Confidence Interval
+        - name: stat[raw]
+          title: ''
+          type: text
+          content: Raw
+        - name: est[raw]
+          title: Estimate
+          type: number
         - name: cil[raw]
           title: Lower
-          superTitle: Confidence interval
+          superTitle: Confidence Interval
         - name: ciu[raw]
           title: Upper
-          superTitle: Confidence interval
+          superTitle: Confidence Interval
 
     - name: desc
       title: Descriptives
@@ -173,17 +203,41 @@ items:
 
     - name: plots
       type: Array
-      title: Plots
+      title: Effect Size Plot
       items: (deps)
       visible: (plots)
       template:
         title: $key
         type: Image
         renderFun: .plot
-        width: 180
+        width: 425
+        height: 425
         clearWith:
           - group
           - alpha
+          - hypothesis
+          - smd_type
+          - low_eqbound
+          - high_eqbound
+          - eqbound_type
+          - var_equal
+
+    - name: descplots
+      type: Array
+      title: Data Plot
+      items: (deps)
+      visible: (descplots)
+      template:
+        title: $key
+        type: Image
+        renderFun: .descplot
+        width: 400
+        height: 375
+        clearWith:
+          - group
+          - alpha
+          - hypothesis
+          - smd_type
           - low_eqbound
           - high_eqbound
           - eqbound_type

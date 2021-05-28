@@ -41,6 +41,22 @@ options:
           R: >
             a number (default: 0) to compare against
 
+    - name: hypothesis
+      title: Alternative hypothesis
+      type: List
+      options:
+        - name: EQU
+          title: "Equivalence Test"
+        - name: MET
+          title: "Minimal Effect Test"
+      default: EQU
+      description:
+          ui: >
+            the alternative hypothesis for equivlance or minimal effect testing.
+          R: >
+            `'EQU'` for equivalence (default), or
+            `'MET'` for minimal effects test, the alternative hypothesis;
+
     - name: low_eqbound
       title: Lower equivalence bounds
       type: Number
@@ -61,14 +77,14 @@ options:
       title: Bounds type
       type: List
       options:
-        - name: d
-          title: Cohen's D
+        - name: SMD
+          title: Standardized
         - name: raw
           title: Raw
-      default: d
+      default: SMD
       description:
           R: >
-            `'d'` (default) or `'raw'`; whether the bounds are specified in
+            `'SMD'` (default) or `'raw'`; whether the bounds are specified in
             Cohen's d or raw units respectively
 
     - name: alpha
@@ -111,3 +127,17 @@ options:
       description:
           R: >
             deprecated
+
+    - name: smd_type
+      title: Standardized Effect Size
+      type: List
+      options:
+        - name: d
+          title: Cohen's d
+        - name: g
+          title: Hedges' g
+      default: g
+      description:
+          R: >
+            `'d'` (default) or `'g'`;
+            whether the calculated effect size is biased (d) or bias-corrected (g).

@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Aaron R. Caldwell" />
+
+<meta name="date" content="2021-04-30" />
+
+<title>Equivalence Testing for F-tests</title>
+
+<script>// Hide empty <a> tag within highlighted CodeBlock for screen reader accessibility (see https://github.com/jgm/pandoc/issues/6352#issuecomment-626106786) -->
+// v0.0.1
+// Written by JooYoung Seo (jooyoung@psu.edu) and Atsushi Yasumoto on June 1st, 2020.
+
+document.addEventListener('DOMContentLoaded', function() {
+  const codeList = document.getElementsByClassName("sourceCode");
+  for (var i = 0; i < codeList.length; i++) {
+    var linkList = codeList[i].getElementsByTagName('a');
+    for (var j = 0; j < linkList.length; j++) {
+      if (linkList[j].innerHTML === "") {
+        linkList[j].setAttribute('aria-hidden', 'true');
+      }
+    }
+  }
+});
+</script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
+<style type="text/css" data-origin="pandoc">
+code.sourceCode > span { display: inline-block; line-height: 1.25; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Equivalence Testing for F-tests</h1>
+<h4 class="author">Aaron R. Caldwell</h4>
+<h4 class="date">2021-04-30</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#f-test-calculations">F-test Calculations</a><ul>
+<li><a href="#an-example">An Example</a><ul>
+<li><a href="#visualize-partial-eta2">Visualize partial <span class="math inline">\(\eta^2\)</span></a></li>
+</ul></li>
+</ul></li>
+<li><a href="#power-analysis-for-f-tests">Power Analysis for <em>F</em>-tests</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+</div>
+
+<p>For an open access tutorial paper explaining how to set equivalence bounds, and how to perform and report equivalence for ANOVA models see <span class="citation">Campbell and Lakens (2021)</span>. These functions are meant to be omnibus tests, and additional testing may be necessary. For example, comparison of the estimated marginal means, in addition to or as an alternative of with may be prudent.</p>
+<div id="f-test-calculations" class="section level1">
+<h1>F-test Calculations</h1>
+<p>Statistical equivalence testing (or “omnibus non-inferiority testing” as <span class="citation">Campbell and Lakens (2021)</span>) for <em>F</em>-tests are special use case of the cumulative distribution function of the non-central <em>F</em> distribution.</p>
+<p>As <span class="citation">Campbell and Lakens (2021)</span> state, these type of questions answer the question: “Can we reject the hypothesis that the total proportion of variance in outcome Y attributable to X is greater than or equal to the equivalence bound <span class="math inline">\(\Delta\)</span>?”</p>
+<p><span class="math display">\[
+H_0: \space 1 &gt; \eta^2_p \geq \Delta
+\\
+H_1: \space 0 \geq \eta^2_p &lt; \Delta
+\]</span> In <code>TOSTER</code> we go a tad farther and calculate a more generalizable non-centrality parameter than allows the equivalence test for <em>F</em>-tests to be applied to variety of designs.</p>
+<p><span class="citation">Campbell and Lakens (2021)</span> calculate the <em>p</em>-value as:</p>
+<p><span class="math display">\[
+p = p_f(F; J-1, N-J, \frac{N \cdot \Delta}{1-\Delta})
+\]</span></p>
+<p>However, this approach could not be applied to factorial ANOVA and the paper only outlines how to apply this approach to a one-way ANOVA and an extension to Welch’s one-way ANOVA.</p>
+<p>However, the non-centrality parameter (ncp = <span class="math inline">\(\lambda\)</span>) can be calculated with the equivalence bound and the degrees of freedom:</p>
+<p><span class="math display">\[
+\lambda_{eq} = \frac{\Delta}{1-\Delta} \cdot(df_1 + df_2 +1)
+\]</span></p>
+<p>The <em>p</em>-value for the equivalence test (<span class="math inline">\(p_{eq}\)</span>) could then be calculated from traditional ANOVA results and the distribution function:</p>
+<p><span class="math display">\[
+p_{eq} = p_f(F; df_1, df_2, \lambda_{eq})
+\]</span></p>
+<div id="an-example" class="section level2">
+<h2>An Example</h2>
+<p>Using the <code>InsectSprays</code> data set in R and the base R <code>aov</code> function we can demonstrate how this omnibus equivalence testing can be applied with <code>TOSTER</code>.</p>
+<p>From the initial analysis we an see a clear “significant” effect (the p-value listed is zero but it just very small) of the factor spray. However, we <em>may</em> be interested in testing if the effect is practically equivalent. I will arbitrarily set the equivalence bound to a partial eta-squared of 0.35 (<span class="math inline">\(H_0: \eta^2_p &gt; 0.35\)</span>)</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">library</span>(TOSTER)</span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="co"># Get Data</span></span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="kw">data</span>(<span class="st">&quot;InsectSprays&quot;</span>)</span>
+<span id="cb1-4"><a href="#cb1-4"></a><span class="co"># Build ANOVA</span></span>
+<span id="cb1-5"><a href="#cb1-5"></a>aovtest =<span class="st"> </span><span class="kw">aov</span>(count <span class="op">~</span><span class="st"> </span>spray,</span>
+<span id="cb1-6"><a href="#cb1-6"></a>              <span class="dt">data =</span> InsectSprays)</span>
+<span id="cb1-7"><a href="#cb1-7"></a></span>
+<span id="cb1-8"><a href="#cb1-8"></a><span class="co"># Display overall results</span></span>
+<span id="cb1-9"><a href="#cb1-9"></a>knitr<span class="op">::</span><span class="kw">kable</span>(broom<span class="op">::</span><span class="kw">tidy</span>(aovtest),</span>
+<span id="cb1-10"><a href="#cb1-10"></a>            <span class="dt">caption =</span> <span class="st">&quot;Traditional ANOVA Test&quot;</span>)</span></code></pre></div>
+<table>
+<caption>Traditional ANOVA Test</caption>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">df</th>
+<th align="right">sumsq</th>
+<th align="right">meansq</th>
+<th align="right">statistic</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">spray</td>
+<td align="right">5</td>
+<td align="right">2668.833</td>
+<td align="right">533.76667</td>
+<td align="right">34.70228</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">Residuals</td>
+<td align="right">66</td>
+<td align="right">1015.167</td>
+<td align="right">15.38131</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+</tr>
+</tbody>
+</table>
+<p>We can then use the information in the table above to perform an equivalence test using the <code>equ_ftest</code> function. This function returns an object of the S3 class <code>htest</code> and the output will look very familiar to the the t-test. The main difference is the estimates, and confidence interval, are for partial <span class="math inline">\(\eta^2_p\)</span>.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw">equ_ftest</span>(<span class="dt">Fstat =</span> <span class="fl">34.70228</span>,</span>
+<span id="cb2-2"><a href="#cb2-2"></a>          <span class="dt">df1 =</span> <span class="dv">5</span>,</span>
+<span id="cb2-3"><a href="#cb2-3"></a>          <span class="dt">df2 =</span> <span class="dv">66</span>,</span>
+<span id="cb2-4"><a href="#cb2-4"></a>          <span class="dt">eqbound =</span> <span class="fl">0.35</span>)</span></code></pre></div>
+<pre><code>## 
+##  Equivalence Test from F-test
+## 
+## data:  Summary Statistics
+## F = 34.702, df1 = 5, df2 = 66, p-value = 1
+## 95 percent confidence interval:
+##  0.5806263 0.7804439
+## sample estimates:
+## [1] 0.724439</code></pre>
+<p>Based on the results above we would conclude there is a significant effect of “spray” and the differences due to spray are <em>not</em> statistically equivalent. In essence, we reject the traditional null hypothesis of “no effect” but accept the null hypothesis of the equivalence test.</p>
+<p>The <code>equ_ftest</code> is very useful because all you need is very basic summary statistics. However, if you are doing all your analyses in R then you can use the <code>equ_anova</code> function. This function accepts objects produced from <code>stats::aov</code>, <code>car::Anova</code> and <code>afex::aov_car</code> (or any anova from <code>afex</code>).</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="kw">equ_anova</span>(aovtest,</span>
+<span id="cb4-2"><a href="#cb4-2"></a>          <span class="dt">eqbound =</span> <span class="fl">0.35</span>)</span></code></pre></div>
+<pre><code>##   effect df1 df2 F.value   p.null   pes eqbound p.equ
+## 1      1   5  66  34.702 3.18e-17 0.724    0.35     1</code></pre>
+<div id="visualize-partial-eta2" class="section level3">
+<h3>Visualize partial <span class="math inline">\(\eta^2\)</span></h3>
+<p>Just like the standardized mean differences, <code>TOSTER</code> also has a function to visualize <span class="math inline">\(\eta^2_p\)</span>.</p>
+</div>
+</div>
+</div>
+<div id="power-analysis-for-f-tests" class="section level1">
+<h1>Power Analysis for <em>F</em>-tests</h1>
+<p>Power for an equivalence <em>F</em>-test can be calculated with the same equations supplied by <span class="citation">Campbell and Lakens (2021)</span>. I have included these within the <code>powerTOST_f</code> function.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a><span class="kw">powerTOST_f</span>(<span class="dt">df1 =</span> <span class="dv">2</span>, </span>
+<span id="cb6-2"><a href="#cb6-2"></a>            <span class="dt">df2 =</span> <span class="dv">60</span>,</span>
+<span id="cb6-3"><a href="#cb6-3"></a>            <span class="dt">eqbound =</span> <span class="fl">.15</span>)</span></code></pre></div>
+<pre><code>## 
+##      Equivalence Test for an F-test 
+## 
+##             df1 = 2
+##             df2 = 60
+##         eqbound = 0.15
+##       sig.level = 0.05
+##           power = 0.8188512</code></pre>
+</div>
+<div id="references" class="section level1 unnumbered">
+<h1>References</h1>
+<div id="refs" class="references">
+<div id="ref-Campbell_2021">
+<p>Campbell, Harlan, and Daniël Lakens. 2021. “Can We Disregard the Whole Model? Omnibus Non-Inferiority Testing for R2 in Multi-Variable Linear Regression and in Anova.” <em>British Journal of Mathematical and Statistical Psychology</em> 74 (1): e12201. <a href="https://doi.org/10.1111/bmsp.12201">https://doi.org/10.1111/bmsp.12201</a>.</p>
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

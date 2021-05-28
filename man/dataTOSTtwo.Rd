@@ -4,10 +4,23 @@
 \alias{dataTOSTtwo}
 \title{TOST Independent Samples T-Test}
 \usage{
-dataTOSTtwo(data, deps, group, var_equal = FALSE, low_eqbound = -0.5,
-  high_eqbound = 0.5, eqbound_type = "d", alpha = 0.05,
-  desc = FALSE, plots = FALSE, low_eqbound_d = -999999999,
-  high_eqbound_d = -999999999)
+dataTOSTtwo(
+  data,
+  deps,
+  group,
+  var_equal = FALSE,
+  hypothesis = "EQU",
+  low_eqbound = -0.5,
+  high_eqbound = 0.5,
+  eqbound_type = "raw",
+  alpha = 0.05,
+  desc = FALSE,
+  plots = FALSE,
+  descplots = FALSE,
+  low_eqbound_d = -999999999,
+  high_eqbound_d = -999999999,
+  smd_type = "g"
+)
 }
 \arguments{
 \item{data}{the data as a data frame}
@@ -20,11 +33,16 @@ have two levels}
 \item{var_equal}{\code{TRUE} or \code{FALSE} (default), assume equal
 variances}
 
-\item{low_eqbound}{a number (default: -0.5) the lower equivalence bounds}
+\item{hypothesis}{\code{'EQU'} for equivalence (default), or \code{'MET'}
+for minimal effects test, the alternative hypothesis.}
 
-\item{high_eqbound}{a number (default: 0.5) the upper equivalence bounds}
+\item{low_eqbound}{a number (default: -0.5) the lower equivalence/MET
+bounds}
 
-\item{eqbound_type}{\code{'d'} (default) or \code{'raw'}; whether the
+\item{high_eqbound}{a number (default: 0.5) the upper equivalence/MET
+bounds}
+
+\item{eqbound_type}{\code{'SMD'} (default) or \code{'raw'}; whether the
 bounds are specified in Cohen's d or raw units respectively}
 
 \item{alpha}{alpha level (default = 0.05)}
@@ -32,19 +50,28 @@ bounds are specified in Cohen's d or raw units respectively}
 \item{desc}{\code{TRUE} or \code{FALSE} (default), provide descriptive
 statistics}
 
-\item{plots}{\code{TRUE} or \code{FALSE} (default), provide plots}
+\item{plots}{\code{TRUE} or \code{FALSE} (default), provide effect size
+plots}
+
+\item{descplots}{\code{TRUE} or \code{FALSE} (default), provide plots}
 
 \item{low_eqbound_d}{deprecated}
 
 \item{high_eqbound_d}{deprecated}
+
+\item{smd_type}{\code{'d'} (default) or \code{'g'}; whether the calculated
+effect size is biased (d) or bias-corrected (g).}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
+  \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
   \code{results$tost} \tab \tab \tab \tab \tab a table \cr
   \code{results$eqb} \tab \tab \tab \tab \tab a table \cr
+  \code{results$effsize} \tab \tab \tab \tab \tab a table \cr
   \code{results$desc} \tab \tab \tab \tab \tab a table \cr
   \code{results$plots} \tab \tab \tab \tab \tab an array of images \cr
+  \code{results$descplots} \tab \tab \tab \tab \tab an array of images \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

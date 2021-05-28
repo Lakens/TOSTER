@@ -10,11 +10,12 @@ dataTOSToneClass <- R6::R6Class(
 
       tt <- self$results$tost
       eqb <- self$results$eqb
+      effsize <- self$results$effsize
 
-      eqb$getColumn('cil[cohen]')$setSuperTitle(jmvcore::format('{}% Confidence interval', ci))
-      eqb$getColumn('ciu[cohen]')$setSuperTitle(jmvcore::format('{}% Confidence interval', ci))
-      eqb$getColumn('cil[raw]')$setSuperTitle(jmvcore::format('{}% Confidence interval', ci))
-      eqb$getColumn('ciu[raw]')$setSuperTitle(jmvcore::format('{}% Confidence interval', ci))
+      effsize$getColumn('cil[cohen]')$setSuperTitle(jmvcore::format('{}% Confidence interval', ci))
+      effsize$getColumn('ciu[cohen]')$setSuperTitle(jmvcore::format('{}% Confidence interval', ci))
+      effsize$getColumn('cil[raw]')$setSuperTitle(jmvcore::format('{}% Confidence interval', ci))
+      effsize$getColumn('ciu[raw]')$setSuperTitle(jmvcore::format('{}% Confidence interval', ci))
 
       for (key in eqb$rowKeys)
         eqb$setRow(rowKey=key, values=list(`cil[cohen]`='', `ciu[cohen]`=''))
@@ -23,6 +24,7 @@ dataTOSToneClass <- R6::R6Class(
 
       tt <- self$results$tost
       eqb <- self$results$eqb
+      effsize <- self$results$effsize
       desc <- self$results$desc
       plots <- self$results$plots
 
@@ -39,63 +41,118 @@ dataTOSToneClass <- R6::R6Class(
         se  <- sd/sqrt(n)
         res <- t.test(var-mu)
         t   <- unname(res$statistic)
-        p   <- unname(res$p.value)
+        pttest   <- unname(res$p.value)
+
 
         low_eqbound    <- self$options$low_eqbound
         high_eqbound   <- self$options$high_eqbound
-        low_eqbound_d  <- self$options$low_eqbound_d  # deprecated
-        high_eqbound_d <- self$options$high_eqbound_d
-
-        if (low_eqbound_d != -999999999 && low_eqbound_d != -999999999) {
-          # low_eqbound_d and high_eqbound_d options are deprecated
-          low_eqbound  <- low_eqbound_d * sd
-          high_eqbound <- high_eqbound_d * sd
-        }
-        else if (self$options$eqbound_type == 'd') {
-          low_eqbound_d <- low_eqbound
-          high_eqbound_d <- high_eqbound
-          low_eqbound  <- low_eqbound * sd
-          high_eqbound <- high_eqbound * sd
+        if (self$options$eqbound_type == 'SMD') {
+          eqbound_type = "SMD"
+          pr_l_eqb = low_eqbound * sd
+          pr_h_eqb = high_eqbound * sd
         } else {
-          low_eqbound_d <- low_eqbound / sd
-          high_eqbound_d <- high_eqbound / sd
+          eqbound_type = "raw"
+          pr_l_eqb = low_eqbound
+          pr_h_eqb = high_eqbound
         }
 
-        degree_f<-n-1
-        t1<-(m-mu-low_eqbound)/(sd/sqrt(n))# t-test
-        p1<-pt(t1, degree_f, lower.tail=FALSE)
-        t2<-(m-mu-high_eqbound)/(sd/sqrt(n)) #t-test
-        p2<-pt(t2, degree_f, lower.tail=TRUE)
-        t<-(m-mu)/(sd/sqrt(n))
-        pttest<-2*pt(-abs(t), df=degree_f)
-        LL90<-m-mu-qt(1-alpha, degree_f)*(sd/sqrt(n))
-        UL90<-m-mu+qt(1-alpha, degree_f)*(sd/sqrt(n))
-        LL95<-m-mu-qt(1-(alpha/2), degree_f)*(sd/sqrt(n))
-        UL95<-m-mu+qt(1-(alpha/2), degree_f)*(sd/sqrt(n))
-        ptost<-max(p1,p2) #Get highest p-value for summary TOST result
-        ttost<-ifelse(abs(t1) < abs(t2), t1, t2) #Get lowest t-value for summary TOST result
-        dif<-(m-mu)
+        if(self$options$hypothesis == "EQU"){
+          alt_low = "greater"
+          alt_high = "less"
+          test_hypothesis = "Hypothesis Tested: Equivalence"
+          null_hyp = paste0(round(pr_l_eqb,2),
+                            " >= (Mean - mu) or (Mean - mu) >= ",
+                            round(pr_h_eqb,2))
+          alt_hyp = paste0(round(pr_l_eqb,2),
+                           " < (Mean - mu) < ",
+                           round(pr_h_eqb,2))
+        } else if(self$options$hypothesis == "MET"){
+          alt_low = "less"
+          alt_high = "greater"
+          test_hypothesis = "Hypothesis Tested: Minimal Effect"
+          null_hyp = paste0(round(pr_l_eqb,2),
+                            " <= (Mean - mu)  <= ",
+                            round(pr_h_eqb,2))
+          alt_hyp = paste0(round(pr_l_eqb,2),
+                           " > (Mean - mu) or (Mean - mu)  > ",
+                           round(pr_h_eqb,2))
+        }
 
-        tt$setRow(rowKey=name, list(
-          `t[0]`=t,  `df[0]`=degree_f, `p[0]`=p,
-          `t[1]`=t2, `df[1]`=degree_f, `p[1]`=p2,
-          `t[2]`=t1, `df[2]`=degree_f, `p[2]`=p1))
+        if(self$options$smd_type == 'g'){
+          bias_c = TRUE
+        } else {
+          bias_c = FALSE
+        }
+        TOSTres = t_TOST(x = var,
+                         hypothesis = self$options$hypothesis,
+                         low_eqbound = low_eqbound,
+                         high_eqbound = high_eqbound,
+                         eqbound_type = eqbound_type,
+                         alpha = alpha,
+                         bias_correction = bias_c)
+        if(eqbound_type == "SMD"){
+          text_res = paste0("Two One-Sided Tests: One Sample t-tests \n \n",
+                            test_hypothesis,
+                            "\n \n",
+                            "Null Hypothesis: ", null_hyp,"\n",
+                            "Alternative: ", alt_hyp,
+                            "Note: SMD confidence intervals are an approximation. See vignette(\"SMD_calcs\") \n",
+                            "\n Warning: standardized bounds produce biased results. \n Consider setting bounds in raw units")
+
+        } else{
+          text_res = paste0("Two One-Sided Tests: One Sample t-tests \n \n",
+                            test_hypothesis,
+                            "\n \n",
+                            "Null Hypothesis: ", null_hyp,"\n",
+                            "Alternative: ", alt_hyp, "\n",
+                            "Note: SMD confidence intervals are an approximation. See vignette(\"SMD_calcs\") \n")
+        }
+
+        tt$setRow(rowKey=name,
+                  list(
+                    `t[0]` = TOSTres$TOST$t[1],
+                    `df[0]` = TOSTres$TOST$df[1],
+                    `p[0]` = TOSTres$TOST$p.value[3],
+                    `t[1]` = TOSTres$TOST$t[2],
+                    `df[1]` = TOSTres$TOST$df[2],
+                    `p[1]` = TOSTres$TOST$p.value[2],
+                    `t[2]` = TOSTres$TOST$t[3],
+                    `df[2]` = TOSTres$TOST$df[3],
+                    `p[2]` = TOSTres$TOST$p.value[3]
+                  ))
 
         eqb$setRow(rowKey=name, list(
-          `low[raw]`=low_eqbound, `high[raw]`=high_eqbound, `cil[raw]`=LL90, `ciu[raw]`=UL90,
-          `low[cohen]`=low_eqbound_d, `high[cohen]`=high_eqbound_d))
+          `low[raw]` = TOSTres$eqb$low_eq[1],
+          `high[raw]` = TOSTres$eqb$high_eq[1],
+          `low[cohen]` = TOSTres$eqb$low_eq[2],
+          `high[cohen]` = TOSTres$eqb$high_eq[2]))
 
-        desc$setRow(rowKey=name, list(n=n, m=m, med=med, sd=sd, se=se))
+        effsize$setRow(
+          rowKey = name,
+          list(
+            `stat[cohen]` = TOSTres$smd$smd_label,
+            `est[cohen]` = TOSTres$smd$d,
+            `cil[cohen]` = TOSTres$smd$dlow,
+            `ciu[cohen]` = TOSTres$smd$dhigh,
+            `est[raw]` = TOSTres$effsize$estimate[1],
+            `cil[raw]` = TOSTres$effsize$lower.ci[1],
+            `ciu[raw]` = TOSTres$effsize$upper.ci[1]
+          )
+        )
+
+
+
+
+        self$results$text$setContent(text_res)
+
+        desc$setRow(rowKey=name, list(n = n,
+                                      m = m,
+                                      med = med,
+                                      sd = sd,
+                                      se = se))
 
         plot <- plots$get(key=name)
-        points <- data.frame(
-          m=dif,
-          cil=LL90,
-          ciu=UL90,
-          low=low_eqbound,
-          high=high_eqbound,
-          stringsAsFactors=FALSE)
-        plot$setState(points)
+        plot$setState(TOSTres)
       }
 
     },
@@ -104,7 +161,10 @@ dataTOSToneClass <- R6::R6Class(
       if (is.null(image$state))
         return(FALSE)
 
-      tostplot(image, ggtheme, theme)
+      TOSTres <- image$state
+
+      plotTOSTr = plot(TOSTres)
+      print(plotTOSTr)
 
       return(TRUE)
     })

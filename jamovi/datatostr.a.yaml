@@ -23,6 +23,37 @@ options:
             a list of vectors of strings naming variables to correlate from
             `data`
 
+    - name: cor_type
+      title: Correlation type
+      type: List
+      options:
+        - name: pearson
+          title: Pearson's r
+        - name: spearman
+          title: Spearman's rho
+        - name: kendall
+          title: Kendall's tau
+      default: pearson
+      description:
+          R: >
+            a character string indicating which correlation coefficient is to be used for the test. One of "pearson", "kendall", or "spearman", can be abbreviated.
+
+    - name: hypothesis
+      title: Alternative hypothesis
+      type: List
+      options:
+        - name: EQU
+          title: "Equivalence Test"
+        - name: MET
+          title: "Minimal Effect Test"
+      default: EQU
+      description:
+          ui: >
+            the alternative hypothesis for equivlance or minimal effect testing.
+          R: >
+            `'EQU'` for equivalence (default), or
+            `'MET'` for minimal effects test, the alternative hypothesis.
+
     - name: low_eqbound_r
       title: Lower equivalence bound (in r)
       type: Number
@@ -65,3 +96,5 @@ options:
       description:
           R: >
             `TRUE` or `FALSE` (default), provide plots
+
+

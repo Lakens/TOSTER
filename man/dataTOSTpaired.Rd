@@ -4,21 +4,39 @@
 \alias{dataTOSTpaired}
 \title{TOST Paired Samples T-Test}
 \usage{
-dataTOSTpaired(data, pairs, low_eqbound = -0.5, high_eqbound = 0.5,
-  eqbound_type = "d", alpha = 0.05, desc = FALSE, plots = FALSE,
-  low_eqbound_dz = -999999999, high_eqbound_dz = -999999999)
+dataTOSTpaired(
+  data,
+  pair1,
+  pair2,
+  hypothesis = "EQU",
+  low_eqbound = -0.5,
+  high_eqbound = 0.5,
+  eqbound_type = "raw",
+  alpha = 0.05,
+  desc = FALSE,
+  plots = FALSE,
+  low_eqbound_dz = -999999999,
+  high_eqbound_dz = -999999999,
+  indplot = FALSE,
+  diffplot = FALSE,
+  smd_type = "g"
+)
 }
 \arguments{
 \item{data}{the data as a data frame}
 
-\item{pairs}{a list of vectors of strings naming variables to pair from
-\code{data}}
+\item{pair1}{A string naming the first part of the pair}
+
+\item{pair2}{A string naming the second part of the pair}
+
+\item{hypothesis}{\code{'EQU'} for equivalence (default), or \code{'MET'}
+for minimal effects test, the alternative hypothesis.}
 
 \item{low_eqbound}{a number (default: 0.5) the lower equivalence bounds}
 
 \item{high_eqbound}{a number (default: 0.5) the upper equivalence bounds}
 
-\item{eqbound_type}{\code{'d'} (default) or \code{'raw'}; whether the
+\item{eqbound_type}{\code{'SMD'} (default) or \code{'raw'}; whether the
 bounds are specified in standardized mean difference (Cohen's dz) or raw
 units respectively}
 
@@ -32,14 +50,27 @@ statistics}
 \item{low_eqbound_dz}{deprecated}
 
 \item{high_eqbound_dz}{deprecated}
+
+\item{indplot}{\code{TRUE} or \code{FALSE} (default), provide plot of
+paired data.}
+
+\item{diffplot}{\code{TRUE} or \code{FALSE} (default), provide plot of
+difference scores.}
+
+\item{smd_type}{\code{'d'} (default) or \code{'g'}; whether the calculated
+effect size is biased (d) or bias-corrected (g).}
 }
 \value{
 A results object containing:
 \tabular{llllll}{
+  \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
   \code{results$tost} \tab \tab \tab \tab \tab a table \cr
   \code{results$eqb} \tab \tab \tab \tab \tab a table \cr
+  \code{results$effsize} \tab \tab \tab \tab \tab a table \cr
   \code{results$desc} \tab \tab \tab \tab \tab a table \cr
-  \code{results$plots} \tab \tab \tab \tab \tab an array of images \cr
+  \code{results$plots} \tab \tab \tab \tab \tab an image \cr
+  \code{results$indplot} \tab \tab \tab \tab \tab an image \cr
+  \code{results$diffplot} \tab \tab \tab \tab \tab an image \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -53,13 +84,14 @@ TOST Paired Samples T-Test
 }
 \section{References}{
 
-Mara, C. A., & Cribbie, R. A. (2012). Paired-Samples Tests of Equivalence. Communications in Statistics - Simulation and Computation, 41(10), 1928-1943. https://doi.org/10.1080/03610918.2011.626545, formula page 1932. Note there is a typo in the formula: n-1 should be n (personal communication, 31-08-2016)
+Mara, C. A., & Cribbie, R. A. (2012). Paired-Samples Tests of Equivalence. Communications in Statistics - Simulation and Computation, 41(10), 1928-1943. <https://doi.org/10.1080/03610918.2011.626545>, formula page 1932. Note there is a typo in the formula: n-1 should be n (personal communication, 31-08-2016)
 }
 
 \examples{
+\dontrun{
 library("TOSTER")
 
-dataTOSTpaired(data = randu, pairs = list(c(i1="x",i2="y")), low_eqbound = -0.3,
+dataTOSTpaired(data = randu, pair1 = "x", pair2="y", low_eqbound = -0.3,
                high_eqbound = 0.3, alpha = 0.05, desc = TRUE, plots = TRUE)
-
+}
 }

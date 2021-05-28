@@ -94,20 +94,24 @@ TOSTmeta<-function(ES,var,se,low_eqbound_d, high_eqbound_d, alpha, plot = TRUE, 
     cat("Null Hypothesis Test Result:\n")
     message(cat("The null hypothesis test was ",testoutcome,", Z = ",format(Z, digits = 3, nsmall = 3, scientific = FALSE),", p = ",format(pttest, digits = 3, nsmall = 3, scientific = FALSE),", given an alpha of ",alpha,".",sep=""))
     if(pttest <= alpha && ptost <= alpha){
-      combined_outcome <- "statistically different from zero and statistically equivalent to zero"
+      combined_outcome <- paste0("NHST: reject null significance hypothesis that the effect is equal to ", 0," \n",
+                                 "TOST: reject null equivalence hypothesis")
     }
     if(pttest < alpha && ptost > alpha){
-      combined_outcome <- "statistically different from zero and statistically not equivalent to zero"
+      combined_outcome <- paste0("NHST: reject null significance hypothesis that the effect is equal to ",0," \n",
+                                 "TOST: don't reject null equivalence hypothesis")
     }
     if(pttest > alpha && ptost <= alpha){
-      combined_outcome <- "statistically not different from zero and statistically equivalent to zero"
+      combined_outcome <- paste0("NHST: don't reject null significance hypothesis that the effect is equal to ",0," \n",
+                                 "TOST: reject null equivalence hypothesis")
     }
     if(pttest > alpha && ptost > alpha){
-      combined_outcome <- "statistically not different from zero and statistically not equivalent to zero"
+      combined_outcome <-  paste0("NHST: don't reject null significance hypothesis that the effect is equal to ",0," \n",
+                                  "TOST: don't reject null equivalence hypothesis")
     }
     cat("\n")
-    message(cat("Based on the equivalence test and the null-hypothesis test combined, we can conclude that the observed effect is ",combined_outcome,".",sep=""))
+    message(combined_outcome)
   }
   # Return results in list()
-  invisible(list(ES=ES,TOST_Z1=Z1,TOST_p1=p1,TOST_Z2=Z2,TOST_p2=p2,alpha=alpha,low_eqbound_d=low_eqbound_d,high_eqbound_d=high_eqbound_d, LL_CI_TOST=LL90,UL_CI_TOST=UL90,LL_CI_ZTEST=LL95,UL_CI_ZTEST=UL95))
+  invisible(list(ES=ES,TOST_Z1=Z1,TOST_p1=p1,TOST_Z2=Z2,TOST_p2=p2,alpha=alpha,low_eqbound_d=low_eqbound_d,high_eqbound_d=high_eqbound_d, LL_CI_TOST=LL90,UL_CI_TOST=UL90,LL_CI_ZTEST=LL95,UL_CI_ZTEST=UL95,NHST_t = t, NHST_p = pttest))
 }

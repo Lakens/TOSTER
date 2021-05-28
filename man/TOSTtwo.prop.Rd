@@ -4,8 +4,17 @@
 \alias{TOSTtwo.prop}
 \title{TOST function for two proportions (raw scores)}
 \usage{
-TOSTtwo.prop(prop1, prop2, n1, n2, low_eqbound, high_eqbound, alpha,
-  plot = TRUE, verbose = TRUE)
+TOSTtwo.prop(
+  prop1,
+  prop2,
+  n1,
+  n2,
+  low_eqbound,
+  high_eqbound,
+  alpha,
+  plot = TRUE,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{prop1}{proportion of group 1}

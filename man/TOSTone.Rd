@@ -4,8 +4,17 @@
 \alias{TOSTone}
 \title{TOST function for a one-sample t-test (Cohen's d)}
 \usage{
-TOSTone(m, mu, sd, n, low_eqbound_d, high_eqbound_d, alpha, plot = TRUE,
-  verbose = TRUE)
+TOSTone(
+  m,
+  mu,
+  sd,
+  n,
+  low_eqbound_d,
+  high_eqbound_d,
+  alpha,
+  plot = TRUE,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{m}{mean}

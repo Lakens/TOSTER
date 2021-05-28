@@ -36,6 +36,19 @@ children:
       - type: TextBox
         name: alpha
         format: number
+  - type: Label
+    label: Hypothesis
+    children:
+      - type: RadioButton
+        name: EQU
+        optionName: hypothesis
+        optionPart: EQU
+        label: Equivalence Test
+      - type: RadioButton
+        name: MET
+        optionName: hypothesis
+        optionPart: MET
+        label: Minimal Effects Test
   - type: LayoutBox
     margin: large
     children:
