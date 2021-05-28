@@ -1,6 +1,5 @@
 Package: TOSTER
 Version: 0.4.0
-Date: 2021-04-16
 Title: Two One-Sided Tests (TOST) Equivalence Testing
 Description: Two one-sided tests (TOST) procedure to test equivalence for t-tests, correlations, differences between proportions, and meta-analyses, including power analysis for t-tests and correlations. Allows you to specify equivalence bounds in raw scale units or in terms of effect sizes. See: Lakens (2017) <doi:10.1177/1948550617697177>.
 Authors@R: c(
@@ -35,6 +34,7 @@ Suggests:
     testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Encoding: UTF-8
+LazyData: true
 Config/testthat/edition: 3
 Depends: 
     R (>= 3.5)

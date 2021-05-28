@@ -9,3 +9,7 @@ temp/
 docs
 *.DS_Store
 .DS_Store
+/doc/
+/Meta/
+build/R
+build/js

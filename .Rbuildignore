@@ -7,10 +7,13 @@
 ^build/js$
 ^.*\.jmo$
 ^Shiny$
-^build$
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
 ^R/dist_smd_ind\.R*
 ^R/dist_smd_ind2\.R*
 ^\.github$
+^doc$
+^Meta$
+build/R
+build/js

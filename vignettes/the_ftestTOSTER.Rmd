@@ -5,13 +5,14 @@ date: "`r Sys.Date()`"
 output: 
   rmarkdown::html_vignette:
     toc: True
+editor_options: 
+  chunk_output_type: console
+bibliography: references.bib
 vignette: >
   %\VignetteIndexEntry{Equivalence Testing for F-tests}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
-editor_options: 
-  chunk_output_type: console
-bibliography: references.bib
+
 ---
 
 For an open access tutorial paper explaining how to set equivalence bounds, and how to perform and report equivalence for ANOVA models see @Campbell_2021. These functions are meant to be omnibus tests, and additional testing may be necessary. For example, comparison of the estimated marginal means, in addition to or as an alternative of  with may be prudent.

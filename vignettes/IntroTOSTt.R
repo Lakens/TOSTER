@@ -157,6 +157,10 @@ print(res1)
 plot(res1, type = "cd") 
 
 ## ----fig.width=6, fig.height=6------------------------------------------------
+plot(res1, type = "cd",
+     ci_shades = c(.9,.95)) 
+
+## ----fig.width=6, fig.height=6------------------------------------------------
 plot(res1, type = "c",
      ci_lines =  c(.9,.95))
 
@@ -212,4 +216,14 @@ res_tsum
 
 ## ----fig.width=6, fig.height=6------------------------------------------------
 plot(res_tsum)
+
+## -----------------------------------------------------------------------------
+power_t_TOST(n = NULL,
+  delta = 1,
+  sd = 2.5,
+  low_eqbound = -2.5,
+  high_eqbound = 2.5,
+  alpha = .025,
+  power = .95,
+  type = "two.sample")
 
