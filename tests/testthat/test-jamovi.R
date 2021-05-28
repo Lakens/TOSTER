@@ -379,3 +379,69 @@ test_that("dataTOSTone: internal consistency",{
                ignore_attr = TRUE
   )
 })
+
+test_that("dataTOSTr",{
+  data('iris')
+
+  t1 = dataTOSTr(
+    data = iris,
+    pairs = list(
+      list(
+        i1="Sepal.Length",
+        i2="Sepal.Width"))
+  )
+
+  t2 = cor(iris$Sepal.Length,iris$Sepal.Width)
+
+  expect_equal(t1$tost$asDF$r,
+               t2)
+
+  t1 = dataTOSTr(
+    data = iris,
+    pairs = list(
+      list(
+        i1="Sepal.Length",
+        i2="Sepal.Width")),
+    cor_type = "spearman"
+  )
+
+  t2 = cor(iris$Sepal.Length,iris$Sepal.Width,
+           method = "spearman")
+
+  expect_equal(t1$tost$asDF$r,
+               t2)
+
+  t1 = dataTOSTr(
+    data = iris,
+    pairs = list(
+      list(
+        i1="Sepal.Length",
+        i2="Sepal.Width")),
+    cor_type = "kendall"
+  )
+
+  t2 = cor(iris$Sepal.Length,iris$Sepal.Width,
+           method = "kendall")
+
+  expect_equal(t1$tost$asDF$r,
+               t2)
+
+  t1_MET = dataTOSTr(
+    data = iris,
+    pairs = list(
+      list(
+        i1="Sepal.Length",
+        i2="Sepal.Width")),
+    hypothesis = "MET",
+    cor_type = "kendall"
+  )
+
+  t2_MET = cor(iris$Sepal.Length,iris$Sepal.Width,
+           method = "kendall")
+
+  expect_equal(t1_MET$tost$asDF$r,
+               t2_MET)
+
+  expect_equal(t1_MET$tost$asDF$p,
+               t1$tost$asDF$p)
+})

@@ -187,6 +187,8 @@ test_that("Run examples for one sample", {
 
   prtest = hush(print(test4))
   p1 = plot(test4)
+  p2 = plot(test4,
+            type = "c")
 
 })
 
