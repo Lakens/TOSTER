@@ -39,7 +39,7 @@ print.TOSTt <- function(x,
   cat("\n")
   cat(x$decision$ttest)
   cat("\n")
-  cat("Conclusion: The effect is ",x$decision$combined,".",sep="")
+  cat(x$decision$combined)
   cat("\n")
   cat("\n")
   cat("TOST Results \n")
