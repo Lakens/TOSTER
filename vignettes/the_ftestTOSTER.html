@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Aaron R. Caldwell" />
+
+<meta name="date" content="2021-05-29" />
+
+<title>Equivalence Testing for F-tests</title>
+
+<script>// Hide empty <a> tag within highlighted CodeBlock for screen reader accessibility (see https://github.com/jgm/pandoc/issues/6352#issuecomment-626106786) -->
+// v0.0.1
+// Written by JooYoung Seo (jooyoung@psu.edu) and Atsushi Yasumoto on June 1st, 2020.
+
+document.addEventListener('DOMContentLoaded', function() {
+  const codeList = document.getElementsByClassName("sourceCode");
+  for (var i = 0; i < codeList.length; i++) {
+    var linkList = codeList[i].getElementsByTagName('a');
+    for (var j = 0; j < linkList.length; j++) {
+      if (linkList[j].innerHTML === "") {
+        linkList[j].setAttribute('aria-hidden', 'true');
+      }
+    }
+  }
+});
+</script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
+<style type="text/css" data-origin="pandoc">
+code.sourceCode > span { display: inline-block; line-height: 1.25; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Equivalence Testing for F-tests</h1>
+<h4 class="author">Aaron R. Caldwell</h4>
+<h4 class="date">2021-05-29</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#f-test-calculations">F-test Calculations</a><ul>
+<li><a href="#an-example">An Example</a><ul>
+<li><a href="#visualize-partial-eta2">Visualize partial <span class="math inline">\(\eta^2\)</span></a></li>
+</ul></li>
+</ul></li>
+<li><a href="#power-analysis-for-f-tests">Power Analysis for <em>F</em>-tests</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+</div>
+
+<p>For an open access tutorial paper explaining how to set equivalence bounds, and how to perform and report equivalence for ANOVA models see <span class="citation">Campbell and Lakens (2021)</span>. These functions are meant to be omnibus tests, and additional testing may be necessary. For example, comparison of the estimated marginal means, in addition to or as an alternative of with may be prudent.</p>
+<div id="f-test-calculations" class="section level1">
+<h1>F-test Calculations</h1>
+<p>Statistical equivalence testing (or “omnibus non-inferiority testing” as <span class="citation">Campbell and Lakens (2021)</span>) for <em>F</em>-tests are special use case of the cumulative distribution function of the non-central <em>F</em> distribution.</p>
+<p>As <span class="citation">Campbell and Lakens (2021)</span> state, these type of questions answer the question: “Can we reject the hypothesis that the total proportion of variance in outcome Y attributable to X is greater than or equal to the equivalence bound <span class="math inline">\(\Delta\)</span>?”</p>
+<p><span class="math display">\[
+H_0: \space 1 &gt; \eta^2_p \geq \Delta
+\\
+H_1: \space 0 \geq \eta^2_p &lt; \Delta
+\]</span> In <code>TOSTER</code> we go a tad farther and calculate a more generalizable non-centrality parameter than allows the equivalence test for <em>F</em>-tests to be applied to variety of designs.</p>
+<p><span class="citation">Campbell and Lakens (2021)</span> calculate the <em>p</em>-value as:</p>
+<p><span class="math display">\[
+p = p_f(F; J-1, N-J, \frac{N \cdot \Delta}{1-\Delta})
+\]</span></p>
+<p>However, this approach could not be applied to factorial ANOVA and the paper only outlines how to apply this approach to a one-way ANOVA and an extension to Welch’s one-way ANOVA.</p>
+<p>However, the non-centrality parameter (ncp = <span class="math inline">\(\lambda\)</span>) can be calculated with the equivalence bound and the degrees of freedom:</p>
+<p><span class="math display">\[
+\lambda_{eq} = \frac{\Delta}{1-\Delta} \cdot(df_1 + df_2 +1)
+\]</span></p>
+<p>The <em>p</em>-value for the equivalence test (<span class="math inline">\(p_{eq}\)</span>) could then be calculated from traditional ANOVA results and the distribution function:</p>
+<p><span class="math display">\[
+p_{eq} = p_f(F; df_1, df_2, \lambda_{eq})
+\]</span></p>
+<div id="an-example" class="section level2">
+<h2>An Example</h2>
+<p>Using the <code>InsectSprays</code> data set in R and the base R <code>aov</code> function we can demonstrate how this omnibus equivalence testing can be applied with <code>TOSTER</code>.</p>
+<p>From the initial analysis we an see a clear “significant” effect (the p-value listed is zero but it just very small) of the factor spray. However, we <em>may</em> be interested in testing if the effect is practically equivalent. I will arbitrarily set the equivalence bound to a partial eta-squared of 0.35 (<span class="math inline">\(H_0: \eta^2_p &gt; 0.35\)</span>)</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">library</span>(TOSTER)</span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="co"># Get Data</span></span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="kw">data</span>(<span class="st">&quot;InsectSprays&quot;</span>)</span>
+<span id="cb1-4"><a href="#cb1-4"></a><span class="co"># Build ANOVA</span></span>
+<span id="cb1-5"><a href="#cb1-5"></a>aovtest =<span class="st"> </span><span class="kw">aov</span>(count <span class="op">~</span><span class="st"> </span>spray,</span>
+<span id="cb1-6"><a href="#cb1-6"></a>              <span class="dt">data =</span> InsectSprays)</span>
+<span id="cb1-7"><a href="#cb1-7"></a></span>
+<span id="cb1-8"><a href="#cb1-8"></a><span class="co"># Display overall results</span></span>
+<span id="cb1-9"><a href="#cb1-9"></a>knitr<span class="op">::</span><span class="kw">kable</span>(broom<span class="op">::</span><span class="kw">tidy</span>(aovtest),</span>
+<span id="cb1-10"><a href="#cb1-10"></a>            <span class="dt">caption =</span> <span class="st">&quot;Traditional ANOVA Test&quot;</span>)</span></code></pre></div>
+<table>
+<caption>Traditional ANOVA Test</caption>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">df</th>
+<th align="right">sumsq</th>
+<th align="right">meansq</th>
+<th align="right">statistic</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">spray</td>
+<td align="right">5</td>
+<td align="right">2668.833</td>
+<td align="right">533.76667</td>
+<td align="right">34.70228</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">Residuals</td>
+<td align="right">66</td>
+<td align="right">1015.167</td>
+<td align="right">15.38131</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+</tr>
+</tbody>
+</table>
+<p>We can then use the information in the table above to perform an equivalence test using the <code>equ_ftest</code> function. This function returns an object of the S3 class <code>htest</code> and the output will look very familiar to the the t-test. The main difference is the estimates, and confidence interval, are for partial <span class="math inline">\(\eta^2_p\)</span>.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw">equ_ftest</span>(<span class="dt">Fstat =</span> <span class="fl">34.70228</span>,</span>
+<span id="cb2-2"><a href="#cb2-2"></a>          <span class="dt">df1 =</span> <span class="dv">5</span>,</span>
+<span id="cb2-3"><a href="#cb2-3"></a>          <span class="dt">df2 =</span> <span class="dv">66</span>,</span>
+<span id="cb2-4"><a href="#cb2-4"></a>          <span class="dt">eqbound =</span> <span class="fl">0.35</span>)</span></code></pre></div>
+<pre><code>## Note: equ_ftest only validated for one-way ANOVA; use with caution</code></pre>
+<pre><code>## 
+##  Equivalence Test from F-test
+## 
+## data:  Summary Statistics
+## F = 34.702, df1 = 5, df2 = 66, p-value = 1
+## 95 percent confidence interval:
+##  0.5806263 0.7804439
+## sample estimates:
+## [1] 0.724439</code></pre>
+<p>Based on the results above we would conclude there is a significant effect of “spray” and the differences due to spray are <em>not</em> statistically equivalent. In essence, we reject the traditional null hypothesis of “no effect” but accept the null hypothesis of the equivalence test.</p>
+<p>The <code>equ_ftest</code> is very useful because all you need is very basic summary statistics. However, if you are doing all your analyses in R then you can use the <code>equ_anova</code> function. This function accepts objects produced from <code>stats::aov</code>, <code>car::Anova</code> and <code>afex::aov_car</code> (or any anova from <code>afex</code>).</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a><span class="kw">equ_anova</span>(aovtest,</span>
+<span id="cb5-2"><a href="#cb5-2"></a>          <span class="dt">eqbound =</span> <span class="fl">0.35</span>)</span></code></pre></div>
+<pre><code>## Note: equ_anova only validated for one-way ANOVA; use with caution</code></pre>
+<pre><code>##   effect df1 df2 F.value   p.null   pes eqbound p.equ
+## 1      1   5  66  34.702 3.18e-17 0.724    0.35     1</code></pre>
+<div id="visualize-partial-eta2" class="section level3">
+<h3>Visualize partial <span class="math inline">\(\eta^2\)</span></h3>
+<p>Just like the standardized mean differences, <code>TOSTER</code> also has a function to visualize <span class="math inline">\(\eta^2_p\)</span>.</p>
+<p>The function, <code>plot_pes</code>, operates in a fashion very similar to <code>equ_ftest</code>. In essence, all you have to do is provide the F-statistic, numerator degrees of freedom, and denominator degrees of freedom. We can also select the type of plot with the <code>type</code> argument. Users have the option of producing a consonance plot (<code>type = &quot;c&quot;</code>), a consonance density plot (<code>type = &quot;cd&quot;</code>), or both (<code>type = c(&quot;cd&quot;,&quot;c&quot;)</code>). By default, <code>plot_pes</code> will produce both plots.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a><span class="kw">plot_pes</span>(<span class="dt">Fstat =</span> <span class="fl">34.70228</span>,</span>
+<span id="cb8-2"><a href="#cb8-2"></a>         <span class="dt">df1 =</span> <span class="dv">5</span>,</span>
+<span id="cb8-3"><a href="#cb8-3"></a>         <span class="dt">df2 =</span> <span class="dv">66</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+</div>
+</div>
+<div id="power-analysis-for-f-tests" class="section level1">
+<h1>Power Analysis for <em>F</em>-tests</h1>
+<p>Power for an equivalence <em>F</em>-test can be calculated with the same equations supplied by <span class="citation">Campbell and Lakens (2021)</span>. I have included these within the <code>power_eq_f</code> function.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a><span class="kw">power_eq_f</span>(<span class="dt">df1 =</span> <span class="dv">2</span>, </span>
+<span id="cb9-2"><a href="#cb9-2"></a>            <span class="dt">df2 =</span> <span class="dv">60</span>,</span>
+<span id="cb9-3"><a href="#cb9-3"></a>            <span class="dt">eqbound =</span> <span class="fl">.15</span>)</span></code></pre></div>
+<pre><code>## Note: equ_anova only validated for one-way ANOVA; use with caution</code></pre>
+<pre><code>## 
+##      Power for Non-Inferiority F-test 
+## 
+##             df1 = 2
+##             df2 = 60
+##         eqbound = 0.15
+##       sig.level = 0.05
+##           power = 0.8188512</code></pre>
+</div>
+<div id="references" class="section level1 unnumbered">
+<h1>References</h1>
+<div id="refs" class="references">
+<div id="ref-Campbell_2021">
+<p>Campbell, Harlan, and Daniël Lakens. 2021. “Can We Disregard the Whole Model? Omnibus Non-Inferiority Testing for R2 in Multi-Variable Linear Regression and in Anova.” <em>British Journal of Mathematical and Statistical Psychology</em> 74 (1): e12201. <a href="https://doi.org/10.1111/bmsp.12201">https://doi.org/10.1111/bmsp.12201</a>.</p>
+</div>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

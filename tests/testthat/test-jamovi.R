@@ -267,6 +267,19 @@ test_that("dataTOSTpaired: internal consistency",{
                t2$effsize$asDF$est,
                ignore_attr = TRUE
   )
+
+  t2 = dataTOSTpaired(data = sleep2,
+                      pair1 = "pair1",
+                      pair2 = "pair2",
+                      eqbound_type = "SMD",
+                      smd_type = "d",
+                      #hypothesis = "MET",
+                      low_eqbound = -2,
+                      high_eqbound = 2,
+                      desc = TRUE,
+                      plots = TRUE,
+                      indplot = TRUE,
+                      diffplot = TRUE)
 })
 
 test_that("dataTOSTone: internal consistency",{
@@ -491,4 +504,26 @@ test_that("datatosttwoprop tests",{
 
   expect_equal(t1$tost$asDF$p,
                t2$tost$asDF$p)
+
+  # Run plot function
+
+  # Both
+  t1 = plot_cor(r = .3, n =22, method = "pearson")
+  t2 = plot_cor(r = .43, n =32, method = "spearman")
+  t3 = plot_cor(r = .21, n =100, method = "kendall")
+
+  # density
+  t1 = plot_cor(r = .3, n =22, method = "pearson",
+                type = "cd")
+  t2 = plot_cor(r = .43, n =32, method = "spearman",
+                type = "cd")
+  t3 = plot_cor(r = .21, n =100, method = "kendall",
+                type = "cd")
+  # consonance
+  t1 = plot_cor(r = .3, n =22, method = "pearson",
+                type = "c")
+  t2 = plot_cor(r = .43, n =32, method = "spearman",
+                type = "c")
+  t3 = plot_cor(r = .21, n =100, method = "kendall",
+                type = "c")
 })

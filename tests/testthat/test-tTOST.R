@@ -1,4 +1,4 @@
-context("Run Examples for t_TOST")
+#context("Run Examples for t_TOST")
 
 # need hush function to run print through examples
 

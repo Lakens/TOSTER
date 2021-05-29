@@ -1,10 +1,12 @@
-context("Do dataTOST and TOST functions give identical results")
-library("TOSTER")
+#context("Do dataTOST and TOST functions give identical results")
+#library("TOSTER")
 
 #data <- read.csv("https://raw.githubusercontent.com/jasp-stats/jasp-desktop/development/Resources/Data%20Sets/Big%205%20(Dolan%2C%20Oort%2C%20Stoel%20%26%20Wicherts%2C%202009).csv", sep="")
 #data <- read.csv("C:/Users/Daniel/Downloads/Big 5 (Dolan, Oort, Stoel & Wicherts, 2009).csv", sep="")
-data("cars")
+
 test_that("p-values for TOSTr are identical using dataTOSTr and TOSTr", {
+
+  data("cars")
   eq1_data <- dataTOSTr(
     data = cars,
     pairs = list(list(i1 = "speed", i2 = "dist")),
@@ -69,4 +71,13 @@ test_that("p-values for TOSTr are identical using dataTOSTr and TOSTr", {
   expect_equal(as.numeric(eq1_data[4]), eq1_sum$NHST_p)
   expect_equal(as.numeric(eq1_data$cil),eq1_sum$LL_CI_TOST)
   expect_equal(as.numeric(eq1_data$ciu),eq1_sum$UL_CI_TOST)
+
+  eq1_data <- dataTOSTr(
+    data = cars,
+    pairs = list(list(i1 = "speed", i2 = "dist")),
+    low_eqbound_r = -0.15,
+    high_eqbound_r = 0.15,
+    desc = TRUE,
+    plots = TRUE
+  )
 })

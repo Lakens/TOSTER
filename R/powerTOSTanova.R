@@ -15,7 +15,7 @@
 #' @importFrom stats pf qf
 #' @export
 
-powerTOST_f <- function(alpha = 0.05,
+power_eq_f<- function(alpha = 0.05,
                         df1,
                         df2,
                         eqbound){

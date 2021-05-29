@@ -294,7 +294,7 @@ test_that("PASS ex#7 pg 519-8", {
 
 test_that("errors",{
 
-  expect_error(  t4 = power_t_TOST(
+  expect_error(  power_t_TOST(
     n = 152,
     power = .7,
     delta = -15,
@@ -306,18 +306,18 @@ test_that("errors",{
   )
   )
 
-  expect_error(  t4 = power_t_TOST(
+  expect_error(  power_t_TOST(
     n = 152,
     delta = -15,
     sd = 28.284,
     low_eqbound = -20,
     high_eqbound = 20,
     type = "paired",
-    alpha = 1
+    alpha = 1.1
   )
   )
 
-  expect_error(  t4 = power_t_TOST(
+  expect_error(  power_t_TOST(
     n = 152,
     delta = -15,
     sd = 28.284,
@@ -325,6 +325,14 @@ test_that("errors",{
     alpha = .05
   )
   )
+
+  # Run a few unused functions for edge cases
+
+  res1 = TOSTER:::OwensQOwen(nu=20,t=1,delta=1,b=1)
+
+  res2 = TOSTER:::OwensT(5,1)
+
+  res3 = TOSTER:::tfn(1,2)
 
 })
 

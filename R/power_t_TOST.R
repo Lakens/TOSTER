@@ -43,6 +43,13 @@ power_t_TOST <- function(
     stop("exactly one of n, d, power, and sig.level must be NULL")
   }
 
+  if(!is.null(alpha) ){
+    if(alpha <=0 || alpha >=1){
+      stop("alpha must be value between 0 and 1")
+    }
+
+  }
+
   # Create quote to evalulate with uniroot
   p.body <- quote({
     pow_tTOST(alpha = alpha,

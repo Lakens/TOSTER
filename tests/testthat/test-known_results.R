@@ -1,8 +1,9 @@
-context("Test if values in examples in functions stay the same")
-library("TOSTER")
+# context("Test if values in examples in functions stay the same")
+# library("TOSTER")
 
 test_that("Test that one-sample t-test output is same as previous version", {
-  res <- TOSTone(m=0.54,mu=0.5,sd=1.2,n=100,low_eqbound_d=-0.3, high_eqbound_d=0.3, alpha=0.05, plot = FALSE)
+  res <- TOSTone(m=0.54,mu=0.5,sd=1.2,n=100,low_eqbound_d=-0.3, high_eqbound_d=0.3, alpha=0.05, plot = FALSE,
+                 verbose = FALSE)
   expect_equal(res$diff, 0.04, tolerance = .0001)
   expect_equal(res$TOST_t1, 3.333333, tolerance = .0001)
   expect_equal(res$TOST_p1, 0.0006040021, tolerance = .0001)
@@ -21,7 +22,8 @@ test_that("Test that one-sample t-test output is same as previous version", {
 })
 
 test_that("Test that raw one-sample t-test output is same as previous version", {
-  res <- TOSTone.raw(m=0.52,mu=0.5,sd=0.5,n=300,low_eqbound=-0.1, high_eqbound=0.1, alpha=0.05, plot = FALSE)
+  res <- TOSTone.raw(m=0.52,mu=0.5,sd=0.5,n=300,low_eqbound=-0.1, high_eqbound=0.1, alpha=0.05, plot = FALSE,
+                     verbose = FALSE)
   expect_equal(res$diff, 0.02, tolerance = .0001)
   expect_equal(res$TOST_t1, 4.156922, tolerance = .0001)
   expect_equal(res$TOST_p1, 0.00002108451, tolerance = .0001)
@@ -38,7 +40,8 @@ test_that("Test that raw one-sample t-test output is same as previous version", 
 })
 
 test_that("Test that two-sample t-test output is same as previous version", {
-  res <- TOSTtwo(m1=5.25,m2=5.22,sd1=0.95,sd2=0.83,n1=95,n2=89,low_eqbound_d=-0.43,high_eqbound_d=0.43, plot = FALSE)
+  res <- TOSTtwo(m1=5.25,m2=5.22,sd1=0.95,sd2=0.83,n1=95,n2=89,low_eqbound_d=-0.43,high_eqbound_d=0.43, plot = FALSE,
+                 verbose = FALSE)
   expect_equal(res$diff, 0.03, tolerance = .0001)
   expect_equal(res$TOST_t1, 3.14973, tolerance = .0001)
   expect_equal(res$TOST_p1, 0.0009560083, tolerance = .0001)
@@ -57,7 +60,8 @@ test_that("Test that two-sample t-test output is same as previous version", {
 })
 
 test_that("Test that raw two-sample t-test output is same as previous version", {
-  res <- TOSTtwo.raw(m1=5.25,m2=5.22,sd1=0.95,sd2=0.83,n1=95,n2=89,low_eqbound=-0.384,high_eqbound=0.384, plot = FALSE)
+  res <- TOSTtwo.raw(m1=5.25,m2=5.22,sd1=0.95,sd2=0.83,n1=95,n2=89,low_eqbound=-0.384,high_eqbound=0.384, plot = FALSE,
+                     verbose = FALSE)
   expect_equal(res$diff, 0.03, tolerance = .0001)
   expect_equal(res$TOST_t1, 3.153015, tolerance = .0001)
   expect_equal(res$TOST_p1, 0.0009458745, tolerance = .0001)
@@ -75,7 +79,8 @@ test_that("Test that raw two-sample t-test output is same as previous version", 
 })
 
 test_that("Test that paired two-sample t-test output is same as previous version", {
-  res <- TOSTpaired(n=65,m1=5.83,m2=5.75,sd1=1.17,sd2=1.29,r12=0.75,low_eqbound_dz=-0.4,high_eqbound_dz=0.4, plot = FALSE)
+  res <- TOSTpaired(n=65,m1=5.83,m2=5.75,sd1=1.17,sd2=1.29,r12=0.75,low_eqbound_dz=-0.4,high_eqbound_dz=0.4,
+                    verbose = FALSE, plot = FALSE)
   expect_equal(res$diff, 0.08, tolerance = .0001)
   expect_equal(res$TOST_t1, 3.960381, tolerance = .0001)
   expect_equal(res$TOST_p1, 0.00009531728, tolerance = .0001)
@@ -94,7 +99,9 @@ test_that("Test that paired two-sample t-test output is same as previous version
 })
 
 test_that("Test that raw paired two-sample t-test output is same as previous version", {
-  res <- TOSTpaired.raw(n=65,m1=5.83,m2=5.75,sd1=1.17,sd2=1.30,r12=0.745,low_eqbound=-0.34,high_eqbound=0.34, plot = FALSE)
+  res <- TOSTpaired.raw(n=65,m1=5.83,m2=5.75,sd1=1.17,sd2=1.30,r12=0.745,
+                        low_eqbound=-0.34,high_eqbound=0.34, plot = FALSE,
+                        verbose = FALSE)
   expect_equal(res$diff, 0.08, tolerance = .0001)
   expect_equal(res$TOST_t1, 3.803437, tolerance = .0001)
   expect_equal(res$TOST_p1, 0.0001606103, tolerance = .0001)
@@ -111,7 +118,8 @@ test_that("Test that raw paired two-sample t-test output is same as previous ver
 })
 
 test_that("Test that correlation test output is same as previous version", {
-  res <- TOSTr(n=100, r = 0.02, low_eqbound_r=-0.3, high_eqbound_r=0.3, alpha=0.05, plot = FALSE)
+  res <- TOSTr(n=100, r = 0.02, low_eqbound_r=-0.3, high_eqbound_r=0.3, alpha=0.05, plot = FALSE,
+               verbose = FALSE)
   expect_equal(res$r, 0.02, tolerance = .0001)
   expect_equal(res$TOST_p1, 0.0005863917, tolerance = .0001)
   expect_equal(res$TOST_p2, 0.002176282, tolerance = .0001)
@@ -125,7 +133,8 @@ test_that("Test that correlation test output is same as previous version", {
 })
 
 test_that("Test that meta test output is same as previous version", {
-  res <- TOSTmeta(ES=0.12, se=0.09, low_eqbound_d=-0.2, high_eqbound_d=0.2, alpha=0.05, plot = FALSE)
+  res <- TOSTmeta(ES=0.12, se=0.09, low_eqbound_d=-0.2, high_eqbound_d=0.2, alpha=0.05, plot = FALSE,
+                  verbose = FALSE)
   expect_equal(res$ES, 0.12, tolerance = .0001)
   expect_equal(res$TOST_Z1, 3.555556, tolerance = .0001)
   expect_equal(res$TOST_p1, 0.0001885906, tolerance = .0001)
@@ -141,7 +150,9 @@ test_that("Test that meta test output is same as previous version", {
 })
 
 test_that("Test that two proportions test output is same as previous version", {
-  res <- TOSTtwo.prop(prop1 = .65, prop2 = .70, n1 = 100, n2 = 100, low_eqbound = -0.1, high_eqbound = 0.1, alpha = .05, plot = FALSE)
+  res <- TOSTtwo.prop(prop1 = .65, prop2 = .70, n1 = 100, n2 = 100,
+                      low_eqbound = -0.1, high_eqbound = 0.1, alpha = .05, plot = FALSE,
+                      verbose = FALSE)
   expect_equal(res$dif, -0.05, tolerance = .0001)
   expect_equal(res$TOST_z1, 0.7559289, tolerance = .0001)
   expect_equal(res$TOST_p1, 0.2248459, tolerance = .0001)

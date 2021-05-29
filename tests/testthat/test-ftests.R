@@ -53,6 +53,23 @@ test_that("Equivalence F-tests",{
                 df1 = 2,
                 df2 = 4577)
 
+  # Test power function
+
+  t1 = equ_ftest(Fstat = 0.49348,
+                 df1 = 2,
+                 df2 = 457,
+                 eqbound = .01)
+  t2 = power_eq_f(.0623,
+                  df1 = 2,
+                  df2 = 457,
+                  eqbound = .01)
+
+  expect_equal(round(t1$p.value,3),
+               round(t2$sig.level,3))
+
+  expect_equal(round(t2$power,2),
+               .39)
+
 })
 
 
