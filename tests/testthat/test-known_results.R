@@ -8,7 +8,8 @@ test_that("Test that one-sample t-test output is same as previous version", {
     sink()
     return(tmp)
   }
-  hush(suppressMessages(TOSTone(m=0.54,mu=0.5,sd=1.2,n=100,low_eqbound_d=-0.3, high_eqbound_d=0.3, alpha=0.05, plot = FALSE,
+  hush(suppressMessages(TOSTone(m=0.54,mu=0.5,sd=1.2,n=100,low_eqbound_d=-0.3, high_eqbound_d=0.3, alpha=0.05,
+                                plot = TRUE,
                                 verbose = TRUE)))
   res <- TOSTone(m=0.54,mu=0.5,sd=1.2,n=100,low_eqbound_d=-0.3, high_eqbound_d=0.3, alpha=0.05, plot = FALSE,
                  verbose = FALSE)
@@ -37,7 +38,9 @@ test_that("Test that raw one-sample t-test output is same as previous version", 
     sink()
     return(tmp)
   }
-  hush(suppressMessages(TOSTone.raw(m=0.52,mu=0.5,sd=0.5,n=300,low_eqbound=-0.1, high_eqbound=0.1, alpha=0.05, plot = FALSE,
+  hush(suppressMessages(TOSTone.raw(m=0.52,mu=0.5,sd=0.5,n=300,
+                                    low_eqbound=-0.1, high_eqbound=0.1, alpha=0.05,
+                                    plot = TRUE,
                                     verbose = TRUE)))
 
   res <- TOSTone.raw(m=0.52,mu=0.5,sd=0.5,n=300,low_eqbound=-0.1, high_eqbound=0.1, alpha=0.05, plot = FALSE,
@@ -65,7 +68,7 @@ test_that("Test that two-sample t-test output is same as previous version", {
     return(tmp)
   }
   hush(suppressMessages(TOSTtwo(m1=5.25,m2=5.22,sd1=0.95,sd2=0.83,n1=95,n2=89,
-                                low_eqbound_d=-0.43,high_eqbound_d=0.43, plot = FALSE,
+                                low_eqbound_d=-0.43,high_eqbound_d=0.43, plot = TRUE,
                                 var.equal =TRUE,
                                 verbose = TRUE)))
   res <- TOSTtwo(m1=5.25,m2=5.22,sd1=0.95,sd2=0.83,n1=95,n2=89,low_eqbound_d=-0.43,high_eqbound_d=0.43, plot = FALSE,
@@ -94,7 +97,8 @@ test_that("Test that raw two-sample t-test output is same as previous version", 
     sink()
     return(tmp)
   }
-  hush(suppressMessages(TOSTtwo.raw(m1=5.25,m2=5.22,sd1=0.95,sd2=0.83,n1=95,n2=89,low_eqbound=-0.384,high_eqbound=0.384, plot = FALSE,
+  hush(suppressMessages(TOSTtwo.raw(m1=5.25,m2=5.22,sd1=0.95,sd2=0.83,n1=95,n2=89,
+                                    low_eqbound=-0.384,high_eqbound=0.384, plot = TRUE,
                                     verbose = TRUE)))
   res <- TOSTtwo.raw(m1=5.25,m2=5.22,sd1=0.95,sd2=0.83,n1=95,n2=89,low_eqbound=-0.384,high_eqbound=0.384, plot = FALSE,
                      verbose = FALSE)
@@ -123,7 +127,7 @@ test_that("Test that paired two-sample t-test output is same as previous version
     return(tmp)
   }
   hush(suppressMessages(TOSTpaired(n=65,m1=5.83,m2=5.75,sd1=1.17,sd2=1.29,r12=0.75,low_eqbound_dz=-0.4,high_eqbound_dz=0.4,
-                                   verbose = TRUE, plot = FALSE)))
+                                   verbose = TRUE, plot = TRUE)))
   res <- TOSTpaired(n=65,m1=5.83,m2=5.75,sd1=1.17,sd2=1.29,r12=0.75,low_eqbound_dz=-0.4,high_eqbound_dz=0.4,
                     verbose = FALSE, plot = FALSE)
   expect_equal(res$diff, 0.08, tolerance = .0001)
@@ -151,7 +155,7 @@ test_that("Test that raw paired two-sample t-test output is same as previous ver
     return(tmp)
   }
   hush(suppressMessages(TOSTpaired.raw(n=65,m1=5.83,m2=5.75,sd1=1.17,sd2=1.30,r12=0.745,
-                                       low_eqbound=-0.34,high_eqbound=0.34, plot = FALSE,
+                                       low_eqbound=-0.34,high_eqbound=0.34, plot = TRUE,
                                        verbose = TRUE)))
   res <- TOSTpaired.raw(n=65,m1=5.83,m2=5.75,sd1=1.17,sd2=1.30,r12=0.745,
                         low_eqbound=-0.34,high_eqbound=0.34, plot = FALSE,
@@ -192,7 +196,7 @@ test_that("Test that correlation test output is same as previous version", {
   expect_equal(res$LL_CI_TTEST, -0.1771139, tolerance = .0001)
   expect_equal(res$UL_CI_TTEST, 0.2155713, tolerance = .0001)
 
-  hush(suppressMessages(TOSTr(n=100, r = 0.02, low_eqbound_r=-0.3, high_eqbound_r=0.3, alpha=0.05, plot = FALSE,
+  hush(suppressMessages(TOSTr(n=100, r = 0.02, low_eqbound_r=-0.3, high_eqbound_r=0.3, alpha=0.05, plot = TRUE,
                              verbose = TRUE)))
 
 })
@@ -220,7 +224,7 @@ test_that("Test that meta test output is same as previous version", {
   expect_equal(res$LL_CI_ZTEST, -0.05639676, tolerance = .0001)
   expect_equal(res$UL_CI_ZTEST, 0.2963968, tolerance = .0001)
 
-  hush(suppressMessages(TOSTmeta(ES=0.12, se=0.09, low_eqbound_d=-0.2, high_eqbound_d=0.2, alpha=0.05, plot = FALSE,
+  hush(suppressMessages(TOSTmeta(ES=0.12, se=0.09, low_eqbound_d=-0.2, high_eqbound_d=0.2, alpha=0.05, plot = TRUE,
                                  verbose = TRUE)))
 })
 
@@ -232,8 +236,9 @@ test_that("Test that two proportions test output is same as previous version", {
     return(tmp)
   }
   hush(suppressMessages(TOSTtwo.prop(prop1 = .65, prop2 = .70, n1 = 100, n2 = 100,
-                                     low_eqbound = -0.1, high_eqbound = 0.1, alpha = .05, plot = FALSE,
-                                     verbose = TRUE)))
+                                     low_eqbound = -0.1, high_eqbound = 0.1, alpha = .05,
+                                     verbose = TRUE,
+                                     plot = TRUE)))
 
   expect_warning(TOSTtwo.prop(prop1 = .65, prop2 = .70, n1 = 100, n2 = 100,
                               low_eqbound = 0.11, high_eqbound = 0.1, alpha = .05, plot = FALSE,
@@ -246,6 +251,9 @@ test_that("Test that two proportions test output is same as previous version", {
                             verbose = FALSE))
   expect_error(TOSTtwo.prop(prop1 = .65, prop2 = 2, n1 = 100, n2 = 100,
                             low_eqbound = -0.1, high_eqbound = 0.1, alpha = .05, plot = FALSE,
+                            verbose = FALSE))
+  expect_error(TOSTtwo.prop(prop1 = .65, prop2 = .7, n1 = 100, n2 = 100,
+                            low_eqbound = -0.1, high_eqbound = 0.1, alpha = 1.5, plot = FALSE,
                             verbose = FALSE))
 
   res <- TOSTtwo.prop(prop1 = .65, prop2 = .70, n1 = 100, n2 = 100,

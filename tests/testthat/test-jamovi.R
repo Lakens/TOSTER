@@ -558,7 +558,8 @@ test_that("plot functions for jamovi work",{
   expect_equal(t1$tost$asDF$p,
                t2$tost$asDF$p)
 
-  t2$plot
+  test = t2$plot
+  test$plot
 
   #TOSTpaired
 
