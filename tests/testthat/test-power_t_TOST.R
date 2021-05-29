@@ -330,9 +330,13 @@ test_that("errors",{
 
   res1 = TOSTER:::OwensQOwen(nu=20,t=1,delta=1,b=1)
 
+  expect_equal(res1, 3.684586e-11)
+
   res2 = TOSTER:::OwensT(5,1)
+  expect_equal(1.433257e-07, round(res2,13))
 
   res3 = TOSTER:::tfn(1,2)
+  expect_equal(round(res3,8), 0.07846821)
 
 })
 

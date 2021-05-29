@@ -502,6 +502,8 @@ test_that("datatosttwoprop tests",{
     group = d2,
     plot = TRUE)
 
+  tst_plot = t2$plot
+
   expect_equal(t1$tost$asDF$p,
                t2$tost$asDF$p)
 
