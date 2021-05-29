@@ -502,7 +502,6 @@ test_that("datatosttwoprop tests",{
     group = d2,
     plot = TRUE)
 
-  tst_plot = t2$plot
 
   expect_equal(t1$tost$asDF$p,
                t2$tost$asDF$p)
@@ -528,4 +527,94 @@ test_that("datatosttwoprop tests",{
                 type = "c")
   t3 = plot_cor(r = .21, n =100, method = "kendall",
                 type = "c")
+})
+
+test_that("plot functions for jamovi work",{
+  skip_on_cran()
+
+  set.seed(8020)
+  d1 = rbinom(10,1,.5)
+  d2 = rbinom(10,1,.25)
+  df1 = data.frame(
+    d1 = d1,
+    d2 = d2
+  )
+
+  #proportions
+
+  t2 = datatosttwoprop(
+    data = df1,
+    var = d1,
+    level = "0",
+    group = d2,
+    plot = TRUE)
+
+  t2$plot
+
+  #TOSTpaired
+
+  data(sleep)
+
+  pair1 = subset(sleep, group == 2)$extra
+  pair2 = subset(sleep, group == 1)$extra
+  sleep2 = data.frame(pair1 = pair1,
+                      pair2 = pair2)
+
+  t2 = dataTOSTpaired(data = sleep2,
+                      pair1 = "pair1",
+                      pair2 = "pair2",
+                      low_eqbound = -2,
+                      high_eqbound = 2,
+                      desc = TRUE,
+                      plots = TRUE,
+                      indplot = TRUE,
+                      diffplot = TRUE)
+
+  t2$plots
+  t2$indplot
+  t2$diffplot
+  t2$desc
+
+  # Correlation plot
+
+  data('iris')
+
+  t1 = dataTOSTr(
+    data = iris,
+    pairs = list(
+      list(
+        i1="Sepal.Length",
+        i2="Sepal.Width")),
+    plot = TRUE
+  )
+
+  t1$plots
+
+  # one sample
+
+  t2 = dataTOSTone(data = sleep,
+                   vars = "extra",
+                   eqbound_type = "raw",
+                   low_eqbound = -2,
+                   high_eqbound = 2,
+                   desc =TRUE,
+                   plots = TRUE)
+
+  t2$plots
+  t2$desc
+
+  # two sample
+
+  t2 = dataTOSTtwo(data = sleep,
+                   deps = "extra",
+                   group = "group",
+                   low_eqbound = -2,
+                   high_eqbound = 2,
+                   desc = TRUE,
+                   plots = TRUE,
+                   descplots = TRUE)
+
+  t2$plots
+  t2$descplots
+
 })
