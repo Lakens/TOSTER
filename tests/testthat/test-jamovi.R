@@ -388,7 +388,8 @@ test_that("dataTOSTr",{
     pairs = list(
       list(
         i1="Sepal.Length",
-        i2="Sepal.Width"))
+        i2="Sepal.Width")),
+    plot = TRUE
   )
 
   t2 = cor(iris$Sepal.Length,iris$Sepal.Width)
@@ -402,7 +403,8 @@ test_that("dataTOSTr",{
       list(
         i1="Sepal.Length",
         i2="Sepal.Width")),
-    cor_type = "spearman"
+    cor_type = "spearman",
+    plot = TRUE
   )
 
   t2 = cor(iris$Sepal.Length,iris$Sepal.Width,
@@ -433,7 +435,8 @@ test_that("dataTOSTr",{
         i1="Sepal.Length",
         i2="Sepal.Width")),
     hypothesis = "MET",
-    cor_type = "kendall"
+    cor_type = "kendall",
+    plot = TRUE
   )
 
   t2_MET = cor(iris$Sepal.Length,iris$Sepal.Width,
@@ -444,4 +447,48 @@ test_that("dataTOSTr",{
 
   expect_equal(t1_MET$tost$asDF$p,
                t1$tost$asDF$p)
+
+
+})
+
+test_that("datatosttwoprop tests",{
+  set.seed(8020)
+  d1 = rbinom(10,1,.5)
+  d2 = rbinom(10,1,.25)
+  df1 = data.frame(
+    d1 = d1,
+    d2 = d2
+  )
+
+  t1 = datatosttwoprop(
+    data = df1,
+    var = d1,
+    level = "0",
+    group = d2)
+  t2 = datatosttwoprop(
+    data = df1,
+    var = d1,
+    level = "0",
+    group = d2,
+    plot = TRUE)
+
+  expect_equal(t1$tost$asDF$p,
+               t2$tost$asDF$p)
+
+  t1 = datatosttwoprop(
+    data = df1,
+    var = d1,
+    level = "0",
+    hypothesis = "MET",
+    group = d2)
+  t2 = datatosttwoprop(
+    data = df1,
+    var = d1,
+    hypothesis = "MET",
+    level = "0",
+    group = d2,
+    plot = TRUE)
+
+  expect_equal(t1$tost$asDF$p,
+               t2$tost$asDF$p)
 })

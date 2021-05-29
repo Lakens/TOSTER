@@ -34,6 +34,25 @@ test_that("Equivalence F-tests",{
 
   t3 = equ_anova(aovmodel, eqbound = .01)$p.equ
   expect_equal(t3, t1$p.value)
+
+  p1 = plot_pes(Fstat = 1.5,
+           df1 = 2,
+           df2 = 45)
+
+  p2 = plot_pes(0.49348,
+                df1 = 2,
+                df2 = 4577,
+                type = "cd")
+
+  p3 = plot_pes(Fstat = 1.5,
+                df1 = 2,
+                df2 = 45,
+                type = "c")
+
+  p4 = plot_pes(0.49348,
+                df1 = 2,
+                df2 = 4577)
+
 })
 
 

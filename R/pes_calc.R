@@ -11,6 +11,11 @@ pes_ci <- function(Fstat,
                               df.1 = df1,
                               df.2 = df2,
                               conf.level = conf.level)
+  if(all(is.na(F_limits))){
+    F_limits$Lower.Limit = 0
+    F_limits$Upper.Limit = 0
+  }
+
   LL_lambda <- F_limits$Lower.Limit
   UL_lambda <- F_limits$Upper.Limit
 
