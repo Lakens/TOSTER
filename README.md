@@ -1,7 +1,5 @@
----
-title: TOSTER
----
 
+# TOSTER
  <!-- badges: start -->
   [![R-CMD-check](https://github.com/Lakens/TOSTER/workflows/R-CMD-check/badge.svg)](https://github.com/Lakens/TOSTER/actions)
   [![Coverage status](https://codecov.io/gh/Lakens/TOSTER/branch/master/graph/badge.svg)](https://codecov.io/github/Lakens/TOSTER?branch=master)

@@ -20,10 +20,6 @@ cor_to_ci <- function(cor, n, ci = 0.95,
   out
 }
 
-
-
-
-
 # Kendall -----------------------------------------------------------------
 #' @importFrom stats qnorm
 .cor_to_ci_kendall <- function(cor, n,

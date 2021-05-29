@@ -71,6 +71,7 @@ test_that("Test that raw two-sample t-test output is same as previous version", 
   expect_equal(res$UL_CI_TOST, 0.2470843, tolerance = .0001)
   expect_equal(res$LL_CI_TTEST, -0.2290799, tolerance = .0001)
   expect_equal(res$UL_CI_TTEST, 0.2890799, tolerance = .0001)
+  res <- TOSTtwo.raw(m1=5.25,m2=5.22,sd1=0.95,sd2=0.83,n1=95,n2=89,low_eqbound=-0.384,high_eqbound=0.384,var.equal = TRUE, plot = FALSE)
 })
 
 test_that("Test that paired two-sample t-test output is same as previous version", {

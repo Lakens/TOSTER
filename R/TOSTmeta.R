@@ -24,16 +24,14 @@ TOSTmeta<-function(ES,var,se,low_eqbound_d, high_eqbound_d, alpha, plot = TRUE, 
   if(missing(alpha)) {
     alpha<-0.05
   }
-  if(missing(se)) {
-    if(missing(var)) {
-      stop("Need to specify variance (var) or standard error (se).")
-    }
-    se<-sqrt(var)
-  }
+
   if(missing(var)) {
     if(missing(se)) {
       stop("Need to specify variance (var) or standard error (se).")
     }
+  }
+  if(missing(se)) {
+    se<-sqrt(var)
   }
   if(low_eqbound_d >= high_eqbound_d) warning("The lower bound is equal to or larger than the upper bound. Check the plot and output to see if the bounds are specified as you intended.")
   if(1 <= alpha | alpha <= 0) stop("The alpha level should be a positive value between 0 and 1.")
