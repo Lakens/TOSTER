@@ -530,7 +530,7 @@ test_that("datatosttwoprop tests",{
 })
 
 test_that("plot functions for jamovi work",{
-  skip_on_cran()
+  #skip_on_cran()
 
   set.seed(8020)
   d1 = rbinom(10,1,.5)
@@ -541,6 +541,12 @@ test_that("plot functions for jamovi work",{
   )
 
   #proportions
+  t1 = datatosttwoprop(
+    data = df1,
+    var = d1,
+    level = "0",
+    hypothesis = "MET",
+    group = d2)
 
   t2 = datatosttwoprop(
     data = df1,
@@ -548,6 +554,9 @@ test_that("plot functions for jamovi work",{
     level = "0",
     group = d2,
     plot = TRUE)
+
+  expect_equal(t1$tost$asDF$p,
+               t2$tost$asDF$p)
 
   t2$plot
 

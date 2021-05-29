@@ -27,17 +27,8 @@
 #' @importFrom graphics abline plot points segments title
 #' @export
 
-
-powerTOSTone.raw<-function(alpha, statistical_power, sd, low_eqbound, high_eqbound){
-  message("Note: this function is defunct. Please use power_t_TOST instead")
-  NT1<-(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(low_eqbound/sd)^2
-  NT2<-(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(high_eqbound/sd)^2
-  N<-ceiling(max(NT1,NT2))
-  message(cat("The required sample size to achieve",100*statistical_power,"% power with equivalence bounds of",low_eqbound,"and",high_eqbound,"is",N))
-  return(N)
-}
-
 powerTOSTone.raw<-function(alpha, statistical_power, N, sd, low_eqbound, high_eqbound){
+  message("Note: this function is defunct. Please use power_t_TOST instead")
   if(missing(N)) {
     NT1<-(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(low_eqbound/sd)^2
     NT2<-(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(high_eqbound/sd)^2
