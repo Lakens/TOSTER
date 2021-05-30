@@ -6,17 +6,24 @@
 
 test_that("p-values for TOSTr are identical using dataTOSTr and TOSTr", {
 
+  hush = function(code) {
+    sink("NUL") # use /dev/null in UNIX
+    tmp = code
+    sink()
+    return(tmp)
+  }
+
   data("cars")
-  eq1_data <- dataTOSTr(
+  eq1_data <- suppressMessages(hush(dataTOSTr(
     data = cars,
     pairs = list(list(i1 = "speed", i2 = "dist")),
     low_eqbound_r = -0.15,
     high_eqbound_r = 0.15,
     desc = FALSE,
     plots = FALSE
-  )
+  ) ))
 
-  eq1_sum <-
+  eq1_sum <- suppressMessages(hush(
     TOSTr(
       n = length(cars$dist),
       r = cor(cars$dist, cars$speed),
@@ -29,6 +36,7 @@ test_that("p-values for TOSTr are identical using dataTOSTr and TOSTr", {
       # Alpha level for TOST and NHST
       plot = FALSE
     )
+  ))
 
   #Store dataTOST results as dataframe
   eq1_data <- as.data.frame(eq1_data$tost)
@@ -41,7 +49,8 @@ test_that("p-values for TOSTr are identical using dataTOSTr and TOSTr", {
 
   #flip dist
   cars$dist = cars$dist*-1
-  eq1_data <- dataTOSTr(
+  eq1_data <- suppressMessages(hush(
+    dataTOSTr(
     data = cars,
     pairs = list(list(i1 = "speed", i2 = "dist")),
     low_eqbound_r = -0.15,
@@ -49,8 +58,9 @@ test_that("p-values for TOSTr are identical using dataTOSTr and TOSTr", {
     desc = FALSE,
     plots = FALSE
   )
+  ))
 
-  eq1_sum <-
+  eq1_sum <- suppressMessages(hush(
     TOSTr(
       n = length(cars$dist),
       r = cor(cars$dist, cars$speed),
@@ -63,6 +73,7 @@ test_that("p-values for TOSTr are identical using dataTOSTr and TOSTr", {
       # Alpha level for TOST and NHST
       plot = FALSE
     )
+  ))
 
   #Store dataTOST results as dataframe
   eq1_data <- as.data.frame(eq1_data$tost)
@@ -72,7 +83,7 @@ test_that("p-values for TOSTr are identical using dataTOSTr and TOSTr", {
   expect_equal(as.numeric(eq1_data$cil),eq1_sum$LL_CI_TOST)
   expect_equal(as.numeric(eq1_data$ciu),eq1_sum$UL_CI_TOST)
 
-  eq1_data <- dataTOSTr(
+  eq1_data <- suppressMessages(hush( dataTOSTr(
     data = cars,
     pairs = list(list(i1 = "speed", i2 = "dist")),
     low_eqbound_r = -0.15,
@@ -80,4 +91,5 @@ test_that("p-values for TOSTr are identical using dataTOSTr and TOSTr", {
     desc = TRUE,
     plots = TRUE
   )
+  ))
 })

@@ -53,22 +53,22 @@ test_that("dataTOSTtwo: internal consistency",{
   )
 
   # bound type to SMD
-  t1 = t_TOST(formula = extra ~ group,
+  t1 = suppressMessages(t_TOST(formula = extra ~ group,
               data = sleep,
               var.equal = TRUE,
               #hypothesis = "MET",
               eqbound_type = "SMD",
               low_eqbound = -2,
-              high_eqbound = 2)
+              high_eqbound = 2))
 
-  t2 = dataTOSTtwo(data = sleep,
+  t2 = suppressMessages(dataTOSTtwo(data = sleep,
                    deps = "extra",
                    group = "group",
                    var_equal = TRUE,
                    eqbound_type = "SMD",
                    #hypothesis = "MET",
                    low_eqbound = -2,
-                   high_eqbound = 2)
+                   high_eqbound = 2))
 
   expect_equal(t1$TOST$p.value,
                c(t2$tost$asDF$`p[0]`,
@@ -86,22 +86,22 @@ test_that("dataTOSTtwo: internal consistency",{
   # hypothesis test to MET
 
   # bound type to SMD
-  t1 = t_TOST(formula = extra ~ group,
+  t1 = suppressMessages(t_TOST(formula = extra ~ group,
               data = sleep,
               var.equal = TRUE,
               hypothesis = "MET",
               eqbound_type = "SMD",
               low_eqbound = -2,
-              high_eqbound = 2)
+              high_eqbound = 2))
 
-  t2 = dataTOSTtwo(data = sleep,
+  t2 = suppressMessages(dataTOSTtwo(data = sleep,
                    deps = "extra",
                    group = "group",
                    var_equal = TRUE,
                    eqbound_type = "SMD",
                    hypothesis = "MET",
                    low_eqbound = -2,
-                   high_eqbound = 2)
+                   high_eqbound = 2))
 
   expect_equal(t1$TOST$p.value,
                c(t2$tost$asDF$`p[0]`,
@@ -184,21 +184,21 @@ test_that("dataTOSTpaired: internal consistency",{
 
 
   # bound type to SMD
-  t1 = t_TOST(formula = extra ~ group,
+  t1 = suppressMessages(t_TOST(formula = extra ~ group,
               data = sleep,
               paired = TRUE,
               #hypothesis = "MET",
               eqbound_type = "SMD",
               low_eqbound = -2,
-              high_eqbound = 2)
+              high_eqbound = 2))
 
-  t2 = dataTOSTpaired(data = sleep2,
+  t2 = suppressMessages(dataTOSTpaired(data = sleep2,
                       pair1 = "pair1",
                       pair2 = "pair2",
                    eqbound_type = "SMD",
                    #hypothesis = "MET",
                    low_eqbound = -2,
-                   high_eqbound = 2)
+                   high_eqbound = 2))
 
   expect_equal(t1$TOST$p.value,
                t2$tost$asDF$p,
@@ -240,23 +240,23 @@ test_that("dataTOSTpaired: internal consistency",{
   )
 
   # bound type to SMD
-  t1 = t_TOST(formula = extra ~ group,
+  t1 = suppressMessages(t_TOST(formula = extra ~ group,
               data = sleep,
               paired = TRUE,
               #hypothesis = "MET",
               eqbound_type = "SMD",
               bias_correction = FALSE,
               low_eqbound = -2,
-              high_eqbound = 2)
+              high_eqbound = 2))
 
-  t2 = dataTOSTpaired(data = sleep2,
+  t2 = suppressMessages(dataTOSTpaired(data = sleep2,
                       pair1 = "pair1",
                       pair2 = "pair2",
                       eqbound_type = "SMD",
                       smd_type = "d",
                       #hypothesis = "MET",
                       low_eqbound = -2,
-                      high_eqbound = 2)
+                      high_eqbound = 2))
 
   expect_equal(t1$TOST$p.value,
                t2$tost$asDF$p,
@@ -268,7 +268,7 @@ test_that("dataTOSTpaired: internal consistency",{
                ignore_attr = TRUE
   )
 
-  t2 = dataTOSTpaired(data = sleep2,
+  t2 = suppressMessages(dataTOSTpaired(data = sleep2,
                       pair1 = "pair1",
                       pair2 = "pair2",
                       eqbound_type = "SMD",
@@ -279,7 +279,7 @@ test_that("dataTOSTpaired: internal consistency",{
                       desc = TRUE,
                       plots = TRUE,
                       indplot = TRUE,
-                      diffplot = TRUE)
+                      diffplot = TRUE))
 })
 
 test_that("dataTOSTone: internal consistency",{
@@ -311,16 +311,16 @@ test_that("dataTOSTone: internal consistency",{
 
 
   # bound type to SMD
-  t1 = t_TOST(x = sleep$extra,
+  t1 = suppressMessages(t_TOST(x = sleep$extra,
               low_eqbound = -2,
               high_eqbound = 2,
-              eqbound_type = "SMD")
+              eqbound_type = "SMD"))
 
-  t2 = dataTOSTone(data = sleep,
+  t2 = suppressMessages(dataTOSTone(data = sleep,
                    vars = "extra",
                    low_eqbound = -2,
                    high_eqbound = 2,
-                   eqbound_type = "SMD")
+                   eqbound_type = "SMD"))
 
   expect_equal(t1$TOST$p.value,
                c(t2$tost$asDF$`p[0]`,
@@ -336,18 +336,18 @@ test_that("dataTOSTone: internal consistency",{
   )
 
   # hypothesis MET
-  t1 = t_TOST(x = sleep$extra,
+  t1 = suppressMessages(t_TOST(x = sleep$extra,
               low_eqbound = -2,
               high_eqbound = 2,
               eqbound_type = "SMD",
-              hypothesis = "MET")
+              hypothesis = "MET"))
 
-  t2 = dataTOSTone(data = sleep,
+  t2 = suppressMessages(dataTOSTone(data = sleep,
                       vars = extra,
                       eqbound_type = "SMD",
                       hypothesis = "MET",
                       low_eqbound = -2,
-                      high_eqbound = 2)
+                      high_eqbound = 2))
 
   expect_equal(t1$TOST$p.value,
                c(t2$tost$asDF$`p[0]`,
@@ -364,20 +364,20 @@ test_that("dataTOSTone: internal consistency",{
 
   # No bias correction
 
-  t1 = t_TOST(x = sleep$extra,
+  t1 = suppressMessages(t_TOST(x = sleep$extra,
               low_eqbound = -2,
               high_eqbound = 2,
               eqbound_type = "SMD",
               hypothesis = "MET",
-              bias_correction = FALSE)
+              bias_correction = FALSE))
 
-  t2 = dataTOSTone(data = sleep,
+  t2 = suppressMessages(dataTOSTone(data = sleep,
                    vars = extra,
                    eqbound_type = "SMD",
                    hypothesis = "MET",
                    low_eqbound = -2,
                    high_eqbound = 2,
-                   smd_type = "d")
+                   smd_type = "d"))
 
   expect_equal(t1$TOST$p.value,
                c(t2$tost$asDF$`p[0]`,

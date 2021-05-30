@@ -17,7 +17,6 @@
 #'
 #' @section References:
 #' Campbell, H., & Lakens, D. (2021). Can we disregard the whole model? Omnibus non‐inferiority testing for R2 in multi‐variable linear regression and in ANOVA. British Journal of Mathematical and Statistical Psychology, 74(1), 64-89. doi: 10.1111/bmsp.12201
-#' @importFrom rstatix anova_summary
 #' @export
 
 
@@ -29,44 +28,41 @@ equ_anova <- function(object,
   message("Note: equ_anova only validated for one-way ANOVA; use with caution")
 
   if(inherits(object, "Anova.mlm")){
-    results <- anova_summary(object,
-                             detailed = FALSE,
-                             effect.size = "pes")$ANOVA
+    results <- anova_summary(object)
   }
   else if(inherits(object, "anova")){
-    results <- anova_summary(object,
-                             detailed = FALSE,
-                             effect.size = "pes")
+    results <- anova_summary(object)
   }
   else if(inherits(object, c("aov", "aovlist"))){
-    results <- anova_summary(object,
-                             detailed = FALSE,
-                             effect.size = "pes")
+    results <- anova_summary(object)
   } else if (inherits(object, "afex_aov")){
     aov_res = object$aov
-    results = results <- anova_summary(object,
-                                       detailed = FALSE,
-                                       effect.size = "pes")
-  }
-  else{
+    results <- anova_summary(aov_res)
+  } else{
     stop("Non-supported object passed: ",
          paste(class(object), collapse = ", "), ". ",
          "Object needs to be of class 'Anova.mlm', 'afex_aov', or 'anova'.")
   }
 
-  res2 = results[c("Effect","DFn","DFd","F","p","pes")]
+  res2 = results[c("Effect","df1","df2","F.value","p.value","pes")]
   colnames(res2) = c("effect","df1","df2","F.value","p.null","pes")
+  res2$f2 = eqbound/(1 - eqbound)
+  res2$lambda = (res2$f2 * (res2$df1 + res2$df2 + 1))
 
-  res2$p.equ = suppressMessages({equ_ftest(
-    Fstat = res2$F.value,
-    df1 = res2$df1,
-    df2 = res2$df2,
-    eqbound = eqbound,
-    MET = MET,
-    alpha = alpha
-  )$p.value
+  res2$p.equ = pf(res2$F.value,
+                  df1 = res2$df1,
+                  df2 = res2$df2,
+                  ncp = res2$lambda,
+                  lower.tail = ifelse(MET,FALSE,TRUE))
 
-  })
+  #res2$p.equ = suppressMessages({equ_ftest(
+  #  Fstat = res2$F.value,
+  #  df1 = res2$df1,
+  #  df2 = res2$df2,
+  #  eqbound = eqbound,
+  #  MET = MET,
+  #  alpha = alpha
+  #)$p.value})
 
   res2$eqbound = eqbound
 

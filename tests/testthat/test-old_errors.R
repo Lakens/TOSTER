@@ -1,5 +1,15 @@
 
 test_that("Errors for TOSTtwo functions",{
+  hush = function(code) {
+    sink("NUL") # use /dev/null in UNIX
+    tmp = code
+    sink()
+    return(tmp)
+  }
+
+  hush(suppressMessages( {
+
+
   expect_warning(TOSTtwo.raw(m1 = 5.25, m2 = 5.22,
                      sd1 = 0.95, sd2 = 0.83,
                      n1 = 95, n2 = 89,
@@ -34,11 +44,20 @@ test_that("Errors for TOSTtwo functions",{
                        alpha = 1,
                        verbose = FALSE,
                        plot = FALSE))
+  }))
 
   })
 
 
 test_that("Errors for TOSTpaired functions",{
+  hush = function(code) {
+    sink("NUL") # use /dev/null in UNIX
+    tmp = code
+    sink()
+    return(tmp)
+  }
+
+  hush(suppressMessages( {
   expect_warning(TOSTpaired(n=65,m1=5.83,m2=5.75,
                             sd1=1.17,sd2=1.29,r12=0.75,
                             low_eqbound_dz=0.4,high_eqbound_dz=0.4,
@@ -85,11 +104,19 @@ test_that("Errors for TOSTpaired functions",{
                           low_eqbound_dz=-0.4,high_eqbound_dz=0.4,
                           verbose = FALSE,
                           plot = FALSE))
-
+}))
 })
 
 
 test_that("Errors for TOSTmeta",{
+  hush = function(code) {
+    sink("NUL") # use /dev/null in UNIX
+    tmp = code
+    sink()
+    return(tmp)
+  }
+
+  hush(suppressMessages( {
   res = TOSTmeta(ES=0.12, se=0.09,
                  low_eqbound_d=-0.2, high_eqbound_d=0.2,
                  verbose = FALSE,
@@ -116,10 +143,18 @@ test_that("Errors for TOSTmeta",{
                           low_eqbound_d=-0.25, high_eqbound_d=0.2,
                           verbose = FALSE,
                           alpha=1.1, plot = FALSE))
-
+}))
 })
 
 test_that("Errors for TOSTone",{
+  hush = function(code) {
+    sink("NUL") # use /dev/null in UNIX
+    tmp = code
+    sink()
+    return(tmp)
+  }
+
+  hush(suppressMessages( {
   res <- TOSTone(m=0.54,mu=0.5,
                  sd=1.2,n=100,
                  low_eqbound_d=-0.3, high_eqbound_d=0.3,
@@ -174,9 +209,19 @@ test_that("Errors for TOSTone",{
                              alpha=0.05, verbose=FALSE,
                              plot = FALSE))
 
+  }))
+
 })
 
 test_that("Errors for TOSTr",{
+  hush = function(code) {
+    sink("NUL") # use /dev/null in UNIX
+    tmp = code
+    sink()
+    return(tmp)
+  }
+
+  hush(suppressMessages( {
   res <- TOSTr(n=100, r = 0.02,
                low_eqbound_r=-0.3,
                high_eqbound_r=0.3,
@@ -207,5 +252,7 @@ test_that("Errors for TOSTr",{
         alpha=0.05,
         verbose = FALSE,
         plot = FALSE))
+
+  }))
 
 })
