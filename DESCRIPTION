@@ -26,10 +26,12 @@ Imports:
     cowplot,
     tidyr,
     utils
-Suggests: 
+Suggests:
     knitr,
     rmarkdown,
     broom,
+    car,
+    afex,
     testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Encoding: UTF-8
