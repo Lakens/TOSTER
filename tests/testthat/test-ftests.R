@@ -96,12 +96,15 @@ test_that("Equivalence F-tests",{
   data(obk.long, package = "afex")
 
   # estimate mixed ANOVA on the full design:
-  test1 = aov_car(value ~ treatment * gender + Error(id/(phase*hour)),
-          data = obk.long, observed = "gender")
+  test1 = suppressMessages(aov_car(value ~ treatment * gender + Error(id/(phase*hour)),
+          data = obk.long, observed = "gender"))
 
   t1 = suppressMessages(equ_anova(test1, eqbound = .55))
 
-  t1 = suppressMessages(equ_anova(test1$Anova, eqbound = .35))
+
+  t2 = suppressMessages(equ_anova(test1$Anova, eqbound = .35))
+
+  expect_error(suppressMessages(equ_anova(t.test(rnorm(1:10)))))
 
 })
 
