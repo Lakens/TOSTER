@@ -110,7 +110,9 @@ summary_independent_anova <- function(res.anova){
   .residuals <- res.anova["Residuals", 1:2]
   if('Mean Sq' %in% colnames(res.anova)){
     # exists when res.anova is from stats::anova
-    res.anova <- select(res.anova, -.data$`Mean Sq`)
+    # res.anova <- select(res.anova, -.data$`Mean Sq`)
+    dropvar1 = names(res.anova) %in% c("Mean Sq")
+    res.anova = res.anova[!dropvar1]
   }
   if('Sum Sq' %in% colnames(res.anova)){
     # in stats::anova, Sum Sq is not the first column, so do select
