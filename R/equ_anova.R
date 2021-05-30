@@ -37,9 +37,8 @@ equ_anova <- function(object,
     results <- anova_summary(object)
   } else if (inherits(object, "afex_aov")){
     aov_res = object$aov
-    results = results <- anova_summary(object)
-  }
-  else{
+    results <- anova_summary(aov_res)
+  } else{
     stop("Non-supported object passed: ",
          paste(class(object), collapse = ", "), ". ",
          "Object needs to be of class 'Anova.mlm', 'afex_aov', or 'anova'.")

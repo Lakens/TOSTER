@@ -5,6 +5,13 @@ test_that("Equivalence F-tests",{
   ## This reads in the data, and formats it appropriately:
   data('hawthorne')
   side_data = hawthorne
+  hush = function(code) {
+    sink("NUL") # use /dev/null in UNIX
+    tmp = code
+    sink()
+    return(tmp)
+  }
+
 
   t1 = suppressMessages(equ_ftest(Fstat = 0.49348,
                  df1 = 2,
@@ -78,6 +85,23 @@ test_that("Equivalence F-tests",{
   t1 =  suppressMessages(equ_anova(npk.aov, eqbound = .9))
   npk.aovE <- aov(yield ~  N*P*K + Error(block), npk)
   t2 =  suppressMessages(equ_anova(npk.aovE, eqbound = .01))
+
+  # test with car and afex
+
+  suppressMessages(hush(suppressWarnings(
+    library(afex,verbose=FALSE,
+          quietly = TRUE)
+    )))
+
+  data(obk.long, package = "afex")
+
+  # estimate mixed ANOVA on the full design:
+  test1 = aov_car(value ~ treatment * gender + Error(id/(phase*hour)),
+          data = obk.long, observed = "gender")
+
+  t1 = suppressMessages(equ_anova(test1, eqbound = .55))
+
+  t1 = suppressMessages(equ_anova(test1$Anova, eqbound = .35))
 
 })
 

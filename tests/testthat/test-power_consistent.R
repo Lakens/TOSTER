@@ -10,7 +10,7 @@ test_that("power functions are internally consistent", {
     return(tmp)
   }
 
-  hush({
+  suppressMessages(hush({
   ## tests for one-sample t-test
   pow_n <-powerTOSTone(alpha=0.05, statistical_power=0.9, low_eqbound_d=-0.3, high_eqbound_d=0.3)
   expect_equal(powerTOSTone(alpha=0.05, N=pow_n, low_eqbound_d=-0.3, high_eqbound_d=0.3), 0.9, tolerance = 0.001)
@@ -68,6 +68,6 @@ test_that("power functions are internally consistent", {
   expect_equal(powerTOSTr(alpha=0.05, N = 50, low_eqbound_r=-pow_bound, high_eqbound_r=pow_bound), .9, tolerance = 0.001)
 
   #
-  })
+  }))
 })
 
