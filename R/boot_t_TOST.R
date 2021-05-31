@@ -14,7 +14,6 @@
 #' @param bias_correction Apply Hedges' correction for bias (default is TRUE).
 #' @param rm_correction Repeated measures correction to make standardized mean difference Cohen's d(rm). This only applies to repeated/paired samples. Default is FALSE.
 #' @param R number of bootstrap replicates
-#' @param symmetric a logical variable indicating whether to assume symmetry in the two-sided test. If TRUE then the symmetric bootstrap p value otherwise the equal-tail boostrap p value is computed.
 #' @param mu a number indicating the true value of the mean for the two tailed test (or difference in means if you are performing a two sample test).
 #' @param subset an optional vector specifying a subset of observations to be used.
 #' @param na.action a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").
@@ -40,6 +39,7 @@
 boot_t_TOST <- function(x, ...){
   UseMethod("boot_t_TOST")
 }
+
 boot_t_TOST.default <- function(x, ...,
                                 hypothesis = "EQU",
                                 paired = FALSE,
@@ -51,8 +51,7 @@ boot_t_TOST.default <- function(x, ...,
                                 bias_correction = TRUE,
                                 rm_correction = FALSE,
                                 mu = 0,
-                                R = 9999,
-                                symmetric = FALSE, ...){
+                                R = 9999, ...){
 
   if(!missing(mu) && (length(mu) != 1 || is.na(mu))) {
     stop("'mu' must be a single number")
@@ -63,6 +62,35 @@ boot_t_TOST.default <- function(x, ...,
                               alpha < 0 || alpha > 1)) {
     stop("'alpha' must be a single number between 0 and 1")
   }
+
+  if(!is.null(y)){
+    nullTOST = t_TOST(x = dat_x,
+                      y = dat_y,
+                      hypothesis = hypothesis,
+                      paired = paired,
+                      var.equal = var.equal,
+                      low_eqbound = low_eqbound,
+                      high_eqbound = high_eqbound,
+                      eqbound_type = eqbound_type,
+                      alpha = alpha,
+                      mu = mu,
+                      bias_correction = bias_correction,
+                      rm_correction = rm_correction)
+  } else{
+    nullTOST = t_TOST(x = dat_x,
+                      hypothesis = hypothesis,
+                      paired = paired,
+                      var.equal = var.equal,
+                      low_eqbound = low_eqbound,
+                      high_eqbound = high_eqbound,
+                      eqbound_type = eqbound_type,
+                      alpha = alpha,
+                      mu = mu,
+                      bias_correction = bias_correction,
+                      rm_correction = rm_correction)
+  }
+
+
 
   conf.level = 1-alpha*2
 
@@ -106,25 +134,29 @@ boot_t_TOST.default <- function(x, ...,
     if (stderr < 10 * .Machine$double.eps * abs(mx))
       stop("data are essentially constant")
     tstat <- (mx - mu)/stderr
+    tstat_low = (mx - low_eqbound)/stderr
+    tstat_high = (mx - high_eqbound)/stderr
     method <- if (paired) "Bootstrapped Paired t-test" else "Bootstrapped One Sample t-test"
     estimate <- setNames(mx, if (paired) "mean of the differences" else "mean of x")
     x.cent <- x - mx
-    X <- matrix(sample(x.cent, size = nx*R, replace = TRUE), nrow = R)
+    X <- matrix(sample(x, size = nx*R, replace = TRUE), nrow = R)
     MX <- rowMeans(X)
     VX <- rowSums((X-MX)^2)/(nx-1)
     STDERR <- sqrt(VX/nx)
-    TSTAT <- MX/STDERR
+    TSTAT <- (MX-rep(mu,R))/STDERR
+    TSTAT_low <- (MX-rep(low_eqbound,R))/STDERR
+    TSTAT_high <- (MX-rep(high_eqbound,R))/STDERR
     EFF <- MX+mx
 
     d_vec <- rep(NA, times=length(R))
     for(i in 1:nrow(X)){
       dat = X[i,]
-      d_vec[i] =TOSTER:::d_est_one(n = length(dat),
+      d_vec[i] = TOSTER:::d_est_one(n = length(dat),
                                    mu = mean(dat),
                                    sd = sd(dat),
-                                   testValue = testValue,
+                                   testValue = 0,
                                    type = smd_type,
-                                   alpha = .05)$d
+                                   alpha = alpha)$d
     }
   }else{
     ny <- length(y)
@@ -161,6 +193,21 @@ boot_t_TOST.default <- function(x, ...,
       V <- (rowSums((X-MX)^2) + rowSums((Y-MY)^2))/df
       STDERR <- sqrt(V*(1/nx + 1/ny))
       EFF <- (MX+mx) - (MY+my)
+      d_vec <- rep(NA, times=length(R))
+      for(i in 1:nrow(Z)){
+        dat = Z[i,]
+        dat_x = dat[1:nx]
+        dat_y = dat[(nx+1):(nx+ny)]
+        d_vec[i] =TOSTER:::d_est_ind(n1 = length(dat_x),
+                                     n2 = length(dat_y),
+                                     m1 = mean(dat_x),
+                                     m2 = mean(dat_y),
+                                     sd1 = sd(dat_x),
+                                     sd2 = sd(dat_y),
+                                     var.equal = var.equal,
+                                     type = smd_type,
+                                     alpha = alpha)$d
+      }
     }else{
       stderrx <- sqrt(vx/nx)
       stderry <- sqrt(vy/ny)
@@ -178,6 +225,35 @@ boot_t_TOST.default <- function(x, ...,
       VY <- rowSums((Y-MY)^2)/(ny-1)
       STDERR <- sqrt(VX/nx + VY/ny)
       EFF <- (MX+mx) - (MY+my)
+      d_vec <- rep(NA, times=length(R))
+      t_vec <- rep(NA, times=length(R))
+      for(i in 1:nrow(Z)){
+        dat = Z[i,]
+        dat_x = dat[1:nx]
+        dat_y = dat[(nx+1):(nx+ny)]
+        d_vec[i] = TOSTER:::d_est_ind(n1 = length(dat_x),
+                                      n2 = length(dat_y),
+                                      m1 = mean(dat_x),
+                                      m2 = mean(dat_y),
+                                      sd1 = sd(dat_x),
+                                      sd2 = sd(dat_y),
+                                      var.equal = var.equal,
+                                      type = smd_type,
+                                      alpha = alpha)$d
+        trun = t_TOST(x = dat_x,
+                          y = dat_y,
+                          hypothesis = hypothesis,
+                          paired = paired,
+                          var.equal = var.equal,
+                          low_eqbound = low_eqbound,
+                          high_eqbound = high_eqbound,
+                          eqbound_type = eqbound_type,
+                          alpha = alpha,
+                          mu = mu,
+                          bias_correction = bias_correction,
+                          rm_correction = rm_correction)
+        t_vec[i] = trun$TOST$t[1]
+      }
     }
     if (stderr < 10 * .Machine$double.eps * max(abs(mx), abs(my))){
       stop("data are essentially constant")
@@ -186,27 +262,17 @@ boot_t_TOST.default <- function(x, ...,
     tstat <- (mx - my - mu)/stderr
     TSTAT <- (MX - MY)/STDERR
   }
-  if (alternative == "less") {
-    pval <- pt(tstat, df)
-    boot.pval <- mean(TSTAT < tstat)
-    cint <- c(-Inf, tstat + qt(conf.level, df))
-    boot.cint <- c(-Inf, quantile(EFF, conf.level))
-  }else if(alternative == "greater") {
-    boot.pval <- mean(TSTAT > tstat)
-    pval <- pt(tstat, df, lower.tail = FALSE)
-    cint <- c(tstat - qt(conf.level, df), Inf)
-    boot.cint <- c(quantile(EFF, 1-conf.level), Inf)
-  }else{
-    pval <- 2 * pt(-abs(tstat), df)
-    if(symmetric)
-      boot.pval <- mean(abs(TSTAT) > abs(tstat))
-    else
-      boot.pval <- 2*min(mean(TSTAT <= tstat), mean(TSTAT > tstat))
-    alpha <- 1 - conf.level
-    cint <- qt(1 - alpha/2, df)
-    cint <- tstat + c(-cint, cint)
-    boot.cint <- quantile(EFF, c(alpha/2, 1-alpha/2))
-  }
+
+
+
+  pval <- 2 * pt(-abs(tstat), df)
+  boot.pval <- 2 * min(mean(TSTAT <= tstat), mean(TSTAT > tstat))
+  #alpha <- 1 - conf.level
+  #cint <- qt(1 - alpha / 2, df)
+  #cint <- tstat + c(-cint, cint)
+  boot.cint <- quantile(EFF, c(alpha, 1 - alpha ))
+  d.cint <- quantile(d_vec, c(alpha, 1 - alpha ))
+
   cint <- mu + cint * stderr
   names(tstat) <- "t"
   names(df) <- "df"
