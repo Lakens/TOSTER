@@ -58,7 +58,7 @@ ggplot() +
   #alignment = "center",
   label = "H1"
   ) +
-theme_tidybayes() + 
+theme_tidybayes() +
   scale_y_continuous(limits = c(0,1.75)) +
   scale_x_continuous(limits = c(-2,2)) +
   labs(x = "", y = "",
@@ -67,7 +67,7 @@ theme_tidybayes() +
   theme(
     strip.text = element_text(face = "bold", size = 10),
     axis.text.y = element_blank(),
-    axis.ticks.y = element_blank() 
+    axis.ticks.y = element_blank()
   )
 
 ggplot() +
@@ -118,17 +118,17 @@ ggplot() +
   #alignment = "center",
   label = "H0"
   ) +
-theme_tidybayes() + 
+theme_tidybayes() +
   scale_y_continuous(limits = c(0,1.75)) +
   scale_x_continuous(limits = c(-2,2)) +
-  labs(x = "", 
+  labs(x = "",
        y = "",
        title="Equivalence Test",
        caption = "H1 = Alternative Hypothesis \n H0 = Null Hypothesis") +
   theme(
     strip.text = element_text(face = "bold", size = 10),
     axis.text.y = element_blank(),
-    axis.ticks.y = element_blank() 
+    axis.ticks.y = element_blank()
   )
 
 ## -----------------------------------------------------------------------------
@@ -154,11 +154,11 @@ res1a = t_TOST(x = subset(sleep,group==1)$extra,
 print(res1)
 
 ## ----fig.width=6, fig.height=6------------------------------------------------
-plot(res1, type = "cd") 
+plot(res1, type = "cd")
 
 ## ----fig.width=6, fig.height=6------------------------------------------------
 plot(res1, type = "cd",
-     ci_shades = c(.9,.95)) 
+     ci_shades = c(.9,.95))
 
 ## ----fig.width=6, fig.height=6------------------------------------------------
 plot(res1, type = "c",

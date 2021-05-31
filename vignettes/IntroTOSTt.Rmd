@@ -1,0 +1,319 @@
+---
+title: "An Introduction to t_TOST"
+subtitle: "A new function for TOST with t-tests"
+author: "Aaron R. Caldwell"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    toc: True
+vignette: >
+  %\VignetteIndexEntry{An Introduction to t_TOST}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options:
+  chunk_output_type: console
+bibliography: references.bib
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(TOSTER)
+library(ggplot2)
+library(ggdist)
+
+```
+
+In an effort to make `TOSTER` more informative and easier to use, a new function `t_TOST` has been created. This function operates very similarly to base R's `t.test` function, but just performs 3 t-tests (one two-tailed and two one-tailed tests). In addition, this function has a generic method where two vectors can be supplied or a formula can be given (e.g.,`y ~ group`). This function also makes it easier to switch between types of t-tests. All three types (two sample, one sample, and paired samples) can be performed/calculated from the same function.Moreover, the summary information and visualizations have been upgraded. This should make the decisions derived from the function more informative and user-friendly. Lastly, `t_TOST` is not limited to equivalence tests. Minimal effects testing (MET) is now possible. MET is useful for situations where the hypothesis is about a minimal effect and the null hypothesis *is* equivalence.
+
+```{r echo=FALSE, message = FALSE, warning = FALSE, fig.show='hold'}
+
+ggplot() +
+  geom_vline(aes(xintercept = -.5),
+             linetype = "dashed") +
+  geom_vline(aes(xintercept = .5),
+             linetype = "dashed") +
+  geom_text(aes(
+    y = 1,
+    x = -0.5,
+    vjust = -.9,
+    hjust = "middle"
+  ),
+  angle = 90,
+  label = 'Lower Bound') +
+  geom_text(aes(
+    y = 1,
+    x = 0.5,
+    vjust = 1.5,
+    hjust = "middle"
+  ),
+  angle = 90,
+  label = 'Upper Bound') +
+  geom_text(aes(
+    y = 1,
+    x = 0,
+    vjust = 1.5,
+    hjust = "middle"
+  ),
+  #alignment = "center",
+  label = "H0"
+  ) +
+  geom_text(aes(
+    y = 1,
+    x = 1.5,
+    vjust = 1.5,
+    hjust = "middle"
+  ),
+  #alignment = "center",
+  label = "H1"
+  ) +
+  geom_text(aes(
+    y = 1,
+    x = -1.5,
+    vjust = 1.5,
+    hjust = "middle"
+  ),
+  #alignment = "center",
+  label = "H1"
+  ) +
+theme_tidybayes() +
+  scale_y_continuous(limits = c(0,1.75)) +
+  scale_x_continuous(limits = c(-2,2)) +
+  labs(x = "", y = "",
+       title="Minimal Effect Test",
+       caption = "H1 = Alternative Hypothesis \n H0 = Null Hypothesis") +
+  theme(
+    strip.text = element_text(face = "bold", size = 10),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank()
+  )
+
+ggplot() +
+  geom_vline(aes(xintercept = -.5),
+             linetype = "dashed") +
+  geom_vline(aes(xintercept = .5),
+             linetype = "dashed") +
+  geom_text(aes(
+    y = 1,
+    x = -0.5,
+    vjust = -.9,
+    hjust = "middle"
+  ),
+  angle = 90,
+  label = 'Lower Bound') +
+  geom_text(aes(
+    y = 1,
+    x = 0.5,
+    vjust = 1.5,
+    hjust = "middle"
+  ),
+  angle = 90,
+  label = 'Upper Bound') +
+  geom_text(aes(
+    y = 1,
+    x = 0,
+    vjust = 1.5,
+    hjust = "middle"
+  ),
+  #alignment = "center",
+  label = "H1"
+  ) +
+  geom_text(aes(
+    y = 1,
+    x = 1.5,
+    vjust = 1.5,
+    hjust = "middle"
+  ),
+  #alignment = "center",
+  label = "H0"
+  ) +
+  geom_text(aes(
+    y = 1,
+    x = -1.5,
+    vjust = 1.5,
+    hjust = "middle"
+  ),
+  #alignment = "center",
+  label = "H0"
+  ) +
+theme_tidybayes() +
+  scale_y_continuous(limits = c(0,1.75)) +
+  scale_x_continuous(limits = c(-2,2)) +
+  labs(x = "",
+       y = "",
+       title="Equivalence Test",
+       caption = "H1 = Alternative Hypothesis \n H0 = Null Hypothesis") +
+  theme(
+    strip.text = element_text(face = "bold", size = 10),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank()
+  )
+```
+
+In the general introduction to this package we detailed how to look at *old* results and how to apply TOST to interpreting those results. However, in many cases, users may have new data that needs to be analyzed. Therefore, `t_TOST` can be applied to new data. This vignette will use the `bugs` data from the `jmv` R package and the `sleep` data.
+
+```{r}
+data('sleep')
+library(jmv)
+data('bugs')
+```
+
+# Independent Groups
+
+For this example, we will use the sleep data. In this data there is a `group` variable and an outcome `extra`.
+
+```{r}
+head(sleep)
+```
+
+We will assume the data are independent, and that we have equivalence bounds of +/- 0.5. All we need to do is provide the `formula`, `data`, and eqbound arguments for the function to run appropriately. In addition, we can set the `var.equal` argument (to assume equal variance), and the `paired` argument (sets if the data is paired or not). Both are logical indicators that can be set to TRUE or FALSE. The `alpha` is automatically set to 0.05 but this can also be adjusted by the user. The Hedges correction is also automatically calculated, but this can be overridden with the `bias_correction` argument. The `hypothesis` is automatically set to "EQU" for equivalence but if a minimal effect is of interest then "MET" can be supplied
+
+```{r}
+res1 = t_TOST(formula = extra ~ group,
+              data = sleep,
+              low_eqbound = -.5,
+              high_eqbound = .5)
+
+res1a = t_TOST(x = subset(sleep,group==1)$extra,
+               y = subset(sleep,group==2)$extra,
+               low_eqbound = -.5,
+               high_eqbound = .5)
+```
+
+Once the function has run, we can print the results with the `print` command. This provides a verbose summary of the results.
+
+```{r}
+print(res1)
+```
+
+Another nice feature is the generic `plot` method that can provide a visual summary of the results. All of the plots in this package were inspired by the [concurve](https://cran.r-project.org/web/packages/concurve/index.html) R package. There are two types of plots that can be produced. The first, and default, is the consonance density plot (`type = "cd"`).
+
+```{r fig.width=6, fig.height=6}
+plot(res1, type = "cd")
+```
+
+The shading pattern can be modified with the `ci_shades`.
+
+```{r fig.width=6, fig.height=6}
+plot(res1, type = "cd",
+     ci_shades = c(.9,.95))
+```
+
+Consonance plots, where all confidence intervals can be simultaneous plotted, can also be produced. The advantage here is multiple confidence interval lines can plotted at once.
+
+```{r fig.width=6, fig.height=6}
+plot(res1, type = "c",
+     ci_lines =  c(.9,.95))
+```
+
+# Paired Samples
+
+To perform a paired samples TOST, the process does not change much. We could process the test the same way by providing a formula. All we would need to then is change `paired` to TRUE.
+
+```{r}
+res2 = t_TOST(formula = extra ~ group,
+              data = sleep,
+              paired = TRUE,
+              low_eqbound = -.5,
+              high_eqbound = .5)
+res2
+```
+
+However, we may have two vectors of data that are paired. So instead we may want to just provide those separately rather than using a data set and setting the formula. This can be demonstrated with the "bugs" data.
+
+```{r}
+res3 = t_TOST(x = bugs$LDHF,
+              y = bugs$LDLF,
+              paired = TRUE,
+              low_eqbound = -1,
+              high_eqbound = 1)
+res3
+```
+
+We may want to perform a Minimal Effect Test with the `hypothesis` argument set to "MET".
+
+```{r}
+res3a = t_TOST(x = bugs$LDHF,
+               y = bugs$LDLF,
+               paired = TRUE,
+               hypothesis = "MET",
+               low_eqbound = -1,
+               high_eqbound = 1)
+res3a
+```
+
+Again, we can plot the effects from the `t_TOST` result.
+
+```{r fig.width=6, fig.height=6}
+plot(res3a)
+```
+
+# One Sample t-test
+
+In other cases we may just have a one sample test. If that is the case all we have to do is supply the `x` argument for the data. For this test we may hypothesis that the mean of LDHF is not more than 1.5 points greater or less than 7.
+
+```{r}
+res4 = t_TOST(x = bugs$LDHF,
+              hypothesis = "EQU",
+              low_eqbound = 5.5,
+              high_eqbound = 8.5)
+res4
+```
+
+```{r fig.width=6, fig.height=6}
+plot(res4)
+```
+
+
+# Only have the summary statistics? No problem!
+
+In some cases you may only have access to the summary statistics. Therefore, we created a function, `tsum_TOST`,to perform the same tests just based on the summary statistics. This involves providing the function with a number of different arguments.
+
+* `n1 & n2` the sample sizes (only n1 needs to be provided for one sample case)
+* `m1 & m2` the sample means
+* `sd1 & sd2` the sample standard deviation
+* `r12` the correlation between each if paired is set to TRUE
+
+The results from above can be replicated with the `tsum_TOST`
+
+```{r}
+res_tsum = tsum_TOST(
+  m1 = mean(bugs$LDHF, na.rm=TRUE),
+  sd1 = sd(bugs$LDHF, na.rm=TRUE),
+  n1 = length(na.omit(bugs$LDHF)),
+  hypothesis = "EQU",
+  low_eqbound = 5.5,
+  high_eqbound = 8.5
+)
+
+res_tsum
+```
+
+```{r fig.width=6, fig.height=6}
+plot(res_tsum)
+```
+
+# Power Analysis for t-test based TOST
+
+A new function, `power_t_TOST` has been created to allow for power calculations for TOST analyses that utilize t-tests. This function uses a more accurate method than the older functions in this package and match the results of the PASS stastical software. The exact calculations of power are based on Owen’s Q-function or by direct integration of the bivariate non-central t-distribution (inspired by @PowerTOST in the `PowerTOST` R package). Approximate power is implemented via the non-central t-distribution or the ‘shifted’ central t-distribution [@phillips1990, @diletti1991]. The function is limited to power analyses involves one sample, two sample, and paired sample cases. More options are available in the `PowerTOST` R package.
+
+The interface for this function is quite simple and was intended to mimic the base R function `power.t.test`. The user must specify the 2 equivalence bounds, and leave only one of the other options blank (`alpha`, `power`, or `n`). The "true difference" can be set with `delta` and the standard deviation (default is 1) can be set with the `sd` argument. Once everything is set and the function is run, the function will return a object of the `power.htest` class.
+
+As an example, let's say we are looking at an equivalence study where we assume the true difference is 1 unit, the standard deviation is 2.5, and we set the equivalence bounds to 2.5 units as well. If we want to find the sample size adequate to have 95% power at an alpha of 0.025 we enter the following:
+
+```{r}
+power_t_TOST(n = NULL,
+  delta = 1,
+  sd = 2.5,
+  low_eqbound = -2.5,
+  high_eqbound = 2.5,
+  alpha = .025,
+  power = .95,
+  type = "two.sample")
+```
+
+From the analysis above we would conclude that adequate power is achieved with 74 participants per group and 148 participants in total.
+
+# References
