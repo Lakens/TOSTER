@@ -10,6 +10,7 @@ boot_t_TOST(x, ...)
 
 \method{boot_t_TOST}{default}(
   x,
+  y = NULL,
   hypothesis = "EQU",
   paired = FALSE,
   var.equal = FALSE,
@@ -30,6 +31,8 @@ boot_t_TOST(x, ...)
 \item{x}{a (non-empty) numeric vector of data values.}
 
 \item{...}{further arguments to be passed to or from methods.}
+
+\item{y}{an optional (non-empty) numeric vector of data values.}
 
 \item{hypothesis}{'EQU' for equivalence (default), or 'MET' for minimal effects test, the alternative hypothesis.}
 
@@ -60,8 +63,6 @@ boot_t_TOST(x, ...)
 \item{subset}{an optional vector specifying a subset of observations to be used.}
 
 \item{na.action}{a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").}
-
-\item{y}{an optional (non-empty) numeric vector of data values.}
 }
 \value{
 An S3 object of class

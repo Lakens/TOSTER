@@ -12,7 +12,6 @@
 #' @param eqbound_type Type of equivalence bound. Can be set to "SMD" for standardized mean difference (i.e., Cohen's d) or  "raw" for the mean difference. Default is "raw". Raw is strongly recommended as SMD bounds will produce biased results.
 #' @param alpha alpha level (default = 0.05)
 #' @param bias_correction Apply Hedges' correction for bias (default is TRUE).
-#' @param rm_correction Repeated measures correction to make standardized mean difference Cohen's d(rm). This only applies to repeated/paired samples. Default is FALSE.
 #' @param R number of bootstrap replicates
 #' @param mu a number indicating the true value of the mean for the two tailed test (or difference in means if you are performing a two sample test).
 #' @param subset an optional vector specifying a subset of observations to be used.
@@ -44,6 +43,7 @@ boot_t_TOST <- function(x, ...){
 #' @export
 
 boot_t_TOST.default <- function(x,
+                                y = NULL,
                                 hypothesis = "EQU",
                                 paired = FALSE,
                                 var.equal = FALSE,
@@ -52,9 +52,8 @@ boot_t_TOST.default <- function(x,
                                 eqbound_type = "raw",
                                 alpha = 0.05,
                                 bias_correction = TRUE,
-                                rm_correction = FALSE,
                                 mu = 0,
-                                R = 999, ...){
+                                R = 1999, ...){
 
   if(!missing(mu) && (length(mu) != 1 || is.na(mu))) {
     stop("'mu' must be a single number")
@@ -130,10 +129,10 @@ boot_t_TOST.default <- function(x,
     yok <- NULL
   }
   x <- x[xok]
-  #if(paired){
-  #  x <- x - y
-  #  y <- NULL
-  #}
+  if(paired !is.null(y)){
+    x <- x - y
+    y <- NULL
+  }
   nx <- length(x)
   mx <- mean(x)
   vx <- var(x)
@@ -141,24 +140,23 @@ boot_t_TOST.default <- function(x,
     if (nx < 2)
       stop("not enough 'x' observations")
     df <- nx - 1
-    stderr <- sqrt(vx/nx)
+    #stderr <- sqrt(vx/nx)
     if (stderr < 10 * .Machine$double.eps * abs(mx))
       stop("data are essentially constant")
-    tstat <- (mx - mu)/stderr
-    tstat_low = (mx - low_eqbound)/stderr
-    tstat_high = (mx - high_eqbound)/stderr
+    #tstat <- (mx - mu)/stderr
+    #tstat_low = (mx - low_eqbound)/stderr
+    #tstat_high = (mx - high_eqbound)/stderr
     method <- if (paired) "Bootstrapped Paired t-test" else "Bootstrapped One Sample t-test"
-    estimate <- setNames(mx, if (paired) "mean of the differences" else "mean of x")
+    #estimate <- setNames(mx, if (paired) "mean of the differences" else "mean of x")
     x.cent <- x - mx
     X <- matrix(sample(x, size = nx*R, replace = TRUE), nrow = R)
-    MX <- rowMeans(X)
-    VX <- rowSums((X-MX)^2)/(nx-1)
+    MX <- rowMeans(X - mx)
+    VX <- rowSums((X - MX) ^ 2) / (nx - 1)
     STDERR <- sqrt(VX/nx)
-    TSTAT <- (MX-rep(mu,R))/STDERR
-    TSTAT_low <- (MX-rep(low_eqbound,R))/STDERR
-    TSTAT_high <- (MX-rep(high_eqbound,R))/STDERR
+    TSTAT <- (MX-mu)/STDERR
+    TSTAT_low <- (MX-low_eqbound)/STDERR
+    TSTAT_high <- (MX-high_eqbound)/STDERR
     EFF <- MX+mx
-
 
     for(i in 1:nrow(X)){
       dat = X[i,]
@@ -176,47 +174,49 @@ boot_t_TOST.default <- function(x,
 
       d_vec[i] <- runTOST$smd$d # smd vector
       m_vec[i] <- runTOST$effsize$estimate[1] # mean difference vector
-      t_vec[i] <- runTOST$TOST$t[1] # t-test vector
-      tl_vec[i] <- runTOST$TOST$t[2] # lower bound vector
-      tu_vec[i] <- runTOST$TOST$t[3] # upper bound vector
+      t_vec[i] <- runTOST$TOST$t[1] - mx # t-test vector
+      tl_vec[i] <- runTOST$TOST$t[2] - mx # lower bound vector
+      tu_vec[i] <- runTOST$TOST$t[3] - mx # upper bound vector
     }
   }
-  if(!is.null(y) && paired) {
-    ny <- length(y)
-    my <- mean(y)
-    vy <- var(y)
-    diff <- x - y
-    method <-  "Bootstrapped Paired t-test"
-    estimate <- setNames(mx, "mean of the differences")
-    x.cent <- diff - mu
-    df = length(x.cint) - 1
-    z <- c(x, y)
-    Z <- matrix(sample(z, size = (nx+ny)*R, replace = TRUE), nrow = R)
+  # Next chunk useless for now skipped automatically
+  #if(!is.null(y) && paired) {
+  #  ny <- length(y)
+  #  my <- mean(y)
+  #  vy <- var(y)
+  #  diff <- x - y
+  #  method <-  "Bootstrapped Paired t-test"
+  #  estimate <- setNames(mx, "mean of the differences")
+  #  x.cent <- diff - mx
+  #  df = length(x.cent) - 1
+  #  z <- c(x, y)
+  #  Z <- matrix(sample(z, size = (nx+ny)*R, replace = TRUE), nrow = R)
 
-    for(i in 1:nrow(Z)){
-      dat = Z[i,]
-      dat_x = dat[1:nx]
-      dat_y = dat[(nx+1):(nx+ny)]
-      runTOST =  t_TOST(x = dat_x,
-                        y = dat_y,
-                        hypothesis = hypothesis,
-                        paired = paired,
-                        var.equal = var.equal,
-                        low_eqbound = low_eqbound,
-                        high_eqbound = high_eqbound,
-                        eqbound_type = eqbound_type,
-                        alpha = alpha,
-                        mu = mu,
-                        bias_correction = bias_correction,
-                        rm_correction = rm_correction)
+  #  for(i in 1:nrow(Z)){
+  #    dat = Z[i,]
+  #    dat_x = dat[1:nx]
+  #    dat_y = dat[(nx+1):(nx+ny)]
+  #    runTOST =  t_TOST(x = dat_x,
+  #                      y = dat_y,
+  #                      hypothesis = hypothesis,
+  #                      paired = paired,
+  #                      var.equal = var.equal,
+  #                      low_eqbound = low_eqbound,
+  #                      high_eqbound = high_eqbound,
+  #                      eqbound_type = eqbound_type,
+  #                      alpha = alpha,
+  #                      mu = mu,
+  #                      bias_correction = bias_correction,
+  #                      rm_correction = rm_correction)
+  #
 
-      d_vec[i] <- runTOST$smd$d # smd vector
-      m_vec[i] <- runTOST$effsize$estimate[1] # mean difference vector
-      t_vec[i] <- runTOST$TOST$t[1] # t-test vector
-      tl_vec[i] <- runTOST$TOST$t[2] # lower bound vector
-      tu_vec[i] <- runTOST$TOST$t[3] # upper bound vector
-    }
-  }
+  #    d_vec[i] <- runTOST$smd$d # smd vector
+  #    m_vec[i] <- runTOST$effsize$estimate[1] # mean difference vector
+  #    t_vec[i] <- runTOST$TOST$t[1] # t-test vector
+  #    tl_vec[i] <- runTOST$TOST$t[2] # lower bound vector
+  #    tu_vec[i] <- runTOST$TOST$t[3] # upper bound vector
+  #  }
+ # }
   if(!is.null(y) && !paired){
     ny <- length(y)
     if(nx < 1 || (!var.equal && nx < 2))
@@ -244,11 +244,12 @@ boot_t_TOST.default <- function(x,
       v <- v/df
       stderr <- sqrt(v * (1/nx + 1/ny))
       z <- c(x, y)
-      Z <- matrix(sample(z, size = (nx+ny)*R, replace = TRUE), nrow = R)
-      X <- Z[,1:nx]
-      Y <- Z[,(nx+1):(nx+ny)]
-      MX <- rowMeans(X)
-      MY <- rowMeans(Y)
+      mz <- mean(z)
+      #Z <- matrix(sample(z, size = (nx+ny)*R, replace = TRUE), nrow = R)
+      X <- matrix(sample(x, size = nx*R, replace = TRUE), nrow = R)
+      Y <- matrix(sample(y, size = ny*R, replace = TRUE), nrow = R)
+      MX <- rowMeans(X- mx + mz)
+      MY <- rowMeans(Y- my + mz)
       V <- (rowSums((X-MX)^2) + rowSums((Y-MY)^2))/df
       STDERR <- sqrt(V*(1/nx + 1/ny))
       EFF <- (MX+mx) - (MY+my)
@@ -286,19 +287,19 @@ boot_t_TOST.default <- function(x,
       mz <- mean(z)
       x.cent <- x - mx + mz
       y.cent <- y - my + mz
-      X <- matrix(sample(x.cent, size = nx*R, replace = TRUE), nrow = R)
-      Y <- matrix(sample(y.cent, size = ny*R, replace = TRUE), nrow = R)
-      MX <- rowMeans(X)
-      MY <- rowMeans(Y)
+      X <- matrix(sample(x, size = nx*R, replace = TRUE), nrow = R)
+      Y <- matrix(sample(y, size = ny*R, replace = TRUE), nrow = R)
+      MX <- rowMeans(X - mx + mz)
+      MY <- rowMeans(Y - my + mz)
       VX <- rowSums((X-MX)^2)/(nx-1)
       VY <- rowSums((Y-MY)^2)/(ny-1)
       STDERR <- sqrt(VX/nx + VY/ny)
       EFF <- (MX+mx) - (MY+my)
 
-      for(i in 1:nrow(Z)){
-        dat = Z[i,]
-        dat_x = dat[1:nx]
-        dat_y = dat[(nx+1):(nx+ny)]
+      for(i in 1:nrow(X)){
+        #dat = Z[i,]
+        dat_x = X[i,]#dat[1:nx]
+        dat_y = Y[i,]#dat[(nx+1):(nx+ny)]
         runTOST =  t_TOST(x = dat_x,
                           y = dat_y,
                           hypothesis = hypothesis,
@@ -329,8 +330,8 @@ boot_t_TOST.default <- function(x,
   tstat = nullTOST$TOST$t[1]
   tstat_l = nullTOST$TOST$t[2]
   tstat_u = nullTOST$TOST$t[3]
-  m_vec = append(m_vec, nullTOST$effsize$estimate[1])
-  d_vec = append(d_vec, nullTOST$effsize$estimate[2])
+  #m_vec = append(m_vec, nullTOST$effsize$estimate[1])
+  #d_vec = append(d_vec, nullTOST$effsize$estimate[2])
 
   boot.pval <- 2 * min(mean(t_vec <= tstat), mean(t_vec > tstat))
 
