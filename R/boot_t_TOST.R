@@ -29,18 +29,21 @@
 #'   \item{\code{"alpha"}}{Alpha level set for the analysis.}
 #'   \item{\code{"method"}}{Type of t-test.}
 #'   \item{\code{"decision"}}{List included text regarding the decisions for statistical inference.}
+#'   \item{\code{"boot"}}{List containing the bootstrap samples.}
 #' }
+#' @details The implemented test corresponds to the proposal of Chapter 16 of Efron and Tibshirani (1993). Returns TOSTt class object with boostrapped based results.
 #' @name boot_t_TOST
 #' @export boot_t_TOST
-
-
-
 
 boot_t_TOST <- function(x, ...){
   UseMethod("boot_t_TOST")
 }
 
-boot_t_TOST.default <- function(x, ...,
+#' @rdname boot_t_TOST
+#' @method boot_t_TOST default
+#' @export
+
+boot_t_TOST.default <- function(x,
                                 hypothesis = "EQU",
                                 paired = FALSE,
                                 var.equal = FALSE,
@@ -51,7 +54,7 @@ boot_t_TOST.default <- function(x, ...,
                                 bias_correction = TRUE,
                                 rm_correction = FALSE,
                                 mu = 0,
-                                R = 9999, ...){
+                                R = 999, ...){
 
   if(!missing(mu) && (length(mu) != 1 || is.na(mu))) {
     stop("'mu' must be a single number")
@@ -106,17 +109,22 @@ boot_t_TOST.default <- function(x, ...,
   if(!is.null(y)){
     dname <- paste(deparse(substitute(x)), "and", deparse(substitute(y)))
     if (paired) {
-      xok <- yok <- complete.cases(x, y)
-    } else{
-      yok <- !is.na(y)
-      xok <- !is.na(x)
+      i1 <- y
+      i2 <- x
+      data <- data.frame(i1 = i1, i2 = i2)
+      data <- na.omit(data)
+      y <- data$i1
+      x <- data$i2
     }
+    yok <- !is.na(y)
+    xok <- !is.na(x)
     y <- y[yok]
+
   }else{
     dname <- deparse(substitute(x))
-    if (paired) {
-      stop("'y' is missing for paired test")
-    }
+    #if (paired) {
+    #  stop("'y' is missing for paired test")
+    #}
 
     xok <- !is.na(x)
     yok <- NULL
@@ -181,6 +189,33 @@ boot_t_TOST.default <- function(x, ...,
     method <-  "Bootstrapped Paired t-test"
     estimate <- setNames(mx, "mean of the differences")
     x.cent <- diff - mu
+    df = length(x.cint) - 1
+    z <- c(x, y)
+    Z <- matrix(sample(z, size = (nx+ny)*R, replace = TRUE), nrow = R)
+
+    for(i in 1:nrow(Z)){
+      dat = Z[i,]
+      dat_x = dat[1:nx]
+      dat_y = dat[(nx+1):(nx+ny)]
+      runTOST =  t_TOST(x = dat_x,
+                        y = dat_y,
+                        hypothesis = hypothesis,
+                        paired = paired,
+                        var.equal = var.equal,
+                        low_eqbound = low_eqbound,
+                        high_eqbound = high_eqbound,
+                        eqbound_type = eqbound_type,
+                        alpha = alpha,
+                        mu = mu,
+                        bias_correction = bias_correction,
+                        rm_correction = rm_correction)
+
+      d_vec[i] <- runTOST$smd$d # smd vector
+      m_vec[i] <- runTOST$effsize$estimate[1] # mean difference vector
+      t_vec[i] <- runTOST$TOST$t[1] # t-test vector
+      tl_vec[i] <- runTOST$TOST$t[2] # lower bound vector
+      tu_vec[i] <- runTOST$TOST$t[3] # upper bound vector
+    }
   }
   if(!is.null(y) && !paired){
     ny <- length(y)
@@ -291,39 +326,149 @@ boot_t_TOST.default <- function(x, ...,
     tstat <- (mx - my - mu)/stderr
     TSTAT <- (MX - MY)/STDERR
   }
+  tstat = nullTOST$TOST$t[1]
+  tstat_l = nullTOST$TOST$t[2]
+  tstat_u = nullTOST$TOST$t[3]
+  m_vec = append(m_vec, nullTOST$effsize$estimate[1])
+  d_vec = append(d_vec, nullTOST$effsize$estimate[2])
 
+  boot.pval <- 2 * min(mean(t_vec <= tstat), mean(t_vec > tstat))
 
+  if(hypothesis == "EQU"){
+    p_l = mean(tl_vec > tstat_l)
+    p_u = mean(tu_vec < tstat_u)
+  } else{
+    p_l = mean(tl_vec < tstat_l)
+    p_u = mean(tu_vec > tstat_u)
+  }
 
-  pval <- 2 * pt(-abs(tstat), df)
-  boot.pval <- 2 * min(mean(TSTAT <= tstat), mean(TSTAT > tstat))
-  #alpha <- 1 - conf.level
-  #cint <- qt(1 - alpha / 2, df)
-  #cint <- tstat + c(-cint, cint)
-  boot.cint <- quantile(EFF, c(alpha, 1 - alpha ))
+  boot.se = sd(m_vec)
+  boot.cint <- quantile(m_vec, c(alpha, 1 - alpha ))
   d.cint <- quantile(d_vec, c(alpha, 1 - alpha ))
+  d.se = sd(d_vec)
 
-  cint <- mu + cint * stderr
-  names(tstat) <- "t"
-  names(df) <- "df"
-  names(mu) <- if (paired || !is.null(y)) "difference in means" else "mean"
-  attr(cint, "conf.level") <- conf.level
-  attr(boot.cint, "conf.level") <- conf.level
-  rval <- list(statistic = tstat, parameter = df, p.value = pval,
-               boot.p.value = boot.pval,
-               conf.int = cint, boot.conf.int = boot.cint,
-               estimate = estimate, null.value = mu,
-               stderr = stderr, alternative = alternative, method = method,
-               data.name = dname)
-  class(rval) <- c("boot.htest", "htest")
-  rval
+  TOST = nullTOST$TOST
+  TOST$p.value = c(boot.pval, p_l, p_u)
+  effsize = nullTOST$effsize
+  effsize$SE = c(boot.se,d.se)
+  effsize$lower.ci = c(boot.cint[1],
+                       d.cint[1])
+
+  effsize$upper.ci = c(boot.cint[2],
+                       d.cint[2])
+  pTOST = max(p_l,p_u)
+  TOSToutcome<-ifelse(pTOST<alpha,"significant","non-significant")
+  testoutcome<-ifelse(boot.pval<alpha,"significant","non-significant")
+  if(hypothesis == "EQU"){
+    pTOST = max(p_l,
+                p_u) # get highest p value for TOST result
+    tTOST = ifelse(abs(tstat_l) < abs(tstat_u),
+                   tstat_l,
+                   tstat_u) #Get lowest t-value for summary TOST result
+  } else {
+    pTOST = min(p_l,
+                p_u) # get highest p value for TOST result
+    tTOST = ifelse(abs(tstat_l) > abs(tstat_u),
+                   tstat_l,
+                   tstat_u) #Get lowest t-value for summary TOST result
+  }
+
+  # Change text based on two tailed t test if mu is not zero
+  if(mu == 0){
+    mu_text = "zero"
+  } else {
+    mu_text = mu
+  }
+
+  if(hypothesis == "EQU"){
+    #format(low_eqbound, digits = 3, nsmall = 3, scientific = FALSE)
+    TOST_restext = paste0("The equivalence test was ",TOSToutcome,", t(",round(df, digits=2),") = ",format(tTOST, digits = 3, nsmall = 3, scientific = FALSE),", p = ",format(pTOST, digits = 3, nsmall = 3, scientific = TRUE),sep="")
+  } else {
+    TOST_restext = paste0("The minimal effect test was ",TOSToutcome,", t(",round(df, digits=2),") = ",format(tTOST, digits = 3, nsmall = 3, scientific = FALSE),", p = ",format(pTOST, digits = 3, nsmall = 3, scientific = TRUE),sep="")
+  }
+
+  ttest_restext = paste0("The null hypothesis test was ",testoutcome,", t(",round(df, digits=2),") = ",format(tstat, digits = 3, nsmall = 3, scientific = FALSE),", p = ",format(boot.pval, digits = 3, nsmall = 3, scientific = TRUE),sep="")
+  if (hypothesis == "EQU"){
+    if(boot.pval <= alpha && pTOST <= alpha){
+      combined_outcome <- paste0("NHST: reject null significance hypothesis that the effect is equal to ",mu_text," \n",
+                                 "TOST: reject null equivalence hypothesis")
+    }
+    if(boot.pval < alpha && pTOST > alpha){
+      combined_outcome <- paste0("NHST: reject null significance hypothesis that the effect is equal to ",mu_text," \n",
+                                 "TOST: don't reject null equivalence hypothesis")
+      # paste0("statistically different from ",mu_text," and not statistically equivalent")
+    }
+    if(boot.pval > alpha && pTOST <= alpha){
+      combined_outcome <- paste0("NHST: don't reject null significance hypothesis that the effect is equal to ",mu_text," \n",
+                                 "TOST: reject null equivalence hypothesis")
+      #paste0("statistically not different from ",mu_text," and statistically equivalent")
+    }
+    if(boot.pval > alpha && pTOST > alpha){
+      combined_outcome <- paste0("NHST: don't reject null significance hypothesis that the effect is equal to ",mu_text," \n",
+                                 "TOST: don't reject null equivalence hypothesis")
+      #paste0("statistically not different from ",mu_text," and not statistically equivalent")
+    }
+  } else {
+    if(boot.pval <= alpha && pTOST <= alpha){
+      combined_outcome <- paste0("NHST: reject null significance hypothesis that the effect is equal to ",mu_text," \n",
+                                 "TOST: reject null MET hypothesis")
+      #paste0("statistically different from ",mu_text," and statistically greater than the minimal effect threshold")
+    }
+    if(boot.pval < alpha && pTOST > alpha){
+      combined_outcome <- paste0("NHST: reject null significance hypothesis that the effect is equal to ",mu_text," \n",
+                                 "TOST: don't reject null MET hypothesis")
+      #paste0("statistically different from ",mu_text," but not statistically greater than the minimal effect threshold")
+    }
+    if(boot.pval > alpha && pTOST <= alpha){
+      combined_outcome <- paste0("NHST: don't reject null significance hypothesis that the effect is equal to ",mu_text," \n",
+                                 "TOST: reject null MET hypothesis")
+      #paste0("statistically not different from ",mu_text," and statistically greater than the minimal effect threshold")
+    }
+    if(boot.pval > alpha && pTOST > alpha){
+      combined_outcome <- paste0("NHST: don't reject null significance hypothesis that the effect is equal to ",mu_text," \n",
+                                 "TOST: don't reject null MET hypothesis")
+      #paste0("statistically not different from ",mu_text," and not statistically greater than the minimal effect threshold")
+    }
+  }
+
+
+  decision = list(
+    TOST = TOST_restext,
+    ttest = ttest_restext,
+    combined = combined_outcome
+  )
+
+  rval = list(
+    TOST = TOST,
+    eqb = nullTOST$eqb,
+    alpha = alpha,
+    method = method,
+    hypothesis = nullTOST$hypothesis,
+    effsize = effsize,
+    smd = nullTOST$smd,
+    decision = decision,
+    boot = list(SMD = d_vec,
+                raw = m_vec)
+  )
+
+  class(rval) = "TOSTt"
+
+  return(rval)
 }
+
+#' @rdname boot_t_TOST
+#' @method boot_t_TOST formula
+#' @export
+#'
 boot_t_TOST.formula <- function (formula, data, subset, na.action, ...){
-  if (missing(formula) || (length(formula) != 3L) || (length(attr(terms(formula[-2L]),
-                                                                  "term.labels")) != 1L))
+  if(missing(formula)
+     || (length(formula) != 3L)
+     || (length(attr(terms(formula[-2L]), "term.labels")) != 1L))
     stop("'formula' missing or incorrect")
   m <- match.call(expand.dots = FALSE)
-  if (is.matrix(eval(m$data, parent.frame())))
+  if(is.matrix(eval(m$data, parent.frame())))
     m$data <- as.data.frame(data)
+  ## need stats:: for non-standard evaluation
   m[[1L]] <- quote(stats::model.frame)
   m$... <- NULL
   mf <- eval(m, parent.frame())
@@ -331,12 +476,10 @@ boot_t_TOST.formula <- function (formula, data, subset, na.action, ...){
   names(mf) <- NULL
   response <- attr(attr(mf, "terms"), "response")
   g <- factor(mf[[-response]])
-  if (nlevels(g) != 2L)
+  if(nlevels(g) != 2L)
     stop("grouping factor must have exactly 2 levels")
   DATA <- setNames(split(mf[[response]], g), c("x", "y"))
   y <- do.call("boot_t_TOST", c(DATA, list(...)))
-  y$data.name <- DNAME
-  if (length(y$estimate) == 2L)
-    names(y$estimate) <- paste("mean in group", levels(g))
+
   y
 }
