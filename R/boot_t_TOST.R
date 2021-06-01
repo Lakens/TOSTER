@@ -107,7 +107,7 @@ boot_t_TOST.default <- function(x, ...,
     dname <- paste(deparse(substitute(x)), "and", deparse(substitute(y)))
     if (paired) {
       xok <- yok <- complete.cases(x, y)
-    }else{
+    } else{
       yok <- !is.na(y)
       xok <- !is.na(x)
     }
@@ -167,10 +167,10 @@ boot_t_TOST.default <- function(x, ...,
                          rm_correction = rm_correction)
 
       d_vec[i] <- runTOST$smd$d # smd vector
-      m_vec[i] <- runTOST$TOST$estimate[1] # mean difference vector
-      t_vec[i] <- rep(NA, times=length(R)) # t-test vector
-      tl_vec[i] <- rep(NA, times=length(R)) # lower bound vector
-      tu_vec[i] <- rep(NA, times=length(R)) # upper bound vector
+      m_vec[i] <- runTOST$effsize$estimate[1] # mean difference vector
+      t_vec[i] <- runTOST$TOST$t[1] # t-test vector
+      tl_vec[i] <- runTOST$TOST$t[2] # lower bound vector
+      tu_vec[i] <- runTOST$TOST$t[3] # upper bound vector
     }
   }
   if(!is.null(y) && paired) {
@@ -182,7 +182,7 @@ boot_t_TOST.default <- function(x, ...,
     estimate <- setNames(mx, "mean of the differences")
     x.cent <- diff - mu
   }
-  else{
+  if(!is.null(y) && !paired){
     ny <- length(y)
     if(nx < 1 || (!var.equal && nx < 2))
       stop("not enough 'x' observations")
@@ -218,20 +218,29 @@ boot_t_TOST.default <- function(x, ...,
       STDERR <- sqrt(V*(1/nx + 1/ny))
       EFF <- (MX+mx) - (MY+my)
 
-      d_vec <- rep(NA, times=length(R))
+      #d_vec <- rep(NA, times=length(R))
       for(i in 1:nrow(Z)){
         dat = Z[i,]
         dat_x = dat[1:nx]
         dat_y = dat[(nx+1):(nx+ny)]
-        d_vec[i] =TOSTER:::d_est_ind(n1 = length(dat_x),
-                                     n2 = length(dat_y),
-                                     m1 = mean(dat_x),
-                                     m2 = mean(dat_y),
-                                     sd1 = sd(dat_x),
-                                     sd2 = sd(dat_y),
-                                     var.equal = var.equal,
-                                     type = smd_type,
-                                     alpha = alpha)$d
+        runTOST =  t_TOST(x = dat_x,
+                          y = dat_y,
+                          hypothesis = hypothesis,
+                          paired = paired,
+                          var.equal = var.equal,
+                          low_eqbound = low_eqbound,
+                          high_eqbound = high_eqbound,
+                          eqbound_type = eqbound_type,
+                          alpha = alpha,
+                          mu = mu,
+                          bias_correction = bias_correction,
+                          rm_correction = rm_correction)
+
+        d_vec[i] <- runTOST$smd$d # smd vector
+        m_vec[i] <- runTOST$effsize$estimate[1] # mean difference vector
+        t_vec[i] <- runTOST$TOST$t[1] # t-test vector
+        tl_vec[i] <- runTOST$TOST$t[2] # lower bound vector
+        tu_vec[i] <- runTOST$TOST$t[3] # upper bound vector
       }
     }else{
       stderrx <- sqrt(vx/nx)
@@ -250,22 +259,12 @@ boot_t_TOST.default <- function(x, ...,
       VY <- rowSums((Y-MY)^2)/(ny-1)
       STDERR <- sqrt(VX/nx + VY/ny)
       EFF <- (MX+mx) - (MY+my)
-      d_vec <- rep(NA, times=length(R))
-      t_vec <- rep(NA, times=length(R))
+
       for(i in 1:nrow(Z)){
         dat = Z[i,]
         dat_x = dat[1:nx]
         dat_y = dat[(nx+1):(nx+ny)]
-        d_vec[i] = TOSTER:::d_est_ind(n1 = length(dat_x),
-                                      n2 = length(dat_y),
-                                      m1 = mean(dat_x),
-                                      m2 = mean(dat_y),
-                                      sd1 = sd(dat_x),
-                                      sd2 = sd(dat_y),
-                                      var.equal = var.equal,
-                                      type = smd_type,
-                                      alpha = alpha)$d
-        trun = t_TOST(x = dat_x,
+        runTOST =  t_TOST(x = dat_x,
                           y = dat_y,
                           hypothesis = hypothesis,
                           paired = paired,
@@ -277,7 +276,12 @@ boot_t_TOST.default <- function(x, ...,
                           mu = mu,
                           bias_correction = bias_correction,
                           rm_correction = rm_correction)
-        t_vec[i] = trun$TOST$t[1]
+
+        d_vec[i] <- runTOST$smd$d # smd vector
+        m_vec[i] <- runTOST$effsize$estimate[1] # mean difference vector
+        t_vec[i] <- runTOST$TOST$t[1] # t-test vector
+        tl_vec[i] <- runTOST$TOST$t[2] # lower bound vector
+        tu_vec[i] <- runTOST$TOST$t[3] # upper bound vector
       }
     }
     if (stderr < 10 * .Machine$double.eps * max(abs(mx), abs(my))){
