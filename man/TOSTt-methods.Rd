@@ -8,10 +8,10 @@
 \usage{
 \method{print}{TOSTt}(x, digits = getOption("digits"), ...)
 
-\method{plot}{TOSTt}(x, type = "cd", ci_lines, ci_shades, ...)
+\method{plot}{TOSTt}(x, type = "cd", estimates = c("raw", "SMD"), ci_lines, ci_shades, ...)
 }
 \arguments{
-\item{x}{object of class \code{TOSTt} as returned from the reli_stats function}
+\item{x}{object of class \code{TOSTt}}
 
 \item{digits}{Number of digits to print for p-values}
 
@@ -32,5 +32,5 @@ for details.
 }
 }
 \description{
-Methods defined for objects returned from the agree functions.
+Methods defined for objects returned from the t_TOST and boot_t_TOST functions.
 }

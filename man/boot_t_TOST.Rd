@@ -19,9 +19,8 @@ boot_t_TOST(x, ...)
   eqbound_type = "raw",
   alpha = 0.05,
   bias_correction = TRUE,
-  rm_correction = FALSE,
   mu = 0,
-  R = 999,
+  R = 1999,
   ...
 )
 
@@ -49,8 +48,6 @@ boot_t_TOST(x, ...)
 \item{alpha}{alpha level (default = 0.05)}
 
 \item{bias_correction}{Apply Hedges' correction for bias (default is TRUE).}
-
-\item{rm_correction}{Repeated measures correction to make standardized mean difference Cohen's d(rm). This only applies to repeated/paired samples. Default is FALSE.}
 
 \item{mu}{a number indicating the true value of the mean for the two tailed test (or difference in means if you are performing a two sample test).}
 
@@ -83,5 +80,11 @@ An S3 object of class
 A function for a bootstrap method for TOST with all types of t-tests.
 }
 \details{
-The implemented test corresponds to the proposal of Chapter 16 of Efron and Tibshirani (1993). Returns TOSTt class object with boostrapped based results.
+The implemented test(s) corresponds to the proposal of Chapter 16 of Efron and Tibshirani (1993). Returns TOSTt class object with boostrapped based results. Please note that the repeated measures "corrected" effect size is not available at this time.
 }
+\section{References}{
+
+
+Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press.
+}
+

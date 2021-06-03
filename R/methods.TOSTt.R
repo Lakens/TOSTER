@@ -1,8 +1,8 @@
 #' Methods for TOSTt objects
 #'
-#' Methods defined for objects returned from the agree functions.
+#' Methods defined for objects returned from the t_TOST and boot_t_TOST functions.
 #'
-#' @param x object of class \code{TOSTt} as returned from the reli_stats function
+#' @param x object of class \code{TOSTt}
 #' @param digits Number of digits to print for p-values
 #' @param type Type of plot to produce. Default is a consonance plot "c" but consonance distribution plot can be produced with "cd".
 #' @param ci_lines Confidence interval lines for plots. Default is 1-alpha*2 (e.g., alpha = 0.05 is 90\%)
@@ -304,7 +304,7 @@ plot.TOSTt <- function(x,
 
     }
 
-    if("boot" %in% x){
+    if("boot" %in% names(x)){
       df_t = data.frame(val = x$boot$raw,
                         type = x_label,
                         est = c(x$effsize$estimate[1]),
