@@ -1,12 +1,13 @@
 #' Methods for TOSTt objects
 #'
-#' Methods defined for objects returned from the agree functions.
+#' Methods defined for objects returned from the t_TOST and boot_t_TOST functions.
 #'
-#' @param x object of class \code{TOSTt} as returned from the reli_stats function
+#' @param x object of class \code{TOSTt}
 #' @param digits Number of digits to print for p-values
 #' @param type Type of plot to produce. Default is a consonance plot "c" but consonance distribution plot can be produced with "cd".
 #' @param ci_lines Confidence interval lines for plots. Default is 1-alpha*2 (e.g., alpha = 0.05 is 90\%)
 #' @param ci_shades Confidence interval shades when plot type is "cd".
+#' @param estimates indicator of what estiamtes to plot; options include "raw" or "SMD". Default is is both: c("raw","SMD").
 #' @param ... further arguments passed through, see description of return value
 #'   for details.
 #'   \code{\link{TOSTt-methods}}.
@@ -48,7 +49,11 @@ print.TOSTt <- function(x,
   cat("Effect Sizes \n")
   print(x$effsize)
   cat("\n")
-  cat("Note: SMD confidence intervals are an approximation. See vignette(\"SMD_calcs\")")
+  if("boot" %in% names(x)){
+    cat("Note: percentile boostrap method utilized.")
+  }else{
+    cat("Note: SMD confidence intervals are an approximation. See vignette(\"SMD_calcs\").")
+  }
   cat("\n")
 
 }
@@ -65,6 +70,7 @@ print.TOSTt <- function(x,
 
 plot.TOSTt <- function(x,
                        type = "cd",
+                       estimates = c("raw","SMD"),
                        ci_lines,
                        ci_shades,
                        ...){
@@ -79,7 +85,6 @@ plot.TOSTt <- function(x,
             length(high_eqt))
   round_t = max(lenst)
   smd_type = x$smd$smd_label
-
 
   if(missing(ci_shades)){
     c1 = 1-x$alpha
@@ -110,7 +115,6 @@ plot.TOSTt <- function(x,
     c2 = ci_lines
   }
 
-
   # Get x-axis label
   if(grepl("one",x$method, ignore.case=TRUE)){
     x_label = "Mean"
@@ -120,6 +124,10 @@ plot.TOSTt <- function(x,
 
 
   if(type == "c"){
+
+    if("boot" %in% names(x)){
+      warning("Consonance plots from bootstrapped result based on estimates not bootstrap samples")
+    }
 
     d_res = d_curv(x)
 
@@ -159,9 +167,20 @@ plot.TOSTt <- function(x,
                                       size = 10),
             axis.title.x = element_blank())
 
-    plts = plot_grid(d_plot,
-                     t_plot,
-                     ncol = 1)
+    if("SMD" %in% estimates && "raw" %in% estimates){
+      plts = plot_grid(d_plot,
+                       t_plot,
+                       ncol = 1)
+    }
+
+    if("SMD" %in% estimates && !("raw" %in% estimates)){
+      plts = d_plot
+    }
+
+    if(!("SMD" %in% estimates) && "raw" %in% estimates){
+      plts = t_plot
+    }
+
     return(plts)
   }
 
@@ -170,6 +189,8 @@ plot.TOSTt <- function(x,
     if(!missing(ci_lines) && length(ci_lines)>1){
       warning("Multiple CI lines provided only first element will be used.")
     }
+
+    if(!("boot" %in% names(x))){
 
 
     d_res = d_curv(x)
@@ -282,6 +303,102 @@ plot.TOSTt <- function(x,
         round(high_eqt, round_t)
       )))
 
+    }
+
+    if("boot" %in% names(x)){
+      df_t = data.frame(val = x$boot$raw,
+                        type = x_label,
+                        est = c(x$effsize$estimate[1]),
+                        low = c(x$eqb$low_eq[1]),
+                        high = c(x$eqb$high_eq[1]),
+                        alpha = c(x$alpha),
+                        stringsAsFactors = FALSE)
+      df_d = data.frame(val = x$boot$SMD,
+                        type = x$smd$smd_label,
+                        est = c(x$effsize$estimate[2]),
+                        low = c(x$eqb$low_eq[2]),
+                        high = c(x$eqb$high_eq[2]),
+                        alpha = c(x$alpha),
+                        stringsAsFactors = FALSE)
+      t_plot = ggplot(data = df_t,
+                      aes(y = 0, x = val)) +
+        stat_halfeye(aes(fill = stat(cut_cdf_qi(
+          cdf,
+          .width = sets
+        ))),
+        .width = c2,
+        slab_color = "black",
+        slab_size = .5) +
+        scale_fill_viridis_d(option = "D",
+                             direction = -1,
+                             na.translate = FALSE) +
+        labs(x = '', y = '',
+             fill = "Confidence Interval") +
+        geom_vline(aes(xintercept = low),
+                   linetype = "dashed") +
+        geom_vline(aes(xintercept = high),
+                   linetype = "dashed") +
+        facet_wrap( ~ type) +
+        theme_tidybayes() +
+        theme(
+          legend.position = "top",
+          strip.text = element_text(face = "bold", size = 11),
+          legend.text = element_text(face = "bold", size = 11),
+          legend.title = element_text(face = "bold", size = 11),
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank(),
+          axis.text.x = element_text(face = "bold", size = 11),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.background = element_rect(fill = "transparent",colour = NA),
+          plot.background = element_rect(fill = "transparent",colour = NA),
+          legend.background = element_rect(fill = "transparent",colour = NA)
+        ) +
+        scale_x_continuous(sec.axis = dup_axis(breaks = c(
+          round(low_eqt, round_t),
+          round(high_eqt, round_t)
+        )))
+
+      d_plot = ggplot(data = df_d,
+                      aes(y = 0, x = val)) +
+        stat_halfeye(aes(fill = stat(cut_cdf_qi(
+          cdf,
+          .width = sets
+        ))),
+        .width = c2,
+        slab_color = "black",
+        slab_size = .5) +
+        scale_fill_viridis_d(option = "D",
+                             direction = -1,
+                             na.translate = FALSE) +
+        labs(x = '', y = '',
+             fill = "Confidence Interval") +
+        geom_vline(aes(xintercept = low),
+                   linetype = "dashed") +
+        geom_vline(aes(xintercept = high),
+                   linetype = "dashed") +
+        facet_wrap( ~ type) +
+        theme_tidybayes() +
+        theme(
+          legend.position = "top",
+          strip.text = element_text(face = "bold", size = 11),
+          legend.text = element_text(face = "bold", size = 11),
+          legend.title = element_text(face = "bold", size = 11),
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank(),
+          axis.text.x = element_text(face = "bold", size = 11),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.background = element_rect(fill = "transparent",colour = NA),
+          plot.background = element_rect(fill = "transparent",colour = NA),
+          legend.background = element_rect(fill = "transparent",colour = NA)
+        ) +
+        scale_x_continuous(sec.axis = dup_axis(breaks = c(
+          round(low_eqd, 2),
+          round(high_eqd, 2)
+        )))
+    }
+
     # extract the legend from one of the plots
     legend <- get_legend(t_plot)
 
@@ -294,9 +411,18 @@ plot.TOSTt <- function(x,
     # add the legend to the row we made earlier. Give it one-third of
     # the width of one plot (via rel_widths).
 
+    if("SMD" %in% estimates && "raw" %in% estimates){
+      plts = plot_grid(legend, prow, ncol = 1,
+                       rel_heights = c(.1, 1))
+    }
 
-    plts = plot_grid(legend, prow, ncol = 1,
-                     rel_heights = c(.1, 1))
+    if("SMD" %in% estimates && !("raw" %in% estimates)){
+      plts = d_plot
+    }
+
+    if(!("SMD" %in% estimates) && "raw" %in% estimates){
+      plts = t_plot
+    }
 
     return(plts)
   }
