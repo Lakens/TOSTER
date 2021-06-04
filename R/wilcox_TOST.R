@@ -169,12 +169,12 @@ wilcox_TOST.default = function(x,
     p.value = c(tresult$p.value,
                 low_ttest$p.value,
                 high_ttest$p.value),
-    row.names = c("t-test","TOST Lower","TOST Upper")
+    row.names = c("NHST","TOST Lower","TOST Upper")
   )
 
   eqb = c(low_eqbound, high_eqbound)
 
-  if(!paired || is.null(y)){
+  if(!paired && is.null(y)){
     raw_name = "pseudomedian"
   } else{
     raw_name = "Median of Differences"
@@ -255,8 +255,6 @@ wilcox_TOST.default = function(x,
     test = ttest_restext,
     combined = combined_outcome
   )
-
-  #message(cat("Based on the equivalence test and the null-hypothesis test combined, we can conclude that the observed effect is ",combined_outcome,".",sep=""))
 
 
   rval = list(

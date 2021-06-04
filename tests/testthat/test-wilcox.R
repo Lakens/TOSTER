@@ -65,6 +65,18 @@ test_that("Run examples for two sample", {
                  high_eqbound = .5,
                  hypothesis = "MET")
 
+  test1 = wilcox_TOST(formula = y ~ group,
+                      data = df_samp,
+                      low_eqbound = -.5,
+                      high_eqbound = .5)
+
+
+  test3 = wilcox_TOST(formula = y ~ group,
+                      data = df_samp,
+                      low_eqbound = -.5,
+                      high_eqbound = .5,
+                      hypothesis = "MET")
+
   expect_equal(1-test1$TOST$p.value[2],
                test3$TOST$p.value[2],
                tolerance = .003)

@@ -137,7 +137,7 @@ rbs <- function(x,
   }
 
   rval = list(rbs = r_rbs,
-              ci = confint,
+              conf.int = confint,
               paired = paired,
               mu = mu)
   return(rval)
