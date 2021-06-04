@@ -70,7 +70,7 @@ The confidence intervals can then be calculated as the following:
 
 $$
 
-r_z = atanh(r_{biserail})
+r_z = atanh(r_{biseriall})
 \\
 
 r_{CI} = tanh(r_z  \pm  Z_{(1 - \alpha / 2)} \cdot SE_r)
