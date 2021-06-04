@@ -14,7 +14,7 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
 ---
 
-In this package there are currently 2 functions that provide robust alternatives to the `t_TOST` function. The 
+In this package there are currently 2 functions that provide robust alternatives to the `t_TOST` function. 
 
 # Wilcoxon TOST
 
@@ -48,7 +48,7 @@ Overall, the correlation is calculated as the proportion of favorable pairs minu
 $$
 r_{biserial} = f_{pairs} - u_{pairs}
 $$
-# Confidence Intervals
+## Confidence Intervals
 
 The Fisher approximation is used to calculate the confidence intervals.
 

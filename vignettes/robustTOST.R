@@ -1,5 +1,6 @@
 ## -----------------------------------------------------------------------------
 data('sleep')
+library(TOSTER)
 
 test1 = wilcox_TOST(formula = extra ~ group,
                       data = sleep,
