@@ -34,6 +34,7 @@
 #' @section References:
 #'
 #' Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press.
+#' @importFrom stats var quantile
 #' @name boot_t_TOST
 #' @export boot_t_TOST
 
@@ -258,10 +259,10 @@ boot_t_TOST.default <- function(x,
       EFF <- (MX+mx) - (MY+my)
 
       #d_vec <- rep(NA, times=length(R))
-      for(i in 1:nrow(Z)){
-        dat = Z[i,]
-        dat_x = dat[1:nx]
-        dat_y = dat[(nx+1):(nx+ny)]
+      for(i in 1:nrow(X)){
+        #dat = Z[i,]
+        dat_x = X[i,]#dat[1:nx]
+        dat_y = Y[i,]#dat[(nx+1):(nx+ny)]
         runTOST =  t_TOST(x = dat_x,
                           y = dat_y,
                           hypothesis = hypothesis,

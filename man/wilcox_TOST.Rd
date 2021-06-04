@@ -37,7 +37,7 @@ wilcox_TOST(
 
 \item{hypothesis}{'EQU' for equivalence (default), or 'MET' for minimal effects test, the alternative hypothesis.}
 
-\item{paired}{a logical indicating whether you want a paired t-test.}
+\item{paired}{a logical indicating whether you want to calculate a paired test.}
 
 \item{low_eqbound}{lower equivalence bounds.}
 
@@ -47,7 +47,9 @@ wilcox_TOST(
 
 \item{y}{an optional (non-empty) numeric vector of data values.}
 
-\item{mu}{a number specifying an optional parameter used to form the null hypothesis.}
+\item{mu}{number indicating the value around which (a-)symmetry (for
+one-sample or paired samples) or shift (for independent samples) is to be
+estimated. See [stats::wilcox.test].}
 
 \item{formula}{a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.}
 

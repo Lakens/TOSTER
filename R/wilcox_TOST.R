@@ -4,12 +4,14 @@
 #' @param y an optional (non-empty) numeric vector of data values.
 #' @param formula a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.
 #' @param data an optional matrix or data frame (or similar: see model.frame) containing the variables in the formula formula. By default the variables are taken from environment(formula).
-#' @param paired a logical indicating whether you want a paired t-test.
+#' @param paired a logical indicating whether you want to calculate a paired test.
 #' @param low_eqbound lower equivalence bounds.
 #' @param high_eqbound upper equivalence bounds.
 #' @param hypothesis 'EQU' for equivalence (default), or 'MET' for minimal effects test, the alternative hypothesis.
 #' @param alpha alpha level (default = 0.05)
-#' @param mu a number specifying an optional parameter used to form the null hypothesis.
+#' @param mu  number indicating the value around which (a-)symmetry (for
+#'   one-sample or paired samples) or shift (for independent samples) is to be
+#'   estimated. See [stats::wilcox.test].
 #' @param subset an optional vector specifying a subset of observations to be used.
 #' @param na.action a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").
 #' @param ...  further arguments to be passed to or from methods.
@@ -104,82 +106,11 @@ wilcox_TOST.default = function(x,
                    conf.level = 1 - alpha*2,
                    alternative = "two.sided")
 
-
-  if(paired == TRUE && !missing(y)){
-    i1 <- y
-    i2 <- x
-    data <- data.frame(i1 = i1, i2 = i2)
-    data <- na.omit(data)
-    colnames(data) = c("i1", "i2")
-    data2 =  data
-    data2$diff = data2$i2 - data2$i1
-
-    n <- nrow(data)
-    i1 <- data$i1
-    i2 <- data$i2
-    m1 <- mean(i1)
-    m2 <- mean(i2)
-    sd1  <- sd(i1)
-    sd2  <- sd(i2)
-    r12 <- cor(i1, i2)
-
-    # Calculate Cohens d
-    cohen_res = d_est_pair(
-      n = n,
-      m1 = m1,
-      m2 = m2,
-      sd1 = sd1,
-      sd2 = sd2,
-      r12 = r12,
-      type = smd_type,
-      denom = denom,
-      alpha = alpha
-    )
-
-  } else if(!missing(y)){
-
-    x1 = na.omit(x)
-    y1 = na.omit(y)
-
-    n1 = length(x1)
-    n2 = length(y1)
-
-    m1 = mean(x1)
-    m2 = mean(y1)
-
-    sd1 = sd(x1)
-    sd2 = sd(y1)
-
-    cohen_res = d_est_ind(
-      n1 = n1,
-      n2 = n2,
-      m1 = m1,
-      m2 = m2,
-      sd1 = sd1,
-      sd2 = sd2,
-      type = smd_type,
-      var.equal = var.equal,
-      alpha = alpha
-    )
-
-  } else {
-
-    x1 = na.omit(x)
-    n1 = length(x1)
-    m1 = mean(x1)
-    sd1 = sd(x1)
-
-    cohen_res = d_est_one(
-      n = n1,
-      mu = m1,
-      sd = sd1,
-      type = smd_type,
-      testValue = 0,
-      alpha = alpha
-    )
-
-  }
-
+  rbs_val = rbs(x = x,
+                y = y,
+                paired = paired,
+                mu = mu,
+                conf.level = 1 - alpha * 2)
 
   if(hypothesis == "EQU"){
     null_hyp = paste0(round(low_eqbound,2),
@@ -251,11 +182,11 @@ wilcox_TOST.default = function(x,
 
   effsize = data.frame(
     estimate = c(tresult$estimate,
-                 cohen_res$d),
-    lower.ci = c(tresult$conf.int[1], cohen_res$dlow),
-    upper.ci = c(tresult$conf.int[2], cohen_res$dhigh),
+                 rbs_val$rbs),
+    lower.ci = c(tresult$conf.int[1], rbs_val$conf.int[1]),
+    upper.ci = c(tresult$conf.int[2], rbs_val$conf.int[2]),
     conf.level = c((1-alpha*2),(1-alpha*2)),
-    row.names = c(raw_name,cohen_res$smd_label)
+    row.names = c(raw_name,"rank-biserial correlation")
   )
   TOSToutcome<-ifelse(pTOST<alpha,"significant","non-significant")
   testoutcome<-ifelse(tresult$p.value<alpha,"significant","non-significant")
@@ -335,7 +266,7 @@ wilcox_TOST.default = function(x,
     method = tresult$method,
     hypothesis = test_hypothesis,
     effsize = effsize,
-    seff = cohen_res,
+    seff = rbs_val,
     decision = decision
   )
 

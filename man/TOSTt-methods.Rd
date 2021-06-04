@@ -21,6 +21,8 @@ for details.
 
 \item{type}{Type of plot to produce. Default is a consonance plot "c" but consonance distribution plot can be produced with "cd".}
 
+\item{estimates}{indicator of what estiamtes to plot; options include "raw" or "SMD". Default is is both: c("raw","SMD").}
+
 \item{ci_lines}{Confidence interval lines for plots. Default is 1-alpha*2 (e.g., alpha = 0.05 is 90\%)}
 
 \item{ci_shades}{Confidence interval shades when plot type is "cd".}
