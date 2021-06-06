@@ -4,7 +4,7 @@
 #'
 #' @param x object of class \code{TOSTt}
 #' @param digits Number of digits to print for p-values
-#' @param type Type of plot to produce. Default is a consonance plot "c" but consonance distribution plot can be produced with "cd".
+#' @param type Type of plot to produce. Default is a consonance density plot "cd". Consonance plots (type = "cd") and null distribution plots (type = "tnull") can also be produced. Note: null distribution plots only available for estimates = "raw".
 #' @param ci_lines Confidence interval lines for plots. Default is 1-alpha*2 (e.g., alpha = 0.05 is 90\%)
 #' @param ci_shades Confidence interval shades when plot type is "cd".
 #' @param estimates indicator of what estiamtes to plot; options include "raw" or "SMD". Default is is both: c("raw","SMD").
@@ -425,6 +425,127 @@ plot.TOSTt <- function(x,
     }
 
     return(plts)
+  }
+
+  if(type == "tnull"){
+    if("SMD" %in% estimates){
+      message("SMD cannot be plotted if type = \"tnull\" ")
+    }
+    if(!missing(ci_lines) && length(ci_lines)>1){
+      warning("Multiple CI lines provided only first element will be used.")
+    }
+
+    if("Equilvalence" %in% x$hypothesis){
+      METhyp = TRUE
+    } else {
+      METhyp = FALSE
+    }
+    points = data.frame(
+      type = x_label,
+      mu = c(x$effsize$estimate[1]),
+      param = c(round(unname(x$TOST$df[1]), 0)),
+      sigma = c(x$TOST$SE[1]),
+      lambda = c(0),
+      est = c(x$effsize$estimate[1]),
+      low = c(x$eqb$low_eq[1]),
+      high = c(x$eqb$high_eq[1]),
+      alpha = c(x$alpha),
+      stringsAsFactors = FALSE
+    )
+    points = data.frame(
+      x_label = x_label,
+      point = x$effsize$estimate[1],
+      ci_high = x$effsize$lower.ci[1],
+      ci_low = x$effsize$upper.ci[1],
+      stringsAsFactors = FALSE
+    )
+    points_l = data.frame(
+      mu = c(x$eqb$low_eq[1]),
+      param = c(round(unname(x$TOST$df[1]), 0)),
+      sigma = c(x$TOST$SE[1]),
+      lambda = c(0),
+      stringsAsFactors = FALSE
+    )
+    points_u = data.frame(
+      mu = c(x$eqb$high_eq[1]),
+      param = c(round(unname(x$TOST$df[1]), 0)),
+      sigma = c(x$TOST$SE[1]),
+      lambda = c(0),
+      stringsAsFactors = FALSE
+    )
+
+    x_l = c(low_eqt - qnorm(1-x$alpha)*points_l$sigma,
+            low_eqt + qnorm(1-x$alpha)*points_l$sigma)
+    x_u = c(high_eqt - qnorm(1-x$alpha)*points_l$sigma,
+                 high_eqt + qnorm(1-x$alpha)*points_l$sigma)
+
+    t_plot = ggplot(data = points,
+                    aes_string(y = 0)) +
+      stat_dist_slab(data = points_l,
+                     aes(fill = stat(x < x_l[1] | x > x_l[2]),
+                         dist = dist_student_t(
+                           mu = mu,
+                           df = param,
+                           sigma = sigma,
+                           ncp = lambda
+                         )),
+                     alpha = .5,
+                     #  fill = NA,
+                     slab_color = "black",
+                     slab_size = .5) +
+      stat_dist_slab(data = points_u,
+                     aes(fill = stat(x < x_u[1] | x > x_u[2]),
+                         dist = dist_student_t(
+                           mu = mu,
+                           df = param,
+                           sigma = sigma,
+                           ncp = lambda
+                         )),
+
+                     alpha = .5,
+                     #  fill = NA,
+                     slab_color = "black",
+                     slab_size = .5) +
+      geom_point(data = data.frame(y = -.1,
+                                   x = points$point),
+                 aes(x = x, y = y),
+                 size = 3) +
+      annotate("segment",
+               x = points$ci_low,
+               xend = points$ci_high,
+               y = -.1, yend = -.1,
+               size = 1.5,
+               colour = "black")+
+      # set palettes  need true false
+      scale_fill_manual(values = c("gray85", "green")) +
+      geom_vline(aes(xintercept = low_eqt),
+                 linetype = "dashed") +
+      geom_vline(aes(xintercept = high_eqt),
+                 linetype = "dashed") +
+      facet_wrap( ~ x_label) +
+      labs(caption = "Note: green indicates rejection region for null equivalence and MET hypotheses")+
+      theme_tidybayes() +
+      theme(
+        legend.position = "none",
+        strip.text = element_text(face = "bold", size = 11),
+        legend.text = element_text(face = "bold", size = 11),
+        legend.title = element_text(face = "bold", size = 11),
+        axis.text.y = element_blank(),
+        axis.title.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.title.x = element_blank(),
+        axis.text.x = element_text(face = "bold", size = 11),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_rect(fill = "transparent",colour = NA),
+        plot.background = element_rect(fill = "transparent",colour = NA),
+        legend.background = element_rect(fill = "transparent",colour = NA)
+      ) +
+      scale_x_continuous(sec.axis = dup_axis(breaks = c(
+        round(low_eqt, round_t),
+        round(high_eqt, round_t)
+      )))
+    return(t_plot)
   }
 
 }

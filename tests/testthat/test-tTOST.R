@@ -849,3 +849,51 @@ test_that("Run examples for plot_smd", {
 
 
 })
+
+test_that("plot generic function",{
+  set.seed(1812)
+
+  samp1 = rnorm(25)
+  samp2 = rnorm(25)
+
+  df_samp = data.frame(y = c(samp1,samp2),
+                       group = c(rep("g1",25),
+                                 rep("g2",25)))
+
+  test1 = t_TOST(x = samp1,
+                 y = samp2,
+                 paired = TRUE,
+                 low_eqbound = -.5,
+                 high_eqbound = .5)
+
+  expect_error(plot(wilcox_TOST(x = samp1,
+                      y = samp2,
+                      paired = TRUE,
+                      low_eqbound = -.5,
+                      high_eqbound = .5)))
+
+  p1 = plot(test1,
+            type = "cd",
+            estimates = "raw")
+  p2 = plot(test1,
+            type = "c",
+            estimates = "raw")
+
+  p3 = plot(test1,
+            type = "cd",
+            estimates = "SMD")
+  p4 = plot(test1,
+            type = "c",
+            estimates = "SMD")
+
+  p5 = expect_message(plot(test1,
+            type = "tnull",
+            estimates = "SMD"))
+  p6 = expect_message(plot(test1,
+                           type = "tnull"))
+  p7 = plot(test1,
+            type = "tnull",
+            estimates = "raw")
+
+
+})

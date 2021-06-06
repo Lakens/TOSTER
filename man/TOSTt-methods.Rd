@@ -19,7 +19,7 @@
 for details.
 \code{\link{TOSTt-methods}}.}
 
-\item{type}{Type of plot to produce. Default is a consonance plot "c" but consonance distribution plot can be produced with "cd".}
+\item{type}{Type of plot to produce. Default is a consonance density plot "cd". Consonance plots (type = "cd") and null distribution plots (type = "tnull") can also be produced. Note: null distribution plots only available for estimates = "raw".}
 
 \item{estimates}{indicator of what estiamtes to plot; options include "raw" or "SMD". Default is is both: c("raw","SMD").}
 
