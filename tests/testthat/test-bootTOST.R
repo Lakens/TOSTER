@@ -76,7 +76,7 @@ test_that("Run examples for one sample", {
 
   prtest = hush(print(test1))
   p1 = plot(test1)
-  p2 = suppressWarnings(plot(test1,
+  p2 = expect_warning(plot(test1,
             type = "c"))
 
 })
