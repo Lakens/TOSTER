@@ -26,7 +26,9 @@ library(ggdist)
 
 ```
 
-In an effort to make `TOSTER` more informative and easier to use, a new function `t_TOST` has been created. This function operates very similarly to base R's `t.test` function, but just performs 3 t-tests (one two-tailed and two one-tailed tests). In addition, this function has a generic method where two vectors can be supplied or a formula can be given (e.g.,`y ~ group`). This function also makes it easier to switch between types of t-tests. All three types (two sample, one sample, and paired samples) can be performed/calculated from the same function.Moreover, the summary information and visualizations have been upgraded. This should make the decisions derived from the function more informative and user-friendly. Lastly, `t_TOST` is not limited to equivalence tests. Minimal effects testing (MET) is now possible. MET is useful for situations where the hypothesis is about a minimal effect and the null hypothesis *is* equivalence.
+In an effort to make `TOSTER` more informative and easier to use, a new function `t_TOST` has been created. This function operates very similarly to base R's `t.test` function, but performs 3 t-tests (one two-tailed and two one-tailed tests). In addition, this function has a generic method where two vectors can be supplied or a formula can be given (e.g.,`y ~ group`). This function also makes it easier to switch between types of t-tests. All three types (two sample, one sample, and paired samples) can be performed/calculated from the same function. Moreover, the summary information and visualizations have been upgraded. This should make the decisions derived from the function more informative and user-friendly. 
+
+Also, `t_TOST` is not limited to equivalence tests. Minimal effects testing (MET) is now possible. MET is useful for situations where the hypothesis is about a minimal effect and the null hypothesis *is* equivalence.
 
 ```{r echo=FALSE, message = FALSE, warning = FALSE, fig.show='hold'}
 

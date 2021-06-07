@@ -74,7 +74,7 @@ An S3 object of class
 }
 }
 \description{
-A function for TOST using the non-parametric methods of the Wilcoxon signed rank test.
+A function for TOST using the non-parametric methods of the Wilcoxon signed rank test. This function uses the normal approximation and applies continuity correction automatically.
 }
 \section{References}{
 

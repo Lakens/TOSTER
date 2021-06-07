@@ -1,5 +1,5 @@
 #' @title TOST with Wilcoxon Signed Rank test
-#' @description A function for TOST using the non-parametric methods of the Wilcoxon signed rank test.
+#' @description A function for TOST using the non-parametric methods of the Wilcoxon signed rank test. This function uses the normal approximation and applies continuity correction automatically.
 #' @param x a (non-empty) numeric vector of data values.
 #' @param y an optional (non-empty) numeric vector of data values.
 #' @param formula a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.
@@ -31,6 +31,7 @@
 #' David F. Bauer (1972). Constructing confidence sets using rank statistics. Journal of the American Statistical Association 67, 687–690. doi: 10.1080/01621459.1972.10481279.
 #'
 #' Myles Hollander and Douglas A. Wolfe (1973). Nonparametric Statistical Methods. New York: John Wiley & Sons. Pages 27–33 (one-sample), 68–75 (two-sample). Or second edition (1999).
+#' @importFrom stats wilcox.test
 #' @name wilcox_TOST
 #' @export wilcox_TOST
 

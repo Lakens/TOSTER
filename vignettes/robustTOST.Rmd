@@ -48,6 +48,7 @@ Overall, the correlation is calculated as the proportion of favorable pairs minu
 $$
 r_{biserial} = f_{pairs} - u_{pairs}
 $$
+
 ## Confidence Intervals
 
 The Fisher approximation is used to calculate the confidence intervals.
@@ -55,28 +56,29 @@ The Fisher approximation is used to calculate the confidence intervals.
 For paired samples the standard error is calculated as the following:
 
 $$
-
 SE_r = \sqrt{ \frac {(2 \cdot nd^3 + 3 \cdot nd^2 + nd) / 6} {(nd^2 + nd) / 2} }
 $$
+
 wherein, nd represents the total count not equal to zero.
 
 For independent samples, the standard error is calculated as the following:
 
 $$
-SE_r = \sqrt{((n1 + n2 + 1) / (3 * n1 * n2))}
+SE_r = \sqrt{\frac {(n1 + n2 + 1)} { (3 \cdot n1 \cdot n2)}}
 $$
 
-The confidence intervals can then be calculated as the following:
+The confidence intervals can then be calculated by transforming the estimate.
 
 $$
+r_z = atanh(r_{biserial})
+$$
 
-r_z = atanh(r_{biseriall})
-\\
+Then the confidence interval can be calculated and back transformed.
 
+$$
 r_{CI} = tanh(r_z  \pm  Z_{(1 - \alpha / 2)} \cdot SE_r)
-
-
 $$
+
 We hope a bootstrapped version of this confidence interval will be added in future updates.
 
 # Boostrap TOST
@@ -94,10 +96,13 @@ In this function we provide a percentile bootstrap solution outlined by @efron93
 $$
 t(z^{*b}) = \frac {(\bar x^*-\bar x - \bar z) - (\bar y^*-\bar y - \bar z)}{\sqrt {sd_y^*/n_y + sd_x^*/n_x}}
 $$
+
 3. An approximate p-value can then be calculated as the number of bootstrapped results greater than the observed t-statistic from the sample.
+
 $$
 p_{boot} = \frac {\#t(z^{*b}) \ge t_{sample}}{B}
 $$
+
 The same process is completed for the one sample case but with the one sample solution for the equation outlined by $t(z^{*b})$. The paired sample case in this bootstrap procedure is equivalent to the one sample soluation because the test is based on the difference scores.
 
 ## Example

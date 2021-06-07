@@ -34,6 +34,12 @@ test_that("NCSS TOST 198-1 to 197-8",{
   expect_equal(96.76246,
                round(test1$effsize$upper.ci[1], 5))
 
+  expect_equal(0.02821,
+               round(test1$TOST$p.value[2], 5))
+
+  expect_equal(0.01436,
+               round(test1$TOST$p.value[3], 5))
+
   test2 = t_TOST(x = yieldA,
                  y = yieldB,
                  low_eqbound = -110,
@@ -52,5 +58,24 @@ test_that("NCSS TOST 198-1 to 197-8",{
 
   expect_equal(104.04259,
                round(test2$effsize$upper.ci[1], 5))
+
+  expect_equal(0.03628,
+               round(test2$TOST$p.value[2], 5))
+
+  expect_equal(0.02002,
+               round(test2$TOST$p.value[3], 5))
+
+  test3 = wilcox_TOST(x = yieldA,
+                 y = yieldB,
+                 low_eqbound = -110,
+                 high_eqbound =110,
+                 alpha = .025)
+
+  expect_equal(0.0218,
+               round(test3$TOST$p.value[2], 4))
+
+  expect_equal(0.0119,
+               round(test3$TOST$p.value[3], 4))
+
 
 })
