@@ -6,7 +6,7 @@
 #' @param low_eqbound lower equivalence bounds (e.g., -0.1) expressed in proportions
 #' @param high_eqbound upper equivalence bounds (e.g., 0.1) expressed in proportions
 #' @param alpha alpha level (default = 0.05)
-#' @param ci_type confidence interval type (default = "wilson"). "wilson" produces Wilson score intervals with a Yates continuity correction while "normal" calculates the simple asymptotic method with no continuity correction.
+#' @param ci_type confidence interval type (default = "normal"). "wilson" produces Wilson score intervals with a Yates continuity correction while "normal" calculates the simple asymptotic method with no continuity correction.
 #' @param plot set whether results should be plotted (plot = TRUE) or not (plot = FALSE) - defaults to TRUE
 #' @param verbose logical variable indicating whether text output should be generated (verbose = TRUE) or not (verbose = FALSE) - default to TRUE
 #' @return Returns TOST z-value 1, TOST p-value 1, TOST z-value 2, TOST p-value 2, low equivalence bound, high equivalence bound, Lower limit confidence interval TOST, Upper limit confidence interval TOST
