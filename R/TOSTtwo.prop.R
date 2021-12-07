@@ -59,7 +59,7 @@ TOSTtwo.prop <- function(prop1, prop2, n1, n2, low_eqbound, high_eqbound, alpha,
   YATES <- abs(DELTA) / sum(1 / n1, 1 / n2)
   n = c(n1,n2)
   WIDTH90 <- qnorm(conf.level) * sqrt(sum(ESTIMATE * (1 - ESTIMATE) / n)) + YATES * sum(1 / n)
-  WIDTH95 <- (qnorm((1+conf.level))/2)* sqrt(sum(ESTIMATE * (1 - ESTIMATE) / n)) + YATES * sum(1 / n)
+  WIDTH95 <- (qnorm((1+conf.level)/2))* sqrt(sum(ESTIMATE * (1 - ESTIMATE) / n)) + YATES * sum(1 / n)
   CINT90 <- c(max(DELTA - WIDTH90, -1), min(DELTA + WIDTH90, 1))
   CINT95 <- c(max(DELTA - WIDTH95, -1), min(DELTA + WIDTH95, 1))
 
