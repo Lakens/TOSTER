@@ -14,3 +14,4 @@ docs
 build/R
 build/js
 NUL
+.DS_Store
