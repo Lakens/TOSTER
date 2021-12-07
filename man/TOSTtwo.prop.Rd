@@ -32,7 +32,7 @@ TOSTtwo.prop(
 
 \item{alpha}{alpha level (default = 0.05)}
 
-\item{ci_type}{confidence interval type (default = "wilson"). "wilson" produces Wilson score intervals with a Yates continuity correction while "normal" calculates the simple asymptotic method with no continuity correction.}
+\item{ci_type}{confidence interval type (default = "normal"). "wilson" produces Wilson score intervals with a Yates continuity correction while "normal" calculates the simple asymptotic method with no continuity correction.}
 
 \item{plot}{set whether results should be plotted (plot = TRUE) or not (plot = FALSE) - defaults to TRUE}
 

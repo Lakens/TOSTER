@@ -237,9 +237,9 @@ wherein $J$ represents the Hedges correction (calculation above).
 
 # Confidence Intervals
 
-For the SMDs calculated in this package we use the non-central *t* method outlined by @Goulet_2018. These calculations are only approximations and newer formulations may provide better coverage [@Cousineau2021]. In any case, if the calculation of confidence intervals for SMDs is of the utmost importance then I would strongly recommend, when possible, using bootstrapping techniques rather than any calculative approach [@Kirby2013].
+For the SMDs calculated in this package we use the non-central *t* method outlined by @Goulet_2018. These calculations are only approximations and newer formulations may provide better coverage [@Cousineau2021]. In any case, if the calculation of confidence intervals for SMDs is of the utmost importance then I would strongly recommend using bootstrapping techniques rather than any calculative approach whenever possible [@Kirby2013].
 
-In any case, the calculations of the confidence intervals in this package involve a two step process: 1) using the noncentral *t*-distribution to calculate the lower and upper bounds of $\lambda$, and 2) transforming this back to the effect size estimate.
+The calculations of the confidence intervals in this package involve a two step process: 1) using the noncentral *t*-distribution to calculate the lower and upper bounds of $\lambda$, and 2) transforming this back to the effect size estimate.
 
 Calculate confidence intervals around $\lambda$.
 
