@@ -13,12 +13,7 @@ Please see the package's [website](https://aaroncaldwell.us/TOSTERpkg) for updat
 
 **Background**
 
-Scientists should be able to provide support for the absence of a meaningful effect. Currently, researchers often incorrectly
-conclude an effect is absent based a non-significant result. A widely recommended approach within a frequentist framework is to
-test for equivalence. In equivalence tests, such as the two one-sided tests (TOST) procedure implemented in this package, an upper and
-lower equivalence bound is specified based on the smallest effect size of interest. The TOST procedure can be used to statistically
-reject the presence of effects large enough to be considered worthwhile. Extending your statistical tool kit
-with equivalence tests is an easy way to improve your statistical and theoretical inferences.
+Scientists should be able to provide support for the absence of a meaningful effect. Currently, researchers often incorrectly conclude an effect is absent based a non-significant result. A widely recommended approach within a frequentist framework is to test for equivalence. In equivalence tests, such as the two one-sided tests (TOST) procedure implemented in this package, an upper and lower equivalence bound is specified based on the smallest effect size of interest. The TOST procedure can be used to statistically reject the presence of effects large enough to be considered worthwhile. Extending your statistical tool kit with equivalence tests is an easy way to improve your statistical and theoretical inferences.
 
 # Installation
 
