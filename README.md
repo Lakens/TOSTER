@@ -46,4 +46,4 @@ For a comparison of equivalence tests and second generation p-values (equivalenc
 Lakens, D., & Delacre, M. (2019). Equivalence Testing and the Second Generation P-Value. Meta-Psychology. https://doi.org/10.31234/osf.io/7k6ay
 
 For a general introduction to the importance of being able to support 'null' effects, and ways to do this, including equivalence tests, bayesian estimation, and bayes factors, see:
-Harms, C., & Lakens, D. (2018). Making “null effects” informative: Statistical techniques and inferential frameworks. Journal of Clinical and Translational Research, (3), 382–393. https://doi.org/10.18053/jctres.03.2017S2.007
+Harms, C., & Lakens, D. (2018). Making "null effects" informative: Statistical techniques and inferential frameworks. Journal of Clinical and Translational Research, (3), 382–393. https://doi.org/10.18053/jctres.03.2017S2.007
