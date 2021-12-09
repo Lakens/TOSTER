@@ -243,7 +243,7 @@ test_that("Test that two proportions test output is same as previous version", {
     sink()
     return(tmp)
   }
-  hush(suppressMessages(TOSTtwo.prop(prop1 = .65, prop2 = .70, n1 = 100, n2 = 100,
+hush(suppressMessages(TOSTtwo.prop(prop1 = .65, prop2 = .70, n1 = 100, n2 = 100,
                                      low_eqbound = -0.1, high_eqbound = 0.1, alpha = .05,
                                      verbose = TRUE,
                                      plot = TRUE)))

@@ -36,7 +36,11 @@ equ_anova <- function(object,
   else if(inherits(object, c("aov", "aovlist"))){
     results <- anova_summary(object)
   } else if (inherits(object, "afex_aov")){
-    aov_res = object$aov
+    if(is.null(object$aov)){
+      aov_res = object$Anova
+    } else{
+      aov_res = object$aov
+    }
     results <- anova_summary(aov_res)
   } else{
     stop("Non-supported object passed: ",

@@ -12,7 +12,7 @@
 
 <meta name="author" content="Aaron R. Caldwell" />
 
-<meta name="date" content="2021-06-07" />
+<meta name="date" content="2021-12-07" />
 
 <title>Standardized Mean Differences</title>
 
@@ -164,7 +164,7 @@ div.csl-indent {
 <h1 class="title toc-ignore">Standardized Mean Differences</h1>
 <h3 class="subtitle">The calculation of Cohen’s d type effect sizes</h3>
 <h4 class="author">Aaron R. Caldwell</h4>
-<h4 class="date">2021-06-07</h4>
+<h4 class="date">2021-12-07</h4>
 
 
 <div id="TOC">
@@ -332,8 +332,8 @@ df = N - 1
 </div>
 <div id="confidence-intervals" class="section level1">
 <h1>Confidence Intervals</h1>
-<p>For the SMDs calculated in this package we use the non-central <em>t</em> method outlined by <span class="citation">Goulet-Pelletier and Cousineau (2018)</span>. These calculations are only approximations and newer formulations may provide better coverage <span class="citation">(Cousineau and Goulet-Pelletier 2021)</span>. In any case, if the calculation of confidence intervals for SMDs is of the utmost importance then I would strongly recommend, when possible, using bootstrapping techniques rather than any calculative approach <span class="citation">(Kirby and Gerlanc 2013)</span>.</p>
-<p>In any case, the calculations of the confidence intervals in this package involve a two step process: 1) using the noncentral <em>t</em>-distribution to calculate the lower and upper bounds of <span class="math inline">\(\lambda\)</span>, and 2) transforming this back to the effect size estimate.</p>
+<p>For the SMDs calculated in this package we use the non-central <em>t</em> method outlined by <span class="citation">Goulet-Pelletier and Cousineau (2018)</span>. These calculations are only approximations and newer formulations may provide better coverage <span class="citation">(Cousineau and Goulet-Pelletier 2021)</span>. In any case, if the calculation of confidence intervals for SMDs is of the utmost importance then I would strongly recommend using bootstrapping techniques rather than any calculative approach whenever possible <span class="citation">(Kirby and Gerlanc 2013)</span>.</p>
+<p>The calculations of the confidence intervals in this package involve a two step process: 1) using the noncentral <em>t</em>-distribution to calculate the lower and upper bounds of <span class="math inline">\(\lambda\)</span>, and 2) transforming this back to the effect size estimate.</p>
 <p>Calculate confidence intervals around <span class="math inline">\(\lambda\)</span>.</p>
 <p><span class="math display">\[
 t_L = t_{(1-2-(1-\alpha)/2,\space df, \space \lambda)} \\

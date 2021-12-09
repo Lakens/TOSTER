@@ -12,6 +12,7 @@ TOSTtwo.prop(
   low_eqbound,
   high_eqbound,
   alpha,
+  ci_type = "normal",
   plot = TRUE,
   verbose = TRUE
 )
@@ -30,6 +31,8 @@ TOSTtwo.prop(
 \item{high_eqbound}{upper equivalence bounds (e.g., 0.1) expressed in proportions}
 
 \item{alpha}{alpha level (default = 0.05)}
+
+\item{ci_type}{confidence interval type (default = "normal"). "wilson" produces Wilson score intervals with a Yates continuity correction while "normal" calculates the simple asymptotic method with no continuity correction.}
 
 \item{plot}{set whether results should be plotted (plot = TRUE) or not (plot = FALSE) - defaults to TRUE}
 

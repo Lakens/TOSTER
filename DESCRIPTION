@@ -13,7 +13,7 @@ Authors@R: c(
 Maintainer: Daniel Lakens <D.Lakens@tue.nl>
 URL: https://aaroncaldwell.us/TOSTERpkg/
 License: GPL-3
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Imports:
     stats,
     graphics,
