@@ -13,7 +13,7 @@
 #'   \item{\code{"p.value"}}{The he p-value for the test.}
 #'   \item{\code{"conf.int"}}{A confidence interval for the partial eta-squared statistic.}
 #'   \item{\code{"estimate"}}{Estimate of partial eta-squared.}
-#'   \item{\code{"null.value"}}{The specified for the equivlance test.}
+#'   \item{\code{"null.value"}}{The specified for the equivalence test.}
 #'   \item{\code{"method"}}{A string indicating the type of F-test.}
 #'   \item{\code{"data.name"}}{A required string indicating that this was calculated from summary statistics.}
 #' }
@@ -28,7 +28,7 @@ equ_ftest <- function(Fstat,
                       eqbound,
                       MET = FALSE,
                       alpha = 0.05){
-  message("Note: equ_ftest only validated for one-way ANOVA; use with caution")
+  #message("Note: equ_ftest only validated for one-way ANOVA; use with caution")
 
   conf_level = 1 - alpha
 

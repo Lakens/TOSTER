@@ -28,6 +28,7 @@ H_0: \space 1 > \eta^2_p \geq \Delta
 \\
 H_1: \space 0 \geq \eta^2_p < \Delta
 $$
+
 In `TOSTER` we go a tad farther and calculate a more generalizable non-centrality parameter than allows the equivalence test for *F*-tests to be applied to variety of designs.
 
 @Campbell_2021 calculate the *p*-value as:

@@ -27,7 +27,7 @@ Object of class '"htest"
   \item{\code{"p.value"}}{The he p-value for the test.}
   \item{\code{"conf.int"}}{A confidence interval for the partial eta-squared statistic.}
   \item{\code{"estimate"}}{Estimate of partial eta-squared.}
-  \item{\code{"null.value"}}{The specified for the equivlance test.}
+  \item{\code{"null.value"}}{The specified for the equivalence test.}
   \item{\code{"method"}}{A string indicating the type of F-test.}
   \item{\code{"data.name"}}{A required string indicating that this was calculated from summary statistics.}
 }

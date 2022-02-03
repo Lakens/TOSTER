@@ -22,7 +22,7 @@ power_t_TOST(
 
 \item{sd}{population standard deviation. Standard deviation of the differences for paired samples}
 
-\item{low_eqbound}{The lower equivalance bound (raw units)}
+\item{low_eqbound}{The lower equivalence bound (raw units)}
 
 \item{high_eqbound}{The upper equivalence bound (raw units)}
 

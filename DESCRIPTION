@@ -10,7 +10,7 @@ Authors@R: c(
            family = "Caldwell",
            role = c("aut", "cre"),
            email = "arcaldwell49@gmail.com"))
-Maintainer: Aaron R. Caldwell <arcaldwell49@gmail.com>
+Maintainer: Aaron Caldwell <arcaldwell49@gmail.com>
 URL: https://aaroncaldwell.us/TOSTERpkg/
 License: GPL-3
 RoxygenNote: 7.1.2

@@ -103,7 +103,7 @@ $$
 p_{boot} = \frac {\#t(z^{*b}) \ge t_{sample}}{B}
 $$
 
-The same process is completed for the one sample case but with the one sample solution for the equation outlined by $t(z^{*b})$. The paired sample case in this bootstrap procedure is equivalent to the one sample soluation because the test is based on the difference scores.
+The same process is completed for the one sample case but with the one sample solution for the equation outlined by $t(z^{*b})$. The paired sample case in this bootstrap procedure is equivalent to the one sample solution because the test is based on the difference scores.
 
 ## Example
 

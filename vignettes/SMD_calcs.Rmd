@@ -135,7 +135,7 @@ wherein $J$ represents the Hedges correction (calculation above).
 
 # Paired Samples
 
-For paired samples there are two calculative approaches supported by `TOSTER`. One the denominator is the standard deviation of the change score (Cohen's d(z)) and the other is the correlation corrected effect sie (Cohen's d(av)). Currently, the choice is made by the function based on whether or not the user sets `rm_correction` to TRUE. If `rm_correction` is set to t TRUE then Cohen's d(rm) will be returned, and otherwise Cohen's d(z) is returned. 
+For paired samples there are two calculative approaches supported by `TOSTER`. One the denominator is the standard deviation of the change score (Cohen's d(z)) and the other is the correlation corrected effect size (Cohen's d(av)). Currently, the choice is made by the function based on whether or not the user sets `rm_correction` to TRUE. If `rm_correction` is set to t TRUE then Cohen's d(rm) will be returned, and otherwise Cohen's d(z) is returned. 
 
 ## Cohen's d(z): Change Scores
 

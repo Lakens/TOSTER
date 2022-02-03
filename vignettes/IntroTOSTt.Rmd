@@ -190,7 +190,7 @@ Once the function has run, we can print the results with the `print` command. Th
 print(res1)
 ```
 
-Another nice feature is the generic `plot` method that can provide a visual summary of the results. All of the plots in this package were inspired by the [concurve](https://cran.r-project.org/web/packages/concurve/index.html) R package. There are two types of plots that can be produced. The first, and default, is the consonance density plot (`type = "cd"`).
+Another nice feature is the generic `plot` method that can provide a visual summary of the results. All of the plots in this package were inspired by the [concurve](https://cran.r-project.org/package=concurve) R package. There are two types of plots that can be produced. The first, and default, is the consonance density plot (`type = "cd"`).
 
 ```{r fig.width=6, fig.height=6}
 plot(res1, type = "cd")
@@ -299,7 +299,7 @@ plot(res_tsum)
 
 # Power Analysis for t-test based TOST
 
-A new function, `power_t_TOST` has been created to allow for power calculations for TOST analyses that utilize t-tests. This function uses a more accurate method than the older functions in this package and match the results of the PASS stastical software. The exact calculations of power are based on Owen’s Q-function or by direct integration of the bivariate non-central t-distribution (inspired by @PowerTOST in the `PowerTOST` R package). Approximate power is implemented via the non-central t-distribution or the ‘shifted’ central t-distribution [@phillips1990, @diletti1991]. The function is limited to power analyses involves one sample, two sample, and paired sample cases. More options are available in the `PowerTOST` R package.
+A new function, `power_t_TOST` has been created to allow for power calculations for TOST analyses that utilize t-tests. This function uses a more accurate method than the older functions in this package and match the results of the PASS statistics software. The exact calculations of power are based on Owen’s Q-function or by direct integration of the bivariate non-central t-distribution (inspired by @PowerTOST in the `PowerTOST` R package). Approximate power is implemented via the non-central t-distribution or the ‘shifted’ central t-distribution [@phillips1990, @diletti1991]. The function is limited to power analyses involves one sample, two sample, and paired sample cases. More options are available in the `PowerTOST` R package.
 
 The interface for this function is quite simple and was intended to mimic the base R function `power.t.test`. The user must specify the 2 equivalence bounds, and leave only one of the other options blank (`alpha`, `power`, or `n`). The "true difference" can be set with `delta` and the standard deviation (default is 1) can be set with the `sd` argument. Once everything is set and the function is run, the function will return a object of the `power.htest` class.
 

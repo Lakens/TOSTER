@@ -120,7 +120,7 @@ TOSTone(m=5.71,mu=6,sd=1.79,n=20,low_eqbound_d=-0.68, high_eqbound_d=0.68, alpha
 
 It is clear I should have been more tentative in my conclusions in this study. Not only can I not conclude equivalence in some of the conditions, the equivalence bound I had 80% power to detect is very large, meaning the possibility that there are theoretically interesting but smaller effects remains. 
 
-*Lakens, D., Semin, G. R., & Foroni, F. (2012). But for the bad, there would not be good: Grounding valence in brightness through shared relational structures. Journal of Experimental Psychology: General, 141(3), 584-594. https://doi.org/10.1037/a0026468 *
+*Lakens, D., Semin, G. R., & Foroni, F. (2012). But for the bad, there would not be good: Grounding valence in brightness through shared relational structures. Journal of Experimental Psychology: General, 141(3), 584-594. DOI: 10.1037/a0026468*
 
 &nbsp;
 

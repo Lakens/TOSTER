@@ -3,7 +3,7 @@
 #' @param n number of observations per group. 2 sample sizes, in a vector, can be provided for the two sample case.
 #' @param delta true difference in means (default is 0)
 #' @param sd population standard deviation. Standard deviation of the differences for paired samples
-#' @param low_eqbound The lower equivalance bound (raw units)
+#' @param low_eqbound The lower equivalence bound (raw units)
 #' @param high_eqbound The upper equivalence bound (raw units)
 #' @param alpha a priori alpha-level (i.e., significance level)
 #' @param power power of the TOST procedure (1-beta)

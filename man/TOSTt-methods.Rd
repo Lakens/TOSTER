@@ -21,7 +21,7 @@ for details.
 
 \item{type}{Type of plot to produce. Default is a consonance density plot "cd". Consonance plots (type = "cd") and null distribution plots (type = "tnull") can also be produced. Note: null distribution plots only available for estimates = "raw".}
 
-\item{estimates}{indicator of what estiamtes to plot; options include "raw" or "SMD". Default is is both: c("raw","SMD").}
+\item{estimates}{indicator of what estimates to plot; options include "raw" or "SMD". Default is is both: c("raw","SMD").}
 
 \item{ci_lines}{Confidence interval lines for plots. Default is 1-alpha*2 (e.g., alpha = 0.05 is 90\%)}
 

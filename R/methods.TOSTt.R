@@ -7,7 +7,7 @@
 #' @param type Type of plot to produce. Default is a consonance density plot "cd". Consonance plots (type = "cd") and null distribution plots (type = "tnull") can also be produced. Note: null distribution plots only available for estimates = "raw".
 #' @param ci_lines Confidence interval lines for plots. Default is 1-alpha*2 (e.g., alpha = 0.05 is 90\%)
 #' @param ci_shades Confidence interval shades when plot type is "cd".
-#' @param estimates indicator of what estiamtes to plot; options include "raw" or "SMD". Default is is both: c("raw","SMD").
+#' @param estimates indicator of what estimates to plot; options include "raw" or "SMD". Default is is both: c("raw","SMD").
 #' @param ... further arguments passed through, see description of return value
 #'   for details.
 #'   \code{\link{TOSTt-methods}}.
