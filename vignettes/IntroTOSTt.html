@@ -12,7 +12,7 @@
 
 <meta name="author" content="Aaron R. Caldwell" />
 
-<meta name="date" content="2022-02-03" />
+<meta name="date" content="2022-02-04" />
 
 <title>An Introduction to t_TOST</title>
 
@@ -164,7 +164,7 @@ div.csl-indent {
 <h1 class="title toc-ignore">An Introduction to t_TOST</h1>
 <h3 class="subtitle">A new function for TOST with t-tests</h3>
 <h4 class="author">Aaron R. Caldwell</h4>
-<h4 class="date">2022-02-03</h4>
+<h4 class="date">2022-02-04</h4>
 
 
 <div id="TOC">
@@ -416,7 +416,7 @@ div.csl-indent {
 </div>
 <div id="power-analysis-for-t-test-based-tost" class="section level1">
 <h1>Power Analysis for t-test based TOST</h1>
-<p>A new function, <code>power_t_TOST</code> has been created to allow for power calculations for TOST analyses that utilize t-tests. This function uses a more accurate method than the older functions in this package and match the results of the PASS stastical software. The exact calculations of power are based on Owen’s Q-function or by direct integration of the bivariate non-central t-distribution (inspired by <span class="citation">Labes, Schütz, and Lang (2021)</span> in the <code>PowerTOST</code> R package). Approximate power is implemented via the non-central t-distribution or the ‘shifted’ central t-distribution <span class="citation">Diletti, Hauschke, and Steinijans (1992)</span>. The function is limited to power analyses involves one sample, two sample, and paired sample cases. More options are available in the <code>PowerTOST</code> R package.</p>
+<p>A new function, <code>power_t_TOST</code> has been created to allow for power calculations for TOST analyses that utilize t-tests. This function uses a more accurate method than the older functions in this package and match the results of the PASS statistics software. The exact calculations of power are based on Owen’s Q-function or by direct integration of the bivariate non-central t-distribution (inspired by <span class="citation">Labes, Schütz, and Lang (2021)</span> in the <code>PowerTOST</code> R package). Approximate power is implemented via the non-central t-distribution or the ‘shifted’ central t-distribution <span class="citation">Diletti, Hauschke, and Steinijans (1992)</span>. The function is limited to power analyses involves one sample, two sample, and paired sample cases. More options are available in the <code>PowerTOST</code> R package.</p>
 <p>The interface for this function is quite simple and was intended to mimic the base R function <code>power.t.test</code>. The user must specify the 2 equivalence bounds, and leave only one of the other options blank (<code>alpha</code>, <code>power</code>, or <code>n</code>). The “true difference” can be set with <code>delta</code> and the standard deviation (default is 1) can be set with the <code>sd</code> argument. Once everything is set and the function is run, the function will return a object of the <code>power.htest</code> class.</p>
 <p>As an example, let’s say we are looking at an equivalence study where we assume the true difference is 1 unit, the standard deviation is 2.5, and we set the equivalence bounds to 2.5 units as well. If we want to find the sample size adequate to have 95% power at an alpha of 0.025 we enter the following:</p>
 <div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">power_t_TOST</span>(<span class="at">n =</span> <span class="cn">NULL</span>,</span>

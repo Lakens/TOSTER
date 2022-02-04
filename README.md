@@ -23,7 +23,7 @@ The developmental version, and most up-to-date, can be installed from [GitHub](h
 devtools::install_github("Lakens/TOSTER")
 ```
 
-The stable release can be downloaded from [CRAN](https://cran.r-project.org › package=TOSTER):
+The stable release can be downloaded from [CRAN](https://cran.r-project.org/package=TOSTER):
 
 ```
 install.packages("TOSTER")
