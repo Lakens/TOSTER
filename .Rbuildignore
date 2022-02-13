@@ -18,3 +18,4 @@
 build/R
 build/js
 NUL
+^paper$
