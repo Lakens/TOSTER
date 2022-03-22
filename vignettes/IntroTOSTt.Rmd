@@ -154,12 +154,11 @@ theme_tidybayes() +
   )
 ```
 
-In the general introduction to this package we detailed how to look at *old* results and how to apply TOST to interpreting those results. However, in many cases, users may have new data that needs to be analyzed. Therefore, `t_TOST` can be applied to new data. This vignette will use the `bugs` data from the `jmv` R package and the `sleep` data.
+In the general introduction to this package we detailed how to look at *old* results and how to apply TOST to interpreting those results. However, in many cases, users may have new data that needs to be analyzed. Therefore, `t_TOST` can be applied to new data. This vignette will use the `iris` and the `sleep` data.
 
 ```{r}
 data('sleep')
-library(jmv)
-data('bugs')
+data('iris')
 ```
 
 # Independent Groups
@@ -223,11 +222,11 @@ res2 = t_TOST(formula = extra ~ group,
 res2
 ```
 
-However, we may have two vectors of data that are paired. So instead we may want to just provide those separately rather than using a data set and setting the formula. This can be demonstrated with the "bugs" data.
+However, we may have two vectors of data that are paired. So instead we may want to just provide those separately rather than using a data set and setting the formula. This can be demonstrated with the "iris" data.
 
 ```{r}
-res3 = t_TOST(x = bugs$LDHF,
-              y = bugs$LDLF,
+res3 = t_TOST(x = iris$Sepal.Length,
+              y = iris$Sepal.Width,
               paired = TRUE,
               low_eqbound = -1,
               high_eqbound = 1)
@@ -237,8 +236,8 @@ res3
 We may want to perform a Minimal Effect Test with the `hypothesis` argument set to "MET".
 
 ```{r}
-res3a = t_TOST(x = bugs$LDHF,
-               y = bugs$LDLF,
+res3a = t_TOST(x = iris$Sepal.Length,
+              y = iris$Sepal.Width,
                paired = TRUE,
                hypothesis = "MET",
                low_eqbound = -1,
@@ -254,10 +253,10 @@ plot(res3a)
 
 # One Sample t-test
 
-In other cases we may just have a one sample test. If that is the case all we have to do is supply the `x` argument for the data. For this test we may hypothesis that the mean of LDHF is not more than 1.5 points greater or less than 7.
+In other cases we may just have a one sample test. If that is the case all we have to do is supply the `x` argument for the data. For this test we may hypothesis that the mean of Sepal.Length is not more than 5.5 points greater or less than 8.5.
 
 ```{r}
-res4 = t_TOST(x = bugs$LDHF,
+res4 = t_TOST(x = iris$Sepal.Length,
               hypothesis = "EQU",
               low_eqbound = 5.5,
               high_eqbound = 8.5)
@@ -282,9 +281,9 @@ The results from above can be replicated with the `tsum_TOST`
 
 ```{r}
 res_tsum = tsum_TOST(
-  m1 = mean(bugs$LDHF, na.rm=TRUE),
-  sd1 = sd(bugs$LDHF, na.rm=TRUE),
-  n1 = length(na.omit(bugs$LDHF)),
+  m1 = mean(iris$Sepal.Length, na.rm=TRUE),
+  sd1 = sd(iris$Sepal.Length, na.rm=TRUE),
+  n1 = length(na.omit(iris$Sepal.Length)),
   hypothesis = "EQU",
   low_eqbound = 5.5,
   high_eqbound = 8.5

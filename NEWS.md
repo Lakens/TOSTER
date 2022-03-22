@@ -3,9 +3,14 @@ NEWS
 
 **TOSTER R package and jamovi module**
 
+# TOSTER v0.4.1
+
+- jmv removed as dependency
+
+
 # TOSTER v0.4.0
 
-## “Avocado TOST” (Release date: NA)
+## “Avocado TOST” (Release date:  2022-02-05)
 
 Changes:
 
