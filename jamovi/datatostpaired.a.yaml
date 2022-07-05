@@ -6,7 +6,7 @@ version: "1.0.0"
 menuGroup: TOSTER
 
 description:
-    main: TOST Paired Samples T-Test
+    main: TOST Paired Samples T-Test in jamovi
     R:
         dontrun: true
         usage: |
