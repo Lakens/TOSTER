@@ -281,7 +281,8 @@ datatosttwopropBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 
 #' TOST Two Proportions
 #'
-#' 
+#' TOST Two Proportions for jamovi. This function is not meant to be utilized 
+#' in R.
 #' @param data .
 #' @param var .
 #' @param level .

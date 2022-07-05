@@ -6,7 +6,7 @@ version: "1.0.0"
 menuGroup: TOSTER
 
 description:
-    main: TOST for correlations in jamovi
+    main: TOST for correlations in jamovi. This function is not meant to be utilized in R.
 options:
     - name: data
       type: Data

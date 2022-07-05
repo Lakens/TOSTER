@@ -456,7 +456,8 @@ dataTOSTtwoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' TOST Independent Samples T-Test
 #'
-#' TOST Independent Samples T-Test
+#' TOST Independent Samples T-Test for jamovi. This function is not meant to 
+#' be utilized in R.
 #'
 #' @examples
 #' library(TOSTER)

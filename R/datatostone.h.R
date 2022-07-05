@@ -401,7 +401,8 @@ dataTOSToneBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' TOST One Sample T-Test
 #'
-#' TOST One Sample T-Test
+#' TOST One Sample T-Test in jamovi. This function is not meant to be utilized 
+#' in R.
 #'
 #' @examples
 #' library("TOSTER")
