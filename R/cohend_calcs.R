@@ -297,3 +297,11 @@ hedge_J <- function(df) {
   # Source: https://doi.org/10.31234/osf.io/s2597
   exp ( lgamma(df/2) - log(sqrt(df/2)) - lgamma((df-1)/2) )
   }
+
+poolSD = function(x,y){
+  n1 = length(x)
+  n2 = length(y)
+  sd1 = sd(x)
+  sd2 = sd(y)
+  sqrt((((n1 - 1)*(sd1^2)) + (n2 - 1)*(sd2^2))/((n1+n2)-2)) #calculate sd pooled
+}

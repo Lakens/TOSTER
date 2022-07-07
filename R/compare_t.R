@@ -1,14 +1,15 @@
 
 
-model.frame(extra ~ 1, data = data1)
-compare_t = function(x1,
-                     y1 = NULL,
-                     x2,
-                     y2 = NULL,
-                     paired = FALSE,
-                     alternative = "two.sided",
-                     R = 1999,
-                     alpha = 0.05){
+
+compare_smd_boot = function(x1,
+                            y1 = NULL,
+                            x2,
+                            y2 = NULL,
+                            null = 0,
+                            paired = FALSE,
+                            alternative = "two.sided",
+                            R = 1999,
+                            alpha = 0.05){
 
   if(!missing(null) && (length(null) != 1 || is.na(null))) {
     stop("'null' must be a single number")
@@ -20,11 +21,8 @@ compare_t = function(x1,
     stop("'alpha' must be a single number between 0 and 1")
   }
 
-  if(TOST){
-    conf_level = 1-alpha*2
-  } else {
-    conf_level = 1-alpha
-  }
+  conf_level = 1-alpha
+
 
   if(is.null(y1) && is.null(y2)){
     paired = TRUE
@@ -38,6 +36,11 @@ compare_t = function(x1,
       df1 = na.omit(data.frame(z = x1 - y1))
       df2 = na.omit(data.frame(z = x2 - y2))
     }
+  } else if(is.null(y1) && is.null(y2)){
+
+      df1 = na.omit(data.frame(z = x1 - y1))
+      df2 = na.omit(data.frame(z = x2 - y2))
+
   } else {
     x1 = na.omit(x1)
     y1 = na.omit(y1)
@@ -51,8 +54,111 @@ compare_t = function(x1,
                                rep("y",length(y2))))
   }
 
-  d_vec <- rep(NA, times=length(R)) # smd vector
-  m_vec <- rep(NA, times=length(R)) # mean difference vector
+
+  smd1_vec = rep(NA, times=length(R))
+  smd2_vec = rep(NA, times=length(R))
+  d_diff_vec = rep(NA, times=length(R))
+  z_stat_vec = zrep(NA, times=length(R))
+  zdiff_stat_vec = rep(NA, times=length(R))
+  #m_vec <- rep(NA, times=length(R)) # mean difference vector
+  if(ncol(df1) == 1){
+    md1 = mean(df1$z)
+    sd1 = sd(df1$z)
+    md2 = mean(df2$z)
+    sd2 = sd(df2$z)
+
+    smd1 = md1/sd1
+    smd2 = md2/sd2
+    se1 = se_dz(smd1, length(df1$z))
+    se2 = se_dz(smd2, length(df2$z))
+    d_diff = smd1 - smd2
+    z_se = sqrt(se1^2+se2^2)
+    z_stat = d_diff/z_se
+    for(i in 1:R){
+      df1_boot = df1[sample(row.names(df1), nrow(df1), replace=TRUE), ]
+      df2_boot = df2[sample(row.names(df2), nrow(df2), replace=TRUE), ]
+
+      md1_boot = mean(df1_boot$z)
+      sd1_boot = sd(df1_boot$z)
+      md2_boot = mean(df2_boot$z)
+      sd2_boot = sd(df2_boot$z)
+
+      smd1_boot = md1_boot/sd1_boot
+      smd2_boot = md2_boot/sd2_boot
+      se1_boot = se_dz(smd1_boot, length(df1_boot$z))
+      se2_boot = se_dz(smd2_boot, length(df2_boot$z))
+      d_diff_boot = smd1_boot - smd2_boot
+      z_se_boot = sqrt(se1_boot^2 + se2_boot^2)
+      z_stat_boot = d_diff_boot / z_se_boot
+      zdiff_stat_boot = (d_diff_boot - d_diff) / z_se_boot
+
+      smd1_vec[i] = smd1_boot
+      smd2_vec[i] = smd2_boot
+      d_diff_vec[i] = d_diff_boot
+      z_stat_vec[i] = z_stat_boot
+      zdiff_stat_vec[i] = zdiff_stat_boot
+    }
+  } else{
+    md1 = mean(subset(df1,
+                      group == "x")$y) -
+      mean(subset(df1,
+                  group == "y")$y)
+    sd1 = poolSD(subset(df1,
+                        group == "x")$y,
+                 subset(df1,
+                        group == "y")$y)
+    md2 = mean(subset(df2,
+                      group == "x")$y) -
+      mean(subset(df2,
+                  group == "y")$y)
+    sd2 = poolSD(subset(df2,
+                        group == "x")$y,
+                 subset(df2,
+                        group == "y")$y)
+
+    smd1 = md1/sd1
+    smd2 = md2/sd2
+    se1 = se_ds(smd1, nrow(df1))
+    se2 = se_ds(smd2, nrow(df2))
+    d_diff = smd1 - smd2
+    z_se = sqrt(se1^2+se2^2)
+    z_stat = d_diff/z_se
+    for(i in 1:R){
+      df1_boot = df1[sample(row.names(df1), nrow(df1), replace=TRUE), ]
+      df2_boot = df2[sample(row.names(df2), nrow(df2), replace=TRUE), ]
+      md1_boot = mean(subset(df1_boot,
+                        group == "x")$y) -
+        mean(subset(df1_boot,
+                    group == "y")$y)
+      sd1_boot = poolSD(subset(df1_boot,
+                          group == "x")$y,
+                   subset(df1_boot,
+                          group == "y")$y)
+      md2_boot = mean(subset(df2_boot,
+                        group == "x")$y) -
+        mean(subset(df2_boot,
+                    group == "y")$y)
+      sd2_boot = poolSD(subset(df2_boot,
+                          group == "x")$y,
+                   subset(df2_boot,
+                          group == "y")$y)
+
+      smd1_boot = md1_boot/sd1_boot
+      smd2_boot = md2_boot/sd2_boot
+      se1_boot = se_ds(smd1_boot, nrow(df1_boot))
+      se2_boot = se_ds(smd2_boot, nrow(df2_boot))
+      d_diff_boot = smd1_boot - smd2_boot
+      z_se_boot = sqrt(se1_boot^2+se2_boot^2)
+      z_stat_boot = d_diff_boot/z_se_boot
+      zdiff_stat_boot = (d_diff_boot - d_diff) / z_se_boot
+
+      smd1_vec[i] = smd1_boot
+      smd2_vec[i] = smd2_boot
+      d_diff_vec[i] = d_diff_boot
+      z_stat_vec[i] = z_stat_boot
+      zdiff_stat_vec[i] = zdiff_stat_boot
+    }
+  }
 }
 
 
