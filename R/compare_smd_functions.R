@@ -27,7 +27,7 @@ se_ds = function(smd,n){
 
 }
 
-ci_perc = fucntion(vec,
+ci_perc = function(vec,
                    alternative = "two.sided",
                    alpha = 0.05){
   if(alternative == "two.sided"){

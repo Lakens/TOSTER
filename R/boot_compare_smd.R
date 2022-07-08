@@ -1,7 +1,7 @@
 
 
 
-compare_smd_boot = function(x1,
+boot_compare_smd = function(x1,
                             y1 = NULL,
                             x2,
                             y2 = NULL,
@@ -20,13 +20,17 @@ compare_smd_boot = function(x1,
                          alpha < 0 || alpha > 1)) {
     stop("'alpha' must be a single number between 0 and 1")
   }
-
-  conf_level = 1-alpha
-
-
-  if(is.null(y1) && is.null(y2)){
-    paired = TRUE
+  if(alternative == "two.sided"){
+    conf_level = 1-alpha
+  } else {
+    conf_level = 1-alpha*2
   }
+
+
+
+  #if(is.null(y1) && is.null(y2)){
+  #  paired = TRUE
+  #}
 
   if(paired){
     if(is.null(y1) && is.null(y2)){
@@ -38,8 +42,8 @@ compare_smd_boot = function(x1,
     }
   } else if(is.null(y1) && is.null(y2)){
 
-      df1 = na.omit(data.frame(z = x1 - y1))
-      df2 = na.omit(data.frame(z = x2 - y2))
+      df1 = na.omit(data.frame(z = x1))
+      df2 = na.omit(data.frame(z = x2))
 
   } else {
     x1 = na.omit(x1)
@@ -58,7 +62,7 @@ compare_smd_boot = function(x1,
   smd1_vec = rep(NA, times=length(R))
   smd2_vec = rep(NA, times=length(R))
   d_diff_vec = rep(NA, times=length(R))
-  z_stat_vec = zrep(NA, times=length(R))
+  z_stat_vec = rep(NA, times=length(R))
   zdiff_stat_vec = rep(NA, times=length(R))
   #m_vec <- rep(NA, times=length(R)) # mean difference vector
   if(ncol(df1) == 1){
@@ -84,15 +88,15 @@ compare_smd_boot = function(x1,
       df1_boot = df1[sample(row.names(df1), nrow(df1), replace=TRUE), ]
       df2_boot = df2[sample(row.names(df2), nrow(df2), replace=TRUE), ]
 
-      md1_boot = mean(df1_boot$z)
-      sd1_boot = sd(df1_boot$z)
-      md2_boot = mean(df2_boot$z)
-      sd2_boot = sd(df2_boot$z)
+      md1_boot = mean(df1_boot)
+      sd1_boot = sd(df1_boot)
+      md2_boot = mean(df2_boot)
+      sd2_boot = sd(df2_boot)
 
       smd1_boot = md1_boot/sd1_boot
       smd2_boot = md2_boot/sd2_boot
-      se1_boot = se_dz(smd1_boot, length(df1_boot$z))
-      se2_boot = se_dz(smd2_boot, length(df2_boot$z))
+      se1_boot = se_dz(smd1_boot, length(df1_boot))
+      se2_boot = se_dz(smd2_boot, length(df2_boot))
       d_diff_boot = smd1_boot - smd2_boot
       z_se_boot = sqrt(se1_boot^2 + se2_boot^2)
       z_stat_boot = d_diff_boot / z_se_boot
@@ -181,9 +185,9 @@ compare_smd_boot = function(x1,
                      upper.ci = c(d_diff_ci[2],smd1_ci[2],smd2_ci[2]),
                      row.names = c("Difference in SMD", "SMD1", "SMD2"))
   # Calculate p-value
-  if(alternative = "greater"){
+  if(alternative == "greater"){
     pval = sum(zdiff_stat_vec >= z_stat)/length(zdiff_stat_vec)
-  } else if(alternative = "less"){
+  } else if(alternative == "less"){
     pval = sum(zdiff_stat_vec <= z_stat)/length(zdiff_stat_vec)
   } else {
     pval1 = sum(zdiff_stat_vec >= z_stat)/length(zdiff_stat_vec)
@@ -195,6 +199,10 @@ compare_smd_boot = function(x1,
   }
   par = R
   names(par) = "R"
+  names(z_stat) = "z (observed)"
+  names(d_diff) = "difference in SMDs"
+  names(null) = "difference in SMDs"
+  attr(d_diff_ci,"conf.level") <- conf_level
   # Store as htest
   rval <- list(statistic = z_stat, p.value = pval,
                conf.int = d_diff_ci,
@@ -205,7 +213,6 @@ compare_smd_boot = function(x1,
                df_ci = df_ci,
                boot_res = list(
                  smd1 = smd1_vec,
-                 smd2 = smd2_vec,
                  d_diff = d_diff_vec,
                  z_stat = z_stat_vec,
                  zdiff_stat = zdiff_stat_vec

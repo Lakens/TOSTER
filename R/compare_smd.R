@@ -26,13 +26,13 @@
 #'
 
 compare_smd = function(smd1,
-            n1,
-            smd2,
-            n2,
-            paired = FALSE,
-            alternative = "two.sided",
-            null = 0,
-            TOST = FALSE){
+                       n1,
+                       smd2,
+                       n2,
+                       paired = FALSE,
+                       alternative = "two.sided",
+                       null = 0,
+                       TOST = FALSE){
   if(length(n1) > 2 || length(n2) > 2 || !is.numeric(n1) || !is.numeric(n1)){
     stop("n1 and n2 must be a numeric vector of a length of 1 or 2.")
   }
