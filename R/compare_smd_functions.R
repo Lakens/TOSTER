@@ -26,3 +26,15 @@ se_ds = function(smd,n){
   sqrt((n[1]+n[2])/(n[1]*n[2]) + smd^2/(2*(n[1]+n[2])))
 
 }
+
+ci_perc = fucntion(vec,
+                   alternative = "two.sided",
+                   alpha = 0.05){
+  if(alternative == "two.sided"){
+    alpha = alpha/2
+    res = quantile(vec, c(alpha,1-alpha))
+  } else {
+    res = quantile(vec, c(alpha,1-alpha))
+  }
+
+}

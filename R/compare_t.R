@@ -62,6 +62,12 @@ compare_smd_boot = function(x1,
   zdiff_stat_vec = rep(NA, times=length(R))
   #m_vec <- rep(NA, times=length(R)) # mean difference vector
   if(ncol(df1) == 1){
+    if(paired){
+      meth = "Bootstrapped Differences in SMDs (paired)"
+    } else {
+      meth = "Bootstrapped Differences in SMDs (one-sample)"
+    }
+
     md1 = mean(df1$z)
     sd1 = sd(df1$z)
     md2 = mean(df2$z)
@@ -99,6 +105,7 @@ compare_smd_boot = function(x1,
       zdiff_stat_vec[i] = zdiff_stat_boot
     }
   } else{
+    meth = "Bootstrapped Differences in SMDs (two-sample)"
     md1 = mean(subset(df1,
                       group == "x")$y) -
       mean(subset(df1,
@@ -159,6 +166,54 @@ compare_smd_boot = function(x1,
       zdiff_stat_vec[i] = zdiff_stat_boot
     }
   }
+
+  smd1_ci = ci_perc(smd1_vec,
+                    alternative = alternative,
+                    alpha = alpha)
+  smd2_ci = ci_perc(smd2_vec,
+                    alternative = alternative,
+                    alpha = alpha)
+  d_diff_ci = ci_perc(d_diff_vec,
+                    alternative = alternative,
+                    alpha = alpha)
+  df_ci = data.frame(estimate = c(d_diff, smd1, smd2),
+                     lower.ci = c(d_diff_ci[1],smd1_ci[1],smd2_ci[1]),
+                     upper.ci = c(d_diff_ci[2],smd1_ci[2],smd2_ci[2]),
+                     row.names = c("Difference in SMD", "SMD1", "SMD2"))
+  # Calculate p-value
+  if(alternative = "greater"){
+    pval = sum(zdiff_stat_vec >= z_stat)/length(zdiff_stat_vec)
+  } else if(alternative = "less"){
+    pval = sum(zdiff_stat_vec <= z_stat)/length(zdiff_stat_vec)
+  } else {
+    pval1 = sum(zdiff_stat_vec >= z_stat)/length(zdiff_stat_vec)
+    pval2 = sum(zdiff_stat_vec <= z_stat)/length(zdiff_stat_vec)
+    pval = 2*min(pval1,pval2)
+    if(pval > 1){
+      pval = 1
+    }
+  }
+  par = R
+  names(par) = "R"
+  # Store as htest
+  rval <- list(statistic = z_stat, p.value = pval,
+               conf.int = d_diff_ci,
+               estimate = d_diff,
+               null.value = null,
+               alternative = alternative,
+               method = meth,
+               df_ci = df_ci,
+               boot_res = list(
+                 smd1 = smd1_vec,
+                 smd2 = smd2_vec,
+                 d_diff = d_diff_vec,
+                 z_stat = z_stat_vec,
+                 zdiff_stat = zdiff_stat_vec
+               ),
+               data.name = "Bootstrapped",
+               call = match.call())
+  class(rval) <- "htest"
+  return(rval)
 }
 
 
