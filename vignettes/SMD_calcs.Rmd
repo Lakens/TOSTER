@@ -270,5 +270,74 @@ plot_smd(d = .43,
          )
 ```
 
+# Comparing SMDs
+
+In some cases, SMDs between original and replication studies want to be compared. Rather than looking at whether or not a replication attempt is significant, a researcher could compare to see how compatible the SMDs are between the two studies.
+
+For example, say there is original study reports an effect of Cohen's dz = 0.95 in a paired samples design with 25 subjects. However, a replication doubled the sample size, found a non-significant effect at an SMD of 0.2. Are these two studies compatible? Or, to put it another way, should the replication be considered a failure to replicate?
+
+We can use the `compare_smd` function to at least measure how often we would expect a discrepancy between the original and replication study if the same underlying effect was being measured (also assuming no publication bias).
+
+We can see from the results below that, if the null hypothesis were true, we would only expect to see a disprency in SMDs between studies at least this large ~1% of the time.
+
+```{r}
+compare_smd(smd1 = 0.95,
+            n1 = 25,
+            smd2 = 0.23,
+            n2 = 50,
+            paired = TRUE)
+```
+
+
+## Raw Data
+
+The above results are only based on an approximating the differences between the SMDs. If the raw data is available, then the optimal solution is the bootstrap the results. This can be accomplished with the `boot_compare_smd` function.
+
+For this example, we will simulate some data.
+
+```{r}
+set.seed(4522)
+diff_study1 = rnorm(25,.95)
+diff_study2 = rnorm(50)
+boot_test = boot_compare_smd(x1 = diff_study1,
+                             x2 = diff_study2,
+                             paired = TRUE)
+
+boot_test
+
+# Table of boostrapped CIs
+knitr::kable(boot_test$df_ci, digits = 4)
+```
+
+
+### Visualize
+
+The results of the bootstrapping are stored in the results. So we can even visualize the differences in SMDs.
+
+```{r}
+library(ggplot2)
+
+list_res = boot_test$boot_res
+df1 = data.frame(study = c(rep("original",length(list_res$smd1)),
+                           rep("replication",length(list_res$smd2))),
+                 smd = c(list_res$smd1,list_res$smd2))
+ggplot(df1,
+            aes(fill = study, color =smd, x = smd))+ 
+ geom_histogram(aes(y=..density..), alpha=0.5, 
+                position="identity")+
+ geom_density(alpha=.2) +
+  labs(y = "", x = "SMD (bootstrapped estimates)") +
+  theme_classic()
+
+df2 = data.frame(diff = list_res$d_diff)
+ggplot(df2,
+            aes(x = diff))+ 
+ geom_histogram(aes(y=..density..), alpha=0.5, 
+                position="identity")+
+ geom_density(alpha=.2) +
+  labs(y = "", x = "Difference in SMDs (bootstrapped estimates)") +
+  theme_classic()
+```
+
 
 # References

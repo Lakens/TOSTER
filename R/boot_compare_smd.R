@@ -245,6 +245,7 @@ boot_compare_smd = function(x1,
                df_ci = df_ci,
                boot_res = list(
                  smd1 = smd1_vec,
+                 smd2 = smd2_vec,
                  d_diff = d_diff_vec,
                  z_stat = z_stat_vec,
                  zdiff_stat = zdiff_stat_vec
