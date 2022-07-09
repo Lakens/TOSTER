@@ -6,8 +6,8 @@
 #' @param n2 sample size(s) from study 2 (can be 1 number or vector of 2 numbers).
 #' @param paired a logical indicating whether the SMD is from a paired or independent samples design.
 #' @param null a number indicating the null hypothesis. For TOST, this would be equivalence bound.
-#' @param TOST logical indicator (default = FALSE) to perform two one-sided tests of equivalence (TOST). Minimal effects testing not currently available.
-#' @param ...  further arguments to be passed to or from methods.
+#' @param alternative a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater" or "less". You can specify just the initial letter.
+#' @param TOST logical indicator (default = FALSE) to perform two one-sided tests of equivalence (TOST). Minimal effects testing not currently available. If specified, alternative is ignored.
 #' @return A list with class "htest" containing the following components:
 #' \describe{
 #'   \item{\code{"statistic"}}{z-score}
@@ -18,7 +18,7 @@
 #'   \item{\code{"method"}}{Type of SMD}
 #'   \item{\code{"data.name"}}{"Summary Statistics" to denote summary statistics were utilized to obtain results.}
 #'   \item{\code{"smd"}}{SMDs input for the function.}
-#'   \item{\code{"data.name"}}{Sample sizes input for the function.}
+#'   \item{\code{"sample_sizes"}}{Sample sizes input for the function.}
 #'   \item{\code{"call"}}{the matched call.}
 #' }
 #' @name compare_smd
@@ -30,9 +30,10 @@ compare_smd = function(smd1,
                        smd2,
                        n2,
                        paired = FALSE,
-                       alternative = "two.sided",
+                       alternative = c("two.sided", "less", "greater"),
                        null = 0,
                        TOST = FALSE){
+  alternative <- match.arg(alternative)
   if(length(n1) > 2 || length(n2) > 2 || !is.numeric(n1) || !is.numeric(n1)){
     stop("n1 and n2 must be a numeric vector of a length of 1 or 2.")
   }

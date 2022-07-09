@@ -1,4 +1,32 @@
-
+#' @title Comparing SMDs between independent studies with Bootstrapping
+#' @description A function to compare standardized mean differences (SMDs) between studies. This function is intended to be used to compare the compatibility of original studies with replication studies (lower p-values indicating lower compatibility)
+#' @param x1 	a (non-empty) numeric vector of data values from study 1.
+#' @param y1 an optional (non-empty) numeric vector of data values from study 1.
+#' @param x2 a (non-empty) numeric vector of data values from study 2.
+#' @param y2 an optional (non-empty) numeric vector of data values from study 2.
+#' @param null a number indicating the null hypothesis. For TOST, this would be equivalence bound.
+#' @param paired a logical indicating whether the SMD is from a paired or independent samples design.
+#' @param alternative a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater" or "less". You can specify just the initial letter.
+#' @param R number of bootstrap replicates
+#' @param alpha alpha level (default = 0.05)
+#' @return A list with class "htest" containing the following components:
+#' \describe{
+#'   \item{\code{"statistic"}}{z-score}
+#'   \item{\code{"p.value"}}{numeric scalar containing the p-value for the test under the null hypothesis.}
+#'   \item{\code{"estimate"}}{difference in SMD between studies}
+#'   \item{\code{"conf.int}}{percentile (bootstrap) confidence interval for difference in SMDs}
+#'   \item{\code{"null.value"}}{the specified hypothesized value for the null hypothesis.}
+#'   \item{\code{"alternative"}}{character string indicating the alternative hypothesis (the value of the input argument alternative). Possible values are "greater", "less", or "two-sided".}
+#'   \item{\code{"method"}}{Type of SMD}
+#'   \item{\code{"data.name"}}{"Boostrapped" to denote summary statistics were utilized to obtain results.}
+#'   \item{\code{"smd"}}{SMDs input for the function.}
+#'   \item{\code{"df_ci"}}{Data frame of confidence intervals.}
+#'   \item{\code{"boot_res"}}{List of bootstrapped results.}
+#'   \item{\code{"call"}}{the matched call.}
+#' }
+#' @name boot_compare_smd
+#' @export boot_compare_smd
+#'
 
 
 boot_compare_smd = function(x1,
@@ -7,10 +35,10 @@ boot_compare_smd = function(x1,
                             y2 = NULL,
                             null = 0,
                             paired = FALSE,
-                            alternative = "two.sided",
+                            alternative = c("two.sided", "less", "greater"),
                             R = 1999,
                             alpha = 0.05){
-
+  alternative <- match.arg(alternative)
   if(!missing(null) && (length(null) != 1 || is.na(null))) {
     stop("'null' must be a single number")
   }
