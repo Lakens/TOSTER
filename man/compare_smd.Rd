@@ -31,8 +31,6 @@ compare_smd(
 \item{null}{a number indicating the null hypothesis. For TOST, this would be equivalence bound.}
 
 \item{TOST}{logical indicator (default = FALSE) to perform two one-sided tests of equivalence (TOST). Minimal effects testing not currently available. If specified, alternative is ignored.}
-
-\item{...}{further arguments to be passed to or from methods.}
 }
 \value{
 A list with class "htest" containing the following components:
@@ -45,7 +43,7 @@ A list with class "htest" containing the following components:
   \item{\code{"method"}}{Type of SMD}
   \item{\code{"data.name"}}{"Summary Statistics" to denote summary statistics were utilized to obtain results.}
   \item{\code{"smd"}}{SMDs input for the function.}
-  \item{\code{"data.name"}}{Sample sizes input for the function.}
+  \item{\code{"sample_sizes"}}{Sample sizes input for the function.}
   \item{\code{"call"}}{the matched call.}
 }
 }

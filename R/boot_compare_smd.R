@@ -14,7 +14,7 @@
 #'   \item{\code{"statistic"}}{z-score}
 #'   \item{\code{"p.value"}}{numeric scalar containing the p-value for the test under the null hypothesis.}
 #'   \item{\code{"estimate"}}{difference in SMD between studies}
-#'   \item{\code{"conf.int}}{percentile (bootstrap) confidence interval for difference in SMDs}
+#'   \item{\code{"conf.int"}}{percentile (bootstrap) confidence interval for difference in SMDs}
 #'   \item{\code{"null.value"}}{the specified hypothesized value for the null hypothesis.}
 #'   \item{\code{"alternative"}}{character string indicating the alternative hypothesis (the value of the input argument alternative). Possible values are "greater", "less", or "two-sided".}
 #'   \item{\code{"method"}}{Type of SMD}
@@ -157,8 +157,12 @@ boot_compare_smd = function(x1,
 
     smd1 = md1/sd1
     smd2 = md2/sd2
-    se1 = se_ds(smd1, nrow(df1))
-    se2 = se_ds(smd2, nrow(df2))
+    n1_1 = nrow(subset(df1, group == "x"))
+    n2_1 = nrow(subset(df1, group == "y"))
+    n1_2 = nrow(subset(df2, group == "x"))
+    n2_2 = nrow(subset(df2, group == "y"))
+    se1 = se_ds(smd1, c(n1_1, n2_1))
+    se2 = se_ds(smd2, c(n1_2, n2_2))
     d_diff = smd1 - smd2
     z_se = sqrt(se1^2+se2^2)
     z_stat = d_diff/z_se
