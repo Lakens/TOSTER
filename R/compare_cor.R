@@ -42,10 +42,10 @@ compare_cor = function(r1,
   pval = p_from_z(z, alternative = alternative)
   names(z) = "z"
   est2 = r1-r2
-  names(est2) = "difference in correlations"
+  names(est2) = "difference between correlations"
   null2 = 0
-  names(null2) = "difference in correlations"
-  meth = "Difference in two independent correlations"
+  names(null2) = "difference between correlations"
+  meth = "Difference between two independent correlations"
   # Store as htest
   rval <- list(statistic = z, p.value = pval,
                #conf.int = cint,
