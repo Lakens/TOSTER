@@ -67,3 +67,20 @@ test_that("compare_smd", {
 
 })
 
+test_that("compare_cor",{
+  # Compare the difference between two correlations based
+  # on two independent groups:
+  r1.jk <- .7  # Correlation between age and intelligence measured in group 1
+  n1 <- 305    # Size of group 1
+
+  r2.hm <- .6  # Correlation between age and intelligence measured in group 2
+  n2 <- 210    # Size of group 2
+  test_cor = compare_cor(r1 = r1.jk, r2 = r2.hm,
+              df1 = n1-2, df2 = n2-2)
+
+  expect_equal(unname(test_cor$statistic),
+               1.93, tolerance = 0.0001)
+  expect_equal(test_cor$p.value,
+               0.0536, tolerance = 0.0001)
+
+})
