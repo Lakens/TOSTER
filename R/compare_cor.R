@@ -18,6 +18,7 @@
 #'   \item{\code{"call"}}{the matched call.}
 #' }
 #' @name compare_cor
+#' @import R6
 #' @export compare_cor
 #'
 

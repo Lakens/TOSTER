@@ -4,7 +4,7 @@
 #' @param n1 sample size(s) from study 1 (can be 1 number or vector of 2 numbers).
 #' @param smd2 SMD from study 2.
 #' @param n2 sample size(s) from study 2 (can be 1 number or vector of 2 numbers).
-#' @param paired a logical indicating whether the SMD is from a paired or independent samples design.
+#' @param paired a logical indicating whether the SMD is from a paired or independent samples design. If a one-sample design, then paired must be set to TRUE.
 #' @param null a number indicating the null hypothesis. For TOST, this would be equivalence bound.
 #' @param alternative a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater" or "less". You can specify just the initial letter.
 #' @param TOST logical indicator (default = FALSE) to perform two one-sided tests of equivalence (TOST). Minimal effects testing not currently available. If specified, alternative is ignored.

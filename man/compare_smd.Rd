@@ -24,7 +24,7 @@ compare_smd(
 
 \item{n2}{sample size(s) from study 2 (can be 1 number or vector of 2 numbers).}
 
-\item{paired}{a logical indicating whether the SMD is from a paired or independent samples design.}
+\item{paired}{a logical indicating whether the SMD is from a paired or independent samples design. If a one-sample design, then paired must be set to TRUE.}
 
 \item{alternative}{a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater" or "less". You can specify just the initial letter.}
 
