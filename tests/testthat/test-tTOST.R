@@ -31,6 +31,9 @@ test_that("Run examples for one sample", {
                  low_eqbound = -.5,
                  high_eqbound = .5)
 
+  test1 = t_TOST(x = samp1,
+                 eqb = .5)
+
   test2 = suppressMessages(t_TOST(x = samp1,
                                 low_eqbound = -.5,
                                 high_eqbound = .5,

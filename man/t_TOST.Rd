@@ -12,6 +12,7 @@ t_TOST(
   hypothesis = "EQU",
   paired = FALSE,
   var.equal = FALSE,
+  eqb,
   low_eqbound,
   high_eqbound,
   eqbound_type = "raw",
@@ -26,6 +27,7 @@ t_TOST(
   hypothesis = "EQU",
   paired = FALSE,
   var.equal = FALSE,
+  eqb,
   low_eqbound,
   high_eqbound,
   eqbound_type = "raw",
@@ -49,9 +51,11 @@ t_TOST(
 
 \item{var.equal}{a logical variable indicating whether to treat the two variances as being equal. If TRUE then the pooled variance is used to estimate the variance otherwise the Welch (or Satterthwaite) approximation to the degrees of freedom is used.}
 
-\item{low_eqbound}{lower equivalence bounds}
+\item{eqb}{Equivalence bound. Can provide 1 value (negative value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds.}
 
-\item{high_eqbound}{upper equivalence bounds}
+\item{low_eqbound}{lower equivalence bounds (deprecated).}
+
+\item{high_eqbound}{upper equivalence bounds (deprecated).}
 
 \item{eqbound_type}{Type of equivalence bound. Can be set to "SMD" for standardized mean difference (i.e., Cohen's d) or  "raw" for the mean difference. Default is "raw". Raw is strongly recommended as SMD bounds will produce biased results.}
 
