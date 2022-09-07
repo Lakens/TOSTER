@@ -5,8 +5,9 @@
 #' @param formula a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.
 #' @param data an optional matrix or data frame (or similar: see model.frame) containing the variables in the formula formula. By default the variables are taken from environment(formula).
 #' @param paired a logical indicating whether you want to calculate a paired test.
-#' @param low_eqbound lower equivalence bounds.
-#' @param high_eqbound upper equivalence bounds.
+#' @param eqb Equivalence bound. Can provide 1 value (negative value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds.
+#' @param low_eqbound Lower equivalence bounds. Deprecated use eqb.
+#' @param high_eqbound Upper equivalence bounds. Deprecated use eqb.
 #' @param hypothesis 'EQU' for equivalence (default), or 'MET' for minimal effects test, the alternative hypothesis.
 #' @param alpha alpha level (default = 0.05)
 #' @param mu  number indicating the value around which (a-)symmetry (for
@@ -39,6 +40,7 @@
 wilcox_TOST <- function(x, ...,
                    hypothesis = "EQU",
                    paired = FALSE,
+                   eqb,
                    low_eqbound,
                    high_eqbound,
                    alpha = 0.05){
@@ -55,6 +57,7 @@ wilcox_TOST.default = function(x,
                           y = NULL,
                           hypothesis = "EQU",
                           paired = FALSE,
+                          eqb,
                           low_eqbound,
                           high_eqbound,
                           alpha = 0.05,
@@ -68,6 +71,8 @@ wilcox_TOST.default = function(x,
   } else {
     sample_type = "Two Sample"
   }
+
+
 
   # temporary until other effect size calculations available.
 
@@ -88,9 +93,24 @@ wilcox_TOST.default = function(x,
     stop("hypothesis must be set to EQU or MET")
   }
 
-  if(missing(low_eqbound) ||
-     missing(high_eqbound)){
+  if(missing(eqb) && (missing(low_eqbound) ||
+                      missing(high_eqbound))){
     stop("Equivalence bounds missing and must be enterered")
+  }
+
+  if(!missing(eqb)){
+    if(!is.numeric(eqb) || length(eqb) > 2){
+      stop(
+        "eqb must be a numeric of a length of 1 or 2"
+      )
+    }
+    if(length(eqb) == 1){
+      high_eqbound = abs(eqb)
+      low_eqbound = -1*abs(eqb)
+    } else {
+      high_eqbound = max(eqb)
+      low_eqbound = min(eqb)
+    }
   }
 
   if(!is.numeric(alpha) || alpha <=0 || alpha >=1){

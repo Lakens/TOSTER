@@ -34,9 +34,12 @@ test_that("Run examples for one sample", {
   test1 = t_TOST(x = samp1,
                  eqb = .5)
 
+  test1 = t_TOST(x = samp1,
+                 eqb = c(-.5,.5))
+
   test2 = suppressMessages(t_TOST(x = samp1,
-                                low_eqbound = -.5,
-                                high_eqbound = .5,
+                                #low_eqbound = -.5,
+                                eqb = .5,
                                 eqbound_type = "SMD"))
 
   test3 = t_TOST(x = samp1,
@@ -45,8 +48,8 @@ test_that("Run examples for one sample", {
                  hypothesis = "MET")
 
   test4 = suppressMessages( { t_TOST(x = samp1,
-                                   low_eqbound = -.5,
-                                   high_eqbound = .5,
+                                   #low_eqbound = -.5,
+                                   eqb = .5,
                                    eqbound_type = "SMD",
                                    hypothesis = "MET")})
 

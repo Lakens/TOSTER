@@ -3,8 +3,9 @@
 #' @param n number of observations per group. 2 sample sizes, in a vector, can be provided for the two sample case.
 #' @param delta true difference in means (default is 0)
 #' @param sd population standard deviation. Standard deviation of the differences for paired samples
-#' @param low_eqbound The lower equivalence bound (raw units)
-#' @param high_eqbound The upper equivalence bound (raw units)
+#' @param eqb Equivalence bound. Can provide 1 value (negative value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds.
+#' @param low_eqbound Lower equivalence bounds. Deprecated use eqb.
+#' @param high_eqbound Upper equivalence bounds. Deprecated use eqb.
 #' @param alpha a priori alpha-level (i.e., significance level)
 #' @param power power of the TOST procedure (1-beta)
 #' @param type string specifying the type of t-test.
@@ -24,12 +25,27 @@ power_t_TOST <- function(
   n = NULL,
   delta = 0,
   sd = 1,
+  eqb,
   low_eqbound = NULL,
   high_eqbound = NULL,
   alpha = NULL,
   power = NULL,
   type = "two.sample"
 ){
+  if(!missing(eqb)){
+    if(!is.numeric(eqb) || length(eqb) > 2){
+      stop(
+        "eqb must be a numeric of a length of 1 or 2"
+      )
+    }
+    if(length(eqb) == 1){
+      high_eqbound = abs(eqb)
+      low_eqbound = -1*abs(eqb)
+    } else {
+      high_eqbound = max(eqb)
+      low_eqbound = min(eqb)
+    }
+  }
   if(is.null(low_eqbound) || is.null(high_eqbound)){
     stop("Equivalence bounds must be provided (low_eqbound and high_eqbound)")
   }

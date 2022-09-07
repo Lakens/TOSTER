@@ -15,6 +15,7 @@ tsum_TOST(
   hypothesis = "EQU",
   paired = FALSE,
   var.equal = FALSE,
+  eqb,
   low_eqbound,
   high_eqbound,
   mu = 0,
@@ -41,9 +42,11 @@ tsum_TOST(
 
 \item{hypothesis}{'EQU' for equivalence (default), or 'MET' for minimal effects test, the alternative hypothesis.}
 
-\item{paired}{a logical indicating whether you want a paired t-test.}
+\item{paired}{a logical indicating whether you want a paired t-test.#'}
 
 \item{var.equal}{a logical variable indicating whether to treat the two variances as being equal. If TRUE then the pooled variance is used to estimate the variance otherwise the Welch (or Satterthwaite) approximation to the degrees of freedom is used.}
+
+\item{eqb}{Equivalence bound. Can provide 1 value (negative value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds.}
 
 \item{low_eqbound}{lower equivalence bounds}
 
