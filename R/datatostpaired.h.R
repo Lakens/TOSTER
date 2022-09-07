@@ -377,7 +377,7 @@ dataTOSTpairedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' TOST Paired Samples T-Test
 #'
 #' TOST Paired Samples T-Test in jamovi. This function is not meant to be 
-#' utilized in R.
+#' utilized in R. See t_TOST function.
 #'
 #' @examples
 #' \dontrun{
