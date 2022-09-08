@@ -84,13 +84,13 @@ as_htest = function(result.object) {
     ifelse(grepl("Lower", which_row), "lower", "upper")
 
   if (alt_bound == "lower" &&
-      grepl(result.object$hypothesis, "Equivalence")) {
+      grepl("equ|Equ",result.object$hypothesis)) {
     alt_text = "greater"
   } else if (alt_bound == "lower" &&
-             !grepl(result.object$hypothesis, "Equivalence")) {
+             !grepl("equ|Equ",result.object$hypothesis)) {
     alt_text = "less"
   } else if (alt_bound != "lower" &&
-             !grepl(result.object$hypothesis, "Equivalence")) {
+             !grepl("equ|Equ",result.object$hypothesis)) {
     alt_text = "greater"
   } else {
     alt_text = "less"
