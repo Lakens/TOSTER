@@ -120,6 +120,14 @@ t_TOST.default = function(x,
     stop("The alpha must be a numeric value between 0 and 1")
   }
 
+  if (!is.null(y)) {
+    dname <- paste(deparse(substitute(x)), "and",
+                   deparse(substitute(y)))
+  }
+  else {
+    dname <- deparse(substitute(x))
+  }
+
 
   tresult = t.test(x = x,
                    y = y,
@@ -390,7 +398,9 @@ t_TOST.default = function(x,
     hypothesis = test_hypothesis,
     effsize = effsize,
     smd = cohen_res,
-    decision = decision
+    decision = decision,
+    data.name = dname,
+    call = match.call()
   )
 
   class(rval) = "TOSTt"
@@ -427,7 +437,7 @@ t_TOST.formula = function(formula,
     stop("grouping factor must have exactly 2 levels")
   DATA <- setNames(split(mf[[response]], g), c("x", "y"))
   y <- do.call("t_TOST", c(DATA, list(...)))
-
+  y$data.name <- DNAME
   y
 
 }

@@ -86,6 +86,14 @@ boot_t_TOST.default <- function(x,
     }
   }
 
+  if (!is.null(y)) {
+    dname <- paste(deparse(substitute(x)), "and",
+                   deparse(substitute(y)))
+  }
+  else {
+    dname <- deparse(substitute(x))
+  }
+
   if(!is.null(y)){
     nullTOST = t_TOST(x = x,
                       y = y,
@@ -474,7 +482,9 @@ boot_t_TOST.default <- function(x,
     smd = nullTOST$smd,
     decision = decision,
     boot = list(SMD = d_vec,
-                raw = m_vec)
+                raw = m_vec),
+    data.name = dname,
+    call = match.call()
   )
 
   class(rval) = "TOSTt"
@@ -506,6 +516,6 @@ boot_t_TOST.formula <- function (formula, data, subset, na.action, ...){
     stop("grouping factor must have exactly 2 levels")
   DATA <- setNames(split(mf[[response]], g), c("x", "y"))
   y <- do.call("boot_t_TOST", c(DATA, list(...)))
-
+  y$data.name <- DNAME
   y
 }

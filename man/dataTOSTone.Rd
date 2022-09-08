@@ -70,7 +70,7 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 }
 \description{
 TOST One Sample T-Test in jamovi. This function is not meant to be utilized 
-in R.
+in R. See t_TOST function.
 }
 \examples{
 library("TOSTER")

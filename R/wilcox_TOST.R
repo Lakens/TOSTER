@@ -72,6 +72,13 @@ wilcox_TOST.default = function(x,
     sample_type = "Two Sample"
   }
 
+  if (!is.null(y)) {
+    dname <- paste(deparse(substitute(x)), "and",
+                   deparse(substitute(y)))
+  }
+  else {
+    dname <- deparse(substitute(x))
+  }
 
 
   # temporary until other effect size calculations available.
@@ -286,7 +293,9 @@ wilcox_TOST.default = function(x,
     hypothesis = test_hypothesis,
     effsize = effsize,
     seff = rbs_val,
-    decision = decision
+    decision = decision,
+    data.name = dname,
+    call = match.call()
   )
 
   class(rval) = "TOSTnp"
@@ -323,7 +332,7 @@ wilcox_TOST.formula = function(formula,
     stop("grouping factor must have exactly 2 levels")
   DATA <- setNames(split(mf[[response]], g), c("x", "y"))
   y <- do.call("wilcox_TOST", c(DATA, list(...)))
-
+  y$data.name <- DNAME
   y
 
 }

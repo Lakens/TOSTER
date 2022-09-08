@@ -81,7 +81,7 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 }
 \description{
 TOST Paired Samples T-Test in jamovi. This function is not meant to be 
-utilized in R.
+utilized in R. See t_TOST function.
 }
 \section{References}{
 
