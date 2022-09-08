@@ -31,6 +31,16 @@ setGeneric("as.htest", function(result.object) standardGeneric("as.htest"))
 setMethod("as.htest", "TOST",
           function(result.object) {
 
+            estimate <- switch(
+              class(result.object),
+              TOSTt = result.object$TOST[c("t-test"),]$t,
+              TOSTnp = c(
+                r.jk = result.object@r.jk,
+                r.jh = result.object@r.jh,
+                r.kh = result.object@r.kh
+              )
+            )
+
             conf.int <- test.object$conf.int
             if (!is.null(conf.int))
               attr(conf.int, "conf.level") <- result.object@conf.level
