@@ -127,8 +127,8 @@ t_TOST.default = function(x,
                    alternative = "two.sided")
 
   if(paired == TRUE && !missing(y)){
-    i1 <- y
-    i2 <- x
+    i1 <- x
+    i2 <- y
     data <- data.frame(i1 = i1, i2 = i2)
     data <- na.omit(data)
     colnames(data) = c("i1", "i2")

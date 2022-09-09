@@ -3,6 +3,11 @@ NEWS
 
 **TOSTER R package and jamovi module**
 
+# TOSTER v0.4.2
+
+- Fix to Cohen's drm calculation
+
+
 # TOSTER v0.4.1
 
 - jmv removed as dependency
