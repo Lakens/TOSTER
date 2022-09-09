@@ -15,3 +15,4 @@ build/R
 build/js
 NUL
 .DS_Store
+cran-comments.md
