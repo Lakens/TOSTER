@@ -19,3 +19,4 @@ build/R
 build/js
 NUL
 ^cran-comments\.md$
+^CRAN-SUBMISSION$
