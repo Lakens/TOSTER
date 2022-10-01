@@ -23,7 +23,8 @@ Imports:
     distributional,
     cowplot,
     tidyr,
-    utils
+    utils,
+    R6
 Suggests:
     knitr,
     rmarkdown,
