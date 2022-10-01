@@ -6,7 +6,7 @@ version: "1.0.0"
 menuGroup: TOSTER
 
 description:
-    main: TOST Independent Samples T-Test
+    main: TOST Independent Samples T-Test for jamovi. This function is not meant to be utilized in R. See t_TOST function.
     R:
         dontrun: false
         usage: |

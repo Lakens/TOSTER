@@ -133,8 +133,7 @@ theme_tidybayes() +
 
 ## -----------------------------------------------------------------------------
 data('sleep')
-library(jmv)
-data('bugs')
+data('iris')
 
 ## -----------------------------------------------------------------------------
 head(sleep)
@@ -173,16 +172,16 @@ res2 = t_TOST(formula = extra ~ group,
 res2
 
 ## -----------------------------------------------------------------------------
-res3 = t_TOST(x = bugs$LDHF,
-              y = bugs$LDLF,
+res3 = t_TOST(x = iris$Sepal.Length,
+              y = iris$Sepal.Width,
               paired = TRUE,
               low_eqbound = -1,
               high_eqbound = 1)
 res3
 
 ## -----------------------------------------------------------------------------
-res3a = t_TOST(x = bugs$LDHF,
-               y = bugs$LDLF,
+res3a = t_TOST(x = iris$Sepal.Length,
+              y = iris$Sepal.Width,
                paired = TRUE,
                hypothesis = "MET",
                low_eqbound = -1,
@@ -193,7 +192,7 @@ res3a
 plot(res3a)
 
 ## -----------------------------------------------------------------------------
-res4 = t_TOST(x = bugs$LDHF,
+res4 = t_TOST(x = iris$Sepal.Length,
               hypothesis = "EQU",
               low_eqbound = 5.5,
               high_eqbound = 8.5)
@@ -204,9 +203,9 @@ plot(res4)
 
 ## -----------------------------------------------------------------------------
 res_tsum = tsum_TOST(
-  m1 = mean(bugs$LDHF, na.rm=TRUE),
-  sd1 = sd(bugs$LDHF, na.rm=TRUE),
-  n1 = length(na.omit(bugs$LDHF)),
+  m1 = mean(iris$Sepal.Length, na.rm=TRUE),
+  sd1 = sd(iris$Sepal.Length, na.rm=TRUE),
+  n1 = length(na.omit(iris$Sepal.Length)),
   hypothesis = "EQU",
   low_eqbound = 5.5,
   high_eqbound = 8.5

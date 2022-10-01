@@ -56,5 +56,6 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$tost)}
 }
 \description{
-TOST Two Proportions
+TOST Two Proportions for jamovi. This function is not meant to be utilized 
+in R.
 }

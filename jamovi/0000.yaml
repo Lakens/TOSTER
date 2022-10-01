@@ -19,29 +19,41 @@ analyses:
     ns: TOSTER
     menuGroup: TOSTER
     menuTitle: TOST Independent Samples T-Test
-    description: TOST Independent Samples T-Test
+    description: >-
+      TOST Independent Samples T-Test for jamovi. This function is not meant to
+      be utilized in R.
   - title: TOST Paired Samples T-Test
     name: dataTOSTpaired
     ns: TOSTER
     menuGroup: TOSTER
     menuTitle: TOST Paired Samples T-Test
-    description: TOST Paired Samples T-Test
+    description: >-
+      TOST Paired Samples T-Test in jamovi. This function is not meant to be
+      utilized in R.
   - title: TOST One Sample T-Test
     name: dataTOSTone
     ns: TOSTER
     menuGroup: TOSTER
     menuTitle: TOST One Sample T-Test
-    description: TOST One Sample T-Test
+    description: >-
+      TOST One Sample T-Test in jamovi. This function is not meant to be
+      utilized in R.
   - title: TOST Correlation
     name: dataTOSTr
     ns: TOSTER
     menuGroup: TOSTER
     menuTitle: TOST Correlation
+    description: >-
+      TOST for correlations in jamovi. This function is not meant to be utilized
+      in R.
   - title: TOST Two Proportions
     name: datatosttwoprop
     ns: TOSTER
     menuGroup: TOSTER
     menuTitle: TOST Two Proportions
+    description: >-
+      TOST Two Proportions for jamovi. This function is not meant to be utilized
+      in R.
 usesNative: true
 minApp: 1.0.8
 

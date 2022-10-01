@@ -3,6 +3,14 @@ NEWS
 
 **TOSTER R package and jamovi module**
 
+
+# TOSTER v0.5.0
+
+- Added "compare" functions. 
+  - `compare_smd`: Compare 2 SMDs from summary statistics
+  - `boot_compare_smd`: Compare 2 SMDs from raw data
+  - `compare_cor`: Compare 2 independent correlations
+
 # TOSTER v0.4.2
 
 - Fix to Cohen's drm calculation

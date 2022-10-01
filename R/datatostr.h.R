@@ -255,7 +255,8 @@ dataTOSTrBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
 
 #' TOST Correlation
 #'
-#' 
+#' TOST for correlations in jamovi. This function is not meant to be utilized 
+#' in R.
 #' @param data the data as a data frame
 #' @param pairs a list of vectors of strings naming variables to correlate
 #'   from \code{data}

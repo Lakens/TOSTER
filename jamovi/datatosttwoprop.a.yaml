@@ -4,7 +4,8 @@ title: TOST Two Proportions
 menuGroup: TOSTER
 version: '1.0.0'
 jas: '1.2'
-
+description:
+    main: TOST Two Proportions for jamovi. This function is not meant to be utilized in R.
 options:
     - name: data
       type: Data

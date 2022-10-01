@@ -81,7 +81,8 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$tost)}
 }
 \description{
-TOST Independent Samples T-Test
+TOST Independent Samples T-Test for jamovi. This function is not meant to 
+be utilized in R.
 }
 \section{References}{
 
