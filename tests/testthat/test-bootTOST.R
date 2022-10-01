@@ -24,7 +24,7 @@ test_that("Run examples for one sample", {
                            high_eqbound = .5,
                            alpha = 1.22,
                            R = 99))
-  expect_error(boot_t_TOST(Sepal.Width ~ species, data = iris))
+  expect_error(boot_t_TOST(Sepal.Width ~ Species, data = iris))
 
   # Normal one sample ----
 

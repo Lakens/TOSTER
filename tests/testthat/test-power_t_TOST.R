@@ -23,6 +23,14 @@ test_that("PASS ex#1 pg 460-8", {
     n = 3,
     delta = -4,
     sd = 18,
+    eqb = c(-19.2,19.2),
+    alpha = 0.05,
+    type = "two.sample"
+  )
+  t1 = power_t_TOST(
+    n = 3,
+    delta = -4,
+    sd = 18,
     low_eqbound = -19.2,
     high_eqbound = 19.2,
     alpha = 0.05,

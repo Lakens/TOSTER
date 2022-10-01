@@ -97,9 +97,12 @@ test_that("Run examples for paired samples", {
   expect_error(wilcox_TOST(x = samp1,
                       eqb = c(-1,1,.5)))
   expect_error(wilcox_TOST(x = samp1,
+                           eqb = c(-1,1),
+                           alpha= 1.22))
+  expect_error(wilcox_TOST(x = samp1,
                            eqb = 1,
                            hypothesis = "DDDDD"))
-  expect_error(wilcox_TOST(Sepal.Width ~ species, data = iris))
+  expect_error(wilcox_TOST(Sepal.Width ~ Species, data = iris))
   samp2 = rnorm(25)
 
   cor12 = stats::cor(samp1,samp2)
@@ -115,6 +118,14 @@ test_that("Run examples for paired samples", {
                  paired = TRUE,
                  low_eqbound = -.5,
                  high_eqbound = .5)
+  test1 = wilcox_TOST(x = samp1,
+                      y = samp2,
+                      paired = TRUE,
+                      eqb = c(-.5, .5))
+  test1 = wilcox_TOST(x = samp1,
+                      y = samp2,
+                      paired = TRUE,
+                      eqb =  .5)
 
   test3 = wilcox_TOST(x = samp1,
                  y = samp2,

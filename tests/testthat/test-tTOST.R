@@ -30,7 +30,7 @@ test_that("Run examples for one sample", {
                      low_eqbound = -.5,
                      high_eqbound = .5,
                      alpha = 1.22))
-  expect_error(t_TOST(Sepal.Width ~ species, data = iris))
+  expect_error(t_TOST(Sepal.Width ~ Species, data = iris))
   # Normal one sample ----
 
   test1 = t_TOST(x = samp1,
