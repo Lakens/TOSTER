@@ -21,7 +21,7 @@ analyses:
     menuTitle: TOST Independent Samples T-Test
     description: >-
       TOST Independent Samples T-Test for jamovi. This function is not meant to
-      be utilized in R.
+      be utilized in R. See t_TOST function.
   - title: TOST Paired Samples T-Test
     name: dataTOSTpaired
     ns: TOSTER
@@ -29,7 +29,7 @@ analyses:
     menuTitle: TOST Paired Samples T-Test
     description: >-
       TOST Paired Samples T-Test in jamovi. This function is not meant to be
-      utilized in R.
+      utilized in R. See t_TOST function.
   - title: TOST One Sample T-Test
     name: dataTOSTone
     ns: TOSTER
@@ -37,7 +37,7 @@ analyses:
     menuTitle: TOST One Sample T-Test
     description: >-
       TOST One Sample T-Test in jamovi. This function is not meant to be
-      utilized in R.
+      utilized in R. See t_TOST function.
   - title: TOST Correlation
     name: dataTOSTr
     ns: TOSTER

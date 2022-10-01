@@ -11,6 +11,7 @@ wilcox_TOST(
   ...,
   hypothesis = "EQU",
   paired = FALSE,
+  eqb,
   low_eqbound,
   high_eqbound,
   alpha = 0.05
@@ -21,6 +22,7 @@ wilcox_TOST(
   y = NULL,
   hypothesis = "EQU",
   paired = FALSE,
+  eqb,
   low_eqbound,
   high_eqbound,
   alpha = 0.05,
@@ -39,9 +41,11 @@ wilcox_TOST(
 
 \item{paired}{a logical indicating whether you want to calculate a paired test.}
 
-\item{low_eqbound}{lower equivalence bounds.}
+\item{eqb}{Equivalence bound. Can provide 1 value (negative value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds.}
 
-\item{high_eqbound}{upper equivalence bounds.}
+\item{low_eqbound}{Lower equivalence bounds. Deprecated use eqb.}
+
+\item{high_eqbound}{Upper equivalence bounds. Deprecated use eqb.}
 
 \item{alpha}{alpha level (default = 0.05)}
 

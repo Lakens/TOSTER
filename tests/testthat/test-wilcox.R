@@ -20,13 +20,13 @@ test_that("Run examples for one sample", {
   test1 = wilcox_TOST(x = samp1,
                  low_eqbound = -.5,
                  high_eqbound = .5)
-
+  ash = as_htest(test1)
 
   test3 = wilcox_TOST(x = samp1,
                  low_eqbound = -.5,
                  high_eqbound = .5,
                  hypothesis = "MET")
-
+  ash = as_htest(test3)
 
   expect_equal(1-test1$TOST$p.value[2],
                test3$TOST$p.value[2],
@@ -57,14 +57,14 @@ test_that("Run examples for two sample", {
                  y = samp2,
                  low_eqbound = -.5,
                  high_eqbound = .5)
-
+  ash = as_htest(test1)
 
   test3 = wilcox_TOST(x = samp1,
                  y = samp2,
                  low_eqbound = -.5,
                  high_eqbound = .5,
                  hypothesis = "MET")
-
+  ash = as_htest(test3)
   test1 = wilcox_TOST(formula = y ~ group,
                       data = df_samp,
                       low_eqbound = -.5,
@@ -94,6 +94,15 @@ test_that("Run examples for paired samples", {
   set.seed(789461245)
 
   samp1 = rnorm(25)
+  expect_error(wilcox_TOST(x = samp1,
+                      eqb = c(-1,1,.5)))
+  expect_error(wilcox_TOST(x = samp1,
+                           eqb = c(-1,1),
+                           alpha= 1.22))
+  expect_error(wilcox_TOST(x = samp1,
+                           eqb = 1,
+                           hypothesis = "DDDDD"))
+  expect_error(wilcox_TOST(Sepal.Width ~ Species, data = iris))
   samp2 = rnorm(25)
 
   cor12 = stats::cor(samp1,samp2)
@@ -109,6 +118,14 @@ test_that("Run examples for paired samples", {
                  paired = TRUE,
                  low_eqbound = -.5,
                  high_eqbound = .5)
+  test1 = wilcox_TOST(x = samp1,
+                      y = samp2,
+                      paired = TRUE,
+                      eqb = c(-.5, .5))
+  test1 = wilcox_TOST(x = samp1,
+                      y = samp2,
+                      paired = TRUE,
+                      eqb =  .5)
 
   test3 = wilcox_TOST(x = samp1,
                  y = samp2,

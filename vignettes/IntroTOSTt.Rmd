@@ -174,13 +174,11 @@ We will assume the data are independent, and that we have equivalence bounds of 
 ```{r}
 res1 = t_TOST(formula = extra ~ group,
               data = sleep,
-              low_eqbound = -.5,
-              high_eqbound = .5)
+              eqb = .5)
 
 res1a = t_TOST(x = subset(sleep,group==1)$extra,
                y = subset(sleep,group==2)$extra,
-               low_eqbound = -.5,
-               high_eqbound = .5)
+               eqb = .5)
 ```
 
 Once the function has run, we can print the results with the `print` command. This provides a verbose summary of the results.
@@ -217,8 +215,7 @@ To perform a paired samples TOST, the process does not change much. We could pro
 res2 = t_TOST(formula = extra ~ group,
               data = sleep,
               paired = TRUE,
-              low_eqbound = -.5,
-              high_eqbound = .5)
+              eqb = .5)
 res2
 ```
 
@@ -228,8 +225,7 @@ However, we may have two vectors of data that are paired. So instead we may want
 res3 = t_TOST(x = iris$Sepal.Length,
               y = iris$Sepal.Width,
               paired = TRUE,
-              low_eqbound = -1,
-              high_eqbound = 1)
+              eqb = 1)
 res3
 ```
 
@@ -240,8 +236,7 @@ res3a = t_TOST(x = iris$Sepal.Length,
               y = iris$Sepal.Width,
                paired = TRUE,
                hypothesis = "MET",
-               low_eqbound = -1,
-               high_eqbound = 1)
+               eqb = 1)
 res3a
 ```
 
@@ -258,8 +253,7 @@ In other cases we may just have a one sample test. If that is the case all we ha
 ```{r}
 res4 = t_TOST(x = iris$Sepal.Length,
               hypothesis = "EQU",
-              low_eqbound = 5.5,
-              high_eqbound = 8.5)
+              eqb = c(5.5,8.5))
 res4
 ```
 
@@ -285,8 +279,7 @@ res_tsum = tsum_TOST(
   sd1 = sd(iris$Sepal.Length, na.rm=TRUE),
   n1 = length(na.omit(iris$Sepal.Length)),
   hypothesis = "EQU",
-  low_eqbound = 5.5,
-  high_eqbound = 8.5
+  eqb = c(5.5,8.5)
 )
 
 res_tsum
@@ -308,8 +301,7 @@ As an example, let's say we are looking at an equivalence study where we assume 
 power_t_TOST(n = NULL,
   delta = 1,
   sd = 2.5,
-  low_eqbound = -2.5,
-  high_eqbound = 2.5,
+  eqb = 2.5,
   alpha = .025,
   power = .95,
   type = "two.sample")

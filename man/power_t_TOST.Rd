@@ -8,6 +8,7 @@ power_t_TOST(
   n = NULL,
   delta = 0,
   sd = 1,
+  eqb,
   low_eqbound = NULL,
   high_eqbound = NULL,
   alpha = NULL,
@@ -22,9 +23,11 @@ power_t_TOST(
 
 \item{sd}{population standard deviation. Standard deviation of the differences for paired samples}
 
-\item{low_eqbound}{The lower equivalence bound (raw units)}
+\item{eqb}{Equivalence bound. Can provide 1 value (negative value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds.}
 
-\item{high_eqbound}{The upper equivalence bound (raw units)}
+\item{low_eqbound}{Lower equivalence bounds. Deprecated use eqb.}
+
+\item{high_eqbound}{Upper equivalence bounds. Deprecated use eqb.}
 
 \item{alpha}{a priori alpha-level (i.e., significance level)}
 

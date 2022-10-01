@@ -141,13 +141,11 @@ head(sleep)
 ## -----------------------------------------------------------------------------
 res1 = t_TOST(formula = extra ~ group,
               data = sleep,
-              low_eqbound = -.5,
-              high_eqbound = .5)
+              eqb = .5)
 
 res1a = t_TOST(x = subset(sleep,group==1)$extra,
                y = subset(sleep,group==2)$extra,
-               low_eqbound = -.5,
-               high_eqbound = .5)
+               eqb = .5)
 
 ## -----------------------------------------------------------------------------
 print(res1)
@@ -167,16 +165,14 @@ plot(res1, type = "c",
 res2 = t_TOST(formula = extra ~ group,
               data = sleep,
               paired = TRUE,
-              low_eqbound = -.5,
-              high_eqbound = .5)
+              eqb = .5)
 res2
 
 ## -----------------------------------------------------------------------------
 res3 = t_TOST(x = iris$Sepal.Length,
               y = iris$Sepal.Width,
               paired = TRUE,
-              low_eqbound = -1,
-              high_eqbound = 1)
+              eqb = 1)
 res3
 
 ## -----------------------------------------------------------------------------
@@ -184,8 +180,7 @@ res3a = t_TOST(x = iris$Sepal.Length,
               y = iris$Sepal.Width,
                paired = TRUE,
                hypothesis = "MET",
-               low_eqbound = -1,
-               high_eqbound = 1)
+               eqb = 1)
 res3a
 
 ## ----fig.width=6, fig.height=6------------------------------------------------
@@ -194,8 +189,7 @@ plot(res3a)
 ## -----------------------------------------------------------------------------
 res4 = t_TOST(x = iris$Sepal.Length,
               hypothesis = "EQU",
-              low_eqbound = 5.5,
-              high_eqbound = 8.5)
+              eqb = c(5.5,8.5))
 res4
 
 ## ----fig.width=6, fig.height=6------------------------------------------------
@@ -207,8 +201,7 @@ res_tsum = tsum_TOST(
   sd1 = sd(iris$Sepal.Length, na.rm=TRUE),
   n1 = length(na.omit(iris$Sepal.Length)),
   hypothesis = "EQU",
-  low_eqbound = 5.5,
-  high_eqbound = 8.5
+  eqb = c(5.5,8.5)
 )
 
 res_tsum
@@ -220,8 +213,7 @@ plot(res_tsum)
 power_t_TOST(n = NULL,
   delta = 1,
   sd = 2.5,
-  low_eqbound = -2.5,
-  high_eqbound = 2.5,
+  eqb = 2.5,
   alpha = .025,
   power = .95,
   type = "two.sample")

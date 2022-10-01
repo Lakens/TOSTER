@@ -7,7 +7,8 @@
 #' @param n1 sample size in group 1
 #' @param n2 sample size in group 2
 #' @param r12 correlation of dependent variable between group 1 and group 2
-#' @param paired a logical indicating whether you want a paired t-test.
+#' @param paired a logical indicating whether you want a paired t-test.#'
+#' @param eqb Equivalence bound. Can provide 1 value (negative value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds.
 #' @param var.equal  a logical variable indicating whether to treat the two variances as being equal. If TRUE then the pooled variance is used to estimate the variance otherwise the Welch (or Satterthwaite) approximation to the degrees of freedom is used.
 #' @param low_eqbound lower equivalence bounds
 #' @param high_eqbound upper equivalence bounds
@@ -44,6 +45,7 @@ tsum_TOST <- function(m1,
                       hypothesis = "EQU",
                       paired = FALSE,
                       var.equal = FALSE,
+                      eqb,
                       low_eqbound,
                       high_eqbound,
                       mu = 0,
@@ -99,8 +101,8 @@ tsum_TOST <- function(m1,
     message("Warning: setting bound type to SMD produces biased results!")
   }
 
-  if(missing(low_eqbound) ||
-     missing(high_eqbound)){
+  if(missing(eqb) && (missing(low_eqbound) ||
+                      missing(high_eqbound))){
     stop("Equivalence bounds missing and must be enterered")
   }
 
@@ -154,6 +156,21 @@ tsum_TOST <- function(m1,
       testValue = mu,
       alpha = alpha
     )
+  }
+
+  if(!missing(eqb)){
+    if(!is.numeric(eqb) || length(eqb) > 2){
+      stop(
+        "eqb must be a numeric of a length of 1 or 2"
+      )
+    }
+    if(length(eqb) == 1){
+      high_eqbound = abs(eqb)
+      low_eqbound = -1*abs(eqb)
+    } else {
+      high_eqbound = max(eqb)
+      low_eqbound = min(eqb)
+    }
   }
 
   if (eqbound_type == 'SMD') {
