@@ -4,10 +4,10 @@
 \alias{as_htest}
 \title{Convert to class 'htest'}
 \usage{
-as_htest(result.object)
+as_htest(TOST)
 }
 \arguments{
-\item{result.object}{A TOSTER result object of class 'TOSTt' or 'TOSTnp' to a list of class 'htest.}
+\item{TOST}{A TOSTER result object of class 'TOSTt' or 'TOSTnp'.}
 }
 \value{
 Returns a list containing a list of class 'htest' for the result of each test with the following elements:

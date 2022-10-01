@@ -445,7 +445,8 @@ test_that("Run examples for two sample", {
                  low_eqbound = -.5,
                  high_eqbound = .5,
                  bias_correction = FALSE)
-
+  # test htest
+  ash = as_htest(test1)
   test2 = suppressMessages( t_TOST(formula = y ~ group,
                                  data = df_samp,
                                  var.equal = TRUE,
@@ -453,7 +454,7 @@ test_that("Run examples for two sample", {
                                  high_eqbound = .5,
                                  eqbound_type = "SMD",
                                  bias_correction = FALSE) )
-
+  ash = as_htest(test2)
   test3 = t_TOST(formula = y ~ group,
                  data = df_samp,
                  var.equal = TRUE,
@@ -526,14 +527,14 @@ test_that("Run examples for paired samples", {
                  paired = TRUE,
                  low_eqbound = -.5,
                  high_eqbound = .5)
-
+  ash = as_htest(test1)
   test2 = suppressMessages(  t_TOST(x = samp1,
                                   y = samp2,
                                   paired = TRUE,
                                   low_eqbound = -.5,
                                   high_eqbound = .5,
                                   eqbound_type = "SMD") )
-
+  ash = as_htest(test2)
   test3 = t_TOST(x = samp1,
                  y = samp2,
                  paired = TRUE,

@@ -20,13 +20,13 @@ test_that("Run examples for one sample", {
   test1 = wilcox_TOST(x = samp1,
                  low_eqbound = -.5,
                  high_eqbound = .5)
-
+  ash = as_htest(test1)
 
   test3 = wilcox_TOST(x = samp1,
                  low_eqbound = -.5,
                  high_eqbound = .5,
                  hypothesis = "MET")
-
+  ash = as_htest(test3)
 
   expect_equal(1-test1$TOST$p.value[2],
                test3$TOST$p.value[2],
@@ -57,14 +57,14 @@ test_that("Run examples for two sample", {
                  y = samp2,
                  low_eqbound = -.5,
                  high_eqbound = .5)
-
+  ash = as_htest(test1)
 
   test3 = wilcox_TOST(x = samp1,
                  y = samp2,
                  low_eqbound = -.5,
                  high_eqbound = .5,
                  hypothesis = "MET")
-
+  ash = as_htest(test3)
   test1 = wilcox_TOST(formula = y ~ group,
                       data = df_samp,
                       low_eqbound = -.5,

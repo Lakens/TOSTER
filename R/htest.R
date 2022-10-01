@@ -2,7 +2,7 @@
 #'
 #' Convert a TOSTER result object of class 'TOSTt' or 'TOSTnp' to a list of class 'htest'.
 #'
-#' @param result.object A TOSTER result object of class 'TOSTt' or 'TOSTnp'.
+#' @param TOST A TOSTER result object of class 'TOSTt' or 'TOSTnp'.
 #'
 #' @return Returns a list containing a list of class 'htest' for the result of each test with the following elements:
 #' \item{data.name}{A character string giving the names of the data.}
@@ -23,60 +23,60 @@
 #'
 #' @export
 
-as_htest = function(result.object) {
-  if(!(class(result.object) %in% c("TOSTt", "TOSTnp"))){
+as_htest = function(TOST) {
+  if(!(class(TOST) %in% c("TOSTt", "TOSTnp"))){
     stop("Class cannot be converted to htest with this function.")
   }
 
 
   # get row
 
-  TOSTp = result.object$TOST[2:3, ]
+  TOSTp = TOST$TOST[2:3, ]
   TOSTp = TOSTp[which.max(TOSTp$p.value), ]
 
   # assign
-  statistic <- switch(class(result.object),
+  statistic <- switch(class(TOST),
                       TOSTt = TOSTp$t,
                       TOSTnp = TOSTp$statistic)
-  names(statistic) <- switch(class(result.object),
+  names(statistic) <- switch(class(TOST),
                              TOSTt = "t",
                              TOSTnp = "WMW")
 
-  parameter <- switch(class(result.object),
+  parameter <- switch(class(TOST),
                       TOSTt = TOSTp$df,
                       TOSTnp = NULL)
-  names(parameter) <- switch(class(result.object),
+  names(parameter) <- switch(class(TOST),
                              TOSTt = "df",
                              TOSTnp = NULL)
 
   which_row = rownames(TOSTp)
   which_eqb <- switch(
-    class(result.object),
+    class(TOST),
     TOSTt = ifelse(grepl("Lower", which_row), 2, 3),
     TOSTnp = ifelse(grepl("Lower", which_row), 1, 2)
   )
-  eqb = result.object$eqb
+  eqb = TOST$eqb
 
-  null.value <- switch(class(result.object),
+  null.value <- switch(class(TOST),
                        TOSTt = eqb[1, which_eqb],
                        TOSTnp = eqb[which_eqb])
-  names(null.value) <- switch(class(result.object),
+  names(null.value) <- switch(class(TOST),
                               TOSTt = "mean",
                               TOSTnp = "location shift")
 
-  stderr <- switch(class(result.object),
+  stderr <- switch(class(TOST),
                    TOSTt = TOSTp$SE,
                    TOSTnp = NULL)
 
-  p.value <- switch(class(result.object),
+  p.value <- switch(class(TOST),
                     TOSTt = TOSTp$p.value,
                     TOSTnp = TOSTp$p.value)
 
-  method <- switch(class(result.object),
-                   TOSTt = result.object$method,
-                   TOSTnp = result.object$method)
+  method <- switch(class(TOST),
+                   TOSTt = TOST$method,
+                   TOSTnp = TOST$method)
 
-  alternative <- switch(class(result.object),
+  alternative <- switch(class(TOST),
                         TOSTt = "one.sided",
                         TOSTnp = "one.sided")
 
@@ -84,19 +84,19 @@ as_htest = function(result.object) {
     ifelse(grepl("Lower", which_row), "lower", "upper")
 
   if (alt_bound == "lower" &&
-      grepl("equ|Equ",result.object$hypothesis)) {
+      grepl("equ|Equ",TOST$hypothesis)) {
     alt_text = "greater"
   } else if (alt_bound == "lower" &&
-             !grepl("equ|Equ",result.object$hypothesis)) {
+             !grepl("equ|Equ",TOST$hypothesis)) {
     alt_text = "less"
   } else if (alt_bound != "lower" &&
-             !grepl("equ|Equ",result.object$hypothesis)) {
+             !grepl("equ|Equ",TOST$hypothesis)) {
     alt_text = "greater"
   } else {
     alt_text = "less"
   }
 
-  if (class(result.object) == "TOSTnp") {
+  if (inherits(TOST,"TOSTnp")) {
     htest <- list(
       statistic = statistic,
       parameter = parameter,
@@ -107,16 +107,16 @@ as_htest = function(result.object) {
       data.name = TOST$data.name
     )
   } else {
-    conf.int <- c(result.object$effsize$lower.ci[1],
-                  result.object$effsize$upper.ci[1])
+    conf.int <- c(TOST$effsize$lower.ci[1],
+                  TOST$effsize$upper.ci[1])
     if (!is.null(conf.int)) {
-      attr(conf.int, "conf.level") <- result.object$effsize$conf.level[1]
+      attr(conf.int, "conf.level") <- TOST$effsize$conf.level[1]
     }
-    if (grepl("One", result.object$method)) {
-      estimate <- result.object$effsize$estimate[1]
+    if (grepl("One", TOST$method)) {
+      estimate <- TOST$effsize$estimate[1]
       names(estimate) = "mean of x"
     } else {
-      estimate <- result.object$effsize$estimate[1]
+      estimate <- TOST$effsize$estimate[1]
       names(estimate) = "mean difference"
     }
 
@@ -128,7 +128,7 @@ as_htest = function(result.object) {
       null.value = null.value,
       alternative = alt_text,
       method = method,
-      data.name = result.object$data.name,
+      data.name = TOST$data.name,
       conf.int = conf.int
     )
   }
