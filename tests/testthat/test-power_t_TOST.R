@@ -3,6 +3,22 @@
 
 test_that("PASS ex#1 pg 460-8", {
   # Solve for power
+  expect_error(power_t_TOST(
+    n = 3,
+    delta = -4,
+    sd = 18,
+    eqb = "19",
+    alpha = 0.05,
+    type = "two.sample"
+  ))
+  t1 = power_t_TOST(
+    n = 3,
+    delta = -4,
+    sd = 18,
+    eqb = 19.2,
+    alpha = 0.05,
+    type = "two.sample"
+  )
   t1 = power_t_TOST(
     n = 3,
     delta = -4,

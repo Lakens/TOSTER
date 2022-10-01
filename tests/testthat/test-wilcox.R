@@ -94,6 +94,12 @@ test_that("Run examples for paired samples", {
   set.seed(789461245)
 
   samp1 = rnorm(25)
+  expect_error(wilcox_TOST(x = samp1,
+                      eqb = c(-1,1,.5)))
+  expect_error(wilcox_TOST(x = samp1,
+                           eqb = 1,
+                           hypothesis = "DDDDD"))
+  expect_error(wilcox_TOST(Sepal.Width ~ species, data = iris))
   samp2 = rnorm(25)
 
   cor12 = stats::cor(samp1,samp2)
