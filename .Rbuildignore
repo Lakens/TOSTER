@@ -19,3 +19,6 @@ build/R
 build/js
 NUL
 ^CRAN-RELEASE$
+^cran-comments\.md$
+^CRAN-SUBMISSION$
+

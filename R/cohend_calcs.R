@@ -18,12 +18,12 @@ d_est_pair <- function(n,
   if(denom == "z"){
     d_denom = sdif
   } else if(denom == "rm"){
-    d_denom = sdif * sqrt(2*(1-r12))
+    d_denom =  (sqrt(2*(1-r12)) / sdif)^-1
   }
 
   df <- n-1
 
-  cohend = abs(m2-m1) / d_denom
+  cohend = abs(m1-m2) / d_denom
 
   d_df = 2*(n)-2
   #J <- gamma(df / 2) / (sqrt(df / 2) * gamma((df - 1) / 2))
@@ -68,7 +68,7 @@ d_est_pair <- function(n,
     dhigh <- thigh / d_lambda * cohend
   }
 
-  if (m2-m1 < 0) {
+  if (m1-m2 < 0) {
     cohend <- cohend * -1
     tdlow <- dlow
     dlow <- dhigh * -1

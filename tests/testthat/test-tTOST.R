@@ -913,3 +913,91 @@ test_that("plot generic function",{
 
 
 })
+
+test_that("Ensure paired output correct", {
+
+  test1 = tsum_TOST(n1 = 23,
+                   n2 = 23,
+                   m2 = 14.2,
+                   m1 = 13.8,
+                   sd1 = 1.23,
+                   sd2 = 1.78,
+                   r12 = .41,
+                   low_eqbound = -.5,
+                   high_eqbound = .5,
+                   paired = T,
+                   bias_correction = FALSE,
+                   eqbound_type = "raw",
+                   rm_correction = T)
+
+  expect_equal(sign(test1$effsize$estimate[1]),sign(test1$effsize$estimate[2]))
+  test2 = tsum_TOST(n1 = 23,
+                   n2 = 23,
+                   m1 = 14.2,
+                   m2 = 13.8,
+                   sd2 = 1.23,
+                   sd1 = 1.78,
+                   r12 = .41,
+                   low_eqbound = -.5,
+                   high_eqbound = .5,
+                   paired = T,
+                   bias_correction = FALSE,
+                   eqbound_type = "raw",
+                   rm_correction = T)
+  expect_equal(sign(test2$effsize$estimate[1]),sign(test2$effsize$estimate[2]))
+
+  test3 = t_TOST(extra ~ group, data = sleep,
+         low_eqbound = -.5,
+         high_eqbound = .5,
+         paired = T,
+         bias_correction = FALSE,
+         eqbound_type = "raw",
+         rm_correction = T)
+
+  expect_equal(sign(test3$effsize$estimate[1]),sign(test3$effsize$estimate[2]))
+
+  set.seed(90183560)
+  x1 = rnorm(30)
+  y1 = rnorm(30)
+
+  test4 = t_TOST(x=x1, y=y1,
+                 low_eqbound = -.5,
+                 high_eqbound = .5,
+                 paired = T,
+                 bias_correction = FALSE,
+                 eqbound_type = "raw",
+                 rm_correction = T)
+
+  test5 = t_TOST(x=x1, y=y1,
+                 low_eqbound = -.5,
+                 high_eqbound = .5,
+                 paired = T,
+                 bias_correction = FALSE,
+                 eqbound_type = "raw",
+                 rm_correction = F)
+
+  expect_equal(test4$effsize$estimate[2], .0952,
+               tolerance = .001)
+
+  expect_equal(test5$effsize$estimate[2], .0694,
+               tolerance = .001)
+
+  # mean(x1)
+  # sd(x1)
+  # mean(y1)
+  # sd(y1)
+  # x1: .14 (1.16)
+  # x2: .04 (1.02)
+  # r12 = .06
+
+  test4 = t_TOST(extra ~ group, data = sleep,
+                 low_eqbound = -.5,
+                 high_eqbound = .5,
+                 paired = T,
+                 bias_correction = FALSE,
+                 eqbound_type = "raw",
+                 rm_correction = T)
+  expect_equal(sign(test4$effsize$estimate[1]),sign(test4$effsize$estimate[2]))
+
+
+})
