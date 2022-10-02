@@ -14,6 +14,7 @@ wilcox_TOST(
   eqb,
   low_eqbound,
   high_eqbound,
+  ses = "rb",
   alpha = 0.05
 )
 
@@ -25,6 +26,7 @@ wilcox_TOST(
   eqb,
   low_eqbound,
   high_eqbound,
+  ses = "rb",
   alpha = 0.05,
   mu = 0,
   ...
@@ -46,6 +48,11 @@ wilcox_TOST(
 \item{low_eqbound}{Lower equivalence bounds. Deprecated use eqb.}
 
 \item{high_eqbound}{Upper equivalence bounds. Deprecated use eqb.}
+
+\item{ses}{Standardized effect size. Default is "rb" for rank-biserial
+correlation. Options also include "cstat" for concordance probability, or
+"odds" for Wilcoxon-Mann-Whitney odds (otherwise known as Agresti's
+generalized odds ratio).}
 
 \item{alpha}{alpha level (default = 0.05)}
 

@@ -2,9 +2,13 @@
 % Please edit documentation in R/rbs.R
 \name{rbs}
 \alias{rbs}
-\title{Rank-Biserial Correlation}
+\alias{np_ses}
+\title{Non-parametric standardized effect sizes
+Effect sizes for simple (one or two sample) non-parametric tests.}
 \usage{
 rbs(x, y = NULL, mu = 0, conf.level = 0.95, paired = FALSE)
+
+np_ses(x, y = NULL, mu = 0, conf.level = 0.95, paired = FALSE, ses = "rb")
 }
 \arguments{
 \item{x}{a (non-empty) numeric vector of data values.}
@@ -18,12 +22,15 @@ estimated. See [stats::wilcox.test].}
 \item{conf.level}{confidence level of the interval.}
 
 \item{paired}{a logical indicating whether you want to calculate a paired test.}
+
+\item{ses}{Rank-biserial (rb), odds (odds), and concordance probablity (cstat).}
 }
 \value{
 Returns a list of results including the rank biserial correlation, logical indicator if it was a paired method, setting for mu, and confidence interval.
 }
 \description{
-Rank-Biserial Correlation
+Non-parametric standardized effect sizes
+Effect sizes for simple (one or two sample) non-parametric tests.
 }
 \details{
 This method was adapted from the effectsize R package.
@@ -39,13 +46,17 @@ from `-1` indicating that all values of the second sample are smaller than
 the first sample, to `+1` indicating that all values of the second sample are
 larger than the first sample.
 
+In addition, the rank-biserial correlation can be transformed into a
+concordance probability (i.e., probability of superiority) or into a
+generalized odds (WMW odds or Agresti's generalized odds ratio).
+
 ## Ties
 When tied values occur, they are each given the average of the ranks that
 would have been given had no ties occurred. No other corrections have been
 implemented yet.
 
 # Confidence Intervals
-Confidence intervals for the rank-biserial correlation
+Confidence intervals for the standardized effect sizes
 are estimated using the normal approximation (via Fisher's transformation).
 }
 \references{

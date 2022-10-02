@@ -9,10 +9,15 @@
 #' @param low_eqbound Lower equivalence bounds. Deprecated use eqb.
 #' @param high_eqbound Upper equivalence bounds. Deprecated use eqb.
 #' @param hypothesis 'EQU' for equivalence (default), or 'MET' for minimal effects test, the alternative hypothesis.
+#' @param ses Rank-biserial (rb), odds (odds), and concordance probablity (cstat).
 #' @param alpha alpha level (default = 0.05)
 #' @param mu  number indicating the value around which (a-)symmetry (for
 #'   one-sample or paired samples) or shift (for independent samples) is to be
 #'   estimated. See [stats::wilcox.test].
+#' @param ses Standardized effect size. Default is "rb" for rank-biserial
+#' correlation. Options also include "cstat" for concordance probability, or
+#' "odds" for Wilcoxon-Mann-Whitney odds (otherwise known as Agresti's
+#' generalized odds ratio).
 #' @param subset an optional vector specifying a subset of observations to be used.
 #' @param na.action a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").
 #' @param ...  further arguments to be passed to or from methods.
@@ -43,6 +48,7 @@ wilcox_TOST <- function(x, ...,
                    eqb,
                    low_eqbound,
                    high_eqbound,
+                   ses = "rb",
                    alpha = 0.05){
   UseMethod("wilcox_TOST")
 }
@@ -60,10 +66,12 @@ wilcox_TOST.default = function(x,
                           eqb,
                           low_eqbound,
                           high_eqbound,
+                          ses = c("rb","odds","cstat"),
                           alpha = 0.05,
                           mu = 0,
                           ...) {
 
+  ses = match.arg(ses)
   if(is.null(y)){
     sample_type = "One Sample"
   } else if(paired == TRUE) {
@@ -75,8 +83,7 @@ wilcox_TOST.default = function(x,
   if (!is.null(y)) {
     dname <- paste(deparse(substitute(x)), "and",
                    deparse(substitute(y)))
-  }
-  else {
+  } else {
     dname <- deparse(substitute(x))
   }
 
@@ -134,11 +141,14 @@ wilcox_TOST.default = function(x,
                    conf.level = 1 - alpha*2,
                    alternative = "two.sided")
 
-  rbs_val = rbs(x = x,
-                y = y,
-                paired = paired,
-                mu = mu,
-                conf.level = 1 - alpha * 2)
+  rbs_val = np_ses(
+    x = x,
+    y = y,
+    paired = paired,
+    mu = mu,
+    conf.level = 1 - alpha * 2,
+    ses = ses
+  )
 
   if(hypothesis == "EQU"){
     null_hyp = paste0(round(low_eqbound,2),
@@ -207,14 +217,18 @@ wilcox_TOST.default = function(x,
   } else{
     raw_name = "Median of Differences"
   }
+  ses_name = switch(ses,
+                    "rb" = "Rank-Biserial Correlation",
+                    "odds" = "WMW Odds",
+                    "cstat" = "Concordance")
 
   effsize = data.frame(
     estimate = c(tresult$estimate,
-                 rbs_val$rbs),
+                 rbs_val$est),
     lower.ci = c(tresult$conf.int[1], rbs_val$conf.int[1]),
     upper.ci = c(tresult$conf.int[2], rbs_val$conf.int[2]),
     conf.level = c((1-alpha*2),(1-alpha*2)),
-    row.names = c(raw_name,"rank-biserial correlation")
+    row.names = c(raw_name,ses_name)
   )
   TOSToutcome<-ifelse(pTOST<alpha,"significant","non-significant")
   testoutcome<-ifelse(tresult$p.value<alpha,"significant","non-significant")

@@ -15,6 +15,7 @@
 #' @param bias_correction Apply Hedges' correction for bias (default is TRUE).
 #' @param rm_correction Repeated measures correction to make standardized mean difference Cohen's d(rm). This only applies to repeated/paired samples. Default is FALSE.
 #' @param mu a number indicating the true value of the mean for the two tailed test (or difference in means if you are performing a two sample test).
+#' @param glass A option to calculate Glass's delta as an alternative to Cohen's d type SMD. Default is NULL to not calculate Glass's delta, "glass1" will use the first group's SD as the denominator whereas "glass2" will use the 2nd group's SD.
 #' @param subset an optional vector specifying a subset of observations to be used.
 #' @param na.action a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").
 #' @param ...  further arguments to be passed to or from methods.
@@ -44,7 +45,8 @@ t_TOST <- function(x, ...,
                    eqbound_type = "raw",
                    alpha = 0.05,
                    bias_correction = TRUE,
-                   rm_correction = FALSE){
+                   rm_correction = FALSE,
+                   glass = NULL){
   UseMethod("t_TOST")
 }
 
@@ -67,6 +69,7 @@ t_TOST.default = function(x,
                           mu = 0,
                           bias_correction = TRUE,
                           rm_correction = FALSE,
+                          glass = NULL,
                           ...) {
 
   if(bias_correction){
