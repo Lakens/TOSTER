@@ -78,18 +78,34 @@ t_TOST.default = function(x,
     smd_type = 'd'
   }
 
-  if(rm_correction){
-    denom = "rm"
-  } else {
-    denom = "z"
-  }
-
   if(is.null(y)){
     sample_type = "One Sample"
   } else if(paired == TRUE) {
     sample_type = "Paired Sample"
   } else {
     sample_type = "Two Sample"
+  }
+
+  if(glass == "glass1" || glass == "glass2"){
+    if(glass == "glass1"){
+      denom = "glass1"
+    }
+
+    if(glass == "glass2"){
+      denom = "glass2"
+    }
+  } else{
+    if(sample_type != "Two Sample" ){
+      if(rm_correction){
+        denom = "rm"
+      } else {
+        denom = "z"
+      }
+    } else{
+      denom = "s"
+    }
+
+
   }
 
   if(hypothesis == "EQU"){
@@ -194,7 +210,8 @@ t_TOST.default = function(x,
       sd2 = sd2,
       type = smd_type,
       var.equal = var.equal,
-      alpha = alpha
+      alpha = alpha,
+      denom = denom
     )
 
   } else {
