@@ -241,7 +241,14 @@ d_est_ind <- function(n1,
     tdlow <- dlow
     dlow <- dhigh * -1
     dhigh <- tdlow * -1
-    d_lambda <- cohend * sqrt(ntilde/2)
+    if(var.equal == TRUE && !(denom %in% c("glass1","glass2"))){
+      mult_lamb = sqrt((n1*n2*(sd1^2 + sd2^2))/(2*(n2*sd1^2 + n1*sd2^2)))
+      d_lambda = cohend * mult_lamb
+    } else if(denom %in% c("glass1","glass2")){
+      d_lambda <- cohend * sqrt(ntilde/2)
+    } else {
+      d_lambda <- cohend * sqrt(ntilde/2)
+    }
   }
 
 
