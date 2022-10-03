@@ -18,7 +18,9 @@ t_TOST(
   eqbound_type = "raw",
   alpha = 0.05,
   bias_correction = TRUE,
-  rm_correction = FALSE
+  rm_correction = FALSE,
+  glass = NULL,
+  smd_ci = c("goulet", "nct", "z")
 )
 
 \method{t_TOST}{default}(
@@ -35,6 +37,8 @@ t_TOST(
   mu = 0,
   bias_correction = TRUE,
   rm_correction = FALSE,
+  glass = NULL,
+  smd_ci = c("goulet", "nct", "z"),
   ...
 )
 
@@ -64,6 +68,8 @@ t_TOST(
 \item{bias_correction}{Apply Hedges' correction for bias (default is TRUE).}
 
 \item{rm_correction}{Repeated measures correction to make standardized mean difference Cohen's d(rm). This only applies to repeated/paired samples. Default is FALSE.}
+
+\item{glass}{A option to calculate Glass's delta as an alternative to Cohen's d type SMD. Default is NULL to not calculate Glass's delta, "glass1" will use the first group's SD as the denominator whereas "glass2" will use the 2nd group's SD.}
 
 \item{y}{an optional (non-empty) numeric vector of data values.}
 

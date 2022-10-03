@@ -8,7 +8,14 @@ Effect sizes for simple (one or two sample) non-parametric tests.}
 \usage{
 rbs(x, y = NULL, mu = 0, conf.level = 0.95, paired = FALSE)
 
-np_ses(x, y = NULL, mu = 0, conf.level = 0.95, paired = FALSE, ses = "rb")
+np_ses(
+  x,
+  y = NULL,
+  mu = 0,
+  conf.level = 0.95,
+  paired = FALSE,
+  ses = c("rb", "odds", "cstat")
+)
 }
 \arguments{
 \item{x}{a (non-empty) numeric vector of data values.}

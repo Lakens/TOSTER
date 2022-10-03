@@ -31,10 +31,23 @@ d_curv = function (TOST_res,
   intrvls <- (0:steps)/steps
 
   # Confidence interval of the SMD from Goulet-Pelletier & Cousineau
-  results <- suppressWarnings({lapply(intrvls, FUN = function(i) d_CI(d = TOST_res$smd$d,
-                                                                      df = TOST_res$smd$d_df,
-                                                                      lambda = TOST_res$smd$d_lambda,
-                                                                      1-i))})
+  results <-
+    suppressWarnings({
+      lapply(
+        intrvls,
+        FUN = function(i)
+          TOSTER:::d_CI(
+            d = TOST_res$smd$d,
+            df = TOST_res$smd$d_df,
+            lambda = TOST_res$smd$d_lambda,
+            sigma = TOST_res$smd$d_sigma,
+            t_stat = TOST_res$smd$t_stat,
+            hn = TOST_res$smd$hn,
+            smd_ci = TOST_res$smd$smd_ci,
+            alpha = 1 - i
+          )
+      )
+    })
 
   df <- data.frame(do.call(rbind, results))
   intrvl.limit <- c("lower.limit", "upper.limit")
@@ -58,6 +71,8 @@ d_curv = function (TOST_res,
 d_curv_raw = function (d,
                        df,
                        lambda,
+                       sigma,
+                       smd_ci = "goulet",
                        steps = 5000) {
   intrvls <- (0:steps)/steps
 
@@ -65,7 +80,9 @@ d_curv_raw = function (d,
   results <- suppressWarnings({lapply(intrvls, FUN = function(i) d_CI(d = d,
                                                                       df = df,
                                                                       lambda = lambda,
-                                                                      1-i))})
+                                                                      sigma = sigma,
+                                                                      smd_ci = smd_ci,
+                                                                      alpha = 1-i))})
 
   df <- data.frame(do.call(rbind, results))
   intrvl.limit <- c("lower.limit", "upper.limit")

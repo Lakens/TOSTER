@@ -1016,3 +1016,34 @@ test_that("Ensure paired output correct", {
 
 
 })
+
+test_that("Check NCT CIs",{
+  #effectsize::hedges_g(x=subset(sleep, group ==1)$extra,y=subset(sleep, group ==2)$extra,paired = TRUE, ci = .9)
+  test1 = t_TOST(x=subset(sleep, group ==1)$extra,y=subset(sleep, group ==2)$extra,
+               paired = TRUE,
+               eqb = .5,
+               smd_ci = "nct",
+               bias_correction = T,
+               glass = NULL)
+  expect_equal(test1$effsize$estimate[2],
+               -1.174, tolerance = .001)
+  expect_equal(test1$effsize$lower.ci[2],
+               -1.805, tolerance = .001)
+  expect_equal(test1$effsize$upper.ci[2],
+               -0.4977, tolerance = .001)
+  #effectsize::cohens_d(x=subset(sleep, group ==1)$extra,y=subset(sleep, group ==2)$extra,paired = TRUE, ci = .9)
+
+  test2= t_TOST(x=subset(sleep, group ==1)$extra,y=subset(sleep, group ==2)$extra,
+               paired = TRUE,
+               eqb = .5,
+               smd_ci = "n",
+               bias_correction = F,
+               glass = NULL)
+  plot(test2)
+  expect_equal(test2$effsize$estimate[2],
+               -1.285, tolerance = .001)
+  expect_equal(test2$effsize$lower.ci[2],
+               -1.975, tolerance = .001)
+  expect_equal(test2$effsize$upper.ci[2],
+               -0.545, tolerance = .001)
+})

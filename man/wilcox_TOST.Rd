@@ -26,7 +26,7 @@ wilcox_TOST(
   eqb,
   low_eqbound,
   high_eqbound,
-  ses = "rb",
+  ses = c("rb", "odds", "cstat"),
   alpha = 0.05,
   mu = 0,
   ...

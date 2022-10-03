@@ -16,6 +16,7 @@
 #' @param rm_correction Repeated measures correction to make standardized mean difference Cohen's d(rm). This only applies to repeated/paired samples. Default is FALSE.
 #' @param mu a number indicating the true value of the mean for the two tailed test (or difference in means if you are performing a two sample test).
 #' @param glass A option to calculate Glass's delta as an alternative to Cohen's d type SMD. Default is NULL to not calculate Glass's delta, "glass1" will use the first group's SD as the denominator whereas "glass2" will use the 2nd group's SD.
+#' @param smd_ci Method for calculating SMD confidence intervals. Methods include Goulet, noncentral t (nct), central t (t), and normal method (z).
 #' @param subset an optional vector specifying a subset of observations to be used.
 #' @param na.action a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").
 #' @param ...  further arguments to be passed to or from methods.
@@ -46,7 +47,8 @@ t_TOST <- function(x, ...,
                    alpha = 0.05,
                    bias_correction = TRUE,
                    rm_correction = FALSE,
-                   glass = NULL){
+                   glass = NULL,
+                   smd_ci = c("goulet","nct", "t", "z")){
   UseMethod("t_TOST")
 }
 
@@ -70,7 +72,13 @@ t_TOST.default = function(x,
                           bias_correction = TRUE,
                           rm_correction = FALSE,
                           glass = NULL,
+                          smd_ci = c("goulet","nct", "t", "z"),
                           ...) {
+
+  if(is.null(glass)){
+    glass = "no"
+  }
+  smd_ci = match.arg(smd_ci)
 
   if(bias_correction){
     smd_type = 'g'
@@ -102,10 +110,8 @@ t_TOST.default = function(x,
         denom = "z"
       }
     } else{
-      denom = "s"
+      denom = "d"
     }
-
-
   }
 
   if(hypothesis == "EQU"){
@@ -184,7 +190,8 @@ t_TOST.default = function(x,
       r12 = r12,
       type = smd_type,
       denom = denom,
-      alpha = alpha
+      alpha = alpha,
+      smd_ci = smd_ci
     )
 
   } else if(!missing(y)){
@@ -211,7 +218,8 @@ t_TOST.default = function(x,
       type = smd_type,
       var.equal = var.equal,
       alpha = alpha,
-      denom = denom
+      denom = denom,
+      smd_ci = smd_ci
     )
 
   } else {
@@ -227,7 +235,8 @@ t_TOST.default = function(x,
       sd = sd1,
       type = smd_type,
       testValue = 0,
-      alpha = alpha
+      alpha = alpha,
+      smd_ci = smd_ci
     )
 
   }
