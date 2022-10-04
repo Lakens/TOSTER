@@ -36,7 +36,7 @@ d_curv = function (TOST_res,
       lapply(
         intrvls,
         FUN = function(i)
-          TOSTER:::d_CI(
+          d_CI(
             d = TOST_res$smd$d,
             df = TOST_res$smd$d_df,
             lambda = TOST_res$smd$d_lambda,
@@ -82,6 +82,8 @@ d_curv_raw = function (d,
                                                                       lambda = lambda,
                                                                       sigma = sigma,
                                                                       smd_ci = smd_ci,
+                                                                      t_stat= NULL,
+                                                                      hn = NULL,
                                                                       alpha = 1-i))})
 
   df <- data.frame(do.call(rbind, results))

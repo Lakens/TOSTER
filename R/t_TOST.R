@@ -53,7 +53,7 @@ t_TOST <- function(x, ...,
 }
 
 #' @rdname t_TOST
-#' @importFrom stats sd cor na.omit setNames t.test terms
+#' @importFrom stats sd cor na.omit setNames t.test terms nlm optim optimize
 #' @method t_TOST default
 #' @export
 

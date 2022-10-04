@@ -120,13 +120,13 @@ d_est_pair <- function(n,
   }
 
   if(smd_ci == "t"){
-    dlow <- cohend - qt(1-alpha/2,d_df)*d_sigma
-    dhigh <- cohend + qt(1-alpha/2,d_df)*d_sigma
+    dlow <- cohend - qt(1-alpha,d_df)*d_sigma
+    dhigh <- cohend + qt(1-alpha,d_df)*d_sigma
   }
 
   if(smd_ci == "z"){
-    dlow <- cohend - qnorm(1-alpha/2)*d_sigma
-    dhigh <- cohend + qnorm(1-alpha/2)*d_sigma
+    dlow <- cohend - qnorm(1-alpha)*d_sigma
+    dhigh <- cohend + qnorm(1-alpha)*d_sigma
   }
 
   if (m1-m2 < 0) {
@@ -294,13 +294,13 @@ d_est_ind <- function(n1,
   }
 
   if(smd_ci == "t"){
-    dlow <- cohend - qt(1-alpha/2,d_df)*d_sigma
-    dhigh <- cohend + qt(1-alpha/2,d_df)*d_sigma
+    dlow <- cohend - qt(1-alpha,d_df)*d_sigma
+    dhigh <- cohend + qt(1-alpha,d_df)*d_sigma
   }
 
   if(smd_ci == "z"){
-    dlow <- cohend - qnorm(1-alpha/2)*d_sigma
-    dhigh <- cohend + qnorm(1-alpha/2)*d_sigma
+    dlow <- cohend - qnorm(1-alpha)*d_sigma
+    dhigh <- cohend + qnorm(1-alpha)*d_sigma
   }
 
   if ((m1-m2) < 0) {
@@ -714,3 +714,5 @@ get_ncp_t2 = function (ncp, df, conf.level = 0.95,
               c(Upper.M1, Upper.M2)[Best.Up])
   return(Result)
 }
+
+utils::globalVariables(c("sd1"))

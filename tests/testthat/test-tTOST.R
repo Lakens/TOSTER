@@ -1017,7 +1017,7 @@ test_that("Ensure paired output correct", {
 
 })
 
-test_that("Check NCT CIs",{
+test_that("Check NCT CIs for paired",{
   #effectsize::hedges_g(x=subset(sleep, group ==1)$extra,y=subset(sleep, group ==2)$extra,paired = TRUE, ci = .9)
   test1 = t_TOST(x=subset(sleep, group ==1)$extra,y=subset(sleep, group ==2)$extra,
                paired = TRUE,
@@ -1039,11 +1039,32 @@ test_that("Check NCT CIs",{
                smd_ci = "n",
                bias_correction = F,
                glass = NULL)
-  plot(test2)
+  test_plot = plot(test2)
   expect_equal(test2$effsize$estimate[2],
                -1.285, tolerance = .001)
   expect_equal(test2$effsize$lower.ci[2],
                -1.975, tolerance = .001)
   expect_equal(test2$effsize$upper.ci[2],
                -0.545, tolerance = .001)
+
+  test3 = t_TOST(x=subset(sleep, group ==1)$extra,y=subset(sleep, group ==2)$extra,
+                paired = TRUE,
+                eqb = .5,
+                smd_ci = "t",
+                bias_correction = F,
+                glass = NULL)
+  p3 = plot(test3)
+  test4 = t_TOST(x=subset(sleep, group ==1)$extra,y=subset(sleep, group ==2)$extra,
+                 paired = TRUE,
+                 eqb = .5,
+                 smd_ci = "z",
+                 bias_correction = F,
+                 glass = NULL)
+  p4 = plot(test4)
+  test5 = t_TOST(x=subset(sleep, group ==1)$extra,y=subset(sleep, group ==2)$extra,
+                 paired = TRUE,
+                 eqb = .5,
+                 smd_ci = "g",
+                 bias_correction = F,
+                 glass = "glass1")
 })
