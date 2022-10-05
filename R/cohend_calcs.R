@@ -460,8 +460,8 @@ d_est_one <- function(n,
     sigma = sd1 / sqrt(n)
     t_stat = cohend / sigma
     ts <- get_ncp_t2(t_stat, d_df, conf.level = 1-alpha*2)
-    dlow <- ts[1] * sqrt(hn)
-    dhigh <- ts[2] * sqrt(hn)
+    dlow <- ts[1] * sqrt(hn)*J
+    dhigh <- ts[2] * sqrt(hn)*J
 
   } else {
     t_stat = NULL

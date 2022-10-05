@@ -1194,27 +1194,24 @@ test_that("Check NCT CIs for ind",{
 
 test_that("Check NCT CIs for one",{
   z1=subset(sleep, group ==1)$extra-subset(sleep, group ==2)$extra
-  #effectsize::hedges_g(x=z1,paired = FALSE, ci = .9, pooled_sd =TRUE)
+  #t1=effectsize::hedges_g(x=z1,paired = FALSE, ci = .9, pooled_sd =TRUE)
 
   test1 = t_TOST(x=z1,
                  eqb = .5,
                  smd_ci = "nct",
                  bias_correction = TRUE)
   expect_equal(test1$effsize$estimate[2],
-               -0.7969352, tolerance = .01)
+               -1.173925, tolerance = .01)
   expect_equal(test1$effsize$lower.ci[2],
-               -1.523594, tolerance = .001)
+               -1.804551, tolerance = .001)
   expect_equal(test1$effsize$upper.ci[2],
-               -0.04942503, tolerance = .001)
-  #effectsize::cohens_d(x=subset(sleep, group ==1)$extra,y=subset(sleep, group ==2)$extra,paired = FALSE, ci = .9)
+               -0.4977325, tolerance = .001)
+  #effectsize::cohens_d(x=z1,paired = FALSE, ci = .9)
 
-  test2= t_TOST(x=subset(sleep, group ==1)$extra,y=subset(sleep, group ==2)$extra,
-                paired = FALSE,
-                var.equal=TRUE,
+  test2= t_TOST(x=z1,
                 eqb = .5,
-                smd_ci = "n",
-                bias_correction = FALSE,
-                glass = NULL)
+                smd_ci = "nct",
+                bias_correction = FALSE)
   test_plot = plot(test2)
   expect_equal(test2$effsize$estimate[2],
                -0.8321, tolerance = .001)
