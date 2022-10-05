@@ -186,10 +186,16 @@ d_est_ind <- function(n1,
     denomSD <- sd1
     d_df = n1 -1
     hn <- 1 / n2 + denomSD^2 / (n1 * denomSD^2)
+    n_glass = n1
+    nn_glass = n2
+    sdn_glass = sd2
   } else if (denom == "glass2"){
     denomSD <- sd2
     hn <- 1 / n2 + denomSD^2 / (n1 * denomSD^2)
     d_df = n2 - 1
+    n_glass = n2
+    nn_glass = n1
+    sdn_glass = sd1
   }
 
 
@@ -219,7 +225,6 @@ d_est_ind <- function(n1,
     } else {
       smd_label = "Glass's delta(d)"
     }
-
   } else if(var.equal == TRUE){
     if(type == 'g') {
       cohend <-  cohend * J
@@ -249,11 +254,8 @@ d_est_ind <- function(n1,
 
   # add options for cohend here
   if(smd_ci == "goulet"){
-
-
   #d_sigma = sqrt((n1+n2)/(n1*n2)+(cohend^2/(2*(n1+n2))))
   d_sigma = sqrt((d_df/(d_df-2)) * (2/ntilde) *(1+cohend^2*(ntilde/2)) - cohend^2/J^2)
-
   # Confidence interval of the SMD from Goulet-Pelletier & Cousineau
   tlow <- qt(1 / 2 - (1-alpha*2) / 2, df = d_df, ncp = d_lambda)
   thigh <- qt(1 / 2 + (1-alpha*2) / 2, df = d_df, ncp = d_lambda)
@@ -264,30 +266,44 @@ d_est_ind <- function(n1,
     dlow <- tlow / d_lambda * cohend
     dhigh <- thigh / d_lambda * cohend
   }
-
-  # The function provided by Goulet-Pelletier & Cousineau works with +mdiff.
-  # Now we fix the signs and directions for negative differences
+  } else{
+    if (denom %in% c("glass1", "glass2")) {
+      N = n1 + n2
+      d_sigma = sqrt((1 / ntilde) * ((N - 2) / (N - 4)) * (1 + ntilde *
+                                                             cohend ^ 2) - cohend ^ 2 / J ^ 2)
+    } else {
+      if (var.equal) {
+        d_sigma = sqrt(((n1 + n2) / (n1 * n2) + d ^ 2 / (2 * (n1 + n2))) * J ^ 2)
+      } else{
+        par1 = 2*(sd1^2/n1+sd2^2/n2)/(sd1^2+sd2^2)
+        par2 = d_df/(d_df-2)-J^2
+        d_sigma = sqrt(d_df/(d_df-2)*par1+cohend^2*par2)
+      }
+    }
 
   }
 
   if(smd_ci == "nct"){
-    if(var.equal == TRUE && !(denom %in% c("glass1","glass2"))){
-      d_sigma = denomSD * sqrt(1 / n1 + 1 / n2)
-      t_stat = cohend/d_sigma
-      ts <- get_ncp_t2(t_stat, d_df, conf.level = 1-alpha*2)
-    } else if(denom %in% c("glass1","glass2")){
-      d_sigma = sqrt(sd2 * sqrt(1 / n2 + sd1^2 / (n1 * sd2^2)))
-      t_stat = cohend/d_sigma
+    if( !(denom %in% c("glass1","glass2"))){
+      #d_sigma = denomSD * sqrt(1 / n1 + 1 / n2)
+      if(var.equal){
+        SE1 = denomSD * sqrt(1 / n1 + 1 / n2)
+      } else {
+        se1 <- sqrt(sd1^2 / n1)
+        se2 <- sqrt(sd2^2 / n2)
+        SE1 <- sqrt(se1^2 + se2^2)
+      }
+
+      t_stat = abs(m1-m2)/SE1
       ts <- get_ncp_t2(t_stat, d_df, conf.level = 1-alpha*2)
     } else {
-      se1 <- sqrt(sd1^2 / n1)
-      se2 <- sqrt(sd2^2 / n2)
-      d_sigma <- sqrt(se1^2 + se2^2)
-      t_stat = cohend/d_sigma
+      SE1 = (denomSD * sqrt(1 / n_glass + sdn_glass^2 / (nn_glass * denomSD^2)))
+      d_df <- n1+n2 - 2
+      t_stat = abs(m1-m2)/SE1
       ts <- get_ncp_t2(t_stat, d_df, conf.level = 1-alpha*2)
     }
-    dlow <- ts[1] * sqrt(hn)
-    dhigh <- ts[2] * sqrt(hn)
+    dlow <- ts[1] * sqrt(hn) * J
+    dhigh <- ts[2] * sqrt(hn) * J
   } else {
     t_stat = NULL
     hn = NULL
@@ -417,15 +433,12 @@ d_est_one <- function(n,
 
   d_lambda <- cohend * sqrt(n)
   if(smd_ci == "goulet"){
-
-
-  #d_sigma = sqrt((df + 1)/(df - 1)*(2/n)*(1 + cohend^2/8))
-  if(smd_ci == "goulet"){
     d_sigma = sqrt((df/(df-2)) * (1/n) *(1+cohend^2*(n/1)) - cohend^2/J^2)
   } else {
     d_sigma = sqrt(1/n + cohend^2/(2*n))
   }
-
+  if(smd_ci == "goulet"){
+  #d_sigma = sqrt((df + 1)/(df - 1)*(2/n)*(1 + cohend^2/8))
 
   # Confidence interval of the SMD from Goulet-Pelletier & Cousineau
   tlow <- suppressWarnings(qt(1 / 2 - (1-alpha*2) / 2,

@@ -32,7 +32,7 @@ The calculation of standardized mean differences (SMDs) can be helpful
 in interpreting data and are essential for meta-analysis. In psychology,
 effect sizes are very often reported as an SMD rather than raw units
 (though either is fine: see @Caldwell2020). In most papers the SMD is
-reported as Cohen's d. The simplest form involves reporting the mean
+reported as Cohen's d^[I'd argue it is more appropriate to label it as a SMD since many times researchers are not reporting Jacob Cohen's original formulation. Therefore it is more accurate descriptor to label any SMD as SMD]. The simplest form involves reporting the mean
 difference (or mean in the case of a one-sample test) divided by the
 standard deviation.
 
@@ -53,7 +53,7 @@ or even the standard error (sigma: $\sigma$) for the SMD. None of these
 are easy to determine and these calculations are hotly debated in the
 statistics literature [@Cousineau2021].
 
-In this package we have opted to the (mostly) use the approaches
+In this package we have opted to make the defult SMD confidence intervals as the formulation
 outlined by @Goulet_2018. We found that that these calculations were
 simple to implement and provided fairly accurate coverage for the
 confidence intervals for any type of SMD (independent, paired, or one
@@ -64,6 +64,8 @@ very limited inferential utility (though exceptions apply). You may
 disagree, and if you are basing your inferences on the SMD, and the
 associated confidence intervals, we recommend you go with a
 bootstrapping approach (see `boot_t_TOST`) [@Kirby2013].
+
+Other packages, such as `MOTE` [@MOTE] or `effectsize` [@effectsize], use a simpler formulation of the noncentral t-distribution. Therefore, we have created an argument for all TOST functions (`tsum_TOST` and `t_TOST`) named `smd_ci` which allow the user to specify "goulet" (for the @Cousineau2021 method), "nct" (this will approximately match @MOTE and @effectsize), "t" (central t method), or "z" (normal method). We would strongly recommend using "nct" or "goulet" for any analysis.
 
 In this section we will detail on the calculations that are involved in
 calculating the SMD, their associated degrees of freedom, non-centrality
@@ -80,12 +82,10 @@ $$
 J = \frac{\Gamma(\frac{df}{2})}{\sqrt{\frac{df}{2}} \cdot \Gamma(\frac{df-1}{2})} 
 $$
 
-The correction factor is calculated in R as the following:
+The correction factor^[This calculation was derived from the supplementary material of
+@Cousineau2021.] is calculated in R as the following:
 
     J <- exp ( lgamma(df/2) - log(sqrt(df/2)) - lgamma((df-1)/2) )
-
-This calculation was derived from the supplementary material of
-@Cousineau2021.
 
 Hedges g (bias corrected Cohen's d) can then be calculated by
 multiplying d by J
@@ -143,6 +143,8 @@ $$
 $$ 
 
 wherein $J$ represents the Hedges correction (calculation above).
+
+2. Other methods
 
 ## Variances Assumed Equal: Cohen's d
 
