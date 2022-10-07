@@ -435,7 +435,7 @@ d_est_one <- function(n,
   if(smd_ci == "goulet"){
     d_sigma = sqrt((df/(df-2)) * (1/n) *(1+cohend^2*(n/1)) - cohend^2/J^2)
   } else {
-    d_sigma = sqrt(1/n + cohend^2/(2*n))
+    d_sigma = sqrt(1/n + (cohend^2/(2*n)))
   }
   if(smd_ci == "goulet"){
   #d_sigma = sqrt((df + 1)/(df - 1)*(2/n)*(1 + cohend^2/8))
@@ -457,8 +457,8 @@ d_est_one <- function(n,
   }
 
   if(smd_ci == "nct"){
-    sigma = sd1 / sqrt(n)
-    t_stat = cohend / sigma
+    SE1 <- sd / sqrt(n)
+    t_stat = abs(mu-testValue) / SE1
     ts <- get_ncp_t2(t_stat, d_df, conf.level = 1-alpha*2)
     dlow <- ts[1] * sqrt(hn)*J
     dhigh <- ts[2] * sqrt(hn)*J

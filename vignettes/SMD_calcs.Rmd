@@ -93,6 +93,7 @@ multiplying d by J
 $$
 g = d \cdot J
 $$
+When the bias correction is not applied, J is equal to 1.
 
 # Independent Samples
 
