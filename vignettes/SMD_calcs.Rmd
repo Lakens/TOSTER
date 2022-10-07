@@ -132,20 +132,26 @@ $$
 
 The non-centrality parameter ($\lambda$) is calculated as the following:
 
+1. Under the @Cousineau2021 method (`smd_ci = "goulet"`):
+
 $$
 \lambda =  d_{av} \times \sqrt{\frac{n_1 \cdot n_2(\sigma^2_1+\sigma^2_2)}{2 \cdot (n_2 \cdot \sigma^2_1+n_1 \cdot \sigma^2_2)}}
 $$
 
+2. Under all other methods (nct, t, or z):
+
+$$
+\lambda = \frac{2 \cdot (n_2 \cdot \sigma_1^2 + n_1 \cdot \sigma_2^2)} {n_1 \cdot n_2 \cdot (\sigma_1^2 + \sigma_2^2)}
+$$
 The standard error ($\sigma$) of Cohen's d(av) is calculated as the
 following:
 
 $$
-\sigma = \sqrt{\frac{df}{df-2} \cdot \frac{2}{\tilde n} (1+d^2 \cdot \frac{\tilde n}{2}) -\frac{d^2}{J^2}}
+\sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{2}{\tilde n} (1+d^2 \cdot \frac{\tilde n}{2}) -\frac{d^2}{J^2}}
 $$ 
 
 wherein $J$ represents the Hedges correction (calculation above).
 
-2. Other methods
 
 ## Variances Assumed Equal: Cohen's d
 
@@ -168,6 +174,8 @@ $$
 
 The non-centrality parameter ($\lambda$) is calculated as the following:
 
+1. Under the @Cousineau2021 method (`smd_ci = "goulet"`):
+
 $$
 \lambda = d \cdot \sqrt \frac{\tilde n}{2}
 $$ 
@@ -179,14 +187,27 @@ $$
 \tilde n = \frac{2 \cdot n_1 \cdot n_2}{n_1 + n_2}
 $$
 
+2. Under all other methods (nct, t, or z):
+
+$$
+\lambda = \frac{1}{n_1} +\frac{1}{n_2}
+$$ 
+
 The standard error ($\sigma$) of Cohen's d is calculated as the
 following:
 
-$$
-\sigma = \sqrt{\frac{df}{df-2} \cdot \frac{2}{\tilde n} (1+d^2 \cdot \frac{\tilde n}{2}) -\frac{d^2}{J}}
-$$ 
+1. Under the @Cousineau2021 method (`smd_ci = "goulet"`):
 
+$$
+\sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{2}{\tilde n} (1+d^2 \cdot \frac{\tilde n}{2}) -\frac{d^2}{J}}
+$$ 
 wherein $J$ represents the Hedges correction (calculation above).
+
+2. Under all other methods (nct, t, or z):
+
+$$
+\sigma_{SMD} = \sqrt{\frac{n_1+n_2}{n_1 \cdot n_2} \cdot \frac{d^2}{2 \cdot(n_1+n_2)} \cdot J^2}
+$$
 
 # Paired Samples
 
@@ -216,21 +237,45 @@ $$
 
 The degrees of freedom for Cohen's d(z) is the following:
 
+1. Under the @Cousineau2021 method (`smd_ci = "goulet"`):
+
 $$
 df = 2 \cdot (N_{pairs}-1)
 $$
 
+2. Under all other methods (nct, t, or z):
+
+$$
+df = N - 1
+$$
+
 The non-centrality parameter ($\lambda$) is calculated as the following:
+
+1. Under the @Cousineau2021 method (`smd_ci = "goulet"`):
 
 $$
 \lambda = d_{z} \cdot \sqrt \frac{N_{pairs}}{2 \cdot (1-r_{12})}
 $$
 
+2. Under all other methods (nct, t, or z):
+
+$$
+\lambda = \frac{1}{n}
+$$
+
 The standard error ($\sigma$) of Cohen's d(z) is calculated as the
 following:
 
+1. Under the @Cousineau2021 method (`smd_ci = "goulet"`):
+
 $$
-\sigma = \sqrt{\frac{df}{df-2} \cdot \frac{2 \cdot (1-r_{12})}{n} \cdot (1+d^2 \cdot \frac{n}{2 \cdot (1-r_{12})}) -\frac{d^2}{J^2}} \space \times \space \sqrt {2 \cdot (1-r_{12})}
+\sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{2 \cdot (1-r_{12})}{n} \cdot (1+d^2 \cdot \frac{n}{2 \cdot (1-r_{12})}) -\frac{d^2}{J^2}} \space \times \space \sqrt {2 \cdot (1-r_{12})}
+$$
+
+2. Under all other methods (nct, t, or z):
+
+$$
+\sigma_{SMD} = \sqrt{\frac{1}{n} + \frac{d_z^2}{(2 \cdot n)}}
 $$
 
 ## Cohen's d(rm): Correlation Corrected
@@ -258,21 +303,37 @@ $$
 
 The degrees of freedom for Cohen's d(rm) is the following:
 
+1. Under the @Cousineau2021 method (`smd_ci = "goulet"`):
+
 $$
 df = 2 \cdot (N_{pairs}-1)
 $$
 
+2. Under all other methods (nct, t, or z):
+
+$$
+df = N - 1
+$$
+
 The non-centrality parameter ($\lambda$) is calculated as the following:
+
+1. Under the @Cousineau2021 method (`smd_ci = "goulet"`):
 
 $$
 \lambda = d_{rm} \cdot \sqrt \frac{N_{pairs}}{2 \cdot (1-r_{12})}
+$$
+
+2. Under all other methods (nct, t, or z):
+
+$$
+\lambda = \frac{1}{n}
 $$
 
 The standard error ($\sigma$) of Cohen's d(rm) is calculated as the
 following:
 
 $$
-\sigma = \sqrt{\frac{df}{df-2} \cdot \frac{2 \cdot (1-r_{12})}{n} \cdot (1+d^2 \cdot \frac{n}{2 \cdot (1-r_{12})}) -\frac{d^2}{J^2}}
+\sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{2 \cdot (1-r_{12})}{n} \cdot (1+d_{rm}^2 \cdot \frac{n}{2 \cdot (1-r_{12})}) -\frac{d_{rm}^2}{J^2}}
 $$
 
 # One Sample
@@ -308,7 +369,7 @@ The standard error ($\sigma$) of Cohen's d is calculated as the
 following:
 
 $$
-\sigma = \sqrt{\frac{df}{df-2} \cdot \frac{1}{N} (1+d^2 \cdot N) -\frac{d^2}{J^2}}
+\sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{1}{N} (1+d^2 \cdot N) -\frac{d^2}{J^2}}
 $$ 
 
 - Wherein $J$ represents the Hedges correction (calculation above).
@@ -328,6 +389,8 @@ two step process: 1) using the noncentral *t*-distribution to calculate
 the lower and upper bounds of $\lambda$, and 2) transforming this back
 to the effect size estimate.
 
+## @Cousineau2021 Method (smd_ci = "goulet")
+
 Calculate confidence intervals around $\lambda$.
 
 $$
@@ -340,6 +403,40 @@ Then transform back to the SMD.
 $$
 d_L = \frac{t_L}{\lambda} \cdot d \\
 d_U = \frac{t_U}{\lambda} \cdot d 
+$$
+
+## The non-central t-method (smd_ci = "nct")
+
+Calculate the non-centrality parameters necessary to form confidence intervals wherein the observed t-statistic ($t_{obs}$) (note: the standard error is slightly altered for d_{rm}) is utilized.
+
+$$
+t_L = t_{(1-alpha,\space df, \space t_{obs})} \\
+t_U = t_{(alpha,\space df, \space  t_{obs})}
+$$
+The confidence intervals can then be constructed using the non-centrality parameter and the bias correction.
+
+$$
+d_L = t_L \cdot \sqrt{\lambda} \cdot J \\
+d_U = t_U \cdot \sqrt{\lambda} \cdot J 
+$$
+## Central t-method
+
+Full warning this method provides sub-optimal coverage.
+
+The limits of the t-distribution at the given alpha-level and degrees of freedom (`qt(1-alpha,df)`) are multiplied by the standard error of the calculated SMD.
+
+$$
+CI = SMD \space \pm \space t_{(1-\alpha,df)} \cdot \sigma_{SMD}
+$$
+
+## Normal method
+
+Full warning this method provides atrocious coverage.
+
+The limits of the z-distribution at the given alpha-level (`qnorm(1-alpha)`) are multiplied by the standard error of the calculated SMD.
+
+$$
+CI = SMD \space \pm \space z_{(1-\alpha)} \cdot \sigma_{SMD}
 $$
 
 # Plotting SMDs
