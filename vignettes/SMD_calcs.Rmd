@@ -97,13 +97,15 @@ When the bias correction is not applied, J is equal to 1.
 
 # Independent Samples
 
-For independent samples there are two calculative approaches supported
+For independent samples there are three calculative approaches supported
 by `TOSTER`. One the denominator is the pooled standard deviation
-(Cohen's d) and the other is the average standard deviation (Cohen's
-d(av)). Currently, the choice is made by the function based on whether
-or not the variance can assumed to be equal. If the variances are not
+(Cohen's d), the average standard deviation (Cohen's
+d(av)), and the standard deviation of the control group (Glass's $\Delta$). 
+Currently, the d or d(av) is selected by whether or not variances are assumed to
+be equal. If the variances are not
 assumed to be equal then Cohen's d(av) will be returned, and if
-variances are assumed to be equal then Cohen's d is returned.
+variances are assumed to be equal then Cohen's d is returned. Glass's delta can
+be selected by setting the `glass` argument to "glass1" or "glass2".
 
 ## Variances Assumed Unequal: Cohen's d(av)
 
@@ -209,15 +211,77 @@ $$
 \sigma_{SMD} = \sqrt{\frac{n_1+n_2}{n_1 \cdot n_2} \cdot \frac{d^2}{2 \cdot(n_1+n_2)} \cdot J^2}
 $$
 
+## Glass's Delta
+
+For this calculation, the denominator is simply the standard
+deviation of one of the groups (`x` for `glass = "glass1"`, or `y` for 
+`glass = "glass2"`.
+
+$$
+s_{c} = SD_{control \space group}
+$$
+
+$$
+d = \frac {\bar{x}_1 - \bar{x}_2} {s_{c}}
+$$
+
+The degrees of freedom for Glass's delta is the following:
+
+$$
+df = n_c - 1
+$$
+
+The non-centrality parameter ($\lambda$) is calculated as the following:
+
+1. Under the @Cousineau2021 method (`smd_ci = "goulet"`):
+
+$$
+\lambda = d \cdot \sqrt \frac{\tilde n}{2}
+$$ 
+
+wherein, $\tilde n$ is the harmonic mean of the 2 sample sizes which
+is calculated as the following:
+
+$$
+\tilde n = \frac{2 \cdot n_1 \cdot n_2}{n_1 + n_2}
+$$
+
+2. Under all other methods (nct, t, or z):
+
+$$
+\lambda = \frac{1}{n_T} +  \frac{s_c^2}{n_c \cdot s_c^2}
+$$ 
+
+The standard error ($\sigma$) of Glass's delta is calculated as the
+following:
+
+1. Under the @Cousineau2021 method (`smd_ci = "goulet"`):
+
+$$
+\sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{2}{\tilde n} (1+d^2 \cdot \frac{\tilde n}{2}) -\frac{d^2}{J}}
+$$ 
+wherein $J$ represents the Hedges correction (calculation above).
+
+2. Under all other methods (nct, t, or z):
+
+$$
+\sigma_{SMD} = \sqrt{\frac{1}{\tilde n} \cdot \frac{N - 2}{N - 4} \cdot (1 + \tilde n \cdot
+                                                             d ^ 2) - \frac{d^2}{J^2}}
+$$
+
+
+
 # Paired Samples
 
 For paired samples there are two calculative approaches supported by
 `TOSTER`. One the denominator is the standard deviation of the change
-score (Cohen's d(z)) and the other is the correlation corrected effect
-size (Cohen's d(av)). Currently, the choice is made by the function
+score (Cohen's d(z)), the correlation corrected effect
+size (Cohen's d(av)), and the standard deviation of the control condition 
+(Glass's $\Delta$). Currently, the choice is made by the function
 based on whether or not the user sets `rm_correction` to TRUE. If
 `rm_correction` is set to t TRUE then Cohen's d(rm) will be returned,
-and otherwise Cohen's d(z) is returned.
+and otherwise Cohen's d(z) is returned. This can be overrident and Glass's delta
+is returned if the `glass` argument is set to "glass1" or "glass2".
 
 ## Cohen's d(z): Change Scores
 
@@ -335,6 +399,57 @@ following:
 $$
 \sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{2 \cdot (1-r_{12})}{n} \cdot (1+d_{rm}^2 \cdot \frac{n}{2 \cdot (1-r_{12})}) -\frac{d_{rm}^2}{J^2}}
 $$
+
+## Glass's Delta
+
+For this calculation, the denominator is simply the standard
+deviation of one of the groups (`x` for `glass = "glass1"`, or `y` for 
+`glass = "glass2"`.
+
+$$
+s_{c} = SD_{control \space condition}
+$$
+
+$$
+d = \frac {\bar{x}_1 - \bar{x}_2} {s_{c}}
+$$
+
+The degrees of freedom for Glass's delta is the following:
+
+1. Under the @Cousineau2021 method (`smd_ci = "goulet"`):
+
+$$
+df = 2 \cdot N - 1
+$$
+
+2. Under all other methods (nct, t, or z):
+
+$$
+df = N - 1
+$$
+
+The non-centrality parameter ($\lambda$) is calculated as the following:
+
+1. Under the @Cousineau2021 method (`smd_ci = "goulet"`):
+
+$$
+\lambda = d \cdot \sqrt{\frac{N}{2 \cdot (1 - r_{12})}}
+$$ 
+
+2. Under all other methods (nct, t, or z):
+
+$$
+\lambda = \frac{1}{N}
+$$ 
+
+The standard error ($\sigma$) of Glass's delta is calculated as the
+following:
+
+$$
+\sigma_{SMD} =     \sqrt{\frac{n-1}{n \cdot (n-3)} \cdot (2\cdot(1-r_{12})+d^2 \cdot N) + \frac{d^2}{J^2}}
+
+$$
+
 
 # One Sample
 
