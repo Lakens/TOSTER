@@ -18,6 +18,8 @@
 #' @param bias_correction Apply Hedges' correction for bias (default is TRUE).
 #' @param rm_correction Repeated measures correction to make standardized mean difference Cohen's d(rm). This only applies to repeated/paired samples. Default is FALSE.
 #' @param mu a number indicating the true value of the mean for the two tailed test (or difference in means if you are performing a two sample test).
+#' @param glass A option to calculate Glass's delta as an alternative to Cohen's d type SMD. Default is NULL to not calculate Glass's delta, "glass1" will use the first group's SD as the denominator whereas "glass2" will use the 2nd group's SD.
+#' @param smd_ci Method for calculating SMD confidence intervals. Methods include Goulet, noncentral t (nct), central t (t), and normal method (z).
 #' @return An S3 object of class
 #'   \code{"TOSTt"} is returned containing the following slots:
 #' \describe{
@@ -52,21 +54,20 @@ tsum_TOST <- function(m1,
                       eqbound_type = "raw",
                       alpha = 0.05,
                       bias_correction = TRUE,
-                      rm_correction = FALSE){
+                      rm_correction = FALSE,
+                      glass = NULL,
+                      smd_ci = c("goulet","nct", "t", "z")){
+
+  if(is.null(glass)){
+    glass = "no"
+  }
+  smd_ci = match.arg(smd_ci)
+
+
   if(bias_correction){
     smd_type = 'g'
   } else {
     smd_type = 'd'
-  }
-
-  if(rm_correction){
-    denom = "rm"
-  } else {
-    denom = "z"
-  }
-
-  if(!(paired)){
-    r12 = NULL
   }
 
   if(is.null(n2) || is.null(m2) || is.null(sd2)){
@@ -78,6 +79,32 @@ tsum_TOST <- function(m1,
   } else {
     sample_type = "Two Sample"
   }
+
+  if(glass == "glass1" || glass == "glass2"){
+    if(glass == "glass1"){
+      denom = "glass1"
+    }
+
+    if(glass == "glass2"){
+      denom = "glass2"
+    }
+  } else{
+    if(sample_type != "Two Sample" ){
+      if(rm_correction){
+        denom = "rm"
+      } else {
+        denom = "z"
+      }
+    } else{
+      denom = "d"
+    }
+  }
+
+  if(!(paired)){
+    r12 = NULL
+  }
+
+
 
   if(hypothesis == "EQU"){
     alt_low = "greater"
@@ -130,7 +157,8 @@ tsum_TOST <- function(m1,
       r12 = r12,
       type = smd_type,
       denom = denom,
-      alpha = alpha
+      alpha = alpha,
+      smd_ci = smd_ci
     )
 
   } else if(sample_type == "Two Sample"){
@@ -144,7 +172,9 @@ tsum_TOST <- function(m1,
       sd2 = sd2,
       type = smd_type,
       var.equal = var.equal,
-      alpha = alpha
+      alpha = alpha,
+      denom = denom,
+      smd_ci = smd_ci
     )
 
   } else {
@@ -153,8 +183,9 @@ tsum_TOST <- function(m1,
       mu = m1,
       sd = sd1,
       type = smd_type,
-      testValue = mu,
-      alpha = alpha
+      testValue = 0,
+      alpha = alpha,
+      smd_ci = smd_ci
     )
   }
 

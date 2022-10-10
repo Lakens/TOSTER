@@ -32,7 +32,7 @@ The calculation of standardized mean differences (SMDs) can be helpful
 in interpreting data and are essential for meta-analysis. In psychology,
 effect sizes are very often reported as an SMD rather than raw units
 (though either is fine: see @Caldwell2020). In most papers the SMD is
-reported as Cohen's d. The simplest form involves reporting the mean
+reported as Cohen's d^[I'd argue it is more appropriate to label it as a SMD since many times researchers are not reporting Jacob Cohen's original formulation. Therefore it is more accurate descriptor to label any SMD as SMD]. The simplest form involves reporting the mean
 difference (or mean in the case of a one-sample test) divided by the
 standard deviation.
 
@@ -53,7 +53,7 @@ or even the standard error (sigma: $\sigma$) for the SMD. None of these
 are easy to determine and these calculations are hotly debated in the
 statistics literature [@Cousineau2021].
 
-In this package we have opted to the (mostly) use the approaches
+In this package we have opted to make the default SMD confidence intervals as the formulation
 outlined by @Goulet_2018. We found that that these calculations were
 simple to implement and provided fairly accurate coverage for the
 confidence intervals for any type of SMD (independent, paired, or one
@@ -64,6 +64,8 @@ very limited inferential utility (though exceptions apply). You may
 disagree, and if you are basing your inferences on the SMD, and the
 associated confidence intervals, we recommend you go with a
 bootstrapping approach (see `boot_t_TOST`) [@Kirby2013].
+
+Other packages, such as `MOTE` [@MOTE] or `effectsize` [@effectsize], use a simpler formulation of the noncentral t-distribution. Therefore, we have created an argument for all TOST functions (`tsum_TOST` and `t_TOST`) named `smd_ci` which allow the user to specify "goulet" (for the @Cousineau2021 method), "nct" (this will approximately match @MOTE and @effectsize), "t" (central t method), or "z" (normal method). We would strongly recommend using "nct" or "goulet" for any analysis.
 
 In this section we will detail on the calculations that are involved in
 calculating the SMD, their associated degrees of freedom, non-centrality
@@ -80,12 +82,10 @@ $$
 J = \frac{\Gamma(\frac{df}{2})}{\sqrt{\frac{df}{2}} \cdot \Gamma(\frac{df-1}{2})} 
 $$
 
-The correction factor is calculated in R as the following:
+The correction factor^[This calculation was derived from the supplementary material of
+@Cousineau2021.] is calculated in R as the following:
 
     J <- exp ( lgamma(df/2) - log(sqrt(df/2)) - lgamma((df-1)/2) )
-
-This calculation was derived from the supplementary material of
-@Cousineau2021.
 
 Hedges g (bias corrected Cohen's d) can then be calculated by
 multiplying d by J
@@ -93,16 +93,19 @@ multiplying d by J
 $$
 g = d \cdot J
 $$
+When the bias correction is not applied, J is equal to 1.
 
 # Independent Samples
 
-For independent samples there are two calculative approaches supported
+For independent samples there are three calculative approaches supported
 by `TOSTER`. One the denominator is the pooled standard deviation
-(Cohen's d) and the other is the average standard deviation (Cohen's
-d(av)). Currently, the choice is made by the function based on whether
-or not the variance can assumed to be equal. If the variances are not
+(Cohen's d), the average standard deviation (Cohen's
+d(av)), and the standard deviation of the control group (Glass's $\Delta$). 
+Currently, the d or d(av) is selected by whether or not variances are assumed to
+be equal. If the variances are not
 assumed to be equal then Cohen's d(av) will be returned, and if
-variances are assumed to be equal then Cohen's d is returned.
+variances are assumed to be equal then Cohen's d is returned. Glass's delta can
+be selected by setting the `glass` argument to "glass1" or "glass2".
 
 ## Variances Assumed Unequal: Cohen's d(av)
 
@@ -117,7 +120,9 @@ The SMD, Cohen's d(av), is then calculated as the following:
 
 $$
 d_{av} = \frac {\bar{x}_1 - \bar{x}_2} {s_{av}}
-$$ Note: the x with the bar above it (pronounced as "x-bar") refers the
+$$ 
+
+Note: the x with the bar above it (pronounced as "x-bar") refers the
 the means of group 1 and 2 respectively.
 
 The degrees of freedom for Cohen's d(av), derived from @delacre2021, is
@@ -129,23 +134,35 @@ $$
 
 The non-centrality parameter ($\lambda$) is calculated as the following:
 
+1. Under the @Cousineau2021 method (`smd_ci = "goulet"`):
+
 $$
 \lambda =  d_{av} \times \sqrt{\frac{n_1 \cdot n_2(\sigma^2_1+\sigma^2_2)}{2 \cdot (n_2 \cdot \sigma^2_1+n_1 \cdot \sigma^2_2)}}
 $$
 
+2. Under all other methods (nct, t, or z):
+
+$$
+\lambda = \frac{2 \cdot (n_2 \cdot \sigma_1^2 + n_1 \cdot \sigma_2^2)} {n_1 \cdot n_2 \cdot (\sigma_1^2 + \sigma_2^2)}
+$$
 The standard error ($\sigma$) of Cohen's d(av) is calculated as the
 following:
 
 $$
-\sigma = \sqrt{\frac{df}{df-2} \cdot \frac{2}{\tilde n} (1+d^2 \cdot \frac{\tilde n}{2}) -\frac{d^2}{J^2}}
-$$ wherein $J$ represents the Hedges correction (calculation above).
+\sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{2}{\tilde n} (1+d^2 \cdot \frac{\tilde n}{2}) -\frac{d^2}{J^2}}
+$$ 
+
+wherein $J$ represents the Hedges correction (calculation above).
+
 
 ## Variances Assumed Equal: Cohen's d
 
 For this calculation, the denominator is simply the pooled standard
 deviation.
 
-$$s_{p} = \sqrt \frac {(n_{1} - 1)s_{1}^2 + (n_{2} - 1)s_{2}^2}{n_{1} + n_{2} - 2}$$
+$$
+s_{p} = \sqrt \frac {(n_{1} - 1)s_{1}^2 + (n_{2} - 1)s_{2}^2}{n_{1} + n_{2} - 2}
+$$
 
 $$
 d = \frac {\bar{x}_1 - \bar{x}_2} {s_{p}}
@@ -159,31 +176,112 @@ $$
 
 The non-centrality parameter ($\lambda$) is calculated as the following:
 
+1. Under the @Cousineau2021 method (`smd_ci = "goulet"`):
+
 $$
 \lambda = d \cdot \sqrt \frac{\tilde n}{2}
-$$ wherein, $\tilde n$ is the harmonic mean of the 2 sample sizes which
+$$ 
+
+wherein, $\tilde n$ is the harmonic mean of the 2 sample sizes which
 is calculated as the following:
 
 $$
 \tilde n = \frac{2 \cdot n_1 \cdot n_2}{n_1 + n_2}
 $$
 
+2. Under all other methods (nct, t, or z):
+
+$$
+\lambda = \frac{1}{n_1} +\frac{1}{n_2}
+$$ 
+
 The standard error ($\sigma$) of Cohen's d is calculated as the
 following:
 
+1. Under the @Cousineau2021 method (`smd_ci = "goulet"`):
+
 $$
-\sigma = \sqrt{\frac{df}{df-2} \cdot \frac{2}{\tilde n} (1+d^2 \cdot \frac{\tilde n}{2}) -\frac{d^2}{J}}
-$$ wherein $J$ represents the Hedges correction (calculation above).
+\sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{2}{\tilde n} (1+d^2 \cdot \frac{\tilde n}{2}) -\frac{d^2}{J}}
+$$ 
+wherein $J$ represents the Hedges correction (calculation above).
+
+2. Under all other methods (nct, t, or z):
+
+$$
+\sigma_{SMD} = \sqrt{\frac{n_1+n_2}{n_1 \cdot n_2} \cdot \frac{d^2}{2 \cdot(n_1+n_2)} \cdot J^2}
+$$
+
+## Glass's Delta
+
+For this calculation, the denominator is simply the standard
+deviation of one of the groups (`x` for `glass = "glass1"`, or `y` for 
+`glass = "glass2"`.
+
+$$
+s_{c} = SD_{control \space group}
+$$
+
+$$
+d = \frac {\bar{x}_1 - \bar{x}_2} {s_{c}}
+$$
+
+The degrees of freedom for Glass's delta is the following:
+
+$$
+df = n_c - 1
+$$
+
+The non-centrality parameter ($\lambda$) is calculated as the following:
+
+1. Under the @Cousineau2021 method (`smd_ci = "goulet"`):
+
+$$
+\lambda = d \cdot \sqrt \frac{\tilde n}{2}
+$$ 
+
+wherein, $\tilde n$ is the harmonic mean of the 2 sample sizes which
+is calculated as the following:
+
+$$
+\tilde n = \frac{2 \cdot n_1 \cdot n_2}{n_1 + n_2}
+$$
+
+2. Under all other methods (nct, t, or z):
+
+$$
+\lambda = \frac{1}{n_T} +  \frac{s_c^2}{n_c \cdot s_c^2}
+$$ 
+
+The standard error ($\sigma$) of Glass's delta is calculated as the
+following:
+
+1. Under the @Cousineau2021 method (`smd_ci = "goulet"`):
+
+$$
+\sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{2}{\tilde n} (1+d^2 \cdot \frac{\tilde n}{2}) -\frac{d^2}{J}}
+$$ 
+wherein $J$ represents the Hedges correction (calculation above).
+
+2. Under all other methods (nct, t, or z):
+
+$$
+\sigma_{SMD} = \sqrt{\frac{1}{\tilde n} \cdot \frac{N - 2}{N - 4} \cdot (1 + \tilde n \cdot
+                                                             d ^ 2) - \frac{d^2}{J^2}}
+$$
+
+
 
 # Paired Samples
 
 For paired samples there are two calculative approaches supported by
 `TOSTER`. One the denominator is the standard deviation of the change
-score (Cohen's d(z)) and the other is the correlation corrected effect
-size (Cohen's d(av)). Currently, the choice is made by the function
+score (Cohen's d(z)), the correlation corrected effect
+size (Cohen's d(av)), and the standard deviation of the control condition 
+(Glass's $\Delta$). Currently, the choice is made by the function
 based on whether or not the user sets `rm_correction` to TRUE. If
 `rm_correction` is set to t TRUE then Cohen's d(rm) will be returned,
-and otherwise Cohen's d(z) is returned.
+and otherwise Cohen's d(z) is returned. This can be overridden and Glass's delta
+is returned if the `glass` argument is set to "glass1" or "glass2".
 
 ## Cohen's d(z): Change Scores
 
@@ -203,21 +301,45 @@ $$
 
 The degrees of freedom for Cohen's d(z) is the following:
 
+1. Under the @Cousineau2021 method (`smd_ci = "goulet"`):
+
 $$
 df = 2 \cdot (N_{pairs}-1)
 $$
 
+2. Under all other methods (nct, t, or z):
+
+$$
+df = N - 1
+$$
+
 The non-centrality parameter ($\lambda$) is calculated as the following:
+
+1. Under the @Cousineau2021 method (`smd_ci = "goulet"`):
 
 $$
 \lambda = d_{z} \cdot \sqrt \frac{N_{pairs}}{2 \cdot (1-r_{12})}
 $$
 
+2. Under all other methods (nct, t, or z):
+
+$$
+\lambda = \frac{1}{n}
+$$
+
 The standard error ($\sigma$) of Cohen's d(z) is calculated as the
 following:
 
+1. Under the @Cousineau2021 method (`smd_ci = "goulet"`):
+
 $$
-\sigma = \sqrt{\frac{df}{df-2} \cdot \frac{2 \cdot (1-r_{12})}{n} \cdot (1+d^2 \cdot \frac{n}{2 \cdot (1-r_{12})}) -\frac{d^2}{J^2}} \space \times \space \sqrt {2 \cdot (1-r_{12})}
+\sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{2 \cdot (1-r_{12})}{n} \cdot (1+d^2 \cdot \frac{n}{2 \cdot (1-r_{12})}) -\frac{d^2}{J^2}} \space \times \space \sqrt {2 \cdot (1-r_{12})}
+$$
+
+2. Under all other methods (nct, t, or z):
+
+$$
+\sigma_{SMD} = \sqrt{\frac{1}{n} + \frac{d_z^2}{(2 \cdot n)}}
 $$
 
 ## Cohen's d(rm): Correlation Corrected
@@ -245,22 +367,89 @@ $$
 
 The degrees of freedom for Cohen's d(rm) is the following:
 
+1. Under the @Cousineau2021 method (`smd_ci = "goulet"`):
+
 $$
 df = 2 \cdot (N_{pairs}-1)
 $$
 
+2. Under all other methods (nct, t, or z):
+
+$$
+df = N - 1
+$$
+
 The non-centrality parameter ($\lambda$) is calculated as the following:
+
+1. Under the @Cousineau2021 method (`smd_ci = "goulet"`):
 
 $$
 \lambda = d_{rm} \cdot \sqrt \frac{N_{pairs}}{2 \cdot (1-r_{12})}
+$$
+
+2. Under all other methods (nct, t, or z):
+
+$$
+\lambda = \frac{1}{n}
 $$
 
 The standard error ($\sigma$) of Cohen's d(rm) is calculated as the
 following:
 
 $$
-\sigma = \sqrt{\frac{df}{df-2} \cdot \frac{2 \cdot (1-r_{12})}{n} \cdot (1+d^2 \cdot \frac{n}{2 \cdot (1-r_{12})}) -\frac{d^2}{J^2}}
+\sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{2 \cdot (1-r_{12})}{n} \cdot (1+d_{rm}^2 \cdot \frac{n}{2 \cdot (1-r_{12})}) -\frac{d_{rm}^2}{J^2}}
 $$
+
+## Glass's Delta
+
+For this calculation, the denominator is simply the standard
+deviation of one of the groups (`x` for `glass = "glass1"`, or `y` for 
+`glass = "glass2"`.
+
+$$
+s_{c} = SD_{control \space condition}
+$$
+
+$$
+d = \frac {\bar{x}_1 - \bar{x}_2} {s_{c}}
+$$
+
+The degrees of freedom for Glass's delta is the following:
+
+1. Under the @Cousineau2021 method (`smd_ci = "goulet"`):
+
+$$
+df = 2 \cdot N - 1
+$$
+
+2. Under all other methods (nct, t, or z):
+
+$$
+df = N - 1
+$$
+
+The non-centrality parameter ($\lambda$) is calculated as the following:
+
+1. Under the @Cousineau2021 method (`smd_ci = "goulet"`):
+
+$$
+\lambda = d \cdot \sqrt{\frac{N}{2 \cdot (1 - r_{12})}}
+$$ 
+
+2. Under all other methods (nct, t, or z):
+
+$$
+\lambda = \frac{1}{N}
+$$ 
+
+The standard error ($\sigma$) of Glass's delta is calculated as the
+following:
+
+$$
+\sigma_{SMD} =     \sqrt{\frac{n-1}{n \cdot (n-3)} \cdot (2\cdot(1-r_{12})+d^2 \cdot N) + \frac{d^2}{J^2}}
+
+$$
+
 
 # One Sample
 
@@ -269,7 +458,10 @@ For a one-sample situation, the calculations are very straight forward
 For this calculation, the denominator is simply the standard deviation
 of the sample.
 
-$$s={\sqrt {{\frac {1}{N-1}}\sum _{i=1}^{N}\left(x_{i}-{\bar {x}}\right)^{2}}}$$
+$$
+s={\sqrt {{\frac {1}{N-1}}\sum _{i=1}^{N}\left(x_{i}-{\bar {x}}\right)^{2}}}
+$$
+
 The SMD is then the mean of X divided by the standard deviation.
 
 $$
@@ -292,8 +484,10 @@ The standard error ($\sigma$) of Cohen's d is calculated as the
 following:
 
 $$
-\sigma = \sqrt{\frac{df}{df-2} \cdot \frac{1}{N} (1+d^2 \cdot N) -\frac{d^2}{J^2}}
-$$ wherein $J$ represents the Hedges correction (calculation above).
+\sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{1}{N} (1+d^2 \cdot N) -\frac{d^2}{J^2}}
+$$ 
+
+- Wherein $J$ represents the Hedges correction (calculation above).
 
 # Confidence Intervals
 
@@ -310,6 +504,8 @@ two step process: 1) using the noncentral *t*-distribution to calculate
 the lower and upper bounds of $\lambda$, and 2) transforming this back
 to the effect size estimate.
 
+## @Cousineau2021 Method (smd_ci = "goulet")
+
 Calculate confidence intervals around $\lambda$.
 
 $$
@@ -322,6 +518,40 @@ Then transform back to the SMD.
 $$
 d_L = \frac{t_L}{\lambda} \cdot d \\
 d_U = \frac{t_U}{\lambda} \cdot d 
+$$
+
+## The non-central t-method (smd_ci = "nct")
+
+Calculate the non-centrality parameters necessary to form confidence intervals wherein the observed t-statistic ($t_{obs}$) (note: the standard error is slightly altered for d_{rm}) is utilized.
+
+$$
+t_L = t_{(1-alpha,\space df, \space t_{obs})} \\
+t_U = t_{(alpha,\space df, \space  t_{obs})}
+$$
+The confidence intervals can then be constructed using the non-centrality parameter and the bias correction.
+
+$$
+d_L = t_L \cdot \sqrt{\lambda} \cdot J \\
+d_U = t_U \cdot \sqrt{\lambda} \cdot J 
+$$
+## Central t-method
+
+Full warning this method provides sub-optimal coverage.
+
+The limits of the t-distribution at the given alpha-level and degrees of freedom (`qt(1-alpha,df)`) are multiplied by the standard error of the calculated SMD.
+
+$$
+CI = SMD \space \pm \space t_{(1-\alpha,df)} \cdot \sigma_{SMD}
+$$
+
+## Normal method
+
+Full warning this method provides atrocious coverage.
+
+The limits of the z-distribution at the given alpha-level (`qnorm(1-alpha)`) are multiplied by the standard error of the calculated SMD.
+
+$$
+CI = SMD \space \pm \space z_{(1-\alpha)} \cdot \sigma_{SMD}
 $$
 
 # Plotting SMDs
@@ -347,13 +577,25 @@ plot_smd(d = .43,
 
 # Comparing SMDs
 
-In some cases, SMDs between original and replication studies want to be compared. Rather than looking at whether or not a replication attempt is significant, a researcher could compare to see how compatible the SMDs are between the two studies.
+In some cases, SMDs between original and replication studies want to be
+compared. Rather than looking at whether or not a replication attempt is
+significant, a researcher could compare to see how compatible the SMDs
+are between the two studies.
 
-For example, say there is original study reports an effect of Cohen's dz = 0.95 in a paired samples design with 25 subjects. However, a replication doubled the sample size, found a non-significant effect at an SMD of 0.2. Are these two studies compatible? Or, to put it another way, should the replication be considered a failure to replicate?
+For example, say there is original study reports an effect of Cohen's dz
+= 0.95 in a paired samples design with 25 subjects. However, a
+replication doubled the sample size, found a non-significant effect at
+an SMD of 0.2. Are these two studies compatible? Or, to put it another
+way, should the replication be considered a failure to replicate?
 
-We can use the `compare_smd` function to at least measure how often we would expect a discrepancy between the original and replication study if the same underlying effect was being measured (also assuming no publication bias).
+We can use the `compare_smd` function to at least measure how often we
+would expect a discrepancy between the original and replication study if
+the same underlying effect was being measured (also assuming no
+publication bias).
 
-We can see from the results below that, if the null hypothesis were true, we would only expect to see a disprency in SMDs between studies at least this large ~1% of the time.
+We can see from the results below that, if the null hypothesis were
+true, we would only expect to see a discrepancy in SMDs between studies at
+least this large \~1% of the time.
 
 ```{r}
 compare_smd(smd1 = 0.95,
@@ -363,10 +605,12 @@ compare_smd(smd1 = 0.95,
             paired = TRUE)
 ```
 
-
 ## Raw Data
 
-The above results are only based on an approximating the differences between the SMDs. If the raw data is available, then the optimal solution is the bootstrap the results. This can be accomplished with the `boot_compare_smd` function.
+The above results are only based on an approximating the differences
+between the SMDs. If the raw data is available, then the optimal
+solution is the bootstrap the results. This can be accomplished with the
+`boot_compare_smd` function.
 
 For this example, we will simulate some data.
 
@@ -380,14 +624,14 @@ boot_test = boot_compare_smd(x1 = diff_study1,
 
 boot_test
 
-# Table of boostrapped CIs
+# Table of bootstrapped CIs
 knitr::kable(boot_test$df_ci, digits = 4)
 ```
 
-
 ### Visualize
 
-The results of the bootstrapping are stored in the results. So we can even visualize the differences in SMDs.
+The results of the bootstrapping are stored in the results. So we can
+even visualize the differences in SMDs.
 
 ```{r}
 library(ggplot2)
@@ -413,6 +657,5 @@ ggplot(df2,
   labs(y = "", x = "Difference in SMDs (bootstrapped estimates)") +
   theme_classic()
 ```
-
 
 # References

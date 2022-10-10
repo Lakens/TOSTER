@@ -31,8 +31,7 @@ library(TOSTER)
 test1 = wilcox_TOST(formula = extra ~ group,
                       data = sleep,
                       paired = FALSE,
-                      low_eqbound = -.5,
-                      high_eqbound = .5)
+                      eqb = .5)
 
 
 print(test1)
@@ -43,23 +42,55 @@ print(test1)
 
 The standardized effect size reported for the `wilcox_TOST` procedure is the rank-biserial correlation. This is a fairly intuitive measure of effect size which has the same interpretation of the common language effect size [@Kerby_2014]. However, instead of assuming normality and equal variances, the rank-biserial correlation calculates the number of favorable (positive) and unfavorable (negative) pairs based on their respective ranks. 
 
-Overall, the correlation is calculated as the proportion of favorable pairs minus the unfavorable pairs.
+For the two sample case, the correlation is calculated as the proportion of favorable pairs minus the unfavorable pairs.
 
 $$
 r_{biserial} = f_{pairs} - u_{pairs}
+$$
+
+For the one sample or paired samples cases, the correlation is calculated with ties (values equal to zero) not being dropped. This provides a *conservative* estimate of the rank biserial correlation.
+
+It is calculated in the following steps wherein $z$ represents the values or difference between paired observations:
+
+1. Calculate signed ranks:
+
+$$
+r_j = -1 \cdot sign(z_j) \cdot rank(|z_j|)
+$$
+2. Calculate the positive and negative sums:
+$$
+    R_{+} = \sum_{1\le i \le n, \space z_i > 0}r_j 
+$$
+
+$$
+    R_{-} = \sum_{1\le i \le n, \space z_i < 0}r_j 
+$$
+3. Determine the smaller of the two rank sums:
+
+$$
+T = min(R_{+}, \space R_{-})
+$$
+
+$$
+S = \begin{cases} -4 & R_{+} \ge R_{-} \\ 4 & R_{+} < R_{-} \end{cases}
+$$
+4. Calculate rank-biserial correlation:
+
+$$
+r_{biserial} = S \cdot | \frac{\frac{T - \frac{(R_{+} + R_{-})}{2}}{n}}{n + 1} |
 $$
 
 ## Confidence Intervals
 
 The Fisher approximation is used to calculate the confidence intervals.
 
-For paired samples the standard error is calculated as the following:
+For paired samples, or one sample, the standard error is calculated as the following:
 
 $$
 SE_r = \sqrt{ \frac {(2 \cdot nd^3 + 3 \cdot nd^2 + nd) / 6} {(nd^2 + nd) / 2} }
 $$
 
-wherein, nd represents the total count not equal to zero.
+wherein, nd represents the total number of observations (or pairs).
 
 For independent samples, the standard error is calculated as the following:
 
@@ -79,11 +110,52 @@ $$
 r_{CI} = tanh(r_z  \pm  Z_{(1 - \alpha / 2)} \cdot SE_r)
 $$
 
-We hope a bootstrapped version of this confidence interval will be added in future updates.
+## Conversion to other effect sizes
+
+Two other effect sizes can be calculated for non-parametric tests. First, there is the concordance probability, which is also known at the c-statistic, c-index, or probability of superiority^[Directly inspired by this blog post from Professor Frank Harrell https://hbiostat.org/blog/post/wpo/]. The c-statistic is converted from the correlation using the following formula:
+
+$$
+c = \frac{(r_{biserial} + 1)}{2}
+$$
+
+The Wilcoxon-Mann-Whitney odds [@wmwodds], also known as the "Generalized Odds Ratio" [@agresti], is calculated by converting the c-statistic using the following formula:
+
+$$
+WMW_{odds} = e^{logit(c)}
+$$
+
+Either effect size is available by simply modifying the `ses` argument for the `wilcox_TOST` function.
+
+```{r}
+# Rank biserial
+wilcox_TOST(formula = extra ~ group,
+                      data = sleep,
+                      paired = FALSE,
+                      ses = "r",
+                      eqb = .5)
+
+# Odds
+
+wilcox_TOST(formula = extra ~ group,
+                      data = sleep,
+                      paired = FALSE,
+                      ses = "o",
+                      eqb = .5)
+
+# Concordance
+
+wilcox_TOST(formula = extra ~ group,
+                      data = sleep,
+                      paired = FALSE,
+                      ses = "c",
+                      eqb = .5)
+
+```
+
 
 # Boostrap TOST
 
-The boostrap is a simulation based technique, derived from resampling with replacement, designed for statistical estimation and inference. Bootsrapping techniques are very useful because they are considered somewhat robust to the violations of assumptions for a simple t-test. Therefore we added a bootsrap option, `boot_t_TOST` to the package to provide another robust alternative to the `t_TOST` function. 
+The bootstrap is a simulation based technique, derived from re-sampling with replacement, designed for statistical estimation and inference. Bootstrapping techniques are very useful because they are considered somewhat robust to the violations of assumptions for a simple t-test. Therefore we added a bootstrap option, `boot_t_TOST` to the package to provide another robust alternative to the `t_TOST` function. 
 
 In this function we provide a percentile bootstrap solution outlined by @efron93 (see chapter 16, page 220). The bootstrapped p-values are derived from the "studentized" version of a test of mean differences outlined by @efron93. Overall, the results should be similar to the results of `t_TOST`. **However**, for paired samples, the Cohen's d(rm) effect size *cannot* be calculated at this time.
 
@@ -107,7 +179,7 @@ The same process is completed for the one sample case but with the one sample so
 
 ## Example
 
-Again, we can use the sleep data to see the bootstrapped results. Notice that the plots show how the resampling via boostrapping indicates the instability of Hedges' d(z).
+Again, we can use the sleep data to see the bootstrapped results. Notice that the plots show how the re-sampling via bootstrapping indicates the instability of Hedges' d(z).
 
 ```{r}
 data('sleep')
@@ -115,8 +187,7 @@ data('sleep')
 test1 = boot_t_TOST(formula = extra ~ group,
                       data = sleep,
                       paired = TRUE,
-                      low_eqbound = -.5,
-                      high_eqbound = .5,
+                      eqb = .5,
                     R = 999)
 
 

@@ -1,11 +1,12 @@
-#' Rank-Biserial Correlation
-#'
+#' @title Non-parametric standardized effect sizes
+#' Effect sizes for simple (one or two sample) non-parametric tests.
 #' @param x a (non-empty) numeric vector of data values.
 #' @param y an optional (non-empty) numeric vector of data values.
 #' @param mu a number indicating the value around which (a-)symmetry (for
 #'   one-sample or paired samples) or shift (for independent samples) is to be
 #'   estimated. See [stats::wilcox.test].
 #' @param paired a logical indicating whether you want to calculate a paired test.
+#' @param ses Rank-biserial (rb), odds (odds), and concordance probablity (cstat).
 #' @param conf.level confidence level of the interval.
 #'
 #' @details
@@ -22,13 +23,17 @@
 #' the first sample, to `+1` indicating that all values of the second sample are
 #' larger than the first sample.
 #'
+#' In addition, the rank-biserial correlation can be transformed into a
+#' concordance probability (i.e., probability of superiority) or into a
+#' generalized odds (WMW odds or Agresti's generalized odds ratio).
+#'
 #' ## Ties
 #' When tied values occur, they are each given the average of the ranks that
 #' would have been given had no ties occurred. No other corrections have been
 #' implemented yet.
 #'
 #' # Confidence Intervals
-#' Confidence intervals for the rank-biserial correlation
+#' Confidence intervals for the standardized effect sizes
 #' are estimated using the normal approximation (via Fisher's transformation).
 #'
 #' @return Returns a list of results including the rank biserial correlation, logical indicator if it was a paired method, setting for mu, and confidence interval.
@@ -105,7 +110,7 @@ rbs <- function(x,
     #out$CI <- conf.level
     rf <- atanh(r_rbs)
     if (paired) {
-      nd <- sum((x - mu) != 0)
+      nd <- length(x)
       maxw <- (nd^2 + nd) / 2
 
       # From: https://en.wikipedia.org/wiki/Wilcoxon_signed-rank_test#Historical_T_statistic
@@ -140,5 +145,44 @@ rbs <- function(x,
               conf.int = confint,
               paired = paired,
               mu = mu)
+  return(rval)
+}
+
+#' @rdname rbs
+#' @export
+
+np_ses <- function(x,
+                   y = NULL,
+                   mu = 0,
+                   conf.level = 0.95,
+                   paired = FALSE,
+                   ses = c("rb","odds","cstat")) {
+  ses = match.arg(ses)
+  rb <- rbs(x=x,
+            y = y,
+            mu = mu,
+            conf.level = conf.level,
+            paired = paired)
+
+  rb2 = switch(ses,
+              "rb" = rb$rbs,
+              "cstat" = rb_to_cstat(rb$rbs),
+              "odds" = rb_to_odds(rb$rbs))
+  confint = switch(ses,
+              "rb" = rb$conf.int,
+              "cstat" = rb_to_cstat(rb$conf.int),
+              "odds" = rb_to_odds(rb$conf.int))
+  type = switch(ses,
+                "rb" = "rb",
+                "cstat" = "cstat",
+                "odds" = "odds")
+
+  rval = list(
+    type = ses,
+    est = rb2,
+    conf.int = confint,
+    paired = paired,
+    mu = mu
+  )
   return(rval)
 }
