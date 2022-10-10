@@ -42,7 +42,7 @@ d_curv = function (TOST_res,
             lambda = TOST_res$smd$d_lambda,
             sigma = TOST_res$smd$d_sigma,
             t_stat = TOST_res$smd$t_stat,
-            hn = TOST_res$smd$hn,
+            #hn = TOST_res$smd$hn,
             smd_ci = TOST_res$smd$smd_ci,
             alpha = 1 - i
           )
@@ -83,7 +83,7 @@ d_curv_raw = function (d,
                                                                       sigma = sigma,
                                                                       smd_ci = smd_ci,
                                                                       t_stat= NULL,
-                                                                      hn = NULL,
+                                                                      #hn = NULL,
                                                                       alpha = 1-i))})
 
   df <- data.frame(do.call(rbind, results))

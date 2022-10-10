@@ -137,7 +137,9 @@ d_est_pair <- function(n,
     d_lambda <- cohend * sqrt(n / (2*(1 - r12)))
     t_stat = -1*t_stat
   }
-
+  if(smd_ci != "goulet"){
+    d_lambda = hn
+  }
   return(list(
     d = cohend,
     d_df = d_df,
@@ -145,7 +147,7 @@ d_est_pair <- function(n,
     dhigh = dhigh,
     d_sigma = d_sigma,
     d_lambda = d_lambda,
-    hn = hn,
+    #hn = hn,
     smd_label = smd_label,
     J = J,
     d_denom = d_denom,
@@ -335,7 +337,9 @@ d_est_ind <- function(n1,
     }
   }
 
-
+  if(smd_ci != "goulet"){
+    d_lambda = hn
+  }
   return(list(
     d = cohend,
     d_df = d_df,
@@ -343,7 +347,7 @@ d_est_ind <- function(n1,
     dhigh = dhigh,
     d_sigma = d_sigma,
     d_lambda = d_lambda,
-    hn = hn,
+    #hn = hn,
     smd_label = smd_label,
     J = J,
     d_denom = denomSD,
@@ -358,7 +362,7 @@ d_CI = function(d,
                 lambda,
                 sigma,
                 t_stat,
-                hn,
+                #hn,
                 alpha,
                 smd_ci = "goulet"){
   d_lambda = lambda
@@ -366,7 +370,8 @@ d_CI = function(d,
   cohend = d
   d_sigma = sigma
   t_stat = t_stat
-  hn = hn
+  #hn = hn
+
   if(smd_ci == "goulet"){
   tlow <- suppressWarnings({
     qt(1 / 2 - (1 - alpha) / 2,
@@ -381,6 +386,8 @@ d_CI = function(d,
 
   dlow <- tlow / d_lambda * cohend
   dhigh <- thigh / d_lambda * cohend
+  } else{
+    hn = d_lambda
   }
 
   if(smd_ci == "nct"){
@@ -486,7 +493,9 @@ d_est_one <- function(n,
     t_stat = -1*t_stat
   }
 
-
+  if(smd_ci != "goulet"){
+    d_lambda = hn
+  }
 
   return(list(
     d = cohend,
@@ -495,7 +504,7 @@ d_est_one <- function(n,
     dhigh = dhigh,
     d_sigma = d_sigma,
     d_lambda = d_lambda,
-    hn = hn,
+    #hn = hn,
     smd_label = smd_label,
     J = J,
     d_denom = sd,
