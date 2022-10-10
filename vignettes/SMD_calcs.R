@@ -32,7 +32,7 @@ boot_test = boot_compare_smd(x1 = diff_study1,
 
 boot_test
 
-# Table of boostrapped CIs
+# Table of bootstrapped CIs
 knitr::kable(boot_test$df_ci, digits = 4)
 
 ## -----------------------------------------------------------------------------

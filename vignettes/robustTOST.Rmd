@@ -155,7 +155,7 @@ wilcox_TOST(formula = extra ~ group,
 
 # Boostrap TOST
 
-The boostrap is a simulation based technique, derived from resampling with replacement, designed for statistical estimation and inference. Bootsrapping techniques are very useful because they are considered somewhat robust to the violations of assumptions for a simple t-test. Therefore we added a bootsrap option, `boot_t_TOST` to the package to provide another robust alternative to the `t_TOST` function. 
+The bootstrap is a simulation based technique, derived from re-sampling with replacement, designed for statistical estimation and inference. Bootstrapping techniques are very useful because they are considered somewhat robust to the violations of assumptions for a simple t-test. Therefore we added a bootstrap option, `boot_t_TOST` to the package to provide another robust alternative to the `t_TOST` function. 
 
 In this function we provide a percentile bootstrap solution outlined by @efron93 (see chapter 16, page 220). The bootstrapped p-values are derived from the "studentized" version of a test of mean differences outlined by @efron93. Overall, the results should be similar to the results of `t_TOST`. **However**, for paired samples, the Cohen's d(rm) effect size *cannot* be calculated at this time.
 
@@ -179,7 +179,7 @@ The same process is completed for the one sample case but with the one sample so
 
 ## Example
 
-Again, we can use the sleep data to see the bootstrapped results. Notice that the plots show how the resampling via boostrapping indicates the instability of Hedges' d(z).
+Again, we can use the sleep data to see the bootstrapped results. Notice that the plots show how the re-sampling via bootstrapping indicates the instability of Hedges' d(z).
 
 ```{r}
 data('sleep')

@@ -12,7 +12,7 @@
 
 <meta name="author" content="Aaron R. Caldwell" />
 
-<meta name="date" content="2022-10-07" />
+<meta name="date" content="2022-10-10" />
 
 <title>Standardized Mean Differences</title>
 
@@ -357,7 +357,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <h1 class="title toc-ignore">Standardized Mean Differences</h1>
 <h3 class="subtitle">The calculation of Cohen’s d type effect sizes</h3>
 <h4 class="author">Aaron R. Caldwell</h4>
-<h4 class="date">2022-10-07</h4>
+<h4 class="date">2022-10-10</h4>
 
 
 <div id="TOC">
@@ -369,12 +369,15 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 Cohen’s d(av)</a></li>
 <li><a href="#variances-assumed-equal-cohens-d" id="toc-variances-assumed-equal-cohens-d">Variances Assumed Equal:
 Cohen’s d</a></li>
+<li><a href="#glasss-delta" id="toc-glasss-delta">Glass’s Delta</a></li>
 </ul></li>
 <li><a href="#paired-samples" id="toc-paired-samples">Paired Samples</a>
 <ul>
 <li><a href="#cohens-dz-change-scores" id="toc-cohens-dz-change-scores">Cohen’s d(z): Change Scores</a></li>
 <li><a href="#cohens-drm-correlation-corrected" id="toc-cohens-drm-correlation-corrected">Cohen’s d(rm): Correlation
 Corrected</a></li>
+<li><a href="#glasss-delta-1" id="toc-glasss-delta-1">Glass’s
+Delta</a></li>
 </ul></li>
 <li><a href="#one-sample" id="toc-one-sample">One Sample</a></li>
 <li><a href="#confidence-intervals" id="toc-confidence-intervals">Confidence Intervals</a>
@@ -383,6 +386,8 @@ Corrected</a></li>
 (smd_ci = “goulet”)</a></li>
 <li><a href="#the-non-central-t-method-smd_ci-nct" id="toc-the-non-central-t-method-smd_ci-nct">The non-central t-method
 (smd_ci = “nct”)</a></li>
+<li><a href="#normal-method" id="toc-normal-method">Normal
+method</a></li>
 </ul></li>
 <li><a href="#plotting-smds" id="toc-plotting-smds">Plotting
 SMDs</a></li>
@@ -421,7 +426,7 @@ calculating a non-centrality parameter (lambda: <span class="math inline">\(\lam
 are easy to determine and these calculations are hotly debated in the
 statistics literature <span class="citation">(Cousineau and
 Goulet-Pelletier 2021)</span>.</p>
-<p>In this package we have opted to make the defult SMD confidence
+<p>In this package we have opted to make the default SMD confidence
 intervals as the formulation outlined by <span class="citation">Goulet-Pelletier and Cousineau (2018)</span>. We found
 that that these calculations were simple to implement and provided
 fairly accurate coverage for the confidence intervals for any type of
@@ -466,14 +471,15 @@ g = d \cdot J
 </div>
 <div id="independent-samples" class="section level1">
 <h1>Independent Samples</h1>
-<p>For independent samples there are two calculative approaches
+<p>For independent samples there are three calculative approaches
 supported by <code>TOSTER</code>. One the denominator is the pooled
-standard deviation (Cohen’s d) and the other is the average standard
-deviation (Cohen’s d(av)). Currently, the choice is made by the function
-based on whether or not the variance can assumed to be equal. If the
+standard deviation (Cohen’s d), the average standard deviation (Cohen’s
+d(av)), and the standard deviation of the control group (Glass’s <span class="math inline">\(\Delta\)</span>). Currently, the d or d(av) is
+selected by whether or not variances are assumed to be equal. If the
 variances are not assumed to be equal then Cohen’s d(av) will be
 returned, and if variances are assumed to be equal then Cohen’s d is
-returned.</p>
+returned. Glass’s delta can be selected by setting the
+<code>glass</code> argument to “glass1” or “glass2”.</p>
 <div id="variances-assumed-unequal-cohens-dav" class="section level2">
 <h2>Variances Assumed Unequal: Cohen’s d(av)</h2>
 <p>For this calculation, the denominator is simply the square root of
@@ -512,8 +518,8 @@ n_2(\sigma^2_1+\sigma^2_2)}{2 \cdot (n_2 \cdot \sigma^2_1+n_1 \cdot
 \]</span> The standard error (<span class="math inline">\(\sigma\)</span>) of Cohen’s d(av) is calculated as
 the following:</p>
 <p><span class="math display">\[
-\sigma = \sqrt{\frac{df}{df-2} \cdot \frac{2}{\tilde n} (1+d^2 \cdot
-\frac{\tilde n}{2}) -\frac{d^2}{J^2}}
+\sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{2}{\tilde n} (1+d^2
+\cdot \frac{\tilde n}{2}) -\frac{d^2}{J^2}}
 \]</span></p>
 <p>wherein <span class="math inline">\(J\)</span> represents the Hedges
 correction (calculation above).</p>
@@ -535,6 +541,10 @@ df = n_1 + n_2 - 2
 \]</span></p>
 <p>The non-centrality parameter (<span class="math inline">\(\lambda\)</span>) is calculated as the
 following:</p>
+<ol style="list-style-type: decimal">
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
+(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+</ol>
 <p><span class="math display">\[
 \lambda = d \cdot \sqrt \frac{\tilde n}{2}
 \]</span></p>
@@ -544,26 +554,102 @@ following:</p>
 <p><span class="math display">\[
 \tilde n = \frac{2 \cdot n_1 \cdot n_2}{n_1 + n_2}
 \]</span></p>
+<ol start="2" style="list-style-type: decimal">
+<li>Under all other methods (nct, t, or z):</li>
+</ol>
+<p><span class="math display">\[
+\lambda = \frac{1}{n_1} +\frac{1}{n_2}
+\]</span></p>
 <p>The standard error (<span class="math inline">\(\sigma\)</span>) of
 Cohen’s d is calculated as the following:</p>
+<ol style="list-style-type: decimal">
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
+(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+</ol>
 <p><span class="math display">\[
-\sigma = \sqrt{\frac{df}{df-2} \cdot \frac{2}{\tilde n} (1+d^2 \cdot
-\frac{\tilde n}{2}) -\frac{d^2}{J}}
+\sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{2}{\tilde n} (1+d^2
+\cdot \frac{\tilde n}{2}) -\frac{d^2}{J}}
+\]</span> wherein <span class="math inline">\(J\)</span> represents the
+Hedges correction (calculation above).</p>
+<ol start="2" style="list-style-type: decimal">
+<li>Under all other methods (nct, t, or z):</li>
+</ol>
+<p><span class="math display">\[
+\sigma_{SMD} = \sqrt{\frac{n_1+n_2}{n_1 \cdot n_2} \cdot \frac{d^2}{2
+\cdot(n_1+n_2)} \cdot J^2}
 \]</span></p>
-<p>wherein <span class="math inline">\(J\)</span> represents the Hedges
-correction (calculation above).</p>
+</div>
+<div id="glasss-delta" class="section level2">
+<h2>Glass’s Delta</h2>
+<p>For this calculation, the denominator is simply the standard
+deviation of one of the groups (<code>x</code> for
+<code>glass = &quot;glass1&quot;</code>, or <code>y</code> for
+<code>glass = &quot;glass2&quot;</code>.</p>
+<p><span class="math display">\[
+s_{c} = SD_{control \space group}
+\]</span></p>
+<p><span class="math display">\[
+d = \frac {\bar{x}_1 - \bar{x}_2} {s_{c}}
+\]</span></p>
+<p>The degrees of freedom for Glass’s delta is the following:</p>
+<p><span class="math display">\[
+df = n_c - 1
+\]</span></p>
+<p>The non-centrality parameter (<span class="math inline">\(\lambda\)</span>) is calculated as the
+following:</p>
+<ol style="list-style-type: decimal">
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
+(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+</ol>
+<p><span class="math display">\[
+\lambda = d \cdot \sqrt \frac{\tilde n}{2}
+\]</span></p>
+<p>wherein, <span class="math inline">\(\tilde n\)</span> is the
+harmonic mean of the 2 sample sizes which is calculated as the
+following:</p>
+<p><span class="math display">\[
+\tilde n = \frac{2 \cdot n_1 \cdot n_2}{n_1 + n_2}
+\]</span></p>
+<ol start="2" style="list-style-type: decimal">
+<li>Under all other methods (nct, t, or z):</li>
+</ol>
+<p><span class="math display">\[
+\lambda = \frac{1}{n_T} +  \frac{s_c^2}{n_c \cdot s_c^2}
+\]</span></p>
+<p>The standard error (<span class="math inline">\(\sigma\)</span>) of
+Glass’s delta is calculated as the following:</p>
+<ol style="list-style-type: decimal">
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
+(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+</ol>
+<p><span class="math display">\[
+\sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{2}{\tilde n} (1+d^2
+\cdot \frac{\tilde n}{2}) -\frac{d^2}{J}}
+\]</span> wherein <span class="math inline">\(J\)</span> represents the
+Hedges correction (calculation above).</p>
+<ol start="2" style="list-style-type: decimal">
+<li>Under all other methods (nct, t, or z):</li>
+</ol>
+<p><span class="math display">\[
+\sigma_{SMD} = \sqrt{\frac{1}{\tilde n} \cdot \frac{N - 2}{N - 4} \cdot
+(1 + \tilde n \cdot
+                                                             d ^ 2) -
+\frac{d^2}{J^2}}
+\]</span></p>
 </div>
 </div>
 <div id="paired-samples" class="section level1">
 <h1>Paired Samples</h1>
 <p>For paired samples there are two calculative approaches supported by
 <code>TOSTER</code>. One the denominator is the standard deviation of
-the change score (Cohen’s d(z)) and the other is the correlation
-corrected effect size (Cohen’s d(av)). Currently, the choice is made by
-the function based on whether or not the user sets
+the change score (Cohen’s d(z)), the correlation corrected effect size
+(Cohen’s d(av)), and the standard deviation of the control condition
+(Glass’s <span class="math inline">\(\Delta\)</span>). Currently, the
+choice is made by the function based on whether or not the user sets
 <code>rm_correction</code> to TRUE. If <code>rm_correction</code> is set
 to t TRUE then Cohen’s d(rm) will be returned, and otherwise Cohen’s
-d(z) is returned.</p>
+d(z) is returned. This can be overridden and Glass’s delta is returned
+if the <code>glass</code> argument is set to “glass1” or “glass2”.</p>
 <div id="cohens-dz-change-scores" class="section level2">
 <h2>Cohen’s d(z): Change Scores</h2>
 <p>For this calculation, the denominator is the standard deviation of
@@ -579,20 +665,50 @@ sd_2}
 d_{z} = \frac {\bar{x}_1 - \bar{x}_2} {s_{diff}}
 \]</span></p>
 <p>The degrees of freedom for Cohen’s d(z) is the following:</p>
+<ol style="list-style-type: decimal">
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
+(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+</ol>
 <p><span class="math display">\[
 df = 2 \cdot (N_{pairs}-1)
 \]</span></p>
+<ol start="2" style="list-style-type: decimal">
+<li>Under all other methods (nct, t, or z):</li>
+</ol>
+<p><span class="math display">\[
+df = N - 1
+\]</span></p>
 <p>The non-centrality parameter (<span class="math inline">\(\lambda\)</span>) is calculated as the
 following:</p>
+<ol style="list-style-type: decimal">
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
+(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+</ol>
 <p><span class="math display">\[
 \lambda = d_{z} \cdot \sqrt \frac{N_{pairs}}{2 \cdot (1-r_{12})}
 \]</span></p>
+<ol start="2" style="list-style-type: decimal">
+<li>Under all other methods (nct, t, or z):</li>
+</ol>
+<p><span class="math display">\[
+\lambda = \frac{1}{n}
+\]</span></p>
 <p>The standard error (<span class="math inline">\(\sigma\)</span>) of
 Cohen’s d(z) is calculated as the following:</p>
+<ol style="list-style-type: decimal">
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
+(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+</ol>
 <p><span class="math display">\[
-\sigma = \sqrt{\frac{df}{df-2} \cdot \frac{2 \cdot (1-r_{12})}{n} \cdot
-(1+d^2 \cdot \frac{n}{2 \cdot (1-r_{12})}) -\frac{d^2}{J^2}} \space
-\times \space \sqrt {2 \cdot (1-r_{12})}
+\sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{2 \cdot (1-r_{12})}{n}
+\cdot (1+d^2 \cdot \frac{n}{2 \cdot (1-r_{12})}) -\frac{d^2}{J^2}}
+\space \times \space \sqrt {2 \cdot (1-r_{12})}
+\]</span></p>
+<ol start="2" style="list-style-type: decimal">
+<li>Under all other methods (nct, t, or z):</li>
+</ol>
+<p><span class="math display">\[
+\sigma_{SMD} = \sqrt{\frac{1}{n} + \frac{d_z^2}{(2 \cdot n)}}
 \]</span></p>
 </div>
 <div id="cohens-drm-correlation-corrected" class="section level2">
@@ -614,20 +730,87 @@ d_{rm} = \frac {\bar{x}_1 - \bar{x}_2}{s_{diff}} \cdot \sqrt {2 \cdot
 (1-r_{12})}
 \]</span></p>
 <p>The degrees of freedom for Cohen’s d(rm) is the following:</p>
+<ol style="list-style-type: decimal">
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
+(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+</ol>
 <p><span class="math display">\[
 df = 2 \cdot (N_{pairs}-1)
 \]</span></p>
+<ol start="2" style="list-style-type: decimal">
+<li>Under all other methods (nct, t, or z):</li>
+</ol>
+<p><span class="math display">\[
+df = N - 1
+\]</span></p>
 <p>The non-centrality parameter (<span class="math inline">\(\lambda\)</span>) is calculated as the
 following:</p>
+<ol style="list-style-type: decimal">
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
+(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+</ol>
 <p><span class="math display">\[
 \lambda = d_{rm} \cdot \sqrt \frac{N_{pairs}}{2 \cdot (1-r_{12})}
+\]</span></p>
+<ol start="2" style="list-style-type: decimal">
+<li>Under all other methods (nct, t, or z):</li>
+</ol>
+<p><span class="math display">\[
+\lambda = \frac{1}{n}
 \]</span></p>
 <p>The standard error (<span class="math inline">\(\sigma\)</span>) of
 Cohen’s d(rm) is calculated as the following:</p>
 <p><span class="math display">\[
-\sigma = \sqrt{\frac{df}{df-2} \cdot \frac{2 \cdot (1-r_{12})}{n} \cdot
-(1+d^2 \cdot \frac{n}{2 \cdot (1-r_{12})}) -\frac{d^2}{J^2}}
+\sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{2 \cdot (1-r_{12})}{n}
+\cdot (1+d_{rm}^2 \cdot \frac{n}{2 \cdot (1-r_{12})})
+-\frac{d_{rm}^2}{J^2}}
 \]</span></p>
+</div>
+<div id="glasss-delta-1" class="section level2">
+<h2>Glass’s Delta</h2>
+<p>For this calculation, the denominator is simply the standard
+deviation of one of the groups (<code>x</code> for
+<code>glass = &quot;glass1&quot;</code>, or <code>y</code> for
+<code>glass = &quot;glass2&quot;</code>.</p>
+<p><span class="math display">\[
+s_{c} = SD_{control \space condition}
+\]</span></p>
+<p><span class="math display">\[
+d = \frac {\bar{x}_1 - \bar{x}_2} {s_{c}}
+\]</span></p>
+<p>The degrees of freedom for Glass’s delta is the following:</p>
+<ol style="list-style-type: decimal">
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
+(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+</ol>
+<p><span class="math display">\[
+df = 2 \cdot N - 1
+\]</span></p>
+<ol start="2" style="list-style-type: decimal">
+<li>Under all other methods (nct, t, or z):</li>
+</ol>
+<p><span class="math display">\[
+df = N - 1
+\]</span></p>
+<p>The non-centrality parameter (<span class="math inline">\(\lambda\)</span>) is calculated as the
+following:</p>
+<ol style="list-style-type: decimal">
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
+(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+</ol>
+<p><span class="math display">\[
+\lambda = d \cdot \sqrt{\frac{N}{2 \cdot (1 - r_{12})}}
+\]</span></p>
+<ol start="2" style="list-style-type: decimal">
+<li>Under all other methods (nct, t, or z):</li>
+</ol>
+<p><span class="math display">\[
+\lambda = \frac{1}{N}
+\]</span></p>
+<p>The standard error (<span class="math inline">\(\sigma\)</span>) of
+Glass’s delta is calculated as the following:</p>
+<p>$$ _{SMD} = </p>
+<p>$$</p>
 </div>
 </div>
 <div id="one-sample" class="section level1">
@@ -656,7 +839,7 @@ following:</p>
 <p>The standard error (<span class="math inline">\(\sigma\)</span>) of
 Cohen’s d is calculated as the following:</p>
 <p><span class="math display">\[
-\sigma = \sqrt{\frac{df}{df-2} \cdot \frac{1}{N} (1+d^2 \cdot N)
+\sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{1}{N} (1+d^2 \cdot N)
 -\frac{d^2}{J^2}}
 \]</span></p>
 <ul>
@@ -694,13 +877,33 @@ d_U = \frac{t_U}{\lambda} \cdot d
 <div id="the-non-central-t-method-smd_ci-nct" class="section level2">
 <h2>The non-central t-method (smd_ci = “nct”)</h2>
 <p>Calculate the non-centrality parameters necessary to form confidence
-intervals wherein the observed t-statistic (<span class="math inline">\(t_{obs}\)</span>) is utilized.</p>
+intervals wherein the observed t-statistic (<span class="math inline">\(t_{obs}\)</span>) (note: the standard error is
+slightly altered for d_{rm}) is utilized.</p>
 <p><span class="math display">\[
 t_L = t_{(1-alpha,\space df, \space t_{obs})} \\
 t_U = t_{(alpha,\space df, \space  t_{obs})}
-\]</span> ts[1] * sqrt(hn) * J <span class="math display">\[
+\]</span> The confidence intervals can then be constructed using the
+non-centrality parameter and the bias correction.</p>
+<p><span class="math display">\[
 d_L = t_L \cdot \sqrt{\lambda} \cdot J \\
 d_U = t_U \cdot \sqrt{\lambda} \cdot J
+\]</span> ## Central t-method</p>
+<p>Full warning this method provides sub-optimal coverage.</p>
+<p>The limits of the t-distribution at the given alpha-level and degrees
+of freedom (<code>qt(1-alpha,df)</code>) are multiplied by the standard
+error of the calculated SMD.</p>
+<p><span class="math display">\[
+CI = SMD \space \pm \space t_{(1-\alpha,df)} \cdot \sigma_{SMD}
+\]</span></p>
+</div>
+<div id="normal-method" class="section level2">
+<h2>Normal method</h2>
+<p>Full warning this method provides atrocious coverage.</p>
+<p>The limits of the z-distribution at the given alpha-level
+(<code>qnorm(1-alpha)</code>) are multiplied by the standard error of
+the calculated SMD.</p>
+<p><span class="math display">\[
+CI = SMD \space \pm \space z_{(1-\alpha)} \cdot \sigma_{SMD}
 \]</span></p>
 </div>
 </div>
@@ -739,8 +942,8 @@ how often we would expect a discrepancy between the original and
 replication study if the same underlying effect was being measured (also
 assuming no publication bias).</p>
 <p>We can see from the results below that, if the null hypothesis were
-true, we would only expect to see a disprency in SMDs between studies at
-least this large ~1% of the time.</p>
+true, we would only expect to see a discrepancy in SMDs between studies
+at least this large ~1% of the time.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">compare_smd</span>(<span class="at">smd1 =</span> <span class="fl">0.95</span>,</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">n1 =</span> <span class="dv">25</span>,</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">smd2 =</span> <span class="fl">0.23</span>,</span>
@@ -782,7 +985,7 @@ solution is the bootstrap the results. This can be accomplished with the
 <span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; difference in SMDs </span></span>
 <span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;          0.8058872</span></span>
 <span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Table of boostrapped CIs</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Table of bootstrapped CIs</span></span>
 <span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(boot_test<span class="sc">$</span>df_ci, <span class="at">digits =</span> <span class="dv">4</span>)</span></code></pre></div>
 <table>
 <thead>
