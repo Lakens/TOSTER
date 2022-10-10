@@ -10,6 +10,10 @@ NEWS
   - `compare_smd`: Compare 2 SMDs from summary statistics
   - `boot_compare_smd`: Compare 2 SMDs from raw data
   - `compare_cor`: Compare 2 independent correlations
+- Added additional SMD options.
+  - Confidence intervals can now be estimated using other methods
+  - smd_ci can be used to set the confidence interval method
+  - Glass's delta can now be calculated using the `glass` argument
 
 # TOSTER v0.4.2
 
