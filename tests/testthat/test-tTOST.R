@@ -1067,6 +1067,12 @@ test_that("Check NCT CIs for paired",{
                  smd_ci = "g",
                  bias_correction = F,
                  glass = "glass1")
+  test5 = t_TOST(x=subset(sleep, group ==1)$extra,y=subset(sleep, group ==2)$extra,
+                 paired = TRUE,
+                 eqb = .5,
+                 smd_ci = "g",
+                 bias_correction = F,
+                 glass = "glass2")
 
   test6 = t_TOST(x=subset(sleep, group ==1)$extra,y=subset(sleep, group ==2)$extra,
                  paired = TRUE,
@@ -1139,6 +1145,25 @@ test_that("Check NCT CIs for ind",{
                  smd_ci = "g",
                  bias_correction = F,
                  glass = "glass1")
+  test5 = t_TOST(x=subset(sleep, group ==1)$extra,y=subset(sleep, group ==2)$extra,
+                 paired = FALSE,
+                 eqb = .5,
+                 smd_ci = "g",
+                 bias_correction = F,
+                 glass = "glass2")
+
+  test5 = t_TOST(x=subset(sleep, group ==1)$extra,y=subset(sleep, group ==2)$extra,
+                 paired = FALSE,
+                 eqb = .5,
+                 smd_ci = "n",
+                 bias_correction = T,
+                 glass = "glass1")
+  test5 = t_TOST(x=subset(sleep, group ==1)$extra,y=subset(sleep, group ==2)$extra,
+                 paired = FALSE,
+                 eqb = .5,
+                 smd_ci = "n",
+                 bias_correction = T,
+                 glass = "glass2")
 
   test6 = t_TOST(x=subset(sleep, group ==1)$extra,y=subset(sleep, group ==2)$extra,
                  paired = FALSE,

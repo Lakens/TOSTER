@@ -16,3 +16,4 @@ build/js
 NUL
 .DS_Store
 cran-comments.md
+tests/testthat/Rplots.pdf

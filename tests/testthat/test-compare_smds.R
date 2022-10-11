@@ -15,6 +15,18 @@ test_that("compare_smd", {
 
   expect_error(compare_smd())
 
+  expect_error(  compare_smd(smd1 = .4,
+                                     n1 = c(6,3),
+                                     smd2 =.5,
+                                     n2 = 12,
+                                     paired = TRUE))
+
+  expect_error(  compare_smd(smd1 = .4,
+                             n1 = c(6,6,24),
+                             smd2 =.5,
+                             n2 = 12,
+                             paired = FALSE))
+
   # One sample
   set.seed(7894021)
   datx1 = rnorm(20)
@@ -27,6 +39,14 @@ test_that("compare_smd", {
                       smd2 = one_boot1$df_ci$estimate[3],
                       n2 = length(datx2),
                       paired = TRUE)
+
+  one_2_TOST = compare_smd(smd1 = one_boot1$df_ci$estimate[2],
+                      n1 = length(datx1),
+                      smd2 = one_boot1$df_ci$estimate[3],
+                      n2 = length(datx2),
+                      paired = TRUE,
+                      TOST = TRUE,
+                      null = .25)
 
   expect_equal(unname(one_1$statistic),
                unname(one_boot1$statistic))

@@ -86,6 +86,15 @@ test_that("Run examples for two sample", {
                tolerance = .003)
   prtest = hush(print(test3))
 
+  test01 = wilcox_TOST(x = samp1,
+                      y = samp2,
+                      eqb = .5,
+                      ses = "o")
+  test02 = wilcox_TOST(x = samp1,
+                       y = samp2,
+                       eqb = .5,
+                       ses = "c")
+
 })
 
 
@@ -143,5 +152,17 @@ test_that("Run examples for paired samples", {
                tolerance = .005)
 
   prtest = hush(print(test1))
+
+  test01 = wilcox_TOST(x = samp1,
+                      y = samp2,
+                      paired = TRUE,
+                      eqb = .5,
+                      ses = "o")
+
+  test02 = wilcox_TOST(x = samp1,
+                       y = samp2,
+                       paired = TRUE,
+                       eqb = .5,
+                       ses = "c")
 
 })
