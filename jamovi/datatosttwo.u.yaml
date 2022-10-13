@@ -8,6 +8,13 @@ children:
     stretchFactor: 1
     children:
       - type: TargetLayoutBox
+        label: Variable
+        children:
+          - type: VariablesListBox
+            name: deps
+            maxItemCount: 1
+            isTarget: true
+      - type: TargetLayoutBox
         children:
           - type: VariablesListBox
             name: group
@@ -21,13 +28,6 @@ children:
                 stretchFactor: 1
                 template:
                   type: VariableLabel
-            isTarget: true
-      - type: TargetLayoutBox
-        label: Variable
-        children:
-          - type: VariablesListBox
-            name: deps
-            maxItemCount: 1
             isTarget: true
   - type: LayoutBox
     margin: large

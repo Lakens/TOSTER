@@ -6,7 +6,7 @@ jrs:   "1.0"
 items:
 
     - name:  text
-      type:  Preformatted
+      type:  Html
       clearWith:
         - mu
         - alpha
