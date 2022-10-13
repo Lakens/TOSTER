@@ -1,0 +1,22 @@
+---
+refs:
+
+    R:
+        type: 'software'
+        author: R Core Team
+        year: 2018
+        title: 'A Language and Envionment for Statistical Computing'
+        publisher: '[Computer software]. Retrieved from https://cran.r-project.org/'
+        url: https://cran.r-project.org/
+
+    TOSTER:
+        type: 'software'
+        author: Caldwell, A.R.
+        year: 2022
+        title: "TOSTER R package 0.5.1"
+        publisher: "CRAN"
+        url: 'https://aaroncaldwell.us/TOSTERpkg/'
+
+
+
+...

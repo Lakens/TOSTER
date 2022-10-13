@@ -167,7 +167,9 @@ dataTOSTtwoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 title="TOST Independent Samples T-Test")
             self$add(jmvcore::Html$new(
                 options=options,
-                name="text"))
+                name="text",
+                refs=list(
+                    "TOSTER")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="tost",
