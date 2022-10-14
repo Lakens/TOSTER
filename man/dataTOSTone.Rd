@@ -54,7 +54,7 @@ effect size is biased (d) or bias-corrected (g).}
 \value{
 A results object containing:
 \tabular{llllll}{
-  \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+  \code{results$text} \tab \tab \tab \tab \tab a html \cr
   \code{results$tost} \tab \tab \tab \tab \tab a table \cr
   \code{results$eqb} \tab \tab \tab \tab \tab a table \cr
   \code{results$effsize} \tab \tab \tab \tab \tab a table \cr
