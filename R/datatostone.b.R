@@ -98,10 +98,16 @@ dataTOSToneClass <- R6::R6Class(
 
         }
 
-        if(grepl(TOSTres$decision$TOST, pattern="non")){
-          TOST_text = "&#10060 TOST: don't reject null null equivalence hypothesis"
+        if(self$options$hypothesis == "EQU"){
+          tost_hypt = "equivalence"
         } else{
-          TOST_text = "&#9989 TOST: reject null null equivalence hypothesis"
+          tost_hypt = "MET"
+        }
+
+        if(grepl(TOSTres$decision$TOST, pattern="non")){
+          TOST_text = paste0("&#10060 TOST: don't reject null ", tost_hypt,"  hypothesis")
+        } else{
+          TOST_text = paste0("&#9989 TOST: reject null ", tost_hypt,"  hypothesis")
 
         }
 
