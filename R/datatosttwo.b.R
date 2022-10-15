@@ -131,20 +131,20 @@ dataTOSTtwoClass <- R6::R6Class(
           alt_high = "less"
           test_hypothesis = "Hypothesis Tested: Equivalence"
           null_hyp = paste0(round(pr_l_eqb,2),
-                            " >= (Mean1 - Mean2) or (Mean1 - Mean2) >= ",
+                            " &ge; (Mean<sub>1</sub> - Mean<sub>2</sub>) or (Mean<sub>1</sub> - Mean<sub>2</sub>) &ge; ",
                             round(pr_h_eqb,2))
           alt_hyp = paste0(round(pr_l_eqb,2),
-                           " < (Mean1 - Mean2) < ",
+                           " < (Mean<sub>1</sub> - Mean<sub>2</sub>) < ",
                            round(pr_h_eqb,2))
         } else if(self$options$hypothesis == "MET"){
           alt_low = "less"
           alt_high = "greater"
           test_hypothesis = "Hypothesis Tested: Minimal Effect"
           null_hyp = paste0(round( pr_l_eqb,2),
-                            " <= (Mean1 - Mean2)  <= ",
+                            " &le; (Mean<sub>1</sub> - Mean<sub>2</sub>)  &le; ",
                             round(pr_h_eqb,2))
           alt_hyp = paste0(round( pr_l_eqb,2),
-                           " > (Mean1 - Mean2) or (Mean1 - Mean2)  > ",
+                           " > (Mean<sub>1</sub> - Mean<sub>2</sub>) or (Mean<sub>1</sub> - Mean<sub>2</sub>)  > ",
                            round(pr_h_eqb,2))
         }
 
@@ -205,14 +205,35 @@ dataTOSTtwoClass <- R6::R6Class(
           )
         )
 
+        if(grepl(TOSTres$decision$ttest, pattern="non")){
+          nhst_text = "&#10060 NHST: don't reject null significance hypothesis that the effect is equal to zero"
+        } else{
+          nhst_text = "&#9989 NHST: reject null significance hypothesis that the effect is equal to zero"
+
+        }
+
+        if(self$options$hypothesis == "EQU"){
+          tost_hypt = "equivalence"
+        } else{
+          tost_hypt = "MET"
+        }
+
+        if(grepl(TOSTres$decision$TOST, pattern="non")){
+          TOST_text = paste0("&#10060 TOST: don't reject null ", tost_hypt," hypothesis")
+        } else{
+          TOST_text = paste0("&#9989 TOST: reject null ", tost_hypt," hypothesis")
+
+        }
+
         text_res = paste0(test_hypothesis,
-                          "\n \n",
-                          "Null Hypothesis: ", null_hyp,"\n",
-                          "Alternative: ", alt_hyp,"\n",
-                          TOSTres$decision$combined,
-                          "\n Note: SMD confidence intervals are an approximation. See vignette(\"SMD_calcs\") \n",
+                          "<br> <br>",
+                          "Null Hypothesis: ", null_hyp,"<br>",
+                          "Alternative: ", alt_hyp,"<br>",
+                          nhst_text, "<br>",
+                          TOST_text, "<br>",
+                          "<br> Note: SMD confidence intervals are an approximation. See our <a href=\"https://aaroncaldwell.us/TOSTERpkg/articles/SMD_calcs.html\">documentation</a>. <br>",
                           ifelse(self$options$eqbound_type == 'SMD',
-                                 "\n Warning: standardized bounds produce biased results. \n Consider setting bounds in raw units", ""))
+                                 "<br> &#x1f6a8; Warning: standardized bounds produce biased results. Consider setting bounds in raw units.", ""))
         self$results$text$setContent(text_res)
 
         plot <- plots$get(key=depName)
@@ -232,7 +253,7 @@ dataTOSTtwoClass <- R6::R6Class(
 
       TOSTres <- image$state
 
-      plotTOSTr = plot(TOSTres)
+      plotTOSTr = plot(TOSTres) + ggtheme
       print(plotTOSTr)
 
       return(TRUE)
@@ -273,19 +294,9 @@ dataTOSTtwoClass <- R6::R6Class(
              y="",
              color = "Group")  +
         scale_colour_manual(values=c("red2","dodgerblue")) +
+        ggtheme +
         theme(
-          legend.position = "top",
-          strip.text = element_text(face = "bold", size = 11),
-          legend.text = element_text(face = "bold", size = 11),
-          legend.title = element_text(face = "bold", size = 11),
-          axis.text.x = element_text(face = "bold", size = 11),
-          axis.text.y = element_text(face = "bold", size = 11),
-          axis.title.x = element_text(face = "bold", size = 11),
-          panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(),
-          panel.background = element_rect(fill = "transparent",colour = NA),
-          plot.background = element_rect(fill = "transparent",colour = NA),
-          legend.background = element_rect(fill = "transparent",colour = NA)
+          legend.position = "top"
         )
 
       print(p)

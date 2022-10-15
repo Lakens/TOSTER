@@ -90,23 +90,37 @@ dataTOSToneClass <- R6::R6Class(
                          eqbound_type = eqbound_type,
                          alpha = alpha,
                          bias_correction = bias_c)
-        if(eqbound_type == "SMD"){
-          text_res = paste0("Two One-Sided Tests: One Sample t-tests \n \n",
-                            test_hypothesis,
-                            "\n \n",
-                            "Null Hypothesis: ", null_hyp,"\n",
-                            "Alternative: ", alt_hyp,
-                            "Note: SMD confidence intervals are an approximation. See vignette(\"SMD_calcs\") \n",
-                            "\n Warning: standardized bounds produce biased results. \n Consider setting bounds in raw units")
 
+        if(grepl(TOSTres$decision$ttest, pattern="non")){
+          nhst_text = "&#10060 NHST: don't reject null significance hypothesis that the effect is equal to zero"
         } else{
-          text_res = paste0("Two One-Sided Tests: One Sample t-tests \n \n",
-                            test_hypothesis,
-                            "\n \n",
-                            "Null Hypothesis: ", null_hyp,"\n",
-                            "Alternative: ", alt_hyp, "\n",
-                            "Note: SMD confidence intervals are an approximation. See vignette(\"SMD_calcs\") \n")
+          nhst_text = "&#9989 NHST: reject null significance hypothesis that the effect is equal to zero"
+
         }
+
+        if(self$options$hypothesis == "EQU"){
+          tost_hypt = "equivalence"
+        } else{
+          tost_hypt = "MET"
+        }
+
+        if(grepl(TOSTres$decision$TOST, pattern="non")){
+          TOST_text = paste0("&#10060 TOST: don't reject null ", tost_hypt,"  hypothesis")
+        } else{
+          TOST_text = paste0("&#9989 TOST: reject null ", tost_hypt,"  hypothesis")
+
+        }
+
+        text_res = paste0(test_hypothesis,
+                          "<br> <br>",
+                          "Null Hypothesis: ", null_hyp,"<br>",
+                          "Alternative: ", alt_hyp,"<br>",
+                          nhst_text, "<br>",
+                          TOST_text, "<br>",
+                          "<br> Note: SMD confidence intervals are an approximation. See our <a href=\"https://aaroncaldwell.us/TOSTERpkg/articles/SMD_calcs.html\">documentation</a>. <br>",
+                          ifelse(self$options$eqbound_type == 'SMD',
+                                 "<br> &#x1f6a8; Warning: standardized bounds produce biased results. Consider setting bounds in raw units.", ""))
+
 
         tt$setRow(rowKey=name,
                   list(
@@ -163,7 +177,7 @@ dataTOSToneClass <- R6::R6Class(
 
       TOSTres <- image$state
 
-      plotTOSTr = plot(TOSTres)
+      plotTOSTr = plot(TOSTres) + ggtheme
       print(plotTOSTr)
 
       return(TRUE)

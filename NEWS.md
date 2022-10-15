@@ -3,6 +3,9 @@ NEWS
 
 **TOSTER R package and jamovi module**
 
+# TOSTER v0.5.1
+
+- Formatting requirements for jamovi (all superficial changes)
 
 # TOSTER v0.5.0
 

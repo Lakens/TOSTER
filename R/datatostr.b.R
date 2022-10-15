@@ -150,7 +150,7 @@ dataTOSTrClass <- R6::R6Class(
         plot$setState(points)
       }
     },
-    .plot=function(image, ...) {
+    .plot=function(image,ggtheme, ...) {
 
       if (is.null(image$state))
         return(FALSE)
@@ -179,20 +179,9 @@ dataTOSTrClass <- R6::R6Class(
                                                         round(points$high_eqbound_r,2)))) +
         labs(y = "",x="")+
         facet_grid(~as.character(points$r_lab)) +
-        theme_tidybayes() +
+        ggtheme +
         theme(
           legend.position = "top",
-          strip.text = element_text(face = "bold", size = 11),
-          legend.text = element_text(face = "bold", size = 11),
-          legend.title = element_text(face = "bold", size = 11),
-          axis.text.y = element_blank(),
-          axis.ticks.y = element_blank(),
-          axis.text.x = element_text(face = "bold", size = 11),
-          panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(),
-          panel.background = element_rect(fill = "transparent",colour = NA),
-          plot.background = element_rect(fill = "transparent",colour = NA),
-          legend.background = element_rect(fill = "transparent",colour = NA)
         )
 
       print(res)
