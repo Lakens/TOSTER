@@ -145,3 +145,49 @@ test_that("Run examples for paired samples", {
   prtest = hush(print(test1))
 
 })
+
+
+test_that("Check rbs",{
+  set.seed(1847501)
+  z1 = rnorm(35)
+  z2 = rnorm(35)
+
+  # Two Sample ------
+  rbs1 = TOSTER:::rbs_calc(x=z1, y=z2, mu=0, paired=FALSE)
+  rbs2 = TOSTER:::rbs_calc(x=z2, y=z1, mu=0, paired=FALSE)
+  expect_equal(abs(rbs1),abs(rbs2))
+
+  # Paired Sample ------
+  rbs1 = TOSTER:::rbs_calc(x=z1, y=z2, mu=0, paired=TRUE)
+  rbs2 = TOSTER:::rbs_calc(x=z2, y=z1, mu=0, paired=TRUE)
+  expect_equal(abs(rbs1),abs(rbs2))
+
+  # Two Sample ------
+  rbs1 = TOSTER:::rbs_calc(x=z1, y=z2, mu=.5, paired=FALSE)
+  rbs2 = TOSTER:::rbs_calc(x=z2, y=z1, mu=.5, paired=FALSE)
+  #expect_equal(abs(rbs1),abs(rbs2))
+
+  # Paired Sample ------
+  rbs1 = TOSTER:::rbs_calc(x=z1, y=z2, mu=.5, paired=TRUE)
+  rbs2 = TOSTER:::rbs_calc(x=z2, y=z1, mu=.5, paired=TRUE)
+  #expect_equal(abs(rbs1),abs(rbs2))
+  x1 = 1.25
+  expect_equal(TOSTER:::pr_to_odds(TOSTER:::odds_to_pr(x1)),
+               1.25)
+
+  rb1 = .75
+
+  expect_equal(TOSTER:::cstat_to_rb(TOSTER:::rb_to_cstat(rb1)),
+               rb1)
+
+  z1 = .45
+
+  expect_equal(TOSTER:::rho_to_z(TOSTER:::z_to_rho(z1)),
+               z1)
+  test1= TOSTER:::ranktransform(z1,sign=FALSE,method="first")
+  test1= TOSTER:::ranktransform(z1,sign=TRUE,method="first")
+  test2 = TOSTER:::ranktransform(1)
+  test25 = TOSTER:::ranktransform(c(7,7,7,7,7))
+  test3 = TOSTER:::ranktransform(c(NA,NA,NA))
+  test3 = TOSTER:::ranktransform(c(TRUE,TRUE,FALSE))
+})
