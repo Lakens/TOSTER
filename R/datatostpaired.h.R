@@ -311,8 +311,8 @@ dataTOSTpairedResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Cl
                 title="Effect Size Plot",
                 visible="(plots)",
                 renderFun=".plot",
-                width=400,
-                height=400,
+                width=500,
+                height=500,
                 clearWith=list(
                     "alpha",
                     "low_eqbound",

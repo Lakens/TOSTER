@@ -368,8 +368,8 @@ dataTOSToneResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                     options=options,
                     title="$key",
                     renderFun=".plot",
-                    width=400,
-                    height=375,
+                    width=450,
+                    height=450,
                     clearWith=list(
                         "mu",
                         "alpha",

@@ -195,8 +195,8 @@ items:
         title: $key
         type: Image
         renderFun: .plot
-        width: 400
-        height: 375
+        width: 500
+        height: 500
         clearWith:
           - mu
           - alpha

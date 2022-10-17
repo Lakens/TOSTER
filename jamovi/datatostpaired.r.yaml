@@ -134,8 +134,8 @@ items:
       type: Image
       visible: (plots)
       renderFun: .plot
-      width: 400
-      height: 400
+      width: 500
+      height: 500
       clearWith:
         - alpha
         - low_eqbound
