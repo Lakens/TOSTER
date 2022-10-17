@@ -211,8 +211,8 @@ items:
         title: $key
         type: Image
         renderFun: .plot
-        width: 425
-        height: 425
+        width: 500
+        height: 500
         clearWith:
           - group
           - alpha

@@ -12,8 +12,6 @@ p_from_z = function(x,
 
 }
 
-
-
 se_dz = function(smd,n){
   sqrt( 1/n + (smd^2/(2*n)) )
 }

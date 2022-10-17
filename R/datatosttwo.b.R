@@ -253,7 +253,8 @@ dataTOSTtwoClass <- R6::R6Class(
 
       TOSTres <- image$state
 
-      plotTOSTr = plot(TOSTres) + ggtheme
+      plotTOSTr = plot_tost_jam(TOSTres,
+                                ggtheme = ggtheme)
       print(plotTOSTr)
 
       return(TRUE)
@@ -289,11 +290,11 @@ dataTOSTtwoClass <- R6::R6Class(
                   side = "right") +
         stat_summary(aes(x=as.numeric(group)+.2),
                      fun.data=data_summary) +
-        theme_tidybayes() +
+        # theme_tidybayes() +
         labs(x="Group",
              y="",
              color = "Group")  +
-        scale_colour_manual(values=c("red2","dodgerblue")) +
+        #scale_colour_manual(values=c("red2","dodgerblue")) +
         ggtheme +
         theme(
           legend.position = "top"

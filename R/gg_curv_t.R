@@ -191,3 +191,5 @@ gg_curv_t <- function(data_list,
 # RMD Check
 utils::globalVariables(c("df", "lower.limit", "upper.limit", "intrvl.width", "intrvl.level", "cdf", "pvalue", "svalue"))
 utils::globalVariables(c("X2", "X3", "limits", "x"))
+
+
