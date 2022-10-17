@@ -253,7 +253,8 @@ dataTOSTtwoClass <- R6::R6Class(
 
       TOSTres <- image$state
 
-      plotTOSTr = plot(TOSTres) + ggtheme
+      plotTOSTr = plot_tost_jam(TOSTres,
+                                ggtheme = ggtheme)
       print(plotTOSTr)
 
       return(TRUE)
