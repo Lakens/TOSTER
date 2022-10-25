@@ -260,6 +260,7 @@ following:
 $$
 \sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{2}{\tilde n} (1+d^2 \cdot \frac{\tilde n}{2}) -\frac{d^2}{J}}
 $$ 
+
 wherein $J$ represents the Hedges correction (calculation above).
 
 2. Under all other methods (nct, t, or z):
@@ -447,7 +448,6 @@ following:
 
 $$
 \sigma_{SMD} =     \sqrt{\frac{n-1}{n \cdot (n-3)} \cdot (2\cdot(1-r_{12})+d^2 \cdot N) + \frac{d^2}{J^2}}
-
 $$
 
 
