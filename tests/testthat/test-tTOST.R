@@ -150,7 +150,8 @@ test_that("Run examples for one sample", {
                                    high_eqbound = .5,
                                    eqbound_type = "SMD",
                                    hypothesis = "MET",
-                                   bias_correction = FALSE)
+                                   bias_correction = FALSE,
+                                   smd_ci = "goulet")
   })
 
   expect_equal(1-test1$TOST$p.value[2],
@@ -493,7 +494,8 @@ test_that("Run examples for two sample", {
                                  high_eqbound = .5,
                                  eqbound_type = "SMD",
                                  hypothesis = "MET",
-                                 bias_correction = FALSE) )
+                                 bias_correction = FALSE,
+                                 smd_ci = "g") )
 
   expect_equal(1-test1$TOST$p.value[2],
                test3$TOST$p.value[2])
@@ -918,7 +920,8 @@ test_that("plot generic function",{
                  y = samp2,
                  paired = TRUE,
                  low_eqbound = -.5,
-                 high_eqbound = .5)
+                 high_eqbound = .5,
+                 smd_ci = "g")
 
   expect_error(plot(wilcox_TOST(x = samp1,
                                 y = samp2,
