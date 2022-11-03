@@ -89,7 +89,8 @@ dataTOSToneClass <- R6::R6Class(
                          high_eqbound = high_eqbound,
                          eqbound_type = eqbound_type,
                          alpha = alpha,
-                         bias_correction = bias_c)
+                         bias_correction = bias_c,
+                         smd_ci = "goulet")
 
         if(grepl(TOSTres$decision$ttest, pattern="non")){
           nhst_text = "&#10060 NHST: don't reject null significance hypothesis that the effect is equal to zero"

@@ -28,7 +28,7 @@ smd_calc(
   bias_correction = TRUE,
   rm_correction = FALSE,
   glass = NULL,
-  smd_ci = c("goulet", "nct", "t", "z"),
+  smd_ci = c("nct", "goulet", "t", "z"),
   ...
 )
 
@@ -72,5 +72,7 @@ A data frame containing the SMD estimates.
 A function to only calculate standardized mean differences.
 }
 \examples{
+\dontrun{
 smd_calc(formula = extra ~ group,data = sleep, paired = TRUE, smd_ci = "nct")
+}
 }

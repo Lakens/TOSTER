@@ -55,5 +55,7 @@ A data frame containing the standardized effect size.
 Standardized effect size (SES), these are the effect sizes not considered SMDs.
 }
 \examples{
+\dontrun{
 ses_calc(formula = extra ~ group, data = sleep, paired = TRUE, ses = "r")
+}
 }

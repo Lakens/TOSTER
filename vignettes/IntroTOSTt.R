@@ -141,7 +141,8 @@ head(sleep)
 ## -----------------------------------------------------------------------------
 res1 = t_TOST(formula = extra ~ group,
               data = sleep,
-              eqb = .5)
+              eqb = .5,
+              smd_ci = "goulet")
 
 res1a = t_TOST(x = subset(sleep,group==1)$extra,
                y = subset(sleep,group==2)$extra,
@@ -153,9 +154,10 @@ print(res1)
 ## ----fig.width=6, fig.height=6------------------------------------------------
 plot(res1, type = "cd")
 
-## ----fig.width=6, fig.height=6------------------------------------------------
-plot(res1, type = "cd",
-     ci_shades = c(.9,.95))
+## ----fig.width=6, fig.height=6, eval=FALSE------------------------------------
+#  # Set to shade only the 90% and 95% CI areas
+#  plot(res1, type = "cd",
+#       ci_shades = c(.9,.95))
 
 ## ----fig.width=6, fig.height=6------------------------------------------------
 plot(res1, type = "c",
@@ -180,20 +182,16 @@ res3a = t_TOST(x = iris$Sepal.Length,
               y = iris$Sepal.Width,
                paired = TRUE,
                hypothesis = "MET",
-               eqb = 1)
+               eqb = 1,
+              smd_ci = "goulet")
 res3a
-
-## ----fig.width=6, fig.height=6------------------------------------------------
-plot(res3a)
 
 ## -----------------------------------------------------------------------------
 res4 = t_TOST(x = iris$Sepal.Length,
               hypothesis = "EQU",
-              eqb = c(5.5,8.5))
+              eqb = c(5.5,8.5),
+              smd_ci = "goulet")
 res4
-
-## ----fig.width=6, fig.height=6------------------------------------------------
-plot(res4)
 
 ## -----------------------------------------------------------------------------
 res_tsum = tsum_TOST(

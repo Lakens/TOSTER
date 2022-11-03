@@ -17,7 +17,9 @@
 #' @param ...  further arguments to be passed to or from methods.
 #' @return A data frame containing the SMD estimates.
 #' @examples
+#' \dontrun{
 #' smd_calc(formula = extra ~ group,data = sleep, paired = TRUE, smd_ci = "nct")
+#' }
 #' @name smd_calc
 #' @export smd_calc
 
@@ -48,7 +50,7 @@ smd_calc.default = function(x,
                             bias_correction = TRUE,
                             rm_correction = FALSE,
                             glass = NULL,
-                            smd_ci = c("goulet", "nct", "t", "z"),
+                            smd_ci = c("nct", "goulet", "t", "z"),
                             ...) {
 
   if(is.null(glass)){

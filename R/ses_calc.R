@@ -18,7 +18,9 @@
 #' @param ...  further arguments to be passed to or from methods.
 #' @return A data frame containing the standardized effect size.
 #' @examples
+#' \dontrun{
 #' ses_calc(formula = extra ~ group, data = sleep, paired = TRUE, ses = "r")
+#' }
 #' @name ses_calc
 #' @export ses_calc
 

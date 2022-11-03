@@ -4,7 +4,8 @@ test_that("dataTOSTtwo: internal consistency",{
   t1 = t_TOST(formula = extra ~ group,
               data = sleep,
               low_eqbound = -2,
-              high_eqbound = 2)
+              high_eqbound = 2,
+              smd_ci = "goulet")
 
   t2 = dataTOSTtwo(data = sleep,
                    deps = "extra",
@@ -30,7 +31,8 @@ test_that("dataTOSTtwo: internal consistency",{
               data = sleep,
               var.equal = TRUE,
               low_eqbound = -2,
-              high_eqbound = 2)
+              high_eqbound = 2,
+              smd_ci = "goulet")
 
   t2 = dataTOSTtwo(data = sleep,
                    deps = "extra",
@@ -59,7 +61,8 @@ test_that("dataTOSTtwo: internal consistency",{
               #hypothesis = "MET",
               eqbound_type = "SMD",
               low_eqbound = -2,
-              high_eqbound = 2))
+              high_eqbound = 2,
+              smd_ci = "goulet"))
 
   t2 = suppressMessages(dataTOSTtwo(data = sleep,
                    deps = "extra",
@@ -92,7 +95,8 @@ test_that("dataTOSTtwo: internal consistency",{
               hypothesis = "MET",
               eqbound_type = "SMD",
               low_eqbound = -2,
-              high_eqbound = 2))
+              high_eqbound = 2,
+              smd_ci = "goulet"))
 
   t2 = suppressMessages(dataTOSTtwo(data = sleep,
                    deps = "extra",
@@ -124,7 +128,8 @@ test_that("dataTOSTtwo: internal consistency",{
               eqbound_type = "raw",
               bias_correction = FALSE,
               low_eqbound = -2,
-              high_eqbound = 2)
+              high_eqbound = 2,
+              smd_ci = "goulet")
 
   t2 = dataTOSTtwo(data = sleep,
                    deps = "extra",
@@ -163,7 +168,8 @@ test_that("dataTOSTpaired: internal consistency",{
               data = sleep,
               paired = TRUE,
               low_eqbound = -2,
-              high_eqbound = 2)
+              high_eqbound = 2,
+              smd_ci = "goulet")
 
   t2 = dataTOSTpaired(data = sleep2,
                       pair1 = "pair1",
@@ -190,7 +196,8 @@ test_that("dataTOSTpaired: internal consistency",{
               #hypothesis = "MET",
               eqbound_type = "SMD",
               low_eqbound = -2,
-              high_eqbound = 2))
+              high_eqbound = 2,
+              smd_ci = "goulet"))
 
   t2 = suppressMessages(dataTOSTpaired(data = sleep2,
                       pair1 = "pair1",
@@ -219,7 +226,8 @@ test_that("dataTOSTpaired: internal consistency",{
               hypothesis = "MET",
               #eqbound_type = "SMD",
               low_eqbound = -2,
-              high_eqbound = 2)
+              high_eqbound = 2,
+              smd_ci = "goulet")
 
   t2 = dataTOSTpaired(data = sleep2,
                       pair1 = "pair1",
@@ -247,7 +255,8 @@ test_that("dataTOSTpaired: internal consistency",{
               eqbound_type = "SMD",
               bias_correction = FALSE,
               low_eqbound = -2,
-              high_eqbound = 2))
+              high_eqbound = 2,
+              smd_ci = "goulet"))
 
   t2 = suppressMessages(dataTOSTpaired(data = sleep2,
                       pair1 = "pair1",
@@ -287,7 +296,8 @@ test_that("dataTOSTone: internal consistency",{
 
   t1 = t_TOST(x = sleep$extra,
               low_eqbound = -2,
-              high_eqbound = 2)
+              high_eqbound = 2,
+              smd_ci = "goulet")
 
   t2 = dataTOSTone(data = sleep,
                    vars = "extra",
@@ -314,7 +324,8 @@ test_that("dataTOSTone: internal consistency",{
   t1 = suppressMessages(t_TOST(x = sleep$extra,
               low_eqbound = -2,
               high_eqbound = 2,
-              eqbound_type = "SMD"))
+              eqbound_type = "SMD",
+              smd_ci = "goulet"))
 
   t2 = suppressMessages(dataTOSTone(data = sleep,
                    vars = "extra",
@@ -340,7 +351,8 @@ test_that("dataTOSTone: internal consistency",{
               low_eqbound = -2,
               high_eqbound = 2,
               eqbound_type = "SMD",
-              hypothesis = "MET"))
+              hypothesis = "MET",
+              smd_ci = "goulet"))
 
   t2 = suppressMessages(dataTOSTone(data = sleep,
                       vars = extra,
@@ -369,7 +381,8 @@ test_that("dataTOSTone: internal consistency",{
               high_eqbound = 2,
               eqbound_type = "SMD",
               hypothesis = "MET",
-              bias_correction = FALSE))
+              bias_correction = FALSE,
+              smd_ci = "goulet"))
 
   t2 = suppressMessages(dataTOSTone(data = sleep,
                    vars = extra,

@@ -36,6 +36,12 @@ test_that("Run examples for one sample", {
   test1 = t_TOST(x = samp1,
                  low_eqbound = -.5,
                  high_eqbound = .5)
+  test1_smd = smd_calc(x = samp1,
+                       alpha = .1)
+  expect_equal(test1_smd$estimate, test1$effsize$estimate[2])
+  expect_equal(test1_smd$lower.ci, test1$effsize$lower.ci[2])
+  expect_equal(test1_smd$upper.ci, test1$effsize$upper.ci[2])
+  expect_equal(test1_smd$SE, test1$effsize$SE[2])
 
   test1 = t_TOST(x = samp1,
                  eqb = .5)
@@ -240,6 +246,15 @@ test_that("Run examples for two sample", {
                  y = samp2,
                  low_eqbound = -.5,
                  high_eqbound = .5)
+
+  test1_smd = smd_calc(x = samp1,
+                              y = samp2,
+                       alpha = .1)
+
+  expect_equal(test1_smd$estimate, test1$effsize$estimate[2])
+  expect_equal(test1_smd$lower.ci, test1$effsize$lower.ci[2])
+  expect_equal(test1_smd$upper.ci, test1$effsize$upper.ci[2])
+  expect_equal(test1_smd$SE, test1$effsize$SE[2])
 
   test2 = suppressMessages( t_TOST(x = samp1,
                                  y = samp2,
@@ -535,6 +550,14 @@ test_that("Run examples for paired samples", {
                  paired = TRUE,
                  low_eqbound = -.5,
                  high_eqbound = .5)
+  test1_smd = smd_calc(x = samp1,
+                 y = samp2,
+                 paired = TRUE,
+                 alpha = .1)
+  expect_equal(test1_smd$estimate, test1$effsize$estimate[2])
+  expect_equal(test1_smd$lower.ci, test1$effsize$lower.ci[2])
+  expect_equal(test1_smd$upper.ci, test1$effsize$upper.ci[2])
+  expect_equal(test1_smd$SE, test1$effsize$SE[2])
   ash = as_htest(test1)
   test2 = suppressMessages(  t_TOST(x = samp1,
                                   y = samp2,

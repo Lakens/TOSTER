@@ -169,12 +169,13 @@ For this example, we will use the sleep data. In this data there is a `group` va
 head(sleep)
 ```
 
-We will assume the data are independent, and that we have equivalence bounds of +/- 0.5. All we need to do is provide the `formula`, `data`, and eqbound arguments for the function to run appropriately. In addition, we can set the `var.equal` argument (to assume equal variance), and the `paired` argument (sets if the data is paired or not). Both are logical indicators that can be set to TRUE or FALSE. The `alpha` is automatically set to 0.05 but this can also be adjusted by the user. The Hedges correction is also automatically calculated, but this can be overridden with the `bias_correction` argument. The `hypothesis` is automatically set to "EQU" for equivalence but if a minimal effect is of interest then "MET" can be supplied
+We will assume the data are independent, and that we have equivalence bounds of +/- 0.5. All we need to do is provide the `formula`, `data`, and eqbound arguments for the function to run appropriately. In addition, we can set the `var.equal` argument (to assume equal variance), and the `paired` argument (sets if the data is paired or not). Both are logical indicators that can be set to TRUE or FALSE. The `alpha` is automatically set to 0.05 but this can also be adjusted by the user. The Hedges correction is also automatically calculated, but this can be overridden with the `bias_correction` argument. The `hypothesis` is automatically set to "EQU" for equivalence but if a minimal effect is of interest then "MET" can be supplied. Note: for this example, we will set `smd_ci` to "goulet" since it will reduce the time to produce plots.
 
 ```{r}
 res1 = t_TOST(formula = extra ~ group,
               data = sleep,
-              eqb = .5)
+              eqb = .5,
+              smd_ci = "goulet")
 
 res1a = t_TOST(x = subset(sleep,group==1)$extra,
                y = subset(sleep,group==2)$extra,
@@ -195,7 +196,8 @@ plot(res1, type = "cd")
 
 The shading pattern can be modified with the `ci_shades`.
 
-```{r fig.width=6, fig.height=6}
+```{r fig.width=6, fig.height=6, eval=FALSE}
+# Set to shade only the 90% and 95% CI areas
 plot(res1, type = "cd",
      ci_shades = c(.9,.95))
 ```
@@ -236,15 +238,11 @@ res3a = t_TOST(x = iris$Sepal.Length,
               y = iris$Sepal.Width,
                paired = TRUE,
                hypothesis = "MET",
-               eqb = 1)
+               eqb = 1,
+              smd_ci = "goulet")
 res3a
 ```
 
-Again, we can plot the effects from the `t_TOST` result.
-
-```{r fig.width=6, fig.height=6}
-plot(res3a)
-```
 
 # One Sample t-test
 
@@ -253,12 +251,9 @@ In other cases we may just have a one sample test. If that is the case all we ha
 ```{r}
 res4 = t_TOST(x = iris$Sepal.Length,
               hypothesis = "EQU",
-              eqb = c(5.5,8.5))
+              eqb = c(5.5,8.5),
+              smd_ci = "goulet")
 res4
-```
-
-```{r fig.width=6, fig.height=6}
-plot(res4)
 ```
 
 

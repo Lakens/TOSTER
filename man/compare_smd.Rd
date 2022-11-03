@@ -7,8 +7,10 @@
 compare_smd(
   smd1,
   n1,
+  se1 = NULL,
   smd2,
   n2,
+  se2 = NULL,
   paired = FALSE,
   alternative = c("two.sided", "less", "greater"),
   null = 0,
@@ -16,13 +18,11 @@ compare_smd(
 )
 }
 \arguments{
-\item{smd1}{SMD from study 1.}
+\item{smd1, smd2}{SMDs from study 1 & 2, respectively.}
 
-\item{n1}{sample size(s) from study 1 (can be 1 number or vector of 2 numbers).}
+\item{n1, n2}{sample size(s) from study 1 & 2, respectively (can be 1 number or vector of 2 numbers).}
 
-\item{smd2}{SMD from study 2.}
-
-\item{n2}{sample size(s) from study 2 (can be 1 number or vector of 2 numbers).}
+\item{se1, se2}{User supplied standard errors (SEs). This will override the internal calculations.}
 
 \item{paired}{a logical indicating whether the SMD is from a paired or independent samples design. If a one-sample design, then paired must be set to TRUE.}
 
