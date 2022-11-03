@@ -48,7 +48,7 @@ t_TOST <- function(x, ...,
                    bias_correction = TRUE,
                    rm_correction = FALSE,
                    glass = NULL,
-                   smd_ci = c("goulet","nct", "t", "z")){
+                   smd_ci = c("nct", "goulet", "t", "z")){
   UseMethod("t_TOST")
 }
 
@@ -60,21 +60,22 @@ t_TOST <- function(x, ...,
 # @method t_TOST default
 t_TOST.default = function(x,
                           y = NULL,
-                          hypothesis = "EQU",
+                          hypothesis = c("EQU","MET"),
                           paired = FALSE,
                           var.equal = FALSE,
                           eqb,
                           low_eqbound,
                           high_eqbound,
-                          eqbound_type = "raw",
+                          eqbound_type = c("raw","SMD"),
                           alpha = 0.05,
                           mu = 0,
                           bias_correction = TRUE,
                           rm_correction = FALSE,
                           glass = NULL,
-                          smd_ci = c("goulet","nct", "t", "z"),
+                          smd_ci = c("nct", "goulet", "t", "z"),
                           ...) {
-
+  hypothesis = match.arg(hypothesis)
+  eqbound_type = match.arg(eqbound_type)
   if(is.null(glass)){
     glass = "no"
   }

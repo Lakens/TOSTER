@@ -12,19 +12,19 @@ tsum_TOST(
   sd2 = NULL,
   n2 = NULL,
   r12 = NULL,
-  hypothesis = "EQU",
+  hypothesis = c("EQU", "MET"),
   paired = FALSE,
   var.equal = FALSE,
   eqb,
   low_eqbound,
   high_eqbound,
   mu = 0,
-  eqbound_type = "raw",
+  eqbound_type = c("raw", "SMD"),
   alpha = 0.05,
   bias_correction = TRUE,
   rm_correction = FALSE,
   glass = NULL,
-  smd_ci = c("goulet", "nct", "t", "z")
+  smd_ci = c("nct", "goulet", "t", "z")
 )
 }
 \arguments{

@@ -3,6 +3,12 @@ NEWS
 
 **TOSTER R package and jamovi module**
 
+# TOSTER v0.6.0
+
+- Changed Glass's delta SE for paired samples (minor).
+- Added `smd_calc` and `ses_calc` for just calculating the standardized effect sizes (no tests).
+- `compare_smd` can be supplied with user provided standard errors.
+
 # TOSTER v0.5.1
 
 - Formatting requirements for jamovi (all superficial changes)

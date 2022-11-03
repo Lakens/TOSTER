@@ -79,10 +79,13 @@ d_est_pair <- function(n,
     d_sigma = sqrt(1/n + (cohend^2/(2*n)))
   }
   if(denom %in% c("glass1","glass2")){
-    sep1 = (n-1)/(n*(n-3))
-    sep2 = (2*(1-r12)+cohend^2*n)
-    sep3 = cohend^2/(J)^2
-    d_sigma = sqrt(sep1*sep2-sep3)
+    #sep1 = (n-1)/(n*(n-3))
+    #sep2 = (2*(1-r12)+cohend^2*n)
+    #sep3 = cohend^2/(J)^2
+    # Borenstein 2009 --- adopted from metafor
+    d_s1 = J^2*(2*(((1-r12)/n)+((cohend^2*J^(-1))/(2*n))))
+      #sqrt(sep1*sep2-sep3)
+    d_sigma = sqrt(d_s1)
   }
 
   if(smd_ci == "goulet"){
