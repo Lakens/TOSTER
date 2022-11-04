@@ -78,8 +78,6 @@ You may disagree, and if you are basing your inferences on the SMD, and the
 associated confidence intervals, we recommend you go with a
 bootstrapping approach (see `boot_t_TOST`) [@Kirby2013].
 
-
-
 In this section we will detail on the calculations that are involved in
 calculating the SMD, their associated degrees of freedom, non-centrality
 parameter, and variance. If these SMDs are being reported in a

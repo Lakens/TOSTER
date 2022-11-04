@@ -84,6 +84,32 @@ test_that("Run examples for one sample", {
                     n1 = length(samp1),
                     low_eqbound = -.5,
                     high_eqbound = .5)
+  tsum1 = tsum_TOST(m1 = mean(samp1),
+                    sd1 = sd(samp1),
+                    n1 = length(samp1),
+                    eqb = .5)
+  tsum1_tg = tsum_TOST(m1 = mean(samp1),
+                    sd1 = sd(samp1),
+                    n1 = length(samp1),
+                    eqb = .5,
+                    glass = "glass1")
+  tsum1_tg = tsum_TOST(m1 = mean(samp1),
+                       sd1 = sd(samp1),
+                       n1 = length(samp1),
+                       eqb = .5,
+                       glass = "glass2")
+  expect_error(tsum_TOST(m1 = mean(samp1),
+                         sd1 = sd(samp1),
+                         n1 = length(samp1),
+                         eqb = c(.5,-.5,1)))
+  expect_error(tsum_TOST(m1 = mean(samp1),
+                         sd1 = sd(samp1),
+                         n1 = length(samp1),
+                         m12 = mean(samp1),
+                         sd12 = sd(samp1),
+                         n12 = length(samp1),
+                         eqb = c(.5,-.5),
+                         paired = TRUE))
   expect_error(tsum_TOST(m1 = mean(samp1),
                     sd1 = sd(samp1),
                     n1 = length(samp1)))
