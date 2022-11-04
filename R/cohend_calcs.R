@@ -79,10 +79,13 @@ d_est_pair <- function(n,
     d_sigma = sqrt(1/n + (cohend^2/(2*n)))
   }
   if(denom %in% c("glass1","glass2")){
-    sep1 = (n-1)/(n*(n-3))
-    sep2 = (2*(1-r12)+cohend^2*n)
-    sep3 = cohend^2/(J)^2
-    d_sigma = sqrt(sep1*sep2-sep3)
+    #sep1 = (n-1)/(n*(n-3))
+    #sep2 = (2*(1-r12)+cohend^2*n)
+    #sep3 = cohend^2/(J)^2
+    # Borenstein 2009 --- adopted from metafor
+    d_s1 = J^2*(2*(((1-r12)/n)+((cohend^2*J^(-1))/(2*n))))
+      #sqrt(sep1*sep2-sep3)
+    d_sigma = sqrt(d_s1)
   }
 
   if(smd_ci == "goulet"){
@@ -578,8 +581,8 @@ get_ncp_t2 = function (ncp, df, conf.level = 0.95,
   if (df <= 0)
     stop("The degrees of freedom must be some positive value.",
          call. = FALSE)
-  if (abs(ncp) > 37.62)
-    print("The observed noncentrality parameter of the noncentral t-distribution has exceeded 37.62 in magnitude (R's limitation for accurate probabilities from the noncentral t-distribution) in the function's iterative search for the appropriate value(s). The results may be fine, but they might be inaccurate; use caution.")
+  #if (abs(ncp) > 37.62)
+  #  print("The observed noncentrality parameter of the noncentral t-distribution has exceeded 37.62 in magnitude (R's limitation for accurate probabilities from the noncentral t-distribution) in the function's iterative search for the appropriate value(s). The results may be fine, but they might be inaccurate; use caution.")
   if (sup.int.warns == TRUE)
     Orig.warn <- options()$warn
   options(warn = -1)

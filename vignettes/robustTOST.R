@@ -49,3 +49,9 @@ print(test1)
 
 plot(test1)
 
+## -----------------------------------------------------------------------------
+ses_calc(formula = extra ~ group,
+         data = sleep,
+         paired = TRUE,
+         ses = "r")
+

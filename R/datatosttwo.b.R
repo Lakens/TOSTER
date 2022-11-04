@@ -113,7 +113,8 @@ dataTOSTtwoClass <- R6::R6Class(
                          alpha = alpha,
                          bias_correction = bias_c,
                          low_eqbound = low_eqbound,
-                         high_eqbound = high_eqbound)
+                         high_eqbound = high_eqbound,
+                         smd_ci = "goulet")
 
         if (self$options$eqbound_type == 'SMD') {
 

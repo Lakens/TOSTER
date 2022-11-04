@@ -9,7 +9,6 @@
 #' @param low_eqbound Lower equivalence bounds. Deprecated use eqb.
 #' @param high_eqbound Upper equivalence bounds. Deprecated use eqb.
 #' @param hypothesis 'EQU' for equivalence (default), or 'MET' for minimal effects test, the alternative hypothesis.
-#' @param ses Rank-biserial (rb), odds (odds), and concordance probablity (cstat).
 #' @param alpha alpha level (default = 0.05)
 #' @param mu  number indicating the value around which (a-)symmetry (for
 #'   one-sample or paired samples) or shift (for independent samples) is to be

@@ -8,6 +8,7 @@
 #' This function was created so that users could create consonance plots of Pearson's correlation coefficient.
 #' These types of plots are discussed by Schweder T, Hjort NL. (2016, ISBN:9781316445051) and Rafi Z, Greenland S. (2020) <doi:10.1186/s12874-020-01105-9>.
 #' @return Returns plot of the distribution of the correlation coefficient.
+#' @family plotting functions
 #' @export
 
 plot_cor <- function(r,

@@ -37,6 +37,7 @@
 #' Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press.
 #' @importFrom stats var quantile
 #' @name boot_t_TOST
+#' @family compare studies
 #' @export boot_t_TOST
 
 boot_t_TOST <- function(x, ...){

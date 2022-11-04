@@ -36,6 +36,12 @@ test_that("Run examples for one sample", {
   test1 = t_TOST(x = samp1,
                  low_eqbound = -.5,
                  high_eqbound = .5)
+  test1_smd = smd_calc(x = samp1,
+                       alpha = .1)
+  expect_equal(test1_smd$estimate, test1$effsize$estimate[2])
+  expect_equal(test1_smd$lower.ci, test1$effsize$lower.ci[2])
+  expect_equal(test1_smd$upper.ci, test1$effsize$upper.ci[2])
+  expect_equal(test1_smd$SE, test1$effsize$SE[2])
 
   test1 = t_TOST(x = samp1,
                  eqb = .5)
@@ -78,6 +84,32 @@ test_that("Run examples for one sample", {
                     n1 = length(samp1),
                     low_eqbound = -.5,
                     high_eqbound = .5)
+  tsum1 = tsum_TOST(m1 = mean(samp1),
+                    sd1 = sd(samp1),
+                    n1 = length(samp1),
+                    eqb = .5)
+  tsum1_tg = tsum_TOST(m1 = mean(samp1),
+                    sd1 = sd(samp1),
+                    n1 = length(samp1),
+                    eqb = .5,
+                    glass = "glass1")
+  tsum1_tg = tsum_TOST(m1 = mean(samp1),
+                       sd1 = sd(samp1),
+                       n1 = length(samp1),
+                       eqb = .5,
+                       glass = "glass2")
+  expect_error(tsum_TOST(m1 = mean(samp1),
+                         sd1 = sd(samp1),
+                         n1 = length(samp1),
+                         eqb = c(.5,-.5,1)))
+  expect_error(tsum_TOST(m1 = mean(samp1),
+                         sd1 = sd(samp1),
+                         n1 = length(samp1),
+                         m12 = mean(samp1),
+                         sd12 = sd(samp1),
+                         n12 = length(samp1),
+                         eqb = c(.5,-.5),
+                         paired = TRUE))
   expect_error(tsum_TOST(m1 = mean(samp1),
                     sd1 = sd(samp1),
                     n1 = length(samp1)))
@@ -144,7 +176,8 @@ test_that("Run examples for one sample", {
                                    high_eqbound = .5,
                                    eqbound_type = "SMD",
                                    hypothesis = "MET",
-                                   bias_correction = FALSE)
+                                   bias_correction = FALSE,
+                                   smd_ci = "goulet")
   })
 
   expect_equal(1-test1$TOST$p.value[2],
@@ -240,6 +273,19 @@ test_that("Run examples for two sample", {
                  y = samp2,
                  low_eqbound = -.5,
                  high_eqbound = .5)
+
+  test1_smd = smd_calc(x = samp1,
+                              y = samp2,
+                       alpha = .1)
+
+  expect_error(smd_calc(x = samp1,
+                        y = samp2,
+                        alpha = -.1))
+
+  expect_equal(test1_smd$estimate, test1$effsize$estimate[2])
+  expect_equal(test1_smd$lower.ci, test1$effsize$lower.ci[2])
+  expect_equal(test1_smd$upper.ci, test1$effsize$upper.ci[2])
+  expect_equal(test1_smd$SE, test1$effsize$SE[2])
 
   test2 = suppressMessages( t_TOST(x = samp1,
                                  y = samp2,
@@ -453,6 +499,10 @@ test_that("Run examples for two sample", {
                  low_eqbound = -.5,
                  high_eqbound = .5,
                  bias_correction = FALSE)
+  test1_smd = smd_calc(formula = y ~ group,
+                       data = df_samp,
+                       var.equal = TRUE,
+                       bias_correction = FALSE)
   # test htest
   ash = as_htest(test1)
   test2 = suppressMessages( t_TOST(formula = y ~ group,
@@ -478,7 +528,8 @@ test_that("Run examples for two sample", {
                                  high_eqbound = .5,
                                  eqbound_type = "SMD",
                                  hypothesis = "MET",
-                                 bias_correction = FALSE) )
+                                 bias_correction = FALSE,
+                                 smd_ci = "g") )
 
   expect_equal(1-test1$TOST$p.value[2],
                test3$TOST$p.value[2])
@@ -535,6 +586,14 @@ test_that("Run examples for paired samples", {
                  paired = TRUE,
                  low_eqbound = -.5,
                  high_eqbound = .5)
+  test1_smd = smd_calc(x = samp1,
+                 y = samp2,
+                 paired = TRUE,
+                 alpha = .1)
+  expect_equal(test1_smd$estimate, test1$effsize$estimate[2])
+  expect_equal(test1_smd$lower.ci, test1$effsize$lower.ci[2])
+  expect_equal(test1_smd$upper.ci, test1$effsize$upper.ci[2])
+  expect_equal(test1_smd$SE, test1$effsize$SE[2])
   ash = as_htest(test1)
   test2 = suppressMessages(  t_TOST(x = samp1,
                                   y = samp2,
@@ -895,7 +954,8 @@ test_that("plot generic function",{
                  y = samp2,
                  paired = TRUE,
                  low_eqbound = -.5,
-                 high_eqbound = .5)
+                 high_eqbound = .5,
+                 smd_ci = "g")
 
   expect_error(plot(wilcox_TOST(x = samp1,
                                 y = samp2,
@@ -1067,6 +1127,20 @@ test_that("Check NCT CIs for paired",{
                  smd_ci = "g",
                  bias_correction = F,
                  glass = "glass1")
+  test5_smd = smd_calc(x=subset(sleep, group ==1)$extra,
+                   y=subset(sleep, group ==2)$extra,
+                 paired = TRUE,
+                 smd_ci = "g",
+                 bias_correction = F,
+                 glass = "glass1",
+                 alpha = .1)
+  test5_smd = smd_calc(x=subset(sleep, group ==1)$extra,
+                       y=subset(sleep, group ==2)$extra,
+                       paired = TRUE,
+                       smd_ci = "g",
+                       bias_correction = F,
+                       glass = "glass2",
+                       alpha = .1)
 
   test6 = t_TOST(x=subset(sleep, group ==1)$extra,y=subset(sleep, group ==2)$extra,
                  paired = TRUE,

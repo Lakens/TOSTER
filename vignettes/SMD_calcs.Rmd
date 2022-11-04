@@ -53,19 +53,30 @@ or even the standard error (sigma: $\sigma$) for the SMD. None of these
 are easy to determine and these calculations are hotly debated in the
 statistics literature [@Cousineau2021].
 
-In this package we have opted to make the default SMD confidence intervals as the formulation
+In this package we originally opted to make the default SMD confidence intervals as the formulation
 outlined by @Goulet_2018. We found that that these calculations were
 simple to implement and provided fairly accurate coverage for the
 confidence intervals for any type of SMD (independent, paired, or one
 sample). However, even the authors have outlined some issues with the
-method in a newer publication [@Cousineau2021]. It is my belief that
-SMDs provide another interesting description of the sample, and have
-very limited inferential utility (though exceptions apply). You may
-disagree, and if you are basing your inferences on the SMD, and the
+method in a newer publication [@Cousineau2021]. 
+Other packages, such as `MOTE` [@MOTE] or `effectsize` [@effectsize], 
+use a simpler formulation of the noncentral t-distribution (nct). 
+The default option in the package is the nct type of confidence intervals.
+We have created an argument for all TOST functions 
+(`tsum_TOST` and `t_TOST`) named `smd_ci` 
+which allow the user to specify "goulet" (for the @Cousineau2021 method), 
+"nct" (this will approximately match the results of @MOTE and @effectsize), 
+"t" (central t method), or "z" (normal method).
+We would strongly recommend using "nct" or "goulet" for any analysis.
+It is important to remember that all of these methods are only *approximations*
+of confidence intervals (of varying degrees of quality)
+and therefore should be interpreted with caution.
+
+It is my belief that SMDs provide another interesting description of the sample, 
+and have very limited inferential utility (though exceptions apply). 
+You may disagree, and if you are basing your inferences on the SMD, and the
 associated confidence intervals, we recommend you go with a
 bootstrapping approach (see `boot_t_TOST`) [@Kirby2013].
-
-Other packages, such as `MOTE` [@MOTE] or `effectsize` [@effectsize], use a simpler formulation of the noncentral t-distribution. Therefore, we have created an argument for all TOST functions (`tsum_TOST` and `t_TOST`) named `smd_ci` which allow the user to specify "goulet" (for the @Cousineau2021 method), "nct" (this will approximately match @MOTE and @effectsize), "t" (central t method), or "z" (normal method). We would strongly recommend using "nct" or "goulet" for any analysis.
 
 In this section we will detail on the calculations that are involved in
 calculating the SMD, their associated degrees of freedom, non-centrality
@@ -447,7 +458,7 @@ The standard error ($\sigma$) of Glass's delta is calculated as the
 following:
 
 $$
-\sigma_{SMD} =     \sqrt{\frac{n-1}{n \cdot (n-3)} \cdot (2\cdot(1-r_{12})+d^2 \cdot N) + \frac{d^2}{J^2}}
+\sigma_{SMD} =     \sqrt{J^2 \cdot (\frac{1-r_{12}}{N} + \frac{d^2}{2 \cdot N \cdot J})}
 $$
 
 
@@ -553,6 +564,21 @@ The limits of the z-distribution at the given alpha-level (`qnorm(1-alpha)`) are
 $$
 CI = SMD \space \pm \space z_{(1-\alpha)} \cdot \sigma_{SMD}
 $$
+
+# Just Estimate the SMD
+
+It was requested that a function be provided that only calculates the SMD.
+Therefore, I created the `smd_calc` function.
+The interface is almost the same as `t_TOST` but you just don't set a equivalence bound.
+
+```{r}
+smd_calc(formula = extra ~ group,
+         data = sleep,
+         paired = TRUE,
+         smd_ci = "nct",
+         bias_correction = F)
+```
+
 
 # Plotting SMDs
 

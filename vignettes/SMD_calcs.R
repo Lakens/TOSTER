@@ -8,6 +8,13 @@ library(ggplot2)
 library(ggdist)
 
 
+## -----------------------------------------------------------------------------
+smd_calc(formula = extra ~ group,
+         data = sleep,
+         paired = TRUE,
+         smd_ci = "nct",
+         bias_correction = F)
+
 ## ----fig.width=6, fig.height=6------------------------------------------------
 plot_smd(d = .43,
          df = 58,

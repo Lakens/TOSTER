@@ -1,9 +1,8 @@
 #' @title Comparing SMDs between independent studies
 #' @description A function to compare standardized mean differences (SMDs) between studies. This function is intended to be used to compare the compatibility of original studies with replication studies (lower p-values indicating lower compatibility)
-#' @param smd1 SMD from study 1.
-#' @param n1 sample size(s) from study 1 (can be 1 number or vector of 2 numbers).
-#' @param smd2 SMD from study 2.
-#' @param n2 sample size(s) from study 2 (can be 1 number or vector of 2 numbers).
+#' @param smd1,smd2 SMDs from study 1 & 2, respectively.
+#' @param n1,n2 sample size(s) from study 1 & 2, respectively (can be 1 number or vector of 2 numbers).
+#' @param se1,se2 User supplied standard errors (SEs). This will override the internal calculations.
 #' @param paired a logical indicating whether the SMD is from a paired or independent samples design. If a one-sample design, then paired must be set to TRUE.
 #' @param null a number indicating the null hypothesis. For TOST, this would be equivalence bound.
 #' @param alternative a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater" or "less". You can specify just the initial letter.
@@ -22,13 +21,16 @@
 #'   \item{\code{"call"}}{the matched call.}
 #' }
 #' @name compare_smd
+#' @family compare studies
 #' @export compare_smd
 #'
 
 compare_smd = function(smd1,
                        n1,
+                       se1 = NULL,
                        smd2,
                        n2,
+                       se2 = NULL,
                        paired = FALSE,
                        alternative = c("two.sided", "less", "greater"),
                        null = 0,
@@ -44,16 +46,48 @@ compare_smd = function(smd1,
   # difference in SMD minus null hypothesis
   d_diff = smd1 - smd2 - null
 
+  if(!is.null(se1) || !is.null(se2)){
+    message("User supplied standard errors. Proceed with caution.")
+  }
+
   # calculate standard errors
   if(paired){
-    se1 = se_dz(smd1, n1)
-    se2 = se_dz(smd2, n2)
-    meth = "Difference in Cohen's dz (paired)"
+    if(!is.null(se1) || !is.null(se2)){
+      meth = "Difference in SMDs (user-supplied SE)"
+    } else{
+      meth = "Difference in Cohen's dz (paired)"
+    }
+    if(is.null(se1)){
+      se1 = se_dz(smd1, n1)
+    } else{
+      se1 = se1
+    }
+    if(is.null(se2)){
+      se2 = se_dz(smd2, n2)
+    } else{
+      se2 = se2
+    }
+
   } else{
-    se1 = se_ds(smd1, n1)
-    se2 = se_ds(smd2, n2)
-    meth = "Difference in Cohen's ds (two-sample)"
+    if(!is.null(se1) || !is.null(se2)){
+      meth = "Difference in SMDs (user-supplied SE)"
+    } else{
+      meth = "Difference in Cohen's ds (two-sample)"
+    }
+    if(is.null(se1)){
+      se1 = se_ds(smd1, n1)
+    } else{
+      se1 = se1
+    }
+    if(is.null(se2)){
+      se2 = se_ds(smd2, n2)
+    } else{
+      se2 = se2
+    }
+
   }
+
+
 
   # z-score and p-value
   se_diff = sqrt(se1^2 + se2^2)

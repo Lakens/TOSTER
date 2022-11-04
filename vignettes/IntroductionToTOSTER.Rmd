@@ -12,7 +12,6 @@ vignette: >
 For an open access tutorial paper explaining how to set equivalence bounds, and how to perform and report equivalence tests, see Lakens, D., Scheel, A. M., & Isager, P. M. (2018). Equivalence Testing for Psychological Research: A Tutorial. *Advances in Methods and Practices in Psychological Science*, 1(2), 259-269.  https://doi.org/10.1177/2515245918770963
 
 **Warning: many of these functions are defunct and outdated. Please see the other vignettes for details on the new functions.**
-
 The "Introduction to t_TOST" vignette, in particular, will be helpful. This vignette, and the functions used, will continue to be in the package for continuity purposes.
 
 # Equivalence Testing with TOSTER

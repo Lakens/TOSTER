@@ -1,0 +1,117 @@
+home:
+  title: The TOSTER R package
+  description: An R pacakge for equivalence testing through two one-sided tests (TOST).
+
+
+template:
+  opengraph:
+    image:
+      src: docs/articles/IntroTOSTt_files/figure-html/tostplots-2.png
+      alt: "Equivalence Test"
+    twitter:
+      creator: "@exphysstudent"
+      card: summary_large_image
+
+reference:
+
+- title: "Two One-Sided Tests (TOST)"
+
+- subtitle: "t-test"
+  desc: >
+    Functions derived from the t-test
+  contents:
+  - t_TOST
+  - tsum_TOST
+
+- subtitle: "Robust"
+  desc: >
+    Functions that are (mostly) robust to the assumptions of t-tests
+  contents:
+  - wilcox_TOST
+  - boot_t_TOST
+
+- subtitle: "ANOVA"
+  desc: >
+    Functions for ANOVAs
+  contents:
+  - equ_anova
+  - equ_ftest
+
+- subtitle: "Methods"
+  desc: >
+    Functions/methods to aid analyses
+  contents:
+  - as_htest
+  - TOSTt-methods
+  - TOSTnp-methods
+
+- title: "Standardized Effect Sizes"
+
+- subtitle: "Calculations"
+  desc: >
+    Functions that calculate standarized effect sizes
+  contents:
+  - smd_calc
+  - ses_calc
+  - rbs
+  - np_ses
+
+- subtitle: "Compare Effects"
+  desc: >
+    Compare standardized mean differences or correlation between studies
+  contents:
+  - boot_compare_smd
+  - compare_smd
+  - compare_cor
+
+- title: "Plotting"
+  desc: >
+    Visualize some effects
+  contents:
+  - plot_smd
+  - plot_pes
+  - plot_cor
+
+- title: "Power"
+  desc: >
+    Fucntions for power calculations
+  contents:
+  - power_t_TOST
+  - power_eq_f
+
+- title: "Data"
+  contents:
+  - hawthorne
+
+- title: "jamovi functions"
+  desc: >
+    Functions intended for jamovi; suggested to do not use in R
+  contents:
+  - dataTOSTpaired
+  - dataTOSTr
+  - dataTOSTtwo
+  - dataTOSTone
+  - datatosttwoprop
+
+- title: "Defunct Functions"
+  desc: >
+    Old functions that are no longer maintained; use with caution
+  contents:
+  - powerTOSTone
+  - powerTOSTone.raw
+  - powerTOSTpaired
+  - powerTOSTpaired.raw
+  - powerTOSTr
+  - powerTOSTtwo.prop
+  - powerTOSTtwo
+  - powerTOSTtwo.raw
+  - TOSTtwo
+  - TOSTtwo.raw
+  - TOSTtwo.prop
+  - TOSTpaired
+  - TOSTpaired.raw
+  - TOSTone
+  - TOSTone.raw
+  - TOSTmeta
+  - TOSTr
+

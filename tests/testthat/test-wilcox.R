@@ -20,6 +20,14 @@ test_that("Run examples for one sample", {
   test1 = wilcox_TOST(x = samp1,
                  low_eqbound = -.5,
                  high_eqbound = .5)
+  test1_ses  = ses_calc(x = samp1,
+                        alpha = .1)
+  expect_equal(test1$effsize$estimate[2],
+               test1_ses$estimate)
+  expect_equal(test1$effsize$lower.ci[2],
+               test1_ses$lower.ci)
+  expect_equal(test1$effsize$upper.ci[2],
+               test1_ses$upper.ci)
   ash = as_htest(test1)
 
   test3 = wilcox_TOST(x = samp1,
@@ -69,7 +77,11 @@ test_that("Run examples for two sample", {
                       data = df_samp,
                       low_eqbound = -.5,
                       high_eqbound = .5)
-
+  test1_smd = ses_calc(formula = y ~ group,
+                      data = df_samp)
+  expect_error(ses_calc(formula = y ~ group,
+                        data = df_samp,
+                        alpha = 1.1))
 
   test3 = wilcox_TOST(formula = y ~ group,
                       data = df_samp,
