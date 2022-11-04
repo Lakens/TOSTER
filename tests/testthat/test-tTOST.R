@@ -252,6 +252,10 @@ test_that("Run examples for two sample", {
                               y = samp2,
                        alpha = .1)
 
+  expect_error(smd_calc(x = samp1,
+                        y = samp2,
+                        alpha = -.1))
+
   expect_equal(test1_smd$estimate, test1$effsize$estimate[2])
   expect_equal(test1_smd$lower.ci, test1$effsize$lower.ci[2])
   expect_equal(test1_smd$upper.ci, test1$effsize$upper.ci[2])
@@ -469,6 +473,10 @@ test_that("Run examples for two sample", {
                  low_eqbound = -.5,
                  high_eqbound = .5,
                  bias_correction = FALSE)
+  test1_smd = smd_calc(formula = y ~ group,
+                       data = df_samp,
+                       var.equal = TRUE,
+                       bias_correction = FALSE)
   # test htest
   ash = as_htest(test1)
   test2 = suppressMessages( t_TOST(formula = y ~ group,
@@ -1093,6 +1101,20 @@ test_that("Check NCT CIs for paired",{
                  smd_ci = "g",
                  bias_correction = F,
                  glass = "glass1")
+  test5_smd = smd_calc(x=subset(sleep, group ==1)$extra,
+                   y=subset(sleep, group ==2)$extra,
+                 paired = TRUE,
+                 smd_ci = "g",
+                 bias_correction = F,
+                 glass = "glass1",
+                 alpha = .1)
+  test5_smd = smd_calc(x=subset(sleep, group ==1)$extra,
+                       y=subset(sleep, group ==2)$extra,
+                       paired = TRUE,
+                       smd_ci = "g",
+                       bias_correction = F,
+                       glass = "glass2",
+                       alpha = .1)
 
   test6 = t_TOST(x=subset(sleep, group ==1)$extra,y=subset(sleep, group ==2)$extra,
                  paired = TRUE,
