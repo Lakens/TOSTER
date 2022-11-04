@@ -76,3 +76,8 @@ A function to only calculate standardized mean differences.
 smd_calc(formula = extra ~ group,data = sleep, paired = TRUE, smd_ci = "nct")
 }
 }
+\seealso{
+Other effect sizes: 
+\code{\link{ses_calc}()}
+}
+\concept{effect sizes}

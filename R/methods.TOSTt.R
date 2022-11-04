@@ -69,11 +69,12 @@ print.TOSTt <- function(x,
 #' @export
 
 plot.TOSTt <- function(x,
-                       type = "cd",
+                       type = c("cd","c","tnull"),
                        estimates = c("raw","SMD"),
                        ci_lines,
                        ci_shades,
                        ...){
+  type = match.arg(type)
 
   low_eqd = x$eqb$low_eq[2]
   high_eqd = x$eqb$high_eq[2]

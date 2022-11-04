@@ -59,3 +59,8 @@ Standardized effect size (SES), these are the effect sizes not considered SMDs.
 ses_calc(formula = extra ~ group, data = sleep, paired = TRUE, ses = "r")
 }
 }
+\seealso{
+Other effect sizes: 
+\code{\link{smd_calc}()}
+}
+\concept{effect sizes}

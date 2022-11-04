@@ -21,6 +21,7 @@
 #' smd_calc(formula = extra ~ group,data = sleep, paired = TRUE, smd_ci = "nct")
 #' }
 #' @name smd_calc
+#' @family effect sizes
 #' @export smd_calc
 
 #smd_calc <- setClass("smd_calc")

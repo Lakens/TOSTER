@@ -22,6 +22,7 @@
 #' ses_calc(formula = extra ~ group, data = sleep, paired = TRUE, ses = "r")
 #' }
 #' @name ses_calc
+#' @family effect sizes
 #' @export ses_calc
 
 #ses_calc <- setClass("ses_calc")

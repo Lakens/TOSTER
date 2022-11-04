@@ -7,6 +7,7 @@ NEWS
 
 - Changed Glass's delta SE for paired samples (minor).
 - Added `smd_calc` and `ses_calc` for just calculating the standardized effect sizes (no tests).
+- Default CIs for for SMDs are now NCT rather than the Goulet method.
 - `compare_smd` can be supplied with user provided standard errors.
 
 # TOSTER v0.5.1

@@ -50,3 +50,8 @@ A list with class "htest" containing the following components:
 \description{
 A function to compare standardized mean differences (SMDs) between studies. This function is intended to be used to compare the compatibility of original studies with replication studies (lower p-values indicating lower compatibility)
 }
+\seealso{
+Other compare studies: 
+\code{\link{boot_t_TOST}()}
+}
+\concept{compare studies}

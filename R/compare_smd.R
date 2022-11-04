@@ -21,6 +21,7 @@
 #'   \item{\code{"call"}}{the matched call.}
 #' }
 #' @name compare_smd
+#' @family compare studies
 #' @export compare_smd
 #'
 
