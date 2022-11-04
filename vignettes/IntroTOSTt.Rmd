@@ -30,7 +30,7 @@ In an effort to make `TOSTER` more informative and easier to use, a new function
 
 Also, `t_TOST` is not limited to equivalence tests. Minimal effects testing (MET) is now possible. MET is useful for situations where the hypothesis is about a minimal effect and the null hypothesis *is* equivalence.
 
-```{r echo=FALSE, message = FALSE, warning = FALSE, fig.show='hold'}
+```{r tostplots,echo=FALSE, message = FALSE, warning = FALSE, fig.show='hold'}
 
 ggplot() +
   geom_vline(aes(xintercept = -.5),

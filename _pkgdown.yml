@@ -1,3 +1,16 @@
+home:
+  title: The TOSTER R package
+  description: An R pacakge for equivalence testing through two one-sided tests (TOST).
+
+
+template:
+  opengraph:
+    image:
+      src: docs/articles/IntroTOSTt_files/figure-html/tostplots-2.png
+      alt: "Equivalence Test"
+    twitter:
+      creator: "@exphysstudent"
+      card: summary_large_image
 
 reference:
 
