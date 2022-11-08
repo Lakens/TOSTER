@@ -52,6 +52,7 @@ A function to compare standardized mean differences (SMDs) between studies. This
 }
 \seealso{
 Other compare studies: 
+\code{\link{boot_log_TOST}()},
 \code{\link{boot_t_TOST}()}
 }
 \concept{compare studies}

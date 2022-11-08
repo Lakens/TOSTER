@@ -38,6 +38,8 @@ log_TOST <- function(x, ...,
 log_TOST.default = function(x,
                             y = NULL,
                             hypothesis = c("EQU","MET"),
+                            var.equal = FALSE,
+                            paired = FALSE,
                             eqb = 1.25,
                             alpha = 0.05,
                             null = 1,
@@ -96,6 +98,8 @@ log_TOST.default = function(x,
                    mu = log(null),
                    conf.level = 1 - alpha*2,
                    alternative = "two.sided")
+  logrom = (tresult$statistic) * tresult$stderr + log(null)
+  logSE = tresult$stderr
 
   if(paired == TRUE && !missing(y)){
     i1 <- x
@@ -114,19 +118,36 @@ log_TOST.default = function(x,
     sd1  <- sd(i1)
     sd2  <- sd(i2)
     r12 <- cor(i1, i2)
+    d_df = n-1
 
     # Calculate log rom ------
-    cohen_res = d_est_pair(
-      n = n,
-      m1 = m1,
-      m2 = m2,
-      sd1 = sd1,
-      sd2 = sd2,
-      r12 = r12,
-      type = smd_type,
-      denom = denom,
-      alpha = alpha,
-      smd_ci = smd_ci
+    #log_romres = logrom_calc(
+    #  paired = TRUE,
+    #  bias_c = TRUE,
+    #  vtype = "LS",
+    #  m1i = m1,
+    #  sd1i = sd1,
+    #  n1i = n1,
+    #  m2i = m2,
+    #  sd2i = sd2,
+    #  n2i = n2,
+    #  ri = r12
+    #)
+
+    rom_res = list(
+      d = exp(tresult$statistic * tresult$stderr),
+      d_df = d_df,
+      dlow = exp(tresult$conf.int[1]),
+      dhigh = exp(tresult$conf.int[2]),
+      d_sigma = logSE,
+      d_lambda = NULL,
+      #hn = hn,
+      smd_label = "Means Ratio",
+      J = 0.5 * (sd1^2 / (n1 * m1^2) - sd2^2 / (n2 * m2^2)),
+      d_denom = 1,
+      ntilde = 1,
+      t_stat = NULL,
+      smd_ci = "t"
     )
 
   } else {
@@ -142,24 +163,27 @@ log_TOST.default = function(x,
 
     sd1 = sd(x1)
     sd2 = sd(y1)
+    d_df = n1 + n2 - 2
 
-    cohen_res = d_est_ind(
-      n1 = n1,
-      n2 = n2,
-      m1 = m1,
-      m2 = m2,
-      sd1 = sd1,
-      sd2 = sd2,
-      type = smd_type,
-      var.equal = var.equal,
-      alpha = alpha,
-      denom = denom,
-      smd_ci = smd_ci
+    rom_res = list(
+      d = exp(tresult$statistic * tresult$stderr),
+      d_df = d_df,
+      dlow = exp(tresult$conf.int[1]),
+      dhigh = exp(tresult$conf.int[2]),
+      d_sigma = logSE,
+      d_lambda = NULL,
+      #hn = hn,
+      smd_label = "Means Ratio",
+      J = 0.5 * (sd1^2 / (n1 * m1^2) - sd2^2 / (n2 * m2^2)),
+      d_denom = 1,
+      ntilde = 1,
+      t_stat = NULL,
+      smd_ci = "t"
     )
 
   }
 
-  if(!missing(eqb)){
+
     if(!is.numeric(eqb) || length(eqb) > 2){
       stop(
         "eqb must be a numeric of a length of 1 or 2"
@@ -178,7 +202,7 @@ log_TOST.default = function(x,
       high_eqbound = max(eqb)
       low_eqbound = min(eqb)
     }
-  }
+
 
   if(hypothesis == "EQU"){
     null_hyp = paste0(round(low_eqbound,2),
@@ -249,8 +273,8 @@ log_TOST.default = function(x,
 
   eqb = data.frame(
     type = c("log(Means Ratio)","Means Ratio"),
-    low_eq = c(log(low_eqbound),low_eqbound_d),
-    high_eq = c(log(high_eqbound),high_eqbound_d)
+    low_eq = c(log(low_eqbound),low_eqbound),
+    high_eq = c(log(high_eqbound),high_eqbound)
   )
 
   effsize = data.frame(
@@ -258,7 +282,7 @@ log_TOST.default = function(x,
                  exp(tresult$statistic * tresult$stderr)),
     SE = c(tresult$stderr,NA),
     lower.ci = c(tresult$conf.int[1], exp(tresult$conf.int[1])),
-    upper.ci = c(tresult$conf.int[2], exp(tresult$conf.int[2]),
+    upper.ci = c(tresult$conf.int[2], exp(tresult$conf.int[2])),
     conf.level = c((1-alpha*2),(1-alpha*2)),
     row.names = c("log(Means Ratio)","Means Ratio")
   )
@@ -336,10 +360,10 @@ log_TOST.default = function(x,
     TOST = TOST,
     eqb = eqb,
     alpha = alpha,
-    method = tresult$method,
+    method = paste0("Log-transformed ",tresult$method),
     hypothesis = test_hypothesis,
     effsize = effsize,
-    smd = cohen_res,
+    smd = rom_res,
     decision = decision,
     data.name = dname,
     call = match.call()
@@ -447,19 +471,22 @@ logrom_calc = function(paired = FALSE,
       sd2i / (m1i * m2i * n1i)
 
   }
+  J = 0.5 * (sd1i^2 / (n1i * m1i^2) - sd2i^2 / (n2i * m2i^2))
+  Jvar = 0.5 * (sd1i^4 / (n1i^2 * m1i^4) - sd2i^4 / (n2i^2 * m2i^4))
 
   if(bias_c){
-    J = 0.5 * (sd1i^2 / (n1i * m1i^2) - sd2i^2 / (n2i * m2i^2))
+
     yi = yi + J
 
-    Jvar = 0.5 * (sd1i^4 / (n1i^2 * m1i^4) - sd2i^4 / (n2i^2 * m2i^4))
     vi = vi + Jvar
   }
 
 
   rval = list(
     log_rom = yi,
-    var_rom = vi
+    var_rom = vi,
+    J = J,
+    Jvar = Jvar
   )
   return(rval)
 }

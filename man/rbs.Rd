@@ -3,8 +3,7 @@
 \name{rbs}
 \alias{rbs}
 \alias{np_ses}
-\title{Non-parametric standardized effect sizes
-Effect sizes for simple (one or two sample) non-parametric tests.}
+\title{Non-parametric standardized effect sizes (replicates of ses_calc)}
 \usage{
 rbs(x, y = NULL, mu = 0, conf.level = 0.95, paired = FALSE)
 
@@ -36,7 +35,6 @@ estimated. See [stats::wilcox.test].}
 Returns a list of results including the rank biserial correlation, logical indicator if it was a paired method, setting for mu, and confidence interval.
 }
 \description{
-Non-parametric standardized effect sizes
 Effect sizes for simple (one or two sample) non-parametric tests.
 }
 \details{
