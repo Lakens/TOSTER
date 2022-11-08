@@ -29,6 +29,7 @@ reference:
   contents:
   - wilcox_TOST
   - boot_t_TOST
+  - log_TOST
 
 - subtitle: "ANOVA"
   desc: >
