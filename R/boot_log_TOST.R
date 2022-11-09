@@ -68,7 +68,7 @@ boot_log_TOST.default <- function(x,
     stop("'alpha' must be a single number between 0 and 1")
   }
 
-  if(!missing(eqb)){
+
     if(!is.numeric(eqb) || length(eqb) > 2){
       stop(
         "eqb must be a numeric of a length of 1 or 2"
@@ -87,7 +87,7 @@ boot_log_TOST.default <- function(x,
       high_eqbound = max(eqb)
       low_eqbound = min(eqb)
     }
-  }
+
 
   if (!is.null(y)) {
     dname <- paste(deparse(substitute(x)), "and",
@@ -105,12 +105,9 @@ boot_log_TOST.default <- function(x,
                       hypothesis = hypothesis,
                       paired = paired,
                       var.equal = var.equal,
-                      low_eqbound = low_eqbound,
-                      high_eqbound = high_eqbound,
-                      eqbound_type = eqbound_type,
+                      lqb=eqb,
                       alpha = alpha,
-                      mu = mu,
-                      bias_correction = bias_correction)
+                      null = null)
   }
   d_vec <- rep(NA, times=length(R)) # smd vector
   m_vec <- rep(NA, times=length(R)) # mean difference vector
@@ -119,12 +116,6 @@ boot_log_TOST.default <- function(x,
   #tu_vec <- rep(NA, times=length(R)) # upper bound vector
 
   conf.level = 1-alpha*2
-
-  if(bias_correction){
-    smd_type = 'g'
-  } else {
-    smd_type = 'd'
-  }
 
   if(!is.null(y)){
     dname <- paste(deparse(substitute(x)), "and", deparse(substitute(y)))
@@ -140,67 +131,12 @@ boot_log_TOST.default <- function(x,
     xok <- !is.na(x)
     y <- y[yok]
 
-  }else{
-    dname <- deparse(substitute(x))
-    #if (paired) {
-    #  stop("'y' is missing for paired test")
-    #}
-
-    xok <- !is.na(x)
-    yok <- NULL
   }
   x <- x[xok]
-  if(paired && !is.null(y)){
-    x <- x - y
-    y <- NULL
-  }
+
   nx <- length(x)
   mx <- mean(x)
   vx <- var(x)
-  if (is.null(y)) {
-    if (nx < 2)
-      stop("not enough 'x' observations")
-    df <- nx - 1
-    stderr <- sqrt(vx/nx)
-    if (stderr < 10 * .Machine$double.eps * abs(mx)){
-      stop("data are essentially constant")
-    }
-    #tstat <- (mx - mu)/stderr
-    #tstat_low = (mx - low_eqbound)/stderr
-    #tstat_high = (mx - high_eqbound)/stderr
-    method <- if (paired) "Bootstrapped Paired t-test" else "Bootstrapped One Sample t-test"
-    #estimate <- setNames(mx, if (paired) "mean of the differences" else "mean of x")
-    #x.cent <- x - mx # remove to have an untransformed matrix
-    X <- matrix(sample(x, size = nx*R, replace = TRUE), nrow = R)
-    MX <- rowMeans(X - mx)
-    VX <- rowSums((X - MX) ^ 2) / (nx - 1)
-    STDERR <- sqrt(VX/nx)
-    TSTAT <- (MX)/STDERR
-    #TSTAT_low <- (MX-low_eqbound)/STDERR
-    #TSTAT_high <- (MX-high_eqbound)/STDERR
-    EFF <- MX+mx
-
-    for(i in 1:nrow(X)){
-      dat = X[i,]
-      runTOST =  t_TOST(x = dat,
-                         hypothesis = hypothesis,
-                         paired = FALSE,
-                         var.equal = TRUE,
-                         low_eqbound = low_eqbound,
-                         high_eqbound = high_eqbound,
-                         eqbound_type = eqbound_type,
-                         alpha = alpha,
-                         mu = mu,
-                         bias_correction = bias_correction,
-                         rm_correction = FALSE)
-
-      d_vec[i] <- runTOST$smd$d # smd vector
-      m_vec[i] <- runTOST$effsize$estimate[1] # mean difference vector
-      #t_vec[i] <- runTOST$TOST$t[1] - mx # t-test vector
-      #tl_vec[i] <- runTOST$TOST$t[2] - mx # lower bound vector
-      #tu_vec[i] <- runTOST$TOST$t[3] - mx # upper bound vector
-    }
-  }
   # Next chunk useless for now skipped automatically
   #if(!is.null(y) && paired) {
   #  ny <- length(y)

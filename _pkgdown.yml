@@ -30,6 +30,7 @@ reference:
   - wilcox_TOST
   - boot_t_TOST
   - log_TOST
+  - boot_log_TOST
 
 - subtitle: "ANOVA"
   desc: >
