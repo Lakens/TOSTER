@@ -196,6 +196,54 @@ print(test1)
 plot(test1)
 ```
 
+# Ratio of Difference (Log Transformed)
+
+In many bioequivalence studies, the differences between drugs are compared on the log scale.
+The log scale allows researchers to compare the ratio of two means.
+
+
+$$
+log ( \frac{y}{x} ) = log(y) - log(x)
+$$
+In addition, the United States Food and Drug Administration (FDA), considers 
+two drugs as bioequivalent when the ratio between x and y is less than 1.25 and
+greater than 0.8 (1/1.25), which is the default equivalence bound for the log
+functions.
+
+
+## log_TOST
+
+For example, we could compare whether the cars of different transmissions
+are "equivalent" with regards to gas mileage. 
+We can use the default equivalence bounds (`eqb = 1.25`).
+
+```{r}
+log_TOST(
+  mpg ~ am,
+  data = mtcars
+)
+```
+
+Note, that the function produces t-tests similar to the `t_TOST` function, but
+provides two effect sizes. The means ratio on the log scale (the scale of the test statistics),
+and the means ratio. The means ratio is missing standard error because the
+confidence intervals and estimate are simply the log scale results exponentiated.
+
+## boot_log_TOST
+
+However, it has been noted in the statistics literature that t-tests on the
+logarithmic scale can be biased, and it is recommended that bootstrapped tests
+be utilized instead. Therefore, the `boot_log_TOST` function can be utilized to
+perform a more precise test.
+
+```{r}
+boot_log_TOST(
+  mpg ~ am,
+  data = mtcars,
+  R = 499
+)
+```
+
 # Just Estimate an Effect Size
 
 It was requested that a function be provided that only calculates and effect size.

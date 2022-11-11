@@ -4,7 +4,7 @@
 \alias{boot_log_TOST}
 \alias{boot_log_TOST.default}
 \alias{boot_log_TOST.formula}
-\title{Bootstrapped TOST with lolog t-tests}
+\title{Bootstrapped TOST with log t-tests}
 \usage{
 boot_log_TOST(x, ...)
 
@@ -40,6 +40,8 @@ boot_log_TOST(x, ...)
 
 \item{alpha}{alpha level (default = 0.05).}
 
+\item{null}{Null hypothesis value for two-tailed test (default is 1).}
+
 \item{R}{number of bootstrap replicates}
 
 \item{formula}{a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.}
@@ -49,16 +51,6 @@ boot_log_TOST(x, ...)
 \item{subset}{an optional vector specifying a subset of observations to be used.}
 
 \item{na.action}{a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").}
-
-\item{low_eqbound}{lower equivalence bounds (deprecated; use eqb).}
-
-\item{high_eqbound}{upper equivalence bounds (deprecated; use eqb).}
-
-\item{eqbound_type}{Type of equivalence bound. Can be set to "SMD" for standardized mean difference (i.e., Cohen's d) or  "raw" for the mean difference. Default is "raw". Raw is strongly recommended as SMD bounds will produce biased results.}
-
-\item{bias_correction}{Apply Hedges' correction for bias (default is TRUE).}
-
-\item{mu}{a number indicating the true value of the mean for the two tailed test (or difference in means if you are performing a two sample test).}
 }
 \value{
 An S3 object of class
@@ -85,6 +77,8 @@ The implemented test(s) corresponds to the proposal of Chapter 16 of Efron and T
 
 
 Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press.
+
+He, Y., Deng, Y., You, C., & Zhou, X. H. (2022). Equivalence tests for ratio of means in bioequivalence studies under crossover design. Statistical Methods in Medical Research, 09622802221093721.
 }
 
 \seealso{

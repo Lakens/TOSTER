@@ -21,6 +21,8 @@ log_TOST(
   x,
   y = NULL,
   hypothesis = c("EQU", "MET"),
+  var.equal = FALSE,
+  paired = FALSE,
   eqb = 1.25,
   alpha = 0.05,
   null = 1,

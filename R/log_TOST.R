@@ -135,7 +135,7 @@ log_TOST.default = function(x,
     #)
 
     rom_res = list(
-      d = exp(tresult$statistic * tresult$stderr),
+      d = exp(logrom),
       d_df = d_df,
       dlow = exp(tresult$conf.int[1]),
       dhigh = exp(tresult$conf.int[2]),
@@ -143,7 +143,7 @@ log_TOST.default = function(x,
       d_lambda = NULL,
       #hn = hn,
       smd_label = "Means Ratio",
-      J = 0.5 * (sd1^2 / (n1 * m1^2) - sd2^2 / (n2 * m2^2)),
+      J = 0.5 * (sd1^2 / (n * m1^2) - sd2^2 / (n * m2^2)),
       d_denom = 1,
       ntilde = 1,
       t_stat = NULL,
@@ -166,7 +166,7 @@ log_TOST.default = function(x,
     d_df = n1 + n2 - 2
 
     rom_res = list(
-      d = exp(tresult$statistic * tresult$stderr),
+      d = exp(logrom),
       d_df = d_df,
       dlow = exp(tresult$conf.int[1]),
       dhigh = exp(tresult$conf.int[2]),
@@ -278,9 +278,9 @@ log_TOST.default = function(x,
   )
 
   effsize = data.frame(
-    estimate = c(tresult$statistic * tresult$stderr,
-                 exp(tresult$statistic * tresult$stderr)),
-    SE = c(tresult$stderr,NA),
+    estimate = c(logrom,
+                 exp(logrom)),
+    SE = c(logSE,NA),
     lower.ci = c(tresult$conf.int[1], exp(tresult$conf.int[1])),
     upper.ci = c(tresult$conf.int[2], exp(tresult$conf.int[2])),
     conf.level = c((1-alpha*2),(1-alpha*2)),
@@ -304,48 +304,13 @@ log_TOST.default = function(x,
   }
 
   ttest_restext = paste0("The null hypothesis test was ",testoutcome,", t(",round(tresult$parameter, digits=2),") = ",format(tresult$statistic, digits = 3, nsmall = 3, scientific = FALSE),", p = ",format(tresult$p.value, digits = 3, nsmall = 3, scientific = TRUE),sep="")
-  if (hypothesis == "EQU"){
-    if(tresult$p.value <= alpha && pTOST <= alpha){
-      combined_outcome <- paste0("NHST: reject null significance hypothesis that the effect is equal to ",mu_text," \n",
-                                 "TOST: reject null equivalence hypothesis")
-    }
-    if(tresult$p.value < alpha && pTOST > alpha){
-      combined_outcome <- paste0("NHST: reject null significance hypothesis that the effect is equal to ",mu_text," \n ",
-                                 "TOST: don't reject null equivalence hypothesis")
-      # paste0("statistically different from ",mu_text," and not statistically equivalent")
-    }
-    if(tresult$p.value > alpha && pTOST <= alpha){
-      combined_outcome <- paste0("NHST: don't reject null significance hypothesis that the effect is equal to ",mu_text," \n ",
-                                 "TOST: reject null equivalence hypothesis")
-      #paste0("statistically not different from ",mu_text," and statistically equivalent")
-    }
-    if(tresult$p.value > alpha && pTOST > alpha){
-      combined_outcome <- paste0("NHST: don't reject null significance hypothesis that the effect is equal to ",mu_text," \n ",
-                                 "TOST: don't reject null equivalence hypothesis")
-      #paste0("statistically not different from ",mu_text," and not statistically equivalent")
-    }
-  } else {
-    if(tresult$p.value <= alpha && pTOST <= alpha){
-      combined_outcome <- paste0("NHST: reject null significance hypothesis that the effect is equal to ",mu_text," \n ",
-                                 "TOST: reject null MET hypothesis")
-      #paste0("statistically different from ",mu_text," and statistically greater than the minimal effect threshold")
-    }
-    if(tresult$p.value < alpha && pTOST > alpha){
-      combined_outcome <- paste0("NHST: reject null significance hypothesis that the effect is equal to ",mu_text," \n ",
-                                 "TOST: don't reject null MET hypothesis")
-      #paste0("statistically different from ",mu_text," but not statistically greater than the minimal effect threshold")
-    }
-    if(tresult$p.value > alpha && pTOST <= alpha){
-      combined_outcome <- paste0("NHST: don't reject null significance hypothesis that the effect is equal to ",mu_text," \n ",
-                                 "TOST: reject null MET hypothesis")
-      #paste0("statistically not different from ",mu_text," and statistically greater than the minimal effect threshold")
-    }
-    if(tresult$p.value > alpha && pTOST > alpha){
-      combined_outcome <- paste0("NHST: don't reject null significance hypothesis that the effect is equal to ",mu_text," \n ",
-                                 "TOST: don't reject null MET hypothesis")
-      #paste0("statistically not different from ",mu_text," and not statistically greater than the minimal effect threshold")
-    }
-  }
+
+  combined_outcome = tost_decision(hypothesis = hypothesis,
+                                    alpha = alpha,
+                                    pvalue = tresult$p.value,
+                                    pTOST = pTOST,
+                                    mu_text = mu_text)
+
 
   decision = list(
     TOST = TOST_restext,
@@ -408,85 +373,4 @@ log_TOST.formula = function(formula,
 
 }
 
-#' @importFrom stats sd
-#' @keywords internal
 
-logrom_calc = function(paired = FALSE,
-                       bias_c = TRUE,
-                       vtype = "LS",
-                       m1i,
-                       sd1i,
-                       n1i,
-                       m2i,
-                       sd2i,
-                       n2i,
-                       ri = NULL) {
-  if (!paired) {
-    yi <- log(m1i / m2i)
-
-
-    ### sample size weighted average of the coefficient of variation in group 1
-    mn1wcvi <- .wmean(sd1i / m1i,
-                      n1i,
-                      na.rm = TRUE)
-    ### sample size weighted average of the coefficient of variation in group 2
-    mn2wcvi <- .wmean(sd2i / m2i,
-                      n2i,
-                      na.rm = TRUE)
-    ### sample size weighted average of the two CV values
-
-    mnwcvi  <-
-      (sum(n1i * (sd1i / m1i)) + sum(n2i * (sd2i / m2i))) / sum((n1i +
-                                                                   n2i))
-
-    ### large sample approximation to the sampling variance (does not assume homoscedasticity)
-    if (vtype == "LS") {
-      vi <-
-        sd1i ^ 2 / (n1i * m1i ^ 2) + sd2i ^ 2 / (n2i * m2i ^
-                                                   2)
-    }
-    ### estimator assuming homoscedasticity
-    if (vtype == "HO") {
-      mi   <- n1i+n2i - 2
-      sdpi <- sqrt(((n1i-1)*sd1i^2 + (n2i-1)*sd2i^2)/mi)
-      vi <-
-        sdpi ^ 2 / (n1i * m1i ^ 2) + sdpi ^ 2 / (n2i * m2i ^
-                                                   2)
-    }
-    ### estimator using the weighted averages of the CV values
-    if (vtype == "AV") {
-      vi <- mn1wcvi ^ 2 / n1i + mn2wcvi ^ 2 / n2i
-    }
-    ### estimator using the weighted average of two weighted averages of the CV values
-    if (vtype == "AVHO"){
-      vi <- mnwcvi ^ 2 * (1 / n1i + 1 / n2i)
-    }
-
-  }
-
-  if (paired) {
-    yi <- log(m1i / m2i)
-    vi <-
-      sd1i ^ 2 / (n1i * m1i ^ 2) + sd2i ^ 2 / (n1i * m2i ^ 2) - 2 * ri * sd1i *
-      sd2i / (m1i * m2i * n1i)
-
-  }
-  J = 0.5 * (sd1i^2 / (n1i * m1i^2) - sd2i^2 / (n2i * m2i^2))
-  Jvar = 0.5 * (sd1i^4 / (n1i^2 * m1i^4) - sd2i^4 / (n2i^2 * m2i^4))
-
-  if(bias_c){
-
-    yi = yi + J
-
-    vi = vi + Jvar
-  }
-
-
-  rval = list(
-    log_rom = yi,
-    var_rom = vi,
-    J = J,
-    Jvar = Jvar
-  )
-  return(rval)
-}

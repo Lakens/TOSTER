@@ -15,6 +15,7 @@ test_that("compare_smd", {
 
   expect_error(compare_smd())
 
+
   # One sample
   set.seed(7894021)
   datx1 = rnorm(20)
@@ -27,6 +28,11 @@ test_that("compare_smd", {
                       smd2 = one_boot1$df_ci$estimate[3],
                       n2 = length(datx2),
                       paired = TRUE)
+  expect_error(compare_smd(smd1 = one_boot1$df_ci$estimate[2],
+                           n1 = length(datx1),
+                           smd2 = one_boot1$df_ci$estimate[3],
+                           n2 = c(1,1),
+                           paired = TRUE))
   se1 = TOSTER:::se_dz(one_boot1$df_ci$estimate[2], length(datx1))
   se2 = TOSTER:::se_dz(one_boot1$df_ci$estimate[3], length(datx2))
 
@@ -72,6 +78,12 @@ test_that("compare_smd", {
                       n2 = c(length(datx2),length(daty2)),
                       paired = FALSE)
 
+  expect_error(compare_smd(smd1 = one_boot3$df_ci$estimate[2],
+              n1 = c(length(datx1),length(daty1)),
+              smd2 = one_boot3$df_ci$estimate[3],
+              n2 = c(length(datx2),length(daty2),1),
+              paired = FALSE))
+
   se1 = TOSTER:::se_dz(one_boot1$df_ci$estimate[2], c(length(datx1),length(daty1)))
   se2 = TOSTER:::se_dz(one_boot1$df_ci$estimate[3], c(length(datx2),length(daty2)))
 
@@ -85,6 +97,14 @@ test_that("compare_smd", {
 
   expect_equal(unname(one_3$statistic),
                unname(one_boot3$statistic))
+
+  one_3 = compare_smd(smd1 = one_boot3$df_ci$estimate[2],
+                      n1 = c(length(datx1),length(daty1)),
+                      smd2 = one_boot3$df_ci$estimate[3]+.32,
+                      n2 = c(length(datx2),length(daty2)),
+                      paired = FALSE,
+                      TOST = TRUE,
+                      null = .25)
 
 })
 

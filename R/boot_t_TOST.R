@@ -37,7 +37,6 @@
 #' Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press.
 #' @importFrom stats var quantile
 #' @name boot_t_TOST
-#' @family compare studies
 #' @export boot_t_TOST
 
 boot_t_TOST <- function(x, ...){
@@ -417,54 +416,32 @@ boot_t_TOST.default <- function(x,
 
   if(hypothesis == "EQU"){
     #format(low_eqbound, digits = 3, nsmall = 3, scientific = FALSE)
-    TOST_restext = paste0("The equivalence test was ",TOSToutcome,", t(",round(df, digits=2),") = ",format(tTOST, digits = 3, nsmall = 3, scientific = FALSE),", p = ",format(pTOST, digits = 3, nsmall = 3, scientific = TRUE),sep="")
+    TOST_restext = paste0("The equivalence test was ",
+                          TOSToutcome,", t(",round(df, digits=2),") = ",
+                          format(tTOST, digits = 3,
+                                 nsmall = 3, scientific = FALSE),", p = ",
+                          format(pTOST, digits = 3,
+                                 nsmall = 3, scientific = TRUE),sep="")
   } else {
-    TOST_restext = paste0("The minimal effect test was ",TOSToutcome,", t(",round(df, digits=2),") = ",format(tTOST, digits = 3, nsmall = 3, scientific = FALSE),", p = ",format(pTOST, digits = 3, nsmall = 3, scientific = TRUE),sep="")
+    TOST_restext = paste0("The minimal effect test was ",
+                          TOSToutcome,", t(",round(df, digits=2),") = ",
+                          format(tTOST, digits = 3,
+                                 nsmall = 3, scientific = FALSE),", p = ",
+                          format(pTOST, digits = 3,
+                                 nsmall = 3, scientific = TRUE),sep="")
   }
 
-  ttest_restext = paste0("The null hypothesis test was ",testoutcome,", t(",round(df, digits=2),") = ",format(tstat, digits = 3, nsmall = 3, scientific = FALSE),", p = ",format(boot.pval, digits = 3, nsmall = 3, scientific = TRUE),sep="")
-  if (hypothesis == "EQU"){
-    if(boot.pval <= alpha && pTOST <= alpha){
-      combined_outcome <- paste0("NHST: reject null significance hypothesis that the effect is equal to ",mu_text," \n",
-                                 "TOST: reject null equivalence hypothesis")
-    }
-    if(boot.pval < alpha && pTOST > alpha){
-      combined_outcome <- paste0("NHST: reject null significance hypothesis that the effect is equal to ",mu_text," \n",
-                                 "TOST: don't reject null equivalence hypothesis")
-      # paste0("statistically different from ",mu_text," and not statistically equivalent")
-    }
-    if(boot.pval > alpha && pTOST <= alpha){
-      combined_outcome <- paste0("NHST: don't reject null significance hypothesis that the effect is equal to ",mu_text," \n",
-                                 "TOST: reject null equivalence hypothesis")
-      #paste0("statistically not different from ",mu_text," and statistically equivalent")
-    }
-    if(boot.pval > alpha && pTOST > alpha){
-      combined_outcome <- paste0("NHST: don't reject null significance hypothesis that the effect is equal to ",mu_text," \n",
-                                 "TOST: don't reject null equivalence hypothesis")
-      #paste0("statistically not different from ",mu_text," and not statistically equivalent")
-    }
-  } else {
-    if(boot.pval <= alpha && pTOST <= alpha){
-      combined_outcome <- paste0("NHST: reject null significance hypothesis that the effect is equal to ",mu_text," \n",
-                                 "TOST: reject null MET hypothesis")
-      #paste0("statistically different from ",mu_text," and statistically greater than the minimal effect threshold")
-    }
-    if(boot.pval < alpha && pTOST > alpha){
-      combined_outcome <- paste0("NHST: reject null significance hypothesis that the effect is equal to ",mu_text," \n",
-                                 "TOST: don't reject null MET hypothesis")
-      #paste0("statistically different from ",mu_text," but not statistically greater than the minimal effect threshold")
-    }
-    if(boot.pval > alpha && pTOST <= alpha){
-      combined_outcome <- paste0("NHST: don't reject null significance hypothesis that the effect is equal to ",mu_text," \n",
-                                 "TOST: reject null MET hypothesis")
-      #paste0("statistically not different from ",mu_text," and statistically greater than the minimal effect threshold")
-    }
-    if(boot.pval > alpha && pTOST > alpha){
-      combined_outcome <- paste0("NHST: don't reject null significance hypothesis that the effect is equal to ",mu_text," \n",
-                                 "TOST: don't reject null MET hypothesis")
-      #paste0("statistically not different from ",mu_text," and not statistically greater than the minimal effect threshold")
-    }
-  }
+  ttest_restext = paste0("The null hypothesis test was ",
+                         testoutcome,", t(",round(df, digits=2),") = ",
+                         format(tstat, digits = 3,
+                                nsmall = 3, scientific = FALSE),", p = ",
+                         format(boot.pval, digits = 3,
+                                nsmall = 3, scientific = TRUE),sep="")
+  combined_outcome = tost_decision(hypothesis = hypothesis,
+                                    alpha = alpha,
+                                    pvalue = boot.pval,
+                                    pTOST = pTOST,
+                                    mu_text = mu_text)
 
 
   decision = list(

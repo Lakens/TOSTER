@@ -1,23 +1,7 @@
-#' @title Bootstrapped TOST with lolog t-tests
+#' @title Bootstrapped TOST with log t-tests
 #' @description A function for a bootstrap method for TOST with all types of t-tests.
-#' @param x a (non-empty) numeric vector of data values.
-#' @param y an optional (non-empty) numeric vector of data values.
-#' @param formula a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.
-#' @param data an optional matrix or data frame (or similar: see model.frame) containing the variables in the formula formula. By default the variables are taken from environment(formula).
-#' @param paired a logical indicating whether you want a paired t-test.
-#' @param var.equal  a logical variable indicating whether to treat the two variances as being equal. If TRUE then the pooled variance is used to estimate the variance otherwise the Welch (or Satterthwaite) approximation to the degrees of freedom is used.
-#' @param eqb Equivalence bound. Can provide 1 value (negative value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds.
-#' @param low_eqbound lower equivalence bounds (deprecated; use eqb).
-#' @param high_eqbound upper equivalence bounds (deprecated; use eqb).
-#' @param hypothesis 'EQU' for equivalence (default), or 'MET' for minimal effects test, the alternative hypothesis.
-#' @param eqbound_type Type of equivalence bound. Can be set to "SMD" for standardized mean difference (i.e., Cohen's d) or  "raw" for the mean difference. Default is "raw". Raw is strongly recommended as SMD bounds will produce biased results.
-#' @param alpha alpha level (default = 0.05).
-#' @param bias_correction Apply Hedges' correction for bias (default is TRUE).
-#' @param R number of bootstrap replicates
-#' @param mu a number indicating the true value of the mean for the two tailed test (or difference in means if you are performing a two sample test).
-#' @param subset an optional vector specifying a subset of observations to be used.
-#' @param na.action a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").
-#' @param ...  further arguments to be passed to or from methods.
+#' @inheritParams boot_t_TOST
+#' @inheritParams log_TOST
 #' @return An S3 object of class
 #'   \code{"TOSTt"} is returned containing the following slots:
 #' \describe{
@@ -35,6 +19,8 @@
 #' @section References:
 #'
 #' Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press.
+#'
+#' He, Y., Deng, Y., You, C., & Zhou, X. H. (2022). Equivalence tests for ratio of means in bioequivalence studies under crossover design. Statistical Methods in Medical Research, 09622802221093721.
 #' @importFrom stats var quantile
 #' @name boot_log_TOST
 #' @family compare studies
@@ -61,7 +47,9 @@ boot_log_TOST.default <- function(x,
   if(!missing(null) && (length(null) != 1 || is.na(null))) {
     stop("'null' must be a single number")
   }
-
+  if(any(x < 0) || any(y < 0)){
+    stop("Negative values detected. Values must be on ratio scale (true zero).")
+  }
 
   if(!missing(alpha) && (length(alpha) != 1 || !is.finite(alpha) ||
                               alpha < 0 || alpha > 1)) {
@@ -106,70 +94,35 @@ boot_log_TOST.default <- function(x,
 
   xok <- !is.na(x)
   yok <- NULL
-}
+
 x <- x[xok]
-if(paired && !is.null(y)){
+if(paired){
   x <- x - y
   y <- NULL
 }
 nx <- length(x)
 mx <- mean(x)
 vx <- var(x)
-if (is.null(y)) {
-  if (nx < 2)
-    stop("not enough 'x' observations")
-  df <- nx - 1
-  stderr <- sqrt(vx/nx)
-  if (stderr < 10 * .Machine$double.eps * abs(mx)){
-    stop("data are essentially constant")
-  }
-  #tstat <- (mx - mu)/stderr
-  #tstat_low = (mx - low_eqbound)/stderr
-  #tstat_high = (mx - high_eqbound)/stderr
-  method <- if (paired) "Bootstrapped Paired t-test" else "Bootstrapped One Sample t-test"
-  #estimate <- setNames(mx, if (paired) "mean of the differences" else "mean of x")
-  #x.cent <- x - mx # remove to have an untransformed matrix
-  X <- matrix(sample(x, size = nx*R, replace = TRUE), nrow = R)
-  MX <- rowMeans(X - mx)
-  VX <- rowSums((X - MX) ^ 2) / (nx - 1)
-  STDERR <- sqrt(VX/nx)
-  TSTAT <- (MX)/STDERR
-  #TSTAT_low <- (MX-low_eqbound)/STDERR
-  #TSTAT_high <- (MX-high_eqbound)/STDERR
-  EFF <- MX+mx
 
-  for(i in 1:nrow(X)){
-    dat = X[i,]
-    runTOST =  t_TOST(x = dat,
-                      hypothesis = hypothesis,
-                      paired = FALSE,
-                      var.equal = TRUE,
-                      low_eqbound = low_eqbound,
-                      high_eqbound = high_eqbound,
-                      eqbound_type = eqbound_type,
-                      alpha = alpha,
-                      mu = mu,
-                      bias_correction = bias_correction,
-                      rm_correction = FALSE)
-
-    d_vec[i] <- runTOST$smd$d # smd vector
-    m_vec[i] <- runTOST$effsize$estimate[1] # mean difference vector
-    #t_vec[i] <- runTOST$TOST$t[1] - mx # t-test vector
-    #tl_vec[i] <- runTOST$TOST$t[2] - mx # lower bound vector
-    #tu_vec[i] <- runTOST$TOST$t[3] - mx # upper bound vector
-  }
-}
-
-  if(!is.null(y)){
-    nullTOST = log_TOST(x = x,
-                      y = y,
+if(!paired){
+  nullTOST = log_TOST(x = exp(x),
+                      y = exp(y),
                       hypothesis = hypothesis,
                       paired = paired,
                       var.equal = var.equal,
-                      lqb=eqb,
+                      eqb = eqb,
                       alpha = alpha,
                       null = null)
-  }
+} else {
+  nullTOST = log_pair(x = x,
+                      hypothesis = hypothesis,
+                      eqb = eqb,
+                      alpha = alpha,
+                      null = null)
+
+}
+
+
   d_vec <- rep(NA, times=length(R)) # smd vector
   m_vec <- rep(NA, times=length(R)) # mean difference vector
   #t_vec <- rep(NA, times=length(R)) # t-test vector
@@ -198,45 +151,49 @@ if (is.null(y)) {
   nx <- length(x)
   mx <- mean(x)
   vx <- var(x)
-  # Next chunk useless for now skipped automatically
-  #if(!is.null(y) && paired) {
-  #  ny <- length(y)
-  #  my <- mean(y)
-  #  vy <- var(y)
-  #  diff <- x - y
-  #  method <-  "Bootstrapped Paired t-test"
-  #  estimate <- setNames(mx, "mean of the differences")
-  #  x.cent <- diff - mx
-  #  df = length(x.cent) - 1
-  #  z <- c(x, y)
-  #  Z <- matrix(sample(z, size = (nx+ny)*R, replace = TRUE), nrow = R)
+  # Paired ----
+  if (is.null(y)) {
+    if (nx < 2)
+      stop("not enough 'x' observations")
+    df <- nx - 1
+    stderr <- sqrt(vx/nx)
+    if (stderr < 10 * .Machine$double.eps * abs(mx)){
+      stop("data are essentially constant")
+    }
+    #tstat <- (mx - mu)/stderr
+    #tstat_low = (mx - low_eqbound)/stderr
+    #tstat_high = (mx - high_eqbound)/stderr
+    method <- if (paired) "Bootstrapped Paired t-test" else "Bootstrapped One Sample t-test"
+    #estimate <- setNames(mx, if (paired) "mean of the differences" else "mean of x")
+    #x.cent <- x - mx # remove to have an untransformed matrix
+    X <- matrix(sample(x, size = nx*R, replace = TRUE), nrow = R)
+    MX <- rowMeans(X - mx)
+    VX <- rowSums((X - MX) ^ 2) / (nx - 1)
+    STDERR <- sqrt(VX/nx)
+    TSTAT <- (MX)/STDERR
+    #TSTAT_low <- (MX-low_eqbound)/STDERR
+    #TSTAT_high <- (MX-high_eqbound)/STDERR
+    EFF <- MX+mx
 
-  #  for(i in 1:nrow(Z)){
-  #    dat = Z[i,]
-  #    dat_x = dat[1:nx]
-  #    dat_y = dat[(nx+1):(nx+ny)]
-  #    runTOST =  t_TOST(x = dat_x,
-  #                      y = dat_y,
-  #                      hypothesis = hypothesis,
-  #                      paired = paired,
-  #                      var.equal = var.equal,
-  #                      low_eqbound = low_eqbound,
-  #                      high_eqbound = high_eqbound,
-  #                      eqbound_type = eqbound_type,
-  #                      alpha = alpha,
-  #                      mu = mu,
-  #                      bias_correction = bias_correction,
-  #                      rm_correction = rm_correction)
-  #
+    for(i in 1:nrow(X)){
+      dat = X[i,]
+      runTOST =  log_pair(
+        x = dat,
+        hypothesis = hypothesis,
+        eqb = eqb,
+        alpha = alpha,
+        null = null
+      )
 
-  #    d_vec[i] <- runTOST$smd$d # smd vector
-  #    m_vec[i] <- runTOST$effsize$estimate[1] # mean difference vector
-  #    t_vec[i] <- runTOST$TOST$t[1] # t-test vector
-  #    tl_vec[i] <- runTOST$TOST$t[2] # lower bound vector
-  #    tu_vec[i] <- runTOST$TOST$t[3] # upper bound vector
-  #  }
- # }
-  if(!is.null(y) && !paired){
+      d_vec[i] <- runTOST$smd$d # smd vector
+      m_vec[i] <- runTOST$effsize$estimate[1] # mean difference vector
+      #t_vec[i] <- runTOST$TOST$t[1] - mx # t-test vector
+      #tl_vec[i] <- runTOST$TOST$t[2] - mx # lower bound vector
+      #tu_vec[i] <- runTOST$TOST$t[3] - mx # upper bound vector
+    }
+  }
+# Two sample ----
+  if(!is.null(y)){
     ny <- length(y)
     if(nx < 1 || (!var.equal && nx < 2))
       stop("not enough 'x' observations")
@@ -246,7 +203,7 @@ if (is.null(y)) {
       stop("not enough observations")
     my <- mean(y)
     vy <- var(y)
-    method <- paste("Bootstrapped", paste(if (!var.equal) "Welch", "Two Sample t-test"))
+    method <- paste("Bootstrapped Log", paste(if (!var.equal) "Welch", "Two Sample t-test"))
     estimate <- c(mx, my)
     names(estimate) <- c("mean of x", "mean of y")
     if(var.equal){
@@ -278,18 +235,14 @@ if (is.null(y)) {
         #dat = Z[i,]
         dat_x = X[i,]#dat[1:nx]
         dat_y = Y[i,]#dat[(nx+1):(nx+ny)]
-        runTOST =  t_TOST(x = dat_x,
-                          y = dat_y,
-                          hypothesis = hypothesis,
-                          paired = paired,
-                          var.equal = var.equal,
-                          low_eqbound = low_eqbound,
-                          high_eqbound = high_eqbound,
-                          eqbound_type = eqbound_type,
-                          alpha = alpha,
-                          mu = mu,
-                          bias_correction = bias_correction,
-                          rm_correction = FALSE)
+        runTOST =  log_TOST(x = exp(dat_x),
+                            y = exp(dat_y),
+                            hypothesis = hypothesis,
+                            paired = paired,
+                            var.equal = var.equal,
+                            eqb = eqb,
+                            alpha = alpha,
+                            null = null)
 
         d_vec[i] <- runTOST$smd$d # smd vector
         m_vec[i] <- runTOST$effsize$estimate[1] # mean difference vector
@@ -319,18 +272,14 @@ if (is.null(y)) {
         #dat = Z[i,]
         dat_x = X[i,]#dat[1:nx]
         dat_y = Y[i,]#dat[(nx+1):(nx+ny)]
-        runTOST =  t_TOST(x = dat_x,
-                          y = dat_y,
+        runTOST =  log_TOST(x = exp(dat_x),
+                          y = exp(dat_y),
                           hypothesis = hypothesis,
                           paired = paired,
                           var.equal = var.equal,
-                          low_eqbound = low_eqbound,
-                          high_eqbound = high_eqbound,
-                          eqbound_type = eqbound_type,
+                          eqb = eqb,
                           alpha = alpha,
-                          mu = mu,
-                          bias_correction = bias_correction,
-                          rm_correction = FALSE)
+                          null = null)
 
         d_vec[i] <- runTOST$smd$d # smd vector
         m_vec[i] <- runTOST$effsize$estimate[1] # mean difference vector
@@ -343,7 +292,7 @@ if (is.null(y)) {
       stop("data are essentially constant")
     }
 
-    tstat <- (mx - my - mu)/stderr
+    tstat <- (mx - my - null)/stderr
     #TSTAT <- (MX - MY)/STDERR
 
     TSTAT <- (MX-MY)/STDERR
@@ -398,64 +347,37 @@ if (is.null(y)) {
   }
 
   # Change text based on two tailed t test if mu is not zero
-  if(mu == 0){
-    mu_text = "zero"
+  if(null == 1){
+    mu_text = "1"
   } else {
-    mu_text = mu
+    mu_text = null
   }
 
   if(hypothesis == "EQU"){
     #format(low_eqbound, digits = 3, nsmall = 3, scientific = FALSE)
     TOST_restext = paste0("The equivalence test was ",TOSToutcome,", t(",round(df, digits=2),") = ",format(tTOST, digits = 3, nsmall = 3, scientific = FALSE),", p = ",format(pTOST, digits = 3, nsmall = 3, scientific = TRUE),sep="")
   } else {
-    TOST_restext = paste0("The minimal effect test was ",TOSToutcome,", t(",round(df, digits=2),") = ",format(tTOST, digits = 3, nsmall = 3, scientific = FALSE),", p = ",format(pTOST, digits = 3, nsmall = 3, scientific = TRUE),sep="")
+    TOST_restext = paste0("The minimal effect test was ",
+                          TOSToutcome,", t(",round(df, digits=2),") = ",
+                          format(tTOST, digits = 3, nsmall = 3,
+                                 scientific = FALSE),", p = ",
+                          format(pTOST, digits = 3, nsmall = 3,
+                                 scientific = TRUE),
+                          sep="")
   }
 
-  ttest_restext = paste0("The null hypothesis test was ",testoutcome,", t(",round(df, digits=2),") = ",format(tstat, digits = 3, nsmall = 3, scientific = FALSE),", p = ",format(boot.pval, digits = 3, nsmall = 3, scientific = TRUE),sep="")
-  if (hypothesis == "EQU"){
-    if(boot.pval <= alpha && pTOST <= alpha){
-      combined_outcome <- paste0("NHST: reject null significance hypothesis that the effect is equal to ",mu_text," \n",
-                                 "TOST: reject null equivalence hypothesis")
-    }
-    if(boot.pval < alpha && pTOST > alpha){
-      combined_outcome <- paste0("NHST: reject null significance hypothesis that the effect is equal to ",mu_text," \n",
-                                 "TOST: don't reject null equivalence hypothesis")
-      # paste0("statistically different from ",mu_text," and not statistically equivalent")
-    }
-    if(boot.pval > alpha && pTOST <= alpha){
-      combined_outcome <- paste0("NHST: don't reject null significance hypothesis that the effect is equal to ",mu_text," \n",
-                                 "TOST: reject null equivalence hypothesis")
-      #paste0("statistically not different from ",mu_text," and statistically equivalent")
-    }
-    if(boot.pval > alpha && pTOST > alpha){
-      combined_outcome <- paste0("NHST: don't reject null significance hypothesis that the effect is equal to ",mu_text," \n",
-                                 "TOST: don't reject null equivalence hypothesis")
-      #paste0("statistically not different from ",mu_text," and not statistically equivalent")
-    }
-  } else {
-    if(boot.pval <= alpha && pTOST <= alpha){
-      combined_outcome <- paste0("NHST: reject null significance hypothesis that the effect is equal to ",mu_text," \n",
-                                 "TOST: reject null MET hypothesis")
-      #paste0("statistically different from ",mu_text," and statistically greater than the minimal effect threshold")
-    }
-    if(boot.pval < alpha && pTOST > alpha){
-      combined_outcome <- paste0("NHST: reject null significance hypothesis that the effect is equal to ",mu_text," \n",
-                                 "TOST: don't reject null MET hypothesis")
-      #paste0("statistically different from ",mu_text," but not statistically greater than the minimal effect threshold")
-    }
-    if(boot.pval > alpha && pTOST <= alpha){
-      combined_outcome <- paste0("NHST: don't reject null significance hypothesis that the effect is equal to ",mu_text," \n",
-                                 "TOST: reject null MET hypothesis")
-      #paste0("statistically not different from ",mu_text," and statistically greater than the minimal effect threshold")
-    }
-    if(boot.pval > alpha && pTOST > alpha){
-      combined_outcome <- paste0("NHST: don't reject null significance hypothesis that the effect is equal to ",mu_text," \n",
-                                 "TOST: don't reject null MET hypothesis")
-      #paste0("statistically not different from ",mu_text," and not statistically greater than the minimal effect threshold")
-    }
-  }
+  ttest_restext = paste0("The null hypothesis test was ",
+                         testoutcome,", t(",round(df, digits=2),") = ",
+                         format(tstat, digits = 3, nsmall = 3,
+                                scientific = FALSE),", p = ",
+                         format(boot.pval, digits = 3, nsmall = 3,
+                                scientific = TRUE),sep="")
 
-
+  combined_outcome = tost_decision(hypothesis = hypothesis,
+                                    alpha = alpha,
+                                    pvalue = boot.pval,
+                                    pTOST = pTOST,
+                                    mu_text = mu_text)
   decision = list(
     TOST = TOST_restext,
     ttest = ttest_restext,
