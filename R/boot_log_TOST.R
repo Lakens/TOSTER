@@ -99,6 +99,67 @@ boot_log_TOST.default <- function(x,
     stop("One sample tests not supported at this time.")
   }
 
+
+  #if (paired) {
+  #  stop("'y' is missing for paired test")
+  #}
+
+  xok <- !is.na(x)
+  yok <- NULL
+}
+x <- x[xok]
+if(paired && !is.null(y)){
+  x <- x - y
+  y <- NULL
+}
+nx <- length(x)
+mx <- mean(x)
+vx <- var(x)
+if (is.null(y)) {
+  if (nx < 2)
+    stop("not enough 'x' observations")
+  df <- nx - 1
+  stderr <- sqrt(vx/nx)
+  if (stderr < 10 * .Machine$double.eps * abs(mx)){
+    stop("data are essentially constant")
+  }
+  #tstat <- (mx - mu)/stderr
+  #tstat_low = (mx - low_eqbound)/stderr
+  #tstat_high = (mx - high_eqbound)/stderr
+  method <- if (paired) "Bootstrapped Paired t-test" else "Bootstrapped One Sample t-test"
+  #estimate <- setNames(mx, if (paired) "mean of the differences" else "mean of x")
+  #x.cent <- x - mx # remove to have an untransformed matrix
+  X <- matrix(sample(x, size = nx*R, replace = TRUE), nrow = R)
+  MX <- rowMeans(X - mx)
+  VX <- rowSums((X - MX) ^ 2) / (nx - 1)
+  STDERR <- sqrt(VX/nx)
+  TSTAT <- (MX)/STDERR
+  #TSTAT_low <- (MX-low_eqbound)/STDERR
+  #TSTAT_high <- (MX-high_eqbound)/STDERR
+  EFF <- MX+mx
+
+  for(i in 1:nrow(X)){
+    dat = X[i,]
+    runTOST =  t_TOST(x = dat,
+                      hypothesis = hypothesis,
+                      paired = FALSE,
+                      var.equal = TRUE,
+                      low_eqbound = low_eqbound,
+                      high_eqbound = high_eqbound,
+                      eqbound_type = eqbound_type,
+                      alpha = alpha,
+                      mu = mu,
+                      bias_correction = bias_correction,
+                      rm_correction = FALSE)
+
+    d_vec[i] <- runTOST$smd$d # smd vector
+    m_vec[i] <- runTOST$effsize$estimate[1] # mean difference vector
+    #t_vec[i] <- runTOST$TOST$t[1] - mx # t-test vector
+    #tl_vec[i] <- runTOST$TOST$t[2] - mx # lower bound vector
+    #tu_vec[i] <- runTOST$TOST$t[3] - mx # upper bound vector
+  }
+}
+
   if(!is.null(y)){
     nullTOST = log_TOST(x = x,
                       y = y,
