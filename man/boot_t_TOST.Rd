@@ -91,9 +91,3 @@ The implemented test(s) corresponds to the proposal of Chapter 16 of Efron and T
 Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press.
 }
 
-\seealso{
-Other compare studies: 
-\code{\link{boot_log_TOST}()},
-\code{\link{compare_smd}()}
-}
-\concept{compare studies}

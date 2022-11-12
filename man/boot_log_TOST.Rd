@@ -83,7 +83,6 @@ He, Y., Deng, Y., You, C., & Zhou, X. H. (2022). Equivalence tests for ratio of 
 
 \seealso{
 Other compare studies: 
-\code{\link{boot_t_TOST}()},
 \code{\link{compare_smd}()}
 }
 \concept{compare studies}
