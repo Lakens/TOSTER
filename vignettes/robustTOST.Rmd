@@ -198,14 +198,18 @@ plot(test1)
 
 # Ratio of Difference (Log Transformed)
 
-In many bioequivalence studies, the differences between drugs are compared on the log scale.
+In many bioequivalence studies, the differences between drugs are compared on the log scale [@he2022].
 The log scale allows researchers to compare the ratio of two means.
 
 
 $$
 log ( \frac{y}{x} ) = log(y) - log(x)
 $$
-In addition, the United States Food and Drug Administration (FDA), considers 
+The [United States Food and Drug Administration (FDA)](https://www.fda.gov/regulatory-information/search-fda-guidance-documents/bioavailability-and-bioequivalence-studies-submitted-ndas-or-inds-general-considerations)^[Food and Drug Administration (2014). Bioavailability and Bioequivalence Studies Submitted in NDAs or INDs — General Considerations.Center for Drug Evaluation and Research. Docket: FDA-2014-D-0204. https://www.fda.gov/regulatory-information/search-fda-guidance-documents/bioavailability-and-bioequivalence-studies-submitted-ndas-or-in] hs stated a rationale for using the log transformed values:
+
+> Using logarithmic transformation, the general linear statistical model employed in the analysis of BE data allows inferences about the difference between the two means on the log scale, which can then be retransformed into inferences about the ratio of the two averages (means or medians) on the original scale. Logarithmic transformation thus achieves a general comparison based on the ratio rather than the differences. 
+
+In addition, the FDA, considers 
 two drugs as bioequivalent when the ratio between x and y is less than 1.25 and
 greater than 0.8 (1/1.25), which is the default equivalence bound for the log
 functions.
