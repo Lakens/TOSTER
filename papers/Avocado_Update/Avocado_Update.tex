@@ -179,7 +179,7 @@ and user-friendly.
 Also, \texttt{t\_TOST} is not limited to equivalence tests. Minimal
 effects testing (MET) is possible. MET is useful for situations where
 the hypothesis is about a minimal effect and the null hypothesis
-\emph{is} equivalence @ref(fig:hypplot) .
+\emph{is} equivalence (see Figure 1).
 
 \begin{figure}
 \centering
@@ -289,8 +289,7 @@ provide a visual summary of the results. All of the plots in this
 package were inspired by the
 \href{https://cran.r-project.org/package=concurve}{concurve} R package.
 There are two types of plots that can be produced. The first, and
-default, is the consonance density plot (\texttt{type\ =\ "cd"})
-@ref(fig:cdplot).
+default, is the consonance density plot (\texttt{type\ =\ "cd"}).
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -306,8 +305,7 @@ default, is the consonance density plot (\texttt{type\ =\ "cd"})
 
 \newpage
 
-The shading pattern can be modified with the \texttt{ci\_shades}
-@ref(fig:shadeplot).
+The shading pattern can be modified with the \texttt{ci\_shades}.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -326,7 +324,7 @@ The shading pattern can be modified with the \texttt{ci\_shades}
 
 Consonance plots, where all confidence intervals can be simultaneous
 plotted, can also be produced. The advantage here is multiple confidence
-interval lines can plotted at once @ref(fig:conplot).
+interval lines can plotted at once.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -586,20 +584,23 @@ TOST, there are two separate tests of directional location shift to
 determine if the location shift is within (equivalence) or outside
 (minimal effect). Many researchers mistakenly think these are tests of
 medians, but this is not the case (See \citet{median_test} for details).
-The exact calculations can be explored via the documentation of the
-\texttt{wilcox.test} function.
+Also, care should be taken when considering paired samples; a test on
+the rank transformed data \citep{kornbrot1990rank} or another robust
+test may be more prudent.
 
 In the TOSTER package, we accomplish this with the \texttt{wilcox\_TOST}
 function. This function operates in an extremely similar implementation
-to the \texttt{t\_TOST} function. However, the standardized mean
-difference (SMD) is \emph{not} calculated since this would be an
-inappropriate measure of effect size alongside the non-parametric test
-statistics. Instead, a standardized effect size (SES) is calculated for
-\emph{all} types of comparisons (e.g., two sample, one sample, and
-paired samples). The function can produce a rank-biserial correlation
-(CITE), a WMW Odds (CITE), or a concordance probability (CITE) (i.e.,
-non-parametric probability of superiority).\footnote{There is no
-  plotting capability at this time for the output of this function.}
+to the \texttt{t\_TOST} function. The exact calculations utilized in
+this function can be explored via the documentation of the
+\texttt{wilcox.test} function. However, the standardized mean difference
+(SMD) is \emph{not} calculated since this would be an inappropriate
+measure of effect size alongside the non-parametric test statistics.
+Instead, a standardized effect size (SES) is calculated for \emph{all}
+types of comparisons (e.g., two sample, one sample, and paired samples).
+The function can produce a rank-biserial correlation (CITE), a WMW Odds
+(CITE), or a concordance probability (CITE) (i.e., non-parametric
+probability of superiority).\footnote{There is no plotting capability at
+  this time for the output of this function.}
 
 As an example, we can use the sleep data to make a non-parametric
 comparison of equivalence.
@@ -734,21 +735,59 @@ instability of Hedges' d(z).
 ## 
 ## Effect Sizes 
 ##               Estimate     SE               C.I. Conf. Level
-## Raw             -1.580 0.3611    [-2.181, -1.02]         0.9
-## Hedges's g(z)   -1.174 0.6300 [-2.7711, -0.9172]         0.9
+## Raw             -1.580 0.3725    [-2.271, -1.02]         0.9
+## Hedges's g(z)   -1.174 0.6883 [-2.8584, -0.9172]         0.9
 ## Note: percentile bootstrap method utilized.
 \end{verbatim}
+
+\newpage
+
+\hypertarget{log-tost}{%
+\subsection{Log TOST}\label{log-tost}}
+
+The logarithmic transformation is often utilized to ``normalize'' the
+data or stabilize the variance.
+
+\begin{itemize}
+\item
+  Basic advantages
+\item
+  How it translates to a ratio
+\item
+  FDA requirements
+\item
+  Default equivalence bounds
+\end{itemize}
+
+\hypertarget{example-of-log-tost}{%
+\subsection{Example of Log TOST}\label{example-of-log-tost}}
+
+\hypertarget{bootstrap-log-tost}{%
+\subsection{Bootstrap Log TOST}\label{bootstrap-log-tost}}
+
+\begin{itemize}
+\tightlist
+\item
+  Why bootstrap is preferred
+\item
+  Example of bootstrap
+\end{itemize}
 
 \hypertarget{equivalence-testing-with-anovas}{%
 \section{Equivalence Testing with
 ANOVAs}\label{equivalence-testing-with-anovas}}
 
-For an open access tutorial paper explaining how to set equivalence
-bounds, and how to perform and report equivalence for ANOVA models see
-\citet{Campbell_2021}. These functions are meant to be omnibus tests,
-and additional testing may be necessary. For example, comparison of the
-estimated marginal means, in addition to or as an alternative of with
-may be prudent.
+For better or worse, many researchers utilize ANOVA as an omnibus test
+for the absence/presence of effects. This is very useful when
+implementing factorial designs where multiple experimental factors are
+tested and/or manipulated. As \citet{Campbell_2021} suggest, the lack of
+a significant result at the ANOVA-level does not necessarily indicate
+that a factor or interaction of factors have no effect. However,
+\citet{Campbell_2021} only suggest an equivalence test for one-way
+ANOVAs and therefore exclude multi-factor ANOVAs. Therefore, I have
+extended the work of \citet{Campbell_2021} to include functions that
+allow for equivalence testing the partial \(\eta^2\) (eta-squared)
+effect size from ANOVAs.
 
 \hypertarget{f-test-calculations}{%
 \subsection{F-test Calculations}\label{f-test-calculations}}
@@ -772,8 +811,9 @@ H_0 =  1 > \eta^2_p \geq \Delta
 H_1 =  0 \geq \eta^2_p < \Delta
 \]
 
-In \texttt{TOSTER} we go a tad farther and calculate a generalization of
-the non-centrality parameter that allows the equivalence test for
+In \texttt{TOSTER}, I have gone a tad farther than
+\citet{Campbell_2021}, and calculate a generalization of the
+non-centrality parameter that allows the equivalence test for
 \emph{F}-tests to be applied to variety of designs.
 
 \citet{Campbell_2021} calculate the \emph{p}-value as:
@@ -781,10 +821,6 @@ the non-centrality parameter that allows the equivalence test for
 \[
 p = p_f(F; J-1, N-J, \frac{N \cdot \Delta}{1-\Delta})
 \]
-
-However, this approach could not be applied to factorial ANOVA and the
-paper only outlines how to apply this approach to a one-way ANOVA and an
-extension to Welch's one-way ANOVA.
 
 The non-centrality parameter (ncp = \(\lambda\)) can be calculated with
 the equivalence bound and the degrees of freedom:
@@ -898,6 +934,15 @@ and \texttt{afex::aov\_car} (or any ANOVA from derived from
 
 \hypertarget{conclusions}{%
 \section{Conclusions}\label{conclusions}}
+
+\begin{itemize}
+\tightlist
+\item
+  This can be useful.
+\item
+  This package is not exhaustive but is good for simple analyses and
+  teaching
+\end{itemize}
 
 \newpage
 

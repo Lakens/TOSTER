@@ -356,10 +356,11 @@ In this package there are many functions that provide robust alternatives to the
 
 ## Tests of Symmetry (rank based tests)
 
-The Wilcoxon-Mann-Whitney (WMW) group of tests (includes Mann-Whitney U-test) provide a non-parametric test of differences between groups, or within samples, based on *ranks*. This provides a test of location shift, which is a fancy way of saying differences in the center of the distribution (i.e., in parametric tests the location is mean). With TOST, there are two separate tests of directional location shift to determine if the location shift is within (equivalence) or outside (minimal effect). Many researchers mistakenly think these are tests of medians, but this is not the case (See @median_test for details). The exact calculations can be explored via the documentation of the `wilcox.test` function.
+The Wilcoxon-Mann-Whitney (WMW) group of tests (includes Mann-Whitney U-test) provide a non-parametric test of differences between groups, or within samples, based on *ranks*. This provides a test of location shift, which is a fancy way of saying differences in the center of the distribution (i.e., in parametric tests the location is mean). With TOST, there are two separate tests of directional location shift to determine if the location shift is within (equivalence) or outside (minimal effect). Many researchers mistakenly think these are tests of medians, but this is not the case (See @median_test for details). Also, care should be taken when considering paired samples; a test on the rank transformed data [@kornbrot1990rank] or another robust test may be more prudent. 
 
 In the TOSTER package, we accomplish this with the `wilcox_TOST` function. 
 This function operates in an extremely similar implementation to the `t_TOST` function. 
+The exact calculations utilized in this function can be explored via the documentation of the `wilcox.test` function.
 However, the standardized mean difference (SMD) is *not* calculated since this would be an inappropriate measure of effect size alongside the non-parametric test statistics. 
 Instead, a standardized effect size (SES) is calculated for *all* types of comparisons (e.g., two sample, one sample, and paired samples). 
 The function can produce a rank-biserial correlation (CITE), a WMW Odds (CITE), or a concordance probability (CITE) (i.e., non-parametric probability of superiority).^[There is no plotting capability at this time for the output of this function.]
@@ -420,10 +421,33 @@ test1 = boot_t_TOST(formula = extra ~ group,
 print(test1)
 ```
 
+\newpage
+
+## Log TOST
+
+The logarithmic transformation is often utilized to "normalize" the data or stabilize the variance.
+
+- Basic advantages
+- How it translates to a ratio
+
+- FDA requirements
+- Default equivalence bounds
+
+## Example of Log TOST
+
+
+## Bootstrap Log TOST
+
+- Why bootstrap is preferred
+- Example of bootstrap
 
 # Equivalence Testing with ANOVAs
 
-For an open access tutorial paper explaining how to set equivalence bounds, and how to perform and report equivalence for ANOVA models see @Campbell_2021. These functions are meant to be omnibus tests, and additional testing may be necessary. For example, comparison of the estimated marginal means, in addition to or as an alternative of with may be prudent.
+For better or worse, many researchers utilize ANOVA as an omnibus test for the absence/presence of effects.
+This is very useful when implementing factorial designs where multiple experimental factors are tested and/or manipulated.
+As @Campbell_2021 suggest, the lack of a significant result at the ANOVA-level does not necessarily indicate that a factor or interaction of factors have no effect. 
+However, @Campbell_2021 only suggest an equivalence test for one-way ANOVAs and therefore exclude multi-factor ANOVAs.
+Therefore, I have extended the work of @Campbell_2021 to include functions that allow for equivalence testing the partial $\eta^2$ (eta-squared) effect size from ANOVAs.
 
 ## F-test Calculations
 
@@ -441,15 +465,13 @@ $$
 H_1 =  0 \geq \eta^2_p < \Delta
 $$
 
-In `TOSTER` we go a tad farther and calculate a generalization of the non-centrality parameter that allows the equivalence test for *F*-tests to be applied to variety of designs.
+In `TOSTER`, I have gone a tad farther than @Campbell_2021, and calculate a generalization of the non-centrality parameter that allows the equivalence test for *F*-tests to be applied to variety of designs.
 
 @Campbell_2021 calculate the *p*-value as:
 
 $$
 p = p_f(F; J-1, N-J, \frac{N \cdot \Delta}{1-\Delta})
 $$
-
-However, this approach could not be applied to factorial ANOVA and the paper only outlines how to apply this approach to a one-way ANOVA and an extension to Welch's one-way ANOVA.
 
 The non-centrality parameter (ncp = $\lambda$) can be calculated with the equivalence bound and the degrees of freedom:
 
@@ -501,8 +523,12 @@ equ_anova(aovtest,
           eqb = 0.35)
 ```
 
+# Equivalence Between Replication Studies
 
 # Conclusions
+
+- This can be useful.
+- This package is not exhaustive but is good for simple analyses and teaching
 
 \newpage
 
