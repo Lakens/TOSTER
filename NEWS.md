@@ -10,6 +10,7 @@ NEWS
 - Default CIs for for SMDs are now NCT rather than the Goulet method.
 - `compare_smd` can be supplied with user provided standard errors.
 - Add `log_TOST` and `boot_log_TOST` function for comparing ratios of means.
+- Reduce the amount of text in the `print` methods
 
 # TOSTER v0.5.1
 

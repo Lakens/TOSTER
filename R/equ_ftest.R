@@ -26,11 +26,15 @@
 equ_ftest <- function(Fstat,
                       df1,
                       df2,
-                      eqbound,
+                      eqbound = NULL,
+                      eqb,
                       MET = FALSE,
                       alpha = 0.05){
   #message("Note: equ_ftest only validated for one-way ANOVA; use with caution")
-
+  if(!is.null(eqbound)){
+    eqb = eqbound
+  }
+  eqbound = eqb
   conf_level = 1 - alpha
 
   pes = Fstat * df1 / (Fstat*df1+df2)

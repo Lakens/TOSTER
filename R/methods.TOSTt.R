@@ -29,12 +29,25 @@
 print.TOSTt <- function(x,
                         digits = getOption("digits"),
                         ...){
+  effsize = x$effsize
+  TOST = x$TOST
+  TOST$p.value = ifelse(TOST$p.value < 0.001,
+                        "< 0.001",
+                        round(TOST$p.value, 3))
+  effsize$CI = paste0("[",
+                      round(effsize$lower.ci,4),
+                      ", ",
+                      round(effsize$upper.ci,4),
+                      "]")
+  effsize = effsize[c("estimate", "SE", "CI","conf.level")]
+  TOST = TOST[c("t","df","p.value")]
+  colnames(effsize) = c("Estimate", "SE", "C.I.", "Conf. Level")
   cat("\n")
   cat(strwrap(x$method), sep = "\n")
-  cat(x$hypothesis, "\n", sep = "")
-  cat("Equivalence Bounds (raw):",format(x$eqb$low_eq[1], digits = 3, nsmall = 3, scientific = FALSE)," & ",format(x$eqb$high_eq[1], digits = 3, nsmall = 3, scientific = FALSE), sep="")
-  cat("\n")
-  cat("Alpha Level:", x$alpha, sep="")
+  #cat(x$hypothesis, "\n", sep = "")
+  #cat("Equivalence Bounds (raw):",format(x$eqb$low_eq[1], digits = 3, nsmall = 3, scientific = FALSE)," & ",format(x$eqb$high_eq[1], digits = 3, nsmall = 3, scientific = FALSE), sep="")
+  #cat("\n")
+  #cat("Alpha Level:", x$alpha, sep="")
   cat("\n")
   cat(x$decision$TOST)
   cat("\n")
@@ -44,15 +57,16 @@ print.TOSTt <- function(x,
   cat("\n")
   cat("\n")
   cat("TOST Results \n")
-  print(x$TOST)
+  print(TOST, digits = 4)
   cat("\n")
   cat("Effect Sizes \n")
-  print(x$effsize)
+  print(effsize, digits = 4)
 
   if(grepl("Log-transformed",x$method, ignore.case=TRUE)){
     cat("\n")
+  } else {
   if("boot" %in% names(x)){
-    cat("Note: percentile boostrap method utilized.")
+    cat("Note: percentile bootstrap method utilized.")
   }else{
     cat("Note: SMD confidence intervals are an approximation. See vignette(\"SMD_calcs\").")
   }

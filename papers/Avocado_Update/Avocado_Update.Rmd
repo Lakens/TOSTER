@@ -1,14 +1,15 @@
 ---
 title: |
-  Exploring Equivalence Testing with the TOSTER R package
+  Exploring Equivalence Testing with the Updated TOSTER R Package
+shorttitle: "Updated TOSTER R Package"
 author:
 - name: Aaron R. Caldwell
   affil: a
   email: arcaldwell49@gmail.com
 type: PREPRINT
 output:
-  rticles::tf_article: default
   papaja::apa6_docx: default
+  papaja::apa6_pdf: default
 bibliography: interactcadsample.bib
 #appendix: appendix.tex
 abstract: |
@@ -40,7 +41,7 @@ library(patchwork)
 
 # Introduction
 
-Researchers often erroneously declare that no statistical effect exists based on a single "non-significant" p-value [@blandaltman95]. In many of these cases, the data may corroborate the researchers claim but the interpretation of a null hypothesis significance test (NHST), wherein the null hypothesis is "no effect", is nonetheless incorrect. In order to statistically test for whether there is "no effect" or "no difference" researchers could explore using equivalence testing (CITE Welleck and Senn books). A very simple equivalence testing approach is the “two one-sided tests” (TOST) procedure [@schuirmann1987]. In the TOST procedure, an upper ($\Delta_U$) and lower ($\Delta_L$) equivalence bound is specified based on the smallest effect size of interest (SESOI). If the TOST procedure indicates the effect is close enough to zero to be practically equivalent then (CITE Lakens).
+Researchers often erroneously declare that no statistical effect exists based on a single "non-significant" p-value [@blandaltman95]. In many of these cases, the data may corroborate the researchers claim but the interpretation of a null hypothesis significance test (NHST), wherein the null hypothesis is "no effect", is nonetheless incorrect. In order to statistically test for whether there is "no effect" or "no difference" researchers could explore using equivalence testing. A very simple equivalence testing approach is the use of “two one-sided tests” (TOST) [@schuirmann1987]. In TOST procedures, an upper ($\Delta_U$) and lower ($\Delta_L$) equivalence bound is specified based on the smallest effect size of interest (SESOI). If the TOST is below a prespecified alpha level, then the effect can be considered close enough to zero to be practically equivalent [@lakens_ori].
 
 Both the complaints about erroneous conclusions regarding equivalence [@blandaltman95] and proposed statistical solutions [@schuirmann1987] have existed for decades now. Yet the problem appears to persist in many applied disciplines. I estimate that the cause of this continued dissonance is due to a lack of education on equivalence testing and struggle for many applied researchers to implement equivalence testing. In my experience, most researchers have received some degree of statistical training in their doctoral or master's studies, but it is rare that any have idea of equivalence testing. It may also be difficult to implement equivalence testing for many researchers. This may be caused by most statistical software defaulting to a null hypothesis of zero, or even completely lacking an ability to change the null hypothesis.
 
@@ -185,6 +186,8 @@ theme_tidybayes() +
 p1 + p2 + plot_annotation(tag_levels = 'A')
 ```
 
+\newpage
+
 ## Vignettes with TOSTER
 
 In the general introduction to this package we detailed how to look at *old* results and how to apply TOST to interpreting those results. However, in many cases, users may have new data that needs to be analyzed. Therefore, `t_TOST` can be applied to new data. This vignette will use the `bugs` data from the `jmv` R package and the `sleep` data.
@@ -194,6 +197,8 @@ data('sleep')
 library(jmv)
 data('bugs')
 ```
+
+\newpage
 
 ### Independent Groups
 
@@ -205,12 +210,17 @@ head(sleep)
 
 We will assume the data are independent, and that we have equivalence bounds of +/- 0.5. All we need to do is provide the `formula`, `data`, and eqbound arguments for the function to run appropriately. In addition, we can set the `var.equal` argument (to assume equal variance), and the `paired` argument (sets if the data is paired or not). Both are logical indicators that can be set to TRUE or FALSE. The `alpha` is automatically set to 0.05 but this can also be adjusted by the user. The Hedges correction is also automatically calculated, but this can be overridden with the `bias_correction` argument. The `hypothesis` is automatically set to "EQU" for equivalence but if a minimal effect is of interest then "MET" can be supplied
 
+\newpage
+
 ```{r}
 # Formula Interface
 res1 = t_TOST(formula = extra ~ group,
               data = sleep,
               low_eqbound = -.5,
-              high_eqbound = .5)
+              high_eqbound = .5,
+              # SMD CIs will be biased
+              # THis was done to make code run faster
+              smd_ci = "t")
 
 # x & y interface
 res1a = t_TOST(x = subset(sleep,group==1)$extra,
@@ -219,17 +229,23 @@ res1a = t_TOST(x = subset(sleep,group==1)$extra,
                high_eqbound = .5)
 ```
 
+\newpage
+
 Once the function has run, we can print the results with the `print` command. This provides a verbose summary of the results.
 
 ```{r}
 print(res1)
 ```
 
+\newpage
+
 Another nice feature is the generic `plot` method that can provide a visual summary of the results. All of the plots in this package were inspired by the [concurve](https://cran.r-project.org/package=concurve) R package. There are two types of plots that can be produced. The first, and default, is the consonance density plot (`type = "cd"`).
 
 ```{r fig.width=6, fig.height=6}
 plot(res1, type = "cd")
 ```
+
+\newpage
 
 The shading pattern can be modified with the `ci_shades`.
 
@@ -238,12 +254,16 @@ plot(res1, type = "cd",
      ci_shades = c(.9,.95))
 ```
 
+\newpage
+
 Consonance plots, where all confidence intervals can be simultaneous plotted, can also be produced. The advantage here is multiple confidence interval lines can plotted at once.
 
 ```{r fig.width=6, fig.height=6}
 plot(res1, type = "c",
      ci_lines =  c(.9,.95))
 ```
+
+\newpage
 
 ### Paired Samples
 
@@ -276,6 +296,7 @@ res3a = t_TOST(x = bugs$LDHF,
                y = bugs$LDLF,
                paired = TRUE,
                hypothesis = "MET",
+               smd_ci = "t",
                low_eqbound = -1,
                high_eqbound = 1)
 res3a
@@ -294,8 +315,8 @@ In other cases we may just have a one sample test. If that is the case all we ha
 ```{r}
 res4 = t_TOST(x = bugs$LDHF,
               hypothesis = "EQU",
-              low_eqbound = 5.5,
-              high_eqbound = 8.5)
+              smd_ci = "t",
+              eqb = c(5.5,8.5))
 res4
 ```
 
@@ -321,6 +342,7 @@ res_tsum = tsum_TOST(
   sd1 = sd(bugs$LDHF, na.rm=TRUE),
   n1 = length(na.omit(bugs$LDHF)),
   hypothesis = "EQU",
+  smd_ci = "t",
   low_eqbound = 5.5,
   high_eqbound = 8.5
 )
@@ -413,13 +435,19 @@ For an open access tutorial paper explaining how to set equivalence bounds, and 
 
 Statistical equivalence testing (or "omnibus non-inferiority testing" as @Campbell_2021) for *F*-tests are special use case of the cumulative distribution function of the non-central *F* distribution. As @Campbell_2021 state, these type of questions answer the question: "Can we reject the hypothesis that the total proportion of variance in outcome Y attributable to X is greater than or equal to the equivalence bound $\Delta$?"
 
+
+### Hypothesis Tests
+
 $$
-H_0: \space 1 > \eta^2_p \geq \Delta
-\\
-H_1: \space 0 \geq \eta^2_p < \Delta
+H_0 =  1 > \eta^2_p \geq \Delta
 $$
 
-In `TOSTER` we go a tad farther and calculate a more generalizable non-centrality parameter that allows the equivalence test for *F*-tests to be applied to variety of designs.
+
+$$
+H_1 =  0 \geq \eta^2_p < \Delta
+$$
+
+In `TOSTER` we go a tad farther and calculate a generalization of the non-centrality parameter that allows the equivalence test for *F*-tests to be applied to variety of designs.
 
 @Campbell_2021 calculate the *p*-value as:
 
@@ -429,7 +457,7 @@ $$
 
 However, this approach could not be applied to factorial ANOVA and the paper only outlines how to apply this approach to a one-way ANOVA and an extension to Welch's one-way ANOVA.
 
-However, the non-centrality parameter (ncp = $\lambda$) can be calculated with the equivalence bound and the degrees of freedom:
+The non-centrality parameter (ncp = $\lambda$) can be calculated with the equivalence bound and the degrees of freedom:
 
 $$
 \lambda_{eq} = \frac{\Delta}{1-\Delta} \cdot(df_1 + df_2 +1)
@@ -490,37 +518,26 @@ An unnumbered section, e.g.\ `\section*{Acknowledgements}`, may be used for than
 
 # Disclosure statement {-}
 
-An unnumbered section, e.g.\ `\section*{Disclosure statement}`, may be used to declare any potential conflict of interest and included _in the non-anonymous version_ before any Notes or References, after any Acknowledgements and before any Funding information.
+The author is the author of the `TOSTER` package.
 
 # Funding {-}
 
-An unnumbered section, e.g.\ `\section*{Funding}`, may be used for grant details, etc.\ if required and included _in the non-anonymous version_ before any Notes or References.
+No funding was provided for this work.
 
 # Notes on contributor(s) {-}
 
-An unnumbered section, e.g.\ `\section*{Notes on contributors}`, may be included _in the non-anonymous version_ if required. A photograph may be added if requested.
+Daniel Lakens provided a review of many of the materials that have been incorporated
+into the update of `TOSTER`, and was the original author of this package.
 
 # Nomenclature/Notation {-}
 
-An unnumbered section, e.g.\ `\section*{Nomenclature}` (or `\section*{Notation}`), may be included if required, before any Notes or References.
+- ANOVA: Analysis of Variance
+- SMD: Standardized mean difference (e.g., Cohen's d)
+- TOST: Two-one sided tests of equivalence
 
 # Notes {-}
 
-An unnumbered `Notes` section may be included before the References (if using the `endnotes` package, use the command `\theendnotes` where the notes are to appear, instead of creating a `\section*`).
+The R package is also (partially) implemented in jamovi as the TOSTER module.
 
 # References
 
-## References cited in the text
-
-## The list of references
-
-References should be listed at the end of the main text in alphabetical order by authors' surnames, then chronologically (earliest first). If references have the same author(s), editor(s), etc., arrange by year of publication, with undated works at the end.
-A single-author entry precedes a multi-author entry that begins with the same name.
-If the reference list contains two or more items by the same author(s) in the same year, add a, b, etc. and list them alphabetically by title.
-Successive entries by two or more authors when only the first author is the same are alphabetized by co-authors' surnames.
-If a reference has more than ten named authors, list only the first seven, followed by 'et al.'.
-If a reference has no author or editor, order by title; if a date of publication is impossible to find, use `n.d.' in its place.
-
-The following list shows some sample references prepared in the Taylor & Francis Chicago author-date style.
-
-[@Ade09; @Alb05]
