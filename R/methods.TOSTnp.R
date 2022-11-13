@@ -22,8 +22,22 @@
 #' @export
 
 print.TOSTnp <- function(x,
-                        digits = getOption("digits"),
+                        digits = 4,
                         ...){
+  effsize = x$effsize
+  TOST = x$TOST
+  TOST$p.value = ifelse(TOST$p.value < 0.001,
+                        "< 0.001",
+                        round(TOST$p.value, 3))
+  effsize$CI = paste0("[",
+                      round(effsize$lower.ci,digits),
+                      ", ",
+                      round(effsize$upper.ci,digits),
+                      "]")
+  effsize = effsize[c("estimate", "CI","conf.level")]
+  #TOST = TOST[c("t","df","p.value")]
+  colnames(TOST) = c("Test Statistic", "p.value")
+  colnames(effsize) = c("Estimate", "C.I.", "Conf. Level")
   cat("\n")
   cat(strwrap(x$method), sep = "\n")
   #cat(x$hypothesis, "\n", sep = "")
@@ -39,10 +53,10 @@ print.TOSTnp <- function(x,
   cat("\n")
   cat("\n")
   cat("TOST Results \n")
-  print(x$TOST)
+  print(TOST, digits = digits)
   cat("\n")
   cat("Effect Sizes \n")
-  print(x$effsize)
+  print(effsize, digits = digits)
   cat("\n")
   if("boot" %in% names(x)){
     cat("Note: percentile boostrap method utilized.")

@@ -237,11 +237,10 @@ Once the function has run, we can print the results with the `print` command. Th
 print(res1)
 ```
 
-\newpage
 
 Another nice feature is the generic `plot` method that can provide a visual summary of the results. All of the plots in this package were inspired by the [concurve](https://cran.r-project.org/package=concurve) R package. There are two types of plots that can be produced. The first, and default, is the consonance density plot (`type = "cd"`).
 
-```{r fig.width=6, fig.height=6}
+```{r fig.width=6, fig.height=6,fig.cap="Example of consonance density plot."}
 plot(res1, type = "cd")
 ```
 
@@ -249,7 +248,7 @@ plot(res1, type = "cd")
 
 The shading pattern can be modified with the `ci_shades`.
 
-```{r fig.width=6, fig.height=6}
+```{r fig.width=6, fig.height=6, fig.cap = "Demonstrating the shading in plot method."}
 plot(res1, type = "cd",
      ci_shades = c(.9,.95))
 ```
@@ -258,7 +257,7 @@ plot(res1, type = "cd",
 
 Consonance plots, where all confidence intervals can be simultaneous plotted, can also be produced. The advantage here is multiple confidence interval lines can plotted at once.
 
-```{r fig.width=6, fig.height=6}
+```{r fig.width=6, fig.height=6, fig.cap = "Example of consonance plot."}
 plot(res1, type = "c",
      ci_lines =  c(.9,.95))
 ```
@@ -273,8 +272,7 @@ To perform a paired samples TOST, the process does not change much. We could pro
 res2 = t_TOST(formula = extra ~ group,
               data = sleep,
               paired = TRUE,
-              low_eqbound = -.5,
-              high_eqbound = .5)
+              eqb = .5)
 res2
 ```
 
@@ -284,8 +282,7 @@ However, we may have two vectors of data that are paired. So instead we may want
 res3 = t_TOST(x = bugs$LDHF,
               y = bugs$LDLF,
               paired = TRUE,
-              low_eqbound = -1,
-              high_eqbound = 1)
+              eqb = 1)
 res3
 ```
 
@@ -296,16 +293,8 @@ res3a = t_TOST(x = bugs$LDHF,
                y = bugs$LDLF,
                paired = TRUE,
                hypothesis = "MET",
-               smd_ci = "t",
-               low_eqbound = -1,
-               high_eqbound = 1)
+               eqb = 1)
 res3a
-```
-
-Again, we can plot the effects from the `t_TOST` result.
-
-```{r fig.width=6, fig.height=6}
-plot(res3a)
 ```
 
 ### One Sample t-test
@@ -315,13 +304,8 @@ In other cases we may just have a one sample test. If that is the case all we ha
 ```{r}
 res4 = t_TOST(x = bugs$LDHF,
               hypothesis = "EQU",
-              smd_ci = "t",
               eqb = c(5.5,8.5))
 res4
-```
-
-```{r fig.width=6, fig.height=6}
-plot(res4)
 ```
 
 
@@ -343,8 +327,7 @@ res_tsum = tsum_TOST(
   n1 = length(na.omit(bugs$LDHF)),
   hypothesis = "EQU",
   smd_ci = "t",
-  low_eqbound = 5.5,
-  high_eqbound = 8.5
+  eqb = c(5.5, 8.5)
 )
 
 res_tsum
@@ -377,8 +360,7 @@ library(TOSTER)
 test1 = wilcox_TOST(formula = extra ~ group,
                       data = sleep,
                       paired = FALSE,
-                      low_eqbound = -.5,
-                      high_eqbound = .5)
+                      eqb = .5)
 
 
 print(test1)
@@ -418,8 +400,7 @@ data('sleep')
 test1 = boot_t_TOST(formula = extra ~ group,
                     data = sleep,
                     paired = TRUE,
-                    low_eqbound = -.5,
-                    high_eqbound = .5,
+                    eqb = .5,
                     R = 999)
 
 
@@ -495,7 +476,7 @@ We can then use the information in the table above to perform an equivalence tes
 equ_ftest(Fstat = 34.70228,
           df1 = 5,
           df2 = 66,
-          eqbound = 0.35)
+          eqb = 0.35)
 ```
 
 Based on the results above we would conclude there is a significant effect of "spray" and the differences due to spray are *not* statistically equivalent. In essence, we reject the traditional null hypothesis of "no effect" but accept the null hypothesis of the equivalence test.
@@ -514,11 +495,12 @@ Add plots from the package
 
 # Acknowledgement(s) {-}
 
-An unnumbered section, e.g.\ `\section*{Acknowledgements}`, may be used for thanks, etc.\ if required and included _in the non-anonymous version_ before any Notes or References.
+I'd would like to thank everyone from the Lakens' laboratory group for their input and suggestions.
 
 # Disclosure statement {-}
 
-The author is the author of the `TOSTER` package.
+The author of this manuscript is the author of the `TOSTER` package. 
+Citations of this manuscript will benefit their citation count.
 
 # Funding {-}
 
@@ -532,8 +514,9 @@ into the update of `TOSTER`, and was the original author of this package.
 # Nomenclature/Notation {-}
 
 - ANOVA: Analysis of Variance
+- MET: Minimal Effects Test
 - SMD: Standardized mean difference (e.g., Cohen's d)
-- TOST: Two-one sided tests of equivalence
+- TOST: Two-one sided tests 
 
 # Notes {-}
 

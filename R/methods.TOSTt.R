@@ -27,7 +27,7 @@
 #' @export
 
 print.TOSTt <- function(x,
-                        digits = getOption("digits"),
+                        digits = 4,
                         ...){
   effsize = x$effsize
   TOST = x$TOST
@@ -35,9 +35,9 @@ print.TOSTt <- function(x,
                         "< 0.001",
                         round(TOST$p.value, 3))
   effsize$CI = paste0("[",
-                      round(effsize$lower.ci,4),
+                      round(effsize$lower.ci,digits),
                       ", ",
-                      round(effsize$upper.ci,4),
+                      round(effsize$upper.ci,digits),
                       "]")
   effsize = effsize[c("estimate", "SE", "CI","conf.level")]
   TOST = TOST[c("t","df","p.value")]
@@ -57,10 +57,10 @@ print.TOSTt <- function(x,
   cat("\n")
   cat("\n")
   cat("TOST Results \n")
-  print(TOST, digits = 4)
+  print(TOST, digits = digits)
   cat("\n")
   cat("Effect Sizes \n")
-  print(effsize, digits = 4)
+  print(effsize, digits = digits)
 
   if(grepl("Log-transformed",x$method, ignore.case=TRUE)){
     cat("\n")

@@ -5,7 +5,7 @@
 \alias{print.TOSTnp}
 \title{Methods for TOSTnp objects}
 \usage{
-\method{print}{TOSTnp}(x, digits = getOption("digits"), ...)
+\method{print}{TOSTnp}(x, digits = 4, ...)
 }
 \arguments{
 \item{x}{object of class \code{TOSTnp} as returned from the reli_stats function}

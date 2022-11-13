@@ -3,7 +3,8 @@
 #' @param Fstat The F-statistic from the F-test.
 #' @param df1 Degrees of freedom for the numerator.
 #' @param df2 Degrees of freedom for the denominator.
-#' @param eqbound Equivalence bound for the partial eta-squared.
+#' @param eqb Defunct argument for quivalence bound for the partial eta-squared.
+#' @param eqbound Defunct argument for quivalence bound for the partial eta-squared. Default is NULL.
 #' @param MET logical indicator to perform a minimal effect test rather than equivalence test (default is FALSE).
 #' @param alpha alpha used for the test (e.g., 0.05).
 #' @return Object of class '"htest"

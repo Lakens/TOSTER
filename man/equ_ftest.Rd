@@ -4,7 +4,7 @@
 \alias{equ_ftest}
 \title{Equivalence Test using an F-test}
 \usage{
-equ_ftest(Fstat, df1, df2, eqbound, MET = FALSE, alpha = 0.05)
+equ_ftest(Fstat, df1, df2, eqbound = NULL, eqb, MET = FALSE, alpha = 0.05)
 }
 \arguments{
 \item{Fstat}{The F-statistic from the F-test.}
@@ -13,7 +13,9 @@ equ_ftest(Fstat, df1, df2, eqbound, MET = FALSE, alpha = 0.05)
 
 \item{df2}{Degrees of freedom for the denominator.}
 
-\item{eqbound}{Equivalence bound for the partial eta-squared.}
+\item{eqbound}{Defunct argument for quivalence bound for the partial eta-squared. Default is NULL.}
+
+\item{eqb}{Defunct argument for quivalence bound for the partial eta-squared.}
 
 \item{MET}{logical indicator to perform a minimal effect test rather than equivalence test (default is FALSE).}
 
