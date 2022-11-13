@@ -13,6 +13,7 @@
 #' @section References:
 #' Campbell, H., & Lakens, D. (2021). Can we disregard the whole model? Omnibus non‐inferiority testing for R2 in multi‐variable linear regression and in ANOVA. British Journal of Mathematical and Statistical Psychology, 74(1), 64-89. doi: 10.1111/bmsp.12201
 #' @importFrom stats pf qf
+#' @family power
 #' @export
 
 power_eq_f<- function(alpha = 0.05,

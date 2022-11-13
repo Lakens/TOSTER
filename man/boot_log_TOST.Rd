@@ -4,7 +4,7 @@
 \alias{boot_log_TOST}
 \alias{boot_log_TOST.default}
 \alias{boot_log_TOST.formula}
-\title{Bootstrapped TOST with log t-tests}
+\title{Bootstrapped TOST with log transformed t-tests}
 \usage{
 boot_log_TOST(x, ...)
 
@@ -38,9 +38,9 @@ boot_log_TOST(x, ...)
 
 \item{eqb}{Equivalence bound. Can provide 1 value (negative value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds.}
 
-\item{alpha}{alpha level (default = 0.05).}
+\item{alpha}{alpha level (default = 0.05)}
 
-\item{null}{Null hypothesis value for two-tailed test (default is 1).}
+\item{null}{Null hypothesis value for a two-tailed test (default is 1).}
 
 \item{R}{number of bootstrap replicates}
 
@@ -60,7 +60,7 @@ An S3 object of class
   \item{\code{"eqb"}}{A table of class \code{"data.frame"} containing equivalence bound settings.}
   \item{\code{"effsize"}}{ table of class \code{"data.frame"} containing effect size estimates}
   \item{\code{"hypothesis"}}{String stating the hypothesis being tested}
-  \item{\code{"smd"}}{List containing the results of the standardized mean difference calculations (e.g., Cohen's d).Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation)}
+  \item{\code{"smd"}}{List containing the results of the means ratio calculation.Items include: d (means ratio estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation)}
   \item{\code{"alpha"}}{Alpha level set for the analysis.}
   \item{\code{"method"}}{Type of t-test.}
   \item{\code{"decision"}}{List included text regarding the decisions for statistical inference.}
@@ -71,18 +71,23 @@ An S3 object of class
 A function for a bootstrap method for TOST with all types of t-tests.
 }
 \details{
-The implemented test(s) corresponds to the proposal of Chapter 16 of Efron and Tibshirani (1993). Returns TOSTt class object with boostrapped based results. Please note that the repeated measures "corrected" effect size is not available at this time.
+The implemented test(s) corresponds to the proposal of Chapter 16 of Efron and Tibshirani (1994).
+Returns TOSTt class object with bootstrapped based results.
+This is approximately equivalent to the percentile bootstrap method mentioned by He et al (2014).
 }
-\section{References}{
-
-
-Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press.
+\references{
+Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press
 
 He, Y., Deng, Y., You, C., & Zhou, X. H. (2022). Equivalence tests for ratio of means in bioequivalence studies under crossover design. Statistical Methods in Medical Research, 09622802221093721.
-}
 
-\seealso{
-Other compare studies: 
-\code{\link{compare_smd}()}
+Food and Drug Administration (2014). Bioavailability and Bioequivalence Studies Submitted in NDAs or INDs — General Considerations.
+Center for Drug Evaluation and Research. Docket: FDA-2014-D-0204.
+https://www.fda.gov/regulatory-information/search-fda-guidance-documents/bioavailability-and-bioequivalence-studies-submitted-ndas-or-inds-general-considerations
 }
-\concept{compare studies}
+\seealso{
+Other Robust TOST: 
+\code{\link{boot_t_TOST}()},
+\code{\link{log_TOST}()},
+\code{\link{wilcox_TOST}()}
+}
+\concept{Robust TOST}

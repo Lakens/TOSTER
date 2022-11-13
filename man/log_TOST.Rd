@@ -46,7 +46,7 @@ log_TOST(
 
 \item{alpha}{alpha level (default = 0.05)}
 
-\item{null}{Null hypothesis value for two-tailed test (default is 1).}
+\item{null}{Null hypothesis value for a two-tailed test (default is 1).}
 
 \item{y}{an optional (non-empty) numeric vector of data values.}
 
@@ -66,12 +66,32 @@ An S3 object of class
   \item{\code{"eqb"}}{A table of class \code{"data.frame"} containing equivalence bound settings.}
   \item{\code{"effsize"}}{ table of class \code{"data.frame"} containing effect size estimates}
   \item{\code{"hypothesis"}}{String stating the hypothesis being tested}
-  \item{\code{"smd"}}{List containing the results of the standardized mean difference calculations (e.g., Cohen's d).Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation)}
+  \item{\code{"smd"}}{List containing the results of the means ratio calculation.Items include: d (means ratio estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation)}
   \item{\code{"alpha"}}{Alpha level set for the analysis.}
   \item{\code{"method"}}{Type of t-test.}
   \item{\code{"decision"}}{List included text regarding the decisions for statistical inference.}
 }
 }
 \description{
-A function for TOST with all types of t-tests.
+A function for TOST on the log-transformed data using parametric t-tests.
 }
+\examples{
+data(mtcars)
+# Default FDA bioequivalence bounds
+log_TOST(mpg ~ am,
+data = mtcars)
+}
+\references{
+He, Y., Deng, Y., You, C., & Zhou, X. H. (2022). Equivalence tests for ratio of means in bioequivalence studies under crossover design. Statistical Methods in Medical Research, 09622802221093721.
+
+Food and Drug Administration (2014). Bioavailability and Bioequivalence Studies Submitted in NDAs or INDs — General Considerations.
+Center for Drug Evaluation and Research. Docket: FDA-2014-D-0204.
+https://www.fda.gov/regulatory-information/search-fda-guidance-documents/bioavailability-and-bioequivalence-studies-submitted-ndas-or-inds-general-considerations
+}
+\seealso{
+Other Robust TOST: 
+\code{\link{boot_log_TOST}()},
+\code{\link{boot_t_TOST}()},
+\code{\link{wilcox_TOST}()}
+}
+\concept{Robust TOST}

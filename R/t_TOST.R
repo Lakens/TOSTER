@@ -32,6 +32,12 @@
 #'   \item{\code{"method"}}{Type of t-test.}
 #'   \item{\code{"decision"}}{List included text regarding the decisions for statistical inference.}
 #' }
+#' @examples
+#' data(mtcars)
+#' t_TOST(mpg ~ am,
+#' data = mtcars,
+#' eqb = 3)
+#' @family TOST
 #' @name t_TOST
 #' @export t_TOST
 

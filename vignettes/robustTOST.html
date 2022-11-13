@@ -12,7 +12,7 @@
 
 <meta name="author" content="Aaron R. Caldwell" />
 
-<meta name="date" content="2022-11-03" />
+<meta name="date" content="2022-11-12" />
 
 <title>Robust TOST Procedures</title>
 
@@ -356,7 +356,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Robust TOST Procedures</h1>
 <h4 class="author">Aaron R. Caldwell</h4>
-<h4 class="date">2022-11-03</h4>
+<h4 class="date">2022-11-12</h4>
 
 
 <div id="TOC">
@@ -373,6 +373,12 @@ sizes</a></li>
 <li><a href="#two-sample-algorithm" id="toc-two-sample-algorithm">Two
 Sample Algorithm</a></li>
 <li><a href="#example" id="toc-example">Example</a></li>
+</ul></li>
+<li><a href="#ratio-of-difference-log-transformed" id="toc-ratio-of-difference-log-transformed">Ratio of Difference (Log
+Transformed)</a>
+<ul>
+<li><a href="#log_tost" id="toc-log_tost">log_TOST</a></li>
+<li><a href="#boot_log_tost" id="toc-boot_log_tost">boot_log_TOST</a></li>
 </ul></li>
 <li><a href="#just-estimate-an-effect-size" id="toc-just-estimate-an-effect-size">Just Estimate an Effect
 Size</a></li>
@@ -679,12 +685,93 @@ indicates the instability of Hedges’ d(z).</p>
 ## 
 ## Effect Sizes 
 ##                estimate        SE  lower.ci   upper.ci conf.level
-## Raw           -1.580000 0.3884699 -2.321000 -1.0590000        0.9
-## Hedges&#39;s g(z) -1.173925 0.6697832 -2.732292 -0.9414159        0.9
-## 
-## Note: percentile boostrap method utilized.</code></pre>
+## Raw           -1.580000 0.3734897 -2.231000 -1.0300000        0.9
+## Hedges&#39;s g(z) -1.173925 0.6654284 -2.860627 -0.9165958        0.9</code></pre>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(test1)</span></code></pre></div>
-<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+</div>
+</div>
+<div id="ratio-of-difference-log-transformed" class="section level1">
+<h1>Ratio of Difference (Log Transformed)</h1>
+<p>In many bioequivalence studies, the differences between drugs are
+compared on the log scale. The log scale allows researchers to compare
+the ratio of two means.</p>
+<p><span class="math display">\[
+log ( \frac{y}{x} ) = log(y) - log(x)
+\]</span> In addition, the United States Food and Drug Administration
+(FDA), considers two drugs as bioequivalent when the ratio between x and
+y is less than 1.25 and greater than 0.8 (1/1.25), which is the default
+equivalence bound for the log functions.</p>
+<div id="log_tost" class="section level2">
+<h2>log_TOST</h2>
+<p>For example, we could compare whether the cars of different
+transmissions are “equivalent” with regards to gas mileage. We can use
+the default equivalence bounds (<code>eqb = 1.25</code>).</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">log_TOST</span>(</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  mpg <span class="sc">~</span> am,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> mtcars</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>## 
+## Log-transformed Welch Two Sample t-test
+## Hypothesis Tested: Equivalence
+## Equivalence Bounds (raw):-0.223 &amp; 0.223
+## Alpha Level:0.05
+## The equivalence test was non-significant, t(23.96) = -1.363, p = 9.07e-01
+## The null hypothesis test was significant, t(23.96) = -3.826, p = 8.19e-04
+## NHST: reject null significance hypothesis that the effect is equal to one 
+## TOST: don&#39;t reject null equivalence hypothesis
+## 
+## TOST Results 
+##                    t         SE       df      p.value
+## t-test     -3.825729 0.09060764 23.95808 8.194054e-04
+## TOST Lower -1.362984 0.09060764 23.95808 9.072192e-01
+## TOST Upper -6.288475 0.09060764 23.95808 8.484560e-07
+## 
+## Effect Sizes 
+##                    estimate         SE   lower.ci   upper.ci conf.level
+## log(Means Ratio) -0.3466403 0.09060764 -0.5016702 -0.1916104        0.9
+## Means Ratio       0.7070596         NA  0.6055185  0.8256284        0.9
+## 
+## Note: SMD confidence intervals are an approximation. See vignette(&quot;SMD_calcs&quot;).</code></pre>
+<p>Note, that the function produces t-tests similar to the
+<code>t_TOST</code> function, but provides two effect sizes. The means
+ratio on the log scale (the scale of the test statistics), and the means
+ratio. The means ratio is missing standard error because the confidence
+intervals and estimate are simply the log scale results
+exponentiated.</p>
+</div>
+<div id="boot_log_tost" class="section level2">
+<h2>boot_log_TOST</h2>
+<p>However, it has been noted in the statistics literature that t-tests
+on the logarithmic scale can be biased, and it is recommended that
+bootstrapped tests be utilized instead. Therefore, the
+<code>boot_log_TOST</code> function can be utilized to perform a more
+precise test.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">boot_log_TOST</span>(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  mpg <span class="sc">~</span> am,</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> mtcars,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">R =</span> <span class="dv">499</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>## 
+## Bootstrapped Log Welch Two Sample t-test
+## Hypothesis Tested: Equivalence
+## Equivalence Bounds (raw):-0.223 &amp; 0.223
+## Alpha Level:0.05
+## The equivalence test was non-significant, t(23.96) = -1.363, p = 9.28e-01
+## The null hypothesis test was significant, t(23.96) = -3.826, p = 0e+00
+## NHST: reject null significance hypothesis that the effect is equal to 1 
+## TOST: don&#39;t reject null equivalence hypothesis
+## 
+## TOST Results 
+##                    t         SE       df   p.value
+## t-test     -3.825729 0.09060764 23.95808 0.0000000
+## TOST Lower -1.362984 0.09060764 23.95808 0.9278557
+## TOST Upper -6.288475 0.09060764 23.95808 0.0000000
+## 
+## Effect Sizes 
+##                    estimate         SE   lower.ci   upper.ci conf.level
+## log(Means Ratio) -0.3466403 0.09282718 -0.5200482 -0.1986665        0.9
+## Means Ratio       0.7070596 0.06535992  0.5944919  0.8198235        0.9</code></pre>
 </div>
 </div>
 <div id="just-estimate-an-effect-size" class="section level1">
@@ -693,10 +780,10 @@ indicates the instability of Hedges’ d(z).</p>
 effect size. Therefore, I created the <code>ses_calc</code> function as
 robust effect size calculation. The interface is almost the same as
 <code>wilcox_TOST</code> but you don’t set an equivalence bound.</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ses_calc</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>         <span class="at">data =</span> sleep,</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">ses =</span> <span class="st">&quot;r&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ses_calc</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>         <span class="at">data =</span> sleep,</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">ses =</span> <span class="st">&quot;r&quot;</span>)</span></code></pre></div>
 <pre><code>##                            estimate lower.ci  upper.ci conf.level
 ## Rank-Biserial Correlation 0.9818182 0.928369 0.9954785       0.95</code></pre>
 </div>

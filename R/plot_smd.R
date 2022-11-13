@@ -14,6 +14,7 @@
 #' The calculations for the standardized mean difference can be found in the vignettes of this package.
 #' These types of plots are discussed by Schweder T, Hjort NL. (2016, ISBN:9781316445051) and Rafi Z, Greenland S. (2020) <doi:10.1186/s12874-020-01105-9>.
 #' @return Returns plot of the distribution of the standardized mean difference.
+#' @family plotting functions
 #' @export
 
 plot_smd <- function(d,

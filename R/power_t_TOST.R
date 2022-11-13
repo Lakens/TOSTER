@@ -19,6 +19,7 @@
 #'
 #' Diletti D, Hauschke D, Steinijans VW. Sample Size Determination for Bioequivalence Assessment by Means of Confidence Intervals. Int J Clin Pharmacol Ther Toxicol. 1991;29(1):1–8.
 #' @importFrom stats integrate uniroot qnorm pnorm dnorm
+#' @family power
 #' @export
 #'
 power_t_TOST <- function(

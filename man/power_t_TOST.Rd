@@ -50,3 +50,8 @@ Phillips KF. Power of the Two One-Sided Tests Procedure in Bioequivalence. J Pha
 
 Diletti D, Hauschke D, Steinijans VW. Sample Size Determination for Bioequivalence Assessment by Means of Confidence Intervals. Int J Clin Pharmacol Ther Toxicol. 1991;29(1):1–8.
 }
+\seealso{
+Other power: 
+\code{\link{power_eq_f}()}
+}
+\concept{power}

@@ -102,3 +102,14 @@ An S3 object of class
 \description{
 A function for TOST with all types of t-tests.
 }
+\examples{
+data(mtcars)
+t_TOST(mpg ~ am,
+data = mtcars,
+eqb = 3)
+}
+\seealso{
+Other TOST: 
+\code{\link{tsum_TOST}()}
+}
+\concept{TOST}

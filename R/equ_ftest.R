@@ -17,6 +17,7 @@
 #'   \item{\code{"method"}}{A string indicating the type of F-test.}
 #'   \item{\code{"data.name"}}{A required string indicating that this was calculated from summary statistics.}
 #' }
+#' @family f-test
 #' @section References:
 #' Campbell, H., & Lakens, D. (2021). Can we disregard the whole model? Omnibus non‐inferiority testing for R2 in multi‐variable linear regression and in ANOVA. British Journal of Mathematical and Statistical Psychology, 74(1), 64-89. doi: 10.1111/bmsp.12201
 #' @importFrom stats pf qf

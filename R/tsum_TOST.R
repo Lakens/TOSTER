@@ -7,19 +7,7 @@
 #' @param n1 sample size in group 1
 #' @param n2 sample size in group 2
 #' @param r12 correlation of dependent variable between group 1 and group 2
-#' @param paired a logical indicating whether you want a paired t-test.#'
-#' @param eqb Equivalence bound. Can provide 1 value (negative value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds.
-#' @param var.equal  a logical variable indicating whether to treat the two variances as being equal. If TRUE then the pooled variance is used to estimate the variance otherwise the Welch (or Satterthwaite) approximation to the degrees of freedom is used.
-#' @param low_eqbound lower equivalence bounds
-#' @param high_eqbound upper equivalence bounds
-#' @param hypothesis 'EQU' for equivalence (default), or 'MET' for minimal effects test, the alternative hypothesis.
-#' @param eqbound_type Type of equivalence bound. Can be set to "SMD" for standardized mean difference (i.e., Cohen's d) or  "raw" for the mean difference. Default is "raw".
-#' @param alpha alpha level (default = 0.05)
-#' @param bias_correction Apply Hedges' correction for bias (default is TRUE).
-#' @param rm_correction Repeated measures correction to make standardized mean difference Cohen's d(rm). This only applies to repeated/paired samples. Default is FALSE.
-#' @param mu a number indicating the true value of the mean for the two tailed test (or difference in means if you are performing a two sample test).
-#' @param glass A option to calculate Glass's delta as an alternative to Cohen's d type SMD. Default is NULL to not calculate Glass's delta, "glass1" will use the first group's SD as the denominator whereas "glass2" will use the 2nd group's SD.
-#' @param smd_ci Method for calculating SMD confidence intervals. Methods include Goulet, noncentral t (nct), central t (t), and normal method (z).
+#' @inheritParams t_TOST
 #' @return An S3 object of class
 #'   \code{"TOSTt"} is returned containing the following slots:
 #' \describe{
@@ -32,6 +20,7 @@
 #'   \item{\code{"method"}}{Type of t-test.}
 #'   \item{\code{"decision"}}{List included text regarding the decisions for statistical inference.}
 #' }
+#' @family TOST
 #' @importFrom stats na.omit setNames terms
 #' @name tsum_TOST
 #' @export tsum_TOST
