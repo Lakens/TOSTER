@@ -208,7 +208,7 @@ For this example, we will use the sleep data. In this data there is a `group` va
 head(sleep)
 ```
 
-We will assume the data are independent, and that we have equivalence bounds of +/- 0.5. All we need to do is provide the `formula`, `data`, and eqbound arguments for the function to run appropriately. In addition, we can set the `var.equal` argument (to assume equal variance), and the `paired` argument (sets if the data is paired or not). Both are logical indicators that can be set to TRUE or FALSE. The `alpha` is automatically set to 0.05 but this can also be adjusted by the user. The Hedges correction is also automatically calculated, but this can be overridden with the `bias_correction` argument. The `hypothesis` is automatically set to "EQU" for equivalence but if a minimal effect is of interest then "MET" can be supplied
+We will assume the data are independent, and that we have equivalence bounds of +/- 0.5. All we need to do is provide the `formula`, `data`, and `eqb` arguments for the function to run appropriately. In addition, we can set the `var.equal` argument (to assume equal variance), and the `paired` argument (sets if the data is paired or not). Both are logical indicators that can be set to TRUE or FALSE. The `alpha` is automatically set to 0.05 but this can also be adjusted by the user. Hedges's correction [@hedges_bias] is also automatically calculated, but this can be overridden with the `bias_correction` argument^[Glass's delta can also be produced in the output by using the `glass` argument]. The `hypothesis` is automatically set to "EQU" for equivalence but if a minimal effect is of interest then "MET" can be supplied.
 
 \newpage
 
@@ -216,8 +216,7 @@ We will assume the data are independent, and that we have equivalence bounds of 
 # Formula Interface
 res1 = t_TOST(formula = extra ~ group,
               data = sleep,
-              low_eqbound = -.5,
-              high_eqbound = .5,
+              eqb = .5,
               # SMD CIs will be biased
               # THis was done to make code run faster
               smd_ci = "t")
@@ -225,8 +224,7 @@ res1 = t_TOST(formula = extra ~ group,
 # x & y interface
 res1a = t_TOST(x = subset(sleep,group==1)$extra,
                y = subset(sleep,group==2)$extra,
-               low_eqbound = -.5,
-               high_eqbound = .5)
+               eqb =.5)
 ```
 
 \newpage
@@ -343,13 +341,13 @@ Why this may be useful
 Describe these aren’t tests of medians but symmetry tests (myth busting)
 Paired samples may want to be rank transformed
 
-In this package there are currently 2 functions that provide robust alternatives to the `t_TOST` function. 
+In this package there are many functions that provide robust alternatives to the `t_TOST` function. 
 
-## Tests of Symmetry
+## Tests of Symmetry (rank based tests)
 
-The Wilcoxon group of tests (includes Mann-Whitney U-test) provide a non-parametric test of differences between groups, or within samples, based on ranks. This provides a test of location shift, which is a fancy way of saying differences in the center of the distribution (i.e., in parametric tests the location is mean). With TOST, there are two separate tests of directional location shift to determine if the location shift is within (equivalence) or outside (minimal effect). The exact calculations can be explored via the documentation of the `wilcox.test` function.
+The Wilcoxon-Mann-Whitney (WMW) group of tests (includes Mann-Whitney U-test) provide a non-parametric test of differences between groups, or within samples, based on *ranks*. This provides a test of location shift, which is a fancy way of saying differences in the center of the distribution (i.e., in parametric tests the location is mean). With TOST, there are two separate tests of directional location shift to determine if the location shift is within (equivalence) or outside (minimal effect). Many researchers mistakenly think these are tests of medians, but this is not the case (See @median_test for details). The exact calculations can be explored via the documentation of the `wilcox.test` function.
 
-In the TOSTER package, we accomplish this with the `wilcox_TOST` function. Overall, this function operates extremely similar to the `t_TOST` function. However, the standardized mean difference (SMD) is *not* calculated. Instead the rank-biserial correlation is calculated for *all* types of comparisons (e.g., two sample, one sample, and paired samples). Also, there is no plotting capability at this time for the output of this function.
+In the TOSTER package, we accomplish this with the `wilcox_TOST` function. This function operates in an extremely similar implementation to the `t_TOST` function. However, the standardized mean difference (SMD) is *not* calculated since this would be an inappropriate measure of effect size alongside the non-parametric test statistics. Instead, a standardized effect size (SES) is calculated for *all* types of comparisons (e.g., two sample, one sample, and paired samples). The function can produce a rank-biserial correlation (CITE), a WMW Odds (CITE), or a concordance probability (CITE) (i.e., non-parametric probability of superiority).^[There is no plotting capability at this time for the output of this function.]
 
 As an example, we can use the sleep data to make a non-parametric comparison of equivalence.
 
@@ -410,11 +408,11 @@ print(test1)
 
 # Equivalence Testing with ANOVAs
 
-For an open access tutorial paper explaining how to set equivalence bounds, and how to perform and report equivalence for ANOVA models see @Campbell_2021. These functions are meant to be omnibus tests, and additional testing may be necessary. For example, comparison of the estimated marginal means, in addition to or as an alternative of  with may be prudent.
+For an open access tutorial paper explaining how to set equivalence bounds, and how to perform and report equivalence for ANOVA models see @Campbell_2021. These functions are meant to be omnibus tests, and additional testing may be necessary. For example, comparison of the estimated marginal means, in addition to or as an alternative of with may be prudent.
 
 ## F-test Calculations
 
-Statistical equivalence testing (or "omnibus non-inferiority testing" as @Campbell_2021) for *F*-tests are special use case of the cumulative distribution function of the non-central *F* distribution. As @Campbell_2021 state, these type of questions answer the question: "Can we reject the hypothesis that the total proportion of variance in outcome Y attributable to X is greater than or equal to the equivalence bound $\Delta$?"
+Statistical equivalence testing (or "omnibus non-inferiority testing" by @Campbell_2021) for *F*-tests are special use case of the cumulative distribution function of the non-central *F* distribution. As @Campbell_2021 states, these type of questions answer the question: "Can we reject the hypothesis that the total proportion of variance in outcome Y attributable to X is greater than or equal to the equivalence bound $\Delta$?"
 
 
 ### Hypothesis Tests
@@ -485,42 +483,48 @@ The `equ_ftest` is very useful because all you need is very basic summary statis
 
 ```{r}
 equ_anova(aovtest,
-          eqbound = 0.35)
+          eqb = 0.35)
 ```
 
 
-# Visualizing Equivalence
+# Conclusions
 
-Add plots from the package
+\newpage
 
-# Acknowledgement(s) {-}
+# Additional Information
+
+## Acknowledgement(s) {-}
 
 I'd would like to thank everyone from the Lakens' laboratory group for their input and suggestions.
 
-# Disclosure statement {-}
+## Disclosure statement {-}
 
 The author of this manuscript is the author of the `TOSTER` package. 
 Citations of this manuscript will benefit their citation count.
 
-# Funding {-}
+## Funding {-}
 
 No funding was provided for this work.
 
-# Notes on contributor(s) {-}
+## Notes on contributor(s) {-}
 
 Daniel Lakens provided a review of many of the materials that have been incorporated
 into the update of `TOSTER`, and was the original author of this package.
 
-# Nomenclature/Notation {-}
+## Nomenclature/Notation {-}
 
 - ANOVA: Analysis of Variance
 - MET: Minimal Effects Test
+- ncp: non-centrality parameter
 - SMD: Standardized mean difference (e.g., Cohen's d)
 - TOST: Two-one sided tests 
+- WMW: Wilcoxon-Mann-Whitney
 
-# Notes {-}
+## Notes {-}
 
 The R package is also (partially) implemented in jamovi as the TOSTER module.
+
+\newpage
 
 # References
 
