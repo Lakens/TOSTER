@@ -87,6 +87,7 @@ A function for TOST with all types of t-tests from summary statistics.
 }
 \seealso{
 Other TOST: 
+\code{\link{extract_r_paired}()},
 \code{\link{t_TOST}()}
 }
 \concept{TOST}

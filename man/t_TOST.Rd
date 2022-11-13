@@ -110,6 +110,7 @@ eqb = 3)
 }
 \seealso{
 Other TOST: 
+\code{\link{extract_r_paired}()},
 \code{\link{tsum_TOST}()}
 }
 \concept{TOST}

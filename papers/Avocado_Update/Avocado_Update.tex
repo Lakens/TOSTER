@@ -88,13 +88,14 @@
 \usepackage[utf8]{inputenc}
 \def\tightlist{}
 
+\usepackage{float}
 
 \begin{document}
 
 
 \articletype{PREPRINT}
 
-\title{Exploring Equivalence Testing with the TOSTER R package}
+\title{Exploring Equivalence Testing with the Updated TOSTER R Package}
 
 
 \author{\name{Aaron R. Caldwell$^{a}$}
@@ -124,14 +125,13 @@ many of these cases, the data may corroborate the researchers claim but
 the interpretation of a null hypothesis significance test (NHST),
 wherein the null hypothesis is ``no effect'', is nonetheless incorrect.
 In order to statistically test for whether there is ``no effect'' or
-``no difference'' researchers could explore using equivalence testing
-(CITE Welleck and Senn books). A very simple equivalence testing
-approach is the ``two one-sided tests'' (TOST) procedure
-\citep{schuirmann1987}. In the TOST procedure, an upper (\(\Delta_U\))
-and lower (\(\Delta_L\)) equivalence bound is specified based on the
-smallest effect size of interest (SESOI). If the TOST procedure
-indicates the effect is close enough to zero to be practically
-equivalent then (CITE Lakens).
+``no difference'' researchers could explore using equivalence testing. A
+very simple equivalence testing approach is the use of ``two one-sided
+tests'' (TOST) \citep{schuirmann1987}. In TOST procedures, an upper
+(\(\Delta_U\)) and lower (\(\Delta_L\)) equivalence bound is specified
+based on the smallest effect size of interest (SESOI). If the TOST is
+below a pre-specified alpha level, then the effect can be considered
+close enough to zero to be practically equivalent \citep{lakens_ori}.
 
 Both the complaints about erroneous conclusions regarding equivalence
 \citep{blandaltman95} and proposed statistical solutions
@@ -141,23 +141,17 @@ cause of this continued dissonance is due to a lack of education on
 equivalence testing and struggle for many applied researchers to
 implement equivalence testing. In my experience, most researchers have
 received some degree of statistical training in their doctoral or
-master's studies\footnote{I do not mean to blame educators for this
-  problem. I merely want to point out that}, but it is rare that any
-have idea of equivalence testing. It may also be difficult to implement
-equivalence testing for many researchers. This may be caused by most
-statistical software defaulting to a null hypothesis of zero, or even
-completely lacking an ability to change the null hypothesis.
+master's studies, but it is rare that any have idea of equivalence
+testing. It may also be difficult to implement equivalence testing for
+many researchers. This may be caused by most statistical software
+defaulting to a null hypothesis of zero, or even completely lacking an
+ability to change the null hypothesis.
 
-The TOSTER R package was orginally developed in 2018 (CITE Lakens) to
-introduce experimental psychologists to the concept of equivalence
-testing. Since then I have made a significant update to the package in
-order to improve the user interface and expand the tools available
-within the pacakge. TOSTER (Avocado TOST edition \textgreater v0.4.0) is
-a good tool to introduce the idea of equivalence testing to the average
-researcher who is already familiar with equivalence testing.
-
-One possible source of this misinterpretation may be due to the fact
-that many researchers are
+The TOSTER R package was originally developed in by \citet{lakens_ori}
+to introduce experimental psychologists to the concept of equivalence
+testing and provide an easy-to-use implementation in R. Since then I
+have made a significant update to the package in order to improve the
+user interface and expand the tools available within the package.
 
 An experienced R programmer may have no problem performing equivalence
 testing within R but beginners may struggle with both writing the code
@@ -171,27 +165,29 @@ Testing}\label{basics-of-equivalence-testing}}
 \subsection{The TOSTER R Package}\label{the-toster-r-package}}
 
 In an effort to make \texttt{TOSTER} more informative and easier to use,
-a new function \texttt{t\_TOST} has been created. This function operates
-very similarly to base R's \texttt{t.test} function, but performs 3
-t-tests (one two-tailed and two one-tailed tests). In addition, this
-function has a generic method where two vectors can be supplied or a
-formula can be given (e.g.,\texttt{y\ \textasciitilde{}\ group}). This
-function also makes it easier to switch between types of t-tests. All
-three types (two sample, one sample, and paired samples) can be
-performed/calculated from the same function. Moreover, the summary
-information and visualizations have been upgraded. This should make the
-decisions derived from the function more informative and user-friendly.
+a new function \texttt{t\_TOST} was created. This function operates very
+similarly to base R's \texttt{t.test} function, but performs 3 t-tests
+(one two-tailed and two one-tailed tests). In addition, this function
+has a generic method where two vectors can be supplied or a formula can
+be given (e.g.,\texttt{y\ \textasciitilde{}\ group}). This function also
+makes it easier to switch between types of t-tests. All three types (two
+sample, one sample, and paired samples) can be performed/calculated from
+the same function. Moreover, the output from this function is verbose,
+and should make the decisions derived from the function more informative
+and user-friendly.
 
 Also, \texttt{t\_TOST} is not limited to equivalence tests. Minimal
 effects testing (MET) is possible. MET is useful for situations where
 the hypothesis is about a minimal effect and the null hypothesis
-\emph{is} equivalence.
+\emph{is} equivalence @ref(fig:hypplot) .
 
 \begin{figure}
 \centering
 \includegraphics{Avocado_Update_files/figure-latex/hypplot-1.pdf}
 \caption{Type of Hypothesis}
 \end{figure}
+
+\newpage
 
 \hypertarget{vignettes-with-toster}{%
 \subsection{Vignettes with TOSTER}\label{vignettes-with-toster}}
@@ -219,7 +215,7 @@ For this example, we will use the sleep data. In this data there is a
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{head}\NormalTok{(sleep)}
+\FunctionTok{head}\NormalTok{(sleep,}\DecValTok{2}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -227,43 +223,38 @@ For this example, we will use the sleep data. In this data there is a
 ##   extra group ID
 ## 1   0.7     1  1
 ## 2  -1.6     1  2
-## 3  -0.2     1  3
-## 4  -1.2     1  4
-## 5  -0.1     1  5
-## 6   3.4     1  6
 \end{verbatim}
 
 We will assume the data are independent, and that we have equivalence
 bounds of +/- 0.5. All we need to do is provide the \texttt{formula},
-\texttt{data}, and eqbound arguments for the function to run
+\texttt{data}, and \texttt{eqb} arguments for the function to run
 appropriately. In addition, we can set the \texttt{var.equal} argument
 (to assume equal variance), and the \texttt{paired} argument (sets if
 the data is paired or not). Both are logical indicators that can be set
 to TRUE or FALSE. The \texttt{alpha} is automatically set to 0.05 but
-this can also be adjusted by the user. The Hedges correction is also
-automatically calculated, but this can be overridden with the
-\texttt{bias\_correction} argument. The \texttt{hypothesis} is
-automatically set to ``EQU'' for equivalence but if a minimal effect is
-of interest then ``MET'' can be supplied
+this can also be adjusted by the user. Hedges's correction
+\citep{hedges_bias} is also automatically calculated, but this can be
+overridden with the \texttt{bias\_correction} argument\footnote{Glass's
+  delta can also be produced in the output by using the \texttt{glass}
+  argument}. The \texttt{hypothesis} is automatically set to ``EQU'' for
+equivalence but if a minimal effect is of interest then ``MET'' can be
+supplied.
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{\# Formula Interface}
-\NormalTok{res1 }\OtherTok{=} \FunctionTok{t\_TOST}\NormalTok{(}\AttributeTok{formula =}\NormalTok{ extra }\SpecialCharTok{\textasciitilde{}}\NormalTok{ group,}
-              \AttributeTok{data =}\NormalTok{ sleep,}
-              \AttributeTok{low\_eqbound =} \SpecialCharTok{{-}}\NormalTok{.}\DecValTok{5}\NormalTok{,}
-              \AttributeTok{high\_eqbound =}\NormalTok{ .}\DecValTok{5}\NormalTok{)}
-
-\CommentTok{\# x \& y interface}
+\NormalTok{res1 }\OtherTok{=} \FunctionTok{t\_TOST}\NormalTok{(}\AttributeTok{formula =}\NormalTok{ extra }\SpecialCharTok{\textasciitilde{}}\NormalTok{ group, }\AttributeTok{data =}\NormalTok{ sleep, }
+              \AttributeTok{eqb =}\NormalTok{ .}\DecValTok{5}\NormalTok{, }\AttributeTok{smd\_ci =} \StringTok{"t"}\NormalTok{)}
+\CommentTok{\# x \& y Interface}
 \NormalTok{res1a }\OtherTok{=} \FunctionTok{t\_TOST}\NormalTok{(}\AttributeTok{x =} \FunctionTok{subset}\NormalTok{(sleep,group}\SpecialCharTok{==}\DecValTok{1}\NormalTok{)}\SpecialCharTok{$}\NormalTok{extra,}
-               \AttributeTok{y =} \FunctionTok{subset}\NormalTok{(sleep,group}\SpecialCharTok{==}\DecValTok{2}\NormalTok{)}\SpecialCharTok{$}\NormalTok{extra,}
-               \AttributeTok{low\_eqbound =} \SpecialCharTok{{-}}\NormalTok{.}\DecValTok{5}\NormalTok{,}
-               \AttributeTok{high\_eqbound =}\NormalTok{ .}\DecValTok{5}\NormalTok{)}
+               \AttributeTok{y =} \FunctionTok{subset}\NormalTok{(sleep,group}\SpecialCharTok{==}\DecValTok{2}\NormalTok{)}\SpecialCharTok{$}\NormalTok{extra, }\AttributeTok{eqb =}\NormalTok{.}\DecValTok{5}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
+\newpage
+
 Once the function has run, we can print the results with the
-\texttt{print} command. This provides a verbose summary of the results.
+\texttt{print} method. This provides a verbose summary of the results.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -274,25 +265,22 @@ Once the function has run, we can print the results with the
 \begin{verbatim}
 ## 
 ## Welch Two Sample t-test
-## Hypothesis Tested: Equivalence
-## Equivalence Bounds (raw):-0.500 & 0.500
-## Alpha Level:0.05
+## 
 ## The equivalence test was non-significant, t(17.78) = -1.272, p = 8.9e-01
 ## The null hypothesis test was non-significant, t(17.78) = -1.861, p = 7.94e-02
 ## NHST: don't reject null significance hypothesis that the effect is equal to zero 
-##  TOST: don't reject null equivalence hypothesis
+## TOST: don't reject null equivalence hypothesis
 ## 
 ## TOST Results 
-##                    t       SE       df    p.value
-## t-test     -1.860813 0.849091 17.77647 0.07939414
-## TOST Lower -1.271948 0.849091 17.77647 0.89010996
-## TOST Upper -2.449678 0.849091 17.77647 0.01245133
+##                 t    df p.value
+## t-test     -1.861 17.78   0.079
+## TOST Lower -1.272 17.78   0.890
+## TOST Upper -2.450 17.78   0.012
 ## 
 ## Effect Sizes 
-##                 estimate       SE  lower.ci    upper.ci conf.level
-## Raw           -1.5800000 0.849091 -3.053381 -0.10661850        0.9
-## Hedges' g(av) -0.7964846 0.497633 -1.684326 -0.06154947        0.9
-## 
+##                Estimate     SE               C.I. Conf. Level
+## Raw             -1.5800 0.8491 [-3.0534, -0.1066]         0.9
+## Hedges's g(av)  -0.7965 0.5992  [-1.8362, 0.2433]         0.9
 ## Note: SMD confidence intervals are an approximation. See vignette("SMD_calcs").
 \end{verbatim}
 
@@ -301,7 +289,8 @@ provide a visual summary of the results. All of the plots in this
 package were inspired by the
 \href{https://cran.r-project.org/package=concurve}{concurve} R package.
 There are two types of plots that can be produced. The first, and
-default, is the consonance density plot (\texttt{type\ =\ "cd"}).
+default, is the consonance density plot (\texttt{type\ =\ "cd"})
+@ref(fig:cdplot).
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -309,9 +298,16 @@ default, is the consonance density plot (\texttt{type\ =\ "cd"}).
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{Avocado_Update_files/figure-latex/unnamed-chunk-5-1.pdf}
+\begin{figure}
+\centering
+\includegraphics{Avocado_Update_files/figure-latex/cdplot-1.pdf}
+\caption{Example of consonance density plot.}
+\end{figure}
 
-The shading pattern can be modified with the \texttt{ci\_shades}.
+\newpage
+
+The shading pattern can be modified with the \texttt{ci\_shades}
+@ref(fig:shadeplot).
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -320,11 +316,17 @@ The shading pattern can be modified with the \texttt{ci\_shades}.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{Avocado_Update_files/figure-latex/unnamed-chunk-6-1.pdf}
+\begin{figure}
+\centering
+\includegraphics{Avocado_Update_files/figure-latex/shadeplot-1.pdf}
+\caption{Demonstrating the shading in plot method.}
+\end{figure}
+
+\newpage
 
 Consonance plots, where all confidence intervals can be simultaneous
 plotted, can also be produced. The advantage here is multiple confidence
-interval lines can plotted at once.
+interval lines can plotted at once @ref(fig:conplot).
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -333,7 +335,13 @@ interval lines can plotted at once.
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{Avocado_Update_files/figure-latex/unnamed-chunk-7-1.pdf}
+\begin{figure}
+\centering
+\includegraphics{Avocado_Update_files/figure-latex/conplot-1.pdf}
+\caption{Example of consonance plot.}
+\end{figure}
+
+\newpage
 
 \hypertarget{paired-samples}{%
 \subsubsection{Paired Samples}\label{paired-samples}}
@@ -347,8 +355,7 @@ need to then is change \texttt{paired} to TRUE.
 \NormalTok{res2 }\OtherTok{=} \FunctionTok{t\_TOST}\NormalTok{(}\AttributeTok{formula =}\NormalTok{ extra }\SpecialCharTok{\textasciitilde{}}\NormalTok{ group,}
               \AttributeTok{data =}\NormalTok{ sleep,}
               \AttributeTok{paired =} \ConstantTok{TRUE}\NormalTok{,}
-              \AttributeTok{low\_eqbound =} \SpecialCharTok{{-}}\NormalTok{.}\DecValTok{5}\NormalTok{,}
-              \AttributeTok{high\_eqbound =}\NormalTok{ .}\DecValTok{5}\NormalTok{)}
+              \AttributeTok{eqb =}\NormalTok{ .}\DecValTok{5}\NormalTok{)}
 \NormalTok{res2}
 \end{Highlighting}
 \end{Shaded}
@@ -356,27 +363,26 @@ need to then is change \texttt{paired} to TRUE.
 \begin{verbatim}
 ## 
 ## Paired t-test
-## Hypothesis Tested: Equivalence
-## Equivalence Bounds (raw):-0.500 & 0.500
-## Alpha Level:0.05
+## 
 ## The equivalence test was non-significant, t(9) = -2.777, p = 9.89e-01
 ## The null hypothesis test was significant, t(9) = -4.062, p = 2.83e-03
 ## NHST: reject null significance hypothesis that the effect is equal to zero 
-##  TOST: don't reject null equivalence hypothesis
+## TOST: don't reject null equivalence hypothesis
 ## 
 ## TOST Results 
-##                    t        SE df      p.value
-## t-test     -4.062128 0.3889587  9 0.0028328902
-## TOST Lower -2.776644 0.3889587  9 0.9892407566
-## TOST Upper -5.347611 0.3889587  9 0.0002319027
+##                 t df p.value
+## t-test     -4.062  9   0.003
+## TOST Lower -2.777  9   0.989
+## TOST Upper -5.348  9 < 0.001
 ## 
 ## Effect Sizes 
-##               estimate        SE  lower.ci   upper.ci conf.level
-## Raw          -1.580000 0.3889587 -2.293005 -0.8669947        0.9
-## Hedges' g(z) -1.230152 0.2008070 -1.848296 -0.8362302        0.9
-## 
+##               Estimate    SE               C.I. Conf. Level
+## Raw             -1.580 0.389   [-2.293, -0.867]         0.9
+## Hedges's g(z)   -1.174 0.411 [-1.8046, -0.4977]         0.9
 ## Note: SMD confidence intervals are an approximation. See vignette("SMD_calcs").
 \end{verbatim}
+
+\newpage
 
 However, we may have two vectors of data that are paired. So instead we
 may want to just provide those separately rather than using a data set
@@ -388,8 +394,7 @@ data.
 \NormalTok{res3 }\OtherTok{=} \FunctionTok{t\_TOST}\NormalTok{(}\AttributeTok{x =}\NormalTok{ bugs}\SpecialCharTok{$}\NormalTok{LDHF,}
               \AttributeTok{y =}\NormalTok{ bugs}\SpecialCharTok{$}\NormalTok{LDLF,}
               \AttributeTok{paired =} \ConstantTok{TRUE}\NormalTok{,}
-              \AttributeTok{low\_eqbound =} \SpecialCharTok{{-}}\DecValTok{1}\NormalTok{,}
-              \AttributeTok{high\_eqbound =} \DecValTok{1}\NormalTok{)}
+              \AttributeTok{eqb =} \DecValTok{1}\NormalTok{)}
 \NormalTok{res3}
 \end{Highlighting}
 \end{Shaded}
@@ -397,27 +402,26 @@ data.
 \begin{verbatim}
 ## 
 ## Paired t-test
-## Hypothesis Tested: Equivalence
-## Equivalence Bounds (raw):-1.000 & 1.000
-## Alpha Level:0.05
+## 
 ## The equivalence test was non-significant, t(90) = 2.655, p = 9.95e-01
 ## The null hypothesis test was significant, t(90) = 6.649, p = 2.22e-09
 ## NHST: reject null significance hypothesis that the effect is equal to zero 
-##  TOST: don't reject null equivalence hypothesis
+## TOST: don't reject null equivalence hypothesis
 ## 
 ## TOST Results 
-##                    t        SE df      p.value
-## t-test      6.648618 0.2504032 90 2.223690e-09
-## TOST Lower 10.642177 0.2504032 90 6.681389e-18
-## TOST Upper  2.655058 0.2504032 90 9.953114e-01
+##                 t df p.value
+## t-test      6.649 90 < 0.001
+## TOST Lower 10.642 90 < 0.001
+## TOST Upper  2.655 90   0.995
 ## 
 ## Effect Sizes 
-##               estimate         SE  lower.ci  upper.ci conf.level
-## Raw          1.6648352 0.25040321 1.2486748 2.0809956        0.9
-## Hedges' g(z) 0.6940558 0.09548981 0.5296194 0.8707979        0.9
-## 
+##               Estimate     SE             C.I. Conf. Level
+## Raw             1.6648 0.2504  [1.2487, 2.081]         0.9
+## Hedges's g(z)   0.6911 0.1167 [0.4987, 0.8802]         0.9
 ## Note: SMD confidence intervals are an approximation. See vignette("SMD_calcs").
 \end{verbatim}
+
+\newpage
 
 We may want to perform a Minimal Effect Test with the
 \texttt{hypothesis} argument set to ``MET''.
@@ -428,8 +432,7 @@ We may want to perform a Minimal Effect Test with the
                \AttributeTok{y =}\NormalTok{ bugs}\SpecialCharTok{$}\NormalTok{LDLF,}
                \AttributeTok{paired =} \ConstantTok{TRUE}\NormalTok{,}
                \AttributeTok{hypothesis =} \StringTok{"MET"}\NormalTok{,}
-               \AttributeTok{low\_eqbound =} \SpecialCharTok{{-}}\DecValTok{1}\NormalTok{,}
-               \AttributeTok{high\_eqbound =} \DecValTok{1}\NormalTok{)}
+               \AttributeTok{eqb =} \DecValTok{1}\NormalTok{)}
 \NormalTok{res3a}
 \end{Highlighting}
 \end{Shaded}
@@ -437,37 +440,26 @@ We may want to perform a Minimal Effect Test with the
 \begin{verbatim}
 ## 
 ## Paired t-test
-## Hypothesis Tested: Minimal Effect
-## Equivalence Bounds (raw):-1.000 & 1.000
-## Alpha Level:0.05
+## 
 ## The minimal effect test was significant, t(90) = 10.642, p = 4.69e-03
 ## The null hypothesis test was significant, t(90) = 6.649, p = 2.22e-09
 ## NHST: reject null significance hypothesis that the effect is equal to zero 
-##  TOST: reject null MET hypothesis
+## TOST: reject null MET hypothesis
 ## 
 ## TOST Results 
-##                    t        SE df      p.value
-## t-test      6.648618 0.2504032 90 2.223690e-09
-## TOST Lower 10.642177 0.2504032 90 1.000000e+00
-## TOST Upper  2.655058 0.2504032 90 4.688649e-03
+##                 t df p.value
+## t-test      6.649 90 < 0.001
+## TOST Lower 10.642 90       1
+## TOST Upper  2.655 90   0.005
 ## 
 ## Effect Sizes 
-##               estimate         SE  lower.ci  upper.ci conf.level
-## Raw          1.6648352 0.25040321 1.2486748 2.0809956        0.9
-## Hedges' g(z) 0.6940558 0.09548981 0.5296194 0.8707979        0.9
-## 
+##               Estimate     SE             C.I. Conf. Level
+## Raw             1.6648 0.2504  [1.2487, 2.081]         0.9
+## Hedges's g(z)   0.6911 0.1167 [0.4987, 0.8802]         0.9
 ## Note: SMD confidence intervals are an approximation. See vignette("SMD_calcs").
 \end{verbatim}
 
-Again, we can plot the effects from the \texttt{t\_TOST} result.
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{plot}\NormalTok{(res3a)}
-\end{Highlighting}
-\end{Shaded}
-
-\includegraphics{Avocado_Update_files/figure-latex/unnamed-chunk-11-1.pdf}
+\newpage
 
 \hypertarget{one-sample-t-test}{%
 \subsubsection{One Sample t-test}\label{one-sample-t-test}}
@@ -481,8 +473,7 @@ points greater or less than 7.
 \begin{Highlighting}[]
 \NormalTok{res4 }\OtherTok{=} \FunctionTok{t\_TOST}\NormalTok{(}\AttributeTok{x =}\NormalTok{ bugs}\SpecialCharTok{$}\NormalTok{LDHF,}
               \AttributeTok{hypothesis =} \StringTok{"EQU"}\NormalTok{,}
-              \AttributeTok{low\_eqbound =} \FloatTok{5.5}\NormalTok{,}
-              \AttributeTok{high\_eqbound =} \FloatTok{8.5}\NormalTok{)}
+              \AttributeTok{eqb =} \FunctionTok{c}\NormalTok{(}\FloatTok{5.5}\NormalTok{,}\FloatTok{8.5}\NormalTok{))}
 \NormalTok{res4}
 \end{Highlighting}
 \end{Shaded}
@@ -490,42 +481,33 @@ points greater or less than 7.
 \begin{verbatim}
 ## 
 ## One Sample t-test
-## Hypothesis Tested: Equivalence
-## Equivalence Bounds (raw):5.500 & 8.500
-## Alpha Level:0.05
+## 
 ## The equivalence test was significant, t(90) = -4.244, p = 2.66e-05
 ## The null hypothesis test was significant, t(90) = 27.942, p = 3.91e-46
 ## NHST: reject null significance hypothesis that the effect is equal to zero 
 ## TOST: reject null equivalence hypothesis
 ## 
 ## TOST Results 
-##                    t        SE df      p.value
-## t-test     27.942403 0.2640833 90 3.906969e-46
-## TOST Lower  7.115638 0.2640833 90 1.298575e-10
-## TOST Upper -4.244416 0.2640833 90 2.658068e-05
+##                 t df p.value
+## t-test     27.942 90 < 0.001
+## TOST Lower  7.116 90 < 0.001
+## TOST Upper -4.244 90 < 0.001
 ## 
 ## Effect Sizes 
-##           estimate        SE lower.ci upper.ci conf.level
-## Raw       7.379121 0.2640833 6.940225 7.818017        0.9
-## Hedges' g 2.904671 0.2452067 2.551811 3.354884        0.9
-## 
+##            Estimate     SE             C.I. Conf. Level
+## Raw           7.379 0.2641  [6.9402, 7.818]         0.9
+## Hedges's g    2.905 0.2395 [2.5058, 3.2949]         0.9
 ## Note: SMD confidence intervals are an approximation. See vignette("SMD_calcs").
 \end{verbatim}
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{plot}\NormalTok{(res4)}
-\end{Highlighting}
-\end{Shaded}
-
-\includegraphics{Avocado_Update_files/figure-latex/unnamed-chunk-13-1.pdf}
+\newpage
 
 \hypertarget{using-summary-statistics}{%
 \subsubsection{Using Summary
 Statistics}\label{using-summary-statistics}}
 
 In some cases you may only have access to the summary statistics.
-Therefore, we created a function, \texttt{tsum\_TOST},to perform the
+Therefore, I created a function, \texttt{tsum\_TOST}, to perform the
 same tests just based on the summary statistics. This involves providing
 the function with a number of different arguments.
 
@@ -542,17 +524,14 @@ the function with a number of different arguments.
   \texttt{r12} the correlation between each if paired is set to TRUE
 \end{itemize}
 
-The results from above can be replicated with the \texttt{tsum\_TOST}
+The results from above can be replicated with the \texttt{tsum\_TOST}:
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{res\_tsum }\OtherTok{=} \FunctionTok{tsum\_TOST}\NormalTok{(}
-  \AttributeTok{m1 =} \FunctionTok{mean}\NormalTok{(bugs}\SpecialCharTok{$}\NormalTok{LDHF, }\AttributeTok{na.rm=}\ConstantTok{TRUE}\NormalTok{),}
-  \AttributeTok{sd1 =} \FunctionTok{sd}\NormalTok{(bugs}\SpecialCharTok{$}\NormalTok{LDHF, }\AttributeTok{na.rm=}\ConstantTok{TRUE}\NormalTok{),}
+  \AttributeTok{m1 =} \FunctionTok{mean}\NormalTok{(bugs}\SpecialCharTok{$}\NormalTok{LDHF, }\AttributeTok{na.rm=}\ConstantTok{TRUE}\NormalTok{), }\AttributeTok{sd1 =} \FunctionTok{sd}\NormalTok{(bugs}\SpecialCharTok{$}\NormalTok{LDHF, }\AttributeTok{na.rm=}\ConstantTok{TRUE}\NormalTok{),}
   \AttributeTok{n1 =} \FunctionTok{length}\NormalTok{(}\FunctionTok{na.omit}\NormalTok{(bugs}\SpecialCharTok{$}\NormalTok{LDHF)),}
-  \AttributeTok{hypothesis =} \StringTok{"EQU"}\NormalTok{,}
-  \AttributeTok{low\_eqbound =} \FloatTok{5.5}\NormalTok{,}
-  \AttributeTok{high\_eqbound =} \FloatTok{8.5}
+  \AttributeTok{hypothesis =} \StringTok{"EQU"}\NormalTok{, }\AttributeTok{smd\_ci =} \StringTok{"t"}\NormalTok{, }\AttributeTok{eqb =} \FunctionTok{c}\NormalTok{(}\FloatTok{5.5}\NormalTok{, }\FloatTok{8.5}\NormalTok{)}
 \NormalTok{)}
 
 \NormalTok{res\_tsum}
@@ -562,35 +541,26 @@ The results from above can be replicated with the \texttt{tsum\_TOST}
 \begin{verbatim}
 ## 
 ## One-sample t-Test
-## Hypothesis Tested: Equivalence
-## Equivalence Bounds (raw):5.500 & 8.500
-## Alpha Level:0.05
+## 
 ## The equivalence test was significant, t(90) = -4.244, p = 2.66e-05
 ## The null hypothesis test was significant, t(90) = 27.942, p = 3.91e-46
 ## NHST: reject null significance hypothesis that the effect is equal to zero 
 ## TOST: reject null equivalence hypothesis
 ## 
 ## TOST Results 
-##                    t        SE df      p.value
-## t-test     27.942403 0.2640833 90 3.906969e-46
-## TOST Lower  7.115638 0.2640833 90 1.298575e-10
-## TOST Upper -4.244416 0.2640833 90 2.658068e-05
+##                 t df p.value
+## t-test     27.942 90 < 0.001
+## TOST Lower  7.116 90 < 0.001
+## TOST Upper -4.244 90 < 0.001
 ## 
 ## Effect Sizes 
-##           estimate        SE lower.ci upper.ci conf.level
-## Raw       7.379121 0.2640833 6.940225 7.818017        0.9
-## Hedges' g 2.904671 0.2452067 2.551811 3.354884        0.9
-## 
+##            Estimate     SE             C.I. Conf. Level
+## Raw           7.379 0.2641  [6.9402, 7.818]         0.9
+## Hedges's g    2.905 0.2395 [2.4289, 3.3804]         0.9
 ## Note: SMD confidence intervals are an approximation. See vignette("SMD_calcs").
 \end{verbatim}
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\FunctionTok{plot}\NormalTok{(res\_tsum)}
-\end{Highlighting}
-\end{Shaded}
-
-\includegraphics{Avocado_Update_files/figure-latex/unnamed-chunk-15-1.pdf}
+\newpage
 
 \hypertarget{robust-methods-for-equivalence-testing}{%
 \section{Robust Methods for Equivalence
@@ -600,29 +570,36 @@ Why this may be useful Describe these aren't tests of medians but
 symmetry tests (myth busting) Paired samples may want to be rank
 transformed
 
-In this package there are currently 2 functions that provide robust
+In this package there are many functions that provide robust
 alternatives to the \texttt{t\_TOST} function.
 
-\hypertarget{tests-of-symmetry}{%
-\subsection{Tests of Symmetry}\label{tests-of-symmetry}}
+\hypertarget{tests-of-symmetry-rank-based-tests}{%
+\subsection{Tests of Symmetry (rank based
+tests)}\label{tests-of-symmetry-rank-based-tests}}
 
-The Wilcoxon group of tests (includes Mann-Whitney U-test) provide a
-non-parametric test of differences between groups, or within samples,
-based on ranks. This provides a test of location shift, which is a fancy
-way of saying differences in the center of the distribution (i.e., in
-parametric tests the location is mean). With TOST, there are two
-separate tests of directional location shift to determine if the
-location shift is within (equivalence) or outside (minimal effect). The
-exact calculations can be explored via the documentation of the
+The Wilcoxon-Mann-Whitney (WMW) group of tests (includes Mann-Whitney
+U-test) provide a non-parametric test of differences between groups, or
+within samples, based on \emph{ranks}. This provides a test of location
+shift, which is a fancy way of saying differences in the center of the
+distribution (i.e., in parametric tests the location is mean). With
+TOST, there are two separate tests of directional location shift to
+determine if the location shift is within (equivalence) or outside
+(minimal effect). Many researchers mistakenly think these are tests of
+medians, but this is not the case (See \citet{median_test} for details).
+The exact calculations can be explored via the documentation of the
 \texttt{wilcox.test} function.
 
 In the TOSTER package, we accomplish this with the \texttt{wilcox\_TOST}
-function. Overall, this function operates extremely similar to the
-\texttt{t\_TOST} function. However, the standardized mean difference
-(SMD) is \emph{not} calculated. Instead the rank-biserial correlation is
-calculated for \emph{all} types of comparisons (e.g., two sample, one
-sample, and paired samples). Also, there is no plotting capability at
-this time for the output of this function.
+function. This function operates in an extremely similar implementation
+to the \texttt{t\_TOST} function. However, the standardized mean
+difference (SMD) is \emph{not} calculated since this would be an
+inappropriate measure of effect size alongside the non-parametric test
+statistics. Instead, a standardized effect size (SES) is calculated for
+\emph{all} types of comparisons (e.g., two sample, one sample, and
+paired samples). The function can produce a rank-biserial correlation
+(CITE), a WMW Odds (CITE), or a concordance probability (CITE) (i.e.,
+non-parametric probability of superiority).\footnote{There is no
+  plotting capability at this time for the output of this function.}
 
 As an example, we can use the sleep data to make a non-parametric
 comparison of equivalence.
@@ -635,8 +612,7 @@ comparison of equivalence.
 \NormalTok{test1 }\OtherTok{=} \FunctionTok{wilcox\_TOST}\NormalTok{(}\AttributeTok{formula =}\NormalTok{ extra }\SpecialCharTok{\textasciitilde{}}\NormalTok{ group,}
                       \AttributeTok{data =}\NormalTok{ sleep,}
                       \AttributeTok{paired =} \ConstantTok{FALSE}\NormalTok{,}
-                      \AttributeTok{low\_eqbound =} \SpecialCharTok{{-}}\NormalTok{.}\DecValTok{5}\NormalTok{,}
-                      \AttributeTok{high\_eqbound =}\NormalTok{ .}\DecValTok{5}\NormalTok{)}
+                      \AttributeTok{eqb =}\NormalTok{ .}\DecValTok{5}\NormalTok{)}
 
 
 \FunctionTok{print}\NormalTok{(test1)}
@@ -646,30 +622,28 @@ comparison of equivalence.
 \begin{verbatim}
 ## 
 ## Wilcoxon rank sum test with continuity correction
-## Hypothesis Tested: Equivalence
-## Equivalence Bounds (raw):-0.500 & 0.500
-## Alpha Level:0.05
+## 
 ## The equivalence test was non-significant W = 20.000, p = 8.94e-01
 ## The null hypothesis test was non-significant W = 25.500, p = 6.93e-02
 ## NHST: don't reject null significance hypothesis that the effect is equal to zero 
 ## TOST: don't reject null equivalence hypothesis
 ## 
 ## TOST Results 
-##            statistic    p.value
-## NHST            25.5 0.06932758
-## TOST Lower      34.0 0.89385308
-## TOST Upper      20.0 0.01287404
+##            Test Statistic p.value
+## NHST                 25.5   0.069
+## TOST Lower           34.0   0.894
+## TOST Upper           20.0   0.013
 ## 
 ## Effect Sizes 
-##                            estimate   lower.ci    upper.ci conf.level
-## Median of Differences     -1.346388 -3.3999651 -0.09995341        0.9
-## rank-biserial correlation -0.490000 -0.7492521 -0.10053222        0.9
+##                           Estimate               C.I. Conf. Level
+## Median of Differences       -1.346       [-3.4, -0.1]         0.9
+## Rank-Biserial Correlation   -0.490 [-0.7493, -0.1005]         0.9
 \end{verbatim}
 
-\hypertarget{boostrap-tost}{%
-\subsection{Boostrap TOST}\label{boostrap-tost}}
+\hypertarget{bootstrap-tost}{%
+\subsection{Bootstrap TOST}\label{bootstrap-tost}}
 
-The boostrap refers to resampling with replacement and can be used
+The bootstrap refers to resampling with replacement and can be used
 statistical estimation and inference. Bootsrapping techniques are very
 useful because they are considered somewhat robust to the violations of
 assumptions for a simple t-test. Therefore we added a bootstrap option,
@@ -725,7 +699,7 @@ solution because the test is based on the difference scores.
 \subsubsection{Example of Bootrapping}\label{example-of-bootrapping}}
 
 Again, we can use the sleep data to see the bootstrapped results. Notice
-that the plots show how the resampling via boostrapping indicates the
+that the plots show how the resampling via bootstrapping indicates the
 instability of Hedges' d(z).
 
 \begin{Shaded}
@@ -735,8 +709,7 @@ instability of Hedges' d(z).
 \NormalTok{test1 }\OtherTok{=} \FunctionTok{boot\_t\_TOST}\NormalTok{(}\AttributeTok{formula =}\NormalTok{ extra }\SpecialCharTok{\textasciitilde{}}\NormalTok{ group,}
                     \AttributeTok{data =}\NormalTok{ sleep,}
                     \AttributeTok{paired =} \ConstantTok{TRUE}\NormalTok{,}
-                    \AttributeTok{low\_eqbound =} \SpecialCharTok{{-}}\NormalTok{.}\DecValTok{5}\NormalTok{,}
-                    \AttributeTok{high\_eqbound =}\NormalTok{ .}\DecValTok{5}\NormalTok{,}
+                    \AttributeTok{eqb =}\NormalTok{ .}\DecValTok{5}\NormalTok{,}
                     \AttributeTok{R =} \DecValTok{999}\NormalTok{)}
 
 
@@ -747,26 +720,23 @@ instability of Hedges' d(z).
 \begin{verbatim}
 ## 
 ## Bootstrapped Paired t-test
-## Hypothesis Tested: Equivalence
-## Equivalence Bounds (raw):-0.500 & 0.500
-## Alpha Level:0.05
+## 
 ## The equivalence test was non-significant, t(9) = -2.777, p = 1e+00
 ## The null hypothesis test was significant, t(9) = -4.062, p = 0e+00
 ## NHST: reject null significance hypothesis that the effect is equal to zero 
 ## TOST: don't reject null equivalence hypothesis
 ## 
 ## TOST Results 
-##                    t        SE df p.value
-## t-test     -4.062128 0.3889587  9       0
-## TOST Lower -2.776644 0.3889587  9       1
-## TOST Upper -5.347611 0.3889587  9       0
+##                 t df p.value
+## t-test     -4.062  9 < 0.001
+## TOST Lower -2.777  9       1
+## TOST Upper -5.348  9 < 0.001
 ## 
 ## Effect Sizes 
-##               estimate        SE  lower.ci   upper.ci conf.level
-## Raw          -1.580000 0.3498821 -2.170000 -1.0490000        0.9
-## Hedges' g(z) -1.230152 0.7258598 -2.881678 -0.9220578        0.9
-## 
-## Note: percentile boostrap method utilized.
+##               Estimate     SE               C.I. Conf. Level
+## Raw             -1.580 0.3611    [-2.181, -1.02]         0.9
+## Hedges's g(z)   -1.174 0.6300 [-2.7711, -0.9172]         0.9
+## Note: percentile bootstrap method utilized.
 \end{verbatim}
 
 \hypertarget{equivalence-testing-with-anovas}{%
@@ -784,22 +754,27 @@ may be prudent.
 \subsection{F-test Calculations}\label{f-test-calculations}}
 
 Statistical equivalence testing (or ``omnibus non-inferiority testing''
-as \citet{Campbell_2021}) for \emph{F}-tests are special use case of the
+by \citet{Campbell_2021}) for \emph{F}-tests are special use case of the
 cumulative distribution function of the non-central \emph{F}
-distribution. As \citet{Campbell_2021} state, these type of questions
+distribution. As \citet{Campbell_2021} states, these type of questions
 answer the question: ``Can we reject the hypothesis that the total
 proportion of variance in outcome Y attributable to X is greater than or
 equal to the equivalence bound \(\Delta\)?''
 
+\hypertarget{hypothesis-tests}{%
+\subsubsection{Hypothesis Tests}\label{hypothesis-tests}}
+
 \[
-H_0: \space 1 > \eta^2_p \geq \Delta
-\\
-H_1: \space 0 \geq \eta^2_p < \Delta
+H_0 =  1 > \eta^2_p \geq \Delta
 \]
 
-In \texttt{TOSTER} we go a tad farther and calculate a more
-generalizable non-centrality parameter that allows the equivalence test
-for \emph{F}-tests to be applied to variety of designs.
+\[
+H_1 =  0 \geq \eta^2_p < \Delta
+\]
+
+In \texttt{TOSTER} we go a tad farther and calculate a generalization of
+the non-centrality parameter that allows the equivalence test for
+\emph{F}-tests to be applied to variety of designs.
 
 \citet{Campbell_2021} calculate the \emph{p}-value as:
 
@@ -811,8 +786,8 @@ However, this approach could not be applied to factorial ANOVA and the
 paper only outlines how to apply this approach to a one-way ANOVA and an
 extension to Welch's one-way ANOVA.
 
-However, the non-centrality parameter (ncp = \(\lambda\)) can be
-calculated with the equivalence bound and the degrees of freedom:
+The non-centrality parameter (ncp = \(\lambda\)) can be calculated with
+the equivalence bound and the degrees of freedom:
 
 \[
 \lambda_{eq} = \frac{\Delta}{1-\Delta} \cdot(df_1 + df_2 +1)
@@ -856,17 +831,17 @@ a partial eta-squared of 0.35 (\(H_0: \eta^2_p > 0.35\))
 
 \begin{longtable}[]{@{}lrrrrr@{}}
 \caption{Traditional ANOVA Test}\tabularnewline
-\toprule
+\toprule()
 term & df & sumsq & meansq & statistic & p.value \\
-\midrule
+\midrule()
 \endfirsthead
-\toprule
+\toprule()
 term & df & sumsq & meansq & statistic & p.value \\
-\midrule
+\midrule()
 \endhead
 spray & 5 & 2668.833 & 533.76667 & 34.70228 & 0 \\
 Residuals & 66 & 1015.167 & 15.38131 & NA & NA \\
-\bottomrule
+\bottomrule()
 \end{longtable}
 
 We can then use the information in the table above to perform an
@@ -880,7 +855,7 @@ estimates, and confidence interval, are for partial \(\eta^2_p\).
 \FunctionTok{equ\_ftest}\NormalTok{(}\AttributeTok{Fstat =} \FloatTok{34.70228}\NormalTok{,}
           \AttributeTok{df1 =} \DecValTok{5}\NormalTok{,}
           \AttributeTok{df2 =} \DecValTok{66}\NormalTok{,}
-          \AttributeTok{eqbound =} \FloatTok{0.35}\NormalTok{)}
+          \AttributeTok{eqb =} \FloatTok{0.35}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -912,7 +887,7 @@ and \texttt{afex::aov\_car} (or any ANOVA from derived from
 \begin{Shaded}
 \begin{Highlighting}[]
 \FunctionTok{equ\_anova}\NormalTok{(aovtest,}
-          \AttributeTok{eqbound =} \FloatTok{0.35}\NormalTok{)}
+          \AttributeTok{eqb =} \FloatTok{0.35}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -921,93 +896,70 @@ and \texttt{afex::aov\_car} (or any ANOVA from derived from
 ## 1 spray         5  66 34.70228 3.182584e-17 0.724439    0.35 0.9999965
 \end{verbatim}
 
-\hypertarget{visualizing-equivalence}{%
-\section{Visualizing Equivalence}\label{visualizing-equivalence}}
+\hypertarget{conclusions}{%
+\section{Conclusions}\label{conclusions}}
 
-Add plots from the package
+\newpage
+
+\hypertarget{additional-information}{%
+\section{Additional Information}\label{additional-information}}
 
 \hypertarget{acknowledgements}{%
-\section*{Acknowledgement(s)}\label{acknowledgements}}
-\addcontentsline{toc}{section}{Acknowledgement(s)}
+\subsection*{Acknowledgement(s)}\label{acknowledgements}}
+\addcontentsline{toc}{subsection}{Acknowledgement(s)}
 
-An unnumbered section,
-e.g.~\texttt{\textbackslash{}section*\{Acknowledgements\}}, may be used
-for thanks, etc.~if required and included \emph{in the non-anonymous
-version} before any Notes or References.
+I'd would like to thank everyone from the Lakens' laboratory group for
+their input and suggestions.
 
 \hypertarget{disclosure-statement}{%
-\section*{Disclosure statement}\label{disclosure-statement}}
-\addcontentsline{toc}{section}{Disclosure statement}
+\subsection*{Disclosure statement}\label{disclosure-statement}}
+\addcontentsline{toc}{subsection}{Disclosure statement}
 
-An unnumbered section,
-e.g.~\texttt{\textbackslash{}section*\{Disclosure\ statement\}}, may be
-used to declare any potential conflict of interest and included \emph{in
-the non-anonymous version} before any Notes or References, after any
-Acknowledgements and before any Funding information.
+The author of this manuscript is the author of the \texttt{TOSTER}
+package. Citations of this manuscript will benefit their citation count.
 
 \hypertarget{funding}{%
-\section*{Funding}\label{funding}}
-\addcontentsline{toc}{section}{Funding}
+\subsection*{Funding}\label{funding}}
+\addcontentsline{toc}{subsection}{Funding}
 
-An unnumbered section,
-e.g.~\texttt{\textbackslash{}section*\{Funding\}}, may be used for grant
-details, etc.~if required and included \emph{in the non-anonymous
-version} before any Notes or References.
+No funding was provided for this work.
 
 \hypertarget{notes-on-contributors}{%
-\section*{Notes on contributor(s)}\label{notes-on-contributors}}
-\addcontentsline{toc}{section}{Notes on contributor(s)}
+\subsection*{Notes on contributor(s)}\label{notes-on-contributors}}
+\addcontentsline{toc}{subsection}{Notes on contributor(s)}
 
-An unnumbered section,
-e.g.~\texttt{\textbackslash{}section*\{Notes\ on\ contributors\}}, may
-be included \emph{in the non-anonymous version} if required. A
-photograph may be added if requested.
+Daniel Lakens provided a review of many of the materials that have been
+incorporated into the update of \texttt{TOSTER}, and was the original
+author of this package.
 
 \hypertarget{nomenclaturenotation}{%
-\section*{Nomenclature/Notation}\label{nomenclaturenotation}}
-\addcontentsline{toc}{section}{Nomenclature/Notation}
+\subsection*{Nomenclature/Notation}\label{nomenclaturenotation}}
+\addcontentsline{toc}{subsection}{Nomenclature/Notation}
 
-An unnumbered section,
-e.g.~\texttt{\textbackslash{}section*\{Nomenclature\}} (or
-\texttt{\textbackslash{}section*\{Notation\}}), may be included if
-required, before any Notes or References.
+\begin{itemize}
+\tightlist
+\item
+  ANOVA: Analysis of Variance
+\item
+  MET: Minimal Effects Test
+\item
+  ncp: non-centrality parameter
+\item
+  SMD: Standardized mean difference (e.g., Cohen's d)
+\item
+  TOST: Two-one sided tests
+\item
+  WMW: Wilcoxon-Mann-Whitney
+\end{itemize}
 
 \hypertarget{notes}{%
-\section*{Notes}\label{notes}}
-\addcontentsline{toc}{section}{Notes}
+\subsection*{Notes}\label{notes}}
+\addcontentsline{toc}{subsection}{Notes}
 
-An unnumbered \texttt{Notes} section may be included before the
-References (if using the \texttt{endnotes} package, use the command
-\texttt{\textbackslash{}theendnotes} where the notes are to appear,
-instead of creating a \texttt{\textbackslash{}section*}).
+The R package is also (partially) implemented in jamovi as the TOSTER
+module.
 
-\hypertarget{references}{%
-\section{References}\label{references}}
-
-\hypertarget{references-cited-in-the-text}{%
-\subsection{References cited in the
-text}\label{references-cited-in-the-text}}
-
-\hypertarget{the-list-of-references}{%
-\subsection{The list of references}\label{the-list-of-references}}
-
-References should be listed at the end of the main text in alphabetical
-order by authors' surnames, then chronologically (earliest first). If
-references have the same author(s), editor(s), etc., arrange by year of
-publication, with undated works at the end. A single-author entry
-precedes a multi-author entry that begins with the same name. If the
-reference list contains two or more items by the same author(s) in the
-same year, add a, b, etc. and list them alphabetically by title.
-Successive entries by two or more authors when only the first author is
-the same are alphabetized by co-authors' surnames. If a reference has
-more than ten named authors, list only the first seven, followed by `et
-al.'. If a reference has no author or editor, order by title; if a date
-of publication is impossible to find, use `n.d.' in its place.
-
-The following list shows some sample references prepared in the Taylor
-\& Francis Chicago author-date style.
-
-\citep{Ade09, Alb05}
+\newpage
 
 \bibliographystyle{tfcad}
 \bibliography{interactcadsample.bib}

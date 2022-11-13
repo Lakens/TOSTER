@@ -668,6 +668,26 @@ test_that("Run examples for paired samples", {
                     hypothesis = "MET",
                     bias_correction = FALSE)
 
+  expect_equal(cor12,
+               extract_r_paired(m1 = mean(samp1),
+                                sd1 = sd(samp1),
+                                m2 = mean(samp2),
+                                sd2 = sd(samp2),
+                                n = length(samp2),
+                                tstat = tsum3$TOST$t[1]))
+  expect_error(extract_r_paired(m1 = mean(samp1),
+                                sd1 = sd(samp1),
+                                m2 = mean(samp2),
+                                sd2 = sd(samp2),
+                                n = length(samp2),
+                                tstat = NULL))
+
+  something = extract_r_paired(m1 = mean(samp1),
+                               sd1 = sd(samp1),
+                               m2 = mean(samp2),
+                               #sd2 = sd(samp2),
+                               n = length(samp2),
+                               tstat = tsum3$TOST$t[1])
   tsum4 = suppressMessages( { tsum_TOST(m1 = mean(samp1),
                                       sd1 = sd(samp1),
                                       n1 = length(samp1),
