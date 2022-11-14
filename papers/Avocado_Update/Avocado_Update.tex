@@ -87,6 +87,13 @@
 \usepackage{hyperref}
 \usepackage[utf8]{inputenc}
 \def\tightlist{}
+\hypersetup{
+  colorlinks=true,
+  citecolor = cyan,
+  linkcolor=blue,
+  filecolor=magenta,      
+  urlcolor=blue
+  }
 
 \usepackage{float}
 
@@ -138,24 +145,36 @@ Both the complaints about erroneous conclusions regarding equivalence
 \citep{schuirmann1987} have existed for decades now. Yet the problem
 appears to persist in many applied disciplines. I estimate that the
 cause of this continued dissonance is due to a lack of education on
-equivalence testing and struggle for many applied researchers to
+equivalence testing and a struggle for many applied researchers to
 implement equivalence testing. In my experience, most researchers have
 received some degree of statistical training in their doctoral or
-master's studies, but it is rare that any have idea of equivalence
-testing. It may also be difficult to implement equivalence testing for
-many researchers. This may be caused by most statistical software
-defaulting to a null hypothesis of zero, or even completely lacking an
-ability to change the null hypothesis.
+master's studies, but it is rare that any have idea of how to use TOST.
+It may also be difficult to implement equivalence testing for many
+researchers. This may be caused by most statistical software defaulting
+to a null hypothesis of zero, or even completely lacking an ability to
+change the null hypothesis. Therefore, I feel continued development of
+educational content on TOST, and software to help with such analyses,
+would be beneficial to many quantitative researchers.
 
 The TOSTER R package was originally developed in by \citet{lakens_ori}
 to introduce experimental psychologists to the concept of equivalence
-testing and provide an easy-to-use implementation in R. Since then I
-have made a significant update to the package in order to improve the
-user interface and expand the tools available within the package.
+testing and provide an easy-to-use implementation in R. In the years
+since that publication, I have made a significant update to the package
+in order to improve the user interface and expand the tools available
+within the package. An experienced R programmer may have no problem
+performing equivalence testing within R but beginners may struggle with
+both writing the code and interpreting the output. If you fall into that
+category, I would suggest using \texttt{jamovi}, an open-source
+statistical software, that has a TOSTER module to perform
+equivalence/TOST analyses.
 
-An experienced R programmer may have no problem performing equivalence
-testing within R but beginners may struggle with both writing the code
-and interpreting the output.
+In this manuscript, I will detail the updates to the TOSTER package, and
+give some basic usage examples of some of the new functions. This is
+meant to just be an introduction to \emph{how} to perform such analyses,
+and provide a little bit of context for when such analyses are
+appropriate. For a greater introduction to equivalence testing, I would
+suggest reading other methodological tutorials
+\citep{lakens_ori, lakens2018equivalence, lakens2020improving, mazzolari2022myths}.
 
 \hypertarget{basics-of-equivalence-testing}{%
 \section{Basics of Equivalence
@@ -164,8 +183,8 @@ Testing}\label{basics-of-equivalence-testing}}
 \hypertarget{the-toster-r-package}{%
 \subsection{The TOSTER R Package}\label{the-toster-r-package}}
 
-In an effort to make \texttt{TOSTER} more informative and easier to use,
-a new function \texttt{t\_TOST} was created. This function operates very
+In an effort to make TOSTER more informative and easier to use, a new
+function \texttt{t\_TOST} was created. This function operates very
 similarly to base R's \texttt{t.test} function, but performs 3 t-tests
 (one two-tailed and two one-tailed tests). In addition, this function
 has a generic method where two vectors can be supplied or a formula can
@@ -232,11 +251,21 @@ appropriately. In addition, we can set the \texttt{var.equal} argument
 (to assume equal variance), and the \texttt{paired} argument (sets if
 the data is paired or not). Both are logical indicators that can be set
 to TRUE or FALSE. The \texttt{alpha} is automatically set to 0.05 but
-this can also be adjusted by the user. Hedges's correction
-\citep{hedges_bias} is also automatically calculated, but this can be
+this can also be adjusted by the user.
+
+Standardize mean differences (SMDs) are provided in the output for any
+t-test based TOST analysis (e.g., Cohen's d). The Hedges's corrected SMD
+\citep{hedges_bias} is automatically calculated, but this can be
 overridden with the \texttt{bias\_correction} argument\footnote{Glass's
   delta can also be produced in the output by using the \texttt{glass}
-  argument}. The \texttt{hypothesis} is automatically set to ``EQU'' for
+  argument}. In previous versions of this package, the equivalence
+bounds could be set by the SMD (e.g., equivalence bound of 0.5 SD), but
+this is an erroneous approach since the bound would be dependent upon
+the \emph{sample} variance. However, users can opt for such an analysis
+by setting \texttt{eqbound\_type} to SMD, which will produce a
+noticeable warning to the R console.
+
+The \texttt{hypothesis} argument is automatically set to ``EQU'' for
 equivalence but if a minimal effect is of interest then ``MET'' can be
 supplied.
 
@@ -462,10 +491,10 @@ We may want to perform a Minimal Effect Test with the
 \hypertarget{one-sample-t-test}{%
 \subsubsection{One Sample t-test}\label{one-sample-t-test}}
 
-In other cases we may just have a one sample test. If that is the case
-all we have to do is supply the \texttt{x} argument for the data. For
-this test we may hypothesis that the mean of LDHF is not more than 1.5
-points greater or less than 7.
+In other cases we may have a one-sample test. If that is the case, only
+\texttt{x} argument for the data is needed. As an example, we may
+hypothesis that the mean of LDHF is not more than 1.5 points greater or
+less than 7.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -564,43 +593,65 @@ The results from above can be replicated with the \texttt{tsum\_TOST}:
 \section{Robust Methods for Equivalence
 Testing}\label{robust-methods-for-equivalence-testing}}
 
-Why this may be useful Describe these aren't tests of medians but
-symmetry tests (myth busting) Paired samples may want to be rank
-transformed
+In some cases, the use of t-test may be less than ideal. Any serious
+violation to the assumptions of a t-test (e.g., normality or
+homoscedasticity) could greatly inflate the type 1 error rate of TOST.
+Therefore, it may be useful to explore alternatives to the t-test for
+TOST.
 
-In this package there are many functions that provide robust
-alternatives to the \texttt{t\_TOST} function.
+The TOSTER package currently provides 4 robust alternatives to the
+t-test for TOST. First, there is the \texttt{wilcox\_TOST} function
+which uses the Wilcoxon-Mann-Whitney (WMW) type tests (i.e.,
+\texttt{wilcox.test}) to perform TOST as a test of symmetry. Second,
+there is the \texttt{log\_TOST} function which performs log-transformed
+t-tests, which is a parametric approach commonly used in pharmaceutical
+bioequivalence studies on ratio data \citep{he2022}. Third, there is the
+\texttt{boot\_t\_TOST} function which uses the bootstrap method outlined
+by \citet{efron93}. Fourth, there is the \texttt{boot\_log\_TOST}
+function which uses the same bootstrap method outlined by
+\citet{efron93} but on the log-transformed data, which is more robust
+than parametric log t-test \citep{he2022}
+
+In the following sections, I will briefly outline the available robust
+TOST functions within the TOSTER package.
 
 \hypertarget{tests-of-symmetry-rank-based-tests}{%
 \subsection{Tests of Symmetry (rank based
 tests)}\label{tests-of-symmetry-rank-based-tests}}
 
-The Wilcoxon-Mann-Whitney (WMW) group of tests (includes Mann-Whitney
-U-test) provide a non-parametric test of differences between groups, or
-within samples, based on \emph{ranks}. This provides a test of location
-shift, which is a fancy way of saying differences in the center of the
-distribution (i.e., in parametric tests the location is mean). With
-TOST, there are two separate tests of directional location shift to
+The WMW group of tests (e.g., Mann-Whitney U-test) provide a
+non-parametric test of differences between groups, or within samples,
+based on \emph{ranks}. This provides a test of location shift, which is
+a fancy way of saying differences in the center of the distribution
+(i.e., in parametric tests the location is mean). Within the TOST
+framework, there are two separate tests of directional location shift to
 determine if the location shift is within (equivalence) or outside
-(minimal effect). Many researchers mistakenly think these are tests of
-medians, but this is not the case (See \citet{median_test} for details).
-Also, care should be taken when considering paired samples; a test on
-the rank transformed data \citep{kornbrot1990rank} or another robust
-test may be more prudent.
+(minimal effect) the equivalence bounds. Many researchers mistakenly
+think these are tests of medians, but this is not the case (See
+\citet{median_test} for details).\footnote{Care should be taken when
+  considering paired samples; a test on the rank transformed data
+  \citep{kornbrot1990rank} or another robust test may be more prudent.}.
+Using a WMW-based TOST is useful for testing whether the differences
+between groups/conditions is symmetric around the equivalence bounds.
+For equivalence testing, the TOST would be testing whether there is
+asymmetry towards no effect with a null hypothesis of symmetry at the
+equivalence bound.
 
-In the TOSTER package, we accomplish this with the \texttt{wilcox\_TOST}
-function. This function operates in an extremely similar implementation
-to the \texttt{t\_TOST} function. The exact calculations utilized in
-this function can be explored via the documentation of the
-\texttt{wilcox.test} function. However, the standardized mean difference
-(SMD) is \emph{not} calculated since this would be an inappropriate
-measure of effect size alongside the non-parametric test statistics.
-Instead, a standardized effect size (SES) is calculated for \emph{all}
-types of comparisons (e.g., two sample, one sample, and paired samples).
-The function can produce a rank-biserial correlation (CITE), a WMW Odds
-(CITE), or a concordance probability (CITE) (i.e., non-parametric
-probability of superiority).\footnote{There is no plotting capability at
-  this time for the output of this function.}
+In the TOSTER package, we accomplish this ``test of symmetry'' with the
+\texttt{wilcox\_TOST} function. This function operates in an extremely
+similar implementation to the \texttt{t\_TOST} function. The exact
+calculations utilized in this function can be explored via the
+documentation of the \texttt{wilcox.test} function. A standardized mean
+difference (SMD) is \emph{not} calculated in this function since this
+would be an inappropriate measure of effect size alongside the
+non-parametric test statistics. Instead, a standardized effect size
+(SES) is calculated for \emph{all} types of comparisons (e.g., two
+sample, one sample, and paired samples). The function can produce a
+rank-biserial correlation (\citet{Kerby_2014}), a WMW Odds
+\citep{wmwodds}, or a ``common language effect size''
+(\citet{Kerby_2014}) (Also known as the non-parametric probability of
+superiority, or concordance probability).\footnote{There is no plotting
+  capability at this time for the output of this function.}
 
 As an example, we can use the sleep data to make a non-parametric
 comparison of equivalence.
@@ -656,7 +707,8 @@ In this function we provide a percentile bootstrap solution outlined by
 are derived from the ``studentized'' version of a test of mean
 differences \citep{efron93}. Overall, the results should be similar to
 the results of \texttt{t\_TOST}. \textbf{However}, for paired samples,
-the Cohen's d(rm) effect size \emph{cannot} be calculated at this time.
+the Cohen's d(rm) effect size \emph{cannot} be calculated by this
+function.
 
 \hypertarget{two-sample-algorithm}{%
 \subsubsection{Two Sample Algorithm}\label{two-sample-algorithm}}
@@ -696,12 +748,12 @@ sample solution for the equation outlined by \(t(z^{*b})\). The paired
 sample case in this bootstrap procedure is equivalent to the one sample
 solution because the test is based on the difference scores.
 
-\hypertarget{example-of-bootrapping}{%
-\subsubsection{Example of Bootrapping}\label{example-of-bootrapping}}
+\hypertarget{example-of-bootsrapping}{%
+\subsubsection{Example of Bootsrapping}\label{example-of-bootsrapping}}
 
-Again, we can use the sleep data to see the bootstrapped results. Notice
-that the plots show how the resampling via bootstrapping indicates the
-instability of Hedges' d(z).
+Again, we can use the sleep data to see the bootstrapped results. If you
+plot the bootstrap samples, it will show how the resampling via
+bootstrapping indicates the instability of Hedges' d(z).
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -735,8 +787,8 @@ instability of Hedges' d(z).
 ## 
 ## Effect Sizes 
 ##               Estimate     SE               C.I. Conf. Level
-## Raw             -1.580 0.3725    [-2.271, -1.02]         0.9
-## Hedges's g(z)   -1.174 0.6883 [-2.8584, -0.9172]         0.9
+## Raw             -1.580 0.3816     [-2.28, -1.01]         0.9
+## Hedges's g(z)   -1.174 0.6494 [-2.7938, -0.9264]         0.9
 ## Note: percentile bootstrap method utilized.
 \end{verbatim}
 
@@ -765,13 +817,9 @@ data or stabilize the variance.
 \hypertarget{bootstrap-log-tost}{%
 \subsection{Bootstrap Log TOST}\label{bootstrap-log-tost}}
 
-\begin{itemize}
-\tightlist
-\item
-  Why bootstrap is preferred
-\item
-  Example of bootstrap
-\end{itemize}
+The bootstrap version of \texttt{log\_TOST}, \texttt{boot\_log\_TOST},
+using the same bootstrapping method detailed above, but it uses the
+log-transformed values
 
 \hypertarget{equivalence-testing-with-anovas}{%
 \section{Equivalence Testing with
@@ -811,10 +859,10 @@ H_0 =  1 > \eta^2_p \geq \Delta
 H_1 =  0 \geq \eta^2_p < \Delta
 \]
 
-In \texttt{TOSTER}, I have gone a tad farther than
-\citet{Campbell_2021}, and calculate a generalization of the
-non-centrality parameter that allows the equivalence test for
-\emph{F}-tests to be applied to variety of designs.
+In TOSTER, I have gone a tad farther than \citet{Campbell_2021}, and
+calculate a generalization of the non-centrality parameter that allows
+the equivalence test for \emph{F}-tests to be applied to variety of
+designs.
 
 \citet{Campbell_2021} calculate the \emph{p}-value as:
 
@@ -842,7 +890,7 @@ Test}\label{example-of-equivalence-anova-test}}
 
 Using the \texttt{InsectSprays} data set in R and the base R
 \texttt{aov} function we can demonstrate how this omnibus equivalence
-testing can be applied with \texttt{TOSTER}.
+testing can be applied with TOSTER.
 
 From the initial analysis we an see a clear ``significant'' effect (the
 p-value listed is zero but it just very small) of the factor spray.
@@ -932,6 +980,27 @@ and \texttt{afex::aov\_car} (or any ANOVA from derived from
 ## 1 spray         5  66 34.70228 3.182584e-17 0.724439    0.35 0.9999965
 \end{verbatim}
 
+\hypertarget{equivalence-between-replication-studies}{%
+\section{Equivalence Between Replication
+Studies}\label{equivalence-between-replication-studies}}
+
+During the development of the TOSTER update, I was helping advise a team
+of researchers on a massive replication project for sport and exercise
+science \citep{repSES}. How to determine whether a direct\footnote{Defined
+  as being a as-close-as possible replication to the original study. In
+  contrast to ``conceptual'' replications.} replication was equivalent
+to the original study was common, and contentious, topic of conversation
+among the team. Inspired by these discussions, I created 2 functions
+that would utilize the basic principles of SMDs\footnote{The textbook by
+  \citet{borenstein} and the some of the works of Wolfgang Vietchbauer
+  were a large source of information for developing these fucntions.} to
+test for differences between two studies.
+
+Overall, the concept is simple: if we have an estimates of SMDs from two
+studies we can use large-sample approximation to compute the sampling
+variances to estimate the degree to which the two studies differ from
+one another.
+
 \hypertarget{conclusions}{%
 \section{Conclusions}\label{conclusions}}
 
@@ -960,8 +1029,8 @@ their input and suggestions.
 \subsection*{Disclosure statement}\label{disclosure-statement}}
 \addcontentsline{toc}{subsection}{Disclosure statement}
 
-The author of this manuscript is the author of the \texttt{TOSTER}
-package. Citations of this manuscript will benefit their citation count.
+The author of this manuscript is the author of the TOSTER package.
+Citations of this manuscript will benefit their citation count.
 
 \hypertarget{funding}{%
 \subsection*{Funding}\label{funding}}
@@ -974,8 +1043,8 @@ No funding was provided for this work.
 \addcontentsline{toc}{subsection}{Notes on contributor(s)}
 
 Daniel Lakens provided a review of many of the materials that have been
-incorporated into the update of \texttt{TOSTER}, and was the original
-author of this package.
+incorporated into the update of TOSTER, and was the original author of
+this package.
 
 \hypertarget{nomenclaturenotation}{%
 \subsection*{Nomenclature/Notation}\label{nomenclaturenotation}}
