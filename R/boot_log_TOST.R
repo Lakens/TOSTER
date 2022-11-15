@@ -16,9 +16,12 @@
 #'   \item{\code{"decision"}}{List included text regarding the decisions for statistical inference.}
 #'   \item{\code{"boot"}}{List containing the bootstrap samples.}
 #' }
-#' @details The implemented test(s) corresponds to the proposal of Chapter 16 of Efron and Tibshirani (1994).
+#' @details The implemented test(s) corresponds to the proposal of Chapter 16 of Efron and Tibshirani (1994),
+#' and recommended by He et al (2022).
 #' Returns TOSTt class object with bootstrapped based results.
 #' This is approximately equivalent to the percentile bootstrap method mentioned by He et al (2014).
+#'
+#' For details on the calculations in this function see vignette("robustTOST").
 #' @references
 #' Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press
 #'
