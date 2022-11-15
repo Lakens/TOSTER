@@ -71,17 +71,6 @@
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 
-% From pandoc table feature
-\usepackage{longtable,booktabs,array}
-\usepackage{calc} % for calculating minipage widths
-% Correct order of tables after \paragraph or \subparagraph
-\usepackage{etoolbox}
-\makeatletter
-\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
-\makeatother
-% Allow footnotes in longtable head/foot
-\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
-\makesavenoteenv{longtable}
 
 
 \usepackage{hyperref}
@@ -115,12 +104,23 @@ Caldwell. Email: \href{mailto:arcaldwell49@gmail.com}{\nolinkurl{arcaldwell49@gm
 \maketitle
 
 \begin{abstract}
-This is an article detailing the ``avocado TOST'' update to the TOSTER R
-package.
+Equivalence testing is arguably under utilized by experimental
+researchers. Despite decades of published statistical crititques,
+researchers seems unable or unwilling to implement such equivalence
+testing procedures. This may be due to limited software support for such
+analyses and little education on the topic in graduate programs. One
+option for equivalence testing is two one-sided tests (TOST). The TOSTER
+R package and jamovi module, originally developed by Daniel Lakens in
+2017, was created to make TOST more accessible to the average
+researcher. In the past two years, I have made significant changes to
+the TOSTER package in order to increase its accessibility and provide
+more robust analysis options for researchers. In this paper, I will
+detail the changes to the package and highlight new analysis options
+that will make TOST easier for the average quantitative researcher.
 \end{abstract}
 
 \begin{keywords}
-statistics, bootstrapping, minimal effects test, NHST, TOST
+statistics, bootstrap, minimal effects test, NHST, TOST
 \end{keywords}
 
 \hypertarget{introduction}{%
@@ -156,17 +156,18 @@ change the null hypothesis. Therefore, I feel continued development of
 educational content on TOST, and software to help with such analyses,
 would be beneficial to many quantitative researchers.
 
-The TOSTER R package was originally developed in by \citet{lakens_ori}
-to introduce experimental psychologists to the concept of equivalence
-testing and provide an easy-to-use implementation in R. In the years
-since that publication, I have made a significant update to the package
-in order to improve the user interface and expand the tools available
-within the package. An experienced R programmer may have no problem
-performing equivalence testing within R but beginners may struggle with
-both writing the code and interpreting the output. If you fall into that
-category, I would suggest using \texttt{jamovi}, an open-source
-statistical software, that has a TOSTER module to perform
-equivalence/TOST analyses.
+The TOSTER R package\footnote{All updates to the package can be found on
+  the package's website \url{https://aaroncaldwell.us/TOSTERpkg}} was
+originally developed in by \citet{lakens_ori} to introduce experimental
+psychologists to the concept of equivalence testing and provide an
+easy-to-use implementation in R. In the years since that publication, I
+have made a significant update to the package in order to improve the
+user interface and expand the tools available within the package. An
+experienced R programmer may have no problem performing equivalence
+testing within R but beginners may struggle with both writing the code
+and interpreting the output. If you fall into that category, I would
+suggest using \texttt{jamovi}, an open-source statistical software, that
+has a TOSTER module to perform equivalence/TOST analyses.
 
 In this manuscript, I will detail the updates to the TOSTER package, and
 give some basic usage examples of some of the new functions. This is
@@ -176,12 +177,8 @@ appropriate. For a greater introduction to equivalence testing, I would
 suggest reading other methodological tutorials
 \citep{lakens_ori, lakens2018equivalence, lakens2020improving, mazzolari2022myths}.
 
-\hypertarget{basics-of-equivalence-testing}{%
-\section{Basics of Equivalence
-Testing}\label{basics-of-equivalence-testing}}
-
-\hypertarget{the-toster-r-package}{%
-\subsection{The TOSTER R Package}\label{the-toster-r-package}}
+\hypertarget{tost-with-t-tests}{%
+\section{TOST with t-tests}\label{tost-with-t-tests}}
 
 In an effort to make TOSTER more informative and easier to use, a new
 function \texttt{t\_TOST} was created. This function operates very
@@ -189,11 +186,11 @@ similarly to base R's \texttt{t.test} function, but performs 3 t-tests
 (one two-tailed and two one-tailed tests). In addition, this function
 has a generic method where two vectors can be supplied or a formula can
 be given (e.g.,\texttt{y\ \textasciitilde{}\ group}). This function also
-makes it easier to switch between types of t-tests. All three types (two
-sample, one sample, and paired samples) can be performed/calculated from
-the same function. Moreover, the output from this function is verbose,
-and should make the decisions derived from the function more informative
-and user-friendly.
+makes it easier to switch between types of t-tests. All three types
+(two-sample, one-sample, and paired samples) can be performed/calculated
+from the same function. Moreover, the output from this function is
+verbose, and should make the decisions derived from the function more
+informative and user-friendly.
 
 Also, \texttt{t\_TOST} is not limited to equivalence tests. Minimal
 effects testing (MET) is possible. MET is useful for situations where
@@ -207,9 +204,6 @@ the hypothesis is about a minimal effect and the null hypothesis
 \end{figure}
 
 \newpage
-
-\hypertarget{vignettes-with-toster}{%
-\subsection{Vignettes with TOSTER}\label{vignettes-with-toster}}
 
 In the general introduction to this package we detailed how to look at
 \emph{old} results and how to apply TOST to interpreting those results.
@@ -227,7 +221,7 @@ and the \texttt{sleep} data.
 \end{Shaded}
 
 \hypertarget{independent-groups}{%
-\subsubsection{Independent Groups}\label{independent-groups}}
+\subsection{Independent Groups}\label{independent-groups}}
 
 For this example, we will use the sleep data. In this data there is a
 \texttt{group} variable and an outcome \texttt{extra}.
@@ -280,8 +274,6 @@ supplied.
 \end{Highlighting}
 \end{Shaded}
 
-\newpage
-
 Once the function has run, we can print the results with the
 \texttt{print} method. This provides a verbose summary of the results.
 
@@ -312,6 +304,8 @@ Once the function has run, we can print the results with the
 ## Hedges's g(av)  -0.7965 0.5992  [-1.8362, 0.2433]         0.9
 ## Note: SMD confidence intervals are an approximation. See vignette("SMD_calcs").
 \end{verbatim}
+
+\newpage
 
 Another nice feature is the generic \texttt{plot} method that can
 provide a visual summary of the results. All of the plots in this
@@ -370,10 +364,10 @@ interval lines can plotted at once.
 
 \newpage
 
-\hypertarget{paired-samples}{%
-\subsubsection{Paired Samples}\label{paired-samples}}
+\hypertarget{paired-sample}{%
+\subsection{Paired Sample}\label{paired-sample}}
 
-To perform a paired samples TOST, the process does not change much. We
+To perform TOST on paired samples, the process does not change much. We
 could process the test the same way by providing a formula. All we would
 need to then is change \texttt{paired} to TRUE.
 
@@ -489,7 +483,7 @@ We may want to perform a Minimal Effect Test with the
 \newpage
 
 \hypertarget{one-sample-t-test}{%
-\subsubsection{One Sample t-test}\label{one-sample-t-test}}
+\subsection{One-Sample t-test}\label{one-sample-t-test}}
 
 In other cases we may have a one-sample test. If that is the case, only
 \texttt{x} argument for the data is needed. As an example, we may
@@ -530,10 +524,10 @@ less than 7.
 \newpage
 
 \hypertarget{using-summary-statistics}{%
-\subsubsection{Using Summary
-Statistics}\label{using-summary-statistics}}
+\subsection{Using Summary Statistics}\label{using-summary-statistics}}
 
-In some cases you may only have access to the summary statistics.
+In some cases you may only have access to the summary statistics (e.g.,
+when reviewing an article or attempting to perform a meta-analysis).
 Therefore, I created a function, \texttt{tsum\_TOST}, to perform the
 same tests just based on the summary statistics. This involves providing
 the function with a number of different arguments.
@@ -610,7 +604,7 @@ bioequivalence studies on ratio data \citep{he2022}. Third, there is the
 by \citet{efron93}. Fourth, there is the \texttt{boot\_log\_TOST}
 function which uses the same bootstrap method outlined by
 \citet{efron93} but on the log-transformed data, which is more robust
-than parametric log t-test \citep{he2022}
+than parametric log t-test \citep{he2022}.
 
 In the following sections, I will briefly outline the available robust
 TOST functions within the TOSTER package.
@@ -628,11 +622,11 @@ framework, there are two separate tests of directional location shift to
 determine if the location shift is within (equivalence) or outside
 (minimal effect) the equivalence bounds. Many researchers mistakenly
 think these are tests of medians, but this is not the case (See
-\citet{median_test} for details).\footnote{Care should be taken when
+\citet{median_test} for details). Using a WMW-based TOST is useful for
+testing whether the differences between groups/conditions is symmetric
+around the equivalence bounds\footnote{Care should be taken when
   considering paired samples; a test on the rank transformed data
   \citep{kornbrot1990rank} or another robust test may be more prudent.}.
-Using a WMW-based TOST is useful for testing whether the differences
-between groups/conditions is symmetric around the equivalence bounds.
 For equivalence testing, the TOST would be testing whether there is
 asymmetry towards no effect with a null hypothesis of symmetry at the
 equivalence bound.
@@ -645,13 +639,13 @@ documentation of the \texttt{wilcox.test} function. A standardized mean
 difference (SMD) is \emph{not} calculated in this function since this
 would be an inappropriate measure of effect size alongside the
 non-parametric test statistics. Instead, a standardized effect size
-(SES) is calculated for \emph{all} types of comparisons (e.g., two
-sample, one sample, and paired samples). The function can produce a
-rank-biserial correlation (\citet{Kerby_2014}), a WMW Odds
-\citep{wmwodds}, or a ``common language effect size''
-(\citet{Kerby_2014}) (Also known as the non-parametric probability of
-superiority, or concordance probability).\footnote{There is no plotting
-  capability at this time for the output of this function.}
+(SES) is calculated for \emph{all} types of comparisons (e.g.,
+two-sample, one sample, and paired samples). The function can produce a
+rank-biserial correlation \citep{Kerby_2014}, a WMW Odds
+\citep{wmwodds}, or a ``common language effect size'' \citep{Kerby_2014}
+(Also known as the non-parametric probability of superiority, or
+concordance probability).\footnote{There is no plotting capability at
+  this time for the output of this function.}
 
 As an example, we can use the sleep data to make a non-parametric
 comparison of equivalence.
@@ -743,22 +737,24 @@ t(z^{*b}) = \frac {(\bar x^*-\bar x - \bar z) - (\bar y^*-\bar y - \bar z)}{\sqr
 p_{boot} = \frac {\#t(z^{*b}) \ge t_{sample}}{B}
 \]
 
-The same process is completed for the one sample case but with the one
-sample solution for the equation outlined by \(t(z^{*b})\). The paired
-sample case in this bootstrap procedure is equivalent to the one sample
-solution because the test is based on the difference scores.
+The same process is completed for the one-sample case but with the
+one-sample solution for the equation outlined by \(t(z^{*b})\). The
+paired sample case in this bootstrap procedure is equivalent to the
+one-sample solution because the test is based on the difference scores.
 
 \hypertarget{example-of-bootsrapping}{%
 \subsubsection{Example of Bootsrapping}\label{example-of-bootsrapping}}
 
-Again, we can use the sleep data to see the bootstrapped results. If you
-plot the bootstrap samples, it will show how the resampling via
-bootstrapping indicates the instability of Hedges' d(z).
+We can use the sleep data to see the bootstrapped results. If you plot
+the bootstrap samples, it will show how the resampling via bootstrapping
+indicates the instability of Hedges' d(z). Just looking at the printed
+results you will notice some differences between confidence intervals
+from the bootstrapped result and the t-test.
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \FunctionTok{data}\NormalTok{(}\StringTok{\textquotesingle{}sleep\textquotesingle{}}\NormalTok{)}
-
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{891111}\NormalTok{)}
 \NormalTok{test1 }\OtherTok{=} \FunctionTok{boot\_t\_TOST}\NormalTok{(}\AttributeTok{formula =}\NormalTok{ extra }\SpecialCharTok{\textasciitilde{}}\NormalTok{ group,}
                     \AttributeTok{data =}\NormalTok{ sleep,}
                     \AttributeTok{paired =} \ConstantTok{TRUE}\NormalTok{,}
@@ -787,8 +783,8 @@ bootstrapping indicates the instability of Hedges' d(z).
 ## 
 ## Effect Sizes 
 ##               Estimate     SE               C.I. Conf. Level
-## Raw             -1.580 0.3816     [-2.28, -1.01]         0.9
-## Hedges's g(z)   -1.174 0.6494 [-2.7938, -0.9264]         0.9
+## Raw             -1.580 0.3699    [-2.26, -1.038]         0.9
+## Hedges's g(z)   -1.174 0.6491 [-2.7507, -0.9285]         0.9
 ## Note: percentile bootstrap method utilized.
 \end{verbatim}
 
@@ -797,56 +793,219 @@ bootstrapping indicates the instability of Hedges' d(z).
 \hypertarget{log-tost}{%
 \subsection{Log TOST}\label{log-tost}}
 
-The logarithmic transformation is often utilized to ``normalize'' the
-data or stabilize the variance.
+The natural logarithmic (log) transformation is often utilized to
+stabilize the variance of a measure, and it often provides the best
+approximation of the normal distribution \citep{logtest}. However,
+another, less often reported, advantage of the log transformation is
+that the back transformation of the differences of the log-transformed
+data is a \emph{ratio} \citep{logtest}. For example, if we had a two
+samples (x \& y) with an geometric mean\footnote{The mean of
+  log-transformed data is the \emph{geometric} not \emph{arithmetic}
+  mean. I highly recommend reading \citet{logtest} and
+  \citet{caldwell2019basic} for more details} or 7 and 10.5, x and y
+respectively in the code below, we could represent the differences as
+ratio of y:x where y is 1.5 times greater than x.
 
-\begin{itemize}
-\item
-  Basic advantages
-\item
-  How it translates to a ratio
-\item
-  FDA requirements
-\item
-  Default equivalence bounds
-\end{itemize}
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{x }\OtherTok{=} \DecValTok{7}\NormalTok{; y }\OtherTok{=} \FloatTok{10.5}
+\FunctionTok{log}\NormalTok{(y) }\SpecialCharTok{{-}} \FunctionTok{log}\NormalTok{(x)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.4054651
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{log}\NormalTok{(y}\SpecialCharTok{/}\NormalTok{x)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.4054651
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{exp}\NormalTok{(}\FunctionTok{log}\NormalTok{(y) }\SpecialCharTok{{-}} \FunctionTok{log}\NormalTok{(x))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1.5
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{y}\SpecialCharTok{/}\NormalTok{x}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1.5
+\end{verbatim}
+
+The log transformation thereby acts as a tool help tame data into
+conforming to the normality assumption, and makes the interpretation
+fairly simple. In addition, some regulatory agencies, such as the United
+States Food and Drug Administration (FDA) \citep{fda}, specifically
+require bioequivalence studies to report the geometric means and make
+statistical comparisons on the log transformed data \citep{he2022}.
+These bioequivalence studies are often used to compare the maximal
+concentration and the area-under-the-curve (AUC) of a specific
+pharmaceutical to a new drug (often a generic version of the other
+drug). In my personal experience as a physiologist, it is not uncommon
+that biological/physiological phenomenon present with longer
+right-tailed distributions, and are often adequately normalized with a
+natural log transformation. The additional advantage is the how
+equivalence bounds can, almost, be universally applied when making
+comparisons on the log scale. The FDA considers to drugs to be
+bioequivalent when the maximal concentration and AUC differences between
+drugs are less than 1.25. To put it another way, ratio between two means
+must be between 1.25 and 0.8 (i.e., 1/1.25) \citep{fda}.
+
+Therefore, I have implemented two functions to allow for the comparison
+of data that is believed to be left skewed (long right tail), and is on
+a ratio scale\footnote{Ratio scale means the outcome is measured on a
+  numerical scale that has equal distances between adjacent values and
+  true zero.}. The first function is a parametric t-test on the log
+transformed scale while the second function is a bootstrapped base test
+which is more robust than parametric version \citep{he2022}.
 
 \hypertarget{example-of-log-tost}{%
-\subsection{Example of Log TOST}\label{example-of-log-tost}}
+\subsubsection{Example of Log TOST}\label{example-of-log-tost}}
 
-\hypertarget{bootstrap-log-tost}{%
-\subsection{Bootstrap Log TOST}\label{bootstrap-log-tost}}
+The \texttt{log\_TOST} function is almost exactly the same as the
+\texttt{t\_TOST} function. First, the primary differences is that it
+only accepts paired and two-sample comparisons. One-sample tests are not
+support (i.e., there is no ratio to calculate). Second, standardized
+mean differences are not calculated, but a ratio of means is instead
+reported \citep{lajeunesse2015bias}\footnote{Also, referred to as a
+  ``response ratio'' in ecology. Like an SMD, the response ratio can be
+  utilized in meta-analysis.}. Third, the default equivalence bounds are
+set to the FDA standards (i.e., \texttt{eqb\ =\ 1.25}), but can be
+changed by the user\footnote{Only one value needs to be supplied to eqb;
+  the reciprocal value of eqb is take as the other equivalence bound.
+  For example, if \texttt{eqb\ \ =\ 0.85} then the upper equivalence
+  bound is 1/0.85 (\textasciitilde1.333)}.
+
+So, as an example we can use the \texttt{mtcars} data to compare the
+type of transmission (\texttt{am}) effects on the gas mileage
+(\texttt{mpg}). We can see from the data below there are significant,
+non-equivalent, differences in mpg between transmission types.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{log\_TOST}\NormalTok{(mpg }\SpecialCharTok{\textasciitilde{}}\NormalTok{ am, }\AttributeTok{data =}\NormalTok{ mtcars)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Log-transformed Welch Two Sample t-test
+## 
+## The equivalence test was non-significant, t(23.96) = -1.363, p = 9.07e-01
+## The null hypothesis test was significant, t(23.96) = -3.826, p = 8.19e-04
+## NHST: reject null significance hypothesis that the effect is equal to one 
+## TOST: don't reject null equivalence hypothesis
+## 
+## TOST Results 
+##                 t    df p.value
+## t-test     -3.826 23.96 < 0.001
+## TOST Lower -1.363 23.96   0.907
+## TOST Upper -6.288 23.96 < 0.001
+## 
+## Effect Sizes 
+##                  Estimate      SE               C.I. Conf. Level
+## log(Means Ratio)  -0.3466 0.09061 [-0.5017, -0.1916]         0.9
+## Means Ratio        0.7071      NA   [0.6055, 0.8256]         0.9
+\end{verbatim}
+
+Please note, that non-ratio data where the value of outcome variable is
+less than zero will lead to the function failing. For example, if you
+use the \texttt{sleep} data, you will notice that the outcome variable
+can be negative (hours of ``extra'' sleep).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{log\_TOST}\NormalTok{(extra }\SpecialCharTok{\textasciitilde{}}\NormalTok{ group, }\AttributeTok{data =}\NormalTok{ sleep)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Error in log_TOST.default(x = c(0.7, -1.6, -0.2, -1.2, -0.1, 3.4, 3.7, : Negative values detected. Values must be on ratio scale (true zero).
+\end{verbatim}
+
+\newpage
+
+\hypertarget{example-of-bootstrap-log-tost}{%
+\subsubsection{Example of Bootstrap Log
+TOST}\label{example-of-bootstrap-log-tost}}
 
 The bootstrap version of \texttt{log\_TOST}, \texttt{boot\_log\_TOST},
-using the same bootstrapping method detailed above, but it uses the
-log-transformed values
+uses the same bootstrapping method detailed above
+(\texttt{boot\_t\_TOST}), but it uses the log-transformed values and
+produces the ratio of means as the effect size.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{boot\_log\_TOST}\NormalTok{(mpg }\SpecialCharTok{\textasciitilde{}}\NormalTok{ am, }\AttributeTok{data =}\NormalTok{ mtcars)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Bootstrapped Log Welch Two Sample t-test
+## 
+## The equivalence test was non-significant, t(23.96) = -1.363, p = 9.55e-01
+## The null hypothesis test was significant, t(23.96) = -3.826, p = 0e+00
+## NHST: reject null significance hypothesis that the effect is equal to 1 
+## TOST: don't reject null equivalence hypothesis
+## 
+## TOST Results 
+##                 t    df p.value
+## t-test     -3.826 23.96 < 0.001
+## TOST Lower -1.363 23.96   0.955
+## TOST Upper -6.288 23.96 < 0.001
+## 
+## Effect Sizes 
+##                  Estimate      SE               C.I. Conf. Level
+## log(Means Ratio)  -0.3466 0.08546 [-0.4885, -0.2105]         0.9
+## Means Ratio        0.7071 0.06060   [0.6136, 0.8101]         0.9
+## Note: percentile bootstrap method utilized.
+\end{verbatim}
+
+\newpage
 
 \hypertarget{equivalence-testing-with-anovas}{%
 \section{Equivalence Testing with
 ANOVAs}\label{equivalence-testing-with-anovas}}
 
-For better or worse, many researchers utilize ANOVA as an omnibus test
-for the absence/presence of effects. This is very useful when
-implementing factorial designs where multiple experimental factors are
-tested and/or manipulated. As \citet{Campbell_2021} suggest, the lack of
-a significant result at the ANOVA-level does not necessarily indicate
-that a factor or interaction of factors have no effect. However,
-\citet{Campbell_2021} only suggest an equivalence test for one-way
-ANOVAs and therefore exclude multi-factor ANOVAs. Therefore, I have
-extended the work of \citet{Campbell_2021} to include functions that
-allow for equivalence testing the partial \(\eta^2\) (eta-squared)
-effect size from ANOVAs.
+Many researchers utilize ANOVA as an omnibus test for the
+absence/presence of effects before inspecting multiple pairwise
+comparisons. This is very useful when implementing factorial designs
+where multiple experimental factors are tested and/or manipulated. As
+\citet{Campbell_2021} suggest, the lack of a significant result at the
+ANOVA-level does not necessarily indicate that a factor or interaction
+of factors have no effect. However, \citet{Campbell_2021} only suggest
+an equivalence test for one-way ANOVAs and therefore exclude
+multi-factor or factorial ANOVAs. Therefore, I have extended the work of
+\citet{Campbell_2021} to include functions that allow for equivalence
+testing of the partial \(\eta^2\) (eta-squared) effect size from ANOVAs.
 
 \hypertarget{f-test-calculations}{%
 \subsection{F-test Calculations}\label{f-test-calculations}}
 
-Statistical equivalence testing (or ``omnibus non-inferiority testing''
-by \citet{Campbell_2021}) for \emph{F}-tests are special use case of the
-cumulative distribution function of the non-central \emph{F}
-distribution. As \citet{Campbell_2021} states, these type of questions
-answer the question: ``Can we reject the hypothesis that the total
-proportion of variance in outcome Y attributable to X is greater than or
-equal to the equivalence bound \(\Delta\)?''
+Statistical equivalence testing\footnote{Also called ``omnibus
+  non-inferiority testing'' by \citet{Campbell_2021}} for \emph{F}-tests
+are special use case of the cumulative distribution function of the
+non-central \emph{F} distribution. As \citet{Campbell_2021} states,
+these type of questions answer the question: ``Can we reject the
+hypothesis that the total proportion of variance in outcome Y
+attributable to X is greater than or equal to the equivalence bound
+\(\Delta\)?''
 
 \hypertarget{hypothesis-tests}{%
 \subsubsection{Hypothesis Tests}\label{hypothesis-tests}}
@@ -860,9 +1019,9 @@ H_1 =  0 \geq \eta^2_p < \Delta
 \]
 
 In TOSTER, I have gone a tad farther than \citet{Campbell_2021}, and
-calculate a generalization of the non-centrality parameter that allows
-the equivalence test for \emph{F}-tests to be applied to variety of
-designs.
+have included a calcuation for a generalization of the non-centrality
+parameter that allows the equivalence test for \emph{F}-tests to be
+applied to variety of designs.
 
 \citet{Campbell_2021} calculate the \emph{p}-value as:
 
@@ -890,43 +1049,33 @@ Test}\label{example-of-equivalence-anova-test}}
 
 Using the \texttt{InsectSprays} data set in R and the base R
 \texttt{aov} function we can demonstrate how this omnibus equivalence
-testing can be applied with TOSTER.
-
-From the initial analysis we an see a clear ``significant'' effect (the
-p-value listed is zero but it just very small) of the factor spray.
-However, we \emph{may} be interested in testing if the effect is
-practically equivalent. I will arbitrarily set the equivalence bound to
-a partial eta-squared of 0.35 (\(H_0: \eta^2_p > 0.35\))
+testing can be applied with TOSTER. From the initial analysis we an see
+a clear ``significant'' effect (the p-value listed is zero but it just
+very small) of the factor spray. However, we \emph{may} be interested in
+testing if the effect is practically equivalent. I will arbitrarily set
+the equivalence bound to a partial eta-squared of 0.35
+(\(H_0: \eta^2_p > 0.35\))
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(TOSTER)}
-\CommentTok{\# Get Data}
 \FunctionTok{data}\NormalTok{(}\StringTok{"InsectSprays"}\NormalTok{)}
-\CommentTok{\# Build ANOVA}
-\NormalTok{aovtest }\OtherTok{=} \FunctionTok{aov}\NormalTok{(count }\SpecialCharTok{\textasciitilde{}}\NormalTok{ spray,}
-              \AttributeTok{data =}\NormalTok{ InsectSprays)}
-
-\CommentTok{\# Display overall results}
-\NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(broom}\SpecialCharTok{::}\FunctionTok{tidy}\NormalTok{(aovtest),}
-            \AttributeTok{caption =} \StringTok{"Traditional ANOVA Test"}\NormalTok{)}
+\NormalTok{aovtest }\OtherTok{=} \FunctionTok{aov}\NormalTok{(count }\SpecialCharTok{\textasciitilde{}}\NormalTok{ spray, }\AttributeTok{data =}\NormalTok{ InsectSprays)}
+\NormalTok{aovtest}
 \end{Highlighting}
 \end{Shaded}
 
-\begin{longtable}[]{@{}lrrrrr@{}}
-\caption{Traditional ANOVA Test}\tabularnewline
-\toprule()
-term & df & sumsq & meansq & statistic & p.value \\
-\midrule()
-\endfirsthead
-\toprule()
-term & df & sumsq & meansq & statistic & p.value \\
-\midrule()
-\endhead
-spray & 5 & 2668.833 & 533.76667 & 34.70228 & 0 \\
-Residuals & 66 & 1015.167 & 15.38131 & NA & NA \\
-\bottomrule()
-\end{longtable}
+\begin{verbatim}
+## Call:
+##    aov(formula = count ~ spray, data = InsectSprays)
+## 
+## Terms:
+##                    spray Residuals
+## Sum of Squares  2668.833  1015.167
+## Deg. of Freedom        5        66
+## 
+## Residual standard error: 3.921902
+## Estimated effects may be unbalanced
+\end{verbatim}
 
 We can then use the information in the table above to perform an
 equivalence test using the \texttt{equ\_ftest} function. This function
@@ -980,6 +1129,8 @@ and \texttt{afex::aov\_car} (or any ANOVA from derived from
 ## 1 spray         5  66 34.70228 3.182584e-17 0.724439    0.35 0.9999965
 \end{verbatim}
 
+\newpage
+
 \hypertarget{equivalence-between-replication-studies}{%
 \section{Equivalence Between Replication
 Studies}\label{equivalence-between-replication-studies}}
@@ -993,13 +1144,130 @@ to the original study was common, and contentious, topic of conversation
 among the team. Inspired by these discussions, I created 2 functions
 that would utilize the basic principles of SMDs\footnote{The textbook by
   \citet{borenstein} and the some of the works of Wolfgang Vietchbauer
-  were a large source of information for developing these fucntions.} to
+  were a large source of information for developing these functions.} to
 test for differences between two studies.
 
 Overall, the concept is simple: if we have an estimates of SMDs from two
 studies we can use large-sample approximation to compute the sampling
 variances to estimate the degree to which the two studies differ from
-one another.
+one another. The users of TOSTER then have the option to test whether
+the two SMDs significantly differ, or use TOST to estimate if they are
+practically equivalent. Additionally, there are two options for
+comparing SMDs: using the summary statistics or using bootstrapping
+(assuming original data is available).
+
+\hypertarget{example-using-summary-statistics}{%
+\subsection{Example using Summary
+Statistics}\label{example-using-summary-statistics}}
+
+In this example, let us imagine an ``original'' study that reports an
+effect of Cohen's dz = 0.95 in a paired samples design with 25 subjects.
+However, a replication doubled the sample size, found a non-significant
+effect at an SMD of 0.2. Are these two studies compatible? Or, to put it
+another way, should the replication be considered a ``failure'' to
+replicate the oringal study?
+
+We can use the \texttt{compare\_smd} function to at least measure how
+often we would expect a discrepancy between the original and replication
+study if the same underlying effect was being measured (also assuming no
+publication bias).
+
+We can see from the results below that, if the null hypothesis were
+true, we would only expect to see a discrepancy in SMDs between studies
+at least this large \textasciitilde1\% of the time.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{compare\_smd}\NormalTok{(}\AttributeTok{smd1 =} \FloatTok{0.95}\NormalTok{,}
+            \AttributeTok{n1 =} \DecValTok{25}\NormalTok{,}
+            \AttributeTok{smd2 =} \FloatTok{0.23}\NormalTok{,}
+            \AttributeTok{n2 =} \DecValTok{50}\NormalTok{,}
+            \AttributeTok{paired =} \ConstantTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Difference in Cohen's dz (paired)
+## 
+## data:  Summary Statistics
+## z = 2.5685, p-value = 0.01021
+## alternative hypothesis: true difference in SMDs is not equal to 0
+## sample estimates:
+## difference in SMDs 
+##               0.72
+\end{verbatim}
+
+Let us also imagine a scenario where a replication team considers a
+replication successful if the SMDs are within 0.25 units of each other.
+We can set the \texttt{TOST} argument to TRUE, and then set the
+equivalence bound using \texttt{null} argument.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{compare\_smd}\NormalTok{(}\AttributeTok{smd1 =} \FloatTok{0.95}\NormalTok{, }\AttributeTok{n1 =} \DecValTok{25}\NormalTok{, }\AttributeTok{smd2 =} \FloatTok{0.23}\NormalTok{,}\AttributeTok{n2 =} \DecValTok{50}\NormalTok{,}
+            \AttributeTok{paired =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{TOST =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{null =}\NormalTok{ .}\DecValTok{25}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Difference in Cohen's dz (paired)
+## 
+## data:  Summary Statistics
+## z = 1.6767, p-value = 0.9532
+## alternative hypothesis: true difference in SMDs is less than 0.25
+## sample estimates:
+## difference in SMDs 
+##               0.72
+\end{verbatim}
+
+Based on the imaginary studies we outlined above, we would not reject
+the null equivalence hypothesis, but reject the null significance
+hypothesis. Therefore, we would could conclude that there are
+significant differences between the studies that are not practically
+equivalent.
+
+\hypertarget{example-using-bootstrapping}{%
+\subsection{Example using
+Bootstrapping}\label{example-using-bootstrapping}}
+
+The above results are only based on an approximating the differences
+between the SMDs. If the raw data is available, then the optimal
+solution is the bootstrap. This can be accomplished with the
+\texttt{boot\_compare\_smd} function. The only drawback to this function
+is that TOST is currently not avaiable, and users would instead have to
+run 2 one-sided tests manually using the \texttt{null} and
+\texttt{alternative} arguments.
+
+For this example, we will simulate some data. As an alternative approach
+to TOST, we can just set the \texttt{alpha} to 0.1, and then check to
+see if the confidence interval is within the preset equivalence bounds.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{4522}\NormalTok{)}
+\NormalTok{boot\_test }\OtherTok{=} \FunctionTok{boot\_compare\_smd}\NormalTok{(}\AttributeTok{x1 =} \FunctionTok{rnorm}\NormalTok{(}\DecValTok{25}\NormalTok{,.}\DecValTok{95}\NormalTok{), }\AttributeTok{x2 =} \FunctionTok{rnorm}\NormalTok{(}\DecValTok{50}\NormalTok{), }
+                             \AttributeTok{paired =} \ConstantTok{TRUE}\NormalTok{, }\AttributeTok{alpha =}\NormalTok{ .}\DecValTok{1}\NormalTok{)}
+\NormalTok{boot\_test}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Bootstrapped Differences in SMDs (paired)
+## 
+## data:  Bootstrapped
+## z (observed) = 2.887, p-value = 0.006003
+## alternative hypothesis: true difference in SMDs is not equal to 0
+## 90 percent confidence interval:
+##  0.4070761 1.3508435
+## sample estimates:
+## difference in SMDs 
+##          0.8058872
+\end{verbatim}
+
+\newpage
 
 \hypertarget{conclusions}{%
 \section{Conclusions}\label{conclusions}}
@@ -1017,6 +1285,13 @@ one another.
 
 \hypertarget{additional-information}{%
 \section{Additional Information}\label{additional-information}}
+
+All analyses/code in this manuscript are from TOSTER v0.6.0:
+
+\begin{verbatim}
+# Install the exact release with this code
+devtools::install_github("Lakens/TOSTER@v0.6.0")
+\end{verbatim}
 
 \hypertarget{acknowledgements}{%
 \subsection*{Acknowledgement(s)}\label{acknowledgements}}
@@ -1055,13 +1330,18 @@ this package.
 \item
   ANOVA: Analysis of Variance
 \item
+  Bootstrapping: the use of random sampling with replacement to estimate
+  statistics
+\item
+  FDA: Food and Drug Administration (United States of America)
+\item
   MET: Minimal Effects Test
 \item
   ncp: non-centrality parameter
 \item
-  SMD: Standardized mean difference (e.g., Cohen's d)
+  SMD: Standardized Mean Difference (e.g., Cohen's d)
 \item
-  TOST: Two-one sided tests
+  TOST: Two-One Sided Tests
 \item
   WMW: Wilcoxon-Mann-Whitney
 \end{itemize}
