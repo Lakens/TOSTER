@@ -83,6 +83,8 @@ An S3 object of class
 A function for a bootstrap method for TOST with all types of t-tests..
 }
 \details{
+For details on the calculations in this function see vignette("robustTOST").
+
 The implemented test(s) corresponds to the proposal of Chapter 16 of Efron and Tibshirani (1994).
  Returns TOSTt class object with bootstrapped based results.
  Please note that the repeated measures "corrected" effect size is not available at this time.

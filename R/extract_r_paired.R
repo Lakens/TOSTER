@@ -5,7 +5,7 @@
 #' @param pvalue The two-tailed p-value from a paired samples t-test
 #' @param n Sample size (number of pairs)
 #' @inheritParams tsum_TOST
-#' @return An estimate of the correlation
+#' @return An estimate of the correlation.
 #' @references
 #' Lajeunesse, M. J. (2011). On the meta‐analysis of response ratios for studies with correlated and multi‐group designs. Ecology, 92(11), 2049-2055
 #' @family TOST

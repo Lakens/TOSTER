@@ -85,6 +85,9 @@ An S3 object of class
 \description{
 A function for TOST with all types of t-tests from summary statistics.
 }
+\details{
+For details on the calculations in this function see vignette("IntroTOSTt") & vignette("SMD_calcs").
+}
 \seealso{
 Other TOST: 
 \code{\link{extract_r_paired}()},

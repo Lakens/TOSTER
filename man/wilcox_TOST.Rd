@@ -87,6 +87,9 @@ An S3 object of class
 \description{
 A function for TOST using the non-parametric methods of the Wilcoxon signed rank test. This function uses the normal approximation and applies continuity correction automatically.
 }
+\details{
+For details on the calculations in this function see vignette("robustTOST").
+}
 \section{References}{
 
 David F. Bauer (1972). Constructing confidence sets using rank statistics. Journal of the American Statistical Association 67, 687–690. doi: 10.1080/01621459.1972.10481279.

@@ -22,7 +22,7 @@ extract_r_paired(m1, sd1, m2, sd2 = NULL, n, tstat = NULL, pvalue = NULL)
 \item{pvalue}{The two-tailed p-value from a paired samples t-test}
 }
 \value{
-An estimate of the correlation
+An estimate of the correlation.
 }
 \description{
 A function for estimating the correlation from a paired samples t-test.

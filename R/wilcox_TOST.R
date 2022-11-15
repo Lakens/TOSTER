@@ -8,7 +8,7 @@
 #' correlation. Options also include "cstat" for concordance probability, or
 #' "odds" for Wilcoxon-Mann-Whitney odds (otherwise known as Agresti's
 #' generalized odds ratio).
-
+#' @details For details on the calculations in this function see vignette("robustTOST").
 #' @return An S3 object of class
 #'   \code{"TOSTnp"} is returned containing the following slots:
 #' \describe{

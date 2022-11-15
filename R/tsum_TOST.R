@@ -8,6 +8,7 @@
 #' @param n2 sample size in group 2
 #' @param r12 correlation of dependent variable between group 1 and group 2
 #' @inheritParams t_TOST
+#' @details For details on the calculations in this function see vignette("IntroTOSTt") & vignette("SMD_calcs").
 #' @return An S3 object of class
 #'   \code{"TOSTt"} is returned containing the following slots:
 #' \describe{

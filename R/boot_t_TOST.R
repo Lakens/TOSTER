@@ -2,6 +2,7 @@
 #' @description A function for a bootstrap method for TOST with all types of t-tests..
 #' @param R number of bootstrap replicates
 #' @inheritParams t_TOST
+#' @details For details on the calculations in this function see vignette("robustTOST").
 #' @return An S3 object of class
 #'   \code{"TOSTt"} is returned containing the following slots:
 #' \describe{

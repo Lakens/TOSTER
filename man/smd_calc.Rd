@@ -71,6 +71,9 @@ A data frame containing the SMD estimates.
 \description{
 A function to only calculate standardized mean differences.
 }
+\details{
+For details on the calculations in this function see vignette("SMD_calcs").
+}
 \examples{
 \dontrun{
 smd_calc(formula = extra ~ group,data = sleep, paired = TRUE, smd_ci = "nct")

@@ -75,6 +75,9 @@ An S3 object of class
 \description{
 A function for TOST on the log-transformed data using parametric t-tests.
 }
+\details{
+For details on the calculations in this function see vignette("robustTOST").
+}
 \examples{
 data(mtcars)
 # Default FDA bioequivalence bounds
