@@ -33,3 +33,8 @@ Campbell, H., & Lakens, D. (2021). Can we disregard the whole model? Omnibus non
 ## df2 = Total N - number of groups = 240 - 3 = 237.
 # powerTOST_f(alpha=0.05, df1=3, df2 = 237, eqbound = 0.01)
 }
+\seealso{
+Other power: 
+\code{\link{power_t_TOST}()}
+}
+\concept{power}

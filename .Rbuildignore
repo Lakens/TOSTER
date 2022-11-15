@@ -22,3 +22,4 @@ NUL
 ^cran-comments\.md$
 ^CRAN-SUBMISSION$
 .covrignore
+^papers

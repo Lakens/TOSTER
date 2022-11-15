@@ -87,8 +87,6 @@ compare_smd = function(smd1,
 
   }
 
-
-
   # z-score and p-value
   se_diff = sqrt(se1^2 + se2^2)
   z = d_diff/se_diff
@@ -97,13 +95,13 @@ compare_smd = function(smd1,
 
   # Equivalence Testing
   if(TOST){
-    d_diff2 = smd1 - smd2 + null
+    d_diff2 = abs(smd1 - smd2) - null
     z2 = d_diff2/se_diff
     if(abs(z2) > abs(z)){
       z = z2
       names(z) = "z"
     }
-    pval = pnorm(abs(z), lower.tail=FALSE)
+    pval = p_from_z(z2, alternative = "less")
     alternative = "less"
   }
 

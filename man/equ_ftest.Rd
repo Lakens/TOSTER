@@ -4,7 +4,7 @@
 \alias{equ_ftest}
 \title{Equivalence Test using an F-test}
 \usage{
-equ_ftest(Fstat, df1, df2, eqbound, MET = FALSE, alpha = 0.05)
+equ_ftest(Fstat, df1, df2, eqbound = NULL, eqb, MET = FALSE, alpha = 0.05)
 }
 \arguments{
 \item{Fstat}{The F-statistic from the F-test.}
@@ -13,7 +13,9 @@ equ_ftest(Fstat, df1, df2, eqbound, MET = FALSE, alpha = 0.05)
 
 \item{df2}{Degrees of freedom for the denominator.}
 
-\item{eqbound}{Equivalence bound for the partial eta-squared.}
+\item{eqbound}{Defunct argument for quivalence bound for the partial eta-squared. Default is NULL.}
+
+\item{eqb}{Defunct argument for quivalence bound for the partial eta-squared.}
 
 \item{MET}{logical indicator to perform a minimal effect test rather than equivalence test (default is FALSE).}
 
@@ -35,8 +37,16 @@ Object of class '"htest"
 \description{
 Performs equivalence test on the partial eta-squared (pes) value for using an F-test.
 }
+\details{
+For details on the calculations in this function see vignette("the_ftestTOSTER").
+}
 \section{References}{
 
 Campbell, H., & Lakens, D. (2021). Can we disregard the whole model? Omnibus non‐inferiority testing for R2 in multi‐variable linear regression and in ANOVA. British Journal of Mathematical and Statistical Psychology, 74(1), 64-89. doi: 10.1111/bmsp.12201
 }
 
+\seealso{
+Other f-test: 
+\code{\link{equ_anova}()}
+}
+\concept{f-test}

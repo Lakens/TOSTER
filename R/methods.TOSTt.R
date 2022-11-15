@@ -27,14 +27,27 @@
 #' @export
 
 print.TOSTt <- function(x,
-                        digits = getOption("digits"),
+                        digits = 4,
                         ...){
+  effsize = x$effsize
+  TOST = x$TOST
+  TOST$p.value = ifelse(TOST$p.value < 0.001,
+                        "< 0.001",
+                        round(TOST$p.value, 3))
+  effsize$CI = paste0("[",
+                      round(effsize$lower.ci,digits),
+                      ", ",
+                      round(effsize$upper.ci,digits),
+                      "]")
+  effsize = effsize[c("estimate", "SE", "CI","conf.level")]
+  TOST = TOST[c("t","df","p.value")]
+  colnames(effsize) = c("Estimate", "SE", "C.I.", "Conf. Level")
   cat("\n")
   cat(strwrap(x$method), sep = "\n")
-  cat(x$hypothesis, "\n", sep = "")
-  cat("Equivalence Bounds (raw):",format(x$eqb$low_eq[1], digits = 3, nsmall = 3, scientific = FALSE)," & ",format(x$eqb$high_eq[1], digits = 3, nsmall = 3, scientific = FALSE), sep="")
-  cat("\n")
-  cat("Alpha Level:", x$alpha, sep="")
+  #cat(x$hypothesis, "\n", sep = "")
+  #cat("Equivalence Bounds (raw):",format(x$eqb$low_eq[1], digits = 3, nsmall = 3, scientific = FALSE)," & ",format(x$eqb$high_eq[1], digits = 3, nsmall = 3, scientific = FALSE), sep="")
+  #cat("\n")
+  #cat("Alpha Level:", x$alpha, sep="")
   cat("\n")
   cat(x$decision$TOST)
   cat("\n")
@@ -44,15 +57,19 @@ print.TOSTt <- function(x,
   cat("\n")
   cat("\n")
   cat("TOST Results \n")
-  print(x$TOST)
+  print(TOST, digits = digits)
   cat("\n")
   cat("Effect Sizes \n")
-  print(x$effsize)
-  cat("\n")
+  print(effsize, digits = digits)
+
+  if(grepl("Log-transformed",x$method, ignore.case=TRUE)){
+    cat("\n")
+  } else {
   if("boot" %in% names(x)){
-    cat("Note: percentile boostrap method utilized.")
+    cat("Note: percentile bootstrap method utilized.")
   }else{
     cat("Note: SMD confidence intervals are an approximation. See vignette(\"SMD_calcs\").")
+  }
   }
   cat("\n")
 
@@ -122,32 +139,17 @@ plot.TOSTt <- function(x,
   } else {
     x_label = "Mean Difference"
   }
+  if(grepl("Log-transformed",x$method, ignore.case=TRUE)){
+    x_label = "log(Means Ratio)"
+  }
 
 
   if(type == "c"){
+    # type c --------
 
     if("boot" %in% names(x)){
       warning("Consonance plots from bootstrapped result based on estimates not bootstrap samples")
     }
-
-    d_res = d_curv(x)
-
-    d_plot <-
-      gg_curv_t(
-        data_list = d_res,
-        type = "c",
-        levels = ci_levs
-      ) +
-      geom_vline(xintercept = low_eqd,linetype = "dashed")+
-      geom_vline(xintercept = high_eqd, linetype ="dashed")+
-      scale_x_continuous(sec.axis = dup_axis(breaks=c(round(low_eqd,2),
-                                                      round(high_eqd,2)),
-                                             name = "")) +
-      facet_grid(~as.character(x$smd$smd_label)) +
-      theme_tidybayes() +
-      theme(strip.text = element_text(face = "bold",
-                                      size = 10),
-            axis.title.x = element_blank())
 
     t_res = t_curv(x)
 
@@ -168,6 +170,52 @@ plot.TOSTt <- function(x,
                                       size = 10),
             axis.title.x = element_blank())
 
+    if(grepl("Log-transformed",x$method, ignore.case=TRUE)){
+
+      d_res = t_res
+      d_res[[1]]$lower.limit = exp(d_res[[1]]$lower.limit)
+      d_res[[1]]$upper.limit = exp(d_res[[1]]$upper.limit)
+      d_res[[1]]$intrvl.width = d_res[[1]]$upper.limit - d_res[[1]]$lower.limit
+      d_res[[2]] = exp(d_res[[2]])
+      d_plot <-
+        gg_curv_t(
+          data_list = d_res,
+          type = "c",
+          levels = ci_levs
+        ) +
+        geom_vline(xintercept = low_eqt,linetype = "dashed")+
+        geom_vline(xintercept = high_eqt, linetype ="dashed")+
+        scale_x_continuous(sec.axis = dup_axis(breaks=c(round(low_eqd,2),
+                                                        round(high_eqd,2)),
+                                               name = "")) +
+        facet_grid(~as.character(x_label)) +
+        theme_tidybayes() +
+        theme(strip.text = element_text(face = "bold",
+                                        size = 10),
+              axis.title.x = element_blank())
+
+    } else {
+
+    d_res = d_curv(x)
+
+    d_plot <-
+      gg_curv_t(
+        data_list = d_res,
+        type = "c",
+        levels = ci_levs
+      ) +
+      geom_vline(xintercept = low_eqd,linetype = "dashed")+
+      geom_vline(xintercept = high_eqd, linetype ="dashed")+
+      scale_x_continuous(sec.axis = dup_axis(breaks=c(round(low_eqd,2),
+                                                      round(high_eqd,2)),
+                                             name = "")) +
+      facet_grid(~as.character(x$smd$smd_label)) +
+      theme_tidybayes() +
+      theme(strip.text = element_text(face = "bold",
+                                      size = 10),
+            axis.title.x = element_blank())
+    }
+
     if("SMD" %in% estimates && "raw" %in% estimates){
       plts = plot_grid(d_plot,
                        t_plot,
@@ -186,55 +234,13 @@ plot.TOSTt <- function(x,
   }
 
   if(type == "cd"){
+    # type cd --------
 
     if(!missing(ci_lines) && length(ci_lines)>1){
       warning("Multiple CI lines provided only first element will be used.")
     }
 
     if(!("boot" %in% names(x))){
-
-
-    d_res = d_curv(x)
-    d_plot <- gg_curv_t(
-      data_list = d_res,
-      type = "cd",
-      levels = sets,
-      xaxis = ""
-    ) +
-      geom_point(data = data.frame(y = 0,
-                                   x = x$effsize$estimate[2]),
-                 aes(x = x, y = y),
-                 size = 3) +
-      annotate("segment",
-               x = x$effsize$lower.ci[2],
-               xend = x$effsize$upper.ci[2],
-               y = 0, yend = 0,
-               size = 1.5,
-               colour = "black")+
-      geom_vline(aes(xintercept = low_eqd),
-                 linetype="dashed") +
-      geom_vline(aes(xintercept = high_eqd),
-                 linetype="dashed") +
-      scale_x_continuous(sec.axis = dup_axis(breaks=c(round(low_eqd,2),
-                                                      round(high_eqd,2)))) +
-      facet_grid(~as.character(smd_type)) +
-      labs(y = "")+
-      theme_tidybayes() +
-      theme(
-        legend.position = "top",
-        strip.text = element_text(face = "bold", size = 11),
-        legend.text = element_text(face = "bold", size = 11),
-        legend.title = element_text(face = "bold", size = 11),
-        axis.text.y = element_blank(),
-        axis.ticks.y = element_blank(),
-        axis.text.x = element_text(face = "bold", size = 11),
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.background = element_rect(fill = "transparent",colour = NA),
-        plot.background = element_rect(fill = "transparent",colour = NA),
-        legend.background = element_rect(fill = "transparent",colour = NA)
-      )
-
 
     points = data.frame(
       type = x_label,
@@ -303,6 +309,60 @@ plot.TOSTt <- function(x,
         round(low_eqt, round_t),
         round(high_eqt, round_t)
       )))
+
+
+    if(grepl("Log-transformed",x$method, ignore.case=TRUE)){
+      t_res = t_curv(x)
+      d_res = t_res
+      d_res[[1]]$lower.limit = exp(d_res[[1]]$lower.limit)
+      d_res[[1]]$upper.limit = exp(d_res[[1]]$upper.limit)
+      d_res[[1]]$intrvl.width = d_res[[1]]$upper.limit - d_res[[1]]$lower.limit
+      d_res[[2]] = exp(d_res[[2]])
+    } else {
+      d_res = d_curv(x)
+    }
+      d_plot <- gg_curv_t(
+        data_list = d_res,
+        type = "cd",
+        levels = sets,
+        xaxis = ""
+      ) +
+        geom_point(data = data.frame(y = 0,
+                                     x = x$effsize$estimate[2]),
+                   aes(x = x, y = y),
+                   size = 3) +
+        annotate("segment",
+                 x = x$effsize$lower.ci[2],
+                 xend = x$effsize$upper.ci[2],
+                 y = 0, yend = 0,
+                 size = 1.5,
+                 colour = "black")+
+        geom_vline(aes(xintercept = low_eqd),
+                   linetype="dashed") +
+        geom_vline(aes(xintercept = high_eqd),
+                   linetype="dashed") +
+        scale_x_continuous(sec.axis = dup_axis(breaks=c(round(low_eqd,2),
+                                                        round(high_eqd,2)))) +
+        facet_grid(~as.character(smd_type)) +
+        labs(y = "")+
+        theme_tidybayes() +
+        theme(
+          legend.position = "top",
+          strip.text = element_text(face = "bold", size = 11),
+          legend.text = element_text(face = "bold", size = 11),
+          legend.title = element_text(face = "bold", size = 11),
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank(),
+          axis.text.x = element_text(face = "bold", size = 11),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.background = element_rect(fill = "transparent",colour = NA),
+          plot.background = element_rect(fill = "transparent",colour = NA),
+          legend.background = element_rect(fill = "transparent",colour = NA)
+        )
+
+
+
 
     }
 
@@ -433,7 +493,7 @@ plot.TOSTt <- function(x,
       message("SMD cannot be plotted if type = \"tnull\" ")
     }
     if(!missing(ci_lines) && length(ci_lines)>1){
-      warning("Multiple CI lines provided only first element will be used.")
+      warning("Multiple CI lines provided; only first element will be used.")
     }
 
     if("Equilvalence" %in% x$hypothesis){

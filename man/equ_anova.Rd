@@ -30,8 +30,16 @@ Returns a data frame containing the ANOVA results with equivalence tests added.
 \description{
 Performs equivalence test on the partial eta-squared (pes) value from ANOVA results.
 }
+\details{
+For details on the calculations in this function see vignette("the_ftestTOSTER").
+}
 \section{References}{
 
 Campbell, H., & Lakens, D. (2021). Can we disregard the whole model? Omnibus non‐inferiority testing for R2 in multi‐variable linear regression and in ANOVA. British Journal of Mathematical and Statistical Psychology, 74(1), 64-89. doi: 10.1111/bmsp.12201
 }
 
+\seealso{
+Other f-test: 
+\code{\link{equ_ftest}()}
+}
+\concept{f-test}

@@ -5,6 +5,7 @@
 #' @param eqbound Equivalence bound for the partial eta-squared.
 #' @param MET logical indicator to perform a minimal effect test rather than equivalence test (default is FALSE).
 #' @param alpha alpha used for the test (e.g., 0.05).
+#' @details For details on the calculations in this function see vignette("the_ftestTOSTER").
 #'@return Returns a data frame containing the ANOVA results with equivalence tests added.
 #'
 #'  The following abbreviations are used in the table:
@@ -17,6 +18,7 @@
 #'
 #' @section References:
 #' Campbell, H., & Lakens, D. (2021). Can we disregard the whole model? Omnibus non‐inferiority testing for R2 in multi‐variable linear regression and in ANOVA. British Journal of Mathematical and Statistical Psychology, 74(1), 64-89. doi: 10.1111/bmsp.12201
+#' @family f-test
 #' @export
 
 

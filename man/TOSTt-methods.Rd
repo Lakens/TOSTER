@@ -6,7 +6,7 @@
 \alias{plot.TOSTt}
 \title{Methods for TOSTt objects}
 \usage{
-\method{print}{TOSTt}(x, digits = getOption("digits"), ...)
+\method{print}{TOSTt}(x, digits = 4, ...)
 
 \method{plot}{TOSTt}(
   x,

@@ -22,6 +22,7 @@ reference:
   contents:
   - t_TOST
   - tsum_TOST
+  - extract_r_paired
 
 - subtitle: "Robust"
   desc: >
@@ -29,6 +30,8 @@ reference:
   contents:
   - wilcox_TOST
   - boot_t_TOST
+  - log_TOST
+  - boot_log_TOST
 
 - subtitle: "ANOVA"
   desc: >

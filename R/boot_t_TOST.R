@@ -1,23 +1,8 @@
 #' @title Bootstrapped TOST with t-tests
-#' @description A function for a bootstrap method for TOST with all types of t-tests.
-#' @param x a (non-empty) numeric vector of data values.
-#' @param y an optional (non-empty) numeric vector of data values.
-#' @param formula a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.
-#' @param data an optional matrix or data frame (or similar: see model.frame) containing the variables in the formula formula. By default the variables are taken from environment(formula).
-#' @param paired a logical indicating whether you want a paired t-test.
-#' @param var.equal  a logical variable indicating whether to treat the two variances as being equal. If TRUE then the pooled variance is used to estimate the variance otherwise the Welch (or Satterthwaite) approximation to the degrees of freedom is used.
-#' @param eqb Equivalence bound. Can provide 1 value (negative value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds.
-#' @param low_eqbound lower equivalence bounds (deprecated; use eqb).
-#' @param high_eqbound upper equivalence bounds (deprecated; use eqb).
-#' @param hypothesis 'EQU' for equivalence (default), or 'MET' for minimal effects test, the alternative hypothesis.
-#' @param eqbound_type Type of equivalence bound. Can be set to "SMD" for standardized mean difference (i.e., Cohen's d) or  "raw" for the mean difference. Default is "raw". Raw is strongly recommended as SMD bounds will produce biased results.
-#' @param alpha alpha level (default = 0.05).
-#' @param bias_correction Apply Hedges' correction for bias (default is TRUE).
+#' @description A function for a bootstrap method for TOST with all types of t-tests..
 #' @param R number of bootstrap replicates
-#' @param mu a number indicating the true value of the mean for the two tailed test (or difference in means if you are performing a two sample test).
-#' @param subset an optional vector specifying a subset of observations to be used.
-#' @param na.action a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").
-#' @param ...  further arguments to be passed to or from methods.
+#' @inheritParams t_TOST
+#' @details For details on the calculations in this function see vignette("robustTOST").
 #' @return An S3 object of class
 #'   \code{"TOSTt"} is returned containing the following slots:
 #' \describe{
@@ -31,13 +16,17 @@
 #'   \item{\code{"decision"}}{List included text regarding the decisions for statistical inference.}
 #'   \item{\code{"boot"}}{List containing the bootstrap samples.}
 #' }
-#' @details The implemented test(s) corresponds to the proposal of Chapter 16 of Efron and Tibshirani (1993). Returns TOSTt class object with boostrapped based results. Please note that the repeated measures "corrected" effect size is not available at this time.
+#' @details The implemented test(s) corresponds to the proposal of Chapter 16 of Efron and Tibshirani (1994).
+#'  Returns TOSTt class object with bootstrapped based results.
+#'  Please note that the repeated measures "corrected" effect size is not available at this time.
+#'
+#' For details on the calculations in this function see vignette("robustTOST").
 #' @section References:
 #'
 #' Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press.
+#' @family Robust TOST
 #' @importFrom stats var quantile
 #' @name boot_t_TOST
-#' @family compare studies
 #' @export boot_t_TOST
 
 boot_t_TOST <- function(x, ...){
@@ -417,54 +406,32 @@ boot_t_TOST.default <- function(x,
 
   if(hypothesis == "EQU"){
     #format(low_eqbound, digits = 3, nsmall = 3, scientific = FALSE)
-    TOST_restext = paste0("The equivalence test was ",TOSToutcome,", t(",round(df, digits=2),") = ",format(tTOST, digits = 3, nsmall = 3, scientific = FALSE),", p = ",format(pTOST, digits = 3, nsmall = 3, scientific = TRUE),sep="")
+    TOST_restext = paste0("The equivalence test was ",
+                          TOSToutcome,", t(",round(df, digits=2),") = ",
+                          format(tTOST, digits = 3,
+                                 nsmall = 3, scientific = FALSE),", p = ",
+                          format(pTOST, digits = 3,
+                                 nsmall = 3, scientific = TRUE),sep="")
   } else {
-    TOST_restext = paste0("The minimal effect test was ",TOSToutcome,", t(",round(df, digits=2),") = ",format(tTOST, digits = 3, nsmall = 3, scientific = FALSE),", p = ",format(pTOST, digits = 3, nsmall = 3, scientific = TRUE),sep="")
+    TOST_restext = paste0("The minimal effect test was ",
+                          TOSToutcome,", t(",round(df, digits=2),") = ",
+                          format(tTOST, digits = 3,
+                                 nsmall = 3, scientific = FALSE),", p = ",
+                          format(pTOST, digits = 3,
+                                 nsmall = 3, scientific = TRUE),sep="")
   }
 
-  ttest_restext = paste0("The null hypothesis test was ",testoutcome,", t(",round(df, digits=2),") = ",format(tstat, digits = 3, nsmall = 3, scientific = FALSE),", p = ",format(boot.pval, digits = 3, nsmall = 3, scientific = TRUE),sep="")
-  if (hypothesis == "EQU"){
-    if(boot.pval <= alpha && pTOST <= alpha){
-      combined_outcome <- paste0("NHST: reject null significance hypothesis that the effect is equal to ",mu_text," \n",
-                                 "TOST: reject null equivalence hypothesis")
-    }
-    if(boot.pval < alpha && pTOST > alpha){
-      combined_outcome <- paste0("NHST: reject null significance hypothesis that the effect is equal to ",mu_text," \n",
-                                 "TOST: don't reject null equivalence hypothesis")
-      # paste0("statistically different from ",mu_text," and not statistically equivalent")
-    }
-    if(boot.pval > alpha && pTOST <= alpha){
-      combined_outcome <- paste0("NHST: don't reject null significance hypothesis that the effect is equal to ",mu_text," \n",
-                                 "TOST: reject null equivalence hypothesis")
-      #paste0("statistically not different from ",mu_text," and statistically equivalent")
-    }
-    if(boot.pval > alpha && pTOST > alpha){
-      combined_outcome <- paste0("NHST: don't reject null significance hypothesis that the effect is equal to ",mu_text," \n",
-                                 "TOST: don't reject null equivalence hypothesis")
-      #paste0("statistically not different from ",mu_text," and not statistically equivalent")
-    }
-  } else {
-    if(boot.pval <= alpha && pTOST <= alpha){
-      combined_outcome <- paste0("NHST: reject null significance hypothesis that the effect is equal to ",mu_text," \n",
-                                 "TOST: reject null MET hypothesis")
-      #paste0("statistically different from ",mu_text," and statistically greater than the minimal effect threshold")
-    }
-    if(boot.pval < alpha && pTOST > alpha){
-      combined_outcome <- paste0("NHST: reject null significance hypothesis that the effect is equal to ",mu_text," \n",
-                                 "TOST: don't reject null MET hypothesis")
-      #paste0("statistically different from ",mu_text," but not statistically greater than the minimal effect threshold")
-    }
-    if(boot.pval > alpha && pTOST <= alpha){
-      combined_outcome <- paste0("NHST: don't reject null significance hypothesis that the effect is equal to ",mu_text," \n",
-                                 "TOST: reject null MET hypothesis")
-      #paste0("statistically not different from ",mu_text," and statistically greater than the minimal effect threshold")
-    }
-    if(boot.pval > alpha && pTOST > alpha){
-      combined_outcome <- paste0("NHST: don't reject null significance hypothesis that the effect is equal to ",mu_text," \n",
-                                 "TOST: don't reject null MET hypothesis")
-      #paste0("statistically not different from ",mu_text," and not statistically greater than the minimal effect threshold")
-    }
-  }
+  ttest_restext = paste0("The null hypothesis test was ",
+                         testoutcome,", t(",round(df, digits=2),") = ",
+                         format(tstat, digits = 3,
+                                nsmall = 3, scientific = FALSE),", p = ",
+                         format(boot.pval, digits = 3,
+                                nsmall = 3, scientific = TRUE),sep="")
+  combined_outcome = tost_decision(hypothesis = hypothesis,
+                                    alpha = alpha,
+                                    pvalue = boot.pval,
+                                    pTOST = pTOST,
+                                    mu_text = mu_text)
 
 
   decision = list(

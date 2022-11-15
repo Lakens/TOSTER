@@ -24,6 +24,7 @@
 #'   \item{\code{"boot_res"}}{List of bootstrapped results.}
 #'   \item{\code{"call"}}{the matched call.}
 #' }
+#' @family compare studies
 #' @name boot_compare_smd
 #' @export boot_compare_smd
 #'

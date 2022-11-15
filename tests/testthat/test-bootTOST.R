@@ -36,6 +36,10 @@ test_that("Run examples for one sample", {
                       eqb = .5,
                       R = 99)
 
+  expect_error( boot_log_TOST(x = samp1,
+                      eqb = .5,
+                      R = 99))
+
   test3 = boot_t_TOST(x = samp1,
                  low_eqbound = -.5,
                  high_eqbound = .5,
@@ -146,6 +150,14 @@ test_that("Run examples for two sample", {
                  high_eqbound = .5,
                  bias_correction = FALSE,
                  R = 199)
+
+  test1 = boot_t_TOST(x = samp1,
+                      y = samp2,
+                      var.equal = TRUE,
+                      eqb = .5,
+                      bias_correction = FALSE,
+                      R = 199)
+
 
   test3 = boot_t_TOST(x = samp1,
                  y = samp2,

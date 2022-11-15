@@ -41,13 +41,13 @@ wilcox_TOST(
 
 \item{hypothesis}{'EQU' for equivalence (default), or 'MET' for minimal effects test, the alternative hypothesis.}
 
-\item{paired}{a logical indicating whether you want to calculate a paired test.}
+\item{paired}{a logical indicating whether you want a paired t-test.}
 
 \item{eqb}{Equivalence bound. Can provide 1 value (negative value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds.}
 
-\item{low_eqbound}{Lower equivalence bounds. Deprecated use eqb.}
+\item{low_eqbound}{lower equivalence bounds (deprecated).}
 
-\item{high_eqbound}{Upper equivalence bounds. Deprecated use eqb.}
+\item{high_eqbound}{upper equivalence bounds (deprecated).}
 
 \item{ses}{Standardized effect size. Default is "rb" for rank-biserial
 correlation. Options also include "cstat" for concordance probability, or
@@ -87,6 +87,9 @@ An S3 object of class
 \description{
 A function for TOST using the non-parametric methods of the Wilcoxon signed rank test. This function uses the normal approximation and applies continuity correction automatically.
 }
+\details{
+For details on the calculations in this function see vignette("robustTOST").
+}
 \section{References}{
 
 David F. Bauer (1972). Constructing confidence sets using rank statistics. Journal of the American Statistical Association 67, 687–690. doi: 10.1080/01621459.1972.10481279.
@@ -94,3 +97,16 @@ David F. Bauer (1972). Constructing confidence sets using rank statistics. Journ
 Myles Hollander and Douglas A. Wolfe (1973). Nonparametric Statistical Methods. New York: John Wiley & Sons. Pages 27–33 (one-sample), 68–75 (two-sample). Or second edition (1999).
 }
 
+\examples{
+data(mtcars)
+wilcox_TOST(mpg ~ am,
+data = mtcars,
+eqb = 3)
+}
+\seealso{
+Other Robust TOST: 
+\code{\link{boot_log_TOST}()},
+\code{\link{boot_t_TOST}()},
+\code{\link{log_TOST}()}
+}
+\concept{Robust TOST}

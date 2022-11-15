@@ -1,0 +1,591 @@
+---
+title: |
+  Exploring Equivalence Testing with the Updated TOSTER R Package
+shorttitle: "Updated TOSTER R Package"
+author:
+- name: Aaron R. Caldwell
+  affil: a
+  email: arcaldwell49@gmail.com
+type: PREPRINT
+output:
+  rticles::tf_article: 
+    extra_dependencies: ["float"]
+  papaja::apa6_docx: default
+bibliography: interactcadsample.bib
+#appendix: appendix.tex
+abstract: |
+  This is an article detailing the "avocado TOST" update to the TOSTER R package.
+keywords: |
+  statistics, bootstrapping, minimal effects test, NHST, TOST
+header-includes: |
+  \usepackage{hyperref}
+  \usepackage[utf8]{inputenc}
+  \def\tightlist{}
+  \hypersetup{
+    colorlinks=true,
+    citecolor = cyan,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=blue
+    }
+affiliation:
+- num: a
+  address: |
+    Natick, MA,  <https://orcid.org/0000-0002-4541-6283>
+---
+
+```{r setup, echo=FALSE}
+knitr::opts_chunk$set(
+  warning = FALSE,
+  message = FALSE,
+  echo = TRUE,
+  fig.pos = "H"
+)
+library(TOSTER)
+library(ggplot2)
+library(ggdist)
+library(patchwork)
+```
+
+
+# Introduction
+
+Researchers often erroneously declare that no statistical effect exists based on a single "non-significant" p-value [@blandaltman95]. 
+In many of these cases, the data may corroborate the researchers claim but the interpretation of a null hypothesis significance test (NHST), wherein the null hypothesis is "no effect", is nonetheless incorrect. 
+In order to statistically test for whether there is "no effect" or "no difference" researchers could explore using equivalence testing. 
+A very simple equivalence testing approach is the use of “two one-sided tests” (TOST) [@schuirmann1987]. 
+In TOST procedures, an upper ($\Delta_U$) and lower ($\Delta_L$) equivalence bound is specified based on the smallest effect size of interest (SESOI).
+If the TOST is below a pre-specified alpha level, then the effect can be considered close enough to zero to be practically equivalent [@lakens_ori].
+
+Both the complaints about erroneous conclusions regarding equivalence [@blandaltman95] and proposed statistical solutions [@schuirmann1987] have existed for decades now. Yet the problem appears to persist in many applied disciplines. 
+I estimate that the cause of this continued dissonance is due to a lack of education on equivalence testing and a struggle for many applied researchers to implement equivalence testing. 
+In my experience, most researchers have received some degree of statistical training in their doctoral or master's studies, but it is rare that any have idea of how to use TOST. 
+It may also be difficult to implement equivalence testing for many researchers. This may be caused by most statistical software defaulting to a null hypothesis of zero, or even completely lacking an ability to change the null hypothesis. Therefore, I feel continued development of educational content on TOST, and software to help with such analyses, would be beneficial to many quantitative researchers.
+
+The TOSTER R package was originally developed in by @lakens_ori to introduce 
+experimental psychologists to the concept of equivalence testing and provide an easy-to-use implementation in R. 
+In the years since that publication, I have made a significant update to the package in order to improve 
+the user interface and expand the tools available within the package. An experienced R programmer may have no problem performing equivalence testing within R but beginners may struggle with both writing the code and interpreting the output. If you fall into that category, I would suggest using `jamovi`, an open-source statistical software, that has a TOSTER module to perform equivalence/TOST analyses.
+
+In this manuscript, I will detail the updates to the TOSTER package, and give some basic usage examples of some of the new functions. This is meant to just be an introduction to *how* to perform such analyses, and provide a little bit of context for when such analyses are appropriate. For a greater introduction to equivalence testing, I would suggest reading other methodological tutorials [@lakens_ori;@lakens2018equivalence;@lakens2020improving;@mazzolari2022myths].
+
+# Basics of Equivalence Testing
+
+## The TOSTER R Package
+
+In an effort to make TOSTER more informative and easier to use, a new function `t_TOST` was created. This function operates very similarly to base R's `t.test` function, but performs 3 t-tests (one two-tailed and two one-tailed tests). In addition, this function has a generic method where two vectors can be supplied or a formula can be given (e.g.,`y ~ group`). This function also makes it easier to switch between types of t-tests. All three types (two sample, one sample, and paired samples) can be performed/calculated from the same function. Moreover, the output from this function is verbose, and should make the decisions derived from the function more informative and user-friendly. 
+
+Also, `t_TOST` is not limited to equivalence tests. Minimal effects testing (MET) is possible. MET is useful for situations where the hypothesis is about a minimal effect and the null hypothesis *is* equivalence (see Figure 1). 
+
+```{r hypplot, fig.width=6, fig.height=2.75, echo=FALSE, message = FALSE, warning = FALSE, fig.show='hold', fig.cap = "Type of Hypothesis"}
+
+p1 = ggplot() +
+  geom_vline(aes(xintercept = -.5),
+             linetype = "dashed") +
+  geom_vline(aes(xintercept = .5),
+             linetype = "dashed") +
+  geom_text(aes(
+    y = 1,
+    x = -0.5,
+    vjust = -.9,
+    hjust = "middle"
+  ),
+  angle = 90,
+  label = 'Lower Bound') +
+  geom_text(aes(
+    y = 1,
+    x = 0.5,
+    vjust = 1.5,
+    hjust = "middle"
+  ),
+  angle = 90,
+  label = 'Upper Bound') +
+  geom_text(aes(
+    y = 1,
+    x = 0,
+    vjust = 1.5,
+    hjust = "middle"
+  ),
+  #alignment = "center",
+  label = "H0"
+  ) +
+  geom_text(aes(
+    y = 1,
+    x = 1.5,
+    vjust = 1.5,
+    hjust = "middle"
+  ),
+  #alignment = "center",
+  label = "H1"
+  ) +
+  geom_text(aes(
+    y = 1,
+    x = -1.5,
+    vjust = 1.5,
+    hjust = "middle"
+  ),
+  #alignment = "center",
+  label = "H1"
+  ) +
+theme_tidybayes() +
+  scale_y_continuous(limits = c(0,1.75)) +
+  scale_x_continuous(limits = c(-2,2)) +
+  labs(x = "", y = "",
+       title="Minimal Effect Test",
+       caption = "H1 = Alternative Hypothesis \n H0 = Null Hypothesis") +
+  theme(
+    strip.text = element_text(face = "bold", size = 10),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank()
+  )
+
+p2 = ggplot() +
+  geom_vline(aes(xintercept = -.5),
+             linetype = "dashed") +
+  geom_vline(aes(xintercept = .5),
+             linetype = "dashed") +
+  geom_text(aes(
+    y = 1,
+    x = -0.5,
+    vjust = -.9,
+    hjust = "middle"
+  ),
+  angle = 90,
+  label = 'Lower Bound') +
+  geom_text(aes(
+    y = 1,
+    x = 0.5,
+    vjust = 1.5,
+    hjust = "middle"
+  ),
+  angle = 90,
+  label = 'Upper Bound') +
+  geom_text(aes(
+    y = 1,
+    x = 0,
+    vjust = 1.5,
+    hjust = "middle"
+  ),
+  #alignment = "center",
+  label = "H1"
+  ) +
+  geom_text(aes(
+    y = 1,
+    x = 1.5,
+    vjust = 1.5,
+    hjust = "middle"
+  ),
+  #alignment = "center",
+  label = "H0"
+  ) +
+  geom_text(aes(
+    y = 1,
+    x = -1.5,
+    vjust = 1.5,
+    hjust = "middle"
+  ),
+  #alignment = "center",
+  label = "H0"
+  ) +
+theme_tidybayes() +
+  scale_y_continuous(limits = c(0,1.75)) +
+  scale_x_continuous(limits = c(-2,2)) +
+  labs(x = "",
+       y = "",
+       title="Equivalence Test",
+       caption = "H1 = Alternative Hypothesis \n H0 = Null Hypothesis") +
+  theme(
+    strip.text = element_text(face = "bold", size = 10),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank()
+  )
+
+p1 + p2 + plot_annotation(tag_levels = 'A')
+```
+
+\newpage
+
+## Vignettes with TOSTER
+
+In the general introduction to this package we detailed how to look at *old* results and how to apply TOST to interpreting those results. However, in many cases, users may have new data that needs to be analyzed. Therefore, `t_TOST` can be applied to new data. This vignette will use the `bugs` data from the `jmv` R package and the `sleep` data.
+
+```{r}
+data('sleep')
+library(jmv)
+data('bugs')
+```
+
+
+### Independent Groups
+
+For this example, we will use the sleep data. In this data there is a `group` variable and an outcome `extra`.
+
+```{r}
+head(sleep,2)
+```
+
+We will assume the data are independent, and that we have equivalence bounds of +/- 0.5. All we need to do is provide the `formula`, `data`, and `eqb` arguments for the function to run appropriately. In addition, we can set the `var.equal` argument (to assume equal variance), and the `paired` argument (sets if the data is paired or not). Both are logical indicators that can be set to TRUE or FALSE. The `alpha` is automatically set to 0.05 but this can also be adjusted by the user. 
+
+Standardize mean differences (SMDs) are provided in the output for any t-test based TOST analysis (e.g., Cohen's d). The Hedges's corrected SMD [@hedges_bias] is automatically calculated, but this can be overridden with the `bias_correction` argument^[Glass's delta can also be produced in the output by using the `glass` argument]. In previous versions of this package, the equivalence bounds could be set by the SMD (e.g., equivalence bound of 0.5 SD), but this is an erroneous approach since the bound would be dependent upon the *sample* variance. However, users can opt for such an analysis by setting `eqbound_type` to SMD, which will produce a noticeable warning to the R console.
+
+The `hypothesis` argument is automatically set to "EQU" for equivalence but if a minimal effect is of interest then "MET" can be supplied.
+
+```{r}
+# Formula Interface
+res1 = t_TOST(formula = extra ~ group, data = sleep, 
+              eqb = .5, smd_ci = "t")
+# x & y Interface
+res1a = t_TOST(x = subset(sleep,group==1)$extra,
+               y = subset(sleep,group==2)$extra, eqb =.5)
+```
+
+\newpage
+
+Once the function has run, we can print the results with the `print` method. 
+This provides a verbose summary of the results.
+
+```{r}
+print(res1)
+```
+
+
+Another nice feature is the generic `plot` method that can provide a visual summary of the results. All of the plots in this package were inspired by the [concurve](https://cran.r-project.org/package=concurve) R package. 
+There are two types of plots that can be produced. The first, and default, is the consonance density plot (`type = "cd"`).
+
+```{r cdplot,fig.width=6, fig.height=5,fig.cap="Example of consonance density plot."}
+plot(res1, type = "cd")
+```
+
+\newpage
+
+The shading pattern can be modified with the `ci_shades`.
+
+```{r shadeplot,fig.width=6, fig.height=5, fig.cap = "Demonstrating the shading in plot method."}
+plot(res1, type = "cd",
+     ci_shades = c(.9,.95))
+```
+
+\newpage
+
+Consonance plots, where all confidence intervals can be simultaneous plotted, can also be produced. The advantage here is multiple confidence interval lines can plotted at once.
+
+```{r conplot,fig.width=6, fig.height=5, fig.cap = "Example of consonance plot."}
+plot(res1, type = "c",
+     ci_lines =  c(.9,.95))
+```
+
+\newpage
+
+### Paired Samples
+
+To perform a paired samples TOST, the process does not change much. We could process the test the same way by providing a formula. All we would need to then is change `paired` to TRUE.
+
+```{r}
+res2 = t_TOST(formula = extra ~ group,
+              data = sleep,
+              paired = TRUE,
+              eqb = .5)
+res2
+```
+
+\newpage
+
+However, we may have two vectors of data that are paired. So instead we may want to just provide those separately rather than using a data set and setting the formula. This can be demonstrated with the "bugs" data.
+
+```{r}
+res3 = t_TOST(x = bugs$LDHF,
+              y = bugs$LDLF,
+              paired = TRUE,
+              eqb = 1)
+res3
+```
+
+\newpage
+
+We may want to perform a Minimal Effect Test with the `hypothesis` argument set to "MET".
+
+```{r}
+res3a = t_TOST(x = bugs$LDHF,
+               y = bugs$LDLF,
+               paired = TRUE,
+               hypothesis = "MET",
+               eqb = 1)
+res3a
+```
+
+\newpage
+
+### One Sample t-test
+
+In other cases we may have a one-sample test.
+If that is the case, only `x` argument for the data is needed. 
+As an example, we may hypothesis that the mean of LDHF is not more than 1.5 points greater or less than 7.
+
+```{r}
+res4 = t_TOST(x = bugs$LDHF,
+              hypothesis = "EQU",
+              eqb = c(5.5,8.5))
+res4
+```
+
+\newpage
+
+
+### Using Summary Statistics
+
+In some cases you may only have access to the summary statistics. 
+Therefore, I created a function, `tsum_TOST`, to perform the same tests just based on the summary statistics. 
+This involves providing the function with a number of different arguments.
+
+* `n1 & n2` the sample sizes (only n1 needs to be provided for one sample case)
+* `m1 & m2` the sample means
+* `sd1 & sd2` the sample standard deviation
+* `r12` the correlation between each if paired is set to TRUE
+
+The results from above can be replicated with the `tsum_TOST`:
+
+```{r}
+res_tsum = tsum_TOST(
+  m1 = mean(bugs$LDHF, na.rm=TRUE), sd1 = sd(bugs$LDHF, na.rm=TRUE),
+  n1 = length(na.omit(bugs$LDHF)),
+  hypothesis = "EQU", smd_ci = "t", eqb = c(5.5, 8.5)
+)
+
+res_tsum
+```
+
+\newpage
+
+# Robust Methods for Equivalence Testing
+
+In some cases, the use of t-test may be less than ideal. 
+Any serious violation to the assumptions of a t-test (e.g., normality or homoscedasticity) could greatly inflate the type 1 error rate of TOST. 
+Therefore, it may be useful to explore alternatives to the t-test for TOST.
+
+The TOSTER package currently provides 4 robust alternatives to the t-test for TOST.
+First, there is the `wilcox_TOST` function which uses the Wilcoxon-Mann-Whitney (WMW) type tests (i.e.,  `wilcox.test`) to perform TOST as a test of symmetry.
+Second, there is the `log_TOST` function which performs log-transformed t-tests, which is a parametric approach commonly used in pharmaceutical bioequivalence studies on ratio data [@he2022]. Third, there is the `boot_t_TOST` function which uses the bootstrap method outlined by @efron93.
+Fourth, there is the `boot_log_TOST` function which uses the same bootstrap method outlined by @efron93 but on the log-transformed data, which is more robust than parametric log t-test [@he2022]
+
+In the following sections, I will briefly outline the available robust TOST functions within the TOSTER package.
+
+## Tests of Symmetry (rank based tests)
+
+The WMW group of tests (e.g., Mann-Whitney U-test) provide a non-parametric test of differences between groups, or within samples, based on *ranks*. This provides a test of location shift, which is a fancy way of saying differences in the center of the distribution (i.e., in parametric tests the location is mean). Within the TOST framework, there are two separate tests of directional location shift to determine if the location shift is within (equivalence) or outside (minimal effect) the equivalence bounds. Many researchers mistakenly think these are tests of medians, but this is not the case (See @median_test for details). Using a WMW-based TOST is useful for testing whether the differences between groups/conditions is symmetric around the equivalence bounds^[Care should be taken when considering paired samples; a test on the rank transformed data [@kornbrot1990rank] or another robust test may be more prudent.]. For equivalence testing, the TOST would be testing whether there is asymmetry towards no effect with a null hypothesis of symmetry at the equivalence bound.
+
+In the TOSTER package, we accomplish this "test of symmetry" with the `wilcox_TOST` function. 
+This function operates in an extremely similar implementation to the `t_TOST` function. 
+The exact calculations utilized in this function can be explored via the documentation of the `wilcox.test` function.
+A standardized mean difference (SMD) is *not* calculated in this function since this would be an inappropriate measure of effect size alongside the non-parametric test statistics. 
+Instead, a standardized effect size (SES) is calculated for *all* types of comparisons (e.g., two sample, one sample, and paired samples). 
+The function can produce a rank-biserial correlation [@Kerby_2014], a WMW Odds [@wmwodds], or a "common language effect size" [@Kerby_2014] (Also known as the non-parametric probability of superiority, or concordance probability).^[There is no plotting capability at this time for the output of this function.]
+
+As an example, we can use the sleep data to make a non-parametric comparison of equivalence.
+
+```{r}
+data('sleep')
+library(TOSTER)
+
+test1 = wilcox_TOST(formula = extra ~ group,
+                      data = sleep,
+                      paired = FALSE,
+                      eqb = .5)
+
+
+print(test1)
+```
+
+## Bootstrap TOST
+
+The bootstrap refers to resampling with replacement and can be used statistical estimation and inference. Bootsrapping techniques are very useful because they are considered somewhat robust to the violations of assumptions for a simple t-test. Therefore we added a bootstrap option, `boot_t_TOST` to the package to provide another robust alternative to the `t_TOST` function. 
+
+In this function we provide a percentile bootstrap solution outlined by @efron93 (see chapter 16, page 220). The bootstrapped p-values are derived from the "studentized" version of a test of mean differences [@efron93]. Overall, the results should be similar to the results of `t_TOST`. **However**, for paired samples, the Cohen's d(rm) effect size *cannot* be calculated by this function.
+
+### Two Sample Algorithm
+
+1. Form B bootstrap data sets from x* and y* wherein x* is sampled with replacement from $\tilde x_1,\tilde x_2, ... \tilde x_n$ and y* is sampled with replacement from $\tilde y_1,\tilde y_2, ... \tilde y_n$
+
+2. t is then evaluated on each sample, but the mean of each sample (y or x) and the overall average (z) are subtracted from each 
+
+$$
+t(z^{*b}) = \frac {(\bar x^*-\bar x - \bar z) - (\bar y^*-\bar y - \bar z)}{\sqrt {sd_y^*/n_y + sd_x^*/n_x}}
+$$
+
+3. An approximate p-value can then be calculated as the number of bootstrapped results greater than the observed t-statistic from the sample.
+
+$$
+p_{boot} = \frac {\#t(z^{*b}) \ge t_{sample}}{B}
+$$
+
+The same process is completed for the one sample case but with the one sample solution for the equation outlined by $t(z^{*b})$. The paired sample case in this bootstrap procedure is equivalent to the one sample solution because the test is based on the difference scores.
+
+### Example of Bootsrapping
+
+Again, we can use the sleep data to see the bootstrapped results. If you plot the bootstrap samples, it will show how the resampling via bootstrapping indicates the instability of Hedges' d(z).
+
+```{r}
+data('sleep')
+
+test1 = boot_t_TOST(formula = extra ~ group,
+                    data = sleep,
+                    paired = TRUE,
+                    eqb = .5,
+                    R = 999)
+
+
+print(test1)
+```
+
+\newpage
+
+## Log TOST
+
+The logarithmic transformation is often utilized to "normalize" the data or stabilize the variance.
+
+- Basic advantages
+- How it translates to a ratio
+
+- FDA requirements
+- Default equivalence bounds
+
+## Example of Log TOST
+
+
+## Bootstrap Log TOST
+
+The bootstrap version of `log_TOST`, `boot_log_TOST`, using the same bootstrapping method detailed above, but it uses the log-transformed values 
+
+# Equivalence Testing with ANOVAs
+
+For better or worse, many researchers utilize ANOVA as an omnibus test for the absence/presence of effects.
+This is very useful when implementing factorial designs where multiple experimental factors are tested and/or manipulated.
+As @Campbell_2021 suggest, the lack of a significant result at the ANOVA-level does not necessarily indicate that a factor or interaction of factors have no effect. 
+However, @Campbell_2021 only suggest an equivalence test for one-way ANOVAs and therefore exclude multi-factor ANOVAs.
+Therefore, I have extended the work of @Campbell_2021 to include functions that allow for equivalence testing the partial $\eta^2$ (eta-squared) effect size from ANOVAs.
+
+## F-test Calculations
+
+Statistical equivalence testing (or "omnibus non-inferiority testing" by @Campbell_2021) for *F*-tests are special use case of the cumulative distribution function of the non-central *F* distribution. As @Campbell_2021 states, these type of questions answer the question: "Can we reject the hypothesis that the total proportion of variance in outcome Y attributable to X is greater than or equal to the equivalence bound $\Delta$?"
+
+
+### Hypothesis Tests
+
+$$
+H_0 =  1 > \eta^2_p \geq \Delta
+$$
+
+
+$$
+H_1 =  0 \geq \eta^2_p < \Delta
+$$
+
+In TOSTER, I have gone a tad farther than @Campbell_2021, and calculate a generalization of the non-centrality parameter that allows the equivalence test for *F*-tests to be applied to variety of designs.
+
+@Campbell_2021 calculate the *p*-value as:
+
+$$
+p = p_f(F; J-1, N-J, \frac{N \cdot \Delta}{1-\Delta})
+$$
+
+The non-centrality parameter (ncp = $\lambda$) can be calculated with the equivalence bound and the degrees of freedom:
+
+$$
+\lambda_{eq} = \frac{\Delta}{1-\Delta} \cdot(df_1 + df_2 +1)
+$$
+
+The *p*-value for the equivalence test ($p_{eq}$) could then be calculated from traditional ANOVA results and the distribution function:
+
+$$
+p_{eq} = p_f(F; df_1, df_2, \lambda_{eq})
+$$
+
+## Example of Equivalence ANOVA Test
+
+Using the `InsectSprays` data set in R and the base R `aov` function we can demonstrate how this omnibus equivalence testing can be applied with TOSTER.
+
+From the initial analysis we an see a clear "significant" effect (the p-value listed is zero but it just very small) of the factor spray. However, we *may* be interested in testing if the effect is practically equivalent. I will arbitrarily set the equivalence bound to a partial eta-squared of 0.35 ($H_0: \eta^2_p > 0.35$)
+
+```{r warning=FALSE, message=FALSE}
+library(TOSTER)
+# Get Data
+data("InsectSprays")
+# Build ANOVA
+aovtest = aov(count ~ spray,
+              data = InsectSprays)
+
+# Display overall results
+knitr::kable(broom::tidy(aovtest),
+            caption = "Traditional ANOVA Test")
+
+```
+
+We can then use the information in the table above to perform an equivalence test using the `equ_ftest` function. This function returns an object of the S3 class `htest` and the output will look very familiar to the the t-test. The main difference is the estimates, and confidence interval, are for partial $\eta^2_p$.
+
+```{r}
+equ_ftest(Fstat = 34.70228,
+          df1 = 5,
+          df2 = 66,
+          eqb = 0.35)
+```
+
+Based on the results above we would conclude there is a significant effect of "spray" and the differences due to spray are *not* statistically equivalent. In essence, we reject the traditional null hypothesis of "no effect" but accept the null hypothesis of the equivalence test.
+
+The `equ_ftest` is very useful because all you need is very basic summary statistics. However, if you are doing all your analyses in R then you can use the `equ_anova` function. This function accepts objects produced from `stats::aov`, `car::Anova` and `afex::aov_car` (or any ANOVA from derived from `afex`).
+
+```{r}
+equ_anova(aovtest,
+          eqb = 0.35)
+```
+
+# Equivalence Between Replication Studies
+
+During the development of the TOSTER update, I was helping advise a team of researchers on a massive replication project for sport and exercise science [@repSES]. 
+How to determine whether a direct^[Defined as being a as-close-as possible replication to the original study. In contrast to "conceptual" replications.] replication was equivalent to the original study was common, and contentious, topic of conversation among the team.
+Inspired by these discussions, I created 2 functions that would utilize the basic principles of SMDs^[The textbook by @borenstein and the some of the works of Wolfgang Vietchbauer were a large source of information for developing these fucntions.] to test for differences between two studies. 
+
+Overall, the concept is simple: if we have an estimates of SMDs from two studies we can use large-sample approximation to compute the sampling variances to estimate the degree to which the two studies differ from one another.
+
+# Conclusions
+
+- This can be useful.
+- This package is not exhaustive but is good for simple analyses and teaching
+
+\newpage
+
+# Additional Information
+
+## Acknowledgement(s) {-}
+
+I'd would like to thank everyone from the Lakens' laboratory group for their input and suggestions.
+
+## Disclosure statement {-}
+
+The author of this manuscript is the author of the TOSTER package. 
+Citations of this manuscript will benefit their citation count.
+
+## Funding {-}
+
+No funding was provided for this work.
+
+## Notes on contributor(s) {-}
+
+Daniel Lakens provided a review of many of the materials that have been incorporated
+into the update of TOSTER, and was the original author of this package.
+
+## Nomenclature/Notation {-}
+
+- ANOVA: Analysis of Variance
+- MET: Minimal Effects Test
+- ncp: non-centrality parameter
+- SMD: Standardized mean difference (e.g., Cohen's d)
+- TOST: Two-one sided tests 
+- WMW: Wilcoxon-Mann-Whitney
+
+## Notes {-}
+
+The R package is also (partially) implemented in jamovi as the TOSTER module.
+
+\newpage
+
+# References
+

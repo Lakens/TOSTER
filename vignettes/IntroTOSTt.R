@@ -8,7 +8,7 @@ library(ggplot2)
 library(ggdist)
 
 
-## ----echo=FALSE, message = FALSE, warning = FALSE, fig.show='hold'------------
+## ----tostplots,echo=FALSE, message = FALSE, warning = FALSE, fig.show='hold'----
 
 ggplot() +
   geom_vline(aes(xintercept = -.5),

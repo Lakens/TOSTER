@@ -1,15 +1,6 @@
 #' @title TOST with Wilcoxon Signed Rank test
 #' @description A function for TOST using the non-parametric methods of the Wilcoxon signed rank test. This function uses the normal approximation and applies continuity correction automatically.
-#' @param x a (non-empty) numeric vector of data values.
-#' @param y an optional (non-empty) numeric vector of data values.
-#' @param formula a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.
-#' @param data an optional matrix or data frame (or similar: see model.frame) containing the variables in the formula formula. By default the variables are taken from environment(formula).
-#' @param paired a logical indicating whether you want to calculate a paired test.
-#' @param eqb Equivalence bound. Can provide 1 value (negative value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds.
-#' @param low_eqbound Lower equivalence bounds. Deprecated use eqb.
-#' @param high_eqbound Upper equivalence bounds. Deprecated use eqb.
-#' @param hypothesis 'EQU' for equivalence (default), or 'MET' for minimal effects test, the alternative hypothesis.
-#' @param alpha alpha level (default = 0.05)
+#' @inheritParams t_TOST
 #' @param mu  number indicating the value around which (a-)symmetry (for
 #'   one-sample or paired samples) or shift (for independent samples) is to be
 #'   estimated. See [stats::wilcox.test].
@@ -17,9 +8,7 @@
 #' correlation. Options also include "cstat" for concordance probability, or
 #' "odds" for Wilcoxon-Mann-Whitney odds (otherwise known as Agresti's
 #' generalized odds ratio).
-#' @param subset an optional vector specifying a subset of observations to be used.
-#' @param na.action a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").
-#' @param ...  further arguments to be passed to or from methods.
+#' @details For details on the calculations in this function see vignette("robustTOST").
 #' @return An S3 object of class
 #'   \code{"TOSTnp"} is returned containing the following slots:
 #' \describe{
@@ -32,11 +21,17 @@
 #'   \item{\code{"method"}}{Type of non-parametric test.}
 #'   \item{\code{"decision"}}{List included text regarding the decisions for statistical inference.}
 #' }
+#' @examples
+#' data(mtcars)
+#' wilcox_TOST(mpg ~ am,
+#' data = mtcars,
+#' eqb = 3)
 #' @section References:
 #' David F. Bauer (1972). Constructing confidence sets using rank statistics. Journal of the American Statistical Association 67, 687–690. doi: 10.1080/01621459.1972.10481279.
 #'
 #' Myles Hollander and Douglas A. Wolfe (1973). Nonparametric Statistical Methods. New York: John Wiley & Sons. Pages 27–33 (one-sample), 68–75 (two-sample). Or second edition (1999).
 #' @importFrom stats wilcox.test
+#' @family Robust TOST
 #' @name wilcox_TOST
 #' @export wilcox_TOST
 
@@ -241,54 +236,33 @@ wilcox_TOST.default = function(x,
 
   if(hypothesis == "EQU"){
     #format(low_eqbound, digits = 3, nsmall = 3, scientific = FALSE)
-    TOST_restext = paste0("The equivalence test was ",TOSToutcome," ",names(tresult$statistic), " = ", format(tTOST, digits = 3, nsmall = 3, scientific = FALSE),", p = ",format(pTOST, digits = 3, nsmall = 3, scientific = TRUE),sep="")
+    TOST_restext = paste0("The equivalence test was ",TOSToutcome," ",
+                          names(tresult$statistic), " = ",
+                          format(tTOST, digits = 3,
+                                 nsmall = 3, scientific = FALSE),", p = ",
+                          format(pTOST, digits = 3,
+                                 nsmall = 3, scientific = TRUE),sep="")
   } else {
-    TOST_restext = paste0("The minimal effect test was ",TOSToutcome," ",names(tresult$statistic), " = ", format(tTOST, digits = 3, nsmall = 3, scientific = FALSE),", p = ",format(pTOST, digits = 3, nsmall = 3, scientific = TRUE),sep="")
+    TOST_restext = paste0("The minimal effect test was ",TOSToutcome," ",
+                          names(tresult$statistic), " = ",
+                          format(tTOST, digits = 3,
+                                 nsmall = 3, scientific = FALSE),", p = ",
+                          format(pTOST, digits = 3,
+                                 nsmall = 3, scientific = TRUE),sep="")
   }
 
-  ttest_restext = paste0("The null hypothesis test was ",testoutcome," ",names(tresult$statistic), " = ", format(tresult$statistic, digits = 3, nsmall = 3, scientific = FALSE),", p = ",format(tresult$p.value, digits = 3, nsmall = 3, scientific = TRUE),sep="")
-  if (hypothesis == "EQU"){
-    if(tresult$p.value <= alpha && pTOST <= alpha){
-      combined_outcome <- paste0("NHST: reject null significance hypothesis that the effect is equal to ",mu_text," \n",
-                                 "TOST: reject null equivalence hypothesis")
-    }
-    if(tresult$p.value < alpha && pTOST > alpha){
-      combined_outcome <- paste0("NHST: reject null significance hypothesis that the effect is equal to ",mu_text," \n",
-                                 "TOST: don't reject null equivalence hypothesis")
-      # paste0("statistically different from ",mu_text," and not statistically equivalent")
-    }
-    if(tresult$p.value > alpha && pTOST <= alpha){
-      combined_outcome <- paste0("NHST: don't reject null significance hypothesis that the effect is equal to ",mu_text," \n",
-                                 "TOST: reject null equivalence hypothesis")
-      #paste0("statistically not different from ",mu_text," and statistically equivalent")
-    }
-    if(tresult$p.value > alpha && pTOST > alpha){
-      combined_outcome <- paste0("NHST: don't reject null significance hypothesis that the effect is equal to ",mu_text," \n",
-                                 "TOST: don't reject null equivalence hypothesis")
-      #paste0("statistically not different from ",mu_text," and not statistically equivalent")
-    }
-  } else {
-    if(tresult$p.value <= alpha && pTOST <= alpha){
-      combined_outcome <- paste0("NHST: reject null significance hypothesis that the effect is equal to ",mu_text," \n",
-                                 "TOST: reject null MET hypothesis")
-      #paste0("statistically different from ",mu_text," and statistically greater than the minimal effect threshold")
-    }
-    if(tresult$p.value < alpha && pTOST > alpha){
-      combined_outcome <- paste0("NHST: reject null significance hypothesis that the effect is equal to ",mu_text," \n",
-                                 "TOST: don't reject null MET hypothesis")
-      #paste0("statistically different from ",mu_text," but not statistically greater than the minimal effect threshold")
-    }
-    if(tresult$p.value > alpha && pTOST <= alpha){
-      combined_outcome <- paste0("NHST: don't reject null significance hypothesis that the effect is equal to ",mu_text," \n",
-                                 "TOST: reject null MET hypothesis")
-      #paste0("statistically not different from ",mu_text," and statistically greater than the minimal effect threshold")
-    }
-    if(tresult$p.value > alpha && pTOST > alpha){
-      combined_outcome <- paste0("NHST: don't reject null significance hypothesis that the effect is equal to ",mu_text," \n",
-                                 "TOST: don't reject null MET hypothesis")
-      #paste0("statistically not different from ",mu_text," and not statistically greater than the minimal effect threshold")
-    }
-  }
+  ttest_restext = paste0("The null hypothesis test was ",testoutcome," ",
+                         names(tresult$statistic), " = ",
+                         format(tresult$statistic,
+                                digits = 3,
+                                nsmall = 3, scientific = FALSE),", p = ",
+                         format(tresult$p.value, digits = 3,
+                                nsmall = 3, scientific = TRUE),sep="")
+  combined_outcome = tost_decision(hypothesis = hypothesis,
+                                    alpha = alpha,
+                                    pvalue = tresult$p.value,
+                                    pTOST = pTOST,
+                                    mu_text = mu_text)
 
 
   decision = list(

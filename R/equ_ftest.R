@@ -3,9 +3,11 @@
 #' @param Fstat The F-statistic from the F-test.
 #' @param df1 Degrees of freedom for the numerator.
 #' @param df2 Degrees of freedom for the denominator.
-#' @param eqbound Equivalence bound for the partial eta-squared.
+#' @param eqb Defunct argument for quivalence bound for the partial eta-squared.
+#' @param eqbound Defunct argument for quivalence bound for the partial eta-squared. Default is NULL.
 #' @param MET logical indicator to perform a minimal effect test rather than equivalence test (default is FALSE).
 #' @param alpha alpha used for the test (e.g., 0.05).
+#' @details For details on the calculations in this function see vignette("the_ftestTOSTER").
 #' @return Object of class '"htest"
 #' \describe{
 #'   \item{\code{"statistic"}}{The value of the F-statistic.}
@@ -17,6 +19,7 @@
 #'   \item{\code{"method"}}{A string indicating the type of F-test.}
 #'   \item{\code{"data.name"}}{A required string indicating that this was calculated from summary statistics.}
 #' }
+#' @family f-test
 #' @section References:
 #' Campbell, H., & Lakens, D. (2021). Can we disregard the whole model? Omnibus non‐inferiority testing for R2 in multi‐variable linear regression and in ANOVA. British Journal of Mathematical and Statistical Psychology, 74(1), 64-89. doi: 10.1111/bmsp.12201
 #' @importFrom stats pf qf
@@ -25,11 +28,15 @@
 equ_ftest <- function(Fstat,
                       df1,
                       df2,
-                      eqbound,
+                      eqbound = NULL,
+                      eqb,
                       MET = FALSE,
                       alpha = 0.05){
   #message("Note: equ_ftest only validated for one-way ANOVA; use with caution")
-
+  if(!is.null(eqbound)){
+    eqb = eqbound
+  }
+  eqbound = eqb
   conf_level = 1 - alpha
 
   pes = Fstat * df1 / (Fstat*df1+df2)

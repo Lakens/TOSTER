@@ -35,6 +35,7 @@ These types of plots are discussed by Schweder T, Hjort NL. (2016, ISBN:97813164
 }
 \seealso{
 Other plotting functions: 
-\code{\link{plot_pes}()}
+\code{\link{plot_pes}()},
+\code{\link{plot_smd}()}
 }
 \concept{plotting functions}

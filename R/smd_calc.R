@@ -15,6 +15,7 @@
 #' @param subset an optional vector specifying a subset of observations to be used.
 #' @param na.action a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").
 #' @param ...  further arguments to be passed to or from methods.
+#' @details For details on the calculations in this function see vignette("SMD_calcs").
 #' @return A data frame containing the SMD estimates.
 #' @examples
 #' \dontrun{
