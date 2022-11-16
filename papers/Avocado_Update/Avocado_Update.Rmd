@@ -543,7 +543,7 @@ Using the `InsectSprays` data set in R and the base R `aov` function I can demon
 
 ```{r warning=FALSE, message=FALSE}
 data("InsectSprays")
-aovtest = aov(count+ ~ spray, data = InsectSprays)
+aovtest = aov(count ~ spray, data = InsectSprays)
 anova(aovtest)
 
 ```
@@ -551,10 +551,7 @@ anova(aovtest)
 We can then use the information in the table above to perform an equivalence test using the `equ_ftest` function. This function returns an object of the S3 class `htest` and the output will look very familiar to the the t-test. The main difference is the estimates, and confidence interval, are for partial $\eta^2_p$.
 
 ```{r}
-equ_ftest(Fstat = 34.70228,
-          df1 = 5, 
-          df2 = 66, 
-          eqb = 0.35)
+equ_ftest(Fstat = 34.70228,  df1 = 5, df2 = 66,  eqb = 0.35)
 ```
 
 Based on the results above we would conclude there is a significant effect of "spray" and the differences due to spray are *not* statistically equivalent. In essence, we reject the traditional null hypothesis of "no effect" but accept the null hypothesis of the equivalence test.

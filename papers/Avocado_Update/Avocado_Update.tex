@@ -1001,8 +1001,8 @@ testing of the partial \(\eta^2\) (eta-squared) effect size from ANOVAs.
 Statistical equivalence testing\footnote{Also called ``omnibus
   non-inferiority testing'' by \citet{Campbell_2021}} for \emph{F}-tests
 are special use case of the cumulative distribution function of the
-non-central \emph{F} distribution. As \citet{Campbell_2021} states,
-these type of questions answer the question: ``Can we reject the
+non-central \emph{F} distribution. As \citet{Campbell_2021} states, this
+type of statistical test answers the question: ``Can we reject the
 hypothesis that the total proportion of variance in outcome Y
 attributable to X is greater than or equal to the equivalence bound
 \(\Delta\)?''
@@ -1019,7 +1019,7 @@ H_1 =  0 \geq \eta^2_p < \Delta
 \]
 
 In TOSTER, I have gone a tad farther than \citet{Campbell_2021}, and
-have included a calcuation for a generalization of the non-centrality
+have included a calculation for a generalization of the non-centrality
 parameter that allows the equivalence test for \emph{F}-tests to be
 applied to variety of designs.
 
@@ -1048,33 +1048,30 @@ p_{eq} = p_f(F; df_1, df_2, \lambda_{eq})
 Test}\label{example-of-equivalence-anova-test}}
 
 Using the \texttt{InsectSprays} data set in R and the base R
-\texttt{aov} function we can demonstrate how this omnibus equivalence
+\texttt{aov} function I can demonstrate how this omnibus equivalence
 testing can be applied with TOSTER. From the initial analysis we an see
-a clear ``significant'' effect (the p-value listed is zero but it just
-very small) of the factor spray. However, we \emph{may} be interested in
-testing if the effect is practically equivalent. I will arbitrarily set
-the equivalence bound to a partial eta-squared of 0.35
-(\(H_0: \eta^2_p > 0.35\))
+a clear ``significant'' effect (very small p-value) of the inspect
+spray. However, we \emph{may} be interested in testing if the effect is
+practically equivalent. I will arbitrarily set the equivalence bound to
+a partial eta-squared of 0.35 (\(H_0: \eta^2_p > 0.35\))
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \FunctionTok{data}\NormalTok{(}\StringTok{"InsectSprays"}\NormalTok{)}
 \NormalTok{aovtest }\OtherTok{=} \FunctionTok{aov}\NormalTok{(count }\SpecialCharTok{\textasciitilde{}}\NormalTok{ spray, }\AttributeTok{data =}\NormalTok{ InsectSprays)}
-\NormalTok{aovtest}
+\FunctionTok{anova}\NormalTok{(aovtest)}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{verbatim}
-## Call:
-##    aov(formula = count ~ spray, data = InsectSprays)
+## Analysis of Variance Table
 ## 
-## Terms:
-##                    spray Residuals
-## Sum of Squares  2668.833  1015.167
-## Deg. of Freedom        5        66
-## 
-## Residual standard error: 3.921902
-## Estimated effects may be unbalanced
+## Response: count
+##           Df Sum Sq Mean Sq F value    Pr(>F)    
+## spray      5 2668.8  533.77  34.702 < 2.2e-16 ***
+## Residuals 66 1015.2   15.38                      
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 \end{verbatim}
 
 We can then use the information in the table above to perform an
@@ -1085,10 +1082,7 @@ estimates, and confidence interval, are for partial \(\eta^2_p\).
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{equ\_ftest}\NormalTok{(}\AttributeTok{Fstat =} \FloatTok{34.70228}\NormalTok{,}
-          \AttributeTok{df1 =} \DecValTok{5}\NormalTok{,}
-          \AttributeTok{df2 =} \DecValTok{66}\NormalTok{,}
-          \AttributeTok{eqb =} \FloatTok{0.35}\NormalTok{)}
+\FunctionTok{equ\_ftest}\NormalTok{(}\AttributeTok{Fstat =} \FloatTok{34.70228}\NormalTok{,  }\AttributeTok{df1 =} \DecValTok{5}\NormalTok{, }\AttributeTok{df2 =} \DecValTok{66}\NormalTok{,  }\AttributeTok{eqb =} \FloatTok{0.35}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1109,6 +1103,8 @@ effect of ``spray'' and the differences due to spray are \emph{not}
 statistically equivalent. In essence, we reject the traditional null
 hypothesis of ``no effect'' but accept the null hypothesis of the
 equivalence test.
+
+\newpage
 
 The \texttt{equ\_ftest} is very useful because all you need is very
 basic summary statistics. However, if you are doing all your analyses in
@@ -1140,18 +1136,20 @@ of researchers on a massive replication project for sport and exercise
 science \citep{repSES}. How to determine whether a direct\footnote{Defined
   as being a as-close-as possible replication to the original study. In
   contrast to ``conceptual'' replications.} replication was equivalent
-to the original study was common, and contentious, topic of conversation
-among the team. Inspired by these discussions, I created 2 functions
-that would utilize the basic principles of SMDs\footnote{The textbook by
+to the original study was contentious topic of conversation among the
+team. Inspired by these discussions, I created 2 functions that would
+utilize the basic principles of SMDs\footnote{The textbook by
   \citet{borenstein} and the some of the works of Wolfgang Vietchbauer
   were a large source of information for developing these functions.} to
 test for differences between two studies.
 
-Overall, the concept is simple: if we have an estimates of SMDs from two
+Overall, the concept is simple: if we have estimates of SMDs from two
 studies we can use large-sample approximation to compute the sampling
-variances to estimate the degree to which the two studies differ from
-one another. The users of TOSTER then have the option to test whether
-the two SMDs significantly differ, or use TOST to estimate if they are
+variances\footnote{Users can also supply their own sampling variances
+  using the \texttt{se1} and \texttt{se2} arguments.} to estimate the
+degree to which the two studies differ from one another (i.e.,
+p-values). The users of TOSTER then have the option to test whether the
+two SMDs significantly differ, or use TOST to estimate if they are
 practically equivalent. Additionally, there are two options for
 comparing SMDs: using the summary statistics or using bootstrapping
 (assuming original data is available).
@@ -1272,14 +1270,8 @@ see if the confidence interval is within the preset equivalence bounds.
 \hypertarget{conclusions}{%
 \section{Conclusions}\label{conclusions}}
 
-\begin{itemize}
-\tightlist
-\item
-  This can be useful.
-\item
-  This package is not exhaustive but is good for simple analyses and
-  teaching
-\end{itemize}
+In this manuscript I have demonstrated most of the new functions and
+features within the TOSTER R package.
 
 \newpage
 
