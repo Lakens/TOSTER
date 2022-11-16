@@ -177,7 +177,7 @@ t_TOST.default = function(x,
     data <- na.omit(data)
     colnames(data) = c("i1", "i2")
     data2 =  data
-    data2$diff = data2$i2 - data2$i1
+    data2$diff = data2$i2 - data2$i1 - mu
 
     n <- nrow(data)
     i1 <- data$i1
@@ -211,7 +211,7 @@ t_TOST.default = function(x,
     n2 = length(y1)
 
     m1 = mean(x1)
-    m2 = mean(y1)
+    m2 = mean(y1)-mu
 
     sd1 = sd(x1)
     sd2 = sd(y1)
@@ -234,7 +234,7 @@ t_TOST.default = function(x,
 
     x1 = na.omit(x)
     n1 = length(x1)
-    m1 = mean(x1)
+    m1 = mean(x1)-mu
     sd1 = sd(x1)
 
     cohen_res = d_est_one(
