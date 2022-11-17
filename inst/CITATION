@@ -1,2 +1,11 @@
-citHeader("To cite the TOSTER package in publications use:")
+citHeader("To cite the TOSTER package in publications use the following papers:")
+
+bibentry(
+ bibtype="Article",
+ title="Exploring Equivalence Testing with the Updated TOSTER R Package",
+ journal="PsyArXiv",
+ year="2022",
+ author= personList(as.person("Aaron R Caldwell")),
+ textVersion="Caldwell, A.R. (2022). Exploring Equivalence Testing with the Updated TOSTER R Package. PsyArXiv." )
+
 citEntry(entry = "Article", author = personList(as.person("Daniel Lakens")), title = "Equivalence tests: A practical primer for t-tests, correlations, and meta-analyses", journal = "Social Psychological and Personality Science", year = 2017, volume = 1, pages = "1--8", doi = "10.1177/1948550617697177", textVersion = paste("Lakens, D. (2017).", "Equivalence tests: A practical primer for t-tests, correlations, and meta-analyses.", "Social Psychological and Personality Science, 8(4), 355-362. doi:10.1177/1948550617697177"))
