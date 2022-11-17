@@ -8,9 +8,9 @@ author:
   email: arcaldwell49@gmail.com
 type: PREPRINT
 output:
+  papaja::apa6_docx: default
   rticles::tf_article: 
     extra_dependencies: ["float"]
-  papaja::apa6_docx: default
 bibliography: interactcadsample.bib
 #appendix: appendix.tex
 abstract: |
@@ -64,8 +64,8 @@ library(patchwork)
 # Introduction
 
 Researchers often erroneously declare that no statistical effect exists based on a single "non-significant" p-value [@blandaltman95]. 
-In many of these cases, the data may corroborate the researcher's claim, but the interpretation of a null hypothesis significance test (NHST), wherein the null hypothesis is "no effect", is nonetheless incorrect. 
-In order to statistically test for whether there is "no effect" or "no difference" researchers could use equivalence testing. 
+In many of these cases, the data may corroborate the researcher's claim, but the interpretation of a null hypothesis significance test (NHST), wherein the lack of significance is considered evidence of "no effect", is nonetheless incorrect. 
+In order to statistically test for whether there is practically no effect, researchers could use equivalence testing. 
 Equivalence testing is used when the goal of a statistical test is to demonstrate that the difference between two conditions is too small to be meaningful. For example, if a researcher wanted to test whether a new drug was no worse than a standard drug, the null hypothesis would be that the new drug is worse than the standard drug by more than a meaningful amount, and the alternative hypothesis would be that the difference between the two drugs is small enough to be meaningless. A very simple equivalence testing approach is the use of “two one-sided tests” (TOST) [@schuirmann1987]. 
 
 The TOST procedure is a statistical test of whether a parameter (e.g., mean difference) is within a specified interval. The TOST procedure can be used to test the equivalence of two means, two proportions, two regression coefficients, and even two variances.
