@@ -172,7 +172,7 @@ if(!paired){
     #tstat <- (mx - mu)/stderr
     #tstat_low = (mx - low_eqbound)/stderr
     #tstat_high = (mx - high_eqbound)/stderr
-    method <- if (paired) "Bootstrapped Paired t-test" else "Bootstrapped One Sample t-test"
+    method <-  "Bootstrapped Log Paired t-test" # else "Bootstrapped One Sample t-test"
     #estimate <- setNames(mx, if (paired) "mean of the differences" else "mean of x")
     #x.cent <- x - mx # remove to have an untransformed matrix
     X <- matrix(sample(x, size = nx*R, replace = TRUE), nrow = R)
