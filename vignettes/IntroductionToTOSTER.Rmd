@@ -5,14 +5,19 @@ date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Introduction to Equivalence Testing with TOSTER}
-  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
 ---
 
 For an open access tutorial paper explaining how to set equivalence bounds, and how to perform and report equivalence tests, see Lakens, D., Scheel, A. M., & Isager, P. M. (2018). Equivalence Testing for Psychological Research: A Tutorial. *Advances in Methods and Practices in Psychological Science*, 1(2), 259-269.  https://doi.org/10.1177/2515245918770963
 
-**Warning: many of these functions are defunct and outdated. Please see the other vignettes for details on the new functions.**
-The "Introduction to t_TOST" vignette, in particular, will be helpful. This vignette, and the functions used, will continue to be in the package for continuity purposes.
+**Warning: many of the TOSTER functions within this particular vignette are outdated.**
+Where this is the case, we have included the updated code as well.
+Please see the other vignettes for details on the new functions.
+The "Introduction to t_TOST" vignette, in particular, will be helpful.
+This vignette, and the functions used, will continue to be in the package for continuity purposes.
 
 # Equivalence Testing with TOSTER
 
@@ -65,8 +70,12 @@ We see that indeed, all effect size estimates are measured with such high precis
 Eskine (2013) showed that participants who had been exposed to organic food were substantially harsher in their moral judgments relative to those exposed to control (d = 0.81, 95% CI: [0.19, 1.45]). A replication by Moery & Calin-Jageman (2016, Study 2) did not observe a significant effect (Control: n = 95, M = 5.25, SD = 0.91, Organic Food: n = 89, M = 5.22, SD = 0.83). Following Simonsohn's (2015) recommendation the equivalence bound was set to the effect size the original study had 33% power to detect (with n = 21 in each condition, this means the equivalence bound is d = 0.48, which equals a difference of 0.429 on a 7-point scale given the sample sizes and a pooled standard deviation of 0.894). Using a TOST equivalence test with alpha = 0.05, assuming equal variances, and equivalence bounds of d = -0.48 and d = 0.48 is significant, t(182) = -3.03, p = 0.001. We can reject effects more extreme than d = 0.48 (or a raw difference of 0.429 scalepoints). 
 
 ```{r, fig.width=6}
+# OLD CODE
 #TOSTtwo(m1=5.25,m2=5.22,sd1=0.95,sd2=0.83,n1=95,n2=89,low_eqbound_d=-0.48, high_eqbound=0.48, alpha = 0.05, var.equal=TRUE)
 TOSTtwo.raw(m1=5.25,m2=5.22,sd1=0.95,sd2=0.83,n1=95,n2=89,low_eqbound=-0.429, high_eqbound=0.429, alpha = 0.05, var.equal=TRUE)
+
+# NEW CODE
+tsum_TOST(m1=5.25,m2=5.22,sd1=0.95,sd2=0.83,n1=95,n2=89,eqb=0.429, alpha = 0.05, var.equal=TRUE)
 ```
 
 *Thanks to Brent Donnelan for pointing out the SD in the control condition in the replication was 0.91, not 0.95 as in an earlier version of this vignette, and the raw equivalence bound is 0.429, not 0.384 as in an earlier version. I mistook the n (95) and the SD, and originally calculated raw bounds for 0.43, not 0.48 by mistake.*
@@ -81,7 +90,12 @@ Deary, Thorpe, Wilson, Starr, and Whally (2003) report the IQ scores of 79,376 c
 
 
 ```{r, fig.width=6}
+# OLD CODE
 TOSTtwo(m1=100.64,m2=100.48,sd1=14.1,sd2=14.9,n1=39343,n2=40033,low_eqbound_d=-0.05, high_eqbound_d=0.05, alpha = 0.05, var.equal=FALSE)
+
+# NEW CODE
+tsum_TOST(m1=100.64,m2=100.48,sd1=14.1,sd2=14.9,n1=39343,n2=40033,eqb=0.05, alpha = 0.05, var.equal=FALSE,
+          eqbound_type = "SMD")
 ```
 
 *Deary, I. J., Thorpe, G., Wilson, V., Starr, J. M., & Whalley, L. J. (2003). Population sex differences in IQ at age 11: The Scottish mental survey 1932. Intelligence, 31(6), 533-542.*
@@ -108,13 +122,23 @@ Lakens, Semin, & Foroni (2012) examined whether the color of Chinese ideographs 
 With 19 to 21 participants in each between subject condition, the study had 80% power to detect equivalence with equivalence bounds of -0.68 to d = 0.68.
 
 ```{r}
+# OLD CODE
 powerTOSTone(alpha=0.05, statistical_power=0.8, low_eqbound_d=-0.68, high_eqbound_d=0.68)
+
+# NEW CODE -- note there is a minor discrepancy
+# because the new function uses a different solution for power
+power_t_TOST(type = "one.sample",eqb = 0.68,
+             power = 0.8,alpha=.05)
 ```
 
 When we perform 5 equivalence tests using equivalence bounds of -0.68 and 0.68, using a Holm-Bonferroni sequential procedure to control error rates, we can conclude statistical equivalence for the data in row 1, 3, and 6, but the conclusion is undetermined for tests 2 and 4, where the data is neither significantly different from guessing average, nor statistically equivalent. For example, performing the test for the data in row 6:
 
 ```{r, fig.width=6}
+# OLD CODE
 TOSTone(m=5.71,mu=6,sd=1.79,n=20,low_eqbound_d=-0.68, high_eqbound_d=0.68, alpha=0.05)
+
+# NEW CODE
+tsum_TOST(m1=5.71-6,sd1=1.79,n1=20,eqb=0.68, eqbound_type = "SMD")
 ```
 
 It is clear I should have been more tentative in my conclusions in this study. Not only can I not conclude equivalence in some of the conditions, the equivalence bound I had 80% power to detect is very large, meaning the possibility that there are theoretically interesting but smaller effects remains. 
@@ -132,7 +156,9 @@ It is clear I should have been more tentative in my conclusions in this study. N
 Olson, Fazio, and Hermann (2007) reported correlations between implicit and explicit measures of self-esteem, such as the IAT, Rosenberg's self-esteem scale, a feeling thermometer, and trait ratings. In Study 1 71 participants completed the self-esteem measures. Because no equivalence bounds are mentioned, we can see which equivalence bounds the researchers would have 80% power to detect. 
 
 ```{r, fig.width=6}
+# No new code for correlations (yet)
 powerTOSTr(alpha=0.05, statistical_power=0.8, low_eqbound_r=-0.24, high_eqbound_r=0.24)
+
 ```
 
 With 71 pairs of observations between measures, the researchers have 80% power for equivalence bounds of r = -0.24 and r = 0.24. 
