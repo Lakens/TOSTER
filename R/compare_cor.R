@@ -27,6 +27,7 @@ compare_cor = function(r1,
                        df1,
                        r2,
                        df2,
+                       method = c("z","ah"),
                        alternative = c("two.sided", "less", "greater")){
 
   alternative <- match.arg(alternative)
