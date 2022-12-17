@@ -32,6 +32,7 @@ boot_cor_test <- function(x,
                           TOST = FALSE,
                           R = 1999,
                           ...) {
+  DNAME <- paste(deparse(substitute(x)), "and", deparse(substitute(y)))
   nboot = R
   null.value = null
   if(!is.vector(x) || !is.vector(y)){
@@ -42,7 +43,7 @@ boot_cor_test <- function(x,
   }
   df <- cbind(x,y)
   df <- df[complete.cases(df), ]
-  n <- nrow(m)
+  n <- nrow(df)
   x <- df[,1]
   y <- df[,2]
   alternative = match.arg(alternative)
@@ -69,12 +70,12 @@ boot_cor_test <- function(x,
     }
   }
 
-  est <- cor(x, y, method)
+  est <- cor(x, y, method = method)
   data <- matrix(sample(n, size=n*nboot, replace=TRUE), nrow=nboot)
-  bvec <- apply(data, 1, .corboot, x, y, method, ...) # Create a 1 by nboot matrix.
+  bvec <- apply(data, 1, .corboot, x, y, method = method, ...) # get bootstrap results corr
 
-  corci = quantile(bvec, c((1 - ci) / 2, 1 - (1 - ci) / 2))
-
+  boot.cint = quantile(bvec, c((1 - ci) / 2, 1 - (1 - ci) / 2))
+  attr(boot.cint, "conf.level") <- ci
   if(alternative == "two.sided"){
     phat <- (sum(bvec < null.value)+.5*sum(bvec==null.value))/nboot
     sig <- 2 * min(phat, 1 - phat)
@@ -85,33 +86,33 @@ boot_cor_test <- function(x,
   if(alternative == "less"){
     sig <- 1 - sum(bvec <= null.value)/nboot
   }
-  if(saveboot){ # save bootstrap samples
-    list(conf.int=corci, p.value=sig, estimate=est, bootsamples=bvec)
-  } else {
-    list(conf.int=corci, p.value=sig, estimate=est)
+  if(TOST){
+    sig2 <- 1 - sum(bvec >= -1*null.value)/nboot
+    sig = max(sig,sig2)
   }
+
 
   if (method == "pearson") {
     # Pearson # Fisher
-    method2 <- "Pearson's product-moment correlation"
+    method2 <- "Bootstrapped Pearson's product-moment correlation"
     names(null.value) = "correlation"
     rfinal = c(cor = est)
   }
   if (method == "spearman") {
-    method2 <- "Spearman's rank correlation rho"
+    method2 <- "Bootstrapped Spearman's rank correlation rho"
     #  # Fieller adjusted
     rfinal = c(rho = est)
     names(null.value) = "rho"
 
   }
   if (method == "kendall") {
-    method2 <- "Kendall's rank correlation tau"
+    method2 <- "Bootstrapped Kendall's rank correlation tau"
     # # Fieller adjusted
     rfinal = c(tau = est)
     names(null.value) = "tau"
 
   }
-  DNAME <- paste(deparse(substitute(x)), "and", deparse(substitute(y)))
+
   # Store as htest
   rval <- list(p.value = sig,
                conf.int = boot.cint,
