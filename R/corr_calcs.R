@@ -133,3 +133,4 @@ corr_curv = function (r,
 
 # plot_cor(.5,18)
 
+
