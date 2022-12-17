@@ -32,18 +32,21 @@ boot_cor_test <- function(x,
                           TOST = FALSE,
                           R = 1999,
                           ...) {
+  nboot = R
+  null.value = null
+  if(!is.vector(x) || !is.vector(y)){
+    stop("x and y must be vectors.")
+  }
+  if(length(x)!=length(y)){
+    stop("the vectors do not have equal lengths.")
+  }
+  df <- cbind(x,y)
+  df <- df[complete.cases(df), ]
+  n <- nrow(m)
+  x <- df[,1]
+  y <- df[,2]
   alternative = match.arg(alternative)
   method = match.arg(method)
-
-  nulltest = z_cor_test(
-    x=x,
-    y=y,
-    alternative = alternative,
-    method = method,
-    alpha = alpha,
-    null = null,
-    TOST = TOST
-  )
 
   if(TOST && null <=0){
     stop("positive value for null must be supplied if using TOST.")
@@ -65,97 +68,64 @@ boot_cor_test <- function(x,
       intmult = c(NA,1)
     }
   }
-  r_xy = cor(x,y,
-             method = method)
-  df = data.frame(x=x,
-                  y=y)
-  df = na.omit(df)
-  n_obs = nrow(df)
 
-  z_xy = rho_to_z(r_xy)
-  DNAME <- paste(deparse(substitute(x)), "and", deparse(substitute(y)))
-  # get absolute value if TOST
-  z_test = ifelse(TOST, abs(z_xy), z_xy)
-  znull = rho_to_z(null)
-  z_test = z_test-znull
-  NVAL = null
+  est <- cor(x, y, method)
+  data <- matrix(sample(n, size=n*nboot, replace=TRUE), nrow=nboot)
+  bvec <- apply(data, 1, .corboot, x, y, method, ...) # Create a 1 by nboot matrix.
+
+  corci = quantile(bvec, c((1 - ci) / 2, 1 - (1 - ci) / 2))
+
+  if(alternative == "two.sided"){
+    phat <- (sum(bvec < null.value)+.5*sum(bvec==null.value))/nboot
+    sig <- 2 * min(phat, 1 - phat)
+  }
+  if(alternative == "greater"){
+    sig <- 1 - sum(bvec >= null.value)/nboot
+  }
+  if(alternative == "less"){
+    sig <- 1 - sum(bvec <= null.value)/nboot
+  }
+  if(saveboot){ # save bootstrap samples
+    list(conf.int=corci, p.value=sig, estimate=est, bootsamples=bvec)
+  } else {
+    list(conf.int=corci, p.value=sig, estimate=est)
+  }
+
   if (method == "pearson") {
     # Pearson # Fisher
     method2 <- "Pearson's product-moment correlation"
-    names(NVAL) = "correlation"
-    rfinal = c(cor = r_xy)
-    z.se <- 1 / sqrt(n_obs - 3)
-    cint = cor_to_ci(cor = r_xy, n = n_obs, ci = ci,
-                     method = "pearson")
+    names(null.value) = "correlation"
+    rfinal = c(cor = est)
   }
   if (method == "spearman") {
     method2 <- "Spearman's rank correlation rho"
     #  # Fieller adjusted
-    rfinal = c(rho = r_xy)
-    names(NVAL) = "rho"
-    z.se <- (1.06 / (n_obs - 3)) ^ 0.5
-    cint = cor_to_ci(cor = r_xy, n = n_obs, ci = ci,
-                     method = "spearman",
-                     correction = "fieller")
+    rfinal = c(rho = est)
+    names(null.value) = "rho"
+
   }
   if (method == "kendall") {
     method2 <- "Kendall's rank correlation tau"
     # # Fieller adjusted
-    rfinal = c(tau = r_xy)
-    names(NVAL) = "tau"
-    z.se <- (0.437 / (n_obs - 4)) ^ 0.5
+    rfinal = c(tau = est)
+    names(null.value) = "tau"
 
-    cint = cor_to_ci(cor = r_xy, n = n_obs, ci = ci,
-                     method = "kendall",
-                     correction = "fieller")
   }
-  z_test2 = z_test / z.se
-  z_stat = z_xy / z.se
-  cor.boot = rep(NA, times = length(R)) # corr difference vector
-  zxy.boot <- rep(NA, times = length(R)) # z vector
-  zstat.boot <- rep(NA, times = length(R)) # z vector
-  for (i in 1:R) {
-    idx <- sample.int(n_obs, n_obs, replace = TRUE)
-    dat_run = df[idx, ]
-    cor.boot[i] <- cor(dat_run,
-                       method = method)[1,2]
-    zxy.boot[i] <- rho_to_z(cor.boot[i])
-    zstat.boot[i] <- zxy.boot[i]/z.se
-  }
-
-  znull = zstat.boot - z_stat
-  #m_vec = append(m_vec, nullTOST$effsize$estimate[1])
-  #d_vec = append(d_vec, nullTOST$effsize$estimate[2])
-  if(alternative == "two.sided")
-    boot.pval <- 2 * min(mean(znull <= z_test2), mean(znull > z_test2))
-  if(alternative == "less"){
-    boot.pval = mean(znull < z_test2)
-  }
-  if(alternative == "greater"){
-    boot.pval = mean(znull > z_test2)
-  }
-
-
-  boot.se = sd(cor.boot, na.rm =TRUE)
-  boot.cint <- quantile(cor.boot, c((1 - ci) / 2, 1 - (1 - ci) / 2))
-
-
-  names(z_test2) = "z"
-  attr(boot.cint, "conf.level") <- ci
-
+  DNAME <- paste(deparse(substitute(x)), "and", deparse(substitute(y)))
   # Store as htest
-  rval <- list(statistic = z_test2, p.value = boot.pval,
+  rval <- list(p.value = sig,
                conf.int = boot.cint,
                estimate = rfinal,
-               null.value = NVAL,
+               stderr = sd(bvec,na.rm=TRUE),
+               null.value = null.value,
                alternative = alternative,
                method = method2,
                data.name = DNAME,
-               boot = list(r = cor.boot,
-                           z = zxy.boot,
-                           znull = znull),
+               boot = bvec,
                call = match.call())
   class(rval) <- "htest"
   return(rval)
 }
+
+
 

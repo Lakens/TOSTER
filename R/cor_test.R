@@ -47,7 +47,7 @@ z_cor_test = function(x,
     ci = 1 - alpha
     if(TOST){
       intmult = c(1,1)
-    } else if(alternative = "less"){
+    } else if(alternative == "less"){
       intmult = c(1,NA)
     } else {
       intmult = c(NA,1)

@@ -133,4 +133,7 @@ corr_curv = function (r,
 
 # plot_cor(.5,18)
 
-
+.corboot <- function(isub, x, y, ...){
+  res <- cor(x[isub], y[isub], ...)
+  res
+}

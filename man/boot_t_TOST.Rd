@@ -80,7 +80,7 @@ An S3 object of class
 }
 }
 \description{
-A function for a bootstrap method for TOST with all types of t-tests..
+A function for a bootstrap method for TOST with all types of t-tests.
 }
 \details{
 For details on the calculations in this function see vignette("robustTOST").
