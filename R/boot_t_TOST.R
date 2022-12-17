@@ -1,5 +1,5 @@
 #' @title Bootstrapped TOST with t-tests
-#' @description A function for a bootstrap method for TOST with all types of t-tests..
+#' @description A function for a bootstrap method for TOST with all types of t-tests.
 #' @param R number of bootstrap replicates
 #' @inheritParams t_TOST
 #' @details For details on the calculations in this function see vignette("robustTOST").

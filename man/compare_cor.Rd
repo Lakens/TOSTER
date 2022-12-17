@@ -4,7 +4,16 @@
 \alias{compare_cor}
 \title{Comparing two independent correlation coefficients}
 \usage{
-compare_cor(r1, df1, r2, df2, alternative = c("two.sided", "less", "greater"))
+compare_cor(
+  r1,
+  df1,
+  r2,
+  df2,
+  method = c("fisher", "ah", "kraatz"),
+  alternative = c("two.sided", "less", "greater"),
+  null = 0,
+  TOST = FALSE
+)
 }
 \arguments{
 \item{r1}{Correlation study 1.}
@@ -14,6 +23,8 @@ compare_cor(r1, df1, r2, df2, alternative = c("two.sided", "less", "greater"))
 \item{r2}{Correlation study 2.}
 
 \item{df2}{Degrees of freedom from study 2 (if a simple correlation the df is N-2).}
+
+\item{method}{Method for determining differences. Default, "z", will use Fisher's transformation, while "AH" will use the Anderson-Hauk approach.}
 
 \item{alternative}{a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater" or "less". You can specify just the initial letter.
  @return A list with class "htest" containing the following components:
@@ -31,4 +42,9 @@ compare_cor(r1, df1, r2, df2, alternative = c("two.sided", "less", "greater"))
 }
 \description{
 A function to compare correlations between studies. This function is intended to be used to compare the compatibility of original studies with replication studies (lower p-values indicating lower compatibility).
+}
+\references{
+Counsell, A., & Cribbie, R. A. (2015). Equivalence tests for comparing correlation and regression coefficients. The British journal of mathematical and statistical psychology, 68(2), 292–309. https://doi.org/10.1111/bmsp.12045
+
+Anderson, S., & Hauck, W. W. (1983). A new procedure for testing equivalence in comparative bioavailability and other clinical trials. Communications in Statistics-Theory and Methods, 12(23), 2663-2692.
 }
