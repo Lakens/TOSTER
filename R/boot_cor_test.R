@@ -1,30 +1,25 @@
-#' @title Bootstrapped TOST with t-tests
-#' @description A function for a bootstrap method for TOST with all types of t-tests.
-#' @param R number of bootstrap replicates
-#' @inheritParams t_TOST
-#' @details For details on the calculations in this function see vignette("robustTOST").
-#' @return An S3 object of class
-#'   \code{"TOSTt"} is returned containing the following slots:
+#' @title Bootstrapped correlation coefficients
+#' @description A function for a bootstrap, percentile, method for correlation coefficients.
+#' @inheritParams boot_t_TOST
+#' @inheritParams z_cor_test
+#' @details This function uses a percentile bootstrap methods for the confidence intervals.
+#' The returned p-values are calculated from a re-sampled null distribution (similar to boot_t_TOST).
+#'  @return A list with class "htest" containing the following components:
 #' \describe{
-#'   \item{\code{"TOST"}}{A table of class \code{"data.frame"} containing two-tailed t-test and both one-tailed results.}
-#'   \item{\code{"eqb"}}{A table of class \code{"data.frame"} containing equivalence bound settings.}
-#'   \item{\code{"effsize"}}{ table of class \code{"data.frame"} containing effect size estimates}
-#'   \item{\code{"hypothesis"}}{String stating the hypothesis being tested}
-#'   \item{\code{"smd"}}{List containing the results of the standardized mean difference calculations (e.g., Cohen's d).Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation)}
-#'   \item{\code{"alpha"}}{Alpha level set for the analysis.}
-#'   \item{\code{"method"}}{Type of t-test.}
-#'   \item{\code{"decision"}}{List included text regarding the decisions for statistical inference.}
-#'   \item{\code{"boot"}}{List containing the bootstrap samples.}
+#'   \item{\code{"statistic"}}{z-score}
+#'   \item{\code{"p.value"}}{the p-value of the test.}
+#'   \item{\code{"estimate"}}{the estimated measure of association, with name "cor", "tau", or "rho" corresponding to the method employed.}
+#'   \item{\code{"null.value"}}{the value of the association measure under the null hypothesis.}
+#'   \item{\code{"alternative"}}{character string indicating the alternative hypothesis (the value of the input argument alternative). Possible values are "greater", "less", or "two-sided".}
+#'   \item{\code{"method"}}{a character string indicating how the association was measured.}
+#'   \item{\code{"data.name"}}{a character string giving the names of the data.}
+#'   \item{\code{"call"}}{the matched call.}
 #' }
-#' @details The implemented test(s) corresponds to the proposal of Chapter 16 of Efron and Tibshirani (1994).
-#'  Returns TOSTt class object with bootstrapped based results.
-#'  Please note that the repeated measures "corrected" effect size is not available at this time.
-#'
-#' For details on the calculations in this function see vignette("robustTOST").
+#' @references
+#' TBA
 #' @section References:
 #'
 #' Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press.
-
 #' @export
 
 
@@ -64,7 +59,7 @@ boot_cor_test <- function(x,
     ci = 1 - alpha
     if(TOST){
       intmult = c(1,1)
-    } else if(alternative = "less"){
+    } else if(alternative == "less"){
       intmult = c(1,NA)
     } else {
       intmult = c(NA,1)
@@ -86,19 +81,33 @@ boot_cor_test <- function(x,
   NVAL = null
   if (method == "pearson") {
     # Pearson # Fisher
-    method <- "Pearson's product-moment correlation"
+    method2 <- "Pearson's product-moment correlation"
+    names(NVAL) = "correlation"
+    rfinal = c(cor = r_xy)
     z.se <- 1 / sqrt(n_obs - 3)
+    cint = cor_to_ci(cor = r_xy, n = n_obs, ci = ci,
+                     method = "pearson")
   }
   if (method == "spearman") {
-    method <- "Spearman's rank correlation rho"
-    # Spearman # Fieller adjusted
+    method2 <- "Spearman's rank correlation rho"
+    #  # Fieller adjusted
+    rfinal = c(rho = r_xy)
+    names(NVAL) = "rho"
     z.se <- (1.06 / (n_obs - 3)) ^ 0.5
+    cint = cor_to_ci(cor = r_xy, n = n_obs, ci = ci,
+                     method = "spearman",
+                     correction = "fieller")
   }
   if (method == "kendall") {
-    method <- "Kendall's rank correlation tau"
-    # Kendall # Fieller adjusted
+    method2 <- "Kendall's rank correlation tau"
+    # # Fieller adjusted
+    rfinal = c(tau = r_xy)
+    names(NVAL) = "tau"
     z.se <- (0.437 / (n_obs - 4)) ^ 0.5
 
+    cint = cor_to_ci(cor = r_xy, n = n_obs, ci = ci,
+                     method = "kendall",
+                     correction = "fieller")
   }
   z_test2 = z_test / z.se
   z_stat = z_xy / z.se
@@ -131,17 +140,20 @@ boot_cor_test <- function(x,
   boot.cint <- quantile(cor.boot, c((1 - ci) / 2, 1 - (1 - ci) / 2))
 
 
-  names(zstat) = "z"
-  attr(cint, "conf.level") <- ci
+  names(z_test2) = "z"
+  attr(boot.cint, "conf.level") <- ci
 
   # Store as htest
-  rval <- list(statistic = z_final, p.value = pvalue,
-               conf.int = cint,
+  rval <- list(statistic = z_test2, p.value = boot.pval,
+               conf.int = boot.cint,
                estimate = rfinal,
                null.value = NVAL,
                alternative = alternative,
-               method = method,
+               method = method2,
                data.name = DNAME,
+               boot = list(r = cor.boot,
+                           z = zxy.boot,
+                           znull = znull),
                call = match.call())
   class(rval) <- "htest"
   return(rval)
