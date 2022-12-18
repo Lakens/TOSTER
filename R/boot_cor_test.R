@@ -2,31 +2,37 @@
 #' @description A function for a bootstrap, percentile, method for correlation coefficients.
 #' @inheritParams boot_t_TOST
 #' @inheritParams z_cor_test
+#' @param method a character string indicating which correlation coefficient is to be used for the test. One of "winsorized", "bendpercent","pearson", "kendall", or "spearman", can be abbreviated.
 #' @details This function uses a percentile bootstrap methods for the confidence intervals.
 #' The returned p-values are calculated from a re-sampled null distribution (similar to boot_t_TOST).
+#'
+#' The bootstrap correlation methods in this package offer two other correlations: a Winsorized correlation and a percentage bend correlation (see Wilcox 2017).
+#' These two can modified by adding the trim (Winsorized) or beta (percentage bend) arguments.
+#' The default for both arguments is 0.2 but can be modified at the user's discretion.
 #'  @return A list with class "htest" containing the following components:
 #' \describe{
 #'   \item{\code{"statistic"}}{z-score}
 #'   \item{\code{"p.value"}}{the p-value of the test.}
-#'   \item{\code{"estimate"}}{the estimated measure of association, with name "cor", "tau", or "rho" corresponding to the method employed.}
+#'   \item{\code{"estimate"}}{the estimated measure of association, with name "pb", "wincor", "cor", "tau", or "rho" corresponding to the method employed.}
 #'   \item{\code{"null.value"}}{the value of the association measure under the null hypothesis.}
 #'   \item{\code{"alternative"}}{character string indicating the alternative hypothesis (the value of the input argument alternative). Possible values are "greater", "less", or "two-sided".}
 #'   \item{\code{"method"}}{a character string indicating how the association was measured.}
 #'   \item{\code{"data.name"}}{a character string giving the names of the data.}
 #'   \item{\code{"call"}}{the matched call.}
 #' }
-#' @references
-#' TBA
 #' @section References:
 #'
-#' Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press.
+#' Wilcox, R.R. (2009) Comparing Pearson Correlations: Dealing with Heteroscedasticity and Nonnormality.
+#' Communications in Statistics - Simulation and Computation, 38, 2220–2234.
+#'
+#' Wilcox, R.R. (2017) Introduction to Robust Estimation and Hypothesis Testing, 4th edition. Academic Press.
 #' @export
 
 
 boot_cor_test <- function(x,
                           y,
                           alternative = c("two.sided", "less", "greater"),
-                          method = c("pearson", "kendall", "spearman"),
+                          method = c("pearson", "kendall", "spearman","winsorized","bendpercent"),
                           alpha = 0.05,
                           null = 0,
                           TOST = FALSE,
@@ -70,9 +76,26 @@ boot_cor_test <- function(x,
     }
   }
 
-  est <- cor(x, y, method = method)
-  data <- matrix(sample(n, size=n*nboot, replace=TRUE), nrow=nboot)
-  bvec <- apply(data, 1, .corboot, x, y, method = method, ...) # get bootstrap results corr
+  if(method %in% c("bendpercent","winsorized")){
+    if(method == "bendpercent"){
+      est <- pbcor(x, y, ...)
+      data <- matrix(sample(n, size=n*nboot, replace=TRUE), nrow=nboot)
+      bvec <- apply(data, 1, .corboot_pbcor, x, y, ...) # get bootstrap results corr
+    }
+
+    if(method == "winsorized"){
+      est <- wincor(x, y, ...)
+      data <- matrix(sample(n, size=n*nboot, replace=TRUE), nrow=nboot)
+      bvec <- apply(data, 1, .corboot_wincor, x, y, ...) # get bootstrap results corr
+    }
+
+
+  } else {
+    est <- cor(x, y, method = method)
+    data <- matrix(sample(n, size=n*nboot, replace=TRUE), nrow=nboot)
+    bvec <- apply(data, 1, .corboot, x, y, method = method, ...) # get bootstrap results corr
+  }
+
 
   boot.cint = quantile(bvec, c((1 - ci) / 2, 1 - (1 - ci) / 2))
   attr(boot.cint, "conf.level") <- ci
@@ -110,6 +133,20 @@ boot_cor_test <- function(x,
     # # Fieller adjusted
     rfinal = c(tau = est)
     names(null.value) = "tau"
+
+  }
+  if (method == "bendpercent") {
+    method2 <- "Bootstrapped percentage bend correlation pb"
+    # # Fieller adjusted
+    rfinal = c(pb = est)
+    names(null.value) = "pb"
+
+  }
+  if (method == "winsorized") {
+    method2 <- "Bootstrapped Winsorized correlation wincor"
+    # # Fieller adjusted
+    rfinal = c(win = est)
+    names(null.value) = "win"
 
   }
 

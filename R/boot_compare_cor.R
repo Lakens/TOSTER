@@ -1,6 +1,6 @@
 boot_compare_cor <- function(x1, y1, x2, y2,
                      alternative = c("two.sided", "less", "greater"),
-                     method = c("pearson", "kendall", "spearman"),
+                     method = c("pearson", "kendall", "spearman","winsorized","bendpercent"),
                      alpha = 0.05,
                      null = 0,
                      TOST = FALSE,
@@ -54,14 +54,45 @@ boot_compare_cor <- function(x1, y1, x2, y2,
   n2 <- nrow(df)
   x2 <- df[,1]
   y2 <- df[,2]
-  # correlations
-  r1 <- cor(x1,y1,method = method)
-  r2 <- cor(x2,y2,method = method)
-  # bootstrap
-  data1 <- matrix(sample(n1, size=n1*nboot, replace=TRUE), nrow=nboot)
-  bvec1 <- apply(data1, 1, .corboot, x1, y1, cor, method = method, ...) # A 1 by nboot matrix.
-  data2 <- matrix(sample(n2, size=n2*nboot, replace=TRUE), nrow=nboot)
-  bvec2 <- apply(data2, 1, .corboot, x2, y2, cor, method = method, ...) # A 1 by nboot matrix.
+
+  if(method %in% c("bendpercent","winsorized")){
+    if(method == "bendpercent"){
+      r1 <- pbcor(x1, y1, ...)
+      r2 <- pbcor(x2, y2, ...)
+      data <- matrix(sample(n, size=n*nboot, replace=TRUE), nrow=nboot)
+      bvec <- apply(data, 1, .corboot_pbcor, x, y, ...) # get bootstrap results corr
+      # bootstrap
+      data1 <- matrix(sample(n1, size=n1*nboot, replace=TRUE), nrow=nboot)
+      bvec1 <- apply(data1, 1, .corboot_pbcor, x1, y1,   ...) # A 1 by nboot matrix.
+      data2 <- matrix(sample(n2, size=n2*nboot, replace=TRUE), nrow=nboot)
+      bvec2 <- apply(data2, 1, .corboot_pbcor, x2, y2,  ...) # A 1 by nboot matrix.
+    }
+
+    if(method == "winsorized"){
+      r1 <- wincor(x1, y1, ...)
+      r2 <- wincor(x2, y2, ...)
+      data <- matrix(sample(n, size=n*nboot, replace=TRUE), nrow=nboot)
+      bvec <- apply(data, 1, .corboot_wincor, x, y, ...) # get bootstrap results corr
+      # bootstrap
+      data1 <- matrix(sample(n1, size=n1*nboot, replace=TRUE), nrow=nboot)
+      bvec1 <- apply(data1, 1, .corboot_wincor, x1, y1,   ...) # A 1 by nboot matrix.
+      data2 <- matrix(sample(n2, size=n2*nboot, replace=TRUE), nrow=nboot)
+      bvec2 <- apply(data2, 1, .corboot_wincor, x2, y2,  ...) # A 1 by nboot matrix
+    }
+
+
+  } else {
+    # correlations
+    r1 <- cor(x1,y1,method = method)
+    r2 <- cor(x2,y2,method = method)
+    # bootstrap
+    data1 <- matrix(sample(n1, size=n1*nboot, replace=TRUE), nrow=nboot)
+    bvec1 <- apply(data1, 1, .corboot, x1, y1, cor, method = method, ...) # A 1 by nboot matrix.
+    data2 <- matrix(sample(n2, size=n2*nboot, replace=TRUE), nrow=nboot)
+    bvec2 <- apply(data2, 1, .corboot, x2, y2, cor, method = method, ...) # A 1 by nboot matrix.
+  }
+
+
   bvec <- bvec1 - bvec2
   bsort <- sort(bvec)
   boot.cint = quantile(bvec, c((1 - ci) / 2, 1 - (1 - ci) / 2))
@@ -94,14 +125,24 @@ boot_compare_cor <- function(x1, y1, x2, y2,
     #  # Fieller adjusted
     rfinal = c(rho = r1-r2)
     names(null.value) = "difference in rho"
-
   }
   if (method == "kendall") {
     method2 <- "Bootstrapped difference in Kendall's tau"
     # # Fieller adjusted
     rfinal = c(tau = r1-r2)
     names(null.value) = "difference in tau"
-
+  }
+  if (method == "bendpercent") {
+    method2 <- "Bootstrapped difference in percentage bend correlation pb"
+    # # Fieller adjusted
+    rfinal = c(pb = est)
+    names(null.value) = "difference in pb"
+  }
+  if (method == "winsorized") {
+    method2 <- "Bootstrapped difference in Winsorized correlation wincor"
+    # # Fieller adjusted
+    rfinal = c(win = est)
+    names(null.value) = "differnce in win"
   }
   # Store as htest
   rval <- list(p.value = sig,

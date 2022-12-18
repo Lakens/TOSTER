@@ -137,3 +137,81 @@ corr_curv = function (r,
   res <- cor(x[isub], y[isub], ...)
   res
 }
+
+# Other corrs -----
+
+
+# winsorized
+
+wincor <- function(x, y, tr=0.2){
+
+  df <- cbind(x,y)
+  df <- m[complete.cases(df), ]
+  n <- nrow(df)
+  x <- df[,1]
+  y <- df[,2]
+  g <- floor(tr*n)
+  xvec <- winval(x,tr)
+  yvec <- winval(y,tr)
+  corv <- cor(xvec,yvec)
+
+  return(corv)
+}
+
+winval <- function(x, tr=0.2){
+  y <- sort(x)
+  n <- length(x)
+  ibot <- floor(tr*n)+1
+  itop <- length(x)-ibot+1
+  xbot <- y[ibot]
+  xtop <- y[itop]
+  winval <- ifelse(x<=xbot,xbot,x)
+  winval <- ifelse(winval>=xtop,xtop,winval)
+  winval
+}
+
+# percentage bend measure of location
+pbos <- function(x, beta=.2){
+  n <- length(x)
+  temp <- sort(abs(x-median(x)))
+  omhatx <- temp[floor((1-beta)*n)]
+  psi <- (x-median(x))/omhatx
+  i1 <- length(psi[psi<(-1)])
+  i2 <- length(psi[psi>1])
+  sx <- ifelse(psi<(-1),0,x)
+  sx <- ifelse(psi>1,0,sx)
+  pbos <- (sum(sx) + omhatx*(i2-i1)) / (n-i1-i2)
+  pbos
+}
+
+pbcor <- function(x, y, beta=.2){
+
+  df <- cbind(x,y)
+  df <- df[complete.cases(df), ]
+  n <- nrow(df)
+  x <- df[,1]
+  y <- df[,2]
+  temp <- sort(abs(x-median(x)))
+  omhatx <- temp[floor((1-beta)*n)]
+  temp <- sort(abs(y-median(y)))
+  omhaty <- temp[floor((1-beta)*n)]
+  a <- (x-pbos(x,beta))/omhatx
+  b <- (y-pbos(y,beta))/omhaty
+  a <- ifelse(a<=-1,-1,a)
+  a <- ifelse(a>=1,1,a)
+  b <- ifelse(b<=-1,-1,b)
+  b <- ifelse(b>=1,1,b)
+  corv <- sum(a*b)/sqrt(sum(a^2)*sum(b^2))
+
+  return(corv)
+}
+
+.corboot_wincor <- function(isub, x, y, ...){
+  res <- wincor(x[isub], y[isub], ...)
+  res
+}
+
+.corboot_pbcor <- function(isub, x, y, ...){
+  res <- pbcor(x[isub], y[isub], ...)
+  res
+}
