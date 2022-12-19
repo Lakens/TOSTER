@@ -14,7 +14,8 @@ boot_compare_cor(
   alpha = 0.05,
   null = 0,
   TOST = FALSE,
-  R = 1999
+  R = 1999,
+  ...
 )
 }
 \arguments{
@@ -44,6 +45,8 @@ boot_compare_cor(
 }}
 
 \item{R}{number of bootstrap replicates}
+
+\item{...}{further arguments to be passed to or from methods.}
 }
 \value{
 A list with class "htest" containing the following components:

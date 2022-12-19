@@ -24,6 +24,7 @@ This function was stylized after the `cor.test` function, but you will notice th
 This is caused by fact that `z_cor_test` uses Fisher's z transformation as the basis for all significance tests (i.e., p-values). However, notice that the confidence intervals are quite similar.
 
 ```{r}
+library(TOSTER)
 cor.test(mtcars$mpg,
            mtcars$qsec)
 
@@ -71,6 +72,7 @@ Further, the `boot_cor_test` function also has 2 other correlations that can be 
 The input for the function is fairly similar to the `z_cor_test` function.
 
 ```{r}
+set.seed(993)
 boot_cor_test(mtcars$mpg,
            mtcars$qsec,
            TOST = TRUE,
@@ -144,11 +146,12 @@ compare_cor(r1 = .8,
 ```
 
 
-## Bootstrapped
+## Bootstrapped 
 
 When data is available for both correlations then the `boot_compare_cor` function can be utilized.
 
 ```{r}
+set.seed(8922)
 x1 = rnorm(40)
 y1 = rnorm(40)
 

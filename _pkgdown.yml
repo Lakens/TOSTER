@@ -1,5 +1,5 @@
 home:
-  title: The TOSTER R package
+  title: TOSTER R package
   description: An R pacakge for equivalence testing through two one-sided tests (TOST).
 
 
@@ -29,7 +29,7 @@ reference:
   contents:
   - z_cor_test
   - boot_cor_test
-  - boot_compare_cor
+  - corsum_test
 
 
 - subtitle: "Robust"
@@ -74,6 +74,7 @@ reference:
   - boot_compare_smd
   - compare_smd
   - compare_cor
+  - boot_compare_cor
 
 - title: "Plotting"
   desc: >

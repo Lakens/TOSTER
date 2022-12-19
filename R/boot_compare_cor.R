@@ -160,11 +160,13 @@ boot_compare_cor <- function(x1, y1, x2, y2,
   if (method == "winsorized") {
     method2 <- "Bootstrapped difference in Winsorized correlation wincor"
     # # Fieller adjusted
-    rfinal = c(win = r1-r2)
-    names(null.value) = "differnce in win"
+    rfinal = c(wincor = r1-r2)
+    names(null.value) = "differnce in wincor"
   }
+  N = c(n1 = n1, n2 = n2)
   # Store as htest
   rval <- list(p.value = sig,
+               parameter = N,
                conf.int = boot.cint,
                estimate = rfinal,
                stderr = sd(bvec,na.rm=TRUE),

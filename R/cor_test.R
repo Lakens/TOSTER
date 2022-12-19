@@ -105,9 +105,12 @@ z_cor_test = function(x,
   z_test2 = z_test/z.se
   names(z_test2) = "z"
   attr(cint, "conf.level") <- ci
+  N = n_obs
+  names(N) = "N"
 
   # Store as htest
   rval <- list(statistic = z_test2, p.value = pvalue,
+               parameter = N,
                conf.int = cint,
                estimate = rfinal,
                stderr = c(z.se = z.se),

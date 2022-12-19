@@ -144,13 +144,15 @@ boot_cor_test <- function(x,
   if (method == "winsorized") {
     method2 <- "Bootstrapped Winsorized correlation wincor"
     # # Fieller adjusted
-    rfinal = c(win = est)
-    names(null.value) = "win"
+    rfinal = c(wincor = est)
+    names(null.value) = "wincor"
 
   }
-
+  N = n
+  names(N) = "N"
   # Store as htest
   rval <- list(p.value = sig,
+               parameter = N,
                conf.int = boot.cint,
                estimate = rfinal,
                stderr = sd(bvec,na.rm=TRUE),
