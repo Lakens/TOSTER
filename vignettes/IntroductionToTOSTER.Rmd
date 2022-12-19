@@ -175,7 +175,12 @@ The correlations observed by Olson et al (2007), Study 1, are presented in the t
 We can test each correlation, for example the correlation between the IAT and the Rosenberg self-esteem scale of -0.12, given 71 participants, and using equivalence bounds of r_U = 0.24 and r_L = -0.24. 
 
 ```{r, fig.width=6}
+# OLD CODE
 TOSTr(n=71, r=-0.12, low_eqbound_r=-0.24, high_eqbound_r=0.24, alpha=0.05)
+
+# NEW CODE
+corsum_test(n=71, r=-0.12, null=0.24, alpha=0.05,
+            TOST = TRUE)
 ```
 
 We see that none of the correlations can be declared to be statistically equivalent. Instead, the tests yield undetermined outcomes: the correlations are not significantly different from 0, nor statistically equivalent.  

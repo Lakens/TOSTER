@@ -1,7 +1,7 @@
-#' @title Test for Association/Correlation Between Paired Samples
+#' @title  Association/Correlation Test from Summary Statistics
 #' @description   Test for association between paired samples, using one of Pearson's product moment correlation coefficient,Kendall's \eqn{\tau}{tau} or Spearman's \eqn{\rho}{rho}.
-#' Unlike the stats version of cor.test, this function allows users to set the null to a value other than zero.
-#' @param x,y numeric vectors of data values. x and y must have the same length.
+#' This is the updated version of the TOSTr function.
+#' @inheritParams TOSTr
 #' @param method a character string indicating which correlation coefficient is to be used for the test. One of "pearson", "kendall", or "spearman", can be abbreviated.
 #' @param null a number indicating the null hypothesis. Default is a correlation of zero.
 #' @param alternative a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater" or "less". You can specify just the initial letter.
@@ -25,13 +25,13 @@
 #'
 
 
-z_cor_test = function(x,
-                      y,
-                      alternative = c("two.sided", "less", "greater"),
-                      method = c("pearson", "kendall", "spearman"),
-                      alpha = 0.05,
-                      null = 0,
-                      TOST = FALSE){
+corsum_test = function(r,
+                       n,
+                       alternative = c("two.sided", "less", "greater"),
+                       method = c("pearson", "kendall", "spearman"),
+                       alpha = 0.05,
+                       null = 0,
+                       TOST = FALSE){
   alternative = match.arg(alternative)
   method = match.arg(method)
 
@@ -55,12 +55,8 @@ z_cor_test = function(x,
       intmult = c(NA,1)
     }
   }
-  r_xy = cor(x,y,
-             method = method)
-  df = data.frame(x=x,
-                  y=y)
-  df = na.omit(df)
-  n_obs = nrow(df)
+  r_xy = r
+  n_obs = n
 
   z_xy = rho_to_z(r_xy)
   DNAME <- paste(deparse(substitute(x)), "and", deparse(substitute(y)))
@@ -78,7 +74,7 @@ z_cor_test = function(x,
     rfinal = c(cor = r_xy)
     z.se <- 1 / sqrt(n_obs - 3)
     cint = cor_to_ci(cor = r_xy, n = n_obs, ci = ci,
-                    method = "pearson")
+                     method = "pearson")
   }
   if (method == "spearman") {
     method <- "Spearman's rank correlation rho"
@@ -87,8 +83,8 @@ z_cor_test = function(x,
     names(NVAL) = "rho"
     z.se <- (1.06 / (n_obs - 3)) ^ 0.5
     cint = cor_to_ci(cor = r_xy, n = n_obs, ci = ci,
-                    method = "spearman",
-                    correction = "fieller")
+                     method = "spearman",
+                     correction = "fieller")
   }
   if (method == "kendall") {
     method <- "Kendall's rank correlation tau"
@@ -98,8 +94,8 @@ z_cor_test = function(x,
     z.se <- (0.437 / (n_obs - 4)) ^ 0.5
 
     cint = cor_to_ci(cor = r_xy, n = n_obs, ci = ci,
-                    method = "kendall",
-                    correction = "fieller")
+                     method = "kendall",
+                     correction = "fieller")
   }
   pvalue = p_from_z(z_test/z.se, alternative = alternative)
   z_test2 = z_test/z.se

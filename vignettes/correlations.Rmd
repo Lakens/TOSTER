@@ -1,0 +1,170 @@
+---
+title: "Correlations"
+author: "Aaron R. Caldwell"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: True
+editor_options: 
+  chunk_output_type: console
+bibliography: references.bib
+vignette: >
+  %\VignetteIndexEntry{Correlations}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+In this package there are a few different functions to calculate correlations. 
+All the included functions are based on a few papers by @goertzen2010 (`z_cor_test` & `compare_cor`), and @wilcox2011introduction (`boot_cor_test`)^[Bootstrapped functions were based off code posted by Rand Wilcox on his website, and was modified after looking at Guillaume Rousselet's code, bootcorci R package, on GitHub https://github.com/GRousselet].
+
+# Simple Correlation Test
+
+Simple tests of association can be accomplished with the `z_cor_test` function. 
+This function was stylized after the `cor.test` function, but you will notice that the results may differ.
+This is caused by fact that `z_cor_test` uses Fisher's z transformation as the basis for all significance tests (i.e., p-values). However, notice that the confidence intervals are quite similar.
+
+```{r}
+cor.test(mtcars$mpg,
+           mtcars$qsec)
+
+z_cor_test(mtcars$mpg,
+           mtcars$qsec)
+```
+
+But, just as `cor.test`, the Spearman and Kendall correlation coefficients can be estimated.
+
+```{r}
+z_cor_test(mtcars$mpg,
+           mtcars$qsec,
+           method = "spear") # Don't need to spell full name
+z_cor_test(mtcars$mpg,
+           mtcars$qsec,
+           method = "kendall")
+```
+
+
+The main advantage of `z_cor_test` is that it can perform equivalence testing (TOST), or any hypothesis test where the null isn't zero.
+
+```{r}
+z_cor_test(mtcars$mpg,
+           mtcars$qsec,
+           TOST = TRUE,
+           null = .4)
+```
+
+## Summary Statistics
+
+If you only have the summary statistics you perform the same tests. Just imagine you are reviewing a study with an observed correlation of 0.121 with a sample size of 105 paired observations. You could then perform an equivalence test with the following code.
+
+```{r}
+corsum_test(r = .121,
+            n = 105,
+            TOST = TRUE,
+            null = .4)
+```
+
+
+# Bootstrapped Correlation Test
+
+If the raw data is available, I would *strongly* recommend using the bootstrapping function which should be more robust than the Fisher's z based function.
+Further, the `boot_cor_test` function also has 2 other correlations that can be estimated: a Winsorized correlation and the percentage bend correlation.
+The input for the function is fairly similar to the `z_cor_test` function.
+
+```{r}
+boot_cor_test(mtcars$mpg,
+           mtcars$qsec,
+           TOST = TRUE,
+           null = .4)
+
+boot_cor_test(mtcars$mpg,
+           mtcars$qsec,
+           method = "spear",
+           TOST = TRUE,
+           null = .4)
+
+boot_cor_test(mtcars$mpg,
+           mtcars$qsec,
+           method = "ken",
+           TOST = TRUE,
+           null = .4)
+```
+
+Robust correlations can also be tested.
+
+```{r}
+boot_cor_test(mtcars$mpg,
+           mtcars$qsec,
+           method = "win",
+           TOST = TRUE,
+           null = .4,
+           tr = .1) # set trim
+
+boot_cor_test(mtcars$mpg,
+           mtcars$qsec,
+           method = "bend",
+           TOST = TRUE,
+           null = .4,
+           beta = .15) # bend argument
+```
+
+# Compare Correlations
+
+In some cases, researchers may want to compare two independent correlations. 
+Sometimes this may be used to compare correlations between two variables between two groups (e.g., the correlation between two variables between male and female subjects) or between two independent studies (e.g., replication study).
+
+When only summary statistics are available the `compare_cor` function can be used. 
+All the user needs is the correlations (r1 and r2) and the degrees of freedom for each correlation.
+The degrees of freedom for most cases would the number of pairs minus 2 ($df = N-2$).
+*Note*: this function, similar to `z_cor_test` is an approximation. 
+
+```{r}
+compare_cor(r1 = .8,
+            df1 = 38,
+            r2 = .2,
+            df2 = 98)
+```
+
+```{r}
+compare_cor(r1 = .8,
+            df1 = 38,
+            r2 = .2,
+            df2 = 98)
+```
+
+The methods included to compare correlations include Fisher's z transformation ("fisher"), Kraatz's method ("kraatz"), and the Anderson-Hauk method ("ah"). The Fisher and Kraatz methods are appropriate for general significance tests, but the Anderson-Hauk method can only be used for equivalence test (`TOST = TRUE`). The Anderson-Hauk method has been recommended for testing equivalence [@counsell2015equ].
+
+```{r}
+compare_cor(r1 = .8,
+            df1 = 38,
+            r2 = .2,
+            df2 = 98,
+            null = .2,
+            method = "ah",
+            TOST = TRUE)
+```
+
+
+## Bootstrapped
+
+When data is available for both correlations then the `boot_compare_cor` function can be utilized.
+
+```{r}
+x1 = rnorm(40)
+y1 = rnorm(40)
+
+x2 = rnorm(100)
+y2 = rnorm(100)
+
+boot_compare_cor(
+  x1 = x1,
+  x2 = x2,
+  y1 = y1,
+  y2 = y2,
+  null = .2,
+  TOST = TRUE,
+  method = "win"
+)
+```
+
+
+# References

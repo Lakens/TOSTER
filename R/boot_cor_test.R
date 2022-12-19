@@ -11,7 +11,6 @@
 #' The default for both arguments is 0.2 but can be modified at the user's discretion.
 #'  @return A list with class "htest" containing the following components:
 #' \describe{
-#'   \item{\code{"statistic"}}{z-score}
 #'   \item{\code{"p.value"}}{the p-value of the test.}
 #'   \item{\code{"estimate"}}{the estimated measure of association, with name "pb", "wincor", "cor", "tau", or "rho" corresponding to the method employed.}
 #'   \item{\code{"null.value"}}{the value of the association measure under the null hypothesis.}
@@ -159,7 +158,7 @@ boot_cor_test <- function(x,
                alternative = alternative,
                method = method2,
                data.name = DNAME,
-               boot = bvec,
+               boot_res = bvec,
                call = match.call())
   class(rval) <- "htest"
   return(rval)

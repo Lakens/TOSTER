@@ -15,7 +15,6 @@ template:
 reference:
 
 - title: "Two One-Sided Tests (TOST)"
-
 - subtitle: "t-test"
   desc: >
     Functions derived from the t-test
@@ -23,6 +22,15 @@ reference:
   - t_TOST
   - tsum_TOST
   - extract_r_paired
+
+- title: "Correlations"
+  desc: >
+    Functions to calculate and test correlations
+  contents:
+  - z_cor_test
+  - boot_cor_test
+  - boot_compare_cor
+
 
 - subtitle: "Robust"
   desc: >

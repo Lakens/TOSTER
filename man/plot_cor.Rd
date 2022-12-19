@@ -7,7 +7,7 @@
 plot_cor(
   r,
   n,
-  method = "pearson",
+  method = c("pearson", "spearman", "kendall"),
   type = c("c", "cd"),
   levels = c(0.68, 0.9, 0.95, 0.999)
 )

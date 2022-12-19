@@ -133,8 +133,8 @@ corr_curv = function (r,
 
 # plot_cor(.5,18)
 
-.corboot <- function(isub, x, y, ...){
-  res <- cor(x[isub], y[isub], ...)
+.corboot <- function(isub, x, y, method){
+  res <- cor(x[isub], y[isub], method = method)
   res
 }
 
@@ -146,7 +146,7 @@ corr_curv = function (r,
 wincor <- function(x, y, tr=0.2){
 
   df <- cbind(x,y)
-  df <- m[complete.cases(df), ]
+  df <- df[complete.cases(df), ]
   n <- nrow(df)
   x <- df[,1]
   y <- df[,2]
