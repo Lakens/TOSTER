@@ -4,7 +4,7 @@
 \alias{wilcox_TOST}
 \alias{wilcox_TOST.default}
 \alias{wilcox_TOST.formula}
-\title{TOST with Wilcoxon Signed Rank test}
+\title{TOST with Wilcoxon-Mann-Whitney tests}
 \usage{
 wilcox_TOST(
   x,
@@ -85,7 +85,8 @@ An S3 object of class
 }
 }
 \description{
-A function for TOST using the non-parametric methods of the Wilcoxon signed rank test. This function uses the normal approximation and applies continuity correction automatically.
+A function for TOST using the non-parametric methods of the Wilcoxon-Mann-Whitney family of tests.
+This function uses the normal approximation and applies a continuity correction automatically.
 }
 \details{
 For details on the calculations in this function see vignette("robustTOST").

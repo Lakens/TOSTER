@@ -1,5 +1,6 @@
-#' @title TOST with Wilcoxon Signed Rank test
-#' @description A function for TOST using the non-parametric methods of the Wilcoxon signed rank test. This function uses the normal approximation and applies continuity correction automatically.
+#' @title TOST with Wilcoxon-Mann-Whitney tests
+#' @description A function for TOST using the non-parametric methods of the Wilcoxon-Mann-Whitney family of tests.
+#' This function uses the normal approximation and applies a continuity correction automatically.
 #' @inheritParams t_TOST
 #' @param mu  number indicating the value around which (a-)symmetry (for
 #'   one-sample or paired samples) or shift (for independent samples) is to be
@@ -37,13 +38,13 @@
 
 #wilcox_TOST <- setClass("wilcox_TOST")
 wilcox_TOST <- function(x, ...,
-                   hypothesis = "EQU",
-                   paired = FALSE,
-                   eqb,
-                   low_eqbound,
-                   high_eqbound,
-                   ses = "rb",
-                   alpha = 0.05){
+                        hypothesis = "EQU",
+                        paired = FALSE,
+                        eqb,
+                        low_eqbound,
+                        high_eqbound,
+                        ses = "rb",
+                        alpha = 0.05){
   UseMethod("wilcox_TOST")
 }
 
