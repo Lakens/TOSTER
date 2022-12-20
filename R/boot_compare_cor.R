@@ -16,6 +16,7 @@
 #'   \item{\code{"call"}}{the matched call.}
 #' }
 #' @name boot_compare_cor
+#' @importFrom stats median
 #' @export boot_compare_cor
 #'
 
