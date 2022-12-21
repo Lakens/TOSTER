@@ -24,8 +24,8 @@ test_that("Run examples for z_cor_test", {
   expect_error(z_cor_test(samp1,
                           samp2,
                           method = "p",
-                          null = -.24,
-                          TOST = TRUE))
+                          null = c(-.24,.24),
+                          TOST = FALSE))
 
   test1 = z_cor_test(samp1,
                      samp2,
@@ -390,8 +390,8 @@ test_that("Run examples for boot_compare_cor", {
 })
 
 test_that("Run examples for corsum_test",{
-  expect_error(corsum_test(n=71, r=-0.12, null=-0.24, alpha=0.05,
-                           TOST = TRUE))
+  expect_error(corsum_test(n=71, r=-0.12, null=c(-0.24,.24), alpha=0.05,
+                           TOST = FALSE))
   test1 = corsum_test(n=71, r=-0.12, null=0.24, alpha=0.05,
               TOST = TRUE)
 
