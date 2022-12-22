@@ -20,14 +20,17 @@
 #' @export boot_compare_cor
 #'
 
-boot_compare_cor <- function(x1, y1, x2, y2,
-                     alternative = c("two.sided", "less", "greater"),
-                     method = c("pearson", "kendall", "spearman","winsorized","bendpercent"),
-                     alpha = 0.05,
-                     null = 0,
-                     TOST = FALSE,
-                     R = 1999,
-                     ...){
+boot_compare_cor <- function(
+    x1,y1,
+    x2,y2,
+    alternative = c("two.sided","less", "greater",
+                    "equivalence", "minimal.effect"),
+    method = c("pearson", "kendall", "spearman",
+               "winsorized", "bendpercent"),
+    alpha = 0.05,
+    null = 0,
+    R = 1999,
+    ...){
   DNAME <- paste(deparse(substitute(x1)), "and", deparse(substitute(y1)),
                  "vs.",
                  deparse(substitute(x2)), "and", deparse(substitute(y2)))
@@ -43,11 +46,23 @@ boot_compare_cor <- function(x1, y1, x2, y2,
     stop("x2 and y2 do not have equal lengths.")
   }
 
-  if(TOST && null <=0){
-    stop("positive value for null must be supplied if using TOST.")
-  }
-  if(TOST){
-    alternative = "less"
+  #if(TOST && null <=0){
+  #  stop("positive value for null must be supplied if using TOST.")
+  #}
+  #if(TOST){
+  #  alternative = "less"
+  #}
+
+  if(alternative %in% c("equivalence", "minimal.effect")){
+    if(length(null) == 1){
+      null = c(null, -1*null)
+    }
+    TOST = TRUE
+  } else {
+    if(length(null) > 1){
+      stop("null can only have 1 value for non-TOST procedures")
+    }
+    TOST = FALSE
   }
 
   if(alternative != "two.sided"){
@@ -128,9 +143,19 @@ boot_compare_cor <- function(x1, y1, x2, y2,
   if(alternative == "less"){
     sig <- 1 - sum(bvec <= null.value)/nboot
   }
-  if(TOST){
-    sig2 <- 1 - sum(bvec >= -1*null.value)/nboot
-    sig = max(sig,sig2)
+  if(alternative == "equivalence"){
+    #sig2 <- 1 - sum(bvec >= -1*null.value)/nboot
+    #sig = max(sig,sig2)
+    sig1 = 1 - sum(bvec >= min(null.value))/nboot
+    sig2 = 1 - sum(bvec <= max(null.value))/nboot
+    sig = max(sig1,sig2)
+  }
+  if(alternative == "minimal.effect"){
+    #sig2 <- 1 - sum(bvec >= -1*null.value)/nboot
+    #sig = max(sig,sig2)
+    sig1 = 1 - sum(bvec >= max(null.value))/nboot
+    sig2 = 1 - sum(bvec <= min(null.value))/nboot
+    sig = min(sig1,sig2)
   }
 
 

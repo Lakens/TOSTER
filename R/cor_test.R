@@ -4,26 +4,24 @@
 #' @param x,y numeric vectors of data values. x and y must have the same length.
 #' @param method a character string indicating which correlation coefficient is to be used for the test. One of "pearson", "kendall", or "spearman", can be abbreviated.
 #' @param null a number indicating the null hypothesis. Default is a correlation of zero.
-#' @param alternative a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater" or "less". You can specify just the initial letter.
-#' @param TOST logical indicator (default = FALSE) to perform two one-sided tests of equivalence (TOST). Minimal effects testing not currently available. If specified, alternative is ignored.
-#'  @return A list with class "htest" containing the following components:
+#' @param alternative a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater", "less", "equivalence" (TOST), or "minimal.effect" (TOST). You can specify just the initial letter.
+#' @param alpha alpha level (default = 0.05)
+#'
+#' @details This function uses Fisher's z transformation for the correlations, but uses Fieller's correction of the standard error for Spearman's rho and Kendall's tau.
+#' @return  A list with class "htest" containing the following components:
 #' \describe{
-#'   \item{\code{"statistic"}}{z-score}
 #'   \item{\code{"p.value"}}{the p-value of the test.}
-#'   \item{\code{"estimate"}}{the estimated measure of association, with name "cor", "tau", or "rho" corresponding to the method employed.}
+#'   \item{\code{"estimate"}}{the estimated measure of association, with name "pb", "wincor", "cor", "tau", or "rho" corresponding to the method employed.}
 #'   \item{\code{"null.value"}}{the value of the association measure under the null hypothesis.}
-#'   \item{\code{"alternative"}}{character string indicating the alternative hypothesis (the value of the input argument alternative). Possible values are "greater", "less", or "two-sided".}
+#'   \item{\code{"alternative"}}{character string indicating the alternative hypothesis (the value of the input argument alternative). }
 #'   \item{\code{"method"}}{a character string indicating how the association was measured.}
 #'   \item{\code{"data.name"}}{a character string giving the names of the data.}
 #'   \item{\code{"call"}}{the matched call.}
 #' }
-#' @details
-#' This function uses Fisher's z transformation for the correlations, but uses Fieller's correction of the standard error for Spearman's rho and Kendall's tau.
 #' @references
 #' Goertzen, J. R., & Cribbie, R. A. (2010). Detecting a lack of association: An equivalence testing approach. British Journal of Mathematical and Statistical Psychology, 63(3), 527-537. https://doi.org/10.1348/000711009X475853, formula page 531.
-#' @export
-#'
-
+#' @name z_cor_test
+#' @export z_cor_test
 
 z_cor_test = function(x,
                       y,
@@ -31,8 +29,7 @@ z_cor_test = function(x,
                                       "equivalence", "minimal.effect"),
                       method = c("pearson", "kendall", "spearman"),
                       alpha = 0.05,
-                      null = 0,
-                      TOST = FALSE){
+                      null = 0){
   alternative = match.arg(alternative)
   method = match.arg(method)
 
@@ -42,9 +39,9 @@ z_cor_test = function(x,
   #if(TOST){
   #  alternative = "less"
   #}
-  if(TOST && alternative %in% c("two.sided","greater","less")){
-    alternative = "equivalence"
-  }
+  #if(TOST && alternative %in% c("two.sided","greater","less")){
+  #  alternative = "equivalence"
+  #}
   if(alternative %in% c("equivalence", "minimal.effect")){
     if(length(null) == 1){
       null = c(null, -1*null)
@@ -54,6 +51,7 @@ z_cor_test = function(x,
     if(length(null) > 1){
       stop("null can only have 1 value for non-TOST procedures")
     }
+    TOST = FALSE
   }
 
   if(alternative != "two.sided"){

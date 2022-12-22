@@ -9,11 +9,10 @@ boot_compare_cor(
   y1,
   x2,
   y2,
-  alternative = c("two.sided", "less", "greater"),
+  alternative = c("two.sided", "less", "greater", "equivalence", "minimal.effect"),
   method = c("pearson", "kendall", "spearman", "winsorized", "bendpercent"),
   alpha = 0.05,
   null = 0,
-  TOST = FALSE,
   R = 1999,
   ...
 )
@@ -23,26 +22,13 @@ boot_compare_cor(
 
 \item{x2, y2}{numeric vectors of data values. x and y must have the same length from study 2.}
 
-\item{alternative}{a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater" or "less". You can specify just the initial letter.}
+\item{alternative}{a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater", "less", "equivalence" (TOST), or "minimal.effect" (TOST). You can specify just the initial letter.}
 
 \item{method}{a character string indicating which correlation coefficient is to be used for the test. One of "winsorized", "bendpercent","pearson", "kendall", or "spearman", can be abbreviated.}
 
 \item{alpha}{alpha level (default = 0.05)}
 
 \item{null}{a number indicating the null hypothesis. Default is a correlation of zero.}
-
-\item{TOST}{logical indicator (default = FALSE) to perform two one-sided tests of equivalence (TOST). Minimal effects testing not currently available. If specified, alternative is ignored.
- @return A list with class "htest" containing the following components:
-\describe{
-  \item{\code{"statistic"}}{z-score}
-  \item{\code{"p.value"}}{the p-value of the test.}
-  \item{\code{"estimate"}}{the estimated measure of association, with name "cor", "tau", or "rho" corresponding to the method employed.}
-  \item{\code{"null.value"}}{the value of the association measure under the null hypothesis.}
-  \item{\code{"alternative"}}{character string indicating the alternative hypothesis (the value of the input argument alternative). Possible values are "greater", "less", or "two-sided".}
-  \item{\code{"method"}}{a character string indicating how the association was measured.}
-  \item{\code{"data.name"}}{a character string giving the names of the data.}
-  \item{\code{"call"}}{the matched call.}
-}}
 
 \item{R}{number of bootstrap replicates}
 

@@ -30,11 +30,11 @@
 
 boot_cor_test <- function(x,
                           y,
-                          alternative = c("two.sided", "less", "greater"),
+                          alternative = c("two.sided", "less", "greater",
+                                          "equivalence", "minimal.effect"),
                           method = c("pearson", "kendall", "spearman","winsorized","bendpercent"),
                           alpha = 0.05,
                           null = 0,
-                          TOST = FALSE,
                           R = 1999,
                           ...) {
   DNAME <- paste(deparse(substitute(x)), "and", deparse(substitute(y)))
@@ -53,13 +53,24 @@ boot_cor_test <- function(x,
   y <- df[,2]
   alternative = match.arg(alternative)
   method = match.arg(method)
+  if(alternative %in% c("equivalence", "minimal.effect")){
+    if(length(null) == 1){
+      null = c(null, -1*null)
+    }
+    TOST = TRUE
+  } else {
+    if(length(null) > 1){
+      stop("null can only have 1 value for non-TOST procedures")
+    }
+    TOST = FALSE
+  }
 
-  if(TOST && null <=0){
-    stop("positive value for null must be supplied if using TOST.")
-  }
-  if(TOST){
-    alternative = "less"
-  }
+  #if(TOST && null <=0){
+  #  stop("positive value for null must be supplied if using TOST.")
+  #}
+  #if(TOST){
+  #  alternative = "less"
+  #}
 
   if(alternative != "two.sided"){
     ci = 1 - alpha*2
@@ -108,44 +119,54 @@ boot_cor_test <- function(x,
   if(alternative == "less"){
     sig <- 1 - sum(bvec <= null.value)/nboot
   }
-  if(TOST){
-    sig2 <- 1 - sum(bvec >= -1*null.value)/nboot
-    sig = max(sig,sig2)
+  if(alternative == "equivalence"){
+    #sig2 <- 1 - sum(bvec >= -1*null.value)/nboot
+    #sig = max(sig,sig2)
+    sig1 = 1 - sum(bvec >= min(null.value))/nboot
+    sig2 = 1 - sum(bvec <= max(null.value))/nboot
+    sig = max(sig1,sig2)
+  }
+  if(alternative == "minimal.effect"){
+    #sig2 <- 1 - sum(bvec >= -1*null.value)/nboot
+    #sig = max(sig,sig2)
+    sig1 = 1 - sum(bvec >= max(null.value))/nboot
+    sig2 = 1 - sum(bvec <= min(null.value))/nboot
+    sig = min(sig1,sig2)
   }
 
 
   if (method == "pearson") {
     # Pearson # Fisher
     method2 <- "Bootstrapped Pearson's product-moment correlation"
-    names(null.value) = "correlation"
+    names(null.value) = rep("correlation",length(null.value))
     rfinal = c(cor = est)
   }
   if (method == "spearman") {
     method2 <- "Bootstrapped Spearman's rank correlation rho"
     #  # Fieller adjusted
     rfinal = c(rho = est)
-    names(null.value) = "rho"
+    names(null.value) = rep("rho",length(null.value))
 
   }
   if (method == "kendall") {
     method2 <- "Bootstrapped Kendall's rank correlation tau"
     # # Fieller adjusted
     rfinal = c(tau = est)
-    names(null.value) = "tau"
+    names(null.value) = rep("tau",length(null.value))
 
   }
   if (method == "bendpercent") {
     method2 <- "Bootstrapped percentage bend correlation pb"
     # # Fieller adjusted
     rfinal = c(pb = est)
-    names(null.value) = "pb"
+    names(null.value) = rep("pb",length(null.value))
 
   }
   if (method == "winsorized") {
     method2 <- "Bootstrapped Winsorized correlation wincor"
     # # Fieller adjusted
     rfinal = c(wincor = est)
-    names(null.value) = "wincor"
+    names(null.value) = rep("wincor",length(null.value))
 
   }
   N = n

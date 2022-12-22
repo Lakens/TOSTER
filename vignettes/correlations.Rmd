@@ -15,7 +15,7 @@ vignette: >
 ---
 
 In this package there are a few different functions to calculate correlations. 
-All the included functions are based on a few papers by @goertzen2010 (`z_cor_test` & `compare_cor`), and @wilcox2011introduction (`boot_cor_test`)^[Bootstrapped functions were based off code posted by Rand Wilcox on his website, and was modified after looking at Guillaume Rousselet's code, bootcorci R package, on GitHub https://github.com/GRousselet].
+All the included functions are based on a few papers by @goertzen2010 (`z_cor_test` & `compare_cor`), and @wilcox2011introduction (`boot_cor_test`)^[Bootstrapped functions were based off code posted by Rand Wilcox on his website, and was modified after looking at Guillaume Rousselet's code, `bootcorci` R package, on GitHub https://github.com/GRousselet].
 
 # Simple Correlation Test
 
@@ -49,7 +49,7 @@ The main advantage of `z_cor_test` is that it can perform equivalence testing (T
 ```{r}
 z_cor_test(mtcars$mpg,
            mtcars$qsec,
-           TOST = TRUE,
+           alternative = "e", # e for equivalence
            null = .4)
 ```
 
@@ -60,7 +60,7 @@ If you only have the summary statistics you perform the same tests. Just imagine
 ```{r}
 corsum_test(r = .121,
             n = 105,
-            TOST = TRUE,
+            alternative = "e",
             null = .4)
 ```
 
@@ -75,19 +75,19 @@ The input for the function is fairly similar to the `z_cor_test` function.
 set.seed(993)
 boot_cor_test(mtcars$mpg,
            mtcars$qsec,
-           TOST = TRUE,
+           alternative = "e",
            null = .4)
 
 boot_cor_test(mtcars$mpg,
            mtcars$qsec,
            method = "spear",
-           TOST = TRUE,
+           alternative = "e",
            null = .4)
 
 boot_cor_test(mtcars$mpg,
            mtcars$qsec,
            method = "ken",
-           TOST = TRUE,
+           alternative = "e",
            null = .4)
 ```
 
@@ -97,14 +97,14 @@ Robust correlations can also be tested.
 boot_cor_test(mtcars$mpg,
            mtcars$qsec,
            method = "win",
-           TOST = TRUE,
+           alternative = "e",
            null = .4,
            tr = .1) # set trim
 
 boot_cor_test(mtcars$mpg,
            mtcars$qsec,
            method = "bend",
-           TOST = TRUE,
+           alternative = "e",
            null = .4,
            beta = .15) # bend argument
 ```
@@ -133,7 +133,7 @@ compare_cor(r1 = .8,
             df2 = 98)
 ```
 
-The methods included to compare correlations include Fisher's z transformation ("fisher"), Kraatz's method ("kraatz"), and the Anderson-Hauk method ("ah"). The Fisher and Kraatz methods are appropriate for general significance tests, but the Anderson-Hauk method can only be used for equivalence test (`TOST = TRUE`). The Anderson-Hauk method has been recommended for testing equivalence [@counsell2015equ].
+The methods included to compare correlations include Fisher's z transformation ("fisher"), and Kraatz's method ("kraatz"). The Fisher and Kraatz methods are appropriate for general significance tests, but may have low statistical power [@counsell2015equ]. The Fisher's method tests the difference between correlations on the z-transformed scale while Kraatz's methods directly measures the difference between the correlation coefficients. My personal recommendation would be to use Fisher's method.
 
 ```{r}
 compare_cor(r1 = .8,
@@ -141,8 +141,8 @@ compare_cor(r1 = .8,
             r2 = .2,
             df2 = 98,
             null = .2,
-            method = "ah",
-            TOST = TRUE)
+            method = "f",
+            alternative = "e")
 ```
 
 
@@ -164,7 +164,7 @@ boot_compare_cor(
   y1 = y1,
   y2 = y2,
   null = .2,
-  TOST = TRUE,
+  alternative = "e",
   method = "win"
 )
 ```

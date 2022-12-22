@@ -77,19 +77,19 @@ test_that("Run examples for z_cor_test", {
                      samp2,
                      method = "p",
                      null = .4,
-                     TOST = TRUE)
+                     alternative = "e")
 
   test2 = z_cor_test(samp1,
                      samp2,
                      method = "s",
                      null = .4,
-                     TOST = TRUE)
+                     alternative = "e")
 
   test3 = z_cor_test(samp1,
                      samp2,
                      method = "k",
                      null = .4,
-                     TOST = TRUE)
+                     alternative = "e")
 
 
   # other alts ----
@@ -164,8 +164,8 @@ test_that("Run examples for boot_cor_test", {
   expect_error(boot_cor_test(samp1,
                              samp2,
                              method = "p",
-                             null = -.2,
-                             TOST = TRUE))
+                             null = c(-.2,.2),
+                             alternative = "t"))
 
   test1 = boot_cor_test(samp1,
                      samp2,
@@ -217,31 +217,31 @@ test_that("Run examples for boot_cor_test", {
                      samp2,
                      method = "p",
                      null = .4,
-                     TOST = TRUE)
+                     alternative = "e")
 
   test2 = boot_cor_test(samp1,
                      samp2,
                      method = "s",
                      null = .4,
-                     TOST = TRUE)
+                     alternative = "e")
 
   test3 = boot_cor_test(samp1,
                      samp2,
                      method = "k",
                      null = .4,
-                     TOST = TRUE)
+                     alternative = "e")
 
   test4 = boot_cor_test(samp1,
                      samp2,
                      method = "b",
                      null = .4,
-                     TOST = TRUE)
+                     alternative = "e")
 
   test5 = boot_cor_test(samp1,
                      samp2,
                      method = "w",
                      null = .4,
-                     TOST = TRUE)
+                     alternative = "e")
   # other alts ----
 
   test1 = boot_cor_test(samp1,
@@ -313,7 +313,7 @@ test_that("Run examples for boot_compare_cor", {
     y1 = y1,
     y2 = y2,
     null = .2,
-    TOST = TRUE,
+    alternative = "e",
     method = "p"
   )
 
@@ -322,8 +322,8 @@ test_that("Run examples for boot_compare_cor", {
     x2 = x2,
     y1 = y1,
     y2 = y2,
-    null = -.2,
-    TOST = TRUE,
+    null = c(-.2,.2),
+    alternative = "t",
     method = "p"
   ))
 
@@ -333,7 +333,7 @@ test_that("Run examples for boot_compare_cor", {
     y1 = y1,
     y2 = y2,
     null = .2,
-    TOST = TRUE,
+    alternative = "e",
     method = "s"
   )
 
@@ -343,7 +343,7 @@ test_that("Run examples for boot_compare_cor", {
     y1 = y1,
     y2 = y2,
     null = .2,
-    TOST = TRUE,
+    alternative = "e",
     method = "k"
   )
 
@@ -353,7 +353,7 @@ test_that("Run examples for boot_compare_cor", {
     y1 = y1,
     y2 = y2,
     null = .2,
-    TOST = TRUE,
+    alternative = "e",
     method = "win"
   )
 
@@ -363,7 +363,7 @@ test_that("Run examples for boot_compare_cor", {
     y1 = y1,
     y2 = y2,
     null = .2,
-    TOST = TRUE,
+    alternative = "e",
     method = "bend"
   )
 
@@ -393,7 +393,7 @@ test_that("Run examples for corsum_test",{
   expect_error(corsum_test(n=71, r=-0.12, null=c(-0.24,.24), alpha=0.05,
                            TOST = FALSE))
   test1 = corsum_test(n=71, r=-0.12, null=0.24, alpha=0.05,
-              TOST = TRUE)
+              alternative = "e")
 
   expect_equal(test1$p.value,
                0.1529,

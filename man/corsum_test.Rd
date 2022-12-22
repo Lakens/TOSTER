@@ -7,11 +7,10 @@
 corsum_test(
   r,
   n,
-  alternative = c("two.sided", "less", "greater"),
+  alternative = c("two.sided", "less", "greater", "equivalence", "minimal.effect"),
   method = c("pearson", "kendall", "spearman"),
   alpha = 0.05,
-  null = 0,
-  TOST = FALSE
+  null = 0
 )
 }
 \arguments{
@@ -19,26 +18,13 @@ corsum_test(
 
 \item{n}{number of pairs of observations}
 
-\item{alternative}{a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater" or "less". You can specify just the initial letter.}
+\item{alternative}{a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater", "less", "equivalence" (TOST), or "minimal.effect" (TOST). You can specify just the initial letter.}
 
 \item{method}{a character string indicating which correlation coefficient is to be used for the test. One of "pearson", "kendall", or "spearman", can be abbreviated.}
 
 \item{alpha}{alpha level (default = 0.05)}
 
 \item{null}{a number indicating the null hypothesis. Default is a correlation of zero.}
-
-\item{TOST}{logical indicator (default = FALSE) to perform two one-sided tests of equivalence (TOST). Minimal effects testing not currently available. If specified, alternative is ignored.
- @return A list with class "htest" containing the following components:
-\describe{
-  \item{\code{"statistic"}}{z-score}
-  \item{\code{"p.value"}}{the p-value of the test.}
-  \item{\code{"estimate"}}{the estimated measure of association, with name "cor", "tau", or "rho" corresponding to the method employed.}
-  \item{\code{"null.value"}}{the value of the association measure under the null hypothesis.}
-  \item{\code{"alternative"}}{character string indicating the alternative hypothesis (the value of the input argument alternative). Possible values are "greater", "less", or "two-sided".}
-  \item{\code{"method"}}{a character string indicating how the association was measured.}
-  \item{\code{"data.name"}}{a character string giving the names of the data.}
-  \item{\code{"call"}}{the matched call.}
-}}
 }
 \description{
 Test for association between paired samples, using one of Pearson's product moment correlation coefficient,Kendall's \eqn{\tau}{tau} or Spearman's \eqn{\rho}{rho}.
@@ -46,6 +32,18 @@ This is the updated version of the TOSTr function.
 }
 \details{
 This function uses Fisher's z transformation for the correlations, but uses Fieller's correction of the standard error for Spearman's rho and Kendall's tau.
+ @return A list with class "htest" containing the following components:
+
+\describe{
+  \item{\code{"statistic"}}{z-score}
+  \item{\code{"p.value"}}{the p-value of the test.}
+  \item{\code{"estimate"}}{the estimated measure of association, with name "cor", "tau", or "rho" corresponding to the method employed.}
+  \item{\code{"null.value"}}{the value of the association measure under the null hypothesis.}
+  \item{\code{"alternative"}}{character string indicating the alternative hypothesis (the value of the input argument alternative). }
+  \item{\code{"method"}}{a character string indicating how the association was measured.}
+  \item{\code{"data.name"}}{a character string giving the names of the data.}
+  \item{\code{"call"}}{the matched call.}
+}
 }
 \references{
 Goertzen, J. R., & Cribbie, R. A. (2010). Detecting a lack of association: An equivalence testing approach. British Journal of Mathematical and Statistical Psychology, 63(3), 527-537. https://doi.org/10.1348/000711009X475853, formula page 531.

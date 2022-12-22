@@ -5,8 +5,9 @@
 #' @param se1,se2 User supplied standard errors (SEs). This will override the internal calculations.
 #' @param paired a logical indicating whether the SMD is from a paired or independent samples design. If a one-sample design, then paired must be set to TRUE.
 #' @param null a number indicating the null hypothesis. For TOST, this would be equivalence bound.
-#' @param alternative a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater" or "less". You can specify just the initial letter.
-#' @param TOST logical indicator (default = FALSE) to perform two one-sided tests of equivalence (TOST). Minimal effects testing not currently available. If specified, alternative is ignored.
+#' @param alternative a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater", "less", "equivalence" (TOST), or "minimal.effect" (TOST). You can specify just the initial letter.
+#' @param TOST Defunct: use alternative argument. Logical indicator (default = FALSE) to perform two one-sided tests of equivalence (TOST).
+#' @details This function tests for differences between correlations.
 #' @return A list with class "htest" containing the following components:
 #' \describe{
 #'   \item{\code{"statistic"}}{z-score}
@@ -37,6 +38,20 @@ compare_smd = function(smd1,
                        null = 0,
                        TOST = FALSE){
   alternative <- match.arg(alternative)
+  if(TOST && alternative %in% c("two.sided","greater","less")){
+    alternative = "equivalence"
+  }
+  if(alternative %in% c("equivalence", "minimal.effect")){
+    if(length(null) == 1){
+      null = c(null, -1*null)
+    }
+    TOST = TRUE
+  } else {
+    if(length(null) > 1){
+      stop("null can only have 1 value for non-TOST procedures")
+    }
+    TOST = FALSE
+  }
   if(length(n1) > 2 || length(n2) > 2 || !is.numeric(n1) || !is.numeric(n1)){
     stop("n1 and n2 must be a numeric vector of a length of 1 or 2.")
   }
@@ -119,9 +134,9 @@ compare_smd = function(smd1,
         z_test = zlo
       }
     }
-    print("made it.")
+
     z = z_test
-    names(z_test) = "z"
+    names(z) = "z"
     pval = pvalue
 
   }else {
@@ -148,7 +163,7 @@ compare_smd = function(smd1,
   est2 = smd1 - smd2
   names(est2) = "difference in SMDs"
   null2 = null
-  names(null2) = "difference in SMDs"
+  names(null2) = rep("difference in SMDs",length(null2))
   # Store as htest
   rval <- list(statistic = z, p.value = pval,
                #conf.int = cint,
