@@ -435,6 +435,25 @@ test_that("Run examples for boot_compare_cor", {
   )
 
   test2_f = compare_cor(
+    r1 = .1,
+    r2 = 0,
+    df1 = length(x1) - 2,
+    df2 = length(x2) - 2,
+    null = .2,
+    alternative = "e",
+    method = "f"
+  )
+  test2_k = compare_cor(
+    r1 = 0.1,
+    r2 = 0,
+    df1 = length(x1) - 2,
+    df2 = length(x2) - 2,
+    null = .2,
+    alternative = "e",
+    method = "k"
+  )
+
+  test2_f = compare_cor(
     r1 = 0,
     r2 = .1,
     df1 = length(x1) - 2,
@@ -446,6 +465,25 @@ test_that("Run examples for boot_compare_cor", {
   test2_k = compare_cor(
     r1 = 0,
     r2 = .1,
+    df1 = length(x1) - 2,
+    df2 = length(x2) - 2,
+    null = .2,
+    alternative = "m",
+    method = "k"
+  )
+
+  test2_f = compare_cor(
+    r1 = 0.1,
+    r2 = 0,
+    df1 = length(x1) - 2,
+    df2 = length(x2) - 2,
+    null = .2,
+    alternative = "m",
+    method = "f"
+  )
+  test2_k = compare_cor(
+    r1 = 0.1,
+    r2 =  0,
     df1 = length(x1) - 2,
     df2 = length(x2) - 2,
     null = .2,
