@@ -23,7 +23,7 @@ reference:
   - tsum_TOST
   - extract_r_paired
 
-- title: "Correlations"
+- subtitle: "Correlations"
   desc: >
     Functions to calculate and test correlations
   contents:

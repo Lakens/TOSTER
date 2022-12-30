@@ -21,7 +21,7 @@ All the included functions are based on a few papers by @goertzen2010 (`z_cor_te
 
 Simple tests of association can be accomplished with the `z_cor_test` function. 
 This function was stylized after the `cor.test` function, but you will notice that the results may differ.
-This is caused by fact that `z_cor_test` uses Fisher's z transformation as the basis for all significance tests (i.e., p-values). However, notice that the confidence intervals are quite similar.
+This is caused by fact that `z_cor_test` uses Fisher's z transformation as the basis for all significance tests (i.e., p-values). However, notice that the confidence intervals are the same.
 
 ```{r}
 library(TOSTER)
@@ -91,7 +91,7 @@ boot_cor_test(mtcars$mpg,
            null = .4)
 ```
 
-Robust correlations can also be tested.
+Robust correlations, such as a winsorized correlation coefficient or percentage bend correlation, can also be tested.
 
 ```{r}
 boot_cor_test(mtcars$mpg,
@@ -133,7 +133,7 @@ compare_cor(r1 = .8,
             df2 = 98)
 ```
 
-The methods included to compare correlations include Fisher's z transformation ("fisher"), and Kraatz's method ("kraatz"). The Fisher and Kraatz methods are appropriate for general significance tests, but may have low statistical power [@counsell2015equ]. The Fisher's method tests the difference between correlations on the z-transformed scale while Kraatz's methods directly measures the difference between the correlation coefficients. My personal recommendation would be to use Fisher's method.
+The methods included to compare correlations include Fisher's z transformation ("fisher"), and Kraatz's method ("kraatz"). The Fisher and Kraatz methods are appropriate for general significance tests, but may have low statistical power [@counsell2015equ]. The Fisher's method can test the difference between correlations on the z-transformed scale while Kraatz's methods directly measures the difference between the correlation coefficients. My personal recommendation would be to use Fisher's method.
 
 ```{r}
 compare_cor(r1 = .8,

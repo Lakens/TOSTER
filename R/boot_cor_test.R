@@ -38,6 +38,9 @@ boot_cor_test <- function(x,
                           R = 1999,
                           ...) {
   DNAME <- paste(deparse(substitute(x)), "and", deparse(substitute(y)))
+  alternative = match.arg(alternative)
+
+  method = match.arg(method)
   nboot = R
   null.value = null
   if(!is.vector(x) || !is.vector(y)){
@@ -51,11 +54,10 @@ boot_cor_test <- function(x,
   n <- nrow(df)
   x <- df[,1]
   y <- df[,2]
-  alternative = match.arg(alternative)
-  method = match.arg(method)
+
   if(alternative %in% c("equivalence", "minimal.effect")){
     if(length(null) == 1){
-      null = c(null, -1*null)
+      null.value = c(null.value, -1*null.value)
     }
     TOST = TRUE
   } else {

@@ -3,6 +3,10 @@ NEWS
 
 **TOSTER R package and jamovi module**
 
+# TOSTER v0.7.0
+
+- Add correlation functions `z_cor_test`, `boot_cor_test`, `corsum_test`, `boot_compare_cor`
+
 # TOSTER v0.6.0
 
 - Changed Glass's delta SE for paired samples (minor).

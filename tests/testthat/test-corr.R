@@ -152,6 +152,84 @@ test_that("Run examples for z_cor_test", {
 
 })
 
+test_that("cor_test: equ and met", {
+
+  set.seed(5533428)
+
+  samp1 = rnorm(150)
+  samp2 = rnorm(150)
+
+  test1 = z_cor_test(samp1,
+                     samp2,
+                     alternative = "e",
+                     null = .1)
+
+  test2 = z_cor_test(samp1,
+                     samp2,
+                     alternative = "e",
+                     null = .3)
+
+  test3 = z_cor_test(samp1,
+                     samp2,
+                     alternative = "e",
+                     null = .5)
+  expect_true(test1$p.value > test2$p.value)
+  expect_true(test2$p.value > test3$p.value)
+
+  test1 = boot_cor_test(samp1,
+                     samp2,
+                     alternative = "equivalence",
+                     null = .1)
+
+  test2 = boot_cor_test(samp1,
+                     samp2,
+                     alternative = "e",
+                     null = .3)
+
+  test3 = boot_cor_test(samp1,
+                     samp2,
+                     alternative = "e",
+                     null = .5)
+  expect_true(test1$p.value > test2$p.value)
+  expect_true(test2$p.value > test3$p.value)
+
+  test1 = z_cor_test(samp1,
+                     samp2,
+                     alternative = "m",
+                     null = .1)
+
+  test2 = z_cor_test(samp1,
+                     samp2,
+                     alternative = "m",
+                     null = .3)
+
+  test3 = z_cor_test(samp1,
+                     samp2,
+                     alternative = "m",
+                     null = .5)
+  expect_true(test1$p.value < test2$p.value)
+  expect_true(test2$p.value < test3$p.value)
+
+  test1 = boot_cor_test(samp1,
+                        samp2,
+                        alternative = "m",
+                        null = .1)
+
+  test2 = boot_cor_test(samp1,
+                        samp2,
+                        alternative = "m",
+                        null = .3)
+
+  test3 = boot_cor_test(samp1,
+                        samp2,
+                        alternative = "m",
+                        null = .5)
+  expect_true(test1$p.value < test2$p.value)
+  expect_true(test2$p.value < test3$p.value)
+
+
+})
+
 test_that("Run examples for boot_cor_test", {
 
   set.seed(76584441)
@@ -337,6 +415,44 @@ test_that("Run examples for boot_compare_cor", {
     method = "s"
   )
 
+  test2_f = compare_cor(
+    r1 = 0,
+    r2 = .1,
+    df1 = length(x1) - 2,
+    df2 = length(x2) - 2,
+    null = .2,
+    alternative = "e",
+    method = "f"
+  )
+  test2_k = compare_cor(
+    r1 = 0,
+    r2 = .1,
+    df1 = length(x1) - 2,
+    df2 = length(x2) - 2,
+    null = .2,
+    alternative = "e",
+    method = "k"
+  )
+
+  test2_f = compare_cor(
+    r1 = 0,
+    r2 = .1,
+    df1 = length(x1) - 2,
+    df2 = length(x2) - 2,
+    null = .2,
+    alternative = "m",
+    method = "f"
+  )
+  test2_k = compare_cor(
+    r1 = 0,
+    r2 = .1,
+    df1 = length(x1) - 2,
+    df2 = length(x2) - 2,
+    null = .2,
+    alternative = "m",
+    method = "k"
+  )
+
   test3 = boot_compare_cor(
     x1 = x1,
     x2 = x2,
@@ -387,6 +503,54 @@ test_that("Run examples for boot_compare_cor", {
                0.05207,
                tolerance= 0.001)
 
+  test3 = boot_compare_cor(
+    x1 = x1,
+    x2 = x2,
+    y1 = y1,
+    y2 = y2,
+    null = .2,
+    alternative = "m",
+    method = "k"
+  )
+
+  test4 = boot_compare_cor(
+    x1 = x1,
+    x2 = x2,
+    y1 = y1,
+    y2 = y2,
+    null = .2,
+    alternative = "m",
+    method = "win"
+  )
+
+  expect_error( boot_compare_cor(
+    x1 = 1,
+    x2 = x2,
+    y1 = y1,
+    y2 = y2,
+    null = .2,
+    alternative = "m",
+    method = "win"
+  ))
+  expect_error( boot_compare_cor(
+    x1 = list(a=1),
+    x2 = x2,
+    y1 = y1,
+    y2 = y2,
+    null = .2,
+    alternative = "m",
+    method = "win"
+  ))
+  expect_error( boot_compare_cor(
+    x1 = x1,
+    x2 = 1,
+    y1 = y1,
+    y2 = y2,
+    null = .2,
+    alternative = "m",
+    method = "win"
+  ))
+
 })
 
 test_that("Run examples for corsum_test",{
@@ -398,12 +562,18 @@ test_that("Run examples for corsum_test",{
   expect_equal(test1$p.value,
                0.1529,
                tolerance = .001)
+  test1 = corsum_test(n=71, r=-0.12, null=0.24, alpha=0.05,
+                      alternative = "m")
 
   test1 = corsum_test(n=71, r=-0.12,  alpha=0.05)
 
   expect_equal(test1$p.value,
                0.32,
                tolerance = .001)
+  test1 = corsum_test(n=71, r=-0.12,  alpha=0.05,
+                      method = "k")
+  test1 = corsum_test(n=71, r=-0.12,  alpha=0.05,
+                      method = "s")
 
   test1 = corsum_test(n=71, r=-0.12, alternative = "less", alpha=0.05)
 
