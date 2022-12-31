@@ -681,6 +681,12 @@ test_that("Run examples for paired samples", {
                                 sd2 = sd(samp2),
                                 n = length(samp2),
                                 tstat = NULL))
+  test_ragain = extract_r_paired(m1 = mean(samp1),
+                                 sd1 = sd(samp1),
+                                 m2 = mean(samp2),
+                                 #sd2 = sd(samp2),
+                                 n = length(samp2),
+                                 tstat = tsum3$TOST$t[1])
 
   something = extract_r_paired(m1 = mean(samp1),
                                sd1 = sd(samp1),
