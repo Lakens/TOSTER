@@ -23,6 +23,10 @@ df_htest = function(htest,
                     show_ci = TRUE,
                     extract_names = TRUE){
 
+  if(!("htest" %in% class(htest))){
+    stop("htest must be of the class htest")
+  }
+
   df1 = data.frame(method = htest$method)
 
   if(test_statistics) {
