@@ -12,7 +12,7 @@
 
 <meta name="author" content="Aaron R. Caldwell" />
 
-<meta name="date" content="2022-12-21" />
+<meta name="date" content="2023-01-03" />
 
 <title>Correlations</title>
 
@@ -356,7 +356,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Correlations</h1>
 <h4 class="author">Aaron R. Caldwell</h4>
-<h4 class="date">2022-12-21</h4>
+<h4 class="date">2023-01-03</h4>
 
 
 <div id="TOC">
@@ -387,8 +387,8 @@ correlations. All the included functions are based on a few papers by
 <code>cor.test</code> function, but you will notice that the results may
 differ. This is caused by fact that <code>z_cor_test</code> uses
 Fisher’s z transformation as the basis for all significance tests (i.e.,
-p-values). However, notice that the confidence intervals are quite
-similar.</p>
+p-values). However, notice that the confidence intervals are the
+same.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(TOSTER)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cor.test</span>(mtcars<span class="sc">$</span>mpg,</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec)</span></code></pre></div>
@@ -512,7 +512,10 @@ function.</p>
 ## 
 ## data:  mtcars$mpg and mtcars$qsec
 ## N = 32, p-value = 0.6088
-## alternative hypothesis: true correlation is  0.4
+## alternative hypothesis: equivalence
+## null values:
+## correlation correlation 
+##         0.4        -0.4 
 ## 90 percent confidence interval:
 ##  0.2445273 0.5848411
 ## sample estimates:
@@ -528,7 +531,10 @@ function.</p>
 ## 
 ## data:  mtcars$mpg and mtcars$qsec
 ## N = 32, p-value = 0.6713
-## alternative hypothesis: true rho is  0.4
+## alternative hypothesis: equivalence
+## null values:
+##  rho  rho 
+##  0.4 -0.4 
 ## 90 percent confidence interval:
 ##  0.1983190 0.6656253
 ## sample estimates:
@@ -543,14 +549,18 @@ function.</p>
 ##  Bootstrapped Kendall&#39;s rank correlation tau
 ## 
 ## data:  mtcars$mpg and mtcars$qsec
-## N = 32, p-value = 0.7724
-## alternative hypothesis: true tau is  0.4
+## N = 32, p-value = 0.2276
+## alternative hypothesis: equivalence
+## null values:
+##  tau  tau 
+##  0.4 -0.4 
 ## 90 percent confidence interval:
 ##  0.1217169 0.4864510
 ## sample estimates:
 ##       tau 
 ## 0.3153652</code></pre>
-<p>Robust correlations can also be tested.</p>
+<p>Robust correlations, such as a winsorized correlation coefficient or
+percentage bend correlation, can also be tested.</p>
 <div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">boot_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">method =</span> <span class="st">&quot;win&quot;</span>,</span>
@@ -562,7 +572,10 @@ function.</p>
 ## 
 ## data:  mtcars$mpg and mtcars$qsec
 ## N = 32, p-value = 0.6878
-## alternative hypothesis: true wincor is  0.4
+## alternative hypothesis: equivalence
+## null values:
+## wincor wincor 
+##    0.4   -0.4 
 ## 90 percent confidence interval:
 ##  0.2163284 0.6629980
 ## sample estimates:
@@ -579,7 +592,10 @@ function.</p>
 ## 
 ## data:  mtcars$mpg and mtcars$qsec
 ## N = 32, p-value = 0.6933
-## alternative hypothesis: true pb is  0.4
+## alternative hypothesis: equivalence
+## null values:
+##   pb   pb 
+##  0.4 -0.4 
 ## 90 percent confidence interval:
 ##  0.2341348 0.6455867
 ## sample estimates:
@@ -608,7 +624,7 @@ approximation.</p>
 ##  Difference between two independent correlations (Fisher&#39;s z transform)
 ## 
 ## data:  Summary Statistics
-## z = 4.6364, p-value &lt; 2.2e-16
+## z = 4.6364, p-value = 3.545e-06
 ## alternative hypothesis: true difference between correlations is not equal to 0
 ## sample estimates:
 ## difference between correlations 
@@ -621,7 +637,7 @@ approximation.</p>
 ##  Difference between two independent correlations (Fisher&#39;s z transform)
 ## 
 ## data:  Summary Statistics
-## z = 4.6364, p-value &lt; 2.2e-16
+## z = 4.6364, p-value = 3.545e-06
 ## alternative hypothesis: true difference between correlations is not equal to 0
 ## sample estimates:
 ## difference between correlations 
@@ -630,10 +646,10 @@ approximation.</p>
 transformation (“fisher”), and Kraatz’s method (“kraatz”). The Fisher
 and Kraatz methods are appropriate for general significance tests, but
 may have low statistical power <span class="citation">(Counsell and
-Cribbie 2015)</span>. The Fisher’s method tests the difference between
-correlations on the z-transformed scale while Kraatz’s methods directly
-measures the difference between the correlation coefficients. My
-personal recommendation would be to use Fisher’s method.</p>
+Cribbie 2015)</span>. The Fisher’s method can test the difference
+between correlations on the z-transformed scale while Kraatz’s methods
+directly measures the difference between the correlation coefficients.
+My personal recommendation would be to use Fisher’s method.</p>
 <div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">compare_cor</span>(<span class="at">r1 =</span> .<span class="dv">8</span>,</span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">df1 =</span> <span class="dv">38</span>,</span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">r2 =</span> .<span class="dv">2</span>,</span>

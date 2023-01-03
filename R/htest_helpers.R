@@ -1,4 +1,4 @@
-#' Convert to class 'htest'
+#' Helpers for
 #'
 #' Convert a TOSTER result object of class 'TOSTt' or 'TOSTnp' to a list of class 'htest'.
 #'

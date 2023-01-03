@@ -33,6 +33,7 @@ Lajeunesse, M. J. (2011). On the meta‐analysis of response ratios for studies 
 }
 \seealso{
 Other TOST: 
+\code{\link{simple_htest}()},
 \code{\link{t_TOST}()},
 \code{\link{tsum_TOST}()}
 }
