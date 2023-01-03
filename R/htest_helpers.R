@@ -1,131 +1,122 @@
-#' Helpers for
+#' Helpers for \code{htest} objects
 #'
-#' Convert a TOSTER result object of class 'TOSTt' or 'TOSTnp' to a list of class 'htest'.
+#' Functions to help interpret or display objects of the class \code{htest}
 #'
-#' @param TOST A TOSTER result object of class 'TOSTt' or 'TOSTnp'.
-#'
-#' @return Returns a list containing a list of class 'htest' for the result of each test with the following elements:
-#' \item{data.name}{A character string giving the names of the data.}
-#' \item{estimate}{Estimated difference in raw units.}
-#' \item{method}{A character string indicating the performed test.}
-#' \item{null.value}{Equivalence bound.}
-#' \item{alternative}{A character string describing the alternative hypothesis.}
-#' \item{parameter}{The degrees of freedom of the distribution of the test statistic.}
-#' \item{statistic}{The value of the test statistic.}
-#' \item{p.value}{The p-value of the test.}
-#' \item{conf.int}{The confidence interval of the difference.}
+#' @param htest A S3 object of the class \code{htest}
+#' @param test_statistics A logical variable to display the test statistics.
+#' @param show_ci A logical variable to display the confidence interval.
+#' @param extract_names A logical variable to take the names from the S3 object (i.e., statistic for \code{t.test} would be "t")
 #'
 #' @examples
 #' # To be added
 #'
-#'
-#' # as.htest(result)
-#'
+#' @name htest-helpers
+
+# Possible functions
+# t.test wilcox.test oneway.test kruskal.test friedman.test
+# cor.test
+
+#' @rdname htest-helpers
 #' @export
+df_htest = function(htest,
+                    test_statistics = TRUE,
+                    show_ci = TRUE,
+                    extract_names = TRUE){
 
-as_htest = function(TOST) {
-  if(!(class(TOST) %in% c("TOSTt", "TOSTnp"))){
-    stop("Class cannot be converted to htest with this function.")
+  df1 = data.frame(method = htest$method)
+
+  if(test_statistics) {
+
+
+  # Get columns
+  if(!is.null(htest$statistic)){
+    if(length(htest$statistic) == 1){
+      df1[ifelse(extract_names, names(htest$statistic),"statistic")] <- unname(htest$statistic)
+    } else{
+      for(i in 1:length(htest$statistic)){
+        parm_name = ifelse(extract_names, names(htest$statistic)[i],paste0("statistic",i))
+        df1[parm_name] <- unname(htest$statistic)[i]
+      }
+    }
   }
 
-
-  # get row
-
-  TOSTp = TOST$TOST[2:3, ]
-  TOSTp = TOSTp[which.max(TOSTp$p.value), ]
-
-  # assign
-  statistic <- switch(class(TOST),
-                      TOSTt = TOSTp$t,
-                      TOSTnp = TOSTp$statistic)
-  names(statistic) <- switch(class(TOST),
-                             TOSTt = "t",
-                             TOSTnp = "WMW")
-
-  parameter <- switch(class(TOST),
-                      TOSTt = TOSTp$df,
-                      TOSTnp = NULL)
-  names(parameter) <- switch(class(TOST),
-                             TOSTt = "df",
-                             TOSTnp = NULL)
-
-  which_row = rownames(TOSTp)
-  which_eqb <- switch(
-    class(TOST),
-    TOSTt = ifelse(grepl("Lower", which_row), 2, 3),
-    TOSTnp = ifelse(grepl("Lower", which_row), 1, 2)
-  )
-  eqb = TOST$eqb
-
-  null.value <- switch(class(TOST),
-                       TOSTt = as.numeric(eqb[1,2:3]),
-                       TOSTnp = eqb)
-  names(null.value) <- switch(class(TOST),
-                              TOSTt = rep("mean",length(null.value)),
-                              TOSTnp = rep("location shift",length(null.value)))
-
-  stderr <- switch(class(TOST),
-                   TOSTt = TOSTp$SE,
-                   TOSTnp = NULL)
-
-  p.value <- switch(class(TOST),
-                    TOSTt = TOSTp$p.value,
-                    TOSTnp = TOSTp$p.value)
-
-  method <- switch(class(TOST),
-                   TOSTt = TOST$method,
-                   TOSTnp = TOST$method)
-
-  alternative <- switch(class(TOST),
-                        TOSTt = "one.sided",
-                        TOSTnp = "one.sided")
-
-  alt_bound <-
-    ifelse(grepl("Lower", which_row), "lower", "upper")
-
-  alt_text = ifelse(grepl("equ", TOST$hypothesis,
-                          ignore.case = TRUE),
-                    "equivalence",
-                    "minimal.effect")
-
-  if (inherits(TOST,"TOSTnp")) {
-    htest <- list(
-      statistic = statistic,
-      parameter = parameter,
-      p.value = p.value,
-      null.value = null.value,
-      alternative = alt_text,
-      method = method,
-      data.name = TOST$data.name
-    )
-  } else {
-    conf.int <- c(TOST$effsize$lower.ci[1],
-                  TOST$effsize$upper.ci[1])
-    if (!is.null(conf.int)) {
-      attr(conf.int, "conf.level") <- TOST$effsize$conf.level[1]
+  if(!is.null(htest$parameter)){
+    if(length(htest$parameter) == 1){
+      df1[ifelse(extract_names, names(htest$parameter),"parameter")] <- unname(htest$parameter)
+    } else{
+      for(i in 1:length(htest$parameter)){
+        parm_name = ifelse(extract_names, names(htest$parameter)[i],paste0("parameter",i))
+        df1[parm_name] <- unname(htest$parameter)[i]
+      }
     }
-    if (grepl("One", TOST$method)) {
-      estimate <- TOST$effsize$estimate[1]
-      names(estimate) = "mean of x"
-    } else {
-      estimate <- TOST$effsize$estimate[1]
-      names(estimate) = "mean difference"
-    }
-
-    htest <- list(
-      statistic = statistic,
-      parameter = parameter,
-      p.value = p.value,
-      estimate = estimate,
-      null.value = null.value,
-      alternative = alt_text,
-      method = method,
-      data.name = TOST$data.name,
-      conf.int = conf.int
-    )
   }
 
-  class(htest) <- "htest"
-  htest
+  if(!is.null(htest$p.value)){
+    df1$p.value <- unname(htest$p.value)
+  }
+
+  }
+
+  if(!is.null(htest$estimate)){
+    if(grepl("two sample t-test",htest$method,ignore.case = TRUE) && length(htest$estimate) > 1){
+      htest$estimate = htest$estimate[1] - htest$estimate[2]
+      names(htest$estimate) = c("mean difference")
+    }
+    if(length(htest$estimate) == 1){
+      df1[ifelse(extract_names, names(htest$estimate),"estimate")] <- unname(htest$estimate)
+    } else{
+      for(i in 1:length(htest$estimate)){
+        parm_name = ifelse(extract_names, names(htest$estimate)[i],paste0("estimate",i))
+        df1[parm_name] <- unname(htest$estimate)[i]
+      }
+    }
+  }
+
+  if(!is.null(htest$stderr)){
+    if(length(htest$stderr) == 1){
+      df1["se"] <- unname(htest$stderr)
+    } else{
+      for(i in 1:length(htest$stderr)){
+        parm_name = paste0("stderr",i)
+        df1[parm_name] <- unname(htest$stderr)[i]
+      }
+    }
+  }
+  if(show_ci == TRUE){
+
+  if(!is.null(htest$conf.int)){
+    df1$ci = attr(htest$conf.int, "conf.level")
+    df1$ci_low = min(htest$conf.int)
+    df1$ci_high = max(htest$conf.int)
+  }
+
+}
+  if(!is.null(htest$alternative)){
+    df1$alternative = htest$alternative
+  }
+
+  if(!is.null(htest$null.value)){
+
+    if(length(htest$null.value) == 1){
+      df1["null"] <- unname(htest$null.value)
+    } else{
+      for(i in 1:length(htest$null.value)){
+        parm_name = paste0("null",i)
+        df1[parm_name] <- unname(htest$null.value)[i]
+      }
+    }
+  }
+  # Rename
+  # names(df1)[names(df1) == 'old.var.name'] <- 'new.var.name'
+
+  df_final = df1
+  return(df_final)
+
 }
 
+#' @rdname htest-helpers
+#' @export
+
+explain_htest = function(htest){
+  print(htest)
+}
