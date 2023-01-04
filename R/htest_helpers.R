@@ -78,10 +78,10 @@ df_htest = function(htest,
 
   if(!is.null(htest$stderr)){
     if(length(htest$stderr) == 1){
-      df1["se"] <- unname(htest$stderr)
+      df1["SE"] <- unname(htest$stderr)
     } else{
       for(i in 1:length(htest$stderr)){
-        parm_name = paste0("stderr",i)
+        parm_name = paste0("SE",i)
         df1[parm_name] <- unname(htest$stderr)[i]
       }
     }
@@ -89,9 +89,11 @@ df_htest = function(htest,
   if(show_ci == TRUE){
 
   if(!is.null(htest$conf.int)){
-    df1$ci = attr(htest$conf.int, "conf.level")
-    df1$ci_low = min(htest$conf.int)
-    df1$ci_high = max(htest$conf.int)
+
+    df1$lower.ci = min(htest$conf.int)
+    df1$upper.ci = max(htest$conf.int)
+    df1$conf.level = attr(htest$conf.int, "conf.level")
+
   }
 
 }
@@ -118,9 +120,3 @@ df_htest = function(htest,
 
 }
 
-#' @rdname htest-helpers
-#' @export
-
-explain_htest = function(htest){
-  print(htest)
-}
