@@ -108,6 +108,7 @@ eqb = 3)
 Other Robust TOST: 
 \code{\link{boot_log_TOST}()},
 \code{\link{boot_t_TOST}()},
+\code{\link{boot_t_test}()},
 \code{\link{log_TOST}()}
 }
 \concept{Robust TOST}

@@ -100,6 +100,7 @@ Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC pre
 \seealso{
 Other Robust TOST: 
 \code{\link{boot_log_TOST}()},
+\code{\link{boot_t_test}()},
 \code{\link{log_TOST}()},
 \code{\link{wilcox_TOST}()}
 }

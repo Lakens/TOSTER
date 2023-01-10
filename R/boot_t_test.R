@@ -37,6 +37,7 @@ boot_t_test <- function(x, ...){
 
 boot_t_test.default <- function(x,
                                 y = NULL,
+                                var.equal = FALSE,
                                 paired = FALSE,
                                 alternative = c("two.sided",
                                                 "less",
@@ -70,10 +71,12 @@ boot_t_test.default <- function(x,
   null_test = simple_htest(x = x,
                            y = y,
                            test = "t.test",
+                           var.equal = var.equal,
                            paired = paired,
                            alternative = alternative,
-                           mu = 0,
+                           mu = mu,
                            alpha = 0.05)
+  mu = null_test$null.value
   m_vec <- rep(NA, times=length(R)) # mean difference vector
   if(alternative %in% c("equivalence","minimal.effect")){
     conf.level = 1-alpha*2
@@ -121,9 +124,8 @@ boot_t_test.default <- function(x,
     if (stderr < 10 * .Machine$double.eps * abs(mx)){
       stop("data are essentially constant")
     }
-    #tstat <- (mx - mu)/stderr
-    #tstat_low = (mx - low_eqbound)/stderr
-    #tstat_high = (mx - high_eqbound)/stderr
+    tstat <- (mx - mu)/stderr
+
     method <- if (paired) "Bootstrapped Paired t-test" else "Bootstrapped One Sample t-test"
     #estimate <- setNames(mx, if (paired) "mean of the differences" else "mean of x")
     #x.cent <- x - mx # remove to have an untransformed matrix
@@ -222,116 +224,73 @@ boot_t_test.default <- function(x,
     }
 
     tstat <- (mx - my - mu)/stderr
+    # Remember tstat[which.max( abs(tstat) )]
     #TSTAT <- (MX - MY)/STDERR
 
     TSTAT <- (MX-MY)/STDERR
     #TSTAT_low <- (MX-low_eqbound)/STDERR
     #TSTAT_high <- (MX-high_eqbound)/STDERR
   }
-  tstat = null_test
-  #m_vec = append(m_vec, nullTOST$effsize$estimate[1])
-  #d_vec = append(d_vec, nullTOST$effsize$estimate[2])
 
-  boot.pval <- 2 * min(mean(TSTAT <= tstat), mean(TSTAT > tstat))
+  if(alternative %in% c("equivalence", "minimal.effect")){
+    if(is.null(y)){
+      diff = mx
+    }else{
+      diff = mx-my
+    }
 
-  if(hypothesis == "EQU"){
+    tstat_l = (diff-min(mu))/stderr
+    tstat_u = (diff-max(mu))/stderr
+  }
+
+  if (alternative == "less") {
+
+    boot.pval <- mean(TSTAT < tstat)
+
+    boot.cint <- quantile(m_vec, c(alpha,1-alpha))
+  }
+
+  if(alternative == "greater") {
+    boot.pval <- mean(TSTAT > tstat)
+    boot.cint <- quantile(m_vec, c(alpha,1-alpha))
+  }
+
+  if(alternative == "two.sided"){
+    boot.pval <- 2*min(mean(TSTAT <= tstat), mean(TSTAT > tstat))
+    boot.cint <- quantile(m_vec, c(alpha/2,1-alpha/2))
+  }
+
+  if(alternative == "equivalence") {
     p_l = mean(TSTAT > tstat_l)
     p_u = mean(TSTAT < tstat_u)
-  } else{
+    boot.pval <- max(p_l, p_u)
+    boot.cint <- quantile(m_vec, c(alpha,1-alpha))
+  }
+
+  if(alternative == "minimal.effect") {
     p_l = mean(TSTAT < tstat_l)
     p_u = mean(TSTAT > tstat_u)
+    boot.pval <- min(p_l,p_u)
+    boot.cint <- quantile(m_vec, c(alpha,1-alpha))
   }
 
-  boot.se = sd(m_vec)
-  boot.cint <- quantile(m_vec, c(alpha, 1 - alpha ))
-  d.cint <- quantile(d_vec, c(alpha, 1 - alpha ))
-  d.se = sd(d_vec)
-
-  TOST = nullTOST$TOST
-  TOST$p.value = c(boot.pval, p_l, p_u)
-  effsize = nullTOST$effsize
-  effsize$SE = c(boot.se,d.se)
-  effsize$lower.ci = c(boot.cint[1],
-                       d.cint[1])
-
-  effsize$upper.ci = c(boot.cint[2],
-                       d.cint[2])
-  pTOST = max(p_l,p_u)
-  TOSToutcome<-ifelse(pTOST<alpha,"significant","non-significant")
-  testoutcome<-ifelse(boot.pval<alpha,"significant","non-significant")
-  if(hypothesis == "EQU"){
-    pTOST = max(p_l,
-                p_u) # get highest p value for TOST result
-    tTOST = ifelse(abs(tstat_l) < abs(tstat_u),
-                   tstat_l,
-                   tstat_u) #Get lowest t-value for summary TOST result
-  } else {
-    pTOST = min(p_l,
-                p_u) # get highest p value for TOST result
-    tTOST = ifelse(abs(tstat_l) > abs(tstat_u),
-                   tstat_l,
-                   tstat_u) #Get lowest t-value for summary TOST result
-  }
-
-  # Change text based on two tailed t test if mu is not zero
-  if(mu == 0){
-    mu_text = "zero"
-  } else {
-    mu_text = mu
-  }
-
-  if(hypothesis == "EQU"){
-    #format(low_eqbound, digits = 3, nsmall = 3, scientific = FALSE)
-    TOST_restext = paste0("The equivalence test was ",
-                          TOSToutcome,", t(",round(df, digits=2),") = ",
-                          format(tTOST, digits = 3,
-                                 nsmall = 3, scientific = FALSE),", p = ",
-                          format(pTOST, digits = 3,
-                                 nsmall = 3, scientific = TRUE),sep="")
-  } else {
-    TOST_restext = paste0("The minimal effect test was ",
-                          TOSToutcome,", t(",round(df, digits=2),") = ",
-                          format(tTOST, digits = 3,
-                                 nsmall = 3, scientific = FALSE),", p = ",
-                          format(pTOST, digits = 3,
-                                 nsmall = 3, scientific = TRUE),sep="")
-  }
-
-  ttest_restext = paste0("The null hypothesis test was ",
-                         testoutcome,", t(",round(df, digits=2),") = ",
-                         format(tstat, digits = 3,
-                                nsmall = 3, scientific = FALSE),", p = ",
-                         format(boot.pval, digits = 3,
-                                nsmall = 3, scientific = TRUE),sep="")
-  combined_outcome = tost_decision(hypothesis = hypothesis,
-                                    alpha = alpha,
-                                    pvalue = boot.pval,
-                                    pTOST = pTOST,
-                                    mu_text = mu_text)
-
-
-  decision = list(
-    TOST = TOST_restext,
-    ttest = ttest_restext,
-    combined = combined_outcome
-  )
+  boot.se = sd(m_vec, na.rm = TRUE)
+  attr(boot.cint, "conf.level") <- conf.level
 
   rval = list(
-    TOST = TOST,
-    eqb = nullTOST$eqb,
-    alpha = alpha,
+    p.value = boot.pval,
+    stderr = boot.se,
+    conf.int = boot.cint,
+    estimate = null_test$estimate,
+    null.value = null_test$null.value,
+    alternative = alternative,
     method = method,
-    hypothesis = nullTOST$hypothesis,
-    effsize = effsize,
-    smd = nullTOST$smd,
-    decision = decision,
-    boot = list(SMD = d_vec,
-                raw = m_vec),
-    data.name = dname,
+    boot = m_vec,
+    data.name = null_test$data.name,
     call = match.call()
   )
 
-  class(rval) = "TOSTt"
+  class(rval) = "htest"
 
   return(rval)
 }

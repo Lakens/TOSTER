@@ -18,6 +18,10 @@ explain_htest(htest, digits = 3, alpha = NULL)
 \item{show_ci}{A logical variable to display the confidence interval.}
 
 \item{extract_names}{A logical variable to take the names from the S3 object (i.e., statistic for \code{t.test} would be "t")}
+
+\item{digits}{integer indicating the number of decimal places.}
+
+\item{alpha}{alpha level (default = 0.05)}
 }
 \description{
 Functions to help interpret or display objects of the class \code{htest}
