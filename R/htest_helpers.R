@@ -195,7 +195,7 @@ explain_htest = function(htest,
                         pval_state)
 
   } else{
-    stat_state = ""
+    stat_state = pval_state
   }
 
   if(!is.null(htest$alternative)){
