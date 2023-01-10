@@ -3,15 +3,12 @@
 \name{htest-helpers}
 \alias{htest-helpers}
 \alias{df_htest}
-\alias{smd_from_htest}
-\alias{ses_from_htest}
+\alias{explain_htest}
 \title{Helpers for \code{htest} objects}
 \usage{
 df_htest(htest, test_statistics = TRUE, show_ci = TRUE, extract_names = TRUE)
 
-smd_from_htest(htest)
-
-ses_from_htest(htest)
+explain_htest(htest, digits = 3, alpha = NULL)
 }
 \arguments{
 \item{htest}{A S3 object of the class \code{htest}}

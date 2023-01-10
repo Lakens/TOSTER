@@ -39,15 +39,15 @@ smd_from_htest = function(htest,
 
   if(grepl("two",htest$method,ignore.case=TRUE)){
     mult = 2
-    if(is.null(sample_size)){
-      sample_size = unname(htest$parameter) + 2
-      if(grepl("welch",htest$method,ignore.case=TRUE)){
-        stop("sample_size argument must be provided if Welch's t-test provided.")
-      }
+
+    sample_size = unname(htest$parameter) + 2
+    if (grepl("welch", htest$method, ignore.case = TRUE)) {
+      message("SMD derived from Welch's t-test is only an approximation.")
     }
+
     if(bias_correction){
       smd_label = "Hedges's g"
-      J = TOSTER:::hedge_J(unname(htest$parameter))
+      J = hedge_J(unname(htest$parameter))
     } else {
       smd_label = "Cohen's d"
       J = 1
@@ -74,12 +74,45 @@ smd_from_htest = function(htest,
 #' @rdname htest-helpers
 #' @export
 
-ses_from_htest = function(htest){
-  if(!("htest" %in% class(htest)) || !grepl("wilcoxon",htest$method,
+ses_from_htest = function(htest,
+                          alpha = .05,
+                          ses = c("odds","rb","cstat")){
+  ses = match.arg(ses)
+  if(!("htest" %in% class(htest)) || !grepl("wilcox",htest$method,
                                             ignore.case=TRUE)){
     stop("htest must be an htest from a Wilcoxon-Mann-Whitney test.")
   }
 }
+
+
+
+es_from_htest = function(htest,
+                         alpha = 0.05,
+                         ...){
+  method = htest$method
+
+  if(!("htest" %in% class(htest))){
+    stop("htest must be of the S3 class \'htest\' ")
+  }
+
+  if(grepl("t-test",htest$method,
+           ignore.case=TRUE)){
+    res = smd_from_htest(htest,
+                         alpha = alpha,
+                         ...)
+  }
+
+  if(grepl("wilcox",htest$method,
+           ignore.case=TRUE)){
+    res = ses_from_htest(htest,
+                         alpha = alpha,
+                         ...)
+  }
+
+
+  return(res)
+}
+
 
 
 d_t_ind <- function(mu,

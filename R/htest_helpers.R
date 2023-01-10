@@ -6,7 +6,8 @@
 #' @param test_statistics A logical variable to display the test statistics.
 #' @param show_ci A logical variable to display the confidence interval.
 #' @param extract_names A logical variable to take the names from the S3 object (i.e., statistic for \code{t.test} would be "t")
-#'
+#' @inheritParams t_TOST
+#' @param digits integer indicating the number of decimal places.
 #' @examples
 #' # To be added
 #'
@@ -120,3 +121,207 @@ df_htest = function(htest,
 
 }
 
+#' @rdname htest-helpers
+#' @export
+
+explain_htest = function(htest,
+                         digits = 3,
+                         alpha = NULL){
+  if(!("htest" %in% class(htest))){
+    stop("htest must be of the class htest")
+  }
+  if(is.null(htest$p.value)){
+    stop("htest must have p.value")
+  }
+  # Set alpha
+  if(is.null(alpha)){
+    if(is.null(htest$conf.int)){
+      alpha = 0.05
+      message("No alpha level set or confidence interval provided. Defaulting to 0.05")
+    } else{
+      alpha = 1-attr(htest$conf.int,"conf.level")
+    }
+  }
+  sig_state = ifelse(
+    htest$p.value < alpha,
+    "statistically significant",
+    "statistically non-significant"
+  )
+
+  hyp_state = ifelse(
+    htest$p.value < alpha,
+    "The test statistics indicate that the null hypothesis should be rejected.",
+    "The test statistics indicate that the null hypothesis should not be rejected."
+  )
+
+  if(!is.null(htest$parameter)){
+
+    for (i in 1:length(htest$parameter)) {
+      if (i == 1) {
+        par_state = paste0(rounder_stat(unname(htest$parameter[i])))
+      } else{
+        par_state = paste0(par_state,", ",rounder_stat(unname(htest$parameter[i])))
+      }
+
+    }
+    par_state = paste0("(",par_state,")")
+
+  } else {
+    par_state = ""
+  }
+
+  if(!is.null(htest$p.value)){
+    pval_state = printable_pval(htest$p.value,
+                                digits = digits)
+  }else{
+    pval_state = ""
+  }
+
+  if(!is.null(htest$statistic)){
+
+    stat_name = names(htest$statistic)
+    stat_est = unname(htest$statistic)
+
+    stat_state = paste0(stat_name,
+                        par_state,
+                        " = ",
+                        rounder_stat(stat_est),
+                        ", ",
+                        pval_state)
+
+  } else{
+    stat_state = ""
+  }
+
+  if(!is.null(htest$alternative)){
+
+    if(!is.null(htest$null.value)) {
+      if(length(htest$null.value) == 1) {
+        alt.char <-
+          switch(htest$alternative,
+                 two.sided = "not equal to",
+                 less = "less than",
+                 greater = "greater than")
+        alt_state = paste0("true ",
+                           names(htest$null.value),
+                           " is ",
+                           alt.char,
+                           " ",
+                           htest$null.value)
+        decision = ifelse(htest$p.value < alpha,
+                          " we can claim that the ",
+                          " we cannot claim that the ")
+
+        print_state = paste0("The ",
+                             htest$method,
+                             " indicates that there is a ",
+                             sig_state,
+                             " hypothesis test (",
+                             stat_state, "). ",
+                             hyp_state,
+                             " Based on the alternative hypothesis,",
+                             decision,
+                             alt_state, ".")
+      } else {
+
+        if(htest$alternative %in% c("equivalence","minimal.effect")){
+          if(htest$alternative == "equivalence"){
+
+            alt_state = paste0("true ",
+                               names(htest$null.value)[1],
+                               " is ",
+                               "between",
+                               " ",
+                               htest$null.value[1], " and ",
+                               htest$null.value[2])
+
+          }
+          if(htest$alternative == "minimal.effect"){
+
+            alt_state = paste0("true ",
+                               names(htest$null.value)[1],
+                               " is ",
+                               "less than ",
+                               htest$null.value[1], " or ",
+                               "greater than ",
+                               htest$null.value[2])
+
+          }
+          decision = ifelse(htest$p.value < alpha,
+                            " we can claim that the ",
+                            " we cannot claim that the ")
+
+          print_state = paste0("The ",
+                               htest$method,
+                               " indicates that there is a ",
+                               sig_state,
+                               " hypothesis test (",
+                               stat_state, "). ",
+                               hyp_state,
+                               " Based on the alternative hypothesis,",
+                               decision,
+                               alt_state, ".")
+        } else{
+          print_state = paste0("The ",
+                               htest$method,
+                               " indicates that there is a ",
+                               sig_state,
+                               " effect (",
+                               stat_state, "). ",
+                               hyp_state,
+                               " alternative: ", htest$alternative, " with ",
+                               htest$null.value,
+                               ".")
+        }
+
+
+      }
+    } else {
+      print_state = paste0("The ",
+                           htest$method,
+                           " indicates that there is a ",
+                           sig_state,
+                           " effect (",
+                           stat_state, "). ",
+                           hyp_state,
+                           " alternative: ", htest$alternative,".")
+
+    }
+
+
+  } else{
+    print_state = paste0("The ",
+                         htest$method,
+                         " indicates that there is a ",
+                         sig_state,
+                         " effect (",
+                         stat_state, "). ",
+                         hyp_state)
+  }
+
+  return(print_state)
+}
+
+rounder_stat = function(number,
+                        digits = 3){
+  cutoff = 1*10^(-1*digits)
+  if(number < cutoff){
+    number = signif(number, digits = digits)
+  } else{
+    number = round(number, digits = digits)
+  }
+
+  return(number)
+}
+
+printable_pval = function(pval,
+                          digits = 3){
+  cutoff = 1*10^(-1*digits)
+  if(pval < cutoff){
+    pval = paste0("p < ",cutoff)
+  } else{
+    pval = paste0("p = ",round(pval, digits = digits))
+  }
+
+  return(pval)
+}
