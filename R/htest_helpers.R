@@ -198,6 +198,30 @@ explain_htest = function(htest,
     stat_state = pval_state
   }
 
+  if(!is.null(htest$estimate) && !is.null(htest$conf.int)){
+    for(i in 1:length(htest$estimate)){
+      est_state = paste0(names(htest$estimate[i]),
+                         " = ",
+                         rounder_stat(unname(htest$estimate[i]),
+                                      digits = digits),
+                         ", ")
+    }
+
+    conf_state = paste0(
+      100 * attr(htest$conf.int, "conf.level"),
+      "% C.I.[",
+      rounder_stat(min(htest$conf.int),
+                   digits = digits),
+      ", ",
+      rounder_stat(max(htest$conf.int),
+                   digits = digits),
+      "]"
+    )
+    est_state = paste0(est_state, conf_state)
+    stat_state = paste0(stat_state,", ", est_state)
+
+  }
+
   if(!is.null(htest$alternative)){
 
     if(!is.null(htest$null.value)) {
@@ -214,17 +238,17 @@ explain_htest = function(htest,
                            " ",
                            htest$null.value)
         decision = ifelse(htest$p.value < alpha,
-                          " we can claim that the ",
-                          " we cannot claim that the ")
+                          " We can claim that the ",
+                          " We cannot claim that the ")
 
         print_state = paste0("The ",
                              htest$method,
                              " indicates that there is a ",
                              sig_state,
-                             " hypothesis test, ",
-                             stat_state, ", at a ", alpha, " alpha-level. ",
+                             " hypothesis test (",
+                             stat_state, ") at a ", alpha, " alpha-level. ",
                              hyp_state,
-                             " Based on the alternative hypothesis,",
+                             #" Based on the alternative hypothesis,",
                              decision,
                              alt_state, ".")
       } else {
@@ -253,17 +277,17 @@ explain_htest = function(htest,
 
           }
           decision = ifelse(htest$p.value < alpha,
-                            " we can claim that the ",
-                            " we cannot claim that the ")
+                            " We can claim that the ",
+                            " We cannot claim that the ")
 
           print_state = paste0("The ",
                                htest$method,
                                " indicates that there is a ",
                                sig_state,
-                               " hypothesis test, ",
-                               stat_state, ", at a ", alpha, " alpha-level. ",
+                               " hypothesis test (",
+                               stat_state, ") at a ", alpha, " alpha-level. ",
                                hyp_state,
-                               " Based on the alternative hypothesis,",
+                               #" Based on the alternative hypothesis,",
                                decision,
                                alt_state, ".")
         } else{
