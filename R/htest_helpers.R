@@ -140,6 +140,11 @@ explain_htest = function(htest,
       message("No alpha level set or confidence interval provided. Defaulting to 0.05")
     } else{
       alpha = 1-attr(htest$conf.int,"conf.level")
+      if(!is.null(htest$alternative)){
+        if(htest$alternative %in% c("equivalence","minimal.effect")){
+          alpha = alpha/2
+        }
+      }
     }
   }
   sig_state = ifelse(
@@ -150,8 +155,8 @@ explain_htest = function(htest,
 
   hyp_state = ifelse(
     htest$p.value < alpha,
-    "The test statistics indicate that the null hypothesis should be rejected.",
-    "The test statistics indicate that the null hypothesis should not be rejected."
+    "The null hypothesis should be rejected.",
+    "The null hypothesis should not be rejected."
   )
 
   if(!is.null(htest$parameter)){
@@ -216,8 +221,8 @@ explain_htest = function(htest,
                              htest$method,
                              " indicates that there is a ",
                              sig_state,
-                             " hypothesis test (",
-                             stat_state, "). ",
+                             " hypothesis test, ",
+                             stat_state, ", at a ", alpha, " alpha-level. ",
                              hyp_state,
                              " Based on the alternative hypothesis,",
                              decision,
@@ -255,8 +260,8 @@ explain_htest = function(htest,
                                htest$method,
                                " indicates that there is a ",
                                sig_state,
-                               " hypothesis test (",
-                               stat_state, "). ",
+                               " hypothesis test, ",
+                               stat_state, ", at a ", alpha, " alpha-level. ",
                                hyp_state,
                                " Based on the alternative hypothesis,",
                                decision,
@@ -266,8 +271,8 @@ explain_htest = function(htest,
                                htest$method,
                                " indicates that there is a ",
                                sig_state,
-                               " effect (",
-                               stat_state, "). ",
+                               " effect, ",
+                               stat_state, ", at a ", alpha, " alpha-level. ",
                                hyp_state,
                                " alternative: ", htest$alternative, " with ",
                                htest$null.value,
@@ -281,8 +286,8 @@ explain_htest = function(htest,
                            htest$method,
                            " indicates that there is a ",
                            sig_state,
-                           " effect (",
-                           stat_state, "). ",
+                           " effect, ",
+                           stat_state, ", at a ", alpha, " alpha-level. ",
                            hyp_state,
                            " alternative: ", htest$alternative,".")
 
@@ -294,8 +299,8 @@ explain_htest = function(htest,
                          htest$method,
                          " indicates that there is a ",
                          sig_state,
-                         " effect (",
-                         stat_state, "). ",
+                         " effect, ",
+                         stat_state, ", at a ", alpha, " alpha-level. ",
                          hyp_state)
   }
 
