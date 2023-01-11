@@ -43,6 +43,8 @@ simple_htest(
 
 \item{y}{an optional (non-empty) numeric vector of data values.}
 
+\item{test}{a character string specifying what type of hypothesis test to use. Options are limited to "wilcox.test" and "t.test". You can specify just the initial letter.}
+
 \item{formula}{a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.}
 
 \item{data}{an optional matrix or data frame (or similar: see model.frame) containing the variables in the formula formula. By default the variables are taken from environment(formula).}
@@ -70,15 +72,13 @@ A list with class \code{"htest"} containing the following components:
 Performs one or two sample t-tests or Wilcoxon-Mann-Whitney rank-based tests with expanded options compared to \code{t.test} or \code{wilcox.test}.
 }
 \details{
-\code{alternative = "greater"} is the alternative that x has a larger mean than y.
-For the one-sample case: that the mean is positive.
+Currently, this function allows for traditional or TOST hypothesis tests using \code{"t.test"} or \code{"wilcox.test"}.
+The type of test, t-test or Wilcoxon-Mann-whitney, can be selected with the \code{"test"} argument.
+More information on the tests can be found in the documentation for the \code{"t.test"} and \code{"wilcox.test"} functions.
 
-If paired is TRUE then both x and y must be specified and they must be the same length.
-Missing values are silently removed (in pairs if paired is TRUE).
-If var.equal is TRUE then the pooled estimate of the variance is used.
- By default, if \code{var.equal} is FALSE then the variance is estimated separately for both groups and the Welch modification to the degrees of freedom is used.
-
-If the input data are effectively constant (compared to the larger of the two means) an error is generated.
+\code{alternative = "greater"} is the alternative that x is larger than y (on average).
+If \code{alternative = "equivalence"} then the alternative is that the difference between x and y is between the two null values (\code{mu}).
+If \code{alternative = "minimal.effect"} then the alternative is that the difference between x and y is less than the lowest null value or greater than the highest.
 }
 \examples{
 data(mtcars)

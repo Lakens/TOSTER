@@ -25,8 +25,6 @@ Returns a list containing a list of class 'htest' for the result of each test wi
 Convert a TOSTER result object of class 'TOSTt' or 'TOSTnp' to a list of class 'htest'.
 }
 \examples{
-# To be added
-
 
 # as.htest(result)
 

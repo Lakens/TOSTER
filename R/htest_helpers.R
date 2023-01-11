@@ -24,7 +24,7 @@ df_htest = function(htest,
                     show_ci = TRUE,
                     extract_names = TRUE){
 
-  if(!("htest" %in% class(htest))){
+  if(!(class(htest) %in% c("htest"))){
     stop("htest must be of the class htest")
   }
 
@@ -124,9 +124,10 @@ df_htest = function(htest,
 #' @export
 
 describe_htest = function(htest,alpha = NULL,digits = 3){
-  if(!("htest" %in% class(htest))){
+  if(!(class(htest) %in% c("htest"))){
     stop("htest must be of the class htest")
   }
+
   if(is.null(htest$p.value)){
     stop("htest must have p.value")
   }

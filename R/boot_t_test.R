@@ -1,7 +1,7 @@
 #' @title Bootstrapped t-test
 #' @description A function for a bootstrap method for Tt-tests.
-#' @param R number of bootstrap replicates
 #' @inheritParams simple_htest
+#' @inheritParams boot_t_TOST
 #' @details For details on the calculations in this function see vignette("robustTOST").
 #' @return A list with class \code{"htest"} containing the following components:
 #' \describe{

@@ -125,8 +125,8 @@ test_that("All other htests",{
                 list(Store = as.character(1:7),
                      Brand = LETTERS[1:5]))
 
-  htset <- stats::quade.test(y)
-  df1 = df_htest(htest)
+  htest <- stats::quade.test(y)
+  df1 = df_htest(htest = htest)
   pr = describe_htest(htest, alpha = .05)
   expect_equal(htest$p.value,df1$p.value)
 

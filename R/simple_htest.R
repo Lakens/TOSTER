@@ -1,5 +1,6 @@
 #' @title One, two, and paired samples hypothesis tests
 #' @description Performs one or two sample t-tests or Wilcoxon-Mann-Whitney rank-based tests with expanded options compared to \code{t.test} or \code{wilcox.test}.
+#' @param test a character string specifying what type of hypothesis test to use. Options are limited to "wilcox.test" and "t.test". You can specify just the initial letter.
 #' @inheritParams t_TOST
 #' @inheritParams z_cor_test
 #' @param ...  further arguments to be passed to or from methods.

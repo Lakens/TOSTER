@@ -16,8 +16,6 @@
 #' \item{conf.int}{The confidence interval of the difference.}
 #'
 #' @examples
-#' # To be added
-#'
 #'
 #' # as.htest(result)
 #'
