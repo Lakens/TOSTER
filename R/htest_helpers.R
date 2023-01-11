@@ -16,7 +16,7 @@
 # Possible functions
 # t.test wilcox.test oneway.test kruskal.test friedman.test
 # cor.test
-
+#' @family htest
 #' @rdname htest-helpers
 #' @export
 df_htest = function(htest,

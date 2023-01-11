@@ -18,7 +18,7 @@
 #' @examples
 #'
 #' # as.htest(result)
-#'
+#' @family htest
 #' @export
 
 as_htest = function(TOST) {
@@ -58,9 +58,14 @@ as_htest = function(TOST) {
   null.value <- switch(class(TOST),
                        TOSTt = as.numeric(eqb[1,2:3]),
                        TOSTnp = eqb)
-  names(null.value) <- switch(class(TOST),
-                              TOSTt = rep("mean",length(null.value)),
-                              TOSTnp = rep("location shift",length(null.value)))
+  if(grepl("one",TOST$method, ignore.case = TRUE)){
+    names(null.value) <- rep("mean",length(null.value))
+  } else {
+    names(null.value) <- switch(class(TOST),
+                                TOSTt = rep("mean difference",length(null.value)),
+                                TOSTnp = rep("location shift",length(null.value)))
+  }
+
 
   stderr <- switch(class(TOST),
                    TOSTt = TOSTp$SE,

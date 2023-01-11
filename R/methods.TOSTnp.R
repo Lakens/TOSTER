@@ -64,3 +64,34 @@ print.TOSTnp <- function(x,
   cat("\n")
 
 }
+
+#' @rdname TOSTnp-methods
+#' @method summary TOSTnp
+#' @export
+
+summary.TOSTnp <- function(x,
+                          digits = 3,
+                          ...){
+
+  tosty = x
+  htest = as_htest(x)
+
+  text = describe_htest(htest = htest,
+                        alpha = tosty$alpha,
+                        digits = digits)
+
+  text2 = paste0(text,
+                 " Additionally, a standardized effect size (SES), ",
+                 row.names(x$effsize)[2],
+                 ", was estimated, SES = ",
+                 rounder_stat(x$effsize$estimate[2], digits = digits),
+                 " ",
+                 x$effsize$conf.level[2]*100,
+                 "% C.I.[",
+                 rounder_stat(x$effsize$estimate[2], digits = digits),
+                 ", ",
+                 rounder_stat(x$effsize$estimate[2],digits = digits),
+                 "].")
+
+  return(text2)
+}

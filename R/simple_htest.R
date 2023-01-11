@@ -47,7 +47,7 @@ simple_htest <- function(x, ...,
                          alpha = 0.05){
   UseMethod("simple_htest")
 }
-
+#' @family htest
 #' @rdname simple_htest
 #' @method simple_htest default
 #' @export

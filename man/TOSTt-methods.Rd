@@ -4,6 +4,7 @@
 \alias{TOSTt-methods}
 \alias{print.TOSTt}
 \alias{plot.TOSTt}
+\alias{summary.TOSTt}
 \title{Methods for TOSTt objects}
 \usage{
 \method{print}{TOSTt}(x, digits = 4, ...)
@@ -16,6 +17,8 @@
   ci_shades,
   ...
 )
+
+\method{summary}{TOSTt}(x, digits = 3, ...)
 }
 \arguments{
 \item{x}{object of class \code{TOSTt}}
