@@ -26,25 +26,50 @@ test_that("Run examples for one sample", {
                            R = 99))
   expect_error(boot_t_TOST(Sepal.Width ~ Species, data = iris))
 
+  htest_alt1 = boot_t_test(x = samp1,
+                           alternative = "t",
+                           R = 99)
+  htest_alt2 = boot_t_test(x = samp1,
+                           alternative = "g",
+                           R = 99)
+  htest_alt3 = boot_t_test(x = samp1,
+                           alternative = "l",
+                           R = 99)
+
   # Normal one sample ----
 
   test1 = boot_t_TOST(x = samp1,
                  low_eqbound = -.5,
                  high_eqbound = .5,
                  R = 99)
+  set.seed(2649)
   test1 = boot_t_TOST(x = samp1,
                       eqb = .5,
                       R = 99)
-
+  set.seed(2649)
+  htest1 = boot_t_test(x = samp1,
+                       mu = .5,
+                       R = 99,
+                       alternative = "e")
+  expect_equal(test1$TOST$p.value[3],
+               htest1$p.value)
   expect_error( boot_log_TOST(x = samp1,
                       eqb = .5,
                       R = 99))
 
+  set.seed(432020)
   test3 = boot_t_TOST(x = samp1,
                  low_eqbound = -.5,
                  high_eqbound = .5,
                  hypothesis = "MET",
                  R = 99)
+  set.seed(432020)
+  htest3 = boot_t_test(x = samp1,
+                       mu = .5,
+                       R = 99,
+                       alternative = "m")
+  expect_equal(test3$TOST$p.value[3],
+               htest3$p.value)
 
   expect_equal(1-test1$TOST$p.value[2],
                test3$TOST$p.value[2],

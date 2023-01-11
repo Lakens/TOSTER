@@ -3,12 +3,12 @@
 \name{htest-helpers}
 \alias{htest-helpers}
 \alias{df_htest}
-\alias{explain_htest}
+\alias{describe_htest}
 \title{Helpers for \code{htest} objects}
 \usage{
 df_htest(htest, test_statistics = TRUE, show_ci = TRUE, extract_names = TRUE)
 
-explain_htest(htest, digits = 3, alpha = NULL)
+describe_htest(htest, alpha = NULL, digits = 3)
 }
 \arguments{
 \item{htest}{A S3 object of the class \code{htest}}
@@ -19,9 +19,9 @@ explain_htest(htest, digits = 3, alpha = NULL)
 
 \item{extract_names}{A logical variable to take the names from the S3 object (i.e., statistic for \code{t.test} would be "t")}
 
-\item{digits}{integer indicating the number of decimal places.}
-
 \item{alpha}{alpha level (default = 0.05)}
+
+\item{digits}{integer indicating the number of decimal places.}
 }
 \description{
 Functions to help interpret or display objects of the class \code{htest}

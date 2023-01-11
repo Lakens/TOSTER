@@ -11,6 +11,7 @@ boot_t_test(x, ...)
 \method{boot_t_test}{default}(
   x,
   y = NULL,
+  var.equal = FALSE,
   paired = FALSE,
   alternative = c("two.sided", "less", "greater", "equivalence", "minimal.effect"),
   mu = 0,

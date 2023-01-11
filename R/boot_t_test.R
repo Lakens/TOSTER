@@ -49,10 +49,6 @@ boot_t_test.default <- function(x,
                                 R = 1999, ...){
   alternative = match.arg(alternative)
 
-  if(!missing(mu) && (length(mu) != 1 || is.na(mu))) {
-    stop("'mu' must be a single number")
-  }
-
 
   if(!missing(alpha) && (length(alpha) != 1 || !is.finite(alpha) ||
                               alpha < 0 || alpha > 1)) {

@@ -32,7 +32,6 @@ df_htest = function(htest,
 
   if(test_statistics) {
 
-
   # Get columns
   if(!is.null(htest$statistic)){
     if(length(htest$statistic) == 1){
@@ -124,9 +123,7 @@ df_htest = function(htest,
 #' @rdname htest-helpers
 #' @export
 
-explain_htest = function(htest,
-                         digits = 3,
-                         alpha = NULL){
+describe_htest = function(htest,alpha = NULL,digits = 3){
   if(!("htest" %in% class(htest))){
     stop("htest must be of the class htest")
   }
@@ -200,11 +197,21 @@ explain_htest = function(htest,
 
   if(!is.null(htest$estimate) && !is.null(htest$conf.int)){
     for(i in 1:length(htest$estimate)){
-      est_state = paste0(names(htest$estimate[i]),
-                         " = ",
-                         rounder_stat(unname(htest$estimate[i]),
-                                      digits = digits),
-                         ", ")
+      if(i == 1){
+        est_state = paste0(names(htest$estimate[i]),
+                           " = ",
+                           rounder_stat(unname(htest$estimate[i]),
+                                        digits = digits),
+                           ", ")
+      } else {
+        est_state = paste0(est_state,
+                           names(htest$estimate[i]),
+                           " = ",
+                           rounder_stat(unname(htest$estimate[i]),
+                                        digits = digits),
+                           ", ")
+      }
+
     }
 
     conf_state = paste0(
@@ -333,11 +340,15 @@ explain_htest = function(htest,
 
 rounder_stat = function(number,
                         digits = 3){
-  cutoff = 1*10^(-1*digits)
-  if(number < cutoff){
-    number = signif(number, digits = digits)
+  if(is.na(number) || !is.numeric(number)){
+    number = NA
   } else{
-    number = round(number, digits = digits)
+    cutoff = 1*10^(-1*digits)
+    if(number < cutoff){
+      number = signif(number, digits = digits)
+    } else{
+      number = round(number, digits = digits)
+    }
   }
 
   return(number)

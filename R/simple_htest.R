@@ -3,15 +3,14 @@
 #' @inheritParams t_TOST
 #' @inheritParams z_cor_test
 #' @param ...  further arguments to be passed to or from methods.
-#' @details \code{alternative = "greater"} is the alternative that x has a larger mean than y.
-#' For the one-sample case: that the mean is positive.
+#' @details Currently, this function allows for traditional or TOST hypothesis tests using \code{"t.test"} or \code{"wilcox.test"}.
+#' The type of test, t-test or Wilcoxon-Mann-whitney, can be selected with the \code{"test"} argument.
+#' More information on the tests can be found in the documentation for the \code{"t.test"} and \code{"wilcox.test"} functions.
 #'
-#' If paired is TRUE then both x and y must be specified and they must be the same length.
-#' Missing values are silently removed (in pairs if paired is TRUE).
-#' If var.equal is TRUE then the pooled estimate of the variance is used.
-#'  By default, if \code{var.equal} is FALSE then the variance is estimated separately for both groups and the Welch modification to the degrees of freedom is used.
+#' \code{alternative = "greater"} is the alternative that x is larger than y (on average).
+#' If \code{alternative = "equivalence"} then the alternative is that the difference between x and y is between the two null values (\code{mu}).
+#' If \code{alternative = "minimal.effect"} then the alternative is that the difference between x and y is less than the lowest null value or greater than the highest.
 #'
-#' If the input data are effectively constant (compared to the larger of the two means) an error is generated.
 #' @return A list with class \code{"htest"} containing the following components:
 #' \describe{
 #'   \item{\code{statistic}}{the value of the t-statistic.}
@@ -214,7 +213,7 @@ simple_htest.default = function(x,
        x = x,
        y = y,
        paired = paired,
-       mu = 0,
+       mu = mu,
        conf.level = 1 - alpha,
        alternative = alternative,
        ...
@@ -223,10 +222,10 @@ simple_htest.default = function(x,
        x = x,
        y = y,
        paired = paired,
-       mu = 0,
        conf.int = TRUE,
        conf.level = 1 - alpha,
        alternative = alternative,
+       null = mu,
        ...
      )
    )
