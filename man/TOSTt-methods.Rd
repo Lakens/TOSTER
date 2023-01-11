@@ -4,7 +4,8 @@
 \alias{TOSTt-methods}
 \alias{print.TOSTt}
 \alias{plot.TOSTt}
-\alias{summary.TOSTt}
+\alias{describe}
+\alias{describe.TOSTt}
 \title{Methods for TOSTt objects}
 \usage{
 \method{print}{TOSTt}(x, digits = 4, ...)
@@ -18,7 +19,9 @@
   ...
 )
 
-\method{summary}{TOSTt}(x, digits = 3, ...)
+describe(x)
+
+\method{describe}{TOSTt}(x, digits = 3, ...)
 }
 \arguments{
 \item{x}{object of class \code{TOSTt}}
@@ -39,8 +42,9 @@ for details.
 }
 \value{
 \describe{
-  \item{\code{print}}{Prints short summary of the Limits of Agreement}
-  \item{\code{plot}}{Returns a plot of the data points used in the reliability analysis}
+  \item{\code{print}}{Prints short summary of the tests.}
+  \item{\code{plot}}{Returns a plot of the effects.}
+  \item{\code{describe}}{Verbose description of results.}
 }
 }
 \description{

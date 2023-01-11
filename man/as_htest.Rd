@@ -27,5 +27,10 @@ Convert a TOSTER result object of class 'TOSTt' or 'TOSTnp' to a list of class '
 \examples{
 
 # as.htest(result)
-
 }
+\seealso{
+Other htest: 
+\code{\link{htest-helpers}},
+\code{\link{simple_htest}()}
+}
+\concept{htest}

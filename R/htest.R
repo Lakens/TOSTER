@@ -59,7 +59,9 @@ as_htest = function(TOST) {
                        TOSTt = as.numeric(eqb[1,2:3]),
                        TOSTnp = eqb)
   if(grepl("one",TOST$method, ignore.case = TRUE)){
-    names(null.value) <- rep("mean",length(null.value))
+    names(null.value) <- switch(class(TOST),
+                                TOSTt = rep("mean",length(null.value)),
+                                TOSTnp = rep("location",length(null.value)))
   } else {
     names(null.value) <- switch(class(TOST),
                                 TOSTt = rep("mean difference",length(null.value)),
@@ -107,13 +109,11 @@ as_htest = function(TOST) {
     if (!is.null(conf.int)) {
       attr(conf.int, "conf.level") <- TOST$effsize$conf.level[1]
     }
-    if (grepl("One", TOST$method)) {
-      estimate <- TOST$effsize$estimate[1]
-      names(estimate) = "mean of x"
-    } else {
-      estimate <- TOST$effsize$estimate[1]
-      names(estimate) = "mean difference"
-    }
+
+    estimate <- TOST$effsize$estimate[1]
+
+    names(estimate) = names(null.value)[1]
+
 
     htest <- list(
       statistic = statistic,

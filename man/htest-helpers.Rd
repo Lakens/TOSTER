@@ -30,3 +30,9 @@ Functions to help interpret or display objects of the class \code{htest}
 # To be added
 
 }
+\seealso{
+Other htest: 
+\code{\link{as_htest}()},
+\code{\link{simple_htest}()}
+}
+\concept{htest}

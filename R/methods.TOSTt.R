@@ -13,8 +13,9 @@
 #'   \code{\link{TOSTt-methods}}.
 #' @return
 #' \describe{
-#'   \item{\code{print}}{Prints short summary of the Limits of Agreement}
-#'   \item{\code{plot}}{Returns a plot of the data points used in the reliability analysis}
+#'   \item{\code{print}}{Prints short summary of the tests.}
+#'   \item{\code{plot}}{Returns a plot of the effects.}
+#'   \item{\code{describe}}{Verbose description of results.}
 #' }
 #'
 #' @name TOSTt-methods
@@ -612,12 +613,19 @@ plot.TOSTt <- function(x,
 }
 
 #' @rdname TOSTt-methods
-#' @method summary TOSTt
 #' @export
 
-summary.TOSTt <- function(x,
-                          digits = 3,
-                          ...){
+describe <- function(x) {
+  UseMethod("describe")
+}
+
+#' @rdname TOSTt-methods
+#' @method describe TOSTt
+#' @export
+
+describe.TOSTt <- function(x,
+                           digits = 3,
+                           ...){
 
   tosty = x
   htest = as_htest(x)

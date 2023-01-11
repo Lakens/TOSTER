@@ -92,5 +92,10 @@ Other TOST:
 \code{\link{extract_r_paired}()},
 \code{\link{t_TOST}()},
 \code{\link{tsum_TOST}()}
+
+Other htest: 
+\code{\link{as_htest}()},
+\code{\link{htest-helpers}}
 }
 \concept{TOST}
+\concept{htest}
