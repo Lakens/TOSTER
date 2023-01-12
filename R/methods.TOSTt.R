@@ -717,7 +717,7 @@ describe_TOST = function(x,
 
 
   if(sigTOST){
-    if(stat_name == "t"){
+    if(!is.null(htest$parameter)){
       stat_print = paste0(stat_name, "(",
                           rounder_stat(htest$parameter, digits = digits),
                           ") = ",
@@ -736,7 +736,7 @@ describe_TOST = function(x,
     claim_text = paste0("At the desired error rate, it can be stated that the ",
                         alt_tost, ".")
   } else if(sigNHST){
-    if(stat_name == "t"){
+    if(!is.null(htest$parameter)){
       stat_print = paste0(stat_name, "(",
                           rounder_stat(htest$parameter, digits = digits),
                           ") = ",
