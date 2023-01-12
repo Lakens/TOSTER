@@ -68,13 +68,6 @@ print.TOSTnp <- function(x,
 
 
 #' @rdname TOSTnp-methods
-#' @export
-
-describe <- function(x) {
-  UseMethod("describe")
-}
-
-#' @rdname TOSTnp-methods
 #' @method describe TOSTnp
 #' @export
 

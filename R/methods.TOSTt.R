@@ -615,7 +615,7 @@ plot.TOSTt <- function(x,
 #' @rdname TOSTt-methods
 #' @export
 
-describe <- function(x) {
+describe <- function(x, ...) {
   UseMethod("describe")
 }
 

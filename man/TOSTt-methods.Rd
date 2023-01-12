@@ -19,7 +19,7 @@
   ...
 )
 
-describe(x)
+describe(x, ...)
 
 \method{describe}{TOSTt}(x, digits = 3, ...)
 }
