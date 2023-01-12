@@ -8,7 +8,6 @@
 #' @return An estimate of the correlation.
 #' @references
 #' Lajeunesse, M. J. (2011). On the meta‐analysis of response ratios for studies with correlated and multi‐group designs. Ecology, 92(11), 2049-2055
-#' @family TOST
 #' @importFrom stats na.omit setNames terms
 #' @export
 extract_r_paired = function(m1,

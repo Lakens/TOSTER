@@ -148,13 +148,13 @@ describe_htest = function(htest,alpha = NULL,digits = 3){
   sig_state = ifelse(
     htest$p.value < alpha,
     "statistically significant",
-    "statistically non-significant"
+    "not statistically significant"
   )
 
   hyp_state = ifelse(
     htest$p.value < alpha,
-    "The null hypothesis should be rejected.",
-    "The null hypothesis should not be rejected."
+    "The null hypothesis can be rejected.",
+    "The null hypothesis cannot be rejected."
   )
 
   if(!is.null(htest$parameter)){
@@ -246,14 +246,14 @@ describe_htest = function(htest,alpha = NULL,digits = 3){
                            " ",
                            htest$null.value)
         decision = ifelse(htest$p.value < alpha,
-                          " We can claim that the ",
-                          " We cannot claim that the ")
+                          " At the desired error rate, it can be stated that the ",
+                          " At the desired error rate, it cannot be stated that the ")
 
         print_state = paste0("The ",
                              htest$method,
-                             " indicates that there is a ",
+                             " is ",
                              sig_state,
-                             " hypothesis test (",
+                             " (",
                              stat_state, ") at a ", alpha, " alpha-level. ",
                              hyp_state,
                              #" Based on the alternative hypothesis,",
@@ -285,14 +285,14 @@ describe_htest = function(htest,alpha = NULL,digits = 3){
 
           }
           decision = ifelse(htest$p.value < alpha,
-                            " We can claim that the ",
-                            " We cannot claim that the ")
+                            " At the desired error rate, it can be stated that the ",
+                            " At the desired error rate, it cannot be stated that the ")
 
           print_state = paste0("The ",
                                htest$method,
-                               " indicates that there is a ",
+                               " is ",
                                sig_state,
-                               " hypothesis test (",
+                               " (",
                                stat_state, ") at a ", alpha, " alpha-level. ",
                                hyp_state,
                                #" Based on the alternative hypothesis,",
@@ -301,7 +301,7 @@ describe_htest = function(htest,alpha = NULL,digits = 3){
         } else{
           print_state = paste0("The ",
                                htest$method,
-                               " indicates that there is a ",
+                               " is ",
                                sig_state,
                                " effect, ",
                                stat_state, ", at a ", alpha, " alpha-level. ",
@@ -316,9 +316,9 @@ describe_htest = function(htest,alpha = NULL,digits = 3){
     } else {
       print_state = paste0("The ",
                            htest$method,
-                           " indicates that there is a ",
+                           " is ",
                            sig_state,
-                           " effect, ",
+                           ", ",
                            stat_state, ", at a ", alpha, " alpha-level. ",
                            hyp_state,
                            " alternative: ", htest$alternative,".")
@@ -329,9 +329,9 @@ describe_htest = function(htest,alpha = NULL,digits = 3){
   } else{
     print_state = paste0("The ",
                          htest$method,
-                         " indicates that there is a ",
+                         " is ",
                          sig_state,
-                         " effect, ",
+                         ", ",
                          stat_state, ", at a ", alpha, " alpha-level. ",
                          hyp_state)
   }

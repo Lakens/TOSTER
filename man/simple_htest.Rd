@@ -89,7 +89,6 @@ mu = 3)
 }
 \seealso{
 Other TOST: 
-\code{\link{extract_r_paired}()},
 \code{\link{t_TOST}()},
 \code{\link{tsum_TOST}()}
 

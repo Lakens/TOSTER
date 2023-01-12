@@ -241,6 +241,7 @@ test_that("Run examples for one sample", {
                ignore_attr = TRUE)
 
   prtest = hush(print(test4))
+  des = hush(describe(test4))
   p1 = plot(test4)
   p2 = plot(test4,
             type = "c")
@@ -256,6 +257,11 @@ test_that("Run examples for two sample", {
     sink()
     return(tmp)
   }
+
+  tt1 = t_TOST(extra ~ group,
+               data = sleep,
+               eqb = 2)
+  des = describe(tt1)
 
 
   set.seed(651466441)
@@ -561,6 +567,7 @@ test_that("Run examples for two sample", {
                ignore_attr = TRUE)
 
   prtest = hush(print(test4))
+  des = hush(describe(test4))
   p1 = plot(test4)
 
 })
@@ -891,6 +898,7 @@ test_that("Run examples for paired samples", {
                test4$TOST$p.value[3])
 
   prtest = hush(print(test4))
+  des = hush(describe(test4))
   p1 = plot(test4)
 
 })

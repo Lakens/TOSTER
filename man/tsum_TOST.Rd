@@ -90,7 +90,6 @@ For details on the calculations in this function see vignette("IntroTOSTt") & vi
 }
 \seealso{
 Other TOST: 
-\code{\link{extract_r_paired}()},
 \code{\link{simple_htest}()},
 \code{\link{t_TOST}()}
 }

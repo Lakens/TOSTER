@@ -627,6 +627,17 @@ describe.TOSTt <- function(x,
                            digits = 3,
                            ...){
 
+  text2 = describe_TOST(x = x,
+                        digits = digits,
+                        ...)
+
+  return(text2)
+}
+
+
+describe_TOST = function(x,
+                         digits = 3,
+                         ...){
   tosty = x
   htest = as_htest(x)
 
@@ -637,17 +648,32 @@ describe.TOSTt <- function(x,
                      0,
                      tosty$call$mu)
   alt_nhst = paste0("true ",
+                    names(htest$null.value[1]),
+                    " is ",
+                    "not equal to",
+                    " ",
+                    nhst_null)
+
+  null_nhst = paste0("true ",
                      names(htest$null.value[1]),
                      " is ",
-                     "not equal to",
+                     "is equal to",
                      " ",
                      nhst_null)
   if(htest$alternative == "equivalence"){
 
     alt_tost = paste0("true ",
+                      names(htest$null.value)[1],
+                      " is ",
+                      "between",
+                      " ",
+                      htest$null.value[1], " and ",
+                      htest$null.value[2])
+
+    null_tost = paste0("true ",
                        names(htest$null.value)[1],
                        " is ",
-                       "between",
+                       "more extreme than",
                        " ",
                        htest$null.value[1], " and ",
                        htest$null.value[2])
@@ -656,65 +682,90 @@ describe.TOSTt <- function(x,
   if(htest$alternative == "minimal.effect"){
 
     alt_tost = paste0("true ",
+                      names(htest$null.value)[1],
+                      " is ",
+                      "less than ",
+                      htest$null.value[1], " or ",
+                      "greater than ",
+                      htest$null.value[2])
+
+    null_tost = paste0("true ",
                        names(htest$null.value)[1],
                        " is ",
-                       "less than ",
-                       htest$null.value[1], " or ",
                        "greater than ",
+                       htest$null.value[1], " or ",
+                       "less than ",
                        htest$null.value[2])
-
 
   }
 
   method_state = paste0("Using the ", htest$method,
-                        " a null hypothesis significance test (NHST)",
+                        ", a null hypothesis significance test (NHST)",
                         ", and two one-sided tests (TOST) were performed",
                         " with an alpha-level of ", x$alpha, ".",
-                        " The NHST tested whether the ", alt_nhst,
-                        ", and the TOST tested whether the ", alt_tost,".")
+                        " These tested the null hypotheses that ", null_nhst,
+                        " (NHST), and ", null_tost,"(TOST).")
 
-  smd_name = tosty$smd$smd_label
+
 
   pTOST = htest$p.value
   sigTOST = ifelse(pTOST < tosty$alpha, TRUE,FALSE)
   pNHST = tosty$TOST$p.value[1]
   sigNHST = ifelse(pNHST < tosty$alpha, TRUE,FALSE)
+  stat_name = names(htest$statistic)
+  smd_name = row.names(tosty$effsize)[2]
+
 
   if(sigTOST){
+    if(stat_name == "t"){
+      stat_print = paste0(stat_name, "(",
+                          rounder_stat(htest$parameter, digits = digits),
+                          ") = ",
+                          rounder_stat(htest$statistic, digits = digits))
+    } else{
+      stat_print = paste0(stat_name, " = ",
+                          rounder_stat(htest$statistic, digits = digits))
+    }
+
     sig_text = paste0("The ", type_tost, " test",
                       " was significant, ",
-                      "t(", rounder_stat(htest$parameter,
-                                         digits=digits),") = ",
-                      rounder_stat(htest$statistic, digits = digits),
+                      stat_print,
                       ", ",
                       printable_pval(pTOST, digits = digits))
 
-    claim_text = paste0("Therefore, we can claim that ",
+    claim_text = paste0("At the desired error rate, it can be stated that the ",
                         alt_tost, ".")
   } else if(sigNHST){
+    if(stat_name == "t"){
+      stat_print = paste0(stat_name, "(",
+                          rounder_stat(htest$parameter, digits = digits),
+                          ") = ",
+                          rounder_stat(tosty$TOST$t[1], digits = digits))
+    } else{
+      stat_print = paste0(stat_name, " = ",
+                          rounder_stat(tosty$TOST$t[1], digits = digits))
+    }
     sig_text = paste0("The ", type_tost, " test was not significant (",
                       printable_pval(pTOST, digits = digits),").",
                       " The NHST",
                       " was significant, ",
-                      "t(", rounder_stat(tosty$TOST$df[1],
-                                         digits=digits),") = ",
-                      rounder_stat(tosty$TOST$t[1], digits = digits),
+                      stat_print,
                       ", ",
                       printable_pval(pNHST, digits = digits))
 
-    claim_text = paste0("Therefore, we can claim that ",
+    claim_text = paste0("At the desired error rate, it can be stated that the ",
                         alt_nhst,
                         " (i.e., no ",type_tost,
                         ").")
   } else {
     sig_text = paste0("Both the ", type_tost, " test (",
                       printable_pval(pTOST, digits = digits),
-                      ") the NHST (",
+                      "), and the NHST (",
                       printable_pval(pNHST, digits = digits),
                       ")",
                       " were not significant")
 
-    claim_text = paste0("Therefore, the results are ambigious (no decision regarding the effect size/direction can be made).")
+    claim_text = paste0("Therefore, the results are inconclusive: neither null hypothesis can be rejected.")
   }
 
   stat_text = paste0(sig_text,
