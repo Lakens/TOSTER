@@ -130,6 +130,23 @@ test_that("Run examples for two sample", {
   samp1 = rnorm(25)
   samp2 = rnorm(25)
 
+  htest_alt1 = boot_t_test(x = samp1,
+                           y= samp2,
+                           alternative = "t",
+                           R = 99)
+  htest_alt2 = boot_t_test(x = samp1,
+                           y=samp2,
+                           alternative = "g",
+                           R = 99)
+  htest_alt3 = boot_t_test(x = samp1,
+                           y = samp2,
+                           alternative = "l",
+                           R = 99)
+  htest_alt4 = boot_t_test(extra ~ group,
+                           data = sleep,
+                           alternative = "t",
+                           R = 99)
+
   df_samp = data.frame(y = c(samp1,samp2),
                        group = c(rep("g1",25),
                                  rep("g2",25)))
@@ -219,6 +236,22 @@ test_that("Run examples for paired samples", {
 
   samp1 = rnorm(25)
   samp2 = rnorm(25)
+
+  htest_alt1 = boot_t_test(x = samp1,
+                           y= samp2,
+                           paired = TRUE,
+                           alternative = "t",
+                           R = 99)
+  htest_alt2 = boot_t_test(x = samp1,
+                           y=samp2,
+                           paired = TRUE,
+                           alternative = "g",
+                           R = 99)
+  htest_alt3 = boot_t_test(x = samp1,
+                           y = samp2,
+                           paired = TRUE,
+                           alternative = "l",
+                           R = 99)
 
   cor12 = stats::cor(samp1,samp2)
 

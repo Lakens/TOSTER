@@ -17,6 +17,10 @@ test_that("simple_htest: t-test & wilcox", {
   testy2 = df_htest(t.test(1:10, y = c(7:20, 200)))
   expect_equivalent(testy1,testy2)
 
+  testy1 = describe_htest(as_htest(t_TOST(1:10, y = c(7:20, 200), eqb = 3)))
+  testy1 = describe_htest(as_htest(t_TOST(1:10, y = c(7:20, 200), eqb = 3,
+                                          hypothesis = "MET")))
+
   # wilcox -- same data
   expect_equal(wilcox.test(1:10, y = c(7:20))$pvalue,
                simple_htest(1:10, y = c(7:20), test = "w")$pvalue)
@@ -33,6 +37,9 @@ test_that("simple_htest: t-test & wilcox", {
                                       conf.int = TRUE))
   expect_equivalent(testy1,testy2)
 
+  testy1 = describe_htest(as_htest(wilcox_TOST(1:10, y = c(7:20, 200), eqb = 3)))
+  testy1 = describe_htest(as_htest(wilcox_TOST(1:10, y = c(7:20, 200), eqb = 3,
+                                               hypothesis = "MET")))
 
   expect_error(simple_htest(1:10, y = c(7:20, 200), test = "w",
                             alternative = "e"))
