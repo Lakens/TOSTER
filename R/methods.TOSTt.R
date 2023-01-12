@@ -657,7 +657,7 @@ describe_TOST = function(x,
   null_nhst = paste0("true ",
                      names(htest$null.value[1]),
                      " is ",
-                     "is equal to",
+                     "equal to",
                      " ",
                      nhst_null)
   if(htest$alternative == "equivalence"){
@@ -704,7 +704,7 @@ describe_TOST = function(x,
                         ", and two one-sided tests (TOST) were performed",
                         " with an alpha-level of ", x$alpha, ".",
                         " These tested the null hypotheses that ", null_nhst,
-                        " (NHST), and ", null_tost,"(TOST).")
+                        " (NHST), and ", null_tost," (TOST).")
 
 
 
@@ -740,10 +740,10 @@ describe_TOST = function(x,
       stat_print = paste0(stat_name, "(",
                           rounder_stat(htest$parameter, digits = digits),
                           ") = ",
-                          rounder_stat(tosty$TOST$t[1], digits = digits))
+                          rounder_stat(tosty$TOST[1,1], digits = digits))
     } else{
       stat_print = paste0(stat_name, " = ",
-                          rounder_stat(tosty$TOST$t[1], digits = digits))
+                          rounder_stat(tosty$TOST[1,1], digits = digits))
     }
     sig_text = paste0("The ", type_tost, " test was not significant (",
                       printable_pval(pTOST, digits = digits),").",

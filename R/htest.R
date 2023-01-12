@@ -93,22 +93,12 @@ as_htest = function(TOST) {
                     "equivalence",
                     "minimal.effect")
 
-  if (inherits(TOST,"TOSTnp")) {
-    htest <- list(
-      statistic = statistic,
-      parameter = parameter,
-      p.value = p.value,
-      null.value = null.value,
-      alternative = alt_text,
-      method = method,
-      data.name = TOST$data.name
-    )
-  } else {
+
     conf.int <- c(TOST$effsize$lower.ci[1],
                   TOST$effsize$upper.ci[1])
-    if (!is.null(conf.int)) {
-      attr(conf.int, "conf.level") <- TOST$effsize$conf.level[1]
-    }
+
+    attr(conf.int, "conf.level") <- TOST$effsize$conf.level[1]
+
 
     estimate <- TOST$effsize$estimate[1]
 
@@ -126,7 +116,7 @@ as_htest = function(TOST) {
       data.name = TOST$data.name,
       conf.int = conf.int
     )
-  }
+
 
   class(htest) <- "htest"
   htest
