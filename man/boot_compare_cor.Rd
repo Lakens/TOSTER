@@ -2,7 +2,7 @@
 % Please edit documentation in R/boot_compare_cor.R
 \name{boot_compare_cor}
 \alias{boot_compare_cor}
-\title{Comparing SMDs between independent studies with Bootstrapping}
+\title{Comparing Correlations between independent studies with Bootstrapping}
 \usage{
 boot_compare_cor(
   x1,

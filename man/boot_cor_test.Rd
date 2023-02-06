@@ -42,6 +42,7 @@ The returned p-values are calculated from a re-sampled null distribution (simila
 The bootstrap correlation methods in this package offer two other correlations: a Winsorized correlation and a percentage bend correlation (see Wilcox 2017).
 These two can modified by adding the trim (Winsorized) or beta (percentage bend) arguments.
 The default for both arguments is 0.2 but can be modified at the user's discretion.
+These calculations are based on Rand Wilcox's R functions for his book (Wilcox, 2017), and adapted from their implementation in Guillaume Rousselet's R package "bootcorci".
  @return A list with class "htest" containing the following components:
 \describe{
   \item{\code{"p.value"}}{the p-value of the test.}
