@@ -116,6 +116,7 @@ test_that("Run examples for one sample", {
 
 
   prtest = hush(print(test1))
+  prtest2 = hush(describe(test1))
   p1 = plot(test1)
   p2 = expect_warning(plot(test1,
             type = "c"))
@@ -165,7 +166,8 @@ test_that("Run examples for two sample", {
                  high_eqbound = .5,
                  hypothesis = "MET",
                  R = 199)
-
+  prtest = hush(print(test3))
+  prtest2 = hush(describe(test3))
   expect_equal(1-test1$TOST$p.value[2],
                test3$TOST$p.value[2],
                tolerance = .1)
@@ -212,7 +214,8 @@ test_that("Run examples for two sample", {
                  bias_correction = FALSE,
                  R = 199)
 
-
+  prtest = hush(print(test3))
+  prtest2 = hush(describe(test3))
   expect_equal(1-test1$TOST$p.value[2],
                test3$TOST$p.value[2],
                tolerance = .1)

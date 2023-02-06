@@ -567,6 +567,7 @@ test_that("Run examples for two sample", {
                ignore_attr = TRUE)
 
   prtest = hush(print(test4))
+  prtest2 = hush(describe(test4))
   des = hush(describe(test4))
   p1 = plot(test4)
 

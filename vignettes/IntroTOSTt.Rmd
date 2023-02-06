@@ -26,7 +26,7 @@ library(ggdist)
 
 ```
 
-In an effort to make `TOSTER` more informative and easier to use, I created the functions `t_TOST` and `simple_htest`. These function operates very similarly to base R's `t.test` function with a few exceptions. First, `t_TOST` performs 3 t-tests (one two-tailed and two one-tailed tests). Second, `simple_htest` allows you to run equivalence testing or minimal effects testing using a t-test or Wilcoxon-Mann-Whitney tests using the `alternative` argument and the output is the same as `t.test` or `wilcox.test` in that the object is of the class `htest`. In addition, these functions have a generic method where two vectors can be supplied or a formula can be given (e.g.,`y ~ group`). These functions also makes it easier to switch between types of t-tests. All three types (two sample, one sample, and paired samples) can be performed/calculated from the same function. Moreover, the summary information and visualizations have been upgraded. This should make the decisions derived from the function more informative and user-friendly. 
+In an effort to make `TOSTER` more informative and easier to use, I created the functions `t_TOST` and `simple_htest`. These function operates very similarly to base R's `t.test` function with a few exceptions. First, `t_TOST` performs 3 t-tests (one two-tailed and two one-tailed tests). Second, `simple_htest` allows you to run equivalence testing or minimal effects testing using a t-test or Wilcoxon-Mann-Whitney tests using the `alternative` argument and the output is the same as `t.test` or `wilcox.test` (in that the object is of the class `htest`). In addition, these functions have a generic method where two vectors can be supplied or a formula can be given (e.g.,`y ~ group`). These functions also makes it easier to switch between types of t-tests. All three types (two sample, one sample, and paired samples) can be performed/calculated from the same function. Moreover, the summary information and visualizations have been upgraded. This should make the decisions derived from the function more informative and user-friendly. 
 
 These functions are not limited to equivalence tests. Minimal effects testing (MET) is now possible. MET is useful for situations where the hypothesis is about a minimal effect and the null hypothesis *is* equivalence.
 
@@ -207,6 +207,9 @@ print(res1)
 print(res1b)
 ```
 
+
+## Plots
+
 Another nice feature is the generic `plot` method that can provide a visual summary of the results (only available for `t_TOST`). All of the plots in this package were inspired by the [concurve](https://cran.r-project.org/package=concurve) R package. There are two types of plots that can be produced. The first, and default, is the consonance density plot (`type = "cd"`).
 
 ```{r fig.width=6, fig.height=6}
@@ -227,6 +230,20 @@ Consonance plots, where all confidence intervals can be simultaneous plotted, ca
 plot(res1, type = "c",
      ci_lines =  c(.9,.95))
 ```
+
+## Descriptions
+
+A description of the results can also be produced with the `describe` or `describe_htest` method and function respectively.
+
+```{r, eval = FALSE}
+describe(res1)
+
+describe_htest(res1b)
+```
+
+> `r describe(res1)`
+
+> `r describe_htest(res1b)`
 
 # Paired Samples
 
@@ -286,6 +303,19 @@ res_metb = simple_htest(x = iris$Sepal.Length,
 res_metb
 ```
 
+## Descriptions
+
+A description of the results can also be produced with the `describe` or `describe_htest` method and function respectively.
+
+```{r, eval = FALSE}
+describe(res_met)
+
+describe_htest(res_metb)
+```
+
+> `r describe(res_met)`
+
+> `r describe_htest(res_metb)`
 
 # One Sample t-test
 
@@ -326,6 +356,11 @@ res_tsum
 ```{r fig.width=6, fig.height=6}
 plot(res_tsum)
 ```
+
+```{r}
+describe(res_tsum)
+```
+
 
 # Power Analysis for t-test based TOST
 
