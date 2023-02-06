@@ -185,6 +185,7 @@ test_that("Run examples for two sample", {
 
 
   # Re-run with bias correction not run and non-Welch ----
+  set.seed(232642)
   test1 = boot_t_TOST(x = samp1,
                  y = samp2,
                  var.equal = TRUE,
@@ -193,6 +194,7 @@ test_that("Run examples for two sample", {
                  bias_correction = FALSE,
                  R = 199)
 
+  set.seed(232642)
   test1 = boot_t_TOST(x = samp1,
                       y = samp2,
                       var.equal = TRUE,
@@ -200,7 +202,7 @@ test_that("Run examples for two sample", {
                       bias_correction = FALSE,
                       R = 199)
 
-
+  set.seed(232642)
   test3 = boot_t_TOST(x = samp1,
                  y = samp2,
                  var.equal = TRUE,
