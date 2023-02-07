@@ -3,12 +3,15 @@
 \name{TOSTnp-methods}
 \alias{TOSTnp-methods}
 \alias{print.TOSTnp}
+\alias{describe.TOSTnp}
 \title{Methods for TOSTnp objects}
 \usage{
 \method{print}{TOSTnp}(x, digits = 4, ...)
+
+\method{describe}{TOSTnp}(x, digits = 3, ...)
 }
 \arguments{
-\item{x}{object of class \code{TOSTnp} as returned from the reli_stats function}
+\item{x}{object of class \code{TOSTnp}}
 
 \item{digits}{Number of digits to print for p-values}
 
@@ -18,9 +21,10 @@ for details.
 }
 \value{
 \describe{
-  \item{\code{print}}{Prints short summary of the Limits of Agreement}
+  \item{\code{print}}{Prints short summary of the tests.}
+  \item{\code{describe}}{Verbose description of results.}
 }
 }
 \description{
-Methods defined for objects returned from the agree functions.
+Methods defined for objects returned from the wilcox_TOST function.
 }

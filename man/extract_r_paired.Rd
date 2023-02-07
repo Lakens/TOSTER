@@ -31,9 +31,3 @@ Useful for tsum_TOST when the correlation is not available.
 \references{
 Lajeunesse, M. J. (2011). On the meta‐analysis of response ratios for studies with correlated and multi‐group designs. Ecology, 92(11), 2049-2055
 }
-\seealso{
-Other TOST: 
-\code{\link{t_TOST}()},
-\code{\link{tsum_TOST}()}
-}
-\concept{TOST}

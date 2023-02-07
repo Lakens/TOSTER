@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Aaron R. Caldwell" />
+
+<meta name="date" content="2023-01-03" />
+
+<title>Correlations</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">
+/* for pandoc --citeproc since 2.11 */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Correlations</h1>
+<h4 class="author">Aaron R. Caldwell</h4>
+<h4 class="date">2023-01-03</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#simple-correlation-test" id="toc-simple-correlation-test">Simple Correlation Test</a>
+<ul>
+<li><a href="#summary-statistics" id="toc-summary-statistics">Summary
+Statistics</a></li>
+</ul></li>
+<li><a href="#bootstrapped-correlation-test" id="toc-bootstrapped-correlation-test">Bootstrapped Correlation
+Test</a></li>
+<li><a href="#compare-correlations" id="toc-compare-correlations">Compare Correlations</a>
+<ul>
+<li><a href="#bootstrapped" id="toc-bootstrapped">Bootstrapped</a></li>
+</ul></li>
+<li><a href="#references" id="toc-references">References</a></li>
+</ul>
+</div>
+
+<p>In this package there are a few different functions to calculate
+correlations. All the included functions are based on a few papers by
+<span class="citation">Goertzen and Cribbie (2010)</span>
+(<code>z_cor_test</code> &amp; <code>compare_cor</code>), and <span class="citation">Wilcox (2011)</span> (<code>boot_cor_test</code>)<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>.</p>
+<div id="simple-correlation-test" class="section level1">
+<h1>Simple Correlation Test</h1>
+<p>Simple tests of association can be accomplished with the
+<code>z_cor_test</code> function. This function was stylized after the
+<code>cor.test</code> function, but you will notice that the results may
+differ. This is caused by fact that <code>z_cor_test</code> uses
+Fisher’s z transformation as the basis for all significance tests (i.e.,
+p-values). However, notice that the confidence intervals are the
+same.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(TOSTER)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cor.test</span>(mtcars<span class="sc">$</span>mpg,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec)</span></code></pre></div>
+<pre><code>## 
+##  Pearson&#39;s product-moment correlation
+## 
+## data:  mtcars$mpg and mtcars$qsec
+## t = 2.5252, df = 30, p-value = 0.01708
+## alternative hypothesis: true correlation is not equal to 0
+## 95 percent confidence interval:
+##  0.08195487 0.66961864
+## sample estimates:
+##      cor 
+## 0.418684</code></pre>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">z_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec)</span></code></pre></div>
+<pre><code>## 
+##  Pearson&#39;s product-moment correlation
+## 
+## data:  mtcars$mpg and mtcars$qsec
+## z = 2.4023, N = 32, p-value = 0.01629
+## alternative hypothesis: true correlation is not equal to 0
+## 95 percent confidence interval:
+##  0.08195487 0.66961864
+## sample estimates:
+##      cor 
+## 0.418684</code></pre>
+<p>But, just as <code>cor.test</code>, the Spearman and Kendall
+correlation coefficients can be estimated.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">z_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">method =</span> <span class="st">&quot;spear&quot;</span>) <span class="co"># Don&#39;t need to spell full name</span></span></code></pre></div>
+<pre><code>## 
+##  Spearman&#39;s rank correlation rho
+## 
+## data:  mtcars$mpg and mtcars$qsec
+## z = 2.6474, N = 32, p-value = 0.008111
+## alternative hypothesis: true rho is not equal to 0
+## 95 percent confidence interval:
+##  0.1306771 0.7068501
+## sample estimates:
+##       rho 
+## 0.4669358</code></pre>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">z_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">method =</span> <span class="st">&quot;kendall&quot;</span>)</span></code></pre></div>
+<pre><code>## 
+##  Kendall&#39;s rank correlation tau
+## 
+## data:  mtcars$mpg and mtcars$qsec
+## z = 2.6134, N = 32, p-value = 0.008964
+## alternative hypothesis: true tau is not equal to 0
+## 95 percent confidence interval:
+##  0.08145572 0.51634821
+## sample estimates:
+##       tau 
+## 0.3153652</code></pre>
+<p>The main advantage of <code>z_cor_test</code> is that it can perform
+equivalence testing (TOST), or any hypothesis test where the null isn’t
+zero.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">z_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>, <span class="co"># e for equivalence</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">null =</span> .<span class="dv">4</span>)</span></code></pre></div>
+<pre><code>## 
+##  Pearson&#39;s product-moment correlation
+## 
+## data:  mtcars$mpg and mtcars$qsec
+## z = 0.12088, N = 32, p-value = 0.5481
+## alternative hypothesis: equivalence
+## null values:
+## correlation correlation 
+##         0.4        -0.4 
+## 90 percent confidence interval:
+##  0.1397334 0.6360650
+## sample estimates:
+##      cor 
+## 0.418684</code></pre>
+<div id="summary-statistics" class="section level2">
+<h2>Summary Statistics</h2>
+<p>If you only have the summary statistics you perform the same tests.
+Just imagine you are reviewing a study with an observed correlation of
+0.121 with a sample size of 105 paired observations. You could then
+perform an equivalence test with the following code.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">corsum_test</span>(<span class="at">r =</span> .<span class="dv">121</span>,</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">n =</span> <span class="dv">105</span>,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>,</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">null =</span> .<span class="dv">4</span>)</span></code></pre></div>
+<pre><code>## 
+##  Pearson&#39;s product-moment correlation
+## 
+## data:  x and y
+## z = -3.0506, N = 105, p-value = 0.001142
+## alternative hypothesis: equivalence
+## null values:
+## correlation correlation 
+##         0.4        -0.4 
+## 90 percent confidence interval:
+##  -0.0412456  0.2770284
+## sample estimates:
+##   cor 
+## 0.121</code></pre>
+</div>
+</div>
+<div id="bootstrapped-correlation-test" class="section level1">
+<h1>Bootstrapped Correlation Test</h1>
+<p>If the raw data is available, I would <em>strongly</em> recommend
+using the bootstrapping function which should be more robust than the
+Fisher’s z based function. Further, the <code>boot_cor_test</code>
+function also has 2 other correlations that can be estimated: a
+Winsorized correlation and the percentage bend correlation. The input
+for the function is fairly similar to the <code>z_cor_test</code>
+function.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">993</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">boot_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>           <span class="at">null =</span> .<span class="dv">4</span>)</span></code></pre></div>
+<pre><code>## 
+##  Bootstrapped Pearson&#39;s product-moment correlation
+## 
+## data:  mtcars$mpg and mtcars$qsec
+## N = 32, p-value = 0.6088
+## alternative hypothesis: equivalence
+## null values:
+## correlation correlation 
+##         0.4        -0.4 
+## 90 percent confidence interval:
+##  0.2445273 0.5848411
+## sample estimates:
+##      cor 
+## 0.418684</code></pre>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">boot_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">method =</span> <span class="st">&quot;spear&quot;</span>,</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>,</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>           <span class="at">null =</span> .<span class="dv">4</span>)</span></code></pre></div>
+<pre><code>## 
+##  Bootstrapped Spearman&#39;s rank correlation rho
+## 
+## data:  mtcars$mpg and mtcars$qsec
+## N = 32, p-value = 0.6713
+## alternative hypothesis: equivalence
+## null values:
+##  rho  rho 
+##  0.4 -0.4 
+## 90 percent confidence interval:
+##  0.1983190 0.6656253
+## sample estimates:
+##       rho 
+## 0.4669358</code></pre>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">boot_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">method =</span> <span class="st">&quot;ken&quot;</span>,</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>,</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>           <span class="at">null =</span> .<span class="dv">4</span>)</span></code></pre></div>
+<pre><code>## 
+##  Bootstrapped Kendall&#39;s rank correlation tau
+## 
+## data:  mtcars$mpg and mtcars$qsec
+## N = 32, p-value = 0.2276
+## alternative hypothesis: equivalence
+## null values:
+##  tau  tau 
+##  0.4 -0.4 
+## 90 percent confidence interval:
+##  0.1217169 0.4864510
+## sample estimates:
+##       tau 
+## 0.3153652</code></pre>
+<p>Robust correlations, such as a winsorized correlation coefficient or
+percentage bend correlation, can also be tested.</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">boot_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">method =</span> <span class="st">&quot;win&quot;</span>,</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>,</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>           <span class="at">null =</span> .<span class="dv">4</span>,</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>           <span class="at">tr =</span> .<span class="dv">1</span>) <span class="co"># set trim</span></span></code></pre></div>
+<pre><code>## 
+##  Bootstrapped Winsorized correlation wincor
+## 
+## data:  mtcars$mpg and mtcars$qsec
+## N = 32, p-value = 0.6878
+## alternative hypothesis: equivalence
+## null values:
+## wincor wincor 
+##    0.4   -0.4 
+## 90 percent confidence interval:
+##  0.2163284 0.6629980
+## sample estimates:
+##   wincor 
+## 0.464062</code></pre>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">boot_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">method =</span> <span class="st">&quot;bend&quot;</span>,</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>,</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>           <span class="at">null =</span> .<span class="dv">4</span>,</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>           <span class="at">beta =</span> .<span class="dv">15</span>) <span class="co"># bend argument</span></span></code></pre></div>
+<pre><code>## 
+##  Bootstrapped percentage bend correlation pb
+## 
+## data:  mtcars$mpg and mtcars$qsec
+## N = 32, p-value = 0.6933
+## alternative hypothesis: equivalence
+## null values:
+##   pb   pb 
+##  0.4 -0.4 
+## 90 percent confidence interval:
+##  0.2341348 0.6455867
+## sample estimates:
+##        pb 
+## 0.4484488</code></pre>
+</div>
+<div id="compare-correlations" class="section level1">
+<h1>Compare Correlations</h1>
+<p>In some cases, researchers may want to compare two independent
+correlations. Sometimes this may be used to compare correlations between
+two variables between two groups (e.g., the correlation between two
+variables between male and female subjects) or between two independent
+studies (e.g., replication study).</p>
+<p>When only summary statistics are available the
+<code>compare_cor</code> function can be used. All the user needs is the
+correlations (r1 and r2) and the degrees of freedom for each
+correlation. The degrees of freedom for most cases would the number of
+pairs minus 2 (<span class="math inline">\(df = N-2\)</span>).
+<em>Note</em>: this function, similar to <code>z_cor_test</code> is an
+approximation.</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">compare_cor</span>(<span class="at">r1 =</span> .<span class="dv">8</span>,</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">df1 =</span> <span class="dv">38</span>,</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">r2 =</span> .<span class="dv">2</span>,</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">df2 =</span> <span class="dv">98</span>)</span></code></pre></div>
+<pre><code>## 
+##  Difference between two independent correlations (Fisher&#39;s z transform)
+## 
+## data:  Summary Statistics
+## z = 4.6364, p-value = 3.545e-06
+## alternative hypothesis: true difference between correlations is not equal to 0
+## sample estimates:
+## difference between correlations 
+##                             0.6</code></pre>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">compare_cor</span>(<span class="at">r1 =</span> .<span class="dv">8</span>,</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">df1 =</span> <span class="dv">38</span>,</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">r2 =</span> .<span class="dv">2</span>,</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">df2 =</span> <span class="dv">98</span>)</span></code></pre></div>
+<pre><code>## 
+##  Difference between two independent correlations (Fisher&#39;s z transform)
+## 
+## data:  Summary Statistics
+## z = 4.6364, p-value = 3.545e-06
+## alternative hypothesis: true difference between correlations is not equal to 0
+## sample estimates:
+## difference between correlations 
+##                             0.6</code></pre>
+<p>The methods included to compare correlations include Fisher’s z
+transformation (“fisher”), and Kraatz’s method (“kraatz”). The Fisher
+and Kraatz methods are appropriate for general significance tests, but
+may have low statistical power <span class="citation">(Counsell and
+Cribbie 2015)</span>. The Fisher’s method can test the difference
+between correlations on the z-transformed scale while Kraatz’s methods
+directly measures the difference between the correlation coefficients.
+My personal recommendation would be to use Fisher’s method.</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">compare_cor</span>(<span class="at">r1 =</span> .<span class="dv">8</span>,</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">df1 =</span> <span class="dv">38</span>,</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">r2 =</span> .<span class="dv">2</span>,</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">df2 =</span> <span class="dv">98</span>,</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">null =</span> .<span class="dv">2</span>,</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">method =</span> <span class="st">&quot;f&quot;</span>,</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>)</span></code></pre></div>
+<pre><code>## 
+##  Difference between two independent correlations (Fisher&#39;s z transform)
+## 
+## data:  Summary Statistics
+## z = 0.69315, p-value = 0.9998
+## alternative hypothesis: equivalence
+## null values:
+## difference between correlations difference between correlations 
+##                             0.2                            -0.2 
+## sample estimates:
+## difference between correlations 
+##                             0.6</code></pre>
+<div id="bootstrapped" class="section level2">
+<h2>Bootstrapped</h2>
+<p>When data is available for both correlations then the
+<code>boot_compare_cor</code> function can be utilized.</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">8922</span>)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>x1 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">40</span>)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>y1 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">40</span>)</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>x2 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">100</span>)</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>y2 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">100</span>)</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a><span class="fu">boot_compare_cor</span>(</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">x1 =</span> x1,</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">x2 =</span> x2,</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">y1 =</span> y1,</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">y2 =</span> y2,</span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">null =</span> .<span class="dv">2</span>,</span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>,</span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">&quot;win&quot;</span></span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<pre><code>## 
+##  Bootstrapped difference in Winsorized correlation wincor
+## 
+## data:  x1 and y1 vs. x2 and y2
+## n1 = 40, n2 = 100, p-value = 0.7739
+## alternative hypothesis: true differnce in wincor is  0.2
+## 90 percent confidence interval:
+##  -0.2970547  0.3978333
+## sample estimates:
+##     wincor 
+## 0.06383164</code></pre>
+</div>
+</div>
+<div id="references" class="section level1 unnumbered">
+<h1 class="unnumbered">References</h1>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-counsell2015equ" class="csl-entry">
+Counsell, Alyssa, and Robert A Cribbie. 2015. <span>“Equivalence Tests
+for Comparing Correlation and Regression Coefficients.”</span>
+<em>British Journal of Mathematical and Statistical Psychology</em> 68
+(2): 292–309. <a href="https://doi.org/10.1111/bmsp.12045">https://doi.org/10.1111/bmsp.12045</a>.
+</div>
+<div id="ref-goertzen2010" class="csl-entry">
+Goertzen, Jason R, and Robert A Cribbie. 2010. <span>“Detecting a Lack
+of Association: An Equivalence Testing Approach.”</span> <em>British
+Journal of Mathematical and Statistical Psychology</em> 63 (3): 527–37.
+<a href="https://doi.org/10.1348/000711009X475853">https://doi.org/10.1348/000711009X475853</a>.
+</div>
+<div id="ref-wilcox2011introduction" class="csl-entry">
+Wilcox, Rand R. 2011. <em>Introduction to Robust Estimation and
+Hypothesis Testing</em>. Academic press.
+</div>
+</div>
+</div>
+<div class="footnotes footnotes-end-of-document">
+<hr />
+<ol>
+<li id="fn1"><p>Bootstrapped functions were based off code posted by
+Rand Wilcox on his website, and was modified after looking at Guillaume
+Rousselet’s code, <code>bootcorci</code> R package, on GitHub <a href="https://github.com/GRousselet" class="uri">https://github.com/GRousselet</a><a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

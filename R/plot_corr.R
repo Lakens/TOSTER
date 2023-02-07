@@ -13,9 +13,10 @@
 
 plot_cor <- function(r,
                      n,
-                     method = "pearson",
+                     method = c("pearson","spearman","kendall"),
                      type = c("c", "cd"),
                      levels = c(.68, .9, .95, .999)){
+  method = match.arg(method)
   dat = corr_curv(r = r,
                   n = n,
                   type = method,

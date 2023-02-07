@@ -92,6 +92,7 @@ https://www.fda.gov/regulatory-information/search-fda-guidance-documents/bioavai
 \seealso{
 Other Robust TOST: 
 \code{\link{boot_t_TOST}()},
+\code{\link{boot_t_test}()},
 \code{\link{log_TOST}()},
 \code{\link{wilcox_TOST}()}
 }

@@ -80,7 +80,7 @@ An S3 object of class
 }
 }
 \description{
-A function for a bootstrap method for TOST with all types of t-tests..
+A function for a bootstrap method for TOST with all types of t-tests.
 }
 \details{
 For details on the calculations in this function see vignette("robustTOST").
@@ -100,6 +100,7 @@ Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC pre
 \seealso{
 Other Robust TOST: 
 \code{\link{boot_log_TOST}()},
+\code{\link{boot_t_test}()},
 \code{\link{log_TOST}()},
 \code{\link{wilcox_TOST}()}
 }

@@ -12,7 +12,7 @@ compare_smd(
   n2,
   se2 = NULL,
   paired = FALSE,
-  alternative = c("two.sided", "less", "greater"),
+  alternative = c("two.sided", "less", "greater", "equivalence", "minimal.effect"),
   null = 0,
   TOST = FALSE
 )
@@ -26,11 +26,11 @@ compare_smd(
 
 \item{paired}{a logical indicating whether the SMD is from a paired or independent samples design. If a one-sample design, then paired must be set to TRUE.}
 
-\item{alternative}{a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater" or "less". You can specify just the initial letter.}
+\item{alternative}{a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater", "less", "equivalence" (TOST), or "minimal.effect" (TOST). You can specify just the initial letter.}
 
 \item{null}{a number indicating the null hypothesis. For TOST, this would be equivalence bound.}
 
-\item{TOST}{logical indicator (default = FALSE) to perform two one-sided tests of equivalence (TOST). Minimal effects testing not currently available. If specified, alternative is ignored.}
+\item{TOST}{Defunct: use alternative argument. Logical indicator (default = FALSE) to perform two one-sided tests of equivalence (TOST).}
 }
 \value{
 A list with class "htest" containing the following components:
@@ -49,6 +49,9 @@ A list with class "htest" containing the following components:
 }
 \description{
 A function to compare standardized mean differences (SMDs) between studies. This function is intended to be used to compare the compatibility of original studies with replication studies (lower p-values indicating lower compatibility)
+}
+\details{
+This function tests for differences between correlations.
 }
 \seealso{
 Other compare studies: 

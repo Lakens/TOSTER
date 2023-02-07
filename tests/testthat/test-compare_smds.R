@@ -105,6 +105,57 @@ test_that("compare_smd", {
                       paired = FALSE,
                       TOST = TRUE,
                       null = .25)
+  one_31 = compare_smd(smd1 = one_boot3$df_ci$estimate[2],
+                      n1 = c(length(datx1),length(daty1)),
+                      smd2 = one_boot3$df_ci$estimate[3]+.32,
+                      n2 = c(length(datx2),length(daty2)),
+                      paired = FALSE,
+                      alternative = "e",
+                      null = .25)
+
+  expect_equal(one_3$p.value,
+               one_31$p.value)
+
+  one_4 = compare_smd(smd1 = one_boot3$df_ci$estimate[2],
+                      n1 = c(length(datx1),length(daty1)),
+                      smd2 = one_boot3$df_ci$estimate[3]+.32,
+                      n2 = c(length(datx2),length(daty2)),
+                      paired = FALSE,
+                      alternative = "m",
+                      null = .25)
+  one_41 = compare_smd(smd1 = one_boot3$df_ci$estimate[2],
+                       n1 = c(length(datx1),length(daty1)),
+                       smd2 = one_boot3$df_ci$estimate[3]+.32,
+                       n2 = c(length(datx2),length(daty2)),
+                       paired = FALSE,
+                       alternative = "m",
+                       null = c(.25,-.25))
+
+  expect_equal(one_4$p.value,
+               one_41$p.value)
+
+  one_5 = compare_smd(smd1 = one_boot3$df_ci$estimate[2],
+                      n1 = c(length(datx1),length(daty1)),
+                      smd2 = one_boot3$df_ci$estimate[3]+.32,
+                      n2 = c(length(datx2),length(daty2)),
+                      paired = FALSE,
+                      alternative = "g",
+                      null = .25)
+  one_51 = compare_smd(smd1 = one_boot3$df_ci$estimate[2],
+                       n1 = c(length(datx1),length(daty1)),
+                       smd2 = one_boot3$df_ci$estimate[3]+.32,
+                       n2 = c(length(datx2),length(daty2)),
+                       paired = FALSE,
+                       alternative = "l",
+                       null = c(.25))
+
+  expect_error(compare_smd(smd1 = one_boot3$df_ci$estimate[2],
+                       n1 = c(length(datx1),length(daty1)),
+                       smd2 = one_boot3$df_ci$estimate[3]+.32,
+                       n2 = c(length(datx2),length(daty2)),
+                       paired = FALSE,
+                       alternative = "l",
+                       null = c(.25,-.25)))
 
 })
 
@@ -123,5 +174,21 @@ test_that("compare_cor",{
                1.93, tolerance = 0.0001)
   expect_equal(test_cor$p.value,
                0.0536, tolerance = 0.0001)
+
+  test_cor2 = compare_cor(r1 = r1.jk, r2 = r2.hm,
+                         df1 = n1-2, df2 = n2-2,
+                         alternative = "l")
+  test_cor3 = compare_cor(r1 = r1.jk, r2 = r2.hm,
+                         df1 = n1-2, df2 = n2-2,
+                         alternative = "g")
+
+  test_cor4 = compare_cor(r1 = r1.jk, r2 = r2.hm,
+                          df1 = n1-2, df2 = n2-2,
+                          alternative = "l",
+                          method = "k")
+  test_cor5 = compare_cor(r1 = r1.jk, r2 = r2.hm,
+                          df1 = n1-2, df2 = n2-2,
+                          alternative = "g",
+                          method = "k")
 
 })

@@ -26,9 +26,9 @@ library(ggdist)
 
 ```
 
-In an effort to make `TOSTER` more informative and easier to use, a new function `t_TOST` has been created. This function operates very similarly to base R's `t.test` function, but performs 3 t-tests (one two-tailed and two one-tailed tests). In addition, this function has a generic method where two vectors can be supplied or a formula can be given (e.g.,`y ~ group`). This function also makes it easier to switch between types of t-tests. All three types (two sample, one sample, and paired samples) can be performed/calculated from the same function. Moreover, the summary information and visualizations have been upgraded. This should make the decisions derived from the function more informative and user-friendly. 
+In an effort to make `TOSTER` more informative and easier to use, I created the functions `t_TOST` and `simple_htest`. These function operates very similarly to base R's `t.test` function with a few exceptions. First, `t_TOST` performs 3 t-tests (one two-tailed and two one-tailed tests). Second, `simple_htest` allows you to run equivalence testing or minimal effects testing using a t-test or Wilcoxon-Mann-Whitney tests using the `alternative` argument and the output is the same as `t.test` or `wilcox.test` (in that the object is of the class `htest`). In addition, these functions have a generic method where two vectors can be supplied or a formula can be given (e.g.,`y ~ group`). These functions also makes it easier to switch between types of t-tests. All three types (two sample, one sample, and paired samples) can be performed/calculated from the same function. Moreover, the summary information and visualizations have been upgraded. This should make the decisions derived from the function more informative and user-friendly. 
 
-Also, `t_TOST` is not limited to equivalence tests. Minimal effects testing (MET) is now possible. MET is useful for situations where the hypothesis is about a minimal effect and the null hypothesis *is* equivalence.
+These functions are not limited to equivalence tests. Minimal effects testing (MET) is now possible. MET is useful for situations where the hypothesis is about a minimal effect and the null hypothesis *is* equivalence.
 
 ```{r tostplots,echo=FALSE, message = FALSE, warning = FALSE, fig.show='hold'}
 
@@ -154,7 +154,7 @@ theme_tidybayes() +
   )
 ```
 
-In the general introduction to this package we detailed how to look at *old* results and how to apply TOST to interpreting those results. However, in many cases, users may have new data that needs to be analyzed. Therefore, `t_TOST` can be applied to new data. This vignette will use the `iris` and the `sleep` data.
+In the general introduction to this package, we detailed how to look at *old* results and how to apply TOST to interpreting those results. However, in many cases, users may have new data that needs to be analyzed. Therefore, `t_TOST` and `simple_htest` can be applied to new data. This vignette will use the `iris` and the `sleep` data.
 
 ```{r}
 data('sleep')
@@ -182,13 +182,35 @@ res1a = t_TOST(x = subset(sleep,group==1)$extra,
                eqb = .5)
 ```
 
+We can also using the "simpler" approach with `simple_htest`.
+
+```{r}
+# Simple htest
+
+res1b = simple_htest(formula = extra ~ group,
+                     data = sleep,
+                     mu = .5, # set equivalence bound
+                     alternative = "e")
+
+
+```
+
 Once the function has run, we can print the results with the `print` command. This provides a verbose summary of the results.
 
 ```{r}
+
+# t_TOST
 print(res1)
+
+# htest
+
+print(res1b)
 ```
 
-Another nice feature is the generic `plot` method that can provide a visual summary of the results. All of the plots in this package were inspired by the [concurve](https://cran.r-project.org/package=concurve) R package. There are two types of plots that can be produced. The first, and default, is the consonance density plot (`type = "cd"`).
+
+## Plots
+
+Another nice feature is the generic `plot` method that can provide a visual summary of the results (only available for `t_TOST`). All of the plots in this package were inspired by the [concurve](https://cran.r-project.org/package=concurve) R package. There are two types of plots that can be produced. The first, and default, is the consonance density plot (`type = "cd"`).
 
 ```{r fig.width=6, fig.height=6}
 plot(res1, type = "cd")
@@ -209,6 +231,20 @@ plot(res1, type = "c",
      ci_lines =  c(.9,.95))
 ```
 
+## Descriptions
+
+A description of the results can also be produced with the `describe` or `describe_htest` method and function respectively.
+
+```{r, eval = FALSE}
+describe(res1)
+
+describe_htest(res1b)
+```
+
+> `r describe(res1)`
+
+> `r describe_htest(res1b)`
+
 # Paired Samples
 
 To perform a paired samples TOST, the process does not change much. We could process the test the same way by providing a formula. All we would need to then is change `paired` to TRUE.
@@ -219,6 +255,14 @@ res2 = t_TOST(formula = extra ~ group,
               paired = TRUE,
               eqb = .5)
 res2
+
+res2b = simple_htest(
+  formula = extra ~ group,
+  data = sleep,
+  paired = TRUE,
+  mu = .5,
+  alternative = "e")
+res2b
 ```
 
 However, we may have two vectors of data that are paired. So instead we may want to just provide those separately rather than using a data set and setting the formula. This can be demonstrated with the "iris" data.
@@ -229,20 +273,49 @@ res3 = t_TOST(x = iris$Sepal.Length,
               paired = TRUE,
               eqb = 1)
 res3
+
+res3a = simple_htest(
+  x = iris$Sepal.Length,
+  y = iris$Sepal.Width,
+  paired = TRUE,
+  mu = 1,
+  alternative = "e"
+)
+res3a
 ```
 
 We may want to perform a Minimal Effect Test with the `hypothesis` argument set to "MET".
 
 ```{r}
-res3a = t_TOST(x = iris$Sepal.Length,
+res_met = t_TOST(x = iris$Sepal.Length,
               y = iris$Sepal.Width,
                paired = TRUE,
                hypothesis = "MET",
                eqb = 1,
               smd_ci = "goulet")
-res3a
+res_met
+
+res_metb = simple_htest(x = iris$Sepal.Length,
+                       y = iris$Sepal.Width,
+                       paired = TRUE,
+                       mu = 1,
+                       alternative = "minimal.effect")
+res_metb
 ```
 
+## Descriptions
+
+A description of the results can also be produced with the `describe` or `describe_htest` method and function respectively.
+
+```{r, eval = FALSE}
+describe(res_met)
+
+describe_htest(res_metb)
+```
+
+> `r describe(res_met)`
+
+> `r describe_htest(res_metb)`
 
 # One Sample t-test
 
@@ -283,6 +356,11 @@ res_tsum
 ```{r fig.width=6, fig.height=6}
 plot(res_tsum)
 ```
+
+```{r}
+describe(res_tsum)
+```
+
 
 # Power Analysis for t-test based TOST
 

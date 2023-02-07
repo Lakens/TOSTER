@@ -5,8 +5,9 @@
 #' @param se1,se2 User supplied standard errors (SEs). This will override the internal calculations.
 #' @param paired a logical indicating whether the SMD is from a paired or independent samples design. If a one-sample design, then paired must be set to TRUE.
 #' @param null a number indicating the null hypothesis. For TOST, this would be equivalence bound.
-#' @param alternative a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater" or "less". You can specify just the initial letter.
-#' @param TOST logical indicator (default = FALSE) to perform two one-sided tests of equivalence (TOST). Minimal effects testing not currently available. If specified, alternative is ignored.
+#' @param alternative a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater", "less", "equivalence" (TOST), or "minimal.effect" (TOST). You can specify just the initial letter.
+#' @param TOST Defunct: use alternative argument. Logical indicator (default = FALSE) to perform two one-sided tests of equivalence (TOST).
+#' @details This function tests for differences between correlations.
 #' @return A list with class "htest" containing the following components:
 #' \describe{
 #'   \item{\code{"statistic"}}{z-score}
@@ -32,10 +33,25 @@ compare_smd = function(smd1,
                        n2,
                        se2 = NULL,
                        paired = FALSE,
-                       alternative = c("two.sided", "less", "greater"),
+                       alternative = c("two.sided", "less", "greater",
+                                       "equivalence", "minimal.effect"),
                        null = 0,
                        TOST = FALSE){
   alternative <- match.arg(alternative)
+  if(TOST && alternative %in% c("two.sided","greater","less")){
+    alternative = "equivalence"
+  }
+  if(alternative %in% c("equivalence", "minimal.effect")){
+    if(length(null) == 1){
+      null = c(null, -1*null)
+    }
+    TOST = TRUE
+  } else {
+    if(length(null) > 1){
+      stop("null can only have 1 value for non-TOST procedures")
+    }
+    TOST = FALSE
+  }
   if(length(n1) > 2 || length(n2) > 2 || !is.numeric(n1) || !is.numeric(n1)){
     stop("n1 and n2 must be a numeric vector of a length of 1 or 2.")
   }
@@ -43,8 +59,7 @@ compare_smd = function(smd1,
     stop("n1 and n2 must be a length of 1 if paired is TRUE.")
   }
 
-  # difference in SMD minus null hypothesis
-  d_diff = smd1 - smd2 - null
+
 
   if(!is.null(se1) || !is.null(se2)){
     message("User supplied standard errors. Proceed with caution.")
@@ -88,27 +103,67 @@ compare_smd = function(smd1,
   }
 
   # z-score and p-value
-  se_diff = sqrt(se1^2 + se2^2)
-  z = d_diff/se_diff
-  names(z) = "z"
-  pval = p_from_z(z, alternative = alternative)
+  # difference in SMD minus null hypothesis
+  if(TOST){
+    se_diff = sqrt(se1^2 + se2^2)
+    nullhi = max(null)
+    nulllo = min(null)
+    d_difflo = smd1 - smd2 - nulllo
+    zlo = d_difflo/se_diff
+    d_diffhi = smd1 - smd2 - nullhi
+    zhi = d_diffhi/se_diff
+    if(alternative == "equivalence"){
+      plo = p_from_z(zlo, alternative = 'greater')
+      phi = p_from_z(zhi, alternative = 'less')
+      if(phi >= plo){
+        pvalue = phi
+        z_test = zhi
+      } else {
+        pvalue = plo
+        z_test = zlo
+      }
+    }
+    if(alternative == "minimal.effect"){
+      plo = p_from_z(zlo, alternative = 'less')
+      phi = p_from_z(zhi, alternative = 'greater')
+      if(phi <= plo){
+        pvalue = phi
+        z_test = zhi
+      } else {
+        pvalue = plo
+        z_test = zlo
+      }
+    }
+
+    z = z_test
+    names(z) = "z"
+    pval = pvalue
+
+  }else {
+    d_diff = smd1 - smd2 - null
+    se_diff = sqrt(se1^2 + se2^2)
+    z = d_diff/se_diff
+    names(z) = "z"
+    pval = p_from_z(z, alternative = alternative)
+  }
+
 
   # Equivalence Testing
-  if(TOST){
-    d_diff2 = abs(smd1 - smd2) - null
-    z2 = d_diff2/se_diff
-    if(abs(z2) > abs(z)){
-      z = z2
-      names(z) = "z"
-    }
-    pval = p_from_z(z2, alternative = "less")
-    alternative = "less"
-  }
+  #if(TOST){
+  #  d_diff2 = abs(smd1 - smd2) - null
+  #  z2 = d_diff2/se_diff
+  #  if(abs(z2) > abs(z)){
+  #    z = z2
+  #    names(z) = "z"
+  #  }
+  #  pval = p_from_z(z2, alternative = "less")
+  #  alternative = "less"
+  #}
 
   est2 = smd1 - smd2
   names(est2) = "difference in SMDs"
   null2 = null
-  names(null2) = "difference in SMDs"
+  names(null2) = rep("difference in SMDs",length(null2))
   # Store as htest
   rval <- list(statistic = z, p.value = pval,
                #conf.int = cint,

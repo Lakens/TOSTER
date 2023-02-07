@@ -1,15 +1,16 @@
 #' Methods for TOSTnp objects
 #'
-#' Methods defined for objects returned from the agree functions.
+#' Methods defined for objects returned from the wilcox_TOST function.
 #'
-#' @param x object of class \code{TOSTnp} as returned from the reli_stats function
+#' @param x object of class \code{TOSTnp}
 #' @param digits Number of digits to print for p-values
 #' @param ... further arguments passed through, see description of return value
 #'   for details.
 #'   \code{\link{TOSTnp-methods}}.
 #' @return
 #' \describe{
-#'   \item{\code{print}}{Prints short summary of the Limits of Agreement}
+#'   \item{\code{print}}{Prints short summary of the tests.}
+#'   \item{\code{describe}}{Verbose description of results.}
 #' }
 #'
 #' @name TOSTnp-methods
@@ -63,4 +64,20 @@ print.TOSTnp <- function(x,
   }
   cat("\n")
 
+}
+
+
+#' @rdname TOSTnp-methods
+#' @method describe TOSTnp
+#' @export
+
+describe.TOSTnp <- function(x,
+                           digits = 3,
+                           ...){
+
+  text2 = describe_TOST(x = x,
+                        digits = digits,
+                        ...)
+
+  return(text2)
 }

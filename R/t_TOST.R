@@ -83,6 +83,7 @@ t_TOST.default = function(x,
                           ...) {
   hypothesis = match.arg(hypothesis)
   eqbound_type = match.arg(eqbound_type)
+  digits = ifelse(alpha < 0.01, 3, 2)
   if(is.null(glass)){
     glass = "no"
   }
@@ -369,33 +370,29 @@ t_TOST.default = function(x,
   if(hypothesis == "EQU"){
     #format(low_eqbound, digits = 3, nsmall = 3, scientific = FALSE)
     TOST_restext = paste0("The equivalence test was ",
-                          TOSToutcome,", t(",round(tresult$parameter,
-                                                   digits=2),") = ",
-                          format(tTOST, digits = 3,
-                                 nsmall = 3, scientific = FALSE),", p = ",
-                          format(pTOST, digits = 3,
-                                 nsmall = 3, scientific = TRUE),sep="")
+                          TOSToutcome,", t(",rounder_stat(tresult$parameter,
+                                                   digits=digits),") = ",
+                          rounder_stat(tTOST, digits = digits), ", ",
+                          printable_pval(pTOST, digits = digits),sep="")
   } else {
     TOST_restext = paste0("The minimal effect test was ",
-                          TOSToutcome,", t(",round(tresult$parameter,
-                                                   digits=2),") = ",
-                          format(tTOST, digits = 3,
-                                 nsmall = 3, scientific = FALSE),", p = ",
-                          format(pTOST, digits = 3,
-                                 nsmall = 3, scientific = TRUE),sep="")
+                          TOSToutcome,", t(",rounder_stat(tresult$parameter,
+                                                          digits=digits),") = ",
+                          rounder_stat(tTOST, digits = digits), ", ",
+                          printable_pval(pTOST, digits = digits),sep="")
   }
 
   ttest_restext = paste0("The null hypothesis test was ",
-                         testoutcome,", t(",round(tresult$parameter, digits=2),") = ",
-                         format(tresult$statistic, digits = 3,
-                                nsmall = 3, scientific = FALSE),", p = ",
-                         format(tresult$p.value, digits = 3,
-                                nsmall = 3, scientific = TRUE),sep="")
-  combined_outcome = tost_decision(hypothesis = hypothesis,
-                                    alpha = alpha,
-                                    pvalue = tresult$p.value,
-                                    pTOST = pTOST,
-                                    mu_text = mu_text)
+                         testoutcome,", t(",rounder_stat(tresult$parameter, digits=2),") = ",
+                         rounder_stat(tresult$statistic, digits = 3),
+                         printable_pval(tresult$p.value, digits = digits),sep="")
+  combined_outcome = tost_decision(
+    hypothesis = hypothesis,
+    alpha = alpha,
+    pvalue = tresult$p.value,
+    pTOST = pTOST,
+    mu_text = mu_text
+  )
 
 
   decision = list(

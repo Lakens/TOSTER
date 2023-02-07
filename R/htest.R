@@ -16,11 +16,9 @@
 #' \item{conf.int}{The confidence interval of the difference.}
 #'
 #' @examples
-#' # To be added
-#'
 #'
 #' # as.htest(result)
-#'
+#' @family htest
 #' @export
 
 as_htest = function(TOST) {
@@ -58,11 +56,18 @@ as_htest = function(TOST) {
   eqb = TOST$eqb
 
   null.value <- switch(class(TOST),
-                       TOSTt = eqb[1, which_eqb],
-                       TOSTnp = eqb[which_eqb])
-  names(null.value) <- switch(class(TOST),
-                              TOSTt = "mean",
-                              TOSTnp = "location shift")
+                       TOSTt = as.numeric(eqb[1,2:3]),
+                       TOSTnp = eqb)
+  if(grepl("one",TOST$method, ignore.case = TRUE)){
+    names(null.value) <- switch(class(TOST),
+                                TOSTt = rep("mean",length(null.value)),
+                                TOSTnp = rep("location",length(null.value)))
+  } else {
+    names(null.value) <- switch(class(TOST),
+                                TOSTt = rep("mean difference",length(null.value)),
+                                TOSTnp = rep("location shift",length(null.value)))
+  }
+
 
   stderr <- switch(class(TOST),
                    TOSTt = TOSTp$SE,
@@ -83,42 +88,22 @@ as_htest = function(TOST) {
   alt_bound <-
     ifelse(grepl("Lower", which_row), "lower", "upper")
 
-  if (alt_bound == "lower" &&
-      grepl("equ|Equ",TOST$hypothesis)) {
-    alt_text = "greater"
-  } else if (alt_bound == "lower" &&
-             !grepl("equ|Equ",TOST$hypothesis)) {
-    alt_text = "less"
-  } else if (alt_bound != "lower" &&
-             !grepl("equ|Equ",TOST$hypothesis)) {
-    alt_text = "greater"
-  } else {
-    alt_text = "less"
-  }
+  alt_text = ifelse(grepl("equ", TOST$hypothesis,
+                          ignore.case = TRUE),
+                    "equivalence",
+                    "minimal.effect")
 
-  if (inherits(TOST,"TOSTnp")) {
-    htest <- list(
-      statistic = statistic,
-      parameter = parameter,
-      p.value = p.value,
-      null.value = null.value,
-      alternative = alt_text,
-      method = method,
-      data.name = TOST$data.name
-    )
-  } else {
+
     conf.int <- c(TOST$effsize$lower.ci[1],
                   TOST$effsize$upper.ci[1])
-    if (!is.null(conf.int)) {
-      attr(conf.int, "conf.level") <- TOST$effsize$conf.level[1]
-    }
-    if (grepl("One", TOST$method)) {
-      estimate <- TOST$effsize$estimate[1]
-      names(estimate) = "mean of x"
-    } else {
-      estimate <- TOST$effsize$estimate[1]
-      names(estimate) = "mean difference"
-    }
+
+    attr(conf.int, "conf.level") <- TOST$effsize$conf.level[1]
+
+
+    estimate <- TOST$effsize$estimate[1]
+
+    names(estimate) = names(null.value)[1]
+
 
     htest <- list(
       statistic = statistic,
@@ -131,7 +116,7 @@ as_htest = function(TOST) {
       data.name = TOST$data.name,
       conf.int = conf.int
     )
-  }
+
 
   class(htest) <- "htest"
   htest

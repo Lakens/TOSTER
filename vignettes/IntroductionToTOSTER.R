@@ -40,5 +40,10 @@ powerTOSTr(alpha=0.05, statistical_power=0.8, low_eqbound_r=-0.24, high_eqbound_
 
 
 ## ---- fig.width=6-------------------------------------------------------------
+# OLD CODE
 TOSTr(n=71, r=-0.12, low_eqbound_r=-0.24, high_eqbound_r=0.24, alpha=0.05)
+
+# NEW CODE
+corsum_test(n=71, r=-0.12, null=0.24, alpha=0.05,
+            alternative = "equivalence")
 
