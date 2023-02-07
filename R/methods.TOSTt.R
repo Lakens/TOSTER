@@ -701,7 +701,7 @@ describe_TOST = function(x,
 
   method_state = paste0("Using the ", htest$method,
                         ", a null hypothesis significance test (NHST)",
-                        ", and two one-sided tests (TOST) were performed",
+                        ", and a ",type_tost," test, via two one-sided tests (TOST), were performed",
                         " with an alpha-level of ", x$alpha, ".",
                         " These tested the null hypotheses that ", null_nhst,
                         " (NHST), and ", null_tost," (TOST).")

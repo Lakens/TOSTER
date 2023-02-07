@@ -56,6 +56,14 @@ reference:
   - TOSTt-methods
   - TOSTnp-methods
 
+- subtitle: "Hypothesis Test Helpers"
+  desc: >
+    Functions for simple hypothesis tests or aide in interpreting these simple tests
+  contents:
+  - htest-helpers
+  - simple_htest
+  - boot_t_test
+
 - title: "Standardized Effect Sizes"
 
 - subtitle: "Calculations"
