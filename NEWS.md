@@ -3,6 +3,10 @@ NEWS
 
 **TOSTER R package and jamovi module**
 
+# TOSTER v0.7.1
+
+- Fixing the ggplot2 error related to `after_stat` update from that package.
+
 # TOSTER v0.7.0
 
 - Add correlation functions `z_cor_test`, `boot_cor_test`, `corsum_test`, `boot_compare_cor`, and `simple_htest`

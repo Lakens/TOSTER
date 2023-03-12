@@ -266,7 +266,7 @@ plot.TOSTt <- function(x,
           sigma = sigma,
           ncp = lambda
         ),
-        fill = stat(cut_cdf_qi(p = cdf,
+        fill = after_stat(cut_cdf_qi(p = cdf,
                                .width = sets))
       ),
       .width = c2,
@@ -384,7 +384,7 @@ plot.TOSTt <- function(x,
                         stringsAsFactors = FALSE)
       t_plot = ggplot(data = df_t,
                       aes(y = 0, x = val)) +
-        stat_halfeye(aes(fill = stat(cut_cdf_qi(
+        stat_halfeye(aes(fill = after_stat(cut_cdf_qi(
           cdf,
           .width = sets
         ))),
@@ -423,7 +423,7 @@ plot.TOSTt <- function(x,
 
       d_plot = ggplot(data = df_d,
                       aes(y = 0, x = val)) +
-        stat_halfeye(aes(fill = stat(cut_cdf_qi(
+        stat_halfeye(aes(fill =after_stat(cut_cdf_qi(
           cdf,
           .width = sets
         ))),
