@@ -5,7 +5,8 @@
 #' @inheritParams z_cor_test
 #' @details
 #' This function uses Fisher's z transformation for the correlations, but uses Fieller's correction of the standard error for Spearman's rho and Kendall's tau.
-#'  @return A list with class "htest" containing the following components:
+#'
+#' @return A list with class "htest" containing the following components:
 #'
 #' \describe{
 #'   \item{\code{"statistic"}}{z-score}

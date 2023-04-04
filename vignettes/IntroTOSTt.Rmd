@@ -26,9 +26,9 @@ library(ggdist)
 
 ```
 
-In an effort to make `TOSTER` more informative and easier to use, I created the functions `t_TOST` and `simple_htest`. These function operates very similarly to base R's `t.test` function with a few exceptions. First, `t_TOST` performs 3 t-tests (one two-tailed and two one-tailed tests). Second, `simple_htest` allows you to run equivalence testing or minimal effects testing using a t-test or Wilcoxon-Mann-Whitney tests using the `alternative` argument and the output is the same as `t.test` or `wilcox.test` (in that the object is of the class `htest`). In addition, these functions have a generic method where two vectors can be supplied or a formula can be given (e.g.,`y ~ group`). These functions also makes it easier to switch between types of t-tests. All three types (two sample, one sample, and paired samples) can be performed/calculated from the same function. Moreover, the summary information and visualizations have been upgraded. This should make the decisions derived from the function more informative and user-friendly. 
+In an effort to make `TOSTER` more informative and easier to use, I created the functions `t_TOST` and `simple_htest`. These function operates very similarly to base R's `t.test` function with a few exceptions. First, `t_TOST` performs 3 t-tests (one two-tailed and two one-tailed tests). Second, `simple_htest` allows you to run equivalence testing or minimal effects testing using a t-test or Wilcoxon-Mann-Whitney tests using the `alternative` argument and the output is the same as `t.test` or `wilcox.test` (in that the object is of the class `htest`). In addition, these functions have a generic method where two vectors can be supplied or a formula can be given (e.g.,`y ~ group`). These functions make it easier to switch between types of t-tests. All three types (two sample, one sample, and paired samples) can be performed/calculated from the same function. Moreover, the summary information and visualizations have been upgraded. This should make the decisions derived from the function more informative and user-friendly. 
 
-These functions are not limited to equivalence tests. Minimal effects testing (MET) is now possible. MET is useful for situations where the hypothesis is about a minimal effect and the null hypothesis *is* equivalence.
+These functions are not limited to equivalence tests. Minimal effects testing (MET) is possible. MET is useful for situations where the hypothesis is about a minimal effect and the null hypothesis *is* equivalence.
 
 ```{r tostplots,echo=FALSE, message = FALSE, warning = FALSE, fig.show='hold'}
 
@@ -169,7 +169,7 @@ For this example, we will use the sleep data. In this data there is a `group` va
 head(sleep)
 ```
 
-We will assume the data are independent, and that we have equivalence bounds of +/- 0.5. All we need to do is provide the `formula`, `data`, and eqbound arguments for the function to run appropriately. In addition, we can set the `var.equal` argument (to assume equal variance), and the `paired` argument (sets if the data is paired or not). Both are logical indicators that can be set to TRUE or FALSE. The `alpha` is automatically set to 0.05 but this can also be adjusted by the user. The Hedges correction is also automatically calculated, but this can be overridden with the `bias_correction` argument. The `hypothesis` is automatically set to "EQU" for equivalence but if a minimal effect is of interest then "MET" can be supplied. Note: for this example, we will set `smd_ci` to "goulet" since it will reduce the time to produce plots.
+We will assume the data are independent, and that we have equivalence bounds of +/- 0.5 raw units. All we need to do is provide the `formula`, `data`, and  `eqb` arguments for the function to run appropriately. In addition, we can set the `var.equal` argument (to assume equal variance), and the `paired` argument (sets if the data is paired or not). Both are logical indicators that can be set to TRUE or FALSE. The `alpha` is automatically set to 0.05 but this can also be adjusted by the user. The Hedges correction is also automatically calculated, but this can be overridden with the `bias_correction` argument. The `hypothesis` is automatically set to "EQU" for equivalence but if a minimal effect is of interest then "MET" can be supplied. Note: for this example, we will set `smd_ci` to "goulet" since it will reduce the time to produce plots.
 
 ```{r}
 res1 = t_TOST(formula = extra ~ group,
@@ -265,7 +265,7 @@ res2b = simple_htest(
 res2b
 ```
 
-However, we may have two vectors of data that are paired. So instead we may want to just provide those separately rather than using a data set and setting the formula. This can be demonstrated with the "iris" data.
+However, we may have two vectors of data that are paired. So we may want to just provide those separately rather than using a data set and setting the formula. This can be demonstrated with the "iris" data.
 
 ```{r}
 res3 = t_TOST(x = iris$Sepal.Length,
@@ -332,12 +332,12 @@ res4
 
 # Only have the summary statistics? No problem!
 
-In some cases you may only have access to the summary statistics. Therefore, we created a function, `tsum_TOST`,to perform the same tests just based on the summary statistics. This involves providing the function with a number of different arguments.
+In some cases you may only have access to the summary statistics. Therefore, we created a function, `tsum_TOST`, to perform the same tests just based on the summary statistics. This involves providing the function with a number of different arguments.
 
 * `n1 & n2` the sample sizes (only n1 needs to be provided for one sample case)
 * `m1 & m2` the sample means
 * `sd1 & sd2` the sample standard deviation
-* `r12` the correlation between each if paired is set to TRUE
+* `r12` the correlation between the paired samples; only needed if `paired` is set to TRUE
 
 The results from above can be replicated with the `tsum_TOST`
 
@@ -364,11 +364,11 @@ describe(res_tsum)
 
 # Power Analysis for t-test based TOST
 
-A new function, `power_t_TOST` has been created to allow for power calculations for TOST analyses that utilize t-tests. This function uses a more accurate method than the older functions in this package and match the results of the PASS statistics software. The exact calculations of power are based on Owen’s Q-function or by direct integration of the bivariate non-central t-distribution (inspired by @PowerTOST in the `PowerTOST` R package). Approximate power is implemented via the non-central t-distribution or the ‘shifted’ central t-distribution [@phillips1990, @diletti1991]. The function is limited to power analyses involves one sample, two sample, and paired sample cases. More options are available in the `PowerTOST` R package.
+We also created `power_t_TOST`  to allow for power calculations for TOST analyses that utilize t-tests. This function uses a more accurate method than the older functions in TOSTER and match the results of the commercially available PASS software. The exact calculations of power are based on Owen’s Q-function or by direct integration of the bivariate non-central t-distribution^[Inspired by @PowerTOST in the `PowerTOST` R package. Please see this package for more options]. Approximate power is implemented via the non-central t-distribution or the ‘shifted’ central t-distribution [@phillips1990, @diletti1991]. The function is limited to power analyses involves one sample, two sample, and paired sample cases. More options are available in the `PowerTOST` R package.
 
-The interface for this function is quite simple and was intended to mimic the base R function `power.t.test`. The user must specify the 2 equivalence bounds, and leave only one of the other options blank (`alpha`, `power`, or `n`). The "true difference" can be set with `delta` and the standard deviation (default is 1) can be set with the `sd` argument. Once everything is set and the function is run, the function will return a object of the `power.htest` class.
+The interface for this function is quite simple and was intended to mimic the base R function `power.t.test`. The user must specify the 2 equivalence bounds, and leave only one of the other options blank (`alpha`, `power`, or `n`). The "true difference" can be set with `delta` and the standard deviation (default is 1) can be set with the `sd` argument. Once everything is set and the function is run, a object of the `power.htest` class will be returned.
 
-As an example, let's say we are looking at an equivalence study where we assume the true difference is 1 unit, the standard deviation is 2.5, and we set the equivalence bounds to 2.5 units as well. If we want to find the sample size adequate to have 95% power at an alpha of 0.025 we enter the following:
+As an example, let's say we are looking at an equivalence study where we assume the *true* difference is *at least* 1 unit, the standard deviation is 2.5, and we set the equivalence bounds to 2.5 units as well. If we want to find the sample size adequate to have 95% power at an alpha of 0.025 we enter the following:
 
 ```{r}
 power_t_TOST(n = NULL,

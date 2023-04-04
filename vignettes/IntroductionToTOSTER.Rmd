@@ -1,6 +1,6 @@
 ---
 title: "Introduction to Equivalence Testing with TOSTER"
-author: "Daniel Lakens"
+author: "Daniel Lakens; Updated by Aaron Caldwell"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >

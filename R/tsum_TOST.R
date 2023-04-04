@@ -21,6 +21,10 @@
 #'   \item{\code{"method"}}{Type of t-test.}
 #'   \item{\code{"decision"}}{List included text regarding the decisions for statistical inference.}
 #' }
+#' @examples
+#' # example code
+#' # One sample test
+#' tsum_TOST(m1 = 0.55, n1 = 18, sd1 = 4, eqb  = 2)
 #' @family TOST
 #' @importFrom stats na.omit setNames terms
 #' @name tsum_TOST

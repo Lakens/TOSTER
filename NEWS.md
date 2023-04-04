@@ -6,6 +6,7 @@ NEWS
 # TOSTER v0.7.1
 
 - Fixing the ggplot2 error related to `after_stat` update from that package.
+- Update documentation.
 
 # TOSTER v0.7.0
 

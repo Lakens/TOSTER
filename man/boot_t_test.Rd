@@ -80,6 +80,11 @@ For details on the calculations in this function see vignette("robustTOST").
 Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press.
 }
 
+\examples{
+# example code
+
+boot_t_test(extra ~ group, data = sleep)
+}
 \seealso{
 Other Robust TOST: 
 \code{\link{boot_log_TOST}()},

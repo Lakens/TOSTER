@@ -9,7 +9,14 @@
 #' @inheritParams t_TOST
 #' @param digits integer indicating the number of decimal places.
 #' @examples
-#' # To be added
+#' # simple example with t-test
+#' tres = t.test(extra ~ group, data = sleep)
+#'
+#' # As a data frame
+#' df_htest(tres)
+#'
+#' # Describe t-test results
+#' describe_htest(tres)
 #'
 #' @name htest-helpers
 

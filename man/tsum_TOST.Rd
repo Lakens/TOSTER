@@ -88,6 +88,11 @@ A function for TOST with all types of t-tests from summary statistics.
 \details{
 For details on the calculations in this function see vignette("IntroTOSTt") & vignette("SMD_calcs").
 }
+\examples{
+# example code
+# One sample test
+tsum_TOST(m1 = 0.55, n1 = 18, sd1 = 4, eqb  = 2)
+}
 \seealso{
 Other TOST: 
 \code{\link{simple_htest}()},

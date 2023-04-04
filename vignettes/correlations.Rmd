@@ -14,7 +14,7 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
 ---
 
-In this package there are a few different functions to calculate correlations. 
+TOSTER has a few different functions to calculate correlations. 
 All the included functions are based on a few papers by @goertzen2010 (`z_cor_test` & `compare_cor`), and @wilcox2011introduction (`boot_cor_test`)^[Bootstrapped functions were based off code posted by Rand Wilcox on his website, and was modified after looking at Guillaume Rousselet's code, `bootcorci` R package, on GitHub https://github.com/GRousselet].
 
 # Simple Correlation Test
@@ -133,7 +133,7 @@ compare_cor(r1 = .8,
             df2 = 98)
 ```
 
-The methods included to compare correlations include Fisher's z transformation ("fisher"), and Kraatz's method ("kraatz"). The Fisher and Kraatz methods are appropriate for general significance tests, but may have low statistical power [@counsell2015equ]. The Fisher's method can test the difference between correlations on the z-transformed scale while Kraatz's methods directly measures the difference between the correlation coefficients. My personal recommendation would be to use Fisher's method.
+The methods included to compare correlations include Fisher's z transformation ("fisher"), and Kraatz's method ("kraatz"). The Fisher and Kraatz methods are appropriate for general significance tests, but may have low statistical power [@counsell2015equ]. The Fisher's method can test the difference between correlations on the z-transformed scale while Kraatz's methods directly measures the difference between the correlation coefficients. My personal recommendation would is Fisher's method.
 
 ```{r}
 compare_cor(r1 = .8,
@@ -141,8 +141,8 @@ compare_cor(r1 = .8,
             r2 = .2,
             df2 = 98,
             null = .2,
-            method = "f",
-            alternative = "e")
+            method = "f", # Fisher
+            alternative = "e") # Equivalence
 ```
 
 
@@ -164,8 +164,8 @@ boot_compare_cor(
   y1 = y1,
   y2 = y2,
   null = .2,
-  alternative = "e",
-  method = "win"
+  alternative = "e", # Equivalence
+  method = "win" # Winsorized correlation
 )
 ```
 

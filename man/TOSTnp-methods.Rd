@@ -28,3 +28,14 @@ for details.
 \description{
 Methods defined for objects returned from the wilcox_TOST function.
 }
+\examples{
+# example code
+data(mtcars)
+res1 = wilcox_TOST(mpg ~ am,data = mtcars,eqb = 3)
+
+# PRINT
+print(res1)
+
+# DESCRIPTION
+describe(res1)
+}

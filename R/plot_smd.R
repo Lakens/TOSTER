@@ -1,4 +1,4 @@
-#' plot_smd
+#' Function to produce plots of the distribution of the standardized mean difference
 #' @description Function to produce plots of the distribution of the standardized mean difference
 #' @param d Estimate of the standardized mean difference
 #' @param df degrees of freedom for the standardized mean difference

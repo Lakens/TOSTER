@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_pes.R
 \name{plot_pes}
 \alias{plot_pes}
-\title{Function to produce plots of the distribution of the standardized mean difference}
+\title{Function to produce plots of the distribution of partial eta-squared}
 \usage{
 plot_pes(
   Fstat,
@@ -27,7 +27,7 @@ plot_pes(
 Returns plot of the distribution of partial eta-squared
 }
 \description{
-Function to produce plots of the distribution of the standardized mean difference
+Function to produce plots of the distribution of partial eta-squared
 }
 \details{
 This function was created so that users could create consonance plots of partial eta-squared from ANOVA-level effects.
