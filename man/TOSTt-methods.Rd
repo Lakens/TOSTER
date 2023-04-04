@@ -50,3 +50,24 @@ for details.
 \description{
 Methods defined for objects returned from the t_TOST and boot_t_TOST functions.
 }
+\examples{
+# example code
+# Print
+
+res1 = t_TOST(mpg ~ am, data = mtcars, eqb = 3)
+
+res1
+# Print with more digits
+print(res1, digits = 6)
+\dontrun{
+# Plot with density plot - only raw values (SLOW)
+plot(res1, type = "cd", estimates = "raw")
+# Plot with consonance - only raw values (SLOW)
+plot(res1, type = "c", estimates = "raw")
+# Plot null distribution - only raw values
+plot(res1, type = "tnull", estimates = "raw")
+}
+# Get description of the results
+describe(res1)
+
+}

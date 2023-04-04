@@ -19,6 +19,11 @@
 #' @details The implemented test(s) corresponds to the proposal of Chapter 16 of Efron and Tibshirani (1994).
 #'
 #' For details on the calculations in this function see vignette("robustTOST").
+#'
+#' @examples
+#' # example code
+#'
+#' boot_t_test(extra ~ group, data = sleep)
 #' @section References:
 #'
 #' Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press.

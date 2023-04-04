@@ -16,8 +16,8 @@
 #' \item{conf.int}{The confidence interval of the difference.}
 #'
 #' @examples
-#'
-#' # as.htest(result)
+#' res1 = t_TOST(formula = extra ~ group,data = sleep,eqb = .5,smd_ci = "goulet")
+#' as_htest(res1)
 #' @family htest
 #' @export
 

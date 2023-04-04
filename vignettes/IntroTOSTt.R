@@ -179,6 +179,11 @@ plot(res1, type = "cd")
 plot(res1, type = "c",
      ci_lines =  c(.9,.95))
 
+## ---- eval = FALSE------------------------------------------------------------
+#  describe(res1)
+#  
+#  describe_htest(res1b)
+
 ## -----------------------------------------------------------------------------
 res2 = t_TOST(formula = extra ~ group,
               data = sleep,
@@ -226,6 +231,11 @@ res_metb = simple_htest(x = iris$Sepal.Length,
                        alternative = "minimal.effect")
 res_metb
 
+## ---- eval = FALSE------------------------------------------------------------
+#  describe(res_met)
+#  
+#  describe_htest(res_metb)
+
 ## -----------------------------------------------------------------------------
 res4 = t_TOST(x = iris$Sepal.Length,
               hypothesis = "EQU",
@@ -246,6 +256,9 @@ res_tsum
 
 ## ----fig.width=6, fig.height=6------------------------------------------------
 plot(res_tsum)
+
+## -----------------------------------------------------------------------------
+describe(res_tsum)
 
 ## -----------------------------------------------------------------------------
 power_t_TOST(n = NULL,
