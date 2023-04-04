@@ -520,8 +520,8 @@ to the effect size estimate.
 Calculate confidence intervals around $\lambda$.
 
 $$
-t_L = t_{(1-2-(1-\alpha)/2,\space df, \space \lambda)} \\
-t_U = t_{(1-2+(1-\alpha)/2,\space df, \space \lambda)}
+t_L = t_{(1/2-(1-\alpha)/2,\space df, \space \lambda)} \\
+t_U = t_{(1/2+(1-\alpha)/2,\space df, \space \lambda)}
 $$
 
 Then transform back to the SMD.
