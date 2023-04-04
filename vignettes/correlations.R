@@ -78,8 +78,8 @@ compare_cor(r1 = .8,
             r2 = .2,
             df2 = 98,
             null = .2,
-            method = "f",
-            alternative = "e")
+            method = "f", # Fisher
+            alternative = "e") # Equivalence
 
 ## -----------------------------------------------------------------------------
 set.seed(8922)
@@ -95,7 +95,7 @@ boot_compare_cor(
   y1 = y1,
   y2 = y2,
   null = .2,
-  alternative = "e",
-  method = "win"
+  alternative = "e", # Equivalence
+  method = "win" # Winsorized correlation
 )
 

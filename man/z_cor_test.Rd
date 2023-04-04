@@ -43,6 +43,15 @@ Unlike the stats version of cor.test, this function allows users to set the null
 \details{
 This function uses Fisher's z transformation for the correlations, but uses Fieller's correction of the standard error for Spearman's rho and Kendall's tau.
 }
+\examples{
+# example code
+x <- c(44.4, 45.9, 41.9, 53.3, 44.7, 44.1, 50.7, 45.2, 60.1)
+y <- c( 2.6,  3.1,  2.5,  5.0,  3.6,  4.0,  5.2,  2.8,  3.8)
+# Sig test
+z_cor_test(x, y, method = "kendall", alternative = "t", null = 0)
+# MET test
+z_cor_test(x, y, method = "kendall", alternative = "min", null = .2)
+}
 \references{
 Goertzen, J. R., & Cribbie, R. A. (2010). Detecting a lack of association: An equivalence testing approach. British Journal of Mathematical and Statistical Psychology, 63(3), 527-537. https://doi.org/10.1348/000711009X475853, formula page 531.
 }

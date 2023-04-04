@@ -12,14 +12,13 @@ vignette: >
   %\VignetteIndexEntry{Equivalence Testing for F-tests}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
-
 ---
 
-For an open access tutorial paper explaining how to set equivalence bounds, and how to perform and report equivalence for ANOVA models see @Campbell_2021. These functions are meant to be omnibus tests, and additional testing may be necessary. For example, comparison of the estimated marginal means, in addition to or as an alternative of  with may be prudent.
+For an open access tutorial paper explaining how to set equivalence bounds, and how to perform and report equivalence for ANOVA models see @Campbell_2021. These functions are meant to be omnibus tests, and additional testing may be necessary^[Russ Lenth's emmeans R package has some capacity for equivalence testing on the marginal means (i.e., a form of pairwise testing). See https://cran.r-project.org/web/packages/emmeans/vignettes/confidence-intervals.html for details]. 
 
 # F-test Calculations
 
-Statistical equivalence testing (or "omnibus non-inferiority testing" as @Campbell_2021) for *F*-tests are special use case of the cumulative distribution function of the non-central *F* distribution.
+Statistical equivalence testing (or "omnibus non-inferiority testing" as stated by @Campbell_2021) for *F*-tests are special use case of the cumulative distribution function of the non-central *F* distribution.
 
 As @Campbell_2021 state, these type of questions answer the question: "Can we reject the hypothesis that the total proportion of variance in outcome Y attributable to X is greater than or equal to the equivalence bound $\Delta$?"
 
@@ -29,7 +28,7 @@ H_0: \space 1 > \eta^2_p \geq \Delta
 H_1: \space 0 \geq \eta^2_p < \Delta
 $$
 
-In `TOSTER` we go a tad farther and calculate a more generalizable non-centrality parameter than allows the equivalence test for *F*-tests to be applied to variety of designs.
+In `TOSTER` we go a tad farther and calculate a more generalization of the non-centrality parameter to allow for the equivalence test for *F*-tests to be applied to variety of designs.
 
 @Campbell_2021 calculate the *p*-value as:
 
@@ -55,7 +54,7 @@ $$
 
 Using the `InsectSprays` data set in R and the base R `aov` function we can demonstrate how this omnibus equivalence testing can be applied with `TOSTER`.
 
-From the initial analysis we an see a clear "significant" effect (the p-value listed is zero but it just very small) of the factor spray. However, we *may* be interested in testing if the effect is practically equivalent. I will arbitrarily set the equivalence bound to a partial eta-squared of 0.35 ($H_0: \eta^2_p > 0.35$)
+From the initial analysis we an see a clear "significant" effect (the p-value listed is zero but it just very small) of the factor spray. However, we *may* be interested in testing if the effect is practically equivalent. I will arbitrarily set the equivalence bound to a partial eta-squared of 0.35 ($H_0: \eta^2_p > 0.35$).
 
 ```{r warning=FALSE, message=FALSE}
 library(TOSTER)

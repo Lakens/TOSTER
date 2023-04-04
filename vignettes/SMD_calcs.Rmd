@@ -557,7 +557,7 @@ $$
 
 ## Normal method
 
-Full warning this method provides atrocious coverage.
+Full warning this method provides atrocious coverage at most sample sizes in my opinion.
 
 The limits of the z-distribution at the given alpha-level (`qnorm(1-alpha)`) are multiplied by the standard error of the calculated SMD.
 
@@ -569,7 +569,7 @@ $$
 
 It was requested that a function be provided that only calculates the SMD.
 Therefore, I created the `smd_calc` function.
-The interface is almost the same as `t_TOST` but you just don't set a equivalence bound.
+The interface is almost the same as `t_TOST` but you don't set an equivalence bound.
 
 ```{r}
 smd_calc(formula = extra ~ group,
@@ -603,7 +603,7 @@ plot_smd(d = .43,
 
 # Comparing SMDs
 
-In some cases, SMDs between original and replication studies want to be
+In some cases, the SMDs between original and replication studies want to be
 compared. Rather than looking at whether or not a replication attempt is
 significant, a researcher could compare to see how compatible the SMDs
 are between the two studies.
@@ -617,11 +617,11 @@ way, should the replication be considered a failure to replicate?
 We can use the `compare_smd` function to at least measure how often we
 would expect a discrepancy between the original and replication study if
 the same underlying effect was being measured (also assuming no
-publication bias).
+publication bias or differences in protocol).
 
 We can see from the results below that, if the null hypothesis were
-true, we would only expect to see a discrepancy in SMDs between studies at
-least this large \~1% of the time.
+true, we would only expect to see a discrepancy in SMDs between studies, at
+least this large, \~1% of the time.
 
 ```{r}
 compare_smd(smd1 = 0.95,

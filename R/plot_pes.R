@@ -1,4 +1,4 @@
-#' Function to produce plots of the distribution of the standardized mean difference
+#' Function to produce plots of the distribution of partial eta-squared
 #' @param Fstat The F-statistic from the F-test.
 #' @param df1 Degrees of freedom for the numerator.
 #' @param df2 Degrees of freedom for the denominator.

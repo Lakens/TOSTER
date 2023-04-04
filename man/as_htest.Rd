@@ -25,8 +25,8 @@ Returns a list containing a list of class 'htest' for the result of each test wi
 Convert a TOSTER result object of class 'TOSTt' or 'TOSTnp' to a list of class 'htest'.
 }
 \examples{
-
-# as.htest(result)
+res1 = t_TOST(formula = extra ~ group,data = sleep,eqb = .5,smd_ci = "goulet")
+as_htest(res1)
 }
 \seealso{
 Other htest: 

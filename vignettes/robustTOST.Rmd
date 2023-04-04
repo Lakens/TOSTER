@@ -14,13 +14,13 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
 ---
 
-In this package there are currently 2 functions that provide robust alternatives to the `t_TOST` function. 
+Within TOSTER there are a few robust alternatives to the `t_TOST` function. 
 
 # Wilcoxon TOST
 
 The Wilcoxon group of tests (includes Mann-Whitney U-test) provide a non-parametric test of differences between groups, or within samples, based on ranks. This provides a test of location shift, which is a fancy way of saying differences in the center of the distribution (i.e., in parametric tests the location is mean). With TOST, there are two separate tests of directional location shift to determine if the location shift is within (equivalence) or outside (minimal effect). The exact calculations can be explored via the documentation of the `wilcox.test` function.
 
-In the TOSTER package, we accomplish this with the `wilcox_TOST` function. Overall, this function operates extremely similar to the `t_TOST` function. However, the standardized mean difference (SMD) is *not* calculated. Instead the rank-biserial correlation is calculated for *all* types of comparisons (e.g., two sample, one sample, and paired samples). Also, there is no plotting capability at this time for the output of this function.
+TOSTER's version  is the `wilcox_TOST` function. Overall, this function operates extremely similar to the `t_TOST` function. However, the standardized mean difference (SMD) is *not* calculated. Instead the rank-biserial correlation is calculated for *all* types of comparisons (e.g., two sample, one sample, and paired samples). Also, there is no plotting capability at this time for the output of this function.
 
 As an example, we can use the sleep data to make a non-parametric comparison of equivalence.
 
@@ -58,6 +58,7 @@ $$
 r_j = -1 \cdot sign(z_j) \cdot rank(|z_j|)
 $$
 2. Calculate the positive and negative sums:
+
 $$
     R_{+} = \sum_{1\le i \le n, \space z_i > 0}r_j 
 $$
@@ -157,7 +158,7 @@ wilcox_TOST(formula = extra ~ group,
 
 The bootstrap is a simulation based technique, derived from re-sampling with replacement, designed for statistical estimation and inference. Bootstrapping techniques are very useful because they are considered somewhat robust to the violations of assumptions for a simple t-test. Therefore we added a bootstrap option, `boot_t_TOST` to the package to provide another robust alternative to the `t_TOST` function. 
 
-In this function we provide a percentile bootstrap solution outlined by @efron93 (see chapter 16, page 220). The bootstrapped p-values are derived from the "studentized" version of a test of mean differences outlined by @efron93. Overall, the results should be similar to the results of `t_TOST`. **However**, for paired samples, the Cohen's d(rm) effect size *cannot* be calculated at this time.
+In this function, we provide the percentile bootstrap solution outlined by @efron93 (see chapter 16, page 220). The bootstrapped p-values are derived from the "studentized" version of a test of mean differences outlined by @efron93. Overall, the results should be similar to the results of `t_TOST`. **However**, for paired samples, the Cohen's d(rm) effect size *cannot* be calculated.
 
 ## Two Sample Algorithm
 
@@ -179,7 +180,7 @@ The same process is completed for the one sample case but with the one sample so
 
 ## Example
 
-Again, we can use the sleep data to see the bootstrapped results. Notice that the plots show how the re-sampling via bootstrapping indicates the instability of Hedges' d(z).
+We can use the sleep data to see the bootstrapped results. Notice that the plots show how the re-sampling via bootstrapping indicates the instability of Hedges' d(z).
 
 ```{r}
 data('sleep')
@@ -233,7 +234,7 @@ provides two effect sizes. The means ratio on the log scale (the scale of the te
 and the means ratio. The means ratio is missing standard error because the
 confidence intervals and estimate are simply the log scale results exponentiated.
 
-## boot_log_TOST
+## Bootstrap + Log
 
 However, it has been noted in the statistics literature that t-tests on the
 logarithmic scale can be biased, and it is recommended that bootstrapped tests
@@ -250,7 +251,7 @@ boot_log_TOST(
 
 # Just Estimate an Effect Size
 
-It was requested that a function be provided that only calculates and effect size.
+It was requested that a function be provided that only calculates a robust effect size.
 Therefore, I created the `ses_calc` function as robust effect size calculation.
 The interface is almost the same as `wilcox_TOST` but you don't set an equivalence bound.
 

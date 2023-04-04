@@ -12,7 +12,16 @@
 #'   \item{\code{print}}{Prints short summary of the tests.}
 #'   \item{\code{describe}}{Verbose description of results.}
 #' }
+#' @examples
+#' # example code
+#' data(mtcars)
+#' res1 = wilcox_TOST(mpg ~ am,data = mtcars,eqb = 3)
 #'
+#' # PRINT
+#' print(res1)
+#'
+#' # DESCRIPTION
+#' describe(res1)
 #' @name TOSTnp-methods
 
 

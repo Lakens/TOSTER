@@ -27,7 +27,14 @@ describe_htest(htest, alpha = NULL, digits = 3)
 Functions to help interpret or display objects of the class \code{htest}
 }
 \examples{
-# To be added
+# simple example with t-test
+tres = t.test(extra ~ group, data = sleep)
+
+# As a data frame
+df_htest(tres)
+
+# Describe t-test results
+describe_htest(tres)
 
 }
 \seealso{

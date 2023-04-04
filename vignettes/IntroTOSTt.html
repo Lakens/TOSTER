@@ -392,14 +392,14 @@ and the output is the same as <code>t.test</code> or
 <code>wilcox.test</code> (in that the object is of the class
 <code>htest</code>). In addition, these functions have a generic method
 where two vectors can be supplied or a formula can be given
-(e.g.,<code>y ~ group</code>). These functions also makes it easier to
-switch between types of t-tests. All three types (two sample, one
-sample, and paired samples) can be performed/calculated from the same
-function. Moreover, the summary information and visualizations have been
-upgraded. This should make the decisions derived from the function more
+(e.g.,<code>y ~ group</code>). These functions make it easier to switch
+between types of t-tests. All three types (two sample, one sample, and
+paired samples) can be performed/calculated from the same function.
+Moreover, the summary information and visualizations have been upgraded.
+This should make the decisions derived from the function more
 informative and user-friendly.</p>
 <p>These functions are not limited to equivalence tests. Minimal effects
-testing (MET) is now possible. MET is useful for situations where the
+testing (MET) is possible. MET is useful for situations where the
 hypothesis is about a minimal effect and the null hypothesis <em>is</em>
 equivalence.</p>
 <p><img src="data:image/png;base64,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" /><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASAAAAEgCAMAAAAjXV6yAAABI1BMVEUAAAAAADoAAGYAOjoAOmYAOpAAZrY6AAA6ADo6AGY6OgA6OmY6OpA6ZmY6ZpA6ZrY6kJA6kLY6kNtNTU1NTW5NTY5NbqtNjshmAABmADpmAGZmOgBmOmZmOpBmZgBmZjpmZmZmkJBmkNtmtttmtv9uTU1uTW5uTY5ubqtuq+SOTU2OTW6OTY6OyP+QOgCQOjqQOmaQZgCQZjqQZmaQkDqQkLaQtpCQttuQ27aQ2/+rbk2ryKur5P+zs7O2ZgC2Zjq2kDq2tma2tpC2ttu225C229u22/+2/7a2/9u2///Ijk3I///bkDrbkGbbtmbbtpDb27bb29vb/7bb/9vb///kq27k////tmb/yI7/25D/27b/5Kv//7b//8j//9v//+T////TWkArAAAACXBIWXMAAA7DAAAOwwHHb6hkAAALnUlEQVR4nO2dC3/jxBXFT8JuTJYUStJCdtNtKZi+CaWPXULBtDQsZFGXdjEYs96g7/8pOi9JY3usO5JnNBPv/f/2kWjuXJ050dyRbMlBybSC1AJyB6kF5A5SC8gdpBaQO0gtIHeQWkDuILWA3EFqAbkDn6AChgNn8/X57an/5o0sTqvd7F+52ue/cG6ODHyC8jCocG+ODHyC+knrahDV56YY9GSEW1+eH5ixXJuvdMjiVBxjT+4Ae29Xg/3hDHjlkfrusztqu05xIb+oGmsag+qm67+IdO+IFnFoHYcYcjfgE2QbpKbbrbNVg+ajsWicYVzNx7EOmI/kN3sXeoBqu4jSm5rGmtqg1X7jvA0ytUHoXZzuPSx/OMeqQfq7yf7V9fn+Izm+arP44Zdfq+9wMBWZ5FcizxMx2KaxpjKoaZqPXpuqdFlPscag+Uj+FKvxNwaVhXJPjfV/n/11hOrAUj/0Qhl3peeg2VaWTWO9p8qgpmk+eunXn5erccMBnyBLmpxEli3NV3JIqlFPDmPQrLa2CdezsTRTbXmOVQZZTRP5/6uPbrxB8h8xw+Ri/ZO///vpaTCDyq/P9Mp/MwzSx76aS5NqzuhRFXsfyq16+NUcrM0obYPqKTZe3VMzxZaa/vuBrP43wiBVPWXBFQbhbf2VHtV89JaeYaIWizVa120R/lAs2eeyBjUHnKxlp3Zj2aSvi7RpmuF1cXj+U3Qp7OVuMOATVJ9Ji6HoNfrOgZkG9oKvzoCr5dwsbGauHFtHkNk2LpvGmnqZt/qZdFJF7su8cmB+hlufy3GW/xnh1W/qaqSW8FKf4d16OKmOGRGOl96xp5g6UZSreNNY05wo1k3qRFEs9eXiTJ4oDA169dLjfCFAr15sEAEbRMAGMRVILSB3kFpA7iC1gNxBagG5g9QCcgceMZ/EFpEz8IiJbJCPhHDdYuyGDSJggwjYIAIu0gRsEAEbRMAGEXCRJmCDCNggAjaIgIs0ARtEwAYRsEEEXKQJ2CACNoiADSLgIk3ABhGwQQRsEAEXaQI2iIANImCDCLhIE7BBBGwQARtEEMyg5sFv+8lvHwkO0JYzHPCICXoEFfopM+txMB8JDqxu6znDATIirEFmGLNgR5A7ZzhARrBBJDGmWNBH42LkrIBHTNhVbGYeN8w9pwEeMbzME7BBBEENMp87ELJIO3KGA2REWIMcj+L5SHDQdIv6eB/IiCjLfFcJDppukU4RV3ezmbBHUHiDHDnDATIicA2KcToX5xRRA4+YsFMs/IVljJw18IjhZZ6ADSKIPMV8JDhouu3gFFvctT7pxkeCg9VuSznDsbobFxGm2Mz6uEQfCQ7Wutk5w7G2GwcxDAp6qbGeMxxru3EQwaBJhJ92jJzJinTQT9uKkbMGHjG8zBOwQQRhDSpWPtctRJFeyxkOkBHRX7T3keDA6rZLL9rz2z4EbBAFvy9GEaOg7lKRvmnAI4YNIgho0ETMBPkulv0+jY8EB3U3V85wgIwIadBEfkaw+n0A4c6DnDnDATIioEHq/Rm1God7PcidMxzwiAl4C149mIC34LlyhgMeMZENyi+nDTxi2CACNogg8m3A+eW0gUcMP8xCwAYRsEEEbBABX6wSRL7DLMucNfCIiXyPYpY5a+ARE/Yl1wiXlDFyVsAjhu8PIuBVjKDdIPtNl4n6PVdbS1h6H2fTjVHr3VrpK9NnN94GFfLFPeqVzwIYLxWNdQlLBk023LVhd1vLub3MzerW8TWoubBuYXL76emY0GcNRtQX+raWbjm9ZNbAI8bXoPnLF+SaK5plRLs+y6DZgcpKKeiS00dmAzxifA2aeTxb29WgsgxukI/MBnjEUAZVi+zM5x3gQk4HImhp3aYN6pjTS2YNPGJCHkHm8cn2+4O8jiC721rO7WVuVrdOyBrkJaGzQR7kUIN8lgdxpK8qW5cQ16B0q5h+k5M4wdC/N9WWty6hs0EF/dRzR5kt6tbpdCbttePr85CrmNf9QX1kSuARE/pabBb4GffdusNMTLHQL07slEFRXtya7V3s0C14k9UjyEeCg6Zb1PcOQUaEr0Hz0VIN8pHgoGe3GLuJ8bRPhMeh4uCzmxgfTRH0Tnuf86C+gIwI/pp0+Fq6W/dJh2enlvkYN33vlkExpsMunQfFeZhlh86DYhgUFZ/dZP9AXUx8dpP1I5n1/Ir0ETnwiMl9mdfMduqx8BhL8iTK0yzwiLkhBu3IeZCGDSLgDzchiGHQztYgHwkOVrvtwioW9SPb4/izQ+dBkYBHDBtEwAYRsEEEfBswARtEwAYRsEEEXKQJ2CACNoiADSLgIk3ABhGwQQRsEAEXaQI2iIANImCDCLhIE7BBBGwQARtEwEWagA0iYIMI2CACLtIEbBABG0TABhFwkSZggwjYIAI2iICLNAEbRMAGEbBBBFykCdggAjaIgA0i4CJNwAYRsEEEbBABF2kCNoiADSJggwi4SBOwQQRsEAEbRPDJi0gXg2yvuoVv22/g3bn6IdmeM9wdG9SjH3qmemFAagG5g9QCcgepBeQOUgvIHXSKfvbuycl7vfbz7Ldfde3y/A8nb3w31M7KTYNDlxTP//hx+ew3H/fY+fcnP++q+ceP3iu/fbPHvvrsrNw4OHTas9T7uMch9Phn/+j8Q33+p6/6HQp9dlZuHBy65pFG96D7UJ/97rvhdmZw7A8dU/z40e977bq75u/fGNwg1+Dg2/nxycmbsnB29Uf3uxFHkHNw6Lbnd/utYX00965B/Vcx1+CwfQq/rp01y+O93yrWz6ANg0OXHN+eSHqZlP950IbBoZeCFwikFpA7SC0gd5BaQO4gtYDcQWoBuYPUAnIHqQXkDlILyB2kFpA7SC0gd5BaQO4gtYDcQWoBuYPUAnIHqQXkDlILyB2kFpA7SC0gd5BaQO4gtYDcQWoBuYPUAnIHqQXkDlILyB2kFpA7SC0gd5BaQO4gtYDcQWoBuYPUAnIHqQXkDlILyB2kFpA7SC0gd5B4//PDq5V/l1jcvVDbHU12ivXmjRk3ddgUjRbxQ2ANZGb/jnXD7K1jH4Na87ra2vItA8+4WDQDmew9WFN9/f6H96ei9YtTYd5C/lPOXznbvzz6ABiLbiPxn9x8eXh5NBXRFzrGzjsZl/Ojp/f+pn4f/aLKc3n4S5XBxM+gUos++isLDOPDRhxTTGiEUi+2HE3lAPVPfHJcFgfCFLFhdFzObk/l/NNt88Mv379Q0SrGzjgToceL09vT2b5KIfrJDjqDybm4d6VSH16ZrywwrB9ryIMA5qe2ftwXYhgHxgRph9Avg6q/Ar1F/BGhxbGJsfMu7k8/FQfWWB1fokmEGMObnKrSldWGZRDdgnZai/T1uRqjMehUfLN3sWTQpGmeH32jZhjUXGoyqlmqxj0Zy43CJ8sgEy/s3LvQaUe6fw0GMmITrVNMzBkzLnP0m6B6eON6igkjHhxNTcxSxkLUeWmQ8wiq483UM19ZAjGACW20HkGFdGl20NQgMwrzV/33cjXeAmLB0zFLGUWEqMUHVckxNchk0Rtkk95uvrI0YCAjNtFm0PWf5feLu2J1uz5Xq081D8zfArh1NhZtl8aIUscsZZRZFnd/1axiZdVB/DXxk3oVm+S2isVn/po53+wHAkrJkkIdOWxQNJBagA9NQRE1Y6mEys2jcWnXr/pCIszlGLaTPgzNSc35eOVEVxokq2ogg9ZBf9nDUQ9VnresDmx++K+DesT1aZHda6vLMQw50L7UQ5VnjrrgWmeT2oEWg7a6HEOSEXekvrCSA1pdkeSY7k9dBgW5HMNgo9wCxxG03Fgctx1BW12OYciB9sVRg5ammBjygxaDtrocw7BD7Ye1ih2vr2KyUS5l0oJi32XQNpdjGHKgfWk/D1KNwhl5afbTey6Dtrkcw3DDTMc2l2MIKyVLtrocQ1gtuwdSC8gdpBaQO0gtIHeQWkDuILWA3EFqAbnzf0sR/NJq/QiWAAAAAElFTkSuQmCC" /></p>
@@ -424,9 +424,9 @@ use the <code>iris</code> and the <code>sleep</code> data.</p>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5  -0.1     1  5</span></span>
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6   3.4     1  6</span></span></code></pre></div>
 <p>We will assume the data are independent, and that we have equivalence
-bounds of +/- 0.5. All we need to do is provide the
-<code>formula</code>, <code>data</code>, and eqbound arguments for the
-function to run appropriately. In addition, we can set the
+bounds of +/- 0.5 raw units. All we need to do is provide the
+<code>formula</code>, <code>data</code>, and <code>eqb</code> arguments
+for the function to run appropriately. In addition, we can set the
 <code>var.equal</code> argument (to assume equal variance), and the
 <code>paired</code> argument (sets if the data is paired or not). Both
 are logical indicators that can be set to TRUE or FALSE. The
@@ -599,10 +599,9 @@ would need to then is change <code>paired</code> to TRUE.</p>
 <span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
 <span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; mean difference </span></span>
 <span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;           -1.58</span></span></code></pre></div>
-<p>However, we may have two vectors of data that are paired. So instead
-we may want to just provide those separately rather than using a data
-set and setting the formula. This can be demonstrated with the “iris”
-data.</p>
+<p>However, we may have two vectors of data that are paired. So we may
+want to just provide those separately rather than using a data set and
+setting the formula. This can be demonstrated with the “iris” data.</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>res3 <span class="ot">=</span> <span class="fu">t_TOST</span>(<span class="at">x =</span> iris<span class="sc">$</span>Sepal.Length,</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>              <span class="at">y =</span> iris<span class="sc">$</span>Sepal.Width,</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>              <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
@@ -762,7 +761,7 @@ not more than 5.5 points greater or less than 8.5.</p>
 <div id="only-have-the-summary-statistics-no-problem" class="section level1">
 <h1>Only have the summary statistics? No problem!</h1>
 <p>In some cases you may only have access to the summary statistics.
-Therefore, we created a function, <code>tsum_TOST</code>,to perform the
+Therefore, we created a function, <code>tsum_TOST</code>, to perform the
 same tests just based on the summary statistics. This involves providing
 the function with a number of different arguments.</p>
 <ul>
@@ -770,8 +769,8 @@ the function with a number of different arguments.</p>
 provided for one sample case)</li>
 <li><code>m1 &amp; m2</code> the sample means</li>
 <li><code>sd1 &amp; sd2</code> the sample standard deviation</li>
-<li><code>r12</code> the correlation between each if paired is set to
-TRUE</li>
+<li><code>r12</code> the correlation between the paired samples; only
+needed if <code>paired</code> is set to TRUE</li>
 </ul>
 <p>The results from above can be replicated with the
 <code>tsum_TOST</code></p>
@@ -810,19 +809,17 @@ TRUE</li>
 </div>
 <div id="power-analysis-for-t-test-based-tost" class="section level1">
 <h1>Power Analysis for t-test based TOST</h1>
-<p>A new function, <code>power_t_TOST</code> has been created to allow
-for power calculations for TOST analyses that utilize t-tests. This
-function uses a more accurate method than the older functions in this
-package and match the results of the PASS statistics software. The exact
+<p>We also created <code>power_t_TOST</code> to allow for power
+calculations for TOST analyses that utilize t-tests. This function uses
+a more accurate method than the older functions in TOSTER and match the
+results of the commercially available PASS software. The exact
 calculations of power are based on Owen’s Q-function or by direct
-integration of the bivariate non-central t-distribution (inspired by
-<span class="citation">Labes, Schütz, and Lang (2021)</span> in the
-<code>PowerTOST</code> R package). Approximate power is implemented via
-the non-central t-distribution or the ‘shifted’ central t-distribution
-<span class="citation">Diletti, Hauschke, and Steinijans (1992)</span>.
-The function is limited to power analyses involves one sample, two
-sample, and paired sample cases. More options are available in the
-<code>PowerTOST</code> R package.</p>
+integration of the bivariate non-central t-distribution<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>. Approximate power is
+implemented via the non-central t-distribution or the ‘shifted’ central
+t-distribution <span class="citation">Diletti, Hauschke, and Steinijans
+(1992)</span>. The function is limited to power analyses involves one
+sample, two sample, and paired sample cases. More options are available
+in the <code>PowerTOST</code> R package.</p>
 <p>The interface for this function is quite simple and was intended to
 mimic the base R function <code>power.t.test</code>. The user must
 specify the 2 equivalence bounds, and leave only one of the other
@@ -830,13 +827,13 @@ options blank (<code>alpha</code>, <code>power</code>, or
 <code>n</code>). The “true difference” can be set with
 <code>delta</code> and the standard deviation (default is 1) can be set
 with the <code>sd</code> argument. Once everything is set and the
-function is run, the function will return a object of the
-<code>power.htest</code> class.</p>
+function is run, a object of the <code>power.htest</code> class will be
+returned.</p>
 <p>As an example, let’s say we are looking at an equivalence study where
-we assume the true difference is 1 unit, the standard deviation is 2.5,
-and we set the equivalence bounds to 2.5 units as well. If we want to
-find the sample size adequate to have 95% power at an alpha of 0.025 we
-enter the following:</p>
+we assume the <em>true</em> difference is <em>at least</em> 1 unit, the
+standard deviation is 2.5, and we set the equivalence bounds to 2.5
+units as well. If we want to find the sample size adequate to have 95%
+power at an alpha of 0.025 we enter the following:</p>
 <div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">power_t_TOST</span>(<span class="at">n =</span> <span class="cn">NULL</span>,</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">delta =</span> <span class="dv">1</span>,</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">sd =</span> <span class="fl">2.5</span>,</span>
@@ -879,6 +876,14 @@ in Bioequivalence.”</span> <em>Journal of Pharmacokinetics and
 Biopharmaceutics</em> 18 (2): 137–44. <a href="https://doi.org/10.1007/bf01063556">https://doi.org/10.1007/bf01063556</a>.
 </div>
 </div>
+</div>
+<div class="footnotes footnotes-end-of-document">
+<hr />
+<ol>
+<li id="fn1"><p>Inspired by <span class="citation">Labes, Schütz, and
+Lang (2021)</span> in the <code>PowerTOST</code> R package. Please see
+this package for more options<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+</ol>
 </div>
 
 
