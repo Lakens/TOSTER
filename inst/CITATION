@@ -7,7 +7,14 @@ bibentry(
  url = "https://doi.org/10.31234/osf.io/ty8de",
  journal="PsyArXiv",
  year="2022",
- author= personList(as.person("Aaron R Caldwell")),
+ author= c(c("Aaron","R."), "Caldwell", role = "aut"),
  textVersion="Caldwell, A.R. (2022). Exploring Equivalence Testing with the Updated TOSTER R Package. PsyArXiv. https://doi.org/10.31234/osf.io/ty8de" )
 
-citEntry(entry = "Article", author = personList(as.person("Daniel Lakens")), title = "Equivalence tests: A practical primer for t-tests, correlations, and meta-analyses", journal = "Social Psychological and Personality Science", year = 2017, volume = 1, pages = "1--8", doi = "10.1177/1948550617697177", textVersion = paste("Lakens, D. (2017).", "Equivalence tests: A practical primer for t-tests, correlations, and meta-analyses.", "Social Psychological and Personality Science, 8(4), 355-362. doi:10.1177/1948550617697177"))
+bibentry(bibtype = "Article",
+author = c("Daniel", "Lakens", role = "aut"),
+title = "Equivalence tests: A practical primer for t-tests, correlations, and meta-analyses",
+journal = "Social Psychological and Personality Science",
+year = 2017, volume = 1,
+pages = "1--8",
+doi = "10.1177/1948550617697177",
+textVersion = paste("Lakens, D. (2017).", "Equivalence tests: A practical primer for t-tests, correlations, and meta-analyses.", "Social Psychological and Personality Science, 8(4), 355-362. doi:10.1177/1948550617697177"))
