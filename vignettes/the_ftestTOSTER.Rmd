@@ -14,7 +14,7 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
 ---
 
-For an open access tutorial paper explaining how to set equivalence bounds, and how to perform and report equivalence for ANOVA models see @Campbell_2021. These functions are meant to be omnibus tests, and additional testing may be necessary^[Russ Lenth's emmeans R package has some capacity for equivalence testing on the marginal means (i.e., a form of pairwise testing). See https://cran.r-project.org/web/packages/emmeans/vignettes/confidence-intervals.html for details]. 
+For an open access tutorial paper explaining how to set equivalence bounds, and how to perform and report equivalence for ANOVA models see @Campbell_2021. These functions are meant to be omnibus tests, and additional testing may be necessary^[Russ Lenth's emmeans R package has some capacity for equivalence testing on the marginal means (i.e., a form of pairwise testing). See the emmeans package vignettes for details]. 
 
 # F-test Calculations
 

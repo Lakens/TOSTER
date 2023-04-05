@@ -545,6 +545,9 @@ $$
 d_L = t_L \cdot \sqrt{\lambda} \cdot J \\
 d_U = t_U \cdot \sqrt{\lambda} \cdot J 
 $$
+
+
+
 ## Central t-method
 
 Full warning this method provides sub-optimal coverage.
