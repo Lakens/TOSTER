@@ -2,26 +2,153 @@ Big Updates to TOSTER
 ================
 Aaron R. Caldwell
 
-## Quarto
+# version 0.7.1: April 2023
 
-Quarto enables you to weave together content and executable code into a
-finished document. To learn more about Quarto see <https://quarto.org>.
+I am happy to announce that today version 0.7.1 of TOSTER made its way
+to CRAN today. As always, detailed documentation of the package can be
+found its [website](aaroncalwell.us/TOSTERpkg). There is a *lot* in this
+update, and I want to use this post to highlight the key features.
 
-## Running Code
+# Correlations
 
-When you click the **Render** button a document will be generated that
-includes both content and the output of embedded code. You can embed
-code like this:
+## Approximate approach
+
+I have added the `z_cor_test` function to TOSTER. Unlike the `cor.test`
+function native to R, this function uses Fisher’s z transformation to
+create confidence intervals and calculate p-values. This is less than
+ideal for Spearman and Kendall correlations. However, it does function
+as a “better than nothing” test of equivalence or minimal effects.
+Additionally, the `corsum_test` function allows you to perform such
+tests when only the summary statistics are available. Please use both
+functions with care since they are only approximate tests.
+
+## Bootstrap approach
+
+In order to overcome the downsides of the approximate tests, I also
+created a bootstrap correlation test. The function, `boot_cor_test`,
+operates almost exactly like `z_cor_test`, but allows for 2 more types
+of correlations to be tested. The bootstrap test allows for Winsorized
+and “bend percentage” type correlations. Both of these types of
+correlations are considered robust correlations (see Rand Wilcox’s work
+for more detail). When possible, I would highly recommend this function
+over using `z_cor_test`.
+
+## Compare correlations
+
+You can also compare correlation coefficients between studies using the
+`compare_cor` and `boot_compare_cor` functions. The `compare_cor`
+function is useful when only summary statistics are available, while
+`boot_compare_cor` can be useful when the raw data is available. These
+functions are useful when you have a replication study where one of the
+tests is a correlation coefficient.
+
+# Log-transformed t-test
+
+Sometimes it is useful to apply a natural logarithim transformation to
+outcome measures to help “normalize” the residuals from a normal
+Gaussian model. The only issue is that of interpretation. Since the raw
+values are transformed then the differences or mean difference is *on
+the log scale*. However, when back-transformed (i.e., exponentiation),
+the differences are *ratio between the two means*. So, equivalence or
+minimal effect can be tested as the ratio (e.g., x/y) rather than the
+difference between two means (e.g., x-y). I created two functions for
+this purpose: `log_TOST` and `boot_log_TOST`. As always, I recommend
+using the bootstrapped function over the simple parametric version.
+
+# Simple Hypothesis Tests
+
+Some people don’t like the output of the traditional t_TOST and
+wilcox_TOST functions. Honestly, I don’t blame them because they are
+rather verbose. At some point someone asked why the functions don’t have
+output like that of `t.test` or `wilcox.test`. I think this is fair
+point as well.
+
+If you would rather have output that looks like the `base` output in R
+you can do so in multiple ways.
+
+1.  Convert results using the `as_htest` function. This will convert
+    results to an `htest` S3 object.
+2.  Use the `simple_htest` function. This essentially combines the
+    functionality of `t.test` and `wilcox.test` (choose which underlying
+    test using `test` argument), but allows the user to specify an
+    `alternative` argument for either “equivalence” or “minimal.effect”
+    in addition to the 3 base options.
+
+I prefer to use `simple_htest` over `t.test` or `wilcox.test` at this
+point, but the function does not provide standardized effect sizes so
+`t_TOST` and `wilcox_TOST` may be preferable if you want a “all-in-one”
+type function.
+
+As an example let’s use `simple_htest` as an alternative to `t.test`,
+but with an equivalence hypothesis.
 
 ``` r
-1 + 1
+simple_htest(data = sleep,
+             extra ~ group,
+             mu = 2, # equivalence bound argument
+             alternative = "equ" # set hypothesis as equivalence
+             )
 ```
 
-    [1] 2
 
-You can add options to executable code like this
+        Welch Two Sample t-test
 
-    [1] 4
+    data:  extra by group
+    t = 0.49465, df = 17.776, p-value = 0.3135
+    alternative hypothesis: equivalence
+    null values:
+    difference in means difference in means 
+                     -2                   2 
+    90 percent confidence interval:
+     -3.0533815 -0.1066185
+    sample estimates:
+    mean of x mean of y 
+         0.75      2.33 
 
-The `echo: false` option disables the printing of code (only output is
-displayed).
+# Descriptions of Results
+
+Another comment I’ve received is that “TOST” is difficult to interpret.
+Therefore, I created `describe` methods for most functions in the
+package and `describe_htest` for results derived from an `htest` object.
+The descriptions will differ slightly on the function that the results
+are derived from.
+
+Here is an example from `simple_htest`:
+
+``` r
+describe_htest(simple_htest(data = sleep,
+             extra ~ group,
+             mu = 2, # equivalence bound argument
+             alternative = "equ" # set hypothesis as equivalence
+             ))
+```
+
+    [1] "The Welch Two Sample t-test is not statistically significant (t(17.776) = 0.495, p = 0.313, mean of x = 0.75, mean of y = 2.33, 90% C.I.[-3.05, -0.107]) at a 0.05 alpha-level. The null hypothesis cannot be rejected. At the desired error rate, it cannot be stated that the true difference in means is between -2 and 2."
+
+Here is an example from `t_TOST`:
+
+``` r
+describe(t_TOST(data = sleep,
+             extra ~ group,
+             eqb = 2, # equivalence bound argument
+             hypothesis = "EQU" # set hypothesis as equivalence
+             ))
+```
+
+    [1] "Using the Welch Two Sample t-test, a null hypothesis significance test (NHST), and a equivalence test, via two one-sided tests (TOST), were performed with an alpha-level of 0.05. These tested the null hypotheses that true mean difference is equal to 0 (NHST), and true mean difference is more extreme than -2 and 2 (TOST). Both the equivalence test (p = 0.313), and the NHST (p = 0.079) were not significant (mean difference = -1.58 90% C.I.[-3.05, -0.107]; Hedges's g(av) = -0.796 90% C.I.[-1.52, -0.0489]). Therefore, the results are inconclusive: neither null hypothesis can be rejected."
+
+# Concluding Remarks
+
+Well, it has been about a year of work to get to this point, but I am
+rather happy with the way TOSTER is currently functioning. If you have
+any questions, concerns, or have suggestions please feel free to reach
+out. I have a “Contact Me” form on my
+[website](https://aaroncaldwell.us/#contact), and please feel free to
+send a message at any time. I would appreciate any feedback on the
+describe functions in particular!
+
+I hope you all enjoy the new TOSTER!
+
+Cheers everyone,
+
+AC
