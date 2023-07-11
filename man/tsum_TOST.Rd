@@ -95,6 +95,7 @@ tsum_TOST(m1 = 0.55, n1 = 18, sd1 = 4, eqb  = 2)
 }
 \seealso{
 Other TOST: 
+\code{\link{brunner_munzel}()},
 \code{\link{simple_htest}()},
 \code{\link{t_TOST}()}
 }

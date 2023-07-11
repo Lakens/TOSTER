@@ -37,13 +37,13 @@ simple_htest(
 
 \item{alternative}{a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater", "less", "equivalence" (TOST), or "minimal.effect" (TOST). You can specify just the initial letter.}
 
-\item{mu}{a number indicating the true value of the mean for the two tailed test (or difference in means if you are performing a two sample test).}
+\item{mu}{a number specifying an optional parameter used to form the null hypothesis. See ‘Details’.}
 
 \item{alpha}{alpha level (default = 0.05)}
 
 \item{y}{an optional (non-empty) numeric vector of data values.}
 
-\item{test}{a character string specifying what type of hypothesis test to use. Options are limited to "wilcox.test" and "t.test". You can specify just the initial letter.}
+\item{test}{a string specifying the type of test which includes \code{"t.test"} or \code{"wilcox.test"} (default is \code{"t.test"}).}
 
 \item{formula}{a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.}
 
@@ -65,7 +65,7 @@ A list with class \code{"htest"} containing the following components:
   \item{\code{stderr}}{the standard error of the mean (difference), used as denominator in the t-statistic formula.}
   \item{\code{alternative}}{a character string describing the alternative hypothesis.}
   \item{\code{method}}{a character string indicating what type of t-test was performed.}
-  \item{\code{data.name}}{a character string giving the name(s) of the data..}
+  \item{\code{data.name}}{a character string giving the name(s) of the data.}
 }
 }
 \description{
@@ -73,7 +73,7 @@ Performs one or two sample t-tests or Wilcoxon-Mann-Whitney rank-based tests wit
 }
 \details{
 Currently, this function allows for traditional or TOST hypothesis tests using \code{"t.test"} or \code{"wilcox.test"}.
-The type of test, t-test or Wilcoxon-Mann-whitney, can be selected with the \code{"test"} argument.
+The type of test, t-test or Wilcoxon-Mann-Whitney, can be selected with the \code{"test"} argument.
 More information on the tests can be found in the documentation for the \code{"t.test"} and \code{"wilcox.test"} functions.
 
 \code{alternative = "greater"} is the alternative that x is larger than y (on average).
@@ -89,6 +89,7 @@ mu = 3)
 }
 \seealso{
 Other TOST: 
+\code{\link{brunner_munzel}()},
 \code{\link{t_TOST}()},
 \code{\link{tsum_TOST}()}
 

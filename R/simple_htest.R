@@ -3,9 +3,11 @@
 #' @param test a character string specifying what type of hypothesis test to use. Options are limited to "wilcox.test" and "t.test". You can specify just the initial letter.
 #' @inheritParams t_TOST
 #' @inheritParams z_cor_test
+#' @param 	mu a number specifying an optional parameter used to form the null hypothesis. See ‘Details’.
+#' @param test a string specifying the type of test which includes \code{"t.test"} or \code{"wilcox.test"} (default is \code{"t.test"}).
 #' @param ...  further arguments to be passed to or from methods.
 #' @details Currently, this function allows for traditional or TOST hypothesis tests using \code{"t.test"} or \code{"wilcox.test"}.
-#' The type of test, t-test or Wilcoxon-Mann-whitney, can be selected with the \code{"test"} argument.
+#' The type of test, t-test or Wilcoxon-Mann-Whitney, can be selected with the \code{"test"} argument.
 #' More information on the tests can be found in the documentation for the \code{"t.test"} and \code{"wilcox.test"} functions.
 #'
 #' \code{alternative = "greater"} is the alternative that x is larger than y (on average).
@@ -23,7 +25,7 @@
 #'   \item{\code{stderr}}{the standard error of the mean (difference), used as denominator in the t-statistic formula.}
 #'   \item{\code{alternative}}{a character string describing the alternative hypothesis.}
 #'   \item{\code{method}}{a character string indicating what type of t-test was performed.}
-#'   \item{\code{data.name}}{a character string giving the name(s) of the data..}
+#'   \item{\code{data.name}}{a character string giving the name(s) of the data.}
 #' }
 #' @examples
 #' data(mtcars)

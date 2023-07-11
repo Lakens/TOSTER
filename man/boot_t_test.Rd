@@ -35,7 +35,7 @@ boot_t_test(x, ...)
 
 \item{alternative}{a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater", "less", "equivalence" (TOST), or "minimal.effect" (TOST). You can specify just the initial letter.}
 
-\item{mu}{a number indicating the true value of the mean for the two tailed test (or difference in means if you are performing a two sample test).}
+\item{mu}{a number specifying an optional parameter used to form the null hypothesis. See ‘Details’.}
 
 \item{alpha}{alpha level (default = 0.05)}
 

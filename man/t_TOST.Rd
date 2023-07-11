@@ -113,6 +113,7 @@ eqb = 3)
 }
 \seealso{
 Other TOST: 
+\code{\link{brunner_munzel}()},
 \code{\link{simple_htest}()},
 \code{\link{tsum_TOST}()}
 }
