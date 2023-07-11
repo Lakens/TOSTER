@@ -5,7 +5,7 @@
 #' @param formula a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.
 #' @param data an optional matrix or data frame (or similar: see model.frame) containing the variables in the formula formula. By default the variables are taken from environment(formula).
 #' @param paired a logical indicating whether you want a paired test.
-#' @param p_null 	a number specifying an optional parameter used to form the null hypothesis (Default = 0.5). This can be thought of as the null in terms of probability of superiority, p = P (X < Y ) + 0.5 * P (X = Y); See ‘Details’.
+#' @param p_null 	a number specifying an optional parameter used to form the null hypothesis (Default = 0.5). This can be thought of as the null in terms of probability of exchangeability, p = P (X < Y ) + 0.5 * P (X = Y); See ‘Details’.
 #' @param alternative a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater" or "less". You can specify just the initial letter.
 #' @param subset an optional vector specifying a subset of observations to be used.
 #' @param na.action a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").
@@ -13,7 +13,7 @@
 #' @param ...  further arguments to be passed to or from methods.
 #' @details
 #'
-#' The estimate of probability of superiority refers to the following:
+#' The estimate of probability of exchangeability refers to the following:
 #'
 #'  p(X<Y) + .5*P(X=Y)
 #'
@@ -106,12 +106,12 @@ brunner_munzel.default = function(x,
     n = length(x)
 
     df.sw = n - 1
-    all_data <- c(x, y)
+    all_data <- c(y, x)
     N = length(all_data)
 
-    xinverse <- c(y, x)
-    x1 <- x
-    x2 <- y
+    xinverse <- c(x, y)
+    x1 <- y
+    x2 <- x
     rx <- rank(all_data)
     rxinverse <- rank(xinverse)
     rx1 <- rx[1:n]
@@ -200,7 +200,7 @@ brunner_munzel.default = function(x,
     pd.upper = ifelse(pd.upper > 1, 1, pd.upper)
   }
 
-  names(p_null) <- "probability of superiority"
+  names(p_null) <- "probability of exchangeability"
   names(test_stat) = "t"
   names(df.sw) = "df"
   cint = c(pd.lower,pd.upper)
@@ -208,7 +208,7 @@ brunner_munzel.default = function(x,
                                    1-alpha,
                                    1-2*alpha)
   estimate = pd
-  names(estimate) = "probability of superiority"
+  names(estimate) = "p(X<Y) + .5*P(X=Y)"
 
   rval <- list(statistic = test_stat,
                parameter = df.sw,
