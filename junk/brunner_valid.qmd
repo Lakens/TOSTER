@@ -1,0 +1,127 @@
+---
+title: "Brunner-Munzel Validation"
+author: "Aaron R. Caldwell"
+format: pdf
+toc: true
+---
+
+\newpage
+
+This document serves as a validation that the `TOSTER` package matches, or at least approximately matches, the provided results of a Brunner-Munzel test compared to the functions implemented in the `nparcomp`, `brunnermunzel`, and `lawstat`.
+
+```{r packageload, echo = FALSE, warning=FALSE, message=FALSE}
+# Packages loaded
+library(tidyverse)
+library(TOSTER)
+library(nparcomp)
+library(brunnermunzel)
+library(lawstat)
+library(testthat)
+```
+
+\newpage
+
+# Sleep Data
+
+## Two-Sample
+
+### Two-sided test
+
+```{r, message=FALSE,warning=FALSE}
+test_that("Two-sample test (t-stat)",{
+tost_res = brunner_munzel(x = subset(sleep, group == 2)$extra,
+                          y = subset(sleep, group == 1)$extra,
+                          paired = FALSE, perm = FALSE, alternative = "two.sided")
+
+nparcomp_res = nparcomp::npar.t.test(data = sleep, info = FALSE,
+                                     extra ~ group, alternative = "two.sided",
+                                     rounds = 5, method = "t.app")
+expect_equal(tost_res$p.value, nparcomp_res$Analysis$p.Value[1],
+             tolerance = .0001)
+
+bm_res = brunnermunzel.test(y = subset(sleep, group == 2)$extra,
+                          x = subset(sleep, group == 1)$extra,
+                          alternative = "two.sided")
+
+expect_equal(tost_res$p.value, bm_res$p.value,
+             tolerance = .0001)
+
+expect_equal(unname(tost_res$estimate), unname(bm_res$estimate),
+             tolerance = .0001)
+expect_equivalent(unname(tost_res$conf.int), unname(bm_res$conf.int),
+             tolerance = .0001)
+
+law_res = brunner.munzel.test(y = subset(sleep, group == 2)$extra,
+                          x = subset(sleep, group == 1)$extra,
+                          alternative = "two.sided")
+
+expect_equal(tost_res$p.value, law_res$p.value,
+             tolerance = .0001)
+
+expect_equal(unname(tost_res$estimate), unname(law_res$estimate),
+             tolerance = .0001)
+expect_equivalent(unname(tost_res$conf.int), unname(law_res$conf.int),
+             tolerance = .0001)
+
+})
+
+
+```
+
+\newpage
+
+## Two-sample paired
+
+### Two-sided test
+
+```{r, message=FALSE,warning=FALSE}
+test_that("Two-sample permutation test (t-stat)",{
+
+set.seed(744622)
+tost_res = brunner_munzel(x = subset(sleep, group == 2)$extra,
+                          y = subset(sleep, group == 1)$extra,
+                          paired = FALSE, perm = TRUE, alternative = "two.sided")
+
+nparcomp_res = nparcomp::npar.t.test(data = sleep, info = FALSE,
+                                     extra ~ group, alternative = "two.sided",
+                                     rounds = 5, method = "permu")
+expect_equal(tost_res$p.value, nparcomp_res$Analysis$p.value[1],
+             tolerance = .1)
+expect_equal(unname(tost_res$estimate), 
+             unname(nparcomp_res$Analysis$Estimator[1]),
+             tolerance = .001)
+expect_equal(unname(tost_res$conf.int[[1]]), 
+             unname(nparcomp_res$Analysis$Lower[1]),
+             tolerance = .001)
+
+bm_res = brunnermunzel.test(y = subset(sleep, group == 2)$extra,
+                          x = subset(sleep, group == 1)$extra,
+                          alternative = "two.sided")
+
+expect_equal(tost_res$p.value, bm_res$p.value,
+             tolerance = .0001)
+
+expect_equal(unname(tost_res$estimate), unname(bm_res$estimate),
+             tolerance = .0001)
+expect_equivalent(unname(tost_res$conf.int), unname(bm_res$conf.int),
+             tolerance = .0001)
+
+law_res = brunner.munzel.test(y = subset(sleep, group == 2)$extra,
+                          x = subset(sleep, group == 1)$extra,
+                          alternative = "two.sided")
+
+expect_equal(tost_res$p.value, law_res$p.value,
+             tolerance = .0001)
+
+expect_equal(unname(tost_res$estimate), unname(law_res$estimate),
+             tolerance = .0001)
+expect_equivalent(unname(tost_res$conf.int), unname(law_res$conf.int),
+             tolerance = .0001)
+
+})
+
+
+```
+
+\newpage
+

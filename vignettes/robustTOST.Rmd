@@ -153,6 +153,28 @@ wilcox_TOST(formula = extra ~ group,
 
 ```
 
+# Brunner-Munzel
+
+As @karch2021 explained, there are some reasons to dislike the WMW family of tests as the non-parametric alternative to the t-test. Regardless of the underlying statistical arguments^[I would like to note that I think the statistical properties of the WMW tests are sound, and Frank Harrell has written [many](https://www.fharrell.com/post/po/) [blogposts](https://www.fharrell.com/post/wpo/) outlined their sound application in biomedicine. ], it can be argued that the interpretation of the WMW tests, especially when involving equivalence testing, is a tad difficult.
+Some may want a non-parametric alternative to the WMW test, and the Brunner-Munzel test(s) may be a useful option.
+
+The Brunner-Munzel test [@brunner2000; @neubert2007] is based on calculating the "stochastic superiority" [@karch2021, i.e., probability of superiority] based on the ranks of the two groups being compared (X and Y). A Brunner-Munzel type test is then a directional test of an effect, and answers a question akin to "what is the probability that a randomly sampled value of Y will be greater than X?"
+
+$$
+\hat p = P(X<Y) + 0.5 \cdot P(X=Y)
+$$
+## Basics of the Calculative Approach
+
+In this section, I will quickly detail the calculative approach that underlies the Brunner-Munzel test in `TOSTER`.
+
+A studentized test statistic can be calculated as:
+
+$$
+t = \sqrt{N} \cdot \frac{\hat p -p_{null}}{s}
+$$
+Wherein the default is typically $p_{null}$ is typically 0.5 (50% probability of superiority is the default null), and $\sigma_N$ refers the rank-based Brunner-Munzel standard error. The null can be modified therefore allowing for equivalence testing *directly based on the probability of superiority*. Additionally, for paired samples the probability of superiority is based on a *hypothesis of exchangability* and is not based on the differences scores^[This means the probability of superiority will *not* match the concordance probability provided by `ses_calc`].
+
+For more details on the calculative approach, I suggest reading @karch2021.
 
 # Boostrap TOST
 
