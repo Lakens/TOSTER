@@ -292,8 +292,8 @@ brunner_munzel.default = function(x,
                                                       ceiling(alpha*max_n_perm)])
       }
 
-      lower_ci = p-sqrt(V/N)*c1
-      upper_ci = p-sqrt(V/N)*c2
+      lower_ci = pd-sqrt(V/N)*c1
+      upper_ci = pd-sqrt(V/N)*c2
 
       p.value = switch(alternative,
                        "two.sided" = min(2-2*p.PERM1,

@@ -80,13 +80,15 @@ test_that("Two-sample permutation test (t-stat)",{
 set.seed(744622)
 tost_res = brunner_munzel(x = subset(sleep, group == 2)$extra,
                           y = subset(sleep, group == 1)$extra,
-                          paired = FALSE, perm = TRUE, alternative = "two.sided")
+                          paired = FALSE, perm = TRUE, alternative = "two.sided",
+                          max_n_perm = 40000)
 
 nparcomp_res = nparcomp::npar.t.test(data = sleep, info = FALSE,
                                      extra ~ group, alternative = "two.sided",
-                                     rounds = 5, method = "permu")
+                                     rounds = 5, method = "permu",
+                                     nperm = 40000)
 expect_equal(tost_res$p.value, nparcomp_res$Analysis$p.value[1],
-             tolerance = .1)
+             tolerance = .001)
 expect_equal(unname(tost_res$estimate), 
              unname(nparcomp_res$Analysis$Estimator[1]),
              tolerance = .001)
