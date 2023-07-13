@@ -277,7 +277,8 @@ brunner_munzel.default = function(x,
       Tprob<-qnorm(pd)*exp(-0.5*qnorm(pd)^2)*sqrt(N/(V*2*pi))
       P<-apply(matrix(rep(1:N,max_n_perm),ncol=max_n_perm),2,sample)
       Px<-matrix(c(x,y)[P],ncol=max_n_perm)
-      Tperm<-t(apply(perm_loop(Px[1:n.x,],Px[(n.x+1):N,],n.x,n.y,max_n_perm),1,sort))
+      Tperm<-t(apply(perm_loop(x=Px[1:n.x,],y=Px[(n.x+1):N,],
+                               n.x=n.x,n.y=n.y,max_n_perm),1,sort))
       p.PERM1<-mean((test_stat <= Tperm[1,]))
       if(alternative == "two.sided"){
         c1<-0.5*(Tperm[1,floor((1-alpha/2)*max_n_perm)]+Tperm[1,ceiling((1-alpha/2)*max_n_perm)])
@@ -397,33 +398,33 @@ brunner_munzel.formula = function(formula,
 }
 
 
-perm_loop <-function(x1,x2,n1,n2,max_n_perm){
+perm_loop <-function(x,y,n.x,n.y,max_n_perm){
 
-  pl1P<-matrix(0,nrow=n1,ncol=max_n_perm)
-  pl2P<-matrix(0,nrow=n2,ncol=max_n_perm)
+  pl1P<-matrix(0,nrow=n.x,ncol=max_n_perm)
+  pl2P<-matrix(0,nrow=n.y,ncol=max_n_perm)
 
-  for(h1 in 1:n1){
-    help1<-matrix(t(x1[h1,]),
+  for(h1 in 1:n.x){
+    help1<-matrix(t(x[h1,]),
                   ncol=max_n_perm,
-                  nrow=n2,byrow=TRUE)
-    pl1P[h1,]<-1/n2*(colSums((x2<help1)+1/2*(x2==help1)))
+                  nrow=n.y,byrow=TRUE)
+    pl1P[h1,]<-1/n.y*(colSums((y<help1)+1/2*(y==help1)))
   }
-  for(h2 in 1:n2){
-    help2<-matrix(t(x2[h2,]),
+  for(h2 in 1:n.y){
+    help2<-matrix(t(y[h2,]),
                   ncol=max_n_perm,
-                  nrow=n1,byrow=TRUE)
-    pl2P[h2,]<-1/n1*(colSums((x1<help2)+1/2*(x1==help2)))
+                  nrow=n.x,byrow=TRUE)
+    pl2P[h2,]<-1/n.x*(colSums((x<help2)+1/2*(x==help2)))
   }
 
   pdP<-colMeans(pl2P)
   pd2P<-colMeans(pl1P)
 
-  v1P<-(colSums(pl1P^2)-n1*pd2P^2)/(n1-1)
-  v2P<-(colSums(pl2P^2)-n2*pdP^2)/(n2-1)
-  vP<-v1P/n1 + v2P/n2
+  v1P<-(colSums(pl1P^2)-n.x*pd2P^2)/(n.x-1)
+  v2P<-(colSums(pl2P^2)-n.y*pdP^2)/(n.y-1)
+  vP<-v1P/n.x + v2P/n.y
 
   v0P<-(vP==0)
-  vP[v0P]<-0.5/(n1*n2)^2
+  vP[v0P]<-0.5/(n.x*n.y)^2
 
   res1<-matrix(rep(0,max_n_perm*3),nrow=3)
 
