@@ -58,6 +58,7 @@
 
 #brunner_munzel <- setClass("brunner_munzel")
 brunner_munzel <- function(x,
+                           ...,
                            paired = FALSE,
                            alternative = c("two.sided",
                                            "less",
@@ -77,7 +78,7 @@ brunner_munzel <- function(x,
 
 # @method brunner_munzel default
 brunner_munzel.default = function(x,
-                                  y = NULL,
+                                  y,
                                   paired = FALSE,
                                   alternative = c("two.sided",
                                                   "less",

@@ -8,18 +8,18 @@
 \usage{
 brunner_munzel(
   x,
+  ...,
   paired = FALSE,
   alternative = c("two.sided", "less", "greater"),
   mu = 0.5,
   alpha = 0.05,
   perm = FALSE,
-  max_n_perm = 10000,
-  ...
+  max_n_perm = 10000
 )
 
 \method{brunner_munzel}{default}(
   x,
-  y = NULL,
+  y,
   paired = FALSE,
   alternative = c("two.sided", "less", "greater"),
   mu = 0.5,
@@ -34,6 +34,8 @@ brunner_munzel(
 \arguments{
 \item{x}{a (non-empty) numeric vector of data values.}
 
+\item{...}{further arguments to be passed to or from methods.}
+
 \item{paired}{a logical indicating whether you want a paired test.}
 
 \item{alternative}{a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater" or "less". You can specify just the initial letter.}
@@ -45,8 +47,6 @@ brunner_munzel(
 \item{perm}{a logical indicating whether or not to perform a permutation test over approximate t-distribution based test (default is FALSE). Highly recommend to set perm = TRUE when sample size per condition is less than 15.}
 
 \item{max_n_perm}{the maximum number of permutations (default is 10000).}
-
-\item{...}{further arguments to be passed to or from methods.}
 
 \item{y}{an optional (non-empty) numeric vector of data values.}
 
