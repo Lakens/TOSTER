@@ -1,11 +1,11 @@
 #' @title Brunner-Munzel Test
-#' @description This is a generic function that performs a generalized asymptotic Brunner-Munzel test in a fashion similar to \code{"t.test"}
+#' @description This is a generic function that performs a generalized asymptotic Brunner-Munzel test in a fashion similar to \code{"t.test"}.
 #' @param x a (non-empty) numeric vector of data values.
 #' @param y an optional (non-empty) numeric vector of data values.
 #' @param formula a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.
 #' @param data an optional matrix or data frame (or similar: see model.frame) containing the variables in the formula formula. By default the variables are taken from environment(formula).
 #' @param paired a logical indicating whether you want a paired test.
-#' @param p_null 	a number specifying an optional parameter used to form the null hypothesis (Default = 0.5). This can be thought of as the null in terms of probability of superiority, p = P (X < Y ) + 0.5 * P (X = Y); See ‘Details’.
+#' @param mu 	a number specifying an optional parameter used to form the null hypothesis (Default = 0.5). This can be thought of as the null in terms of the relative effect, p = P (X < Y ) + 0.5 * P (X = Y); See ‘Details’.
 #' @param perm a logical indicating whether or not to perform a permutation test over approximate t-distribution based test (default is FALSE). Highly recommend to set perm = TRUE when sample size per condition is less than 15.
 #' @param max_n_perm the maximum number of permutations (default is 10000).
 #' @param alternative a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater" or "less". You can specify just the initial letter.
@@ -15,7 +15,11 @@
 #' @param ...  further arguments to be passed to or from methods.
 #' @details
 #'
-#' The estimate of probability of superiority refers to the following:
+#' This function is made to provide a test of stochastic equality between two samples (paired or independent), and is referred to as the Brunner-Munzel test.
+#'
+#' This tests the hypothesis that the relative effect, discussed below, is equal to the null value (default is mu = 0.5).
+#'
+#' The estimate of the relative effect, which can be considered as value similar to the probability of superiority, refers to the following:
 #'
 #'  p = p(X<Y) + .5*P(X=Y)
 #'
@@ -39,8 +43,7 @@
 #' }
 #' @examples
 #' data(mtcars)
-#' #brunner_munzel(mpg ~ am,
-#' #data = mtcars)
+#' brunner_munzel(mpg ~ am, data = mtcars)
 #' @references reference
 #' Brunner, E., Munzel, U. (2000). The Nonparametric Behrens-Fisher Problem: Asymptotic Theory and a Small Sample Approximation. Biometrical Journal 42, 17 -25.
 #'
@@ -55,14 +58,14 @@
 
 #brunner_munzel <- setClass("brunner_munzel")
 brunner_munzel <- function(x,
+                           paired = FALSE,
                            alternative = c("two.sided",
                                            "less",
                                            "greater"),
-                           p_null = 0.5,
+                           mu = 0.5,
                            alpha = 0.05,
                            perm = FALSE,
-                           max_n_perm = 10000,
-                           ...) {
+                           max_n_perm = 10000) {
 
   UseMethod("brunner_munzel")
 }
@@ -79,17 +82,16 @@ brunner_munzel.default = function(x,
                                   alternative = c("two.sided",
                                                   "less",
                                                   "greater"),
-                                  p_null = 0.5,
+                                  mu = 0.5,
                                   alpha = 0.05,
                                   perm = FALSE,
                                   max_n_perm = 10000,
-                                  ...
-) {
+                                  ...) {
   alternative = match.arg(alternative)
-  if(!missing(p_null) &&
-     ((length(p_null) > 1L) || !is.finite(p_null)) &&
-     p_null > 0 && p_null < 1)
-    stop("'p_null' must be a single number between 0 and 1.")
+  if(!missing(mu) &&
+     ((length(mu) > 1L) || !is.finite(mu)) ||
+    ( mu < 0 || mu > 1))
+    stop("'mu' must be a single number between 0 and 1.")
 
   if(!is.numeric(x)) stop("'x' must be numeric")
   if(!is.null(y)) {
@@ -151,7 +153,7 @@ brunner_munzel.default = function(x,
     v <- (sum(BM3 ^ 2) - n * m ^ 2) / (n - 1)
     v0 <- (v == 0)
     v[v0] <- 1 / n
-    test_stat <- sqrt(n) * (pd - p_null) / sqrt(v)
+    test_stat <- sqrt(n) * (pd - mu) / sqrt(v)
     std_err = sqrt(v)
 
     if(perm == TRUE){
@@ -196,7 +198,7 @@ brunner_munzel.default = function(x,
       vperm30<-(vperm3==0)
       vperm3[vperm30]<-1/n
       #print(vperm3)
-      Tperm<-sqrt(n)*(pdperm-p_null)/sqrt(vperm3)
+      Tperm<-sqrt(n)*(pdperm-mu)/sqrt(vperm3)
       p1perm<-mean(Tperm<=test_stat)
       pq1<-sort(Tperm)[(floor((1-alpha/2)*max_n_perm)+1)]
       pq2<-sort(Tperm)[(floor((1-alpha)*max_n_perm)+1)]
@@ -265,7 +267,7 @@ brunner_munzel.default = function(x,
     std_err = sqrt(V)
 
 
-    test_stat <- sqrt(N)*(pd - p_null)/sqrt(V)
+    test_stat <- sqrt(N)*(pd - mu)/sqrt(V)
     df.sw <- (s1 + s2)^2/(s1^2/(n.x - 1) + s2^2/(n.y - 1))
     df.sw[is.nan(df.sw)] <- 1000
 
@@ -339,7 +341,7 @@ brunner_munzel.default = function(x,
     }
   }
 
-  names(p_null) <- "probability of superiority"
+  names(mu) <- "relative effect"
   names(test_stat) = "t"
   names(df.sw) = "df"
   cint = c(pd.lower,pd.upper)
@@ -355,7 +357,7 @@ brunner_munzel.default = function(x,
                estimate = estimate,
                stderr = std_err,
                conf.int = cint,
-               null.value = p_null,
+               null.value = mu,
                alternative = alternative,
                method = METHOD,
                data.name = DNAME)

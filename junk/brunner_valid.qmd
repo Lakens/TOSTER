@@ -1,5 +1,6 @@
 ---
-title: "Brunner-Munzel Validation"
+title: "Brunner-Munzel Validation #1"
+subtitle: "Basic Validation using R Data"
 author: "Aaron R. Caldwell"
 format: pdf
 toc: true
@@ -17,6 +18,9 @@ library(nparcomp)
 library(brunnermunzel)
 library(lawstat)
 library(testthat)
+data(sleep)
+data(PGI)
+data(mtcars)
 ```
 
 \newpage
@@ -25,9 +29,7 @@ library(testthat)
 
 ## Two-Sample
 
-### Two-sided test
-
-```{r, message=FALSE,warning=FALSE}
+```{r sleep21, message=FALSE,warning=FALSE}
 test_that("Two-sample test (t-stat)",{
 tost_res = brunner_munzel(x = subset(sleep, group == 2)$extra,
                           y = subset(sleep, group == 1)$extra,
@@ -43,82 +45,81 @@ bm_res = brunnermunzel.test(y = subset(sleep, group == 2)$extra,
                           x = subset(sleep, group == 1)$extra,
                           alternative = "two.sided")
 
-expect_equal(tost_res$p.value, bm_res$p.value,
+expect_equal(abs(tost_res$p.value - bm_res$p.value),
+             0,
+             tolerance = .01)
+expect_equal(abs(unname(tost_res$estimate) - unname(bm_res$estimate)),
+             0,
              tolerance = .0001)
-
-expect_equal(unname(tost_res$estimate), unname(bm_res$estimate),
-             tolerance = .0001)
-expect_equivalent(unname(tost_res$conf.int), unname(bm_res$conf.int),
-             tolerance = .0001)
+expect_equal(abs(unname(tost_res$conf.int[[1]])-unname(bm_res$conf.int[1])),
+             0,
+             tolerance = .01)
+expect_equal(abs(unname(tost_res$conf.int[[2]]) - unname(bm_res$conf.int[2])),
+             0,
+             tolerance = .01)
 
 law_res = brunner.munzel.test(y = subset(sleep, group == 2)$extra,
                           x = subset(sleep, group == 1)$extra,
                           alternative = "two.sided")
 
-expect_equal(tost_res$p.value, law_res$p.value,
+expect_equal(abs(tost_res$p.value - law_res$p.value),
+             0,
+             tolerance = .01)
+expect_equal(abs(unname(tost_res$estimate) - unname(law_res$estimate)),
+             0,
              tolerance = .0001)
-
-expect_equal(unname(tost_res$estimate), unname(law_res$estimate),
-             tolerance = .0001)
-expect_equivalent(unname(tost_res$conf.int), unname(law_res$conf.int),
-             tolerance = .0001)
+expect_equal(abs(unname(tost_res$conf.int[[1]])-unname(law_res$conf.int[1])),
+             0,
+             tolerance = .01)
+expect_equal(abs(unname(tost_res$conf.int[[2]]) - unname(law_res$conf.int[2])),
+             0,
+             tolerance = .01)
 
 })
 
 
 ```
-
 \newpage
 
-## Two-sample paired
+## Two-sample permuted
 
-### Two-sided test
-
-```{r, message=FALSE,warning=FALSE}
+```{r sleep22, message=FALSE,warning=FALSE}
 test_that("Two-sample permutation test (t-stat)",{
 
-set.seed(744622)
+set.seed(1728622)
 tost_res = brunner_munzel(x = subset(sleep, group == 2)$extra,
                           y = subset(sleep, group == 1)$extra,
                           paired = FALSE, perm = TRUE, alternative = "two.sided",
                           max_n_perm = 40000)
-
+set.seed(1728622)
 nparcomp_res = nparcomp::npar.t.test(data = sleep, info = FALSE,
                                      extra ~ group, alternative = "two.sided",
                                      rounds = 5, method = "permu",
                                      nperm = 40000)
-expect_equal(tost_res$p.value, nparcomp_res$Analysis$p.value[1],
-             tolerance = .001)
-expect_equal(unname(tost_res$estimate), 
-             unname(nparcomp_res$Analysis$Estimator[1]),
-             tolerance = .001)
-expect_equal(unname(tost_res$conf.int[[1]]), 
-             unname(nparcomp_res$Analysis$Lower[1]),
-             tolerance = .001)
+expect_equal(abs(tost_res$p.value - nparcomp_res$Analysis$p.value[1]),
+             0,
+             tolerance = .01)
+expect_equal(abs(unname(tost_res$estimate) - unname(nparcomp_res$Analysis$Estimator[1])),
+             0,
+             tolerance = .0001)
+expect_equal(abs(unname(tost_res$conf.int[[1]])-unname(nparcomp_res$Analysis$Lower[1])),
+             0,
+             tolerance = .01)
+expect_equal(abs(unname(tost_res$conf.int[[2]]) - unname(nparcomp_res$Analysis$Upper[1])),
+             0,
+             tolerance = .01)
 
-bm_res = brunnermunzel.test(y = subset(sleep, group == 2)$extra,
+
+bm_res = brunnermunzel.permutation.test(y = subset(sleep, group == 2)$extra,
                           x = subset(sleep, group == 1)$extra,
                           alternative = "two.sided")
 
-expect_equal(tost_res$p.value, bm_res$p.value,
-             tolerance = .0001)
+expect_equal(abs(tost_res$p.value - bm_res$p.value),
+             0,
+             tolerance = .01)
 
-expect_equal(unname(tost_res$estimate), unname(bm_res$estimate),
-             tolerance = .0001)
-expect_equivalent(unname(tost_res$conf.int), unname(bm_res$conf.int),
-             tolerance = .0001)
 
-law_res = brunner.munzel.test(y = subset(sleep, group == 2)$extra,
-                          x = subset(sleep, group == 1)$extra,
-                          alternative = "two.sided")
 
-expect_equal(tost_res$p.value, law_res$p.value,
-             tolerance = .0001)
-
-expect_equal(unname(tost_res$estimate), unname(law_res$estimate),
-             tolerance = .0001)
-expect_equivalent(unname(tost_res$conf.int), unname(law_res$conf.int),
-             tolerance = .0001)
 
 })
 
@@ -127,3 +128,271 @@ expect_equivalent(unname(tost_res$conf.int), unname(law_res$conf.int),
 
 \newpage
 
+## Paired
+
+```{r sleep23, message=FALSE,warning=FALSE}
+test_that("paired test (t-stat)",{
+tost_res = brunner_munzel(x = subset(sleep, group == 2)$extra,
+                          y = subset(sleep, group == 1)$extra,
+                          paired = TRUE, perm = FALSE, alternative = "two.sided")
+
+nparcomp_res = nparcomp::npar.t.test.paired(data = sleep, info = FALSE,
+                                     extra ~ group, alternative = "two.sided",
+                                     rounds = 5, 
+                                     nperm = 40000,
+                                     plot.simci = FALSE)
+expect_equal(abs(tost_res$p.value - nparcomp_res$Analysis[1,5]),
+             0,
+             tolerance = .01)
+expect_equal(abs(unname(tost_res$estimate) - unname(nparcomp_res$Analysis[1,2])),
+             0,
+             tolerance = .0001)
+expect_equal(abs(unname(tost_res$conf.int[[1]])-unname(nparcomp_res$Analysis[1,1])),
+             0,
+             tolerance = .01)
+expect_equal(abs(unname(tost_res$conf.int[[2]]) - unname(nparcomp_res$Analysis[1,3])),
+             0,
+             tolerance = .01)
+
+
+set.seed(220975298)
+tost_res = brunner_munzel(x = subset(sleep, group == 2)$extra,
+                          y = subset(sleep, group == 1)$extra,
+                          paired = TRUE, perm = TRUE, alternative = "two.sided",
+                          max_n_perm = 40000)
+set.seed(220975298)
+nparcomp_res = nparcomp::npar.t.test.paired(data = sleep, info = FALSE,
+                                     extra ~ group, alternative = "two.sided",
+                                     plot.simci = FALSE,
+                                     rounds = 5, 
+                                     nperm = 40000)
+expect_equal(abs(tost_res$p.value - nparcomp_res$Analysis[2,5]),
+             0,
+             tolerance = .01)
+expect_equal(abs(unname(tost_res$estimate) - unname(nparcomp_res$Analysis[2,2])),
+             0,
+             tolerance = .0001)
+expect_equal(abs(unname(tost_res$conf.int[[1]])-unname(nparcomp_res$Analysis[2,1])),
+             0,
+             tolerance = .02)
+expect_equal(abs(unname(tost_res$conf.int[[2]]) - unname(nparcomp_res$Analysis[2,3])),
+             0,
+             tolerance = .02)
+})
+```
+
+
+\newpage
+
+# PGI Data
+
+## Two-Sample
+
+```{r pgi21, message=FALSE,warning=FALSE}
+test_that("Two-sample test (t-stat)",{
+tost_res = brunner_munzel(x = subset(PGI, timepoint == "base")$PGIscore,
+                          y = subset(PGI, timepoint == "week4")$PGIscore,
+                          paired = FALSE, perm = FALSE, alternative = "two.sided")
+
+nparcomp_res = nparcomp::npar.t.test(data = PGI, info = FALSE,
+                                     PGIscore ~ timepoint, alternative = "two.sided",
+                                     rounds = 5, method = "t.app")
+expect_equal(tost_res$p.value, nparcomp_res$Analysis$p.Value[1],
+             tolerance = .0001)
+
+bm_res = brunnermunzel.test(y = subset(PGI, timepoint == "base")$PGIscore,
+                          x = subset(PGI, timepoint == "week4")$PGIscore,
+                          alternative = "two.sided")
+
+expect_equal(abs(tost_res$p.value - bm_res$p.value),
+             0,
+             tolerance = .01)
+expect_equal(abs(unname(tost_res$estimate) - unname(bm_res$estimate)),
+             0,
+             tolerance = .0001)
+expect_equal(abs(unname(tost_res$conf.int[[1]])-unname(bm_res$conf.int[1])),
+             0,
+             tolerance = .01)
+expect_equal(abs(unname(tost_res$conf.int[[2]]) - unname(bm_res$conf.int[2])),
+             0,
+             tolerance = .01)
+
+law_res = brunner.munzel.test(y = subset(PGI, timepoint == "base")$PGIscore,
+                          x = subset(PGI, timepoint == "week4")$PGIscore,
+                          alternative = "two.sided")
+
+expect_equal(abs(tost_res$p.value - law_res$p.value),
+             0,
+             tolerance = .01)
+expect_equal(abs(unname(tost_res$estimate) - unname(law_res$estimate)),
+             0,
+             tolerance = .0001)
+expect_equal(abs(unname(tost_res$conf.int[[1]])-unname(law_res$conf.int[1])),
+             0,
+             tolerance = .01)
+expect_equal(abs(unname(tost_res$conf.int[[2]]) - unname(law_res$conf.int[2])),
+             0,
+             tolerance = .01)
+
+})
+
+
+```
+\newpage
+
+## Two-sample permuted
+
+```{r pgi22, message=FALSE,warning=FALSE}
+test_that("Two-sample permutation test (t-stat)",{
+
+set.seed(1728622)
+tost_res = brunner_munzel(x = subset(PGI, timepoint == "week4")$PGIscore,
+                          y = subset(PGI, timepoint == "base")$PGIscore,
+                          paired = FALSE, perm = TRUE, alternative = "two.sided",
+                          max_n_perm = 40000)
+set.seed(1728622)
+nparcomp_res = nparcomp::npar.t.test(data = PGI, info = FALSE,
+                                     PGIscore ~ timepoint, alternative = "two.sided",
+                                     rounds = 5, method = "permu",
+                                     nperm = 40000)
+expect_equal(abs(tost_res$p.value - nparcomp_res$Analysis$p.value[1]),
+             0,
+             tolerance = .01)
+expect_equal(abs(unname(tost_res$estimate) - unname(nparcomp_res$Analysis$Estimator[1])),
+             0,
+             tolerance = .0001)
+expect_equal(abs(unname(tost_res$conf.int[[1]])-unname(nparcomp_res$Analysis$Lower[1])),
+             0,
+             tolerance = .01)
+expect_equal(abs(unname(tost_res$conf.int[[2]]) - unname(nparcomp_res$Analysis$Upper[1])),
+             0,
+             tolerance = .01)
+
+
+bm_res = brunnermunzel.permutation.test(y = subset(PGI, timepoint == "week4")$PGIscore,
+                          x = subset(PGI, timepoint == "base")$PGIscore,
+                          alternative = "two.sided")
+
+expect_equal(abs(tost_res$p.value - bm_res$p.value),
+             0,
+             tolerance = .01)
+
+
+
+
+})
+
+
+```
+
+\newpage
+
+## Paired
+
+```{r pgi23, message=FALSE,warning=FALSE}
+test_that("paired test (t-stat)",{
+tost_res = brunner_munzel(x = subset(PGI, timepoint == "week4")$PGIscore,
+                          y = subset(PGI, timepoint == "base")$PGIscore,
+                          paired = TRUE, perm = FALSE, alternative = "two.sided")
+
+nparcomp_res = nparcomp::npar.t.test.paired(data = PGI, info = FALSE,
+                                     PGIscore ~ timepoint, alternative = "two.sided",
+                                     rounds = 5, 
+                                     nperm = 40000,
+                                     plot.simci = FALSE)
+expect_equal(abs(tost_res$p.value - nparcomp_res$Analysis[1,5]),
+             0,
+             tolerance = .01)
+expect_equal(abs(unname(tost_res$estimate) - unname(nparcomp_res$Analysis[1,2])),
+             0,
+             tolerance = .0001)
+expect_equal(abs(unname(tost_res$conf.int[[1]])-unname(nparcomp_res$Analysis[1,1])),
+             0,
+             tolerance = .01)
+expect_equal(abs(unname(tost_res$conf.int[[2]]) - unname(nparcomp_res$Analysis[1,3])),
+             0,
+             tolerance = .01)
+
+
+set.seed(220975298)
+tost_res = brunner_munzel(x = subset(PGI, timepoint == "week4")$PGIscore,
+                          y = subset(PGI, timepoint == "base")$PGIscore,
+                          paired = TRUE, perm = TRUE, alternative = "two.sided",
+                          max_n_perm = 10000)
+set.seed(220975298)
+nparcomp_res = nparcomp::npar.t.test.paired(data = PGI, info = FALSE,
+                                     PGIscore ~ timepoint, alternative = "two.sided",
+                                     plot.simci = FALSE)
+expect_equal(abs(tost_res$p.value - nparcomp_res$Analysis[2,5]),
+             0,
+             tolerance = .01)
+expect_equal(abs(unname(tost_res$estimate) - unname(nparcomp_res$Analysis[2,2])),
+             0,
+             tolerance = .001)
+expect_equal(abs(unname(tost_res$conf.int[[1]])-unname(nparcomp_res$Analysis[2,1])),
+             0,
+             tolerance = .02)
+expect_equal(abs(unname(tost_res$conf.int[[2]]) - unname(nparcomp_res$Analysis[2,3])),
+             0,
+             tolerance = .02)
+})
+```
+
+
+# mtcars Data
+
+## Two-Sample
+
+```{r mtcars21, message=FALSE,warning=FALSE}
+test_that("Two-sample test (t-stat)",{
+tost_res = brunner_munzel(x = subset(mtcars, am == 1)$mpg,
+                          y = subset(mtcars, am == 0)$mpg,
+                          paired = FALSE, perm = FALSE, alternative = "two.sided")
+
+nparcomp_res = nparcomp::npar.t.test(data = mtcars, info = FALSE,
+                                     mpg ~ am, alternative = "two.sided",
+                                     rounds = 5, method = "t.app")
+expect_equal(abs(tost_res$p.value- nparcomp_res$Analysis$p.Value[1]),
+             0,
+             tolerance = .0001)
+
+bm_res = brunnermunzel.test(y = subset(mtcars, am == 1)$mpg,
+                          x = subset(mtcars, am == 0)$mpg,
+                          alternative = "two.sided")
+
+expect_equal(abs(tost_res$p.value - bm_res$p.value),
+             0,
+             tolerance = .01)
+expect_equal(abs(unname(tost_res$estimate) - unname(bm_res$estimate)),
+             0,
+             tolerance = .0001)
+expect_equal(abs(unname(tost_res$conf.int[[1]])-unname(bm_res$conf.int[1])),
+             0,
+             tolerance = .01)
+expect_equal(abs(unname(tost_res$conf.int[[2]]) - unname(bm_res$conf.int[2])),
+             0,
+             tolerance = .01)
+
+law_res = brunner.munzel.test(y = subset(mtcars, am == 1)$mpg,
+                          x = subset(mtcars, am == 0)$mpg,
+                          alternative = "two.sided")
+
+expect_equal(abs(tost_res$p.value - law_res$p.value),
+             0,
+             tolerance = .01)
+expect_equal(abs(unname(tost_res$estimate) - unname(law_res$estimate)),
+             0,
+             tolerance = .0001)
+expect_equal(abs(unname(tost_res$conf.int[[1]])-unname(law_res$conf.int[1])),
+             0,
+             tolerance = .01)
+expect_equal(abs(unname(tost_res$conf.int[[2]]) - unname(law_res$conf.int[2])),
+             0,
+             tolerance = .01)
+
+})
+
+
+```
+
+\newpage

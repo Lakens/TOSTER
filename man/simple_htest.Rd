@@ -18,7 +18,7 @@ simple_htest(
 \method{simple_htest}{default}(
   x,
   y = NULL,
-  test = c("t.test", "wilcox.test"),
+  test = c("t.test", "wilcox.test", "brunner_munzel"),
   paired = FALSE,
   alternative = c("two.sided", "less", "greater", "equivalence", "minimal.effect"),
   mu = 0,
@@ -69,7 +69,7 @@ A list with class \code{"htest"} containing the following components:
 }
 }
 \description{
-Performs one or two sample t-tests or Wilcoxon-Mann-Whitney rank-based tests with expanded options compared to \code{t.test} or \code{wilcox.test}.
+Performs one or two sample t-tests or Wilcoxon-Mann-Whitney rank-based tests with expanded options compared to \code{t.test}, \code{brunner_munzel}, or \code{wilcox.test}.
 }
 \details{
 Currently, this function allows for traditional or TOST hypothesis tests using \code{"t.test"} or \code{"wilcox.test"}.

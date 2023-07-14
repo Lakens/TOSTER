@@ -1,8 +1,9 @@
 #' @title One, two, and paired samples hypothesis tests
-#' @description Performs one or two sample t-tests or Wilcoxon-Mann-Whitney rank-based tests with expanded options compared to \code{t.test} or \code{wilcox.test}.
-#' @param test a character string specifying what type of hypothesis test to use. Options are limited to "wilcox.test" and "t.test". You can specify just the initial letter.
+#' @description Performs one or two sample t-tests or Wilcoxon-Mann-Whitney rank-based tests with expanded options compared to \code{t.test}, \code{brunner_munzel}, or \code{wilcox.test}.
+#' @param test a character string specifying what type of hypothesis test to use. Options are limited to "wilcox.test", "t.test", or "brunner_munzel". You can specify just the initial letter.
 #' @inheritParams t_TOST
 #' @inheritParams z_cor_test
+#' @inheritParams brunner_munzel
 #' @param 	mu a number specifying an optional parameter used to form the null hypothesis. See ‘Details’.
 #' @param test a string specifying the type of test which includes \code{"t.test"} or \code{"wilcox.test"} (default is \code{"t.test"}).
 #' @param ...  further arguments to be passed to or from methods.
@@ -57,7 +58,7 @@ simple_htest <- function(x, ...,
 # @method simple_htest default
 simple_htest.default = function(x,
                                 y = NULL,
-                                test = c("t.test","wilcox.test"),
+                                test = c("t.test","wilcox.test","brunner_munzel"),
                                 paired = FALSE,
                                 alternative = c("two.sided",
                                                 "less",
@@ -73,10 +74,19 @@ simple_htest.default = function(x,
  if(alternative %in% c("equivalence","minimal.effect")){
 
    if(length(mu) == 1){
-     if(mu ==  0){
+     if(mu ==  0 && test %in% c("t.test","wilcox.test")){
        stop("mu cannot be zero if alternative is equivalence or minimal.effect")
      }
-     mu = c(mu, -1*mu)
+
+     if(mu ==  0.5 && test %in% c("brunner_munzel")){
+       stop("mu cannot be zero if alternative is equivalence or minimal.effect")
+     }
+
+     if(test %in% c("t.test","wilcox.test")){
+       mu = c(mu, -1*mu)
+     } else {
+       mu = c(mu, abs(mu-1))
+     }
    }
 
 
@@ -103,6 +113,16 @@ simple_htest.default = function(x,
        conf.level = 1 - alpha * 2,
        alternative = "two.sided",
        ...
+     ),
+     brunner_munzel = brunner_munzel(
+       x = x,
+       y = y,
+       paired = paired,
+       mu = 0.5,
+       #conf.int = TRUE,
+       alpha = alpha*2,
+       alternative = "two.sided",
+       ...
      )
    )
 
@@ -124,6 +144,13 @@ simple_htest.default = function(x,
        paired = paired,
        mu = lo_bound,
        alternative = "greater",
+       ...),
+     brunner_munzel = brunner_munzel(
+       x = x,
+       y = y,
+       paired = paired,
+       mu = lo_bound,
+       alternative = "greater",
        ...))
      hi_test = switch(
        test,
@@ -136,6 +163,13 @@ simple_htest.default = function(x,
          ...
        ),
        wilcox.test = wilcox.test(
+         x = x,
+         y = y,
+         paired = paired,
+         mu = hi_bound,
+         alternative = "less",
+         ...),
+       brunner_munzel = brunner_munzel(
          x = x,
          y = y,
          paired = paired,
@@ -176,7 +210,15 @@ simple_htest.default = function(x,
          paired = paired,
          mu = lo_bound,
          alternative = "less",
+         ...),
+       brunner_munzel = brunner_munzel(
+         x = x,
+         y = y,
+         paired = paired,
+         mu = lo_bound,
+         alternative = "less",
          ...))
+
      hi_test = switch(
        test,
        t.test = t.test(
@@ -188,6 +230,13 @@ simple_htest.default = function(x,
          ...
        ),
        wilcox.test = wilcox.test(
+         x = x,
+         y = y,
+         paired = paired,
+         mu = hi_bound,
+         alternative = "greater",
+         ...),
+       brunner_munzel = brunner_munzel(
          x = x,
          y = y,
          paired = paired,
@@ -228,7 +277,16 @@ simple_htest.default = function(x,
        conf.int = TRUE,
        conf.level = 1 - alpha,
        alternative = alternative,
-       null = mu,
+       mu = mu,
+       ...
+     ),
+     brunner_munzel = brunner_munzel(
+       x = x,
+       y = y,
+       paired = paired,
+       alpha = alpha,
+       alternative = alternative,
+       mu = mu,
        ...
      )
    )

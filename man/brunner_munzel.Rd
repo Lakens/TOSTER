@@ -8,9 +8,12 @@
 \usage{
 brunner_munzel(
   x,
+  paired = FALSE,
   alternative = c("two.sided", "less", "greater"),
-  p_null = 0.5,
+  mu = 0.5,
   alpha = 0.05,
+  perm = FALSE,
+  max_n_perm = 10000,
   ...
 )
 
@@ -19,8 +22,10 @@ brunner_munzel(
   y = NULL,
   paired = FALSE,
   alternative = c("two.sided", "less", "greater"),
-  p_null = 0,
+  mu = 0.5,
   alpha = 0.05,
+  perm = FALSE,
+  max_n_perm = 10000,
   ...
 )
 
@@ -29,17 +34,21 @@ brunner_munzel(
 \arguments{
 \item{x}{a (non-empty) numeric vector of data values.}
 
+\item{paired}{a logical indicating whether you want a paired test.}
+
 \item{alternative}{a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater" or "less". You can specify just the initial letter.}
 
-\item{p_null}{a number specifying an optional parameter used to form the null hypothesis (Default = 0.5). This can be thought of as the null in terms of probability of superiority, p = P (X < Y ) + 0.5 * P (X = Y); See ‘Details’.}
+\item{mu}{a number specifying an optional parameter used to form the null hypothesis (Default = 0.5). This can be thought of as the null in terms of the relative effect, p = P (X < Y ) + 0.5 * P (X = Y); See ‘Details’.}
 
 \item{alpha}{alpha level (default = 0.05)}
+
+\item{perm}{a logical indicating whether or not to perform a permutation test over approximate t-distribution based test (default is FALSE). Highly recommend to set perm = TRUE when sample size per condition is less than 15.}
+
+\item{max_n_perm}{the maximum number of permutations (default is 10000).}
 
 \item{...}{further arguments to be passed to or from methods.}
 
 \item{y}{an optional (non-empty) numeric vector of data values.}
-
-\item{paired}{a logical indicating whether you want a paired test.}
 
 \item{formula}{a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.}
 
@@ -65,17 +74,25 @@ A list with class \code{"htest"} containing the following components:
 }
 }
 \description{
-This is a generic function that performs a generalized asymptotic Brunner-Munzel test in a fashion similar to \code{"t.test"}
+This is a generic function that performs a generalized asymptotic Brunner-Munzel test in a fashion similar to \code{"t.test"}.
 }
 \details{
-The estimate of probability of superiority refers to the following:
+This function is made to provide a test of stochastic equality between two samples (paired or independent), and is referred to as the Brunner-Munzel test.
 
- p(X<Y) + .5*P(X=Y)
+This tests the hypothesis that the relative effect, discussed below, is equal to the null value (default is mu = 0.5).
+
+The estimate of the relative effect, which can be considered as value similar to the probability of superiority, refers to the following:
+
+ p = p(X<Y) + .5*P(X=Y)
+
+ Note, for paired samples, this does *not* refer to the probability of an increase/decrease in paired sample but rather the probability that a randomly sampled value of X.
+ This is also referred to as the "relative" effect in the literature. Therefore, the results will differ from the concordance probability provided by the ses_calc function.
+
+ The brunner_munzel function is based on the npar.t.test and npar.t.test.paired functions within the nparcomp package (Konietschke et al. 2015).
 }
 \examples{
 data(mtcars)
-#brunner_munzel(mpg ~ am,
-#data = mtcars)
+brunner_munzel(mpg ~ am, data = mtcars)
 }
 \references{
 reference
@@ -84,6 +101,8 @@ Brunner, E., Munzel, U. (2000). The Nonparametric Behrens-Fisher Problem: Asympt
 Neubert, K., Brunner, E., (2006). A Studentized Permutation Test for the Nonparametric Behrens-Fisher Problem. Computational Statistics and Data Analysis.
 
 Munzel, U., Brunner, E. (2002). An Exact Paired Rank Test. Biometrical Journal 44, 584-593.
+
+Konietschke, F., Placzek, M., Schaarschmidt, F., & Hothorn, L. A. (2015). nparcomp: an R software package for nonparametric multiple comparisons and simultaneous confidence intervals. Journal of Statistical Software 64 (2015), Nr. 9, 64(9), 1-17. http://www.jstatsoft.org/v64/i09/
 }
 \seealso{
 Other TOST: 
