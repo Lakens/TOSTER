@@ -248,6 +248,13 @@ test_that("brunner_munzel",{
                           paired = TRUE)
   expect_equal(testy1$p.value,testy2$p.value)
 
+  test_big = brunner_munzel(x = rnorm(100),
+                            y = rnorm(100),
+                          mu = .25,
+                          alternative = "t",
+                          perm = TRUE,
+                          paired = TRUE)
+
   set.seed(1945)
   testy1 = simple_htest(data = sleep,
                         extra ~ group,
@@ -308,6 +315,38 @@ test_that("brunner_munzel",{
   testydf = df_htest(testy1)
   expect_equal(testy1$p.value,testy2$p.value)
   expect_equal(testy1$p.value, testydf$p.value)
+
+  # Errors ----
+
+  expect_error(brunner_munzel(x = rnorm(100),
+                              #y = rnorm(100),
+                              mu = .25,
+                              alternative = "t",
+                              perm = TRUE,
+                              paired = TRUE))
+
+  expect_error(brunner_munzel(x = "error",
+                              #y = rnorm(100),
+                              mu = .25,
+                              alternative = "t",
+                              perm = TRUE,
+                              paired = TRUE))
+
+  expect_error(brunner_munzel(x = rnorm(100),
+                              y = rnorm(99),
+                              mu = .25,
+                              alternative = "t",
+                              perm = TRUE,
+                              paired = TRUE))
+
+  expect_message(brunner_munzel(x = rnorm(300),
+                              y = rnorm(300),
+                              mu = .25,
+                              alternative = "t",
+                              perm = TRUE,
+                              #paired = TRUE
+                              ))
+
 
 
 })

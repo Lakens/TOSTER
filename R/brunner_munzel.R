@@ -95,7 +95,7 @@ brunner_munzel.default = function(x,
     stop("'mu' must be a single number between 0 and 1.")
 
   if(!is.numeric(x)) stop("'x' must be numeric")
-  if(!is.null(y)) {
+  if(!missing(y)) {
     if(!is.numeric(y)) stop("'y' must be numeric")
     DNAME <- paste(deparse(substitute(x)), "and",
                    deparse(substitute(y)))

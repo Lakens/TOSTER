@@ -110,6 +110,16 @@ test_that("Run examples for one sample", {
                          n12 = length(samp1),
                          eqb = c(.5,-.5),
                          paired = TRUE))
+
+  expect_warning(tsum_TOST(m1 = mean(samp1),
+                         sd1 = sd(samp1),
+                         n1 = length(samp1),
+                         m2 = mean(samp1),
+                         sd2 = sd(samp1),
+                         r12 = .73,
+                         n2 = 999,
+                         eqb = c(.5,-.5),
+                         paired = TRUE))
   expect_error(tsum_TOST(m1 = mean(samp1),
                     sd1 = sd(samp1),
                     n1 = length(samp1)))
@@ -1362,5 +1372,38 @@ test_that("Check NCT CIs for one",{
                  smd_ci = "t",
                  rm_correction = TRUE,
                  bias_correction = F)
+
+})
+
+test_that("More tsum_test",{
+  expect_error(TOSTER:::tsum_test(
+    m1 = 12,
+    sd1 = 1,
+    n1 = 30,
+    m2 = 11,
+    sd2 = 1.5,
+    n2 = 30,
+    r12 = NULL,
+    paired = FALSE,
+    alternative = "two.sided",
+    mu = c(0,1),
+    var.equal = FALSE,
+    conf.level = 0.95
+  ))
+
+  expect_error(TOSTER:::tsum_test(
+    m1 = 12,
+    sd1 = 1,
+    n1 = 30,
+    m2 = 11,
+    sd2 = 1.5,
+    n2 = 30,
+    r12 = NULL,
+    paired = FALSE,
+    alternative = "two.sided",
+    mu = 0,
+    var.equal = FALSE,
+    conf.level = 55
+  ))
 
 })
