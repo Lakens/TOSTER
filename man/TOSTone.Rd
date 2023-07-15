@@ -39,7 +39,11 @@ TOSTone(
 Returns TOST t-value 1, TOST p-value 1, TOST t-value 2, TOST p-value 2, degrees of freedom, low equivalence bound, high equivalence bound, Lower limit confidence interval TOST, Upper limit confidence interval TOST
 }
 \description{
-TOST function for a one-sample t-test (Cohen's d)
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}}
+
+Development on this function is complete, and for new code we recommend
+switching to \link{tsum_TOST}, which is easier to use, more featureful,
+and still under active development.
 }
 \examples{
 ## Test observed mean of 0.54 and standard deviation of 1.2 in sample of 100 participants

@@ -2,7 +2,9 @@
 % Please edit documentation in R/TOSTr.R
 \name{TOSTr}
 \alias{TOSTr}
-\title{TOST function for a correlations}
+\title{TOST function for a correlations
+#' @description
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}}}
 \usage{
 TOSTr(n, r, low_eqbound_r, high_eqbound_r, alpha, plot = TRUE, verbose = TRUE)
 }
@@ -25,7 +27,9 @@ TOSTr(n, r, low_eqbound_r, high_eqbound_r, alpha, plot = TRUE, verbose = TRUE)
 Returns TOST p-value 1, TOST p-value 2, alpha, low equivalence bound r, high equivalence bound r, Lower limit confidence interval TOST, Upper limit confidence interval TOST
 }
 \description{
-TOST function for a correlations
+Development on \code{TOSTr} is complete, and for new code we recommend
+switching to \link{corsum_test}, which is easier to use, more featureful,
+and still under active development.
 }
 \section{References}{
 

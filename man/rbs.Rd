@@ -23,7 +23,7 @@ np_ses(
 
 \item{mu}{a number indicating the value around which (a-)symmetry (for
 one-sample or paired samples) or shift (for independent samples) is to be
-estimated. See [stats::wilcox.test].}
+estimated. See \link[stats:wilcox.test]{stats::wilcox.test}.}
 
 \item{conf.level}{confidence level of the interval.}
 
@@ -42,47 +42,45 @@ This method was adapted from the effectsize R package.
 The rank-biserial correlation is appropriate for non-parametric tests of
 differences - both for the one sample or paired samples case, that would
 normally be tested with Wilcoxon's Signed Rank Test (giving the
-**matched-pairs** rank-biserial correlation) and for two independent samples
-case, that would normally be tested with Mann-Whitney's *U* Test (giving
-**Glass'** rank-biserial correlation). See [stats::wilcox.test]. In both
+\strong{matched-pairs} rank-biserial correlation) and for two independent samples
+case, that would normally be tested with Mann-Whitney's \emph{U} Test (giving
+\strong{Glass'} rank-biserial correlation). See \link[stats:wilcox.test]{stats::wilcox.test}. In both
 cases, the correlation represents the difference between the proportion of
 favorable and unfavorable pairs / signed ranks (Kerby, 2014). Values range
-from `-1` indicating that all values of the second sample are smaller than
-the first sample, to `+1` indicating that all values of the second sample are
+from \code{-1} indicating that all values of the second sample are smaller than
+the first sample, to \code{+1} indicating that all values of the second sample are
 larger than the first sample.
 
 In addition, the rank-biserial correlation can be transformed into a
 concordance probability (i.e., probability of superiority) or into a
 generalized odds (WMW odds or Agresti's generalized odds ratio).
+\subsection{Ties}{
 
-## Ties
 When tied values occur, they are each given the average of the ranks that
 would have been given had no ties occurred. No other corrections have been
 implemented yet.
-
-# Confidence Intervals
+}
+}
+\section{Confidence Intervals}{
 Confidence intervals for the standardized effect sizes
 are estimated using the normal approximation (via Fisher's transformation).
 }
-\references{
-- Cureton, E. E. (1956). Rank-biserial correlation. Psychometrika, 21(3),
-287-290.
 
-- Glass, G. V. (1965). A ranking variable analogue of biserial correlation:
+\references{
+\itemize{
+\item Cureton, E. E. (1956). Rank-biserial correlation. Psychometrika, 21(3),
+287-290.
+\item Glass, G. V. (1965). A ranking variable analogue of biserial correlation:
 Implications for short-cut item analysis. Journal of Educational Measurement,
 2(1), 91-95.
-
-- Kendall, M.G. (1948) Rank correlation methods. London: Griffin.
-
-- Kerby, D. S. (2014). The simple difference formula: An approach to teaching
+\item Kendall, M.G. (1948) Rank correlation methods. London: Griffin.
+\item Kerby, D. S. (2014). The simple difference formula: An approach to teaching
 nonparametric correlation. Comprehensive Psychology, 3, 11-IT.
-
-- King, B. M., & Minium, E. W. (2008). Statistical reasoning in the
+\item King, B. M., & Minium, E. W. (2008). Statistical reasoning in the
 behavioral sciences. John Wiley & Sons Inc.
-
-- Cliff, N. (1993). Dominance statistics: Ordinal analyses to answer ordinal
+\item Cliff, N. (1993). Dominance statistics: Ordinal analyses to answer ordinal
 questions. Psychological bulletin, 114(3), 494.
-
-- Tomczak, M., & Tomczak, E. (2014). The need to report effect size estimates
+\item Tomczak, M., & Tomczak, E. (2014). The need to report effect size estimates
 revisited. An overview of some recommended measures of effect size.
+}
 }

@@ -26,18 +26,18 @@ z_cor_test(
 }
 \value{
 A list with class "htest" containing the following components:
-\describe{
-  \item{\code{"p.value"}}{the p-value of the test.}
-  \item{\code{"estimate"}}{the estimated measure of association, with name "pb", "wincor", "cor", "tau", or "rho" corresponding to the method employed.}
-  \item{\code{"null.value"}}{the value of the association measure under the null hypothesis.}
-  \item{\code{"alternative"}}{character string indicating the alternative hypothesis (the value of the input argument alternative). }
-  \item{\code{"method"}}{a character string indicating how the association was measured.}
-  \item{\code{"data.name"}}{a character string giving the names of the data.}
-  \item{\code{"call"}}{the matched call.}
+\itemize{
+\item "p.value": the p-value of the test.
+\item "estimate": the estimated measure of association, with name "pb", "wincor", "cor", "tau", or "rho" corresponding to the method employed.
+\item "null.value": the value of the association measure under the null hypothesis.
+\item "alternative": character string indicating the alternative hypothesis (the value of the input argument alternative).
+\item "method": a character string indicating how the association was measured.
+\item "data.name": a character string giving the names of the data.
+\item "call": the matched call.
 }
 }
 \description{
-Test for association between paired samples, using one of Pearson's product moment correlation coefficient,Kendall's \eqn{\tau}{tau} or Spearman's \eqn{\rho}{rho}.
+Test for association between paired samples, using one of Pearson's product moment correlation coefficient,Kendall's tau or Spearman's rho.
 Unlike the stats version of cor.test, this function allows users to set the null to a value other than zero.
 }
 \details{

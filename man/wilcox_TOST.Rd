@@ -60,7 +60,7 @@ generalized odds ratio).}
 
 \item{mu}{number indicating the value around which (a-)symmetry (for
 one-sample or paired samples) or shift (for independent samples) is to be
-estimated. See [stats::wilcox.test].}
+estimated. See \link[stats:wilcox.test]{stats::wilcox.test}.}
 
 \item{formula}{a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.}
 
@@ -72,24 +72,26 @@ estimated. See [stats::wilcox.test].}
 }
 \value{
 An S3 object of class
-  \code{"TOSTnp"} is returned containing the following slots:
-\describe{
-  \item{\code{"TOST"}}{A table of class \code{"data.frame"} containing two-tailed wilcoxon signed rank test and both one-tailed results.}
-  \item{\code{"eqb"}}{A table of class \code{"data.frame"} containing equivalence bound settings.}
-  \item{\code{"effsize"}}{ table of class \code{"data.frame"} containing effect size estimates.}
-  \item{\code{"hypothesis"}}{String stating the hypothesis being tested.}
-  \item{\code{"smd"}}{List containing information on standardized effect size.}
-  \item{\code{"alpha"}}{Alpha level set for the analysis.}
-  \item{\code{"method"}}{Type of non-parametric test.}
-  \item{\code{"decision"}}{List included text regarding the decisions for statistical inference.}
+\code{"TOSTnp"} is returned containing the following slots:
+\itemize{
+\item "TOST": A table of class \code{"data.frame"} containing two-tailed wilcoxon signed rank test and both one-tailed results.
+\item "eqb": A table of class \code{"data.frame"} containing equivalence bound settings.
+\item "effsize":  table of class \code{"data.frame"} containing effect size estimates.
+\item "hypothesis": String stating the hypothesis being tested.
+\item "smd": List containing information on standardized effect size.
+\item "alpha": Alpha level set for the analysis.
+\item "method": Type of non-parametric test.
+\item "decision": List included text regarding the decisions for statistical inference.
 }
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+
 A function for TOST using the non-parametric methods of the Wilcoxon-Mann-Whitney family of tests.
 This function uses the normal approximation and applies a continuity correction automatically.
 }
 \details{
-For details on the calculations in this function see vignette("robustTOST").
+For details on the calculations in this function see \code{vignette("robustTOST")}.
 }
 \section{References}{
 

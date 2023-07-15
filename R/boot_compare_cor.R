@@ -4,17 +4,17 @@
 #' @param x2,y2 numeric vectors of data values. x and y must have the same length from study 2.
 #' @inheritParams boot_cor_test
 #' @return A list with class "htest" containing the following components:
-#' \describe{
-#'   \item{\code{"p.value"}}{numeric scalar containing the p-value for the test under the null hypothesis.}
-#'   \item{\code{"estimate"}}{difference in correlations between studies.}
-#'   \item{\code{"conf.int"}}{percentile (bootstrap) confidence interval for difference in correlations.}
-#'   \item{\code{"null.value"}}{the specified hypothesized value for the null hypothesis.}
-#'   \item{\code{"alternative"}}{character string indicating the alternative hypothesis (the value of the input argument alternative). Possible values are "greater", "less", or "two-sided".}
-#'   \item{\code{"method"}}{a character string indicating how the association was measured.}
-#'   \item{\code{"data.name"}}{Names of input values..}
-#'   \item{\code{"boot_res"}}{List of bootstrapped results.}
-#'   \item{\code{"call"}}{the matched call.}
-#' }
+#'
+#'   - "p.value": numeric scalar containing the p-value for the test under the null hypothesis.
+#'   - "estimate": difference in correlations between studies.
+#'   - "conf.int": percentile (bootstrap) confidence interval for difference in correlations.
+#'   - "null.value": the specified hypothesized value for the null hypothesis.
+#'   - "alternative": character string indicating the alternative hypothesis (the value of the input argument alternative). Possible values are "greater", "less", or "two-sided".
+#'   - "method": a character string indicating how the association was measured.
+#'   - "data.name": Names of input values.
+#'   - "boot_res": List of bootstrapped results.
+#'   - "call": the matched call.
+#'
 #' @name boot_compare_cor
 #' @importFrom stats median
 #' @export boot_compare_cor

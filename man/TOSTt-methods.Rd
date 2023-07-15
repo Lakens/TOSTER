@@ -24,27 +24,27 @@ describe(x, ...)
 \method{describe}{TOSTt}(x, digits = 3, ...)
 }
 \arguments{
-\item{x}{object of class \code{TOSTt}}
+\item{x}{object of class \code{TOSTt}.}
 
 \item{digits}{Number of digits to print for p-values}
 
 \item{...}{further arguments passed through, see description of return value
 for details.
-\code{\link{TOSTt-methods}}.}
+\link{TOSTt-methods}.}
 
 \item{type}{Type of plot to produce. Default is a consonance density plot "cd". Consonance plots (type = "cd") and null distribution plots (type = "tnull") can also be produced. Note: null distribution plots only available for estimates = "raw".}
 
 \item{estimates}{indicator of what estimates to plot; options include "raw" or "SMD". Default is is both: c("raw","SMD").}
 
-\item{ci_lines}{Confidence interval lines for plots. Default is 1-alpha*2 (e.g., alpha = 0.05 is 90\%)}
+\item{ci_lines}{Confidence interval lines for plots. Default is 1-alpha*2 (e.g., alpha = 0.05 is 90\\%)}
 
 \item{ci_shades}{Confidence interval shades when plot type is "cd".}
 }
 \value{
-\describe{
-  \item{\code{print}}{Prints short summary of the tests.}
-  \item{\code{plot}}{Returns a plot of the effects.}
-  \item{\code{describe}}{Verbose description of results.}
+\itemize{
+\item print: Prints short summary of the tests.
+\item plot: Returns a plot of the effects.
+\item describe: Verbose description of results.
 }
 }
 \description{
@@ -59,14 +59,14 @@ res1 = t_TOST(mpg ~ am, data = mtcars, eqb = 3)
 res1
 # Print with more digits
 print(res1, digits = 6)
-\dontrun{
+
 # Plot with density plot - only raw values (SLOW)
-plot(res1, type = "cd", estimates = "raw")
+#plot(res1, type = "cd", estimates = "raw")
 # Plot with consonance - only raw values (SLOW)
-plot(res1, type = "c", estimates = "raw")
+#plot(res1, type = "c", estimates = "raw")
 # Plot null distribution - only raw values
-plot(res1, type = "tnull", estimates = "raw")
-}
+#plot(res1, type = "tnull", estimates = "raw")
+
 # Get description of the results
 describe(res1)
 

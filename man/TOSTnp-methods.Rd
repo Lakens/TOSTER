@@ -11,18 +11,18 @@
 \method{describe}{TOSTnp}(x, digits = 3, ...)
 }
 \arguments{
-\item{x}{object of class \code{TOSTnp}}
+\item{x}{object of class \code{TOSTnp}.}
 
 \item{digits}{Number of digits to print for p-values}
 
 \item{...}{further arguments passed through, see description of return value
 for details.
-\code{\link{TOSTnp-methods}}.}
+\link{TOSTnp-methods}.}
 }
 \value{
-\describe{
-  \item{\code{print}}{Prints short summary of the tests.}
-  \item{\code{describe}}{Verbose description of results.}
+\itemize{
+\item print: Prints short summary of the tests.
+\item describe: Verbose description of results.
 }
 }
 \description{

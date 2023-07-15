@@ -43,7 +43,7 @@ simple_htest(
 
 \item{y}{an optional (non-empty) numeric vector of data values.}
 
-\item{test}{a string specifying the type of test which includes \code{"t.test"} or \code{"wilcox.test"} (default is \code{"t.test"}).}
+\item{test}{a character string specifying what type of hypothesis test to use. Options are limited to "wilcox.test", "t.test", or "brunner_munzel". You can specify just the initial letter.}
 
 \item{formula}{a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.}
 
@@ -55,29 +55,27 @@ simple_htest(
 }
 \value{
 A list with class \code{"htest"} containing the following components:
-\describe{
-  \item{\code{statistic}}{the value of the t-statistic.}
-  \item{\code{parameter}}{the degrees of freedom for the t-statistic.}
-  \item{\code{p.value}}{the p-value for the test.}
-  \item{\code{conf.int}}{a confidence interval for the mean appropriate to the specified alternative hypothesis.}
-  \item{\code{estimate}}{the estimated mean or difference in means depending on whether it was a one-sample test or a two-sample test.}
-  \item{\code{null.value}}{the specified hypothesized value of the mean or mean difference. May be 2 values.}
-  \item{\code{stderr}}{the standard error of the mean (difference), used as denominator in the t-statistic formula.}
-  \item{\code{alternative}}{a character string describing the alternative hypothesis.}
-  \item{\code{method}}{a character string indicating what type of t-test was performed.}
-  \item{\code{data.name}}{a character string giving the name(s) of the data.}
+\itemize{
+\item statistic: the value of the t-statistic.
+\item parameter: the degrees of freedom for the t-statistic.
+\item p.value: the p-value for the test.
+\item conf.int: a confidence interval for the mean appropriate to the specified alternative hypothesis.
+\item estimate: the estimated mean or difference in means depending on whether it was a one-sample test or a two-sample test.
+\item null.value: the specified hypothesized value of the mean or mean difference. May be 2 values.
+\item stderr: the standard error of the mean (difference), used as denominator in the t-statistic formula.
+\item alternative: a character string describing the alternative hypothesis.
+\item method: a character string indicating what type of t-test was performed.
+\item data.name: a character string giving the name(s) of the data.
 }
 }
 \description{
-Performs one or two sample t-tests or Wilcoxon-Mann-Whitney rank-based tests with expanded options compared to \code{t.test}, \code{brunner_munzel}, or \code{wilcox.test}.
+Performs one or two sample t-tests or Wilcoxon-Mann-Whitney rank-based tests with expanded options compared to \link{t.test}, \link{brunner_munzel}, or \link{wilcox.test}.
 }
 \details{
-Currently, this function allows for traditional or TOST hypothesis tests using \code{"t.test"} or \code{"wilcox.test"}.
-The type of test, t-test or Wilcoxon-Mann-Whitney, can be selected with the \code{"test"} argument.
-More information on the tests can be found in the documentation for the \code{"t.test"} and \code{"wilcox.test"} functions.
+The type of test, t-test/Wilcoxon-Mann-Whitney/Brunner-Munzel, can be selected with the \code{"test"} argument.
 
 \code{alternative = "greater"} is the alternative that x is larger than y (on average).
-If \code{alternative = "equivalence"} then the alternative is that the difference between x and y is between the two null values (\code{mu}).
+If \code{alternative = "equivalence"} then the alternative is that the difference between x and y is between the two null values \code{mu}..
 If \code{alternative = "minimal.effect"} then the alternative is that the difference between x and y is less than the lowest null value or greater than the highest.
 }
 \examples{

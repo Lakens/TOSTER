@@ -12,15 +12,15 @@
 #' These calculations are based on Rand Wilcox's R functions for his book (Wilcox, 2017), and adapted from their implementation in Guillaume Rousselet's R package "bootcorci".
 #'
 #' @return A list with class "htest" containing the following components:
-#' \describe{
-#'   \item{\code{"p.value"}}{the p-value of the test.}
-#'   \item{\code{"estimate"}}{the estimated measure of association, with name "pb", "wincor", "cor", "tau", or "rho" corresponding to the method employed.}
-#'   \item{\code{"null.value"}}{the value of the association measure under the null hypothesis.}
-#'   \item{\code{"alternative"}}{character string indicating the alternative hypothesis (the value of the input argument alternative). }
-#'   \item{\code{"method"}}{a character string indicating how the association was measured.}
-#'   \item{\code{"data.name"}}{a character string giving the names of the data.}
-#'   \item{\code{"call"}}{the matched call.}
-#' }
+#'
+#'   - "p.value": the p-value of the test.
+#'   - "estimate": the estimated measure of association, with name "pb", "wincor", "cor", "tau", or "rho" corresponding to the method employed.
+#'   - "null.value": the value of the association measure under the null hypothesis.
+#'   - "alternative": character string indicating the alternative hypothesis (the value of the input argument alternative).
+#'   - "method": a character string indicating how the association was measured.
+#'   - "data.name": a character string giving the names of the data.
+#'   - "call": the matched call.
+#'
 #' @section References:
 #'
 #' Wilcox, R.R. (2009) Comparing Pearson Correlations: Dealing with Heteroscedasticity and Nonnormality.

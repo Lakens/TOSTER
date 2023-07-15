@@ -19,9 +19,9 @@ power_t_TOST(
 \arguments{
 \item{n}{number of observations per group. 2 sample sizes, in a vector, can be provided for the two sample case.}
 
-\item{delta}{true difference in means (default is 0)}
+\item{delta}{true difference in means (default is 0).}
 
-\item{sd}{population standard deviation. Standard deviation of the differences for paired samples}
+\item{sd}{population standard deviation. Standard deviation of the differences for paired samples.}
 
 \item{eqb}{Equivalence bound. Can provide 1 value (negative value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds.}
 
@@ -29,9 +29,9 @@ power_t_TOST(
 
 \item{high_eqbound}{Upper equivalence bounds. Deprecated use eqb.}
 
-\item{alpha}{a priori alpha-level (i.e., significance level)}
+\item{alpha}{a priori alpha-level (i.e., significance level).}
 
-\item{power}{power of the TOST procedure (1-beta)}
+\item{power}{power of the TOST procedure (1-beta).}
 
 \item{type}{string specifying the type of t-test.}
 }

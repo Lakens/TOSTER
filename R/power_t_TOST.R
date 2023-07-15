@@ -1,13 +1,13 @@
 #' @title Power calculations for TOST for t-tests
 #' @description  Calculates the exact power of two one sided t-tests (TOST) for one, two, and paired samples.
 #' @param n number of observations per group. 2 sample sizes, in a vector, can be provided for the two sample case.
-#' @param delta true difference in means (default is 0)
-#' @param sd population standard deviation. Standard deviation of the differences for paired samples
+#' @param delta true difference in means (default is 0).
+#' @param sd population standard deviation. Standard deviation of the differences for paired samples.
 #' @param eqb Equivalence bound. Can provide 1 value (negative value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds.
 #' @param low_eqbound Lower equivalence bounds. Deprecated use eqb.
 #' @param high_eqbound Upper equivalence bounds. Deprecated use eqb.
-#' @param alpha a priori alpha-level (i.e., significance level)
-#' @param power power of the TOST procedure (1-beta)
+#' @param alpha a priori alpha-level (i.e., significance level).
+#' @param power power of the TOST procedure (1-beta).
 #' @param type string specifying the type of t-test.
 #' @details
 #' The exact calculations of power are based on Owen’s Q-function or by direct integration of the bivariate non-central t-distribution (inspired by the PowerTOST package).

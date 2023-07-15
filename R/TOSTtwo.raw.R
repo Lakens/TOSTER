@@ -1,4 +1,11 @@
 #' TOST function for an independent t-test (raw scores)
+#' @description
+#' `r lifecycle::badge('superseded')`
+#'
+#' Development on `TOSTtwo.raw` is complete, and for new code we recommend
+#' switching to [tsum_TOST], which is easier to use, more featureful,
+#' and still under active development.
+#'
 #' @param m1 mean of group 1
 #' @param m2 mean of group 2
 #' @param sd1 standard deviation of group 1

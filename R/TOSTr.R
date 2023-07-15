@@ -1,4 +1,11 @@
 #' TOST function for a correlations
+#' #' @description
+#' `r lifecycle::badge('superseded')`
+#'
+#' Development on `TOSTr` is complete, and for new code we recommend
+#' switching to [corsum_test], which is easier to use, more featureful,
+#' and still under active development.
+#'
 #' @param n number of pairs of observations
 #' @param r observed correlation
 #' @param low_eqbound_r lower equivalence bounds (e.g., -0.3) expressed in a correlation effect size

@@ -36,16 +36,16 @@ boot_compare_cor(
 }
 \value{
 A list with class "htest" containing the following components:
-\describe{
-  \item{\code{"p.value"}}{numeric scalar containing the p-value for the test under the null hypothesis.}
-  \item{\code{"estimate"}}{difference in correlations between studies.}
-  \item{\code{"conf.int"}}{percentile (bootstrap) confidence interval for difference in correlations.}
-  \item{\code{"null.value"}}{the specified hypothesized value for the null hypothesis.}
-  \item{\code{"alternative"}}{character string indicating the alternative hypothesis (the value of the input argument alternative). Possible values are "greater", "less", or "two-sided".}
-  \item{\code{"method"}}{a character string indicating how the association was measured.}
-  \item{\code{"data.name"}}{Names of input values..}
-  \item{\code{"boot_res"}}{List of bootstrapped results.}
-  \item{\code{"call"}}{the matched call.}
+\itemize{
+\item "p.value": numeric scalar containing the p-value for the test under the null hypothesis.
+\item "estimate": difference in correlations between studies.
+\item "conf.int": percentile (bootstrap) confidence interval for difference in correlations.
+\item "null.value": the specified hypothesized value for the null hypothesis.
+\item "alternative": character string indicating the alternative hypothesis (the value of the input argument alternative). Possible values are "greater", "less", or "two-sided".
+\item "method": a character string indicating how the association was measured.
+\item "data.name": Names of input values.
+\item "boot_res": List of bootstrapped results.
+\item "call": the matched call.
 }
 }
 \description{

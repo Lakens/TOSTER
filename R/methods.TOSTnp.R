@@ -2,16 +2,17 @@
 #'
 #' Methods defined for objects returned from the wilcox_TOST function.
 #'
-#' @param x object of class \code{TOSTnp}
+#' @param x object of class `TOSTnp`.
 #' @param digits Number of digits to print for p-values
 #' @param ... further arguments passed through, see description of return value
 #'   for details.
-#'   \code{\link{TOSTnp-methods}}.
+#'   [TOSTnp-methods].
+#'
 #' @return
-#' \describe{
-#'   \item{\code{print}}{Prints short summary of the tests.}
-#'   \item{\code{describe}}{Verbose description of results.}
-#' }
+#'
+#'   - print: Prints short summary of the tests.
+#'   - describe: Verbose description of results.
+#'
 #' @examples
 #' # example code
 #' data(mtcars)

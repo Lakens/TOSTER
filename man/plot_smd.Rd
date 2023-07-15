@@ -42,7 +42,7 @@ Function to produce plots of the distribution of the standardized mean differenc
 This function was created so that users could create plots from their own SMD calculations and were inspired by the concurve R package.
 The difficulty is that specific information must be past onto this function.
 The calculations for the standardized mean difference can be found in the vignettes of this package.
-These types of plots are discussed by Schweder T, Hjort NL. (2016, ISBN:9781316445051) and Rafi Z, Greenland S. (2020) <doi:10.1186/s12874-020-01105-9>.
+These types of plots are discussed by Schweder T, Hjort NL. (2016, ISBN:9781316445051) and Rafi Z, Greenland S. (2020) \url{doi:10.1186/s12874-020-01105-9}.
 }
 \seealso{
 Other plotting functions: 

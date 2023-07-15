@@ -8,17 +8,17 @@
 #' @inheritParams compare_smd
 #' @details This function tests for differences between correlations.
 #'  @return A list with class "htest" containing the following components:
-#' \describe{
-#'   \item{\code{"statistic"}}{z-score}
-#'   \item{\code{"p.value"}}{numeric scalar containing the p-value for the test under the null hypothesis.}
-#'   \item{\code{"estimate"}}{difference in SMD between studies}
-#'   \item{\code{"null.value"}}{the specified hypothesized value for the null hypothesis.}
-#'   \item{\code{"alternative"}}{character string indicating the alternative hypothesis (the value of the input argument alternative). Possible values are "greater", "less", or "two-sided".}
-#'   \item{\code{"method"}}{Type of SMD}
-#'   \item{\code{"data.name"}}{"Summary Statistics" to denote summary statistics were utilized to obtain results.}
-#'   \item{\code{"cor"}}{Correlation input for the function.}
-#'   \item{\code{"call"}}{the matched call.}
-#' }
+#'
+#'   - "statistic":  z-score
+#'   - "p.value":  numeric scalar containing the p-value for the test under the null hypothesis.
+#'   - "estimate":  difference in SMD between studies.
+#'   - "null.value":  the specified hypothesized value for the null hypothesis.
+#'   - "alternative":  character string indicating the alternative hypothesis (the value of the input argument alternative). Possible values are "greater", "less", or "two-sided".
+#'   - "method":  Type of SMD.
+#'   - "data.name":  "Summary Statistics" to denote summary statistics were utilized to obtain results.
+#'   - "cor":  Correlation input for the function.
+#'   - "call":  the matched call.
+#'
 #' @references
 #' Counsell, A., & Cribbie, R. A. (2015). Equivalence tests for comparing correlation and regression coefficients. The British journal of mathematical and statistical psychology, 68(2), 292–309. https://doi.org/10.1111/bmsp.12045
 #'

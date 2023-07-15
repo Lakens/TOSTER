@@ -1,5 +1,5 @@
 #' @title Brunner-Munzel Test
-#' @description This is a generic function that performs a generalized asymptotic Brunner-Munzel test in a fashion similar to \code{"t.test"}.
+#' @description This is a generic function that performs a generalized asymptotic Brunner-Munzel test in a fashion similar to `"t.test"`.
 #' @param x a (non-empty) numeric vector of data values.
 #' @param y an optional (non-empty) numeric vector of data values.
 #' @param formula a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.
@@ -28,19 +28,19 @@
 #'
 #'  The brunner_munzel function is based on the npar.t.test and npar.t.test.paired functions within the nparcomp package (Konietschke et al. 2015).
 #'
-#' @return A list with class \code{"htest"} containing the following components:
-#' \describe{
-#'   \item{\code{statistic}}{the value of the test statistic.}
-#'   \item{\code{parameter}}{the degrees of freedom for the test statistic.}
-#'   \item{\code{p.value}}{the p-value for the test.}
-#'   \item{\code{conf.int}}{a confidence interval for the mean appropriate to the specified alternative hypothesis.}
-#'   \item{\code{estimate}}{the estimated mean or difference in means depending on whether it was a one-sample test or a two-sample test.}
-#'   \item{\code{null.value}}{the specified hypothesized value of the mean or mean difference. May be 2 values.}
-#'   \item{\code{stderr}}{the standard error.}
-#'   \item{\code{alternative}}{a character string describing the alternative hypothesis.}
-#'   \item{\code{method}}{a character string indicating what type of test was performed.}
-#'   \item{\code{data.name}}{a character string giving the name(s) of the data.}
-#' }
+#' @return A list with class `"htest"` containing the following components:
+#'
+#'   - "statistic": the value of the test statistic.
+#'   - "parameter": the degrees of freedom for the test statistic.
+#'   - "p.value": the p-value for the test.
+#'   - "conf.int": a confidence interval for the mean appropriate to the specified alternative hypothesis.
+#'   - "estimate": the estimated mean or difference in means depending on whether it was a one-sample test or a two-sample test.
+#'   - "null.value": the specified hypothesized value of the mean or mean difference. May be 2 values.
+#'   - "stderr": the standard error.
+#'   - "alternative": a character string describing the alternative hypothesis.
+#'   - "method": a character string indicating what type of test was performed.
+#'   - "data.name": a character string giving the name(s) of the data.
+#'
 #' @examples
 #' data(mtcars)
 #' brunner_munzel(mpg ~ am, data = mtcars)

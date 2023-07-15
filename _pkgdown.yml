@@ -34,12 +34,13 @@ reference:
 
 - subtitle: "Robust"
   desc: >
-    Functions that are (mostly) robust to the assumptions of t-tests
+    Functions that are robust alternatives to the t-test
   contents:
   - wilcox_TOST
   - boot_t_TOST
   - log_TOST
   - boot_log_TOST
+  - brunner_munzel
 
 - subtitle: "ANOVA"
   desc: >

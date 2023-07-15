@@ -1,4 +1,10 @@
 #' TOST function for a one-sample t-test (Cohen's d)
+#' @description
+#' `r lifecycle::badge('superseded')`
+#'
+#' Development on this function is complete, and for new code we recommend
+#' switching to [tsum_TOST], which is easier to use, more featureful,
+#' and still under active development.
 #' @param m mean
 #' @param mu value to compare against
 #' @param sd standard deviation

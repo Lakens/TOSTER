@@ -34,17 +34,17 @@ A function to compare correlations between studies. This function is intended to
 }
 \details{
 This function tests for differences between correlations.
- @return A list with class "htest" containing the following components:
-\describe{
-  \item{\code{"statistic"}}{z-score}
-  \item{\code{"p.value"}}{numeric scalar containing the p-value for the test under the null hypothesis.}
-  \item{\code{"estimate"}}{difference in SMD between studies}
-  \item{\code{"null.value"}}{the specified hypothesized value for the null hypothesis.}
-  \item{\code{"alternative"}}{character string indicating the alternative hypothesis (the value of the input argument alternative). Possible values are "greater", "less", or "two-sided".}
-  \item{\code{"method"}}{Type of SMD}
-  \item{\code{"data.name"}}{"Summary Statistics" to denote summary statistics were utilized to obtain results.}
-  \item{\code{"cor"}}{Correlation input for the function.}
-  \item{\code{"call"}}{the matched call.}
+@return A list with class "htest" containing the following components:
+\itemize{
+\item "statistic":  z-score
+\item "p.value":  numeric scalar containing the p-value for the test under the null hypothesis.
+\item "estimate":  difference in SMD between studies.
+\item "null.value":  the specified hypothesized value for the null hypothesis.
+\item "alternative":  character string indicating the alternative hypothesis (the value of the input argument alternative). Possible values are "greater", "less", or "two-sided".
+\item "method":  Type of SMD.
+\item "data.name":  "Summary Statistics" to denote summary statistics were utilized to obtain results.
+\item "cor":  Correlation input for the function.
+\item "call":  the matched call.
 }
 }
 \references{

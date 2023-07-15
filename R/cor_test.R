@@ -1,5 +1,5 @@
 #' @title Test for Association/Correlation Between Paired Samples
-#' @description   Test for association between paired samples, using one of Pearson's product moment correlation coefficient,Kendall's \eqn{\tau}{tau} or Spearman's \eqn{\rho}{rho}.
+#' @description   Test for association between paired samples, using one of Pearson's product moment correlation coefficient,Kendall's tau or Spearman's rho.
 #' Unlike the stats version of cor.test, this function allows users to set the null to a value other than zero.
 #' @param x,y numeric vectors of data values. x and y must have the same length.
 #' @param method a character string indicating which correlation coefficient is to be used for the test. One of "pearson", "kendall", or "spearman", can be abbreviated.
@@ -9,15 +9,15 @@
 #'
 #' @details This function uses Fisher's z transformation for the correlations, but uses Fieller's correction of the standard error for Spearman's rho and Kendall's tau.
 #' @return  A list with class "htest" containing the following components:
-#' \describe{
-#'   \item{\code{"p.value"}}{the p-value of the test.}
-#'   \item{\code{"estimate"}}{the estimated measure of association, with name "pb", "wincor", "cor", "tau", or "rho" corresponding to the method employed.}
-#'   \item{\code{"null.value"}}{the value of the association measure under the null hypothesis.}
-#'   \item{\code{"alternative"}}{character string indicating the alternative hypothesis (the value of the input argument alternative). }
-#'   \item{\code{"method"}}{a character string indicating how the association was measured.}
-#'   \item{\code{"data.name"}}{a character string giving the names of the data.}
-#'   \item{\code{"call"}}{the matched call.}
-#' }
+#'
+#'   - "p.value": the p-value of the test.
+#'   - "estimate": the estimated measure of association, with name "pb", "wincor", "cor", "tau", or "rho" corresponding to the method employed.
+#'   - "null.value": the value of the association measure under the null hypothesis.
+#'   - "alternative": character string indicating the alternative hypothesis (the value of the input argument alternative).
+#'   - "method": a character string indicating how the association was measured.
+#'   - "data.name": a character string giving the names of the data.
+#'   - "call": the matched call.
+#'
 #' @examples
 #' # example code
 #' x <- c(44.4, 45.9, 41.9, 53.3, 44.7, 44.1, 50.7, 45.2, 60.1)

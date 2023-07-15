@@ -9,16 +9,16 @@
 #' @param alpha alpha used for the test (e.g., 0.05).
 #' @details For details on the calculations in this function see vignette("the_ftestTOSTER").
 #' @return Object of class '"htest"
-#' \describe{
-#'   \item{\code{"statistic"}}{The value of the F-statistic.}
-#'   \item{\code{"parameter"}}{The degrees of freedom for the F-statistic.}
-#'   \item{\code{"p.value"}}{The he p-value for the test.}
-#'   \item{\code{"conf.int"}}{A confidence interval for the partial eta-squared statistic.}
-#'   \item{\code{"estimate"}}{Estimate of partial eta-squared.}
-#'   \item{\code{"null.value"}}{The specified for the equivalence test.}
-#'   \item{\code{"method"}}{A string indicating the type of F-test.}
-#'   \item{\code{"data.name"}}{A required string indicating that this was calculated from summary statistics.}
-#' }
+#'
+#'   - "statistic": The value of the F-statistic.
+#'   - "parameter": The degrees of freedom for the F-statistic.
+#'   - "p.value": The he p-value for the test.
+#'   - "conf.int": A confidence interval for the partial eta-squared statistic.
+#'   - "estimate": Estimate of partial eta-squared.
+#'   - "null.value": The specified for the equivalence test.
+#'   - "method": A string indicating the type of F-test.
+#'   - "data.name": A required string indicating that this was calculated from summary statistics.
+#'
 #' @family f-test
 #' @section References:
 #' Campbell, H., & Lakens, D. (2021). Can we disregard the whole model? Omnibus non‐inferiority testing for R2 in multi‐variable linear regression and in ANOVA. British Journal of Mathematical and Statistical Psychology, 74(1), 64-89. doi: 10.1111/bmsp.12201

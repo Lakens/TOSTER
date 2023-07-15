@@ -87,19 +87,24 @@ t_TOST(
 }
 \value{
 An S3 object of class
-  \code{"TOSTt"} is returned containing the following slots:
-\describe{
-  \item{\code{"TOST"}}{A table of class \code{"data.frame"} containing two-tailed t-test and both one-tailed results.}
-  \item{\code{"eqb"}}{A table of class \code{"data.frame"} containing equivalence bound settings.}
-  \item{\code{"effsize"}}{ table of class \code{"data.frame"} containing effect size estimates}
-  \item{\code{"hypothesis"}}{String stating the hypothesis being tested}
-  \item{\code{"smd"}}{List containing the results of the standardized mean difference calculations (e.g., Cohen's d).Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation)}
-  \item{\code{"alpha"}}{Alpha level set for the analysis.}
-  \item{\code{"method"}}{Type of t-test.}
-  \item{\code{"decision"}}{List included text regarding the decisions for statistical inference.}
+\code{"TOSTt"} is returned containing the following slots:
+\itemize{
+\item "TOST": A table of class \code{"data.frame"} containing two-tailed t-test and both one-tailed results.
+\item "eqb": A table of class \verb{"data.frame}" containing equivalence bound settings.
+\item "effsize":  table of class \code{"data.frame"} containing effect size estimates.
+\item "hypothesis": String stating the hypothesis being tested
+\item "smd": List containing the results of the standardized mean difference calculations (e.g., Cohen's d).
+\itemize{
+\item Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation)
+}
+\item "alpha": Alpha level set for the analysis.
+\item "method": Type of t-test.
+\item "decision": List included text regarding the decisions for statistical inference.
 }
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+
 A function for TOST with all types of t-tests.
 }
 \details{

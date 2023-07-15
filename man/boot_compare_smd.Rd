@@ -37,19 +37,19 @@ boot_compare_smd(
 }
 \value{
 A list with class "htest" containing the following components:
-\describe{
-  \item{\code{"statistic"}}{z-score}
-  \item{\code{"p.value"}}{numeric scalar containing the p-value for the test under the null hypothesis.}
-  \item{\code{"estimate"}}{difference in SMD between studies}
-  \item{\code{"conf.int"}}{percentile (bootstrap) confidence interval for difference in SMDs}
-  \item{\code{"null.value"}}{the specified hypothesized value for the null hypothesis.}
-  \item{\code{"alternative"}}{character string indicating the alternative hypothesis (the value of the input argument alternative). Possible values are "greater", "less", or "two-sided".}
-  \item{\code{"method"}}{Type of SMD}
-  \item{\code{"data.name"}}{"Boostrapped" to denote summary statistics were utilized to obtain results.}
-  \item{\code{"smd"}}{SMDs input for the function.}
-  \item{\code{"df_ci"}}{Data frame of confidence intervals.}
-  \item{\code{"boot_res"}}{List of bootstrapped results.}
-  \item{\code{"call"}}{the matched call.}
+\itemize{
+\item "statistic": z-score.
+\item "p.value": numeric scalar containing the p-value for the test under the null hypothesis.
+\item "estimate": difference in SMD between studies
+\item "conf.int": percentile (bootstrap) confidence interval for difference in SMDs
+\item "null.value": the specified hypothesized value for the null hypothesis.
+\item "alternative": character string indicating the alternative hypothesis (the value of the input argument alternative). Possible values are "greater", "less", or "two-sided".
+\item "method": Type of SMD.
+\item "data.name": "Boostrapped" to denote summary statistics were utilized to obtain results.
+\item "smd": SMDs input for the function.
+\item "df_ci": Data frame of confidence intervals.
+\item "boot_res": List of bootstrapped results.
+\item "call": the matched call.
 }
 }
 \description{

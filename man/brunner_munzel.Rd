@@ -60,17 +60,17 @@ brunner_munzel(
 }
 \value{
 A list with class \code{"htest"} containing the following components:
-\describe{
-  \item{\code{statistic}}{the value of the test statistic.}
-  \item{\code{parameter}}{the degrees of freedom for the test statistic.}
-  \item{\code{p.value}}{the p-value for the test.}
-  \item{\code{conf.int}}{a confidence interval for the mean appropriate to the specified alternative hypothesis.}
-  \item{\code{estimate}}{the estimated mean or difference in means depending on whether it was a one-sample test or a two-sample test.}
-  \item{\code{null.value}}{the specified hypothesized value of the mean or mean difference. May be 2 values.}
-  \item{\code{stderr}}{the standard error.}
-  \item{\code{alternative}}{a character string describing the alternative hypothesis.}
-  \item{\code{method}}{a character string indicating what type of test was performed.}
-  \item{\code{data.name}}{a character string giving the name(s) of the data.}
+\itemize{
+\item "statistic": the value of the test statistic.
+\item "parameter": the degrees of freedom for the test statistic.
+\item "p.value": the p-value for the test.
+\item "conf.int": a confidence interval for the mean appropriate to the specified alternative hypothesis.
+\item "estimate": the estimated mean or difference in means depending on whether it was a one-sample test or a two-sample test.
+\item "null.value": the specified hypothesized value of the mean or mean difference. May be 2 values.
+\item "stderr": the standard error.
+\item "alternative": a character string describing the alternative hypothesis.
+\item "method": a character string indicating what type of test was performed.
+\item "data.name": a character string giving the name(s) of the data.
 }
 }
 \description{
@@ -83,12 +83,12 @@ This tests the hypothesis that the relative effect, discussed below, is equal to
 
 The estimate of the relative effect, which can be considered as value similar to the probability of superiority, refers to the following:
 
- p = p(X<Y) + .5*P(X=Y)
+p = p(X<Y) + .5*P(X=Y)
 
- Note, for paired samples, this does *not* refer to the probability of an increase/decrease in paired sample but rather the probability that a randomly sampled value of X.
- This is also referred to as the "relative" effect in the literature. Therefore, the results will differ from the concordance probability provided by the ses_calc function.
+Note, for paired samples, this does \emph{not} refer to the probability of an increase/decrease in paired sample but rather the probability that a randomly sampled value of X.
+This is also referred to as the "relative" effect in the literature. Therefore, the results will differ from the concordance probability provided by the ses_calc function.
 
- The brunner_munzel function is based on the npar.t.test and npar.t.test.paired functions within the nparcomp package (Konietschke et al. 2015).
+The brunner_munzel function is based on the npar.t.test and npar.t.test.paired functions within the nparcomp package (Konietschke et al. 2015).
 }
 \examples{
 data(mtcars)

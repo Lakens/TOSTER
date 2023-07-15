@@ -1,5 +1,8 @@
 #' @title TOST with Wilcoxon-Mann-Whitney tests
-#' @description A function for TOST using the non-parametric methods of the Wilcoxon-Mann-Whitney family of tests.
+#' @description
+#' `r lifecycle::badge('stable')`
+#'
+#'  A function for TOST using the non-parametric methods of the Wilcoxon-Mann-Whitney family of tests.
 #' This function uses the normal approximation and applies a continuity correction automatically.
 #' @inheritParams t_TOST
 #' @param mu  number indicating the value around which (a-)symmetry (for
@@ -9,19 +12,19 @@
 #' correlation. Options also include "cstat" for concordance probability, or
 #' "odds" for Wilcoxon-Mann-Whitney odds (otherwise known as Agresti's
 #' generalized odds ratio).
-#' @details For details on the calculations in this function see vignette("robustTOST").
+#' @details For details on the calculations in this function see `vignette("robustTOST")`.
 #' @return An S3 object of class
-#'   \code{"TOSTnp"} is returned containing the following slots:
-#' \describe{
-#'   \item{\code{"TOST"}}{A table of class \code{"data.frame"} containing two-tailed wilcoxon signed rank test and both one-tailed results.}
-#'   \item{\code{"eqb"}}{A table of class \code{"data.frame"} containing equivalence bound settings.}
-#'   \item{\code{"effsize"}}{ table of class \code{"data.frame"} containing effect size estimates.}
-#'   \item{\code{"hypothesis"}}{String stating the hypothesis being tested.}
-#'   \item{\code{"smd"}}{List containing information on standardized effect size.}
-#'   \item{\code{"alpha"}}{Alpha level set for the analysis.}
-#'   \item{\code{"method"}}{Type of non-parametric test.}
-#'   \item{\code{"decision"}}{List included text regarding the decisions for statistical inference.}
-#' }
+#'   `"TOSTnp"` is returned containing the following slots:
+#'
+#'   - "TOST": A table of class `"data.frame"` containing two-tailed wilcoxon signed rank test and both one-tailed results.
+#'   - "eqb": A table of class `"data.frame"` containing equivalence bound settings.
+#'   - "effsize":  table of class `"data.frame"` containing effect size estimates.
+#'   - "hypothesis": String stating the hypothesis being tested.
+#'   - "smd": List containing information on standardized effect size.
+#'   - "alpha": Alpha level set for the analysis.
+#'   - "method": Type of non-parametric test.
+#'   - "decision": List included text regarding the decisions for statistical inference.
+#'
 #' @examples
 #' data(mtcars)
 #' wilcox_TOST(mpg ~ am,

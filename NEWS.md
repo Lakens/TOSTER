@@ -3,6 +3,11 @@ NEWS
 
 **TOSTER R package and jamovi module**
 
+# TOSTER v0.8.0
+
+- Added Brunner-Munzel test.
+- Updated documentation.
+
 # TOSTER v0.7.1
 
 - Fixing the ggplot2 error related to `after_stat` update from that package.

@@ -2,7 +2,9 @@
 % Please edit documentation in R/TOSTpaired.raw.R
 \name{TOSTpaired.raw}
 \alias{TOSTpaired.raw}
-\title{TOST function for a dependent t-test (raw scores)}
+\title{TOST function for a dependent t-test (raw scores)
+#' @description
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}}}
 \usage{
 TOSTpaired.raw(
   n,
@@ -45,7 +47,9 @@ TOSTpaired.raw(
 Returns TOST t-value 1, TOST p-value 1, TOST t-value 2, TOST p-value 2, degrees of freedom, low equivalence bound, high equivalence bound, Lower limit confidence interval TOST, Upper limit confidence interval TOST
 }
 \description{
-TOST function for a dependent t-test (raw scores)
+Development on this function is complete, and for new code we recommend
+switching to \link{tsum_TOST}, which is easier to use, more featureful,
+and still under active development.
 }
 \section{References}{
 

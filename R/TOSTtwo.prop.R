@@ -1,4 +1,12 @@
 #' TOST function for two proportions (raw scores)
+#'
+#' #' @description
+#' `r lifecycle::badge('superseded')`
+#'
+#' Development on `TOSTtwo.prop` is complete, and for new code we recommend
+#' switching to [tsum_TOST], which is easier to use, more featureful,
+#' and still under active development.
+#'
 #' @param prop1 proportion of group 1
 #' @param prop2 proportion of group 2
 #' @param n1 sample size in group 1

@@ -2,7 +2,7 @@
 #'
 #' Methods defined for objects returned from the t_TOST and boot_t_TOST functions.
 #'
-#' @param x object of class \code{TOSTt}
+#' @param x object of class `TOSTt`.
 #' @param digits Number of digits to print for p-values
 #' @param type Type of plot to produce. Default is a consonance density plot "cd". Consonance plots (type = "cd") and null distribution plots (type = "tnull") can also be produced. Note: null distribution plots only available for estimates = "raw".
 #' @param ci_lines Confidence interval lines for plots. Default is 1-alpha*2 (e.g., alpha = 0.05 is 90\%)
@@ -10,13 +10,12 @@
 #' @param estimates indicator of what estimates to plot; options include "raw" or "SMD". Default is is both: c("raw","SMD").
 #' @param ... further arguments passed through, see description of return value
 #'   for details.
-#'   \code{\link{TOSTt-methods}}.
+#'   [TOSTt-methods].
 #' @return
-#' \describe{
-#'   \item{\code{print}}{Prints short summary of the tests.}
-#'   \item{\code{plot}}{Returns a plot of the effects.}
-#'   \item{\code{describe}}{Verbose description of results.}
-#' }
+#'   - print: Prints short summary of the tests.
+#'   - plot: Returns a plot of the effects.
+#'   - describe: Verbose description of results.
+#'
 #'
 #' @examples
 #' # example code
@@ -27,14 +26,14 @@
 #' res1
 #' # Print with more digits
 #' print(res1, digits = 6)
-#' \dontrun{
+#'
 #' # Plot with density plot - only raw values (SLOW)
-#' plot(res1, type = "cd", estimates = "raw")
+#' #plot(res1, type = "cd", estimates = "raw")
 #' # Plot with consonance - only raw values (SLOW)
-#' plot(res1, type = "c", estimates = "raw")
+#' #plot(res1, type = "c", estimates = "raw")
 #' # Plot null distribution - only raw values
-#' plot(res1, type = "tnull", estimates = "raw")
-#' }
+#' #plot(res1, type = "tnull", estimates = "raw")
+#'
 #' # Get description of the results
 #' describe(res1)
 #'

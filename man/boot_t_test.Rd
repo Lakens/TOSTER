@@ -51,17 +51,17 @@ boot_t_test(x, ...)
 }
 \value{
 A list with class \code{"htest"} containing the following components:
-\describe{
-  \item{\code{statistic}}{the value of the t-statistic.}
-  \item{\code{parameter}}{the degrees of freedom for the t-statistic.}
-  \item{\code{p.value}}{the p-value for the test.}
-  \item{\code{conf.int}}{a confidence interval for the mean appropriate to the specified alternative hypothesis.}
-  \item{\code{estimate}}{the estimated mean or difference in means depending on whether it was a one-sample test or a two-sample test.}
-  \item{\code{null.value}}{the specified hypothesized value of the mean or mean difference. May be 2 values.}
-  \item{\code{stderr}}{the standard error of the mean (difference), used as denominator in the t-statistic formula.}
-  \item{\code{alternative}}{a character string describing the alternative hypothesis.}
-  \item{\code{method}}{a character string indicating what type of t-test was performed.}
-  \item{\code{data.name}}{a character string giving the name(s) of the data..}
+\itemize{
+\item "statistic": the value of the t-statistic.
+\item "parameter": the degrees of freedom for the t-statistic.
+\item "p.value": the p-value for the test.
+\item "conf.int": a confidence interval for the mean appropriate to the specified alternative hypothesis.
+\item "estimate": the estimated mean or difference in means depending on whether it was a one-sample test or a two-sample test.
+\item "null.value": the specified hypothesized value of the mean or mean difference. May be 2 values.
+\item "stderr": the standard error of the mean (difference), used as denominator in the t-statistic formula.
+\item "alternative": a character string describing the alternative hypothesis.
+\item "method": a character string indicating what type of t-test was performed.
+\item "data.name": a character string giving the name(s) of the data.
 }
 }
 \description{

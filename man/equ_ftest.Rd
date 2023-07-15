@@ -23,15 +23,15 @@ equ_ftest(Fstat, df1, df2, eqbound = NULL, eqb, MET = FALSE, alpha = 0.05)
 }
 \value{
 Object of class '"htest"
-\describe{
-  \item{\code{"statistic"}}{The value of the F-statistic.}
-  \item{\code{"parameter"}}{The degrees of freedom for the F-statistic.}
-  \item{\code{"p.value"}}{The he p-value for the test.}
-  \item{\code{"conf.int"}}{A confidence interval for the partial eta-squared statistic.}
-  \item{\code{"estimate"}}{Estimate of partial eta-squared.}
-  \item{\code{"null.value"}}{The specified for the equivalence test.}
-  \item{\code{"method"}}{A string indicating the type of F-test.}
-  \item{\code{"data.name"}}{A required string indicating that this was calculated from summary statistics.}
+\itemize{
+\item "statistic": The value of the F-statistic.
+\item "parameter": The degrees of freedom for the F-statistic.
+\item "p.value": The he p-value for the test.
+\item "conf.int": A confidence interval for the partial eta-squared statistic.
+\item "estimate": Estimate of partial eta-squared.
+\item "null.value": The specified for the equivalence test.
+\item "method": A string indicating the type of F-test.
+\item "data.name": A required string indicating that this was calculated from summary statistics.
 }
 }
 \description{

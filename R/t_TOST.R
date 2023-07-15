@@ -1,5 +1,8 @@
 #' @title TOST with t-tests
-#' @description A function for TOST with all types of t-tests.
+#' @description
+#' `r lifecycle::badge('stable')`
+#'
+#'  A function for TOST with all types of t-tests.
 #' @param x a (non-empty) numeric vector of data values.
 #' @param y an optional (non-empty) numeric vector of data values.
 #' @param formula a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.
@@ -22,17 +25,18 @@
 #' @param ...  further arguments to be passed to or from methods.
 #' @details For details on the calculations in this function see vignette("IntroTOSTt") & vignette("SMD_calcs").
 #' @return An S3 object of class
-#'   \code{"TOSTt"} is returned containing the following slots:
-#' \describe{
-#'   \item{\code{"TOST"}}{A table of class \code{"data.frame"} containing two-tailed t-test and both one-tailed results.}
-#'   \item{\code{"eqb"}}{A table of class \code{"data.frame"} containing equivalence bound settings.}
-#'   \item{\code{"effsize"}}{ table of class \code{"data.frame"} containing effect size estimates}
-#'   \item{\code{"hypothesis"}}{String stating the hypothesis being tested}
-#'   \item{\code{"smd"}}{List containing the results of the standardized mean difference calculations (e.g., Cohen's d).Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation)}
-#'   \item{\code{"alpha"}}{Alpha level set for the analysis.}
-#'   \item{\code{"method"}}{Type of t-test.}
-#'   \item{\code{"decision"}}{List included text regarding the decisions for statistical inference.}
-#' }
+#'   `"TOSTt"` is returned containing the following slots:
+#'
+#'   - "TOST": A table of class `"data.frame"` containing two-tailed t-test and both one-tailed results.
+#'   - "eqb": A table of class `"data.frame`" containing equivalence bound settings.
+#'   - "effsize":  table of class `"data.frame"` containing effect size estimates.
+#'   - "hypothesis": String stating the hypothesis being tested
+#'   - "smd": List containing the results of the standardized mean difference calculations (e.g., Cohen's d).
+#'      - Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation)
+#'   - "alpha": Alpha level set for the analysis.
+#'   - "method": Type of t-test.
+#'   - "decision": List included text regarding the decisions for statistical inference.
+#'
 #' @examples
 #' data(mtcars)
 #' t_TOST(mpg ~ am,

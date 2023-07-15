@@ -4,18 +4,19 @@
 #' @inheritParams t_TOST
 #' @details For details on the calculations in this function see vignette("robustTOST").
 #' @return An S3 object of class
-#'   \code{"TOSTt"} is returned containing the following slots:
-#' \describe{
-#'   \item{\code{"TOST"}}{A table of class \code{"data.frame"} containing two-tailed t-test and both one-tailed results.}
-#'   \item{\code{"eqb"}}{A table of class \code{"data.frame"} containing equivalence bound settings.}
-#'   \item{\code{"effsize"}}{ table of class \code{"data.frame"} containing effect size estimates}
-#'   \item{\code{"hypothesis"}}{String stating the hypothesis being tested}
-#'   \item{\code{"smd"}}{List containing the results of the standardized mean difference calculations (e.g., Cohen's d).Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation)}
-#'   \item{\code{"alpha"}}{Alpha level set for the analysis.}
-#'   \item{\code{"method"}}{Type of t-test.}
-#'   \item{\code{"decision"}}{List included text regarding the decisions for statistical inference.}
-#'   \item{\code{"boot"}}{List containing the bootstrap samples.}
-#' }
+#'   `"TOSTt"` is returned containing the following slots:
+#'
+#'   - "TOST": A table of class "data.frame" containing two-tailed t-test and both one-tailed results.
+#'   - "eqb": A table of class "data.frame" containing equivalence bound settings.
+#'   - "effsize":  table of class "data.frame" containing effect size estimates.
+#'   - "hypothesis": String stating the hypothesis being tested
+#'   - "smd": List containing the results of the standardized mean difference calculations (e.g., Cohen's d).
+#'      - Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation)
+#'   - "alpha": Alpha level set for the analysis.
+#'   - "method": Type of t-test.
+#'   - "decision": List included text regarding the decisions for statistical inference.
+#'   - "boot": List containing the bootstrap samples.
+#'
 #' @details The implemented test(s) corresponds to the proposal of Chapter 16 of Efron and Tibshirani (1994).
 #'  Returns TOSTt class object with bootstrapped based results.
 #'  Please note that the repeated measures "corrected" effect size is not available.
