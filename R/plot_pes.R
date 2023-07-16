@@ -1,3 +1,7 @@
+#' @title Plot partial eta-squared
+#' @description
+#' `r lifecycle::badge('stable')`
+#'
 #' Function to produce plots of the distribution of partial eta-squared
 #' @param Fstat The F-statistic from the F-test.
 #' @param df1 Degrees of freedom for the numerator.

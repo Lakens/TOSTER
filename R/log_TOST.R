@@ -1,5 +1,8 @@
 #' @title TOST with log transformed t-tests
-#' @description A function for TOST on the log-transformed data using parametric t-tests.
+#' @description
+#' `r lifecycle::badge('stable')`
+#'
+#'A function for TOST on the log-transformed data using parametric t-tests.
 #' @param eqb Equivalence bound; default is 1.25 (FDA guidelines). Can provide 1 value (reciprical value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds.
 #' @param null Null hypothesis value for a two-tailed test (default is 1).
 #' @inheritParams t_TOST

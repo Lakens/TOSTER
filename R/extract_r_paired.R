@@ -1,5 +1,8 @@
 #' @title Extract Paired Correlation
-#' @description A function for estimating the correlation from a paired samples t-test.
+#' @description
+#' `r lifecycle::badge('stable')`
+#'
+#' A function for estimating the correlation from a paired samples t-test.
 #' Useful for tsum_TOST when the correlation is not available.
 #' @param tstat The t-value from a paired samples t-test
 #' @param pvalue The two-tailed p-value from a paired samples t-test

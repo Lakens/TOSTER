@@ -1,5 +1,8 @@
 #' @title  Association/Correlation Test from Summary Statistics
-#' @description   Test for association between paired samples, using one of Pearson's product moment correlation coefficient,Kendall's tau or Spearman's rho.
+#' @description
+#' `r lifecycle::badge('stable')`
+#'
+#' Test for association between paired samples, using one of Pearson's product moment correlation coefficient,Kendall's tau or Spearman's rho.
 #' This is the updated version of the TOSTr function.
 #' @inheritParams TOSTr
 #' @inheritParams z_cor_test

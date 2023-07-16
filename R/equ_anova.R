@@ -1,5 +1,8 @@
 #' @title Equivalence Test for ANOVA Results
-#' @description Performs equivalence test on the partial eta-squared (pes) value from ANOVA results.
+#' @description
+#' `r lifecycle::badge('stable')`
+#'
+#' Performs equivalence test on the partial eta-squared (pes) value from ANOVA results.
 #'@param object an object of returned by either `Anova`,
 #'  `aov`, or `afex_aov`
 #' @param eqbound Equivalence bound for the partial eta-squared.

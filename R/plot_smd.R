@@ -1,5 +1,8 @@
-#' Function to produce plots of the distribution of the standardized mean difference
-#' @description Function to produce plots of the distribution of the standardized mean difference
+#' @title Plot Distribution of a SMD
+#' @description
+#' `r lifecycle::badge('stable')`
+#'
+#'Function to produce plots of the distribution of the standardized mean difference
 #' @param d Estimate of the standardized mean difference
 #' @param df degrees of freedom for the standardized mean difference
 #' @param lambda The non-centrality parameter for the standardized mean difference

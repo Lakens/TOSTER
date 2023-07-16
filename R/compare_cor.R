@@ -1,5 +1,8 @@
 #' @title Comparing two independent correlation coefficients
-#' @description A function to compare correlations between studies. This function is intended to be used to compare the compatibility of original studies with replication studies (lower p-values indicating lower compatibility).
+#' @description
+#' `r lifecycle::badge('stable')`
+#'
+#' A function to compare correlations between studies. This function is intended to be used to compare the compatibility of original studies with replication studies (lower p-values indicating lower compatibility).
 #' @param r1 Correlation study 1.
 #' @param df1 Degrees of freedom from study 1 (if a simple correlation the df is N-2).
 #' @param r2 Correlation study 2.

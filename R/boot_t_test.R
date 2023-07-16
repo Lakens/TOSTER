@@ -1,5 +1,8 @@
 #' @title Bootstrapped t-test
-#' @description A function for a bootstrap method for Tt-tests.
+#' @description
+#' `r lifecycle::badge('stable')`
+#'
+#'  A function for a bootstrap method for Tt-tests.
 #' @inheritParams simple_htest
 #' @inheritParams boot_t_TOST
 #' @details For details on the calculations in this function see vignette("robustTOST").

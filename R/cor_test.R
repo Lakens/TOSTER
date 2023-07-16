@@ -1,5 +1,8 @@
 #' @title Test for Association/Correlation Between Paired Samples
-#' @description   Test for association between paired samples, using one of Pearson's product moment correlation coefficient,Kendall's tau or Spearman's rho.
+#' @description
+#' `r lifecycle::badge('stable')`
+#'
+#' Test for association between paired samples, using one of Pearson's product moment correlation coefficient,Kendall's tau or Spearman's rho.
 #' Unlike the stats version of cor.test, this function allows users to set the null to a value other than zero.
 #' @param x,y numeric vectors of data values. x and y must have the same length.
 #' @param method a character string indicating which correlation coefficient is to be used for the test. One of "pearson", "kendall", or "spearman", can be abbreviated.

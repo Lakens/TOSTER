@@ -1,5 +1,8 @@
 #' @title Bootstrapped correlation coefficients
-#' @description A function for a bootstrap, percentile, method for correlation coefficients.
+#' @description
+#' `r lifecycle::badge('stable')`
+#'
+#'  A function for a bootstrap, percentile, method for correlation coefficients.
 #' @inheritParams boot_t_TOST
 #' @inheritParams z_cor_test
 #' @param method a character string indicating which correlation coefficient is to be used for the test. One of "winsorized", "bendpercent","pearson", "kendall", or "spearman", can be abbreviated.

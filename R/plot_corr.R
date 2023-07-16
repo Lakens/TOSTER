@@ -1,3 +1,7 @@
+#' @title Plot correlation coefficients
+#' @description
+#' `r lifecycle::badge('stable')`
+#'
 #' Function to produce plots of the distribution of standard correlation coefficients
 #' @param r The observed correlation coefficient.
 #' @param n Total number of observations (sample size).

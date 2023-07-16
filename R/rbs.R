@@ -1,5 +1,8 @@
 #' @title Non-parametric standardized effect sizes (replicates of ses_calc)
-#' @description Effect sizes for simple (one or two sample) non-parametric tests.
+#' @description
+#' `r lifecycle::badge('stable')`
+#'
+#'Effect sizes for simple (one or two sample) non-parametric tests.
 #' @param x a (non-empty) numeric vector of data values.
 #' @param y an optional (non-empty) numeric vector of data values.
 #' @param mu a number indicating the value around which (a-)symmetry (for

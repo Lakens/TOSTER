@@ -1,5 +1,8 @@
 #' @title Equivalence Test using an F-test
-#' @description Performs equivalence test on the partial eta-squared (pes) value for using an F-test.
+#' @description
+#' `r lifecycle::badge('stable')`
+#'
+#' Performs equivalence test on the partial eta-squared (pes) value for using an F-test.
 #' @param Fstat The F-statistic from the F-test.
 #' @param df1 Degrees of freedom for the numerator.
 #' @param df2 Degrees of freedom for the denominator.
