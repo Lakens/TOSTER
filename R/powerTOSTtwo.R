@@ -1,7 +1,7 @@
 #' @title Power Two Sample t-test
 #'
 #' @description
-#' `r lifecycle::badge("superseded")`
+#' `r lifecycle::badge("deprecated")`
 #'
 #' Power analysis for TOST for independent t-test (Cohen's d).
 #' This function is no longer maintained please use [power_t_TOST].
@@ -79,34 +79,13 @@ powerTOSTtwo<-function(alpha,
 #' @rdname powerTOSTtwo
 #' @export
 
-powerTOSTtwo.raw<-function(alpha,
+powerTOSTtwo.raw <-function(alpha,
                            statistical_power,
                            N,
                            sdpooled,
                            low_eqbound,
                            high_eqbound,
                            delta = 0){
-  lifecycle::deprecate_soft("0.4.0", "powerTOSTtwo.raw()", "power_t_TOST()")
-  if(missing(N)) {
-    NT1<-2*sdpooled^2*(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(delta - low_eqbound)^2
-    NT2<-2*sdpooled^2*(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(delta - high_eqbound)^2
-    N<-max(NT1,NT2)
-    message(cat("The required sample size to achieve",100*statistical_power,"% power with equivalence bounds of",low_eqbound,"and",high_eqbound,"is",N,"per group, or", 2*ceiling(N),"in total."))
-    return(N)
-  }
-  if(missing(statistical_power)) {
-    statistical_power1<-2*(pnorm(abs(low_eqbound)/sdpooled*sqrt(N/2)-qnorm(1-alpha))+pnorm(-abs(low_eqbound)/sdpooled*sqrt(N/2)-qnorm(1-alpha)))-1
-    statistical_power2<-2*(pnorm(abs(high_eqbound)/sdpooled*sqrt(N/2)-qnorm(1-alpha))+pnorm(-abs(high_eqbound)/sdpooled*sqrt(N/2)-qnorm(1-alpha)))-1
-    statistical_power<-min(statistical_power1,statistical_power2)
-    if(statistical_power<0) {statistical_power<-0}
-    message(cat("The statistical power is",round(100*statistical_power,2),"% for equivalence bounds of",low_eqbound,"and",high_eqbound,"."))
-    return(statistical_power)
-  }
-  if(missing(low_eqbound) && missing(high_eqbound)) {
-    low_eqbound<--sqrt(2*(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/N)*sdpooled
-    high_eqbound<-sqrt(2*(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/N)*sdpooled
-    message(cat("The equivalence bounds to achieve",100*statistical_power,"% power with N =",N,"are",round(low_eqbound,2),"and",round(high_eqbound,2),"."))
-    bounds<-c(low_eqbound,high_eqbound)
-    return(bounds)
-  }
+  lifecycle::deprecate_stop("0.4.0", "powerTOSTtwo.raw()", "power_t_TOST()")
+
 }

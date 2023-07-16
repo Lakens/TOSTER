@@ -1,7 +1,10 @@
-#' Power Paired Sample t-test
+#' @name powerTOSTpaired
+#' @aliases powerTOSTpaired
+#' @aliases powerTOSTpaired.raw
+#' @title Power Paired Sample t-test
 #'
 #' @description
-#' `r lifecycle::badge("superseded")`
+#' `r lifecycle::badge("deprecated")`
 #'
 #' Power analysis for TOST for dependent t-test (Cohen's dz).
 #' This function is no longer maintained please use [power_t_TOST].
@@ -75,6 +78,7 @@ powerTOSTpaired<-function(alpha,
   }
 }
 
+
 #' @rdname powerTOSTpaired
 #' @export
 
@@ -84,10 +88,8 @@ powerTOSTpaired.raw<-function(alpha,
                               low_eqbound,
                               high_eqbound,
                               sdif){
-  lifecycle::deprecate_soft("0.4.0", "powerTOSTpaired.raw()", "power_t_TOST()")
-  NT1<-(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(low_eqbound/sdif)^2
-  NT2<-(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(high_eqbound/sdif)^2
-  N<-ceiling(max(NT1,NT2))
-  message(cat("The required sample size to achieve",100*statistical_power,"% power with equivalence bounds of",low_eqbound,"and",high_eqbound,"is",N,"pairs"))
-  return(N)
+
+  lifecycle::deprecate_stop("0.4.0", "powerTOSTpaired.raw()", "power_t_TOST()")
+
+
 }
