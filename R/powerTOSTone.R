@@ -48,7 +48,11 @@
 #' @importFrom graphics abline plot points segments title
 #' @export
 
-powerTOSTone<-function(alpha, statistical_power, N, low_eqbound_d, high_eqbound_d){
+powerTOSTone<-function(alpha,
+                       statistical_power,
+                       N,
+                       low_eqbound_d,
+                       high_eqbound_d){
   lifecycle::deprecate_soft("0.4.0", "powerTOSTone()", "power_t_TOST()")
   if(missing(N)) {
     NT1<-(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(low_eqbound_d)^2
@@ -73,6 +77,10 @@ powerTOSTone<-function(alpha, statistical_power, N, low_eqbound_d, high_eqbound_
     return(bounds)
   }
 }
+
+#' @rdname powerTOSTone
+#' @export
+
 
 powerTOSTone.raw<-function(alpha, statistical_power, N, sd, low_eqbound, high_eqbound){
   lifecycle::deprecate_soft("0.4.0", "powerTOSTone.raw()", "power_t_TOST()")

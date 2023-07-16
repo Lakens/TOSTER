@@ -46,7 +46,11 @@
 #' @importFrom graphics abline plot points segments title
 #' @export
 
-powerTOSTtwo<-function(alpha, statistical_power, N, low_eqbound_d, high_eqbound_d){
+powerTOSTtwo<-function(alpha,
+                       statistical_power,
+                       N,
+                       low_eqbound_d,
+                       high_eqbound_d){
   lifecycle::deprecate_soft("0.4.0", "powerTOSTtwo()", "power_t_TOST()")
   if(missing(N)) {
     NT1<-2*(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(low_eqbound_d)^2
@@ -71,6 +75,9 @@ powerTOSTtwo<-function(alpha, statistical_power, N, low_eqbound_d, high_eqbound_
     return(bounds)
   }
 }
+
+#' @rdname powerTOSTtwo
+#' @export
 
 powerTOSTtwo.raw<-function(alpha,
                            statistical_power,

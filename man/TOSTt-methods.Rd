@@ -28,15 +28,13 @@ describe(x, ...)
 
 \item{digits}{Number of digits to print for p-values}
 
-\item{...}{further arguments passed through, see description of return value
-for details.
-\link{TOSTt-methods}.}
+\item{...}{further arguments passed through, see description of return value for details..}
 
 \item{type}{Type of plot to produce. Default is a consonance density plot "cd". Consonance plots (type = "cd") and null distribution plots (type = "tnull") can also be produced. Note: null distribution plots only available for estimates = "raw".}
 
 \item{estimates}{indicator of what estimates to plot; options include "raw" or "SMD". Default is is both: c("raw","SMD").}
 
-\item{ci_lines}{Confidence interval lines for plots. Default is 1-alpha*2 (e.g., alpha = 0.05 is 90\\%)}
+\item{ci_lines}{Confidence interval lines for plots. Default is 1-alpha*2 (e.g., alpha = 0.05 is 90\%)}
 
 \item{ci_shades}{Confidence interval shades when plot type is "cd".}
 }

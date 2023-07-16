@@ -1,7 +1,7 @@
 #' @title Convert to class 'htest'
 #'
 #' @description
-#' `r lifecycle::badge('stable')`
+#' `r lifecycle::badge('maturing')`
 #'
 #' Convert a TOSTER result object of class 'TOSTt' or 'TOSTnp' to a list of class 'htest'.
 #'

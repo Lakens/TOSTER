@@ -9,6 +9,7 @@ test_that("power functions are internally consistent", {
     sink()
     return(tmp)
   }
+  withr::local_options(lifecycle_verbosity = "quiet")
 
   suppressMessages(hush({
   ## tests for one-sample t-test

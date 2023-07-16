@@ -5,6 +5,7 @@
 #'
 #' Power analysis for TOST for dependent t-test (Cohen's dz).
 #' This function is no longer maintained please use [power_t_TOST].
+#'
 #' @param alpha alpha used for the test (e.g., 0.05)
 #' @param statistical_power desired power (e.g., 0.8)
 #' @param N number of pairs (e.g., 96)
@@ -44,7 +45,11 @@
 #' @importFrom graphics abline plot points segments title
 #' @export
 
-powerTOSTpaired<-function(alpha, statistical_power, N, low_eqbound_dz, high_eqbound_dz){
+powerTOSTpaired<-function(alpha,
+                          statistical_power,
+                          N,
+                          low_eqbound_dz,
+                          high_eqbound_dz){
   lifecycle::deprecate_soft("0.4.0", "powerTOSTpaired()", "power_t_TOST()")
   if(missing(N)) {
     NT1<-(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(low_eqbound_dz)^2
@@ -70,7 +75,15 @@ powerTOSTpaired<-function(alpha, statistical_power, N, low_eqbound_dz, high_eqbo
   }
 }
 
-powerTOSTpaired.raw<-function(alpha, statistical_power, low_eqbound, high_eqbound, sdif){
+#' @rdname powerTOSTpaired
+#' @export
+
+
+powerTOSTpaired.raw<-function(alpha,
+                              statistical_power,
+                              low_eqbound,
+                              high_eqbound,
+                              sdif){
   lifecycle::deprecate_soft("0.4.0", "powerTOSTpaired.raw()", "power_t_TOST()")
   NT1<-(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(low_eqbound/sdif)^2
   NT2<-(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(high_eqbound/sdif)^2

@@ -2,6 +2,7 @@
 % Please edit documentation in R/TOSTpaired.R
 \name{TOSTpaired}
 \alias{TOSTpaired}
+\alias{TOSTpaired.raw}
 \title{TOST function for a dependent t-test (Cohen's dz)}
 \usage{
 TOSTpaired(
@@ -13,6 +14,20 @@ TOSTpaired(
   r12,
   low_eqbound_dz,
   high_eqbound_dz,
+  alpha,
+  plot = TRUE,
+  verbose = TRUE
+)
+
+TOSTpaired.raw(
+  n,
+  m1,
+  m2,
+  sd1,
+  sd2,
+  r12,
+  low_eqbound,
+  high_eqbound,
   alpha,
   plot = TRUE,
   verbose = TRUE
@@ -40,6 +55,10 @@ TOSTpaired(
 \item{plot}{set whether results should be plotted (plot = TRUE) or not (plot = FALSE) - defaults to TRUE}
 
 \item{verbose}{logical variable indicating whether text output should be generated (verbose = TRUE) or not (verbose = FALSE) - default to TRUE}
+
+\item{low_eqbound}{lower equivalence bounds (e.g., -0.5) expressed in raw scores}
+
+\item{high_eqbound}{upper equivalence bounds (e.g., 0.5) expressed in raw scores}
 }
 \value{
 Returns TOST t-value 1, TOST p-value 1, TOST t-value 2, TOST p-value 2, degrees of freedom, low equivalence bound, high equivalence bound, low equivalence bound in dz, high equivalence bound in dz, Lower limit confidence interval TOST, Upper limit confidence interval TOST

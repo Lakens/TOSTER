@@ -2,9 +2,12 @@
 % Please edit documentation in R/powerTOSTpaired.R
 \name{powerTOSTpaired}
 \alias{powerTOSTpaired}
+\alias{powerTOSTpaired.raw}
 \title{Power Paired Sample t-test}
 \usage{
 powerTOSTpaired(alpha, statistical_power, N, low_eqbound_dz, high_eqbound_dz)
+
+powerTOSTpaired.raw(alpha, statistical_power, low_eqbound, high_eqbound, sdif)
 }
 \arguments{
 \item{alpha}{alpha used for the test (e.g., 0.05)}

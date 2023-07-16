@@ -9,6 +9,7 @@ test_that("power values for raw and standardized functions are identical", {
     sink()
     return(tmp)
   }
+  withr::local_options(lifecycle_verbosity = "quiet")
 
   hush({
     expect_equal(powerTOSTone.raw(alpha=0.05, statistical_power=0.9, sd = 0.5, low_eqbound=-0.25, high_eqbound=0.25),

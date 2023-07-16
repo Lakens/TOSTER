@@ -2,9 +2,12 @@
 % Please edit documentation in R/powerTOSTone.R
 \name{powerTOSTone}
 \alias{powerTOSTone}
+\alias{powerTOSTone.raw}
 \title{Power One Sample t-test}
 \usage{
 powerTOSTone(alpha, statistical_power, N, low_eqbound_d, high_eqbound_d)
+
+powerTOSTone.raw(alpha, statistical_power, N, sd, low_eqbound, high_eqbound)
 }
 \arguments{
 \item{alpha}{alpha used for the test (e.g., 0.05)}

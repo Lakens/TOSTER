@@ -2,9 +2,20 @@
 % Please edit documentation in R/powerTOSTtwo.R
 \name{powerTOSTtwo}
 \alias{powerTOSTtwo}
+\alias{powerTOSTtwo.raw}
 \title{Power Two Sample t-test}
 \usage{
 powerTOSTtwo(alpha, statistical_power, N, low_eqbound_d, high_eqbound_d)
+
+powerTOSTtwo.raw(
+  alpha,
+  statistical_power,
+  N,
+  sdpooled,
+  low_eqbound,
+  high_eqbound,
+  delta = 0
+)
 }
 \arguments{
 \item{alpha}{alpha used for the test (e.g., 0.05)}
@@ -17,11 +28,11 @@ powerTOSTtwo(alpha, statistical_power, N, low_eqbound_d, high_eqbound_d)
 
 \item{high_eqbound_d}{upper equivalence bounds (e.g., 0.5) expressed in standardized mean difference (Cohen's d)}
 
+\item{sdpooled}{specify the pooled standard deviation}
+
 \item{low_eqbound}{lower equivalence bounds (e.g., -0.5) expressed in raw scale units (e.g., scalepoints)}
 
 \item{high_eqbound}{upper equivalence bounds (e.g., 0.5) expressed in raw scale units (e.g., scalepoints)}
-
-\item{sdpooled}{specify the pooled standard deviation}
 
 \item{delta}{hypothesized true value for the difference between the 2 means. Default is zero.}
 }
