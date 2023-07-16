@@ -1,3 +1,8 @@
+#' @title TOST Power for Tests of Two Proportions
+#'
+#' @description
+#' `r lifecycle::badge("experimental")`
+#'
 #' Power analysis for TOST for difference between two proportions using Z-test (pooled)
 #' @param alpha alpha used for the test (e.g., 0.05)
 #' @param statistical_power desired power (e.g., 0.8)

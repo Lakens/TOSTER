@@ -1,5 +1,9 @@
 #' @title One, two, and paired samples hypothesis tests
-#' @description Performs one or two sample t-tests or Wilcoxon-Mann-Whitney rank-based tests with expanded options compared to [t.test], [brunner_munzel], or [wilcox.test].
+#'
+#' @description
+#' `r lifecycle::badge("maturing")`
+#'
+#' Performs one or two sample t-tests or Wilcoxon-Mann-Whitney rank-based tests with expanded options compared to [t.test], [brunner_munzel], or [wilcox.test].
 #' @param test a character string specifying what type of hypothesis test to use. Options are limited to "wilcox.test", "t.test", or "brunner_munzel". You can specify just the initial letter.
 #' @inheritParams t_TOST
 #' @inheritParams z_cor_test

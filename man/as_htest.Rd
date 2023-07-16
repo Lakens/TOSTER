@@ -22,6 +22,8 @@ Returns a list containing a list of class 'htest' for the result of each test wi
 \item{conf.int}{The confidence interval of the difference.}
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+
 Convert a TOSTER result object of class 'TOSTt' or 'TOSTnp' to a list of class 'htest'.
 }
 \examples{

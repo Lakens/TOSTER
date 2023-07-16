@@ -36,6 +36,8 @@ power_t_TOST(
 \item{type}{string specifying the type of t-test.}
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+
 Calculates the exact power of two one sided t-tests (TOST) for one, two, and paired samples.
 }
 \details{

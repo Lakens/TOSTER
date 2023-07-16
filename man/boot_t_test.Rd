@@ -65,6 +65,8 @@ A list with class \code{"htest"} containing the following components:
 }
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+
 A function for a bootstrap method for Tt-tests.
 }
 \details{

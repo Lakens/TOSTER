@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_corr.R
 \name{plot_cor}
 \alias{plot_cor}
-\title{Function to produce plots of the distribution of standard correlation coefficients}
+\title{Plot correlation coefficients}
 \usage{
 plot_cor(
   r,
@@ -27,6 +27,8 @@ plot_cor(
 Returns plot of the distribution of the correlation coefficient.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+
 Function to produce plots of the distribution of standard correlation coefficients
 }
 \details{

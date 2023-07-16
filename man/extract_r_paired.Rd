@@ -25,6 +25,8 @@ extract_r_paired(m1, sd1, m2, sd2 = NULL, n, tstat = NULL, pvalue = NULL)
 An estimate of the correlation.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+
 A function for estimating the correlation from a paired samples t-test.
 Useful for tsum_TOST when the correlation is not available.
 }

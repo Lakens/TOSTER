@@ -37,6 +37,8 @@ A list with class "htest" containing the following components:
 }
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+
 Test for association between paired samples, using one of Pearson's product moment correlation coefficient,Kendall's tau or Spearman's rho.
 Unlike the stats version of cor.test, this function allows users to set the null to a value other than zero.
 }

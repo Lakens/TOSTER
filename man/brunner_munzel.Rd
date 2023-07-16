@@ -74,6 +74,8 @@ A list with class \code{"htest"} containing the following components:
 }
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#maturing}{\figure{lifecycle-maturing.svg}{options: alt='[Maturing]'}}}{\strong{[Maturing]}}
+
 This is a generic function that performs a generalized asymptotic Brunner-Munzel test in a fashion similar to \code{"t.test"}.
 }
 \details{

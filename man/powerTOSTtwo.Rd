@@ -2,7 +2,7 @@
 % Please edit documentation in R/powerTOSTtwo.R
 \name{powerTOSTtwo}
 \alias{powerTOSTtwo}
-\title{Power analysis for TOST for independent t-test (Cohen's d).}
+\title{Power Two Sample t-test}
 \usage{
 powerTOSTtwo(alpha, statistical_power, N, low_eqbound_d, high_eqbound_d)
 }
@@ -16,13 +16,24 @@ powerTOSTtwo(alpha, statistical_power, N, low_eqbound_d, high_eqbound_d)
 \item{low_eqbound_d}{lower equivalence bounds (e.g., -0.5) expressed in standardized mean difference (Cohen's d)}
 
 \item{high_eqbound_d}{upper equivalence bounds (e.g., 0.5) expressed in standardized mean difference (Cohen's d)}
+
+\item{low_eqbound}{lower equivalence bounds (e.g., -0.5) expressed in raw scale units (e.g., scalepoints)}
+
+\item{high_eqbound}{upper equivalence bounds (e.g., 0.5) expressed in raw scale units (e.g., scalepoints)}
+
+\item{sdpooled}{specify the pooled standard deviation}
+
+\item{delta}{hypothesized true value for the difference between the 2 means. Default is zero.}
 }
 \value{
 Calculate either achieved power, equivalence bounds, or required N, assuming a true effect size of 0.
 Returns a string summarizing the power analysis, and a numeric variable for number of observations, equivalence bounds, or power.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}}
+
 Power analysis for TOST for independent t-test (Cohen's d).
+This function is no longer maintained please use \link{power_t_TOST}.
 }
 \section{References}{
 
@@ -41,4 +52,16 @@ powerTOSTtwo(alpha=0.05, N=108, low_eqbound_d=-0.4, high_eqbound_d=0.4)
 ## Equivalence bounds for alpha = 0.05, N = 108 per group, statistical power of
 ## 0.8, assuming true effect = 0
 powerTOSTtwo(alpha=0.05, N=108, statistical_power=0.8)
+
+## Sample size for alpha = 0.05, 80\% power, equivalence bounds of -200 and 200 in raw
+## units, assuming pooled standard deviation of 350, and assuming true effect = 0
+powerTOSTtwo.raw(alpha=0.05,statistical_power=0.8,low_eqbound=-200,high_eqbound=200,sdpooled=350)
+
+## Power for alpha = 0.05, N = 53 per group, equivalence bounds of
+## -200 and 200 in raw units, assuming sdpooled = 350 and true effect = 0
+powerTOSTtwo.raw(alpha=0.05, N=53, low_eqbound=-200, high_eqbound=200, sdpooled=350)
+
+## Equivalence bounds for alpha = 0.05, N = 108 per group, statistical power of
+## 0.8, assuming true effect = 0
+powerTOSTtwo.raw(alpha=0.05, N=53, statistical_power=0.8, sdpooled=350)
 }

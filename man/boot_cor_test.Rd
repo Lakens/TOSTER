@@ -45,6 +45,8 @@ A list with class "htest" containing the following components:
 }
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+
 A function for a bootstrap, percentile, method for correlation coefficients.
 }
 \details{

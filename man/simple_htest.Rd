@@ -69,6 +69,8 @@ A list with class \code{"htest"} containing the following components:
 }
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#maturing}{\figure{lifecycle-maturing.svg}{options: alt='[Maturing]'}}}{\strong{[Maturing]}}
+
 Performs one or two sample t-tests or Wilcoxon-Mann-Whitney rank-based tests with expanded options compared to \link{t.test}, \link{brunner_munzel}, or \link{wilcox.test}.
 }
 \details{

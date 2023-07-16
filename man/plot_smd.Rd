@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_smd.R
 \name{plot_smd}
 \alias{plot_smd}
-\title{Function to produce plots of the distribution of the standardized mean difference}
+\title{Plot Distribution of a SMD}
 \usage{
 plot_smd(
   d,
@@ -36,6 +36,8 @@ plot_smd(
 Returns plot of the distribution of the standardized mean difference.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+
 Function to produce plots of the distribution of the standardized mean difference
 }
 \details{

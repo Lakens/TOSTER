@@ -2,7 +2,7 @@
 % Please edit documentation in R/powerTOSTr.R
 \name{powerTOSTr}
 \alias{powerTOSTr}
-\title{Power analysis for TOST for correlations.}
+\title{TOST Power for Correlations}
 \usage{
 powerTOSTr(alpha, statistical_power, N, low_eqbound_r, high_eqbound_r)
 }
@@ -22,7 +22,9 @@ Calculate either achieved power, equivalence bounds, or required N, assuming a t
 Returns a string summarizing the power analysis, and a numeric variable for number of observations, equivalence bounds, or power.
 }
 \description{
-Power analysis for TOST for correlations.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+
+Power analysis for TOST for Pearson product-moment correlations.
 }
 \examples{
 ## Sample size for alpha = 0.05, 90\% power, equivalence bounds of

@@ -2,7 +2,7 @@
 % Please edit documentation in R/powerTOSTanova.R
 \name{power_eq_f}
 \alias{power_eq_f}
-\title{Power analysis for TOST for an F-test}
+\title{F-test Power}
 \usage{
 power_eq_f(alpha = 0.05, df1, df2, eqbound)
 }
@@ -19,6 +19,7 @@ power_eq_f(alpha = 0.05, df1, df2, eqbound)
 Object of class '"power.htest"
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 Power analysis for TOST for an F-test
 }
 \section{References}{

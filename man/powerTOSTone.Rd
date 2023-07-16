@@ -2,7 +2,7 @@
 % Please edit documentation in R/powerTOSTone.R
 \name{powerTOSTone}
 \alias{powerTOSTone}
-\title{Power analysis for TOST for one-sample t-test (Cohen's d).}
+\title{Power One Sample t-test}
 \usage{
 powerTOSTone(alpha, statistical_power, N, low_eqbound_d, high_eqbound_d)
 }
@@ -16,13 +16,20 @@ powerTOSTone(alpha, statistical_power, N, low_eqbound_d, high_eqbound_d)
 \item{low_eqbound_d}{lower equivalence bounds (e.g., -0.5) expressed in standardized mean difference (Cohen's d)}
 
 \item{high_eqbound_d}{upper equivalence bounds (e.g., 0.5) expressed in standardized mean difference (Cohen's d)}
+
+\item{low_eqbound}{lower equivalence bounds (e.g., -0.5) expressed in raw scores}
+
+\item{high_eqbound}{upper equivalence bounds (e.g., 0.5) expressed in raw scores}
 }
 \value{
 Calculate either achieved power, equivalence bounds, or required N, assuming a true effect size of 0.
 Returns a string summarizing the power analysis, and a numeric variable for number of observations, equivalence bounds, or power.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}}
+
 Power analysis for TOST for one-sample t-test (Cohen's d).
+This function is no longer maintained please use \link{power_t_TOST}.
 }
 \section{References}{
 
@@ -40,7 +47,21 @@ powerTOSTone(alpha=0.05, statistical_power=0.9, low_eqbound_d=-0.3, high_eqbound
 powerTOSTone(alpha=0.05, N=121, low_eqbound_d=-0.3, high_eqbound_d=0.3)
 
 ## Equivalence bounds for sample size of 121, alpha = 0.05, statistical power of
-## 0.9, and assuming true effect = 0
+## 0.9, and assuming true effect d = 0
 
 powerTOSTone(alpha=0.05, N=121, statistical_power=.9)
+
+#' ## Sample size for alpha = 0.05, 90\% power, equivalence bounds of -0.3 and 0.3 in
+## raw units, assuming pooled standard deviation of 1, and assuming true effect d = 0
+powerTOSTone.raw(alpha=0.05, statistical_power=0.9, sd = 1, low_eqbound=-0.3, high_eqbound=0.3)
+
+## Power for sample size of 121, alpha = 0.05, equivalence bounds of
+## -0.3 and 0.3 in raw units, assuming pooled standard deviation of 1, and assuming true effect = 0
+
+powerTOSTone.raw(alpha=0.05, N=121, sd = 1, low_eqbound=-0.3, high_eqbound=0.3)
+
+## Power for sample size of 121, alpha = 0.05, statistical power of
+## 0.9, and assuming true effect = 0
+
+powerTOSTone.raw(alpha=0.05, N=121, statistical_power=.9, sd=1)
 }

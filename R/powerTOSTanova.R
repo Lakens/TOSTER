@@ -1,4 +1,8 @@
+#' F-test Power
+#' @description
+#' `r lifecycle::badge('stable')`
 #' Power analysis for TOST for an F-test
+#'
 #' @param alpha alpha used for the test (e.g., 0.05)
 #' @param df1 Degrees of freedom for the numerator
 #' @param df2 Degrees of freedom for the denominator

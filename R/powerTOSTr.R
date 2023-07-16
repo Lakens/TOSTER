@@ -1,4 +1,10 @@
-#' Power analysis for TOST for correlations.
+#' @title TOST Power for Correlations
+#'
+#' @description
+#' `r lifecycle::badge("experimental")`
+#'
+#' Power analysis for TOST for Pearson product-moment correlations.
+#'
 #' @param alpha alpha used for the test (e.g., 0.05)
 #' @param statistical_power desired power (e.g., 0.8)
 #' @param N number of pairs (e.g., 96)

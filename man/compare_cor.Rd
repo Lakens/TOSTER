@@ -30,6 +30,8 @@ compare_cor(
 \item{null}{a number indicating the null hypothesis. For TOST, this would be equivalence bound.}
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+
 A function to compare correlations between studies. This function is intended to be used to compare the compatibility of original studies with replication studies (lower p-values indicating lower compatibility).
 }
 \details{

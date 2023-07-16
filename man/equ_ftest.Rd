@@ -35,6 +35,8 @@ Object of class '"htest"
 }
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+
 Performs equivalence test on the partial eta-squared (pes) value for using an F-test.
 }
 \details{

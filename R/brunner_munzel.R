@@ -1,6 +1,6 @@
 #' @title Brunner-Munzel Test
 #' @description
-#' `r lifecycle::badge("experimental")`
+#' `r lifecycle::badge("maturing")`
 #'
 #' This is a generic function that performs a generalized asymptotic Brunner-Munzel test in a fashion similar to `"t.test"`.
 #' @param x a (non-empty) numeric vector of data values.

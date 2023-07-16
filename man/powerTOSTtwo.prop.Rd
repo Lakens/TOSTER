@@ -2,7 +2,7 @@
 % Please edit documentation in R/powerTOSTtwo.prop.R
 \name{powerTOSTtwo.prop}
 \alias{powerTOSTtwo.prop}
-\title{Power analysis for TOST for difference between two proportions using Z-test (pooled)}
+\title{TOST Power for Tests of Two Proportions}
 \usage{
 powerTOSTtwo.prop(
   alpha,
@@ -34,6 +34,8 @@ Calculate either achieved power, equivalence bounds, or required N, assuming a t
 Returns a string summarizing the power analysis, and a numeric variable for number of observations, equivalence bounds, or power.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
+
 Power analysis for TOST for difference between two proportions using Z-test (pooled)
 }
 \section{References}{
