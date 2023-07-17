@@ -79,7 +79,7 @@ pow_corr = function (n = NULL, r = NULL, power = NULL, null = 0,
     alpha <- uniroot(function(alpha) eval(p.body) - power,
                      c(1e-10, 1 - 1e-10))$root
   else stop("internal error")
-  METHOD <- "Power for Pearson Product-Moment Correlation"
+  METHOD <- "Approximate Power for Pearson Product-Moment Correlation (z-test)"
 
   structure(list(n = n, rho = r,
                  alpha = alpha, beta = 1-power, power = power,
@@ -125,7 +125,7 @@ pow_corr_tost = function (n = NULL, r = 0, power = NULL, null = NULL,
     alpha <- uniroot(function(alpha) eval(p.body) - power,
                      c(1e-10, 1 - 1e-10))$root
   else stop("internal error")
-  METHOD <- "Power for Pearson Product-Moment Correlation"
+  METHOD <- "Approximate Power for Pearson Product-Moment Correlation (z-test)"
 
   structure(list(n = n, rho = r,
                  alpha = alpha, beta = 1-power, power = power,

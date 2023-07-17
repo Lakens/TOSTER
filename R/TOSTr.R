@@ -24,7 +24,7 @@
 #'
 
 TOSTr<-function(n, r, low_eqbound_r, high_eqbound_r, alpha, plot = TRUE, verbose = TRUE){
-  lifecycle::deprecate_soft("0.4.0", "TOSTr()", "corsum_test()")
+  lifecycle::deprecate_warn("0.4.0", "TOSTr()", "corsum_test()")
   if(missing(alpha)) {
     alpha <- 0.05
   }
