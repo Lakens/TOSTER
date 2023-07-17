@@ -36,6 +36,7 @@ power_eq_f(alpha=0.05, df1=3, df2 = 237, eqbound = 0.01)
 }
 \seealso{
 Other power: 
-\code{\link{power_t_TOST}()}
+\code{\link{power_t_TOST}()},
+\code{\link{power_z_cor}()}
 }
 \concept{power}

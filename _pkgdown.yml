@@ -99,6 +99,7 @@ reference:
   contents:
   - power_t_TOST
   - power_eq_f
+  - power_z_cor
 
 - title: "Data"
   contents:

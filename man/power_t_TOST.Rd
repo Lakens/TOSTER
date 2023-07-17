@@ -54,6 +54,7 @@ Diletti D, Hauschke D, Steinijans VW. Sample Size Determination for Bioequivalen
 }
 \seealso{
 Other power: 
-\code{\link{power_eq_f}()}
+\code{\link{power_eq_f}()},
+\code{\link{power_z_cor}()}
 }
 \concept{power}
