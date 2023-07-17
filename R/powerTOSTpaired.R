@@ -48,12 +48,15 @@
 #' @importFrom graphics abline plot points segments title
 #' @export
 
-powerTOSTpaired<-function(alpha,
-                          statistical_power,
-                          N,
-                          low_eqbound_dz,
-                          high_eqbound_dz){
-  lifecycle::deprecate_soft("0.4.0", "powerTOSTpaired()", "power_t_TOST()")
+
+powerTOSTpaired <- function(alpha,
+                            statistical_power,
+                            N,
+                            low_eqbound_dz,
+                            high_eqbound_dz) {
+
+  lifecycle::deprecate_warn("0.4.0", "powerTOSTpaired()", "power_t_TOST()")
+
   if(missing(N)) {
     NT1<-(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(low_eqbound_dz)^2
     NT2<-(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(high_eqbound_dz)^2
@@ -83,13 +86,38 @@ powerTOSTpaired<-function(alpha,
 #' @export
 
 
-powerTOSTpaired.raw<-function(alpha,
-                              statistical_power,
-                              low_eqbound,
-                              high_eqbound,
-                              sdif){
+powerTOSTpaired.raw <- function(alpha,
+                                statistical_power,
+                                low_eqbound,
+                                high_eqbound,
+                                sdif,
+                                N) {
 
-  lifecycle::deprecate_stop("0.4.0", "powerTOSTpaired.raw()", "power_t_TOST()")
+
+  lifecycle::deprecate_warn("0.4.0", "powerTOSTpaired.raw()", "power_t_TOST()")
+
+  if(missing(N)) {
+    NT1<-(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(low_eqbound/sdif)^2
+    NT2<-(qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/(high_eqbound/sdif)^2
+    N<-max(NT1,NT2)
+    message(cat("The required sample size to achieve",100*statistical_power,"% power with equivalence bounds of",low_eqbound,"and",high_eqbound,"is",ceiling(N),"pairs"))
+    return(N)
+  }
+  if(missing(statistical_power)) {
+    statistical_power1<-2*(pnorm((abs(low_eqbound)/sdif*sqrt(N))-qnorm(1-alpha))+pnorm(-(abs(low_eqbound)/sdif*sqrt(N))-qnorm(1-alpha)))-1
+    statistical_power2<-2*(pnorm((abs(high_eqbound)/sdif*sqrt(N))-qnorm(1-alpha))+pnorm(-(abs(high_eqbound)/sdif*sqrt(N))-qnorm(1-alpha)))-1
+    statistical_power<-min(statistical_power1,statistical_power2)
+    if(statistical_power<0) {statistical_power<-0}
+    message(cat("The statistical power is",round(100*statistical_power,2),"% for equivalence bounds of",low_eqbound,"and",high_eqbound,"."))
+    return(statistical_power)
+  }
+  if(missing(low_eqbound) && missing(high_eqbound)) {
+    low_eqbound<--sqrt((qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/N)*sdif
+    high_eqbound<-sqrt((qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))^2/N)*sdif
+    message(cat("The equivalence bounds to achieve",100*statistical_power,"% power with N =",N,"are",round(low_eqbound,2),"and",round(high_eqbound,2),"."))
+    bounds<-c(low_eqbound,high_eqbound)
+    return(bounds)
+  }
 
 
 }
