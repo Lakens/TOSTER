@@ -43,15 +43,24 @@
 #' # Example 9.4b equivalence of two proportions (p. 113) #
 #' powerTOSTtwo.prop(alpha=0.010, statistical_power=0.8, prop1 = 0.5, prop2 = 0.5,
 #'    low_eqbound_prop = -0.2, high_eqbound_prop = 0.2)/2
-#' @section References:
+#' @references
 #' Silva, G. T. da, Logan, B. R., & Klein, J. P. (2008). Methods for Equivalence and Noninferiority Testing. Biology of Blood and Marrow Transplantation: Journal of the American Society for Blood and Marrow Transplantation, 15(1 Suppl), 120-127. https://doi.org/10.1016/j.bbmt.2008.10.004
+#'
 #' Julious, S. A. & Campell, M. J. (2012). Tutorial in biostatistics: sample sizes for parallel group clinical trials with binary data. Statistics in Medicine, 31:2904-2936.
+#'
 #' Chow, S.-C., Wang, H., & Shao, J. (2007). Sample Size Calculations in Clinical Research, Second Edition (2 edition). Boca Raton: Chapman and Hall/CRC.
 #' @importFrom stats pnorm pt qnorm qt
 #' @export
 
-powerTOSTtwo.prop<-function(alpha, statistical_power, prop1, prop2, N, low_eqbound_prop, high_eqbound_prop){
-  if(missing(N)) {
+powerTOSTtwo.prop <- function(alpha,
+                              statistical_power,
+                              prop1,
+                              prop2,
+                              N,
+                              low_eqbound_prop,
+                              high_eqbound_prop)
+{
+    if(missing(N)) {
     NT1<-(prop1*(1-prop1)+prop2*(1-prop2))*((qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))/(abs(prop1-prop2)-abs(low_eqbound_prop)))^2
     NT2<-(prop1*(1-prop1)+prop2*(1-prop2))*((qnorm(1-alpha)+qnorm(1-((1-statistical_power)/2)))/(abs(prop1-prop2)-abs(high_eqbound_prop)))^2
     N<-max(NT1,NT2)

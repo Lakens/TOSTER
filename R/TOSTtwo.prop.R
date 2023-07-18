@@ -27,8 +27,9 @@
 #' TOSTtwo.prop(prop1 = .65, prop2 = .70, n1 = 100, n2 = 100,
 #'    low_eqbound = -0.1, high_eqbound = 0.1, alpha = .05)
 #'
-#' @section References:
+#' @references
 #' Tunes da Silva, G., Logan, B. R., & Klein, J. P. (2008). Methods for Equivalence and Noninferiority Testing. Biology of Blood Marrow Transplant, 15(1 Suppl), 120-127.
+#'
 #' Yin, G. (2012). Clinical Trial Design: Bayesian and Frequentist Adaptive Methods. Hoboken, New Jersey: John Wiley & Sons, Inc.
 #' @export
 
