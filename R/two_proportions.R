@@ -87,4 +87,12 @@ twoprop_test = function(p1, p2,
   # NORMAL APPROX.
   conf_int = prop_dif - c(-1,1)*(qnorm(conf) * prop_se)
 
+  if(alternative == "less"){
+    conf_int[1] = -Inf
+  }
+
+  if(alternative == "greater"){
+    conf_int[2] = Inf
+  }
+
 }
