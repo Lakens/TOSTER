@@ -83,8 +83,25 @@ twoprop_test = function(p1, p2,
     )
 
   }
-
+  STATISTIC = ztest
+  names(STATISTIC) <- "z"
+  ESTIMATE = prop_dif
+  names(ESTIMATE) = "difference in proportions"
+  NVAL = null
+  names(NVAL) = rep("difference in proportions", length(null))
   # NORMAL APPROX.
-  conf_int = prop_dif - c(-1,1)*(qnorm(conf) * prop_se)
+  CINT = prop_dif - c(-1,1)*(qnorm(conf) * prop_se)
+  attr(CINT, "conf.level") <- conf_level
+  METHOD = "difference in two proportions z-test"
+  RVAL <- list(statistic = STATISTIC,
+               #parameter = PARAMETER,
+               p.value = as.numeric(PVAL),
+               estimate = ESTIMATE,
+               null.value = NVAL,
+               conf.int = CINT,
+               alternative = alternative,
+               method = METHOD)
+  class(RVAL) <- "htest"
+  return(RVAL)
 
 }
