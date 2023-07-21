@@ -104,4 +104,12 @@ twoprop_test = function(p1, p2,
   class(RVAL) <- "htest"
   return(RVAL)
 
+  if(alternative == "less"){
+    conf_int[1] = -Inf
+  }
+
+  if(alternative == "greater"){
+    conf_int[2] = Inf
+  }
+
 }
