@@ -1,7 +1,10 @@
+#' @name power_twoprop
+#' @aliases powerTOSTtwo.prop
+#' @aliases power_twoprop
 #' @title TOST Power for Tests of Two Proportions
 #'
 #' @description
-#' `r lifecycle::badge("experimental")`
+#' `r lifecycle::badge("maturing")`
 #'
 #' Power analysis for TOST for difference between two proportions using Z-test (pooled)
 #' @param alpha alpha used for the test (e.g., 0.05)
@@ -82,4 +85,26 @@ powerTOSTtwo.prop <- function(alpha,
     bounds<-c(low_eqbound_prop,high_eqbound_prop)
     return(bounds)
   }
+}
+
+#' @rdname power_twoprop
+#' @export
+
+power_twoprop = function(p1, p2,
+                         n = NULL,
+                         null = 0,
+                         alpha = NULL,
+                         power = NULL,
+                         alternative = c("two.sided",
+                                         "less",
+                                         "greater",
+                                         "equivalence")){
+
+  p.body =     quote({
+    statistical_power1<-2*(pnorm((abs(prop1-prop2)-low_eqbound_prop)/sqrt(prop1*(1-prop1)/N+prop2*(1-prop2)/N)-qnorm(1-alpha))+pnorm(-(abs(prop1-prop2)-low_eqbound_prop)/sqrt(prop1*(1-prop1)/N+prop2*(1-prop2)/N)-qnorm(1-alpha)))-1
+  statistical_power2<-2*(pnorm((abs(prop1-prop2)-high_eqbound_prop)/sqrt(prop1*(1-prop1)/N+prop2*(1-prop2)/N)-qnorm(1-alpha))+pnorm(-(abs(prop1-prop2)-high_eqbound_prop)/sqrt(prop1*(1-prop1)/N+prop2*(1-prop2)/N)-qnorm(1-alpha)))-1
+  statistical_power<-min(statistical_power1,statistical_power2)
+  if(statistical_power<0) {statistical_power<-0}
+  })
+
 }
