@@ -90,7 +90,7 @@ powerTOSTtwo.prop <- function(alpha,
 #' @rdname power_twoprop
 #' @export
 
-power_twoprop = function(p1, p2,
+power_twoprop = function(p1, p2 = NULL,
                          n = NULL,
                          null = 0,
                          alpha = NULL,
@@ -99,12 +99,163 @@ power_twoprop = function(p1, p2,
                                          "less",
                                          "greater",
                                          "equivalence")){
+  if(missing(p1)){
+    stop("p1 must be supplied")
+  }
 
-  p.body =     quote({
-    statistical_power1<-2*(pnorm((abs(prop1-prop2)-low_eqbound_prop)/sqrt(prop1*(1-prop1)/N+prop2*(1-prop2)/N)-qnorm(1-alpha))+pnorm(-(abs(prop1-prop2)-low_eqbound_prop)/sqrt(prop1*(1-prop1)/N+prop2*(1-prop2)/N)-qnorm(1-alpha)))-1
-  statistical_power2<-2*(pnorm((abs(prop1-prop2)-high_eqbound_prop)/sqrt(prop1*(1-prop1)/N+prop2*(1-prop2)/N)-qnorm(1-alpha))+pnorm(-(abs(prop1-prop2)-high_eqbound_prop)/sqrt(prop1*(1-prop1)/N+prop2*(1-prop2)/N)-qnorm(1-alpha)))-1
-  statistical_power<-min(statistical_power1,statistical_power2)
-  if(statistical_power<0) {statistical_power<-0}
+  alternative = match.arg(alternative)
+
+  if(alternative == "equivalence"){
+    if(length(null) == 1){
+      if(null ==  0){
+        stop("null cannot be zero if alternative is equivalence")
+      }
+
+      null = c(null,-1 * null)
+
+    }
+    pow_prop_tost(n = n, r = rho, power = power, null = null,
+                  alpha = alpha)
+  } else{
+    pow_prop(n = null, r = r, power = power, null = null,
+             alpha = alpha, alternative = alternative)
+  }
+
+
+
+}
+
+
+pow_prop = function (p1, p2 = NULL,
+                     n = NULL,
+                     null = 0,
+                     alpha = NULL,
+                     power = NULL,
+                     alternative = c("two.sided",
+                                     "less",
+                                     "greater"))
+{
+  if (sum(sapply(list(p2, n, power, alpha), is.null)) != 1)
+    stop("exactly one of p2, n, power, and alpha must be NULL")
+  if (!is.null(n) && min(n) < 1)
+    stop("number of observations in each group must be at least 1")
+  if (!is.null(alpha) && !is.numeric(alpha) || any(0 > alpha | alpha >
+                                                   1))
+    stop(sQuote("alpha"), " must be numeric in [0, 1]")
+  if (!is.null(power) && !is.numeric(power) || any(0 > power | power >
+                                                   1))
+    stop(sQuote("power"), " must be numeric in [0, 1]")
+  alternative <- match.arg(alternative)
+  tside <- switch(alternative, less = 1, two.sided = 2, greater = 3)
+
+  if (tside == 3) {
+    p.body <- quote({
+      prop_se <- sqrt((p1*(1-p1))/n + (p2*(1-p2))/n)
+      prop_dif <- p1 - p2 - null
+      zval = qnorm(alpha)
+      pnorm(qnorm(alpha, lower = FALSE) - (zval*prop_se+prop_dif)/prop_se, lower = FALSE)
+    })
+  }
+  if (tside == 2) {
+
+    p.body <- quote({
+      prop_se <- sqrt((p1*(1-p1))/n + (p2*(1-p2))/n)
+      prop_dif <- p1 - p2 - null
+      zval = qnorm(alpha/2)
+      pnorm(qnorm(alpha/2, lower = FALSE) - (zval*prop_se+prop_dif)/prop_se, lower = FALSE) +
+        pnorm(qnorm(alpha/2, lower = TRUE) - (zval*prop_se+prop_dif)/prop_se, lower = TRUE)
+    })
+  }
+  if (tside == 1) {
+    p.body <- quote({
+      prop_se <- sqrt((p1*(1-p1))/n + (p2*(1-p2))/n)
+      prop_dif <- p1 - p2 - null
+      zval = qnorm(alpha)
+      pnorm(qnorm(alpha, lower = TRUE) - (zval*prop_se+prop_dif)/prop_se, lower = TRUE)
+    })
+  }
+
+  if (is.null(power))
+    power <- eval(p.body)
+  else if (is.null(n))
+    n <- uniroot(function(n) eval(p.body) - power, c(4 + 1e-10, 1e+07))$root
+  else if (is.null(alpha))
+    alpha <- uniroot(function(alpha) eval(p.body) - power,
+                     c(1e-10, 1 - 1e-10))$root
+  else if (is.null(p2))
+    p2 = uniroot(function(alpha) eval(p.body) - power,
+                 c(1e-10, 1 - 1e-10))$root
+  else stop("internal error")
+
+  if (is.null(power))
+    power <- eval(p.body) else if (is.null(h)) {
+      if (tside == 2) {
+        h <- uniroot(function(h) eval(p.body) - power, c(1e-10, 10))$root
+      }
+      if (tside == 1) {
+        h <- uniroot(function(h) eval(p.body) - power, c(-10, 5))$root
+      }
+      if (tside == 3) {
+        h <- uniroot(function(h) eval(p.body) - power, c(-5, 10))$root
+      }
+    } else if (is.null(n))
+      n <- uniroot(function(n) eval(p.body) - power, c(2 + 1e-10, 1e+05))$root else if (is.null(alpha))
+        alpha <- uniroot(function(alpha) eval(p.body) - power, c(1e-10,
+                                                                 1 - 1e-10))$root else stop("internal error")
+
+  METHOD <- "Power for Test of Differences in Two Proportions (z-test)"
+  NOTE = "Sample sizes for EACH group"
+  structure(list(n = n,
+                 proportions = c(p1,p2),
+                 alpha = alpha,
+                 beta = 1-power, power = power,
+                 null = null, alternative = alternative,
+                 method = METHOD,
+                 NOTE = NOTE),
+            class = "power.htest")
+}
+
+pow_prop_tost = function (n = NULL, r = 0, power = NULL, null = NULL,
+                          alpha = NULL)
+{
+
+  if (sum(sapply(list(n, r, power, alpha), is.null)) != 1)
+    stop("exactly one of n, r, power, and alpha must be NULL")
+  if(is.null(r)){
+    stop("r cannot be set to NULL at this time.")
+  }
+  if (!is.null(alpha) && !is.numeric(alpha) || any(0 > alpha |
+                                                   alpha > 1))
+    stop(sQuote("alpha"), " must be numeric in [0, 1]")
+  if (!is.null(power) && !is.numeric(power) || any(0 > power |
+                                                   power > 1))
+    stop(sQuote("power"), " must be numeric in [0, 1]")
+  if (!is.null(n) && min(n) < 4)
+    stop("number of observations must be at least 4")
+
+  alternative <- "equivalence"
+
+  p.body =  quote({
+    statistical_power1<-2*(pnorm((abs(prop1-prop2)-min(null))/sqrt(prop1*(1-prop1)/N+prop2*(1-prop2)/N)-qnorm(1-alpha))+pnorm(-(abs(prop1-prop2)-min(null))/sqrt(prop1*(1-prop1)/N+prop2*(1-prop2)/N)-qnorm(1-alpha)))-1
+    statistical_power2<-2*(pnorm((abs(prop1-prop2)-max(null))/sqrt(prop1*(1-prop1)/N+prop2*(1-prop2)/N)-qnorm(1-alpha))+pnorm(-(abs(prop1-prop2)-max(null))/sqrt(prop1*(1-prop1)/N+prop2*(1-prop2)/N)-qnorm(1-alpha)))-1
+    statistical_power<-min(statistical_power1,statistical_power2)
+    if(statistical_power<0) {statistical_power<-0}
   })
 
+  if (is.null(power))
+    power <- eval(p.body)
+  else if (is.null(n))
+    n <- uniroot(function(n) eval(p.body) - power, c(4 + 1e-10, 1e+07))$root
+  else if (is.null(alpha))
+    alpha <- uniroot(function(alpha) eval(p.body) - power,
+                     c(1e-10, 1 - 1e-10))$root
+  else stop("internal error")
+  METHOD <- "Power for Test of Differences in Two Proportions (z-test)"
+  NOTE = "Sample sizes for EACH group"
+  structure(list(n = n, rho = r,
+                 alpha = alpha, beta = 1-power, power = power,
+                 null = null, alternative = alternative,
+                 method = METHOD,
+                 NOTE = NOTE),
+            class = "power.htest")
 }
