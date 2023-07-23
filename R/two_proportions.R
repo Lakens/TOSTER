@@ -9,6 +9,7 @@
 #' @param p1,p2 Proportions in each respective group.
 #' @param n1,n2 sample size in each respective group.
 #' @param null a number indicating the null hypothesis of the difference in proportions between two groups.
+#' @param effect_size the effect size estimate, and confidence intervals, to calculate. Options include the difference between both proportions ("difference"), odds ratio ("odds.ratio"), or risk ratio ("risk.ratio").
 #' @inheritParams z_cor_test
 #' @return An S3 object of the class `htest`.
 #'
@@ -26,7 +27,10 @@ twoprop_test = function(p1, p2,
                                         "less",
                                         "greater",
                                         "equivalence",
-                                        "minimal.effect")){
+                                        "minimal.effect"),
+                        effect_size = c("difference",
+                                        "odds.ratio",
+                                        "risk.ratio")){
 
   prop_dif <- p1 - p2
   # proportion se
@@ -102,14 +106,125 @@ twoprop_test = function(p1, p2,
 
   }
 
+  # effect size ----
+  effect_size = switch(effect_size,
+                       difference = calc_prop_dif(p1, p2, n1, n2,
+                                                  conf_level,
+                                                  conf,
+                                                  alternative),
+                       odds.ratio = calc_odds_ratio(p1, p2, n1, n2,
+                                                    conf_level,
+                                                    conf,
+                                                    alternative),
+                       risk.ratio = calc_risk_ratio(p1, p2, n1, n2,
+                                                    conf_level,
+                                                    conf,
+                                                    alternative))
 
   STATISTIC = ztest
   names(STATISTIC) <- "z"
-  ESTIMATE = prop_dif
-  names(ESTIMATE) = "difference in proportions"
+
   NVAL = null
   names(NVAL) = rep("difference in proportions", length(null))
-  # NORMAL APPROX.
+
+  METHOD = "difference in two proportions z-test"
+  RVAL <- list(statistic = STATISTIC,
+               #parameter = PARAMETER,
+               p.value = as.numeric(PVAL),
+               estimate = effect_size$ESTIMATE,
+               null.value = NVAL,
+               conf.int = effect_size$CINT,
+               alternative = alternative,
+               method = METHOD)
+  class(RVAL) <- "htest"
+  return(RVAL)
+
+
+
+}
+
+calc_odds_ratio = function(p1,p2,n1,n2,
+                           conf_level = .95,
+                           conf = .975,
+                           alternative){
+
+  # Fleiss, J. L., Levin, B., Paik, M.C. 2003. Statistical Methods for Rates and Proportions. Third Edition. John Wiley & Sons. New York.
+  q1 = 1-p1
+  q2 = 1-p2
+  a = 1/(n1*p1+.5)
+  b = 1/(n1*q1+.5)
+  c = 1/(n2*p2+.5)
+  d = 1/(n2*q2+.5)
+  OR = (p1/q1) / (p2/q2)
+
+  z_mult = qnorm(conf)
+  se_logodds = sqrt(sum(a,b,c,d))
+
+  CINT = exp(
+    log(OR) + c(-1,1)*z_mult*se_logodds
+    )
+
+  if(alternative == "less"){
+    CINT[1] = -Inf
+  }
+
+  if(alternative == "greater"){
+    CINT[2] = Inf
+  }
+  attr(CINT, "conf.level") <- conf_level
+
+  ESTIMATE = OR
+  names(ESTIMATE) = "Odds Ratio"
+
+  list(ESTIMATE = ESTIMATE,
+       CINT = CINT)
+
+}
+
+calc_risk_ratio = function(p1,p2,n1,n2,
+                           conf_level = .95,
+                           conf = .975,
+                           alternative){
+  # Gart and Nam (1988), page 324
+  # Gart, John J. and Nam, Jun-mo. 1988. 'Approximate Interval Estimation of the Ratio of Binomial Parameters: Review and Corrections for Skewness.' Biometrics, Volume 44, 323-338
+  phi = p1/p2
+  z_mult = qnorm(conf)
+  q1 = 1-p1
+  q2 = 1-p2
+
+  se_val = sqrt(q1/(n1*p1) + q2/(n2*p2))
+  CINT = phi * exp(c(-1,1)*z_mult*se_val)
+
+  if(alternative == "less"){
+    CINT[1] = -Inf
+  }
+
+  if(alternative == "greater"){
+    CINT[2] = Inf
+  }
+  attr(CINT, "conf.level") <- conf_level
+
+  ESTIMATE = phi
+  names(ESTIMATE) = "Risk Ratio"
+
+  list(ESTIMATE = ESTIMATE,
+       CINT = CINT)
+}
+
+calc_prop_dif = function(p1,p2,n1,n2,
+                           conf_level = .95,
+                           conf = .975,
+                         alternative){
+  # Normal Approx.
+  prop_dif <- p1 - p2
+  # proportion se
+  prop_se <- sqrt((p1*(1-p1))/n1 + (p2*(1-p2))/n2)
+  z_mult = qnorm(conf)
+  q1 = 1-p1
+  q2 = 1-p2
+  ESTIMATE = prop_dif
+  names(ESTIMATE) = "difference in proportions"
+
   CINT = prop_dif - c(-1,1)*(qnorm(conf) * prop_se)
   if(alternative == "less"){
     CINT[1] = -Inf
@@ -119,18 +234,9 @@ twoprop_test = function(p1, p2,
     CINT[2] = Inf
   }
   attr(CINT, "conf.level") <- conf_level
-  METHOD = "difference in two proportions z-test"
-  RVAL <- list(statistic = STATISTIC,
-               #parameter = PARAMETER,
-               p.value = as.numeric(PVAL),
-               estimate = ESTIMATE,
-               null.value = NVAL,
-               conf.int = CINT,
-               alternative = alternative,
-               method = METHOD)
-  class(RVAL) <- "htest"
-  return(RVAL)
 
-
-
+  list(ESTIMATE = ESTIMATE,
+       CINT = CINT)
 }
+
+
