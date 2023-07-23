@@ -1,10 +1,10 @@
 #' TOST function for two proportions (raw scores)
 #'
 #' #' @description
-#' `r lifecycle::badge('superseded')`
+#' `r lifecycle::badge('deprecated')`
 #'
 #' Development on `TOSTtwo.prop` is complete, and for new code we recommend
-#' switching to [tsum_TOST], which is easier to use, more featureful,
+#' switching to [twoprop_test], which is easier to use, more featureful,
 #' and still under active development.
 #'
 #' @param prop1 proportion of group 1
@@ -33,7 +33,13 @@
 #' Yin, G. (2012). Clinical Trial Design: Bayesian and Frequentist Adaptive Methods. Hoboken, New Jersey: John Wiley & Sons, Inc.
 #' @export
 
-TOSTtwo.prop <- function(prop1, prop2, n1, n2, low_eqbound, high_eqbound, alpha, ci_type = "normal", plot = TRUE, verbose = TRUE) {
+TOSTtwo.prop <- function(prop1,
+                         prop2,
+                         n1, n2,
+                         low_eqbound, high_eqbound,
+                         alpha, ci_type = "normal",
+                         plot = TRUE, verbose = TRUE) {
+  lifecycle::deprecate_soft("0.8.0", "TOSTtwo.prop()", "twoprop_test()")
   if(missing(alpha)) {
     alpha <- 0.05
   }

@@ -29,13 +29,13 @@ powerTOSTr(alpha, statistical_power, N, low_eqbound_r, high_eqbound_r)
 
 \item{alternative}{a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater", "less", or "equivalence" (TOST). You can specify just the initial letter.}
 
-\item{statistical_power}{Depracated. desired power (e.g., 0.8)}
+\item{statistical_power}{Deprecated. desired power (e.g., 0.8)}
 
-\item{N}{Depracated. number of pairs (e.g., 96)}
+\item{N}{Deprecated. number of pairs (e.g., 96)}
 
-\item{low_eqbound_r}{Depracated. lower equivalence bounds (e.g., -0.3) expressed in a correlation effect size}
+\item{low_eqbound_r}{Deprecated. lower equivalence bounds (e.g., -0.3) expressed in a correlation effect size}
 
-\item{high_eqbound_r}{Depracated. upper equivalence bounds (e.g., 0.3) expressed in a correlation effect size}
+\item{high_eqbound_r}{Deprecated. upper equivalence bounds (e.g., 0.3) expressed in a correlation effect size}
 }
 \value{
 An object of the class power.htest.

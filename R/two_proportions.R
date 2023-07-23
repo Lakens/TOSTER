@@ -1,4 +1,22 @@
-
+#' Testing for differences in proportions in 2 groups
+#'
+#' #' @description
+#' `r lifecycle::badge('maturing')`
+#'
+#' This is a hypothesis testing function that mimics [prop.test], but focuses only on testing differences in proportions between two groups.
+#' This function utilizes a z-test with unpooled variance estimates.
+#'
+#' @param p1,p2 Proportions in each respective group.
+#' @param n1,n2 sample size in each respective group.
+#' @param null a number indicating the null hypothesis of the difference in proportions between two groups.
+#' @inheritParams z_cor_test
+#' @return An S3 object of the class `htest`.
+#'
+#' @references
+#' Tunes da Silva, G., Logan, B. R., & Klein, J. P. (2008). Methods for Equivalence and Noninferiority Testing. Biology of Blood Marrow Transplant, 15(1 Suppl), 120-127.
+#'
+#' Yin, G. (2012). Clinical Trial Design: Bayesian and Frequentist Adaptive Methods. Hoboken, New Jersey: John Wiley & Sons, Inc.
+#' @export
 
 twoprop_test = function(p1, p2,
                         n1, n2,

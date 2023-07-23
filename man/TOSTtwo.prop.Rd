@@ -47,15 +47,9 @@ Returns TOST z-value 1, TOST p-value 1, TOST z-value 2, TOST p-value 2, low equi
 }
 \details{
 Development on \code{TOSTtwo.prop} is complete, and for new code we recommend
-switching to \link{tsum_TOST}, which is easier to use, more featureful,
+switching to \link{twoprop_test}, which is easier to use, more featureful,
 and still under active development.
 }
-\section{References}{
-
-Tunes da Silva, G., Logan, B. R., & Klein, J. P. (2008). Methods for Equivalence and Noninferiority Testing. Biology of Blood Marrow Transplant, 15(1 Suppl), 120-127.
-Yin, G. (2012). Clinical Trial Design: Bayesian and Frequentist Adaptive Methods. Hoboken, New Jersey: John Wiley & Sons, Inc.
-}
-
 \examples{
 ## Equivalence test for two independent proportions equal to .65 and .70, with 100 samples
 ## per group, lower equivalence bound of -0.1, higher equivalence bound of 0.1, and alpha of 0.05.
@@ -63,4 +57,9 @@ Yin, G. (2012). Clinical Trial Design: Bayesian and Frequentist Adaptive Methods
 TOSTtwo.prop(prop1 = .65, prop2 = .70, n1 = 100, n2 = 100,
    low_eqbound = -0.1, high_eqbound = 0.1, alpha = .05)
 
+}
+\references{
+Tunes da Silva, G., Logan, B. R., & Klein, J. P. (2008). Methods for Equivalence and Noninferiority Testing. Biology of Blood Marrow Transplant, 15(1 Suppl), 120-127.
+
+Yin, G. (2012). Clinical Trial Design: Bayesian and Frequentist Adaptive Methods. Hoboken, New Jersey: John Wiley & Sons, Inc.
 }
