@@ -96,9 +96,9 @@ test_prop_dif = function(p1,p2,n1,n2,
   prop_dif <- p1 - p2
   # proportion se
   prop_se <- sqrt((p1*(1-p1))/n1 + (p2*(1-p2))/n2)
-  YATES <- abs(prop_dif) / sum(1 / n1, 1 / n2)
-  if (any((null <= 0) | (null >= 1))) {
-    stop("elements of 'null' must be in (0,1)")
+  #YATES <- abs(prop_dif) / sum(1 / n1, 1 / n2)
+  if (any((null <= -1) | (null >= 1))) {
+    stop("elements of 'null' must be in (-1,1)")
   }
 
   if(alternative %in% c("equivalence","minimal.effect")){
@@ -179,7 +179,7 @@ test_prop_dif = function(p1,p2,n1,n2,
   }
   attr(CINT, "conf.level") <- conf_level
 
-  STATISTIC = ztest
+  STATISTIC = ZTEST
   names(STATISTIC) <- "z"
 
   NVAL = null
@@ -217,12 +217,16 @@ test_odds_ratio = function(p1, p2, n1, n2,
       if (null ==  1) {
         stop("null for odds ratio cannot be 1 if alternative is equivalence or minimal.effect")
       }
-      null = c(null,-1 * null)
+      null = c(null,null^(-1))
 
     }
 
-    lo_ztest = (prop_dif - min(null))/prop_se
-    hi_ztest = (prop_dif - max(null))/prop_se
+    lo_ztest = miettinen_nurminen_z(p1, p2,
+                                    n1, n2,
+                                    m1, min(null))
+    hi_ztest = miettinen_nurminen_z(p1, p2,
+                                    n1, n2,
+                                    m1, max(null))
 
     lo_pvalue = switch(
       alternative,
@@ -256,7 +260,9 @@ test_odds_ratio = function(p1, p2, n1, n2,
     if(length(null) != 1){
       stop("null must have length of 1 if alternative is not a TOST test.")
     }
-    ZTEST = (prop_dif - null) / prop_se
+    ZTEST = miettinen_nurminen_z(p1, p2,
+                                 n1, n2,
+                                 m1, null)
     PVAL = p_from_z(ZTEST,
                     alternative = alternative)
 
@@ -308,9 +314,20 @@ miettinen_nurminen_z = function(p1, p2,
   c_parameter = -1*m1
 
 
-  p_tilde2 = (-1*b_parameter + sqrt(b_parameter^2-4*a_parameter*c_parameter) ) / (2*a_parameter)
+  p_tilde2 = (-1 * b_parameter + sqrt(b_parameter ^ 2 - 4 * a_parameter *
+                                        c_parameter)) / (2 * a_parameter)
 
-  p_tilde1 = (p_tilde2 * null)/ (1+ p_tild2*(null-1))
+  p_tilde1 = (p_tilde2 * null) / (1 + p_tilde2 * (null - 1))
+
+  q_tilde1 = 1-p_tilde1
+
+  q_tilde2 = 1-p_tilde2
+
+  z_mno_num = (p1-p_tilde1)/(p_tilde1*q_tilde1) - (p2-p_tilde2)/(p_tilde2*q_tilde2)
+  z_mno_den = (1/(n1*p_tilde1*q_tilde1)+1/(n2*p_tilde2*q_tilde2))*(sum(n1,n2)/(sum(n1,n2)-1))
+  z_mno = z_mno_num/sqrt(z_mno_den)
+
+  z_mno
 }
 
 test_risk_ratio = function(p1, p2, n1, n2,
@@ -330,7 +347,7 @@ test_risk_ratio = function(p1, p2, n1, n2,
       if (null ==  0) {
         stop("null cannot be zero if alternative is equivalence or minimal.effect")
       }
-      null = c(null,-1 * null)
+      null = c(null,null^(-1))
 
     }
 
