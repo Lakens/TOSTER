@@ -32,6 +32,63 @@ twoprop_test = function(p1, p2,
                                         "odds.ratio",
                                         "risk.ratio")){
 
+  if(alternative %in% c("equivalence","minimal.effect")){
+
+    conf_level = 1-alpha*2
+    conf = 1-alpha
+
+  } else{
+
+    conf_level = switch(
+      alternative,
+      "two.sided" = 1-alpha,
+      "less" =  1-alpha*2,
+      "greater" = 1-alpha*2
+    )
+
+    conf = switch(
+      alternative,
+      "two.sided" = 1-alpha/2,
+      "less" =  1-alpha,
+      "greater" = 1-alpha
+    )
+
+  }
+
+  # effect size ----
+  effect_size = switch(effect_size,
+                       difference = calc_prop_dif(p1, p2, n1, n2,
+                                                  conf_level,
+                                                  conf,
+                                                  alternative),
+                       odds.ratio = calc_odds_ratio(p1, p2, n1, n2,
+                                                    conf_level,
+                                                    conf,
+                                                    alternative),
+                       risk.ratio = calc_risk_ratio(p1, p2, n1, n2,
+                                                    conf_level,
+                                                    conf,
+                                                    alternative))
+
+
+  METHOD = "difference in two proportions z-test"
+  RVAL <- list(statistic = STATISTIC,
+               #parameter = PARAMETER,
+               p.value = as.numeric(PVAL),
+               estimate = effect_size$ESTIMATE,
+               null.value = NVAL,
+               conf.int = effect_size$CINT,
+               alternative = alternative,
+               method = METHOD)
+  class(RVAL) <- "htest"
+  return(RVAL)
+
+}
+
+test_prop_dif = function(p1,p2,n1,n2,
+                         null,
+                         alternative) {
+
   prop_dif <- p1 - p2
   # proportion se
   prop_se <- sqrt((p1*(1-p1))/n1 + (p2*(1-p2))/n2)
@@ -39,7 +96,6 @@ twoprop_test = function(p1, p2,
   if (any((null <= 0) | (null >= 1))) {
     stop("elements of 'null' must be in (0,1)")
   }
-
 
   if(alternative %in% c("equivalence","minimal.effect")){
 
@@ -79,9 +135,6 @@ twoprop_test = function(p1, p2,
     test_p = PVAL == c(lo_pvalue, hi_pvalue)
     test_z = c(lo_ztest, hi_ztest)
     ZTEST = test_z[test_p]
-    conf_level = 1-alpha*2
-    conf = 1-alpha
-
   } else{
     if(length(null) != 1){
       stop("null must have length of 1 if alternative is not a TOST test.")
@@ -89,37 +142,7 @@ twoprop_test = function(p1, p2,
     ZTEST = (prop_dif - null) / prop_se
     PVAL = p_from_z(ZTEST,
                     alternative = alternative)
-
-    conf_level = switch(
-      alternative,
-      "two.sided" = 1-alpha,
-      "less" =  1-alpha*2,
-      "greater" = 1-alpha*2
-    )
-
-    conf = switch(
-      alternative,
-      "two.sided" = 1-alpha/2,
-      "less" =  1-alpha,
-      "greater" = 1-alpha
-    )
-
   }
-
-  # effect size ----
-  effect_size = switch(effect_size,
-                       difference = calc_prop_dif(p1, p2, n1, n2,
-                                                  conf_level,
-                                                  conf,
-                                                  alternative),
-                       odds.ratio = calc_odds_ratio(p1, p2, n1, n2,
-                                                    conf_level,
-                                                    conf,
-                                                    alternative),
-                       risk.ratio = calc_risk_ratio(p1, p2, n1, n2,
-                                                    conf_level,
-                                                    conf,
-                                                    alternative))
 
   STATISTIC = ztest
   names(STATISTIC) <- "z"
@@ -127,21 +150,12 @@ twoprop_test = function(p1, p2,
   NVAL = null
   names(NVAL) = rep("difference in proportions", length(null))
 
-  METHOD = "difference in two proportions z-test"
-  RVAL <- list(statistic = STATISTIC,
-               #parameter = PARAMETER,
-               p.value = as.numeric(PVAL),
-               estimate = effect_size$ESTIMATE,
-               null.value = NVAL,
-               conf.int = effect_size$CINT,
-               alternative = alternative,
-               method = METHOD)
-  class(RVAL) <- "htest"
-  return(RVAL)
-
-
-
+  list(STATISTIC = STATISTIC,
+       PVAL = PVAL,
+       NVAL = NVAL)
 }
+
+
 
 calc_odds_ratio = function(p1,p2,n1,n2,
                            conf_level = .95,
