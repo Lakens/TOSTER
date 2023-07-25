@@ -32,27 +32,21 @@ twoprop_test = function(p1, p2,
                                         "odds.ratio",
                                         "risk.ratio")){
 
-  if(alternative %in% c("equivalence","minimal.effect")){
+  alternative = match.arg(alternative)
+  effect_size = match.arg(effect_size)
+  if(!is.numeric(alpha) || alpha <=0 || alpha >=1){
+    stop("The alpha must be a numeric value between 0 and 1")
+  }
+  if (any(c(p1, p2) > 1 | c(p1, p2) < 0)
+  ) {
+    stop("elements of p1 or p2 must be in [0,1]")
+  }
+  if(any(c(n1, n2) < 10)){
+    stop("elements of n1 or n2 must be greater than 9")
+  }
 
-    conf_level = 1-alpha*2
-    conf = 1-alpha
-
-  } else{
-
-    conf_level = switch(
-      alternative,
-      "two.sided" = 1-alpha,
-      "less" =  1-alpha*2,
-      "greater" = 1-alpha*2
-    )
-
-    conf = switch(
-      alternative,
-      "two.sided" = 1-alpha/2,
-      "less" =  1-alpha,
-      "greater" = 1-alpha
-    )
-
+  if(any(c(n1, n2) <= 50)){
+    message("Small sample size in at least one group; proceed with caution")
   }
 
   # effect size ----
@@ -210,6 +204,7 @@ test_odds_ratio = function(p1, p2, n1, n2,
   d = 1/(n2*q2+.5)
   m1 = n1*p1 + n2*p2
   OR = (p1/q1) / (p2/q2)
+  se_logodds = sqrt(sum(a,b,c,d))
 
   if(alternative %in% c("equivalence","minimal.effect")){
 
@@ -221,12 +216,8 @@ test_odds_ratio = function(p1, p2, n1, n2,
 
     }
 
-    lo_ztest = miettinen_nurminen_z(p1, p2,
-                                    n1, n2,
-                                    m1, min(null))
-    hi_ztest = miettinen_nurminen_z(p1, p2,
-                                    n1, n2,
-                                    m1, max(null))
+    lo_ztest = (log(OR) - min(log(null))) / se_logodds
+    hi_ztest = (log(OR) - max(log(null))) / se_logodds
 
     lo_pvalue = switch(
       alternative,
@@ -260,9 +251,7 @@ test_odds_ratio = function(p1, p2, n1, n2,
     if(length(null) != 1){
       stop("null must have length of 1 if alternative is not a TOST test.")
     }
-    ZTEST = miettinen_nurminen_z(p1, p2,
-                                 n1, n2,
-                                 m1, null)
+    ZTEST = (log(OR) - log(null)) / se_logodds
     PVAL = p_from_z(ZTEST,
                     alternative = alternative)
 
@@ -282,7 +271,7 @@ test_odds_ratio = function(p1, p2, n1, n2,
   }
 
   z_mult = qnorm(conf)
-  se_logodds = sqrt(sum(a,b,c,d))
+
 
   CINT = exp(
     log(OR) + c(-1,1)*z_mult*se_logodds
@@ -300,46 +289,32 @@ test_odds_ratio = function(p1, p2, n1, n2,
   ESTIMATE = OR
   names(ESTIMATE) = "Odds Ratio"
 
-  list(ESTIMATE = ESTIMATE,
+  NVAL = null
+  names(NVAL) = rep("Odds Ratio", length(null))
+
+  list(STATISTIC = STATISTIC,
+       PVAL = PVAL,
+       NVAL = NVAL,
+       ESTIMATE = ESTIMATE,
        CINT = CINT)
 
 }
 
-miettinen_nurminen_z = function(p1, p2,
-                                n1, n2,
-                                m1, null){
-
-  a_parameter = n2*(null-1)
-  b_parameter = n1*null+n2-m1*(null-1)
-  c_parameter = -1*m1
-
-
-  p_tilde2 = (-1 * b_parameter + sqrt(b_parameter ^ 2 - 4 * a_parameter *
-                                        c_parameter)) / (2 * a_parameter)
-
-  p_tilde1 = (p_tilde2 * null) / (1 + p_tilde2 * (null - 1))
-
-  q_tilde1 = 1-p_tilde1
-
-  q_tilde2 = 1-p_tilde2
-
-  z_mno_num = (p1-p_tilde1)/(p_tilde1*q_tilde1) - (p2-p_tilde2)/(p_tilde2*q_tilde2)
-  z_mno_den = (1/(n1*p_tilde1*q_tilde1)+1/(n2*p_tilde2*q_tilde2))*(sum(n1,n2)/(sum(n1,n2)-1))
-  z_mno = z_mno_num/sqrt(z_mno_den)
-
-  z_mno
-}
 
 test_risk_ratio = function(p1, p2, n1, n2,
                            null,
                            alternative,
                            alpha){
+  if(is.null(null)){
+    null = 1
+  }
   # Gart and Nam (1988), page 324
   # Gart, John J. and Nam, Jun-mo. 1988. 'Approximate Interval Estimation of the Ratio of Binomial Parameters: Review and Corrections for Skewness.' Biometrics, Volume 44, 323-338
   phi = p1/p2
   z_mult = qnorm(conf)
   q1 = 1-p1
   q2 = 1-p2
+  se_val = sqrt(q1/(n1*p1) + q2/(n2*p2))
 
   if(alternative %in% c("equivalence","minimal.effect")){
 
@@ -351,8 +326,8 @@ test_risk_ratio = function(p1, p2, n1, n2,
 
     }
 
-    lo_ztest = (prop_dif - min(null))/prop_se
-    hi_ztest = (prop_dif - max(null))/prop_se
+    lo_ztest = (log(phi) - min(log(null))) / se_val
+    hi_ztest = (log(phi) - max(log(null))) / se_val
 
     lo_pvalue = switch(
       alternative,
@@ -386,7 +361,7 @@ test_risk_ratio = function(p1, p2, n1, n2,
     if(length(null) != 1){
       stop("null must have length of 1 if alternative is not a TOST test.")
     }
-    ZTEST = (prop_dif - null) / prop_se
+    ZTEST = (log(phi) - log(null)) / se_val
     PVAL = p_from_z(ZTEST,
                     alternative = alternative)
 
@@ -405,7 +380,7 @@ test_risk_ratio = function(p1, p2, n1, n2,
     )
   }
 
-  se_val = sqrt(q1/(n1*p1) + q2/(n2*p2))
+
   CINT = phi * exp(c(-1,1)*z_mult*se_val)
 
   if(alternative == "less"){
@@ -420,7 +395,13 @@ test_risk_ratio = function(p1, p2, n1, n2,
   ESTIMATE = phi
   names(ESTIMATE) = "Risk Ratio"
 
-  list(ESTIMATE = ESTIMATE,
+  NVAL = null
+  names(NVAL) = rep("Risk Ratio", length(null))
+
+  list(STATISTIC = STATISTIC,
+       PVAL = PVAL,
+       NVAL = NVAL,
+       ESTIMATE = ESTIMATE,
        CINT = CINT)
 }
 
