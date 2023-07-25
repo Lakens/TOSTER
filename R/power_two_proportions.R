@@ -116,11 +116,18 @@ power_twoprop = function(p1, p2,
       null = c(null,-1 * null)
 
     }
-    pow_prop_tost(n = n, r = rho, power = power, null = null,
-                  alpha = alpha)
+    pow_prop_tost(p1, p2,
+                  n,
+                  null,
+                  alpha,
+                  power)
   } else{
-    pow_prop(n = null, r = r, power = power, null = null,
-             alpha = alpha, alternative = alternative)
+    pow_prop(p1, p2,
+             n,
+             null,
+             alpha,
+             power,
+             alternative)
   }
 
 

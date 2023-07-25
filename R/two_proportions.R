@@ -1,10 +1,10 @@
-#' Testing for differences in proportions in 2 groups
+#' Test of Proportions between 2 Independent Groups
 #'
-#' #' @description
+#' @description
 #' `r lifecycle::badge('maturing')`
 #'
 #' This is a hypothesis testing function that mimics [prop.test], but focuses only on testing differences in proportions between two groups.
-#' This function utilizes a z-test with unpooled variance estimates.
+#' This function utilizes a z-test to calculate the p-values (may be inaccurate with small sample sizes).
 #'
 #' @param p1,p2 Proportions in each respective group.
 #' @param n1,n2 sample size in each respective group.
@@ -13,7 +13,75 @@
 #' @inheritParams z_cor_test
 #' @return An S3 object of the class `htest`.
 #'
+#' @details
+#' The hypothesis test for differences in proportions can be made on the raw proportions scale, the odds ratio, or the risk ratio (details below).
+#' This function uses the large sample size asymptotic approximations for both the p-value and confidence interval calculations.
+#' There should be a good deal of caution when sample sizes are small.
+#'
+#' ## Differences in Proportions
+#'
+#' Differences in proportions test is based on the following calculation:
+#'
+#' \deqn{d = p_1 - p_2}
+#'
+#' The standard error of \eqn{d} is calculated as the following:
+#'
+#' \deqn{se(d) = \sqrt{\frac{p_1 \cdot (1-p_1)}{n_1} + \frac{p_2 \cdot (1-p_2)}{n_2}} }
+#'
+#' The z-test, with \eqn{d_0} being the null value, is then calculated as the following (standard normal distribution evaluated to calculate p-value):
+#'
+#' \deqn{z = \frac{d - d_0}{se(d)}}
+#'
+#' The confidence interval can then be calculated as the following:
+#'
+#' \deqn{d_{lower},d_{upper} = d \pm z_{\alpha} \cdot se(d)}
+#'
+#' ## Risk Ratio
+#'
+#' The ratio between proportions test is based on the following calculation:
+#'
+#' \deqn{\phi = p_1/p_2}
+#'
+#' The standard error of \eqn{ln(\phi)} is calculated as the following:
+#'
+#' \deqn{se(ln(\phi)) = \sqrt{\frac{1-p_1}{n_1 \cdot p_1} + \frac{1-p_2}{n_2 \cdot p_2}} }
+#'
+#' The z-test, with \eqn{\phi_0} being the null value, is then calculated as the following (standard normal distribution evaluated to calculate p-value):
+#'
+#' \deqn{z = \frac{ln(\phi) - ln(\phi_0)}{se(ln(\phi))}}
+#'
+#' The confidence interval can then be calculated as the following:
+#'
+#'
+#' \deqn{\phi_{lower} = \phi \cdot e^{-z_{\alpha} \cdot se(ln(\phi))}}
+#'
+#' \deqn{\phi_{upper} = \phi \cdot e^{z_{\alpha} \cdot se(ln(\phi))}}
+#'
+#' ## Odds Ratio
+#'
+#' The ratio between proportions test is based on the following calculation:
+#' (p1/q1) / (p2/q2)
+#'
+#' \deqn{OR = \frac{p_1}{1-p_1} / \frac{p_2}{1-p_2}}
+#'
+#' The standard error of \eqn{ln(OR)} is calculated as the following:
+#'
+#'
+#' \deqn{se(ln(OR)) = \sqrt{\frac{1}{n_1 \cdot p_1 + 0.5} + \frac{1}{n_1 \cdot (1-p_1) + 0.5} + \frac{1}{n_2 \cdot p_2 + 0.5} + \frac{1}{n_2 \cdot (1-p_2) + 0.5} } }
+#'
+#' The z-test, with \eqn{OR_0} being the null value, is then calculated as the following (standard normal distribution evaluated to calculate p-value):
+#'
+#' \deqn{z = \frac{ln(OR) - ln(OR_0)}{se(ln(OR))}}
+#'
+#' The confidence interval can then be calculated as the following:
+#'
+#' \deqn{OR_{lower},OR_{upper} = exp(ln(OR) \pm z_{\alpha} \cdot se(ln(OR)))}
+#'
+#'
 #' @references
+#'
+#' Gart, J. J., & Nam, J. M. (1988). Approximate interval estimation of the ratio of binomial parameters: a review and corrections for skewness. Biometrics, 323-338.
+#'
 #' Tunes da Silva, G., Logan, B. R., & Klein, J. P. (2008). Methods for Equivalence and Noninferiority Testing. Biology of Blood Marrow Transplant, 15(1 Suppl), 120-127.
 #'
 #' Yin, G. (2012). Clinical Trial Design: Bayesian and Frequentist Adaptive Methods. Hoboken, New Jersey: John Wiley & Sons, Inc.
@@ -21,7 +89,7 @@
 
 twoprop_test = function(p1, p2,
                         n1, n2,
-                        null,
+                        null = NULL,
                         alpha = .05,
                         alternative = c("two.sided",
                                         "less",
@@ -65,7 +133,7 @@ twoprop_test = function(p1, p2,
                                                     alpha))
 
 
-  METHOD = "difference in two proportions z-test"
+
   RVAL <- list(statistic = res_tests$STATISTIC,
                #parameter = PARAMETER,
                p.value = as.numeric(res_tests$PVAL),
@@ -73,7 +141,7 @@ twoprop_test = function(p1, p2,
                null.value = res_tests$NVAL,
                conf.int = res_tests$CINT,
                alternative = alternative,
-               method = METHOD)
+               method = res_tests$METHOD)
   class(RVAL) <- "htest"
   return(RVAL)
 
@@ -90,6 +158,9 @@ test_prop_dif = function(p1,p2,n1,n2,
   prop_dif <- p1 - p2
   # proportion se
   prop_se <- sqrt((p1*(1-p1))/n1 + (p2*(1-p2))/n2)
+  p_bar = (n1*p1 + n2*p2) / (n1 + n2)
+  prop_se_pool = sqrt(p_bar * (1-p_bar) * (1/n1+1/n2))
+
   #YATES <- abs(prop_dif) / sum(1 / n1, 1 / n2)
   if (any((null <= -1) | (null >= 1))) {
     stop("elements of 'null' must be in (-1,1)")
@@ -163,7 +234,7 @@ test_prop_dif = function(p1,p2,n1,n2,
   ESTIMATE = prop_dif
   names(ESTIMATE) = "difference in proportions"
 
-  CINT = prop_dif - c(-1,1)*(qnorm(conf) * prop_se)
+  CINT = prop_dif + c(-1,1)*(qnorm(conf) * prop_se)
   if(alternative == "less"){
     CINT[1] = -Inf
   }
@@ -178,12 +249,14 @@ test_prop_dif = function(p1,p2,n1,n2,
 
   NVAL = null
   names(NVAL) = rep("difference in proportions", length(null))
+  METHOD = "difference in two proportions z-test"
 
   list(STATISTIC = STATISTIC,
        PVAL = PVAL,
        NVAL = NVAL,
        ESTIMATE = ESTIMATE,
-       CINT = CINT)
+       CINT = CINT,
+       METHOD = METHOD)
 }
 
 
@@ -289,14 +362,18 @@ test_odds_ratio = function(p1, p2, n1, n2,
   ESTIMATE = OR
   names(ESTIMATE) = "Odds Ratio"
 
+  STATISTIC = ZTEST
+  names(STATISTIC) <- "z"
+
   NVAL = null
   names(NVAL) = rep("Odds Ratio", length(null))
-
+  METHOD = "Odds Ratio z-test"
   list(STATISTIC = STATISTIC,
        PVAL = PVAL,
        NVAL = NVAL,
        ESTIMATE = ESTIMATE,
-       CINT = CINT)
+       CINT = CINT,
+       METHOD = METHOD)
 
 }
 
@@ -311,7 +388,7 @@ test_risk_ratio = function(p1, p2, n1, n2,
   # Gart and Nam (1988), page 324
   # Gart, John J. and Nam, Jun-mo. 1988. 'Approximate Interval Estimation of the Ratio of Binomial Parameters: Review and Corrections for Skewness.' Biometrics, Volume 44, 323-338
   phi = p1/p2
-  z_mult = qnorm(conf)
+  #
   q1 = 1-p1
   q2 = 1-p2
   se_val = sqrt(q1/(n1*p1) + q2/(n2*p2))
@@ -319,7 +396,7 @@ test_risk_ratio = function(p1, p2, n1, n2,
   if(alternative %in% c("equivalence","minimal.effect")){
 
     if (length(null) == 1) {
-      if (null ==  0) {
+      if (null ==  1) {
         stop("null cannot be zero if alternative is equivalence or minimal.effect")
       }
       null = c(null,null^(-1))
@@ -380,7 +457,7 @@ test_risk_ratio = function(p1, p2, n1, n2,
     )
   }
 
-
+  z_mult = qnorm(conf)
   CINT = phi * exp(c(-1,1)*z_mult*se_val)
 
   if(alternative == "less"){
@@ -395,14 +472,20 @@ test_risk_ratio = function(p1, p2, n1, n2,
   ESTIMATE = phi
   names(ESTIMATE) = "Risk Ratio"
 
+  STATISTIC = ZTEST
+  names(STATISTIC) <- "z"
+
   NVAL = null
   names(NVAL) = rep("Risk Ratio", length(null))
+
+  METHOD = "Risk Ratio z-test"
 
   list(STATISTIC = STATISTIC,
        PVAL = PVAL,
        NVAL = NVAL,
        ESTIMATE = ESTIMATE,
-       CINT = CINT)
+       CINT = CINT,
+       METHOD = METHOD)
 }
 
 
