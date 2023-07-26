@@ -8,6 +8,7 @@
 #' @param alpha alpha used for the test (e.g., 0.05)
 #' @param statistical_power desired power (e.g., 0.8)
 #' @param N sample size (e.g., 108)
+#' @param sd standard deviation.
 #' @param low_eqbound_d lower equivalence bounds (e.g., -0.5) expressed in standardized mean difference (Cohen's d)
 #' @param high_eqbound_d upper equivalence bounds (e.g., 0.5) expressed in standardized mean difference (Cohen's d)
 #' @param low_eqbound lower equivalence bounds (e.g., -0.5) expressed in raw scores

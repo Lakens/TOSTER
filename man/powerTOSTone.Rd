@@ -20,6 +20,8 @@ powerTOSTone.raw(alpha, statistical_power, N, sd, low_eqbound, high_eqbound)
 
 \item{high_eqbound_d}{upper equivalence bounds (e.g., 0.5) expressed in standardized mean difference (Cohen's d)}
 
+\item{sd}{standard deviation.}
+
 \item{low_eqbound}{lower equivalence bounds (e.g., -0.5) expressed in raw scores}
 
 \item{high_eqbound}{upper equivalence bounds (e.g., 0.5) expressed in raw scores}

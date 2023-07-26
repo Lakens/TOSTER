@@ -49,6 +49,10 @@ reference:
   - equ_anova
   - equ_ftest
 
+- subtitle: "Proportions"
+  contents:
+  - twoprop_test
+
 - subtitle: "Methods"
   desc: >
     Functions/methods to aid analyses
@@ -100,6 +104,7 @@ reference:
   - power_t_TOST
   - power_eq_f
   - power_z_cor
+  - power_twoprop
 
 - title: "Data"
   contents:

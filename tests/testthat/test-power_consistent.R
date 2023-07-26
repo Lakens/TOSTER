@@ -9,9 +9,9 @@ test_that("power functions are internally consistent", {
     sink()
     return(tmp)
   }
-  withr::local_options(lifecycle_verbosity = "quiet")
+  #withr::local_options(lifecycle_verbosity = "quiet")
 
-  suppressMessages(hush({
+  suppressWarnings({ suppressMessages(hush({
   ## tests for one-sample t-test
   pow_n <-powerTOSTone(alpha=0.05, statistical_power=0.9,
                        low_eqbound_d=-0.3, high_eqbound_d=0.3)
@@ -149,5 +149,6 @@ test_that("power functions are internally consistent", {
                                low_eqbound_dz = -0.3, high_eqbound_dz = 0.3))
   #
   }))
+  })
 })
 

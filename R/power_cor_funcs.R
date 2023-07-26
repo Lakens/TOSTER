@@ -1,9 +1,9 @@
-pow_corr = function (n = NULL, r = NULL, power = NULL, null = 0,
+pow_corr = function (n = NULL, rho = NULL, power = NULL, null = 0,
           alpha = NULL, alternative = c("two.sided", "less", "greater"))
 {
 
-  if (sum(sapply(list(n, r, power, alpha), is.null)) != 1)
-    stop("exactly one of n, r, power, and alpha must be NULL")
+  if (sum(sapply(list(n, rho, power, alpha), is.null)) != 1)
+    stop("exactly one of n, rho, power, and alpha must be NULL")
   if (!is.null(alpha) && !is.numeric(alpha) || any(0 > alpha |
                                                    alpha > 1))
     stop(sQuote("alpha"), " must be numeric in [0, 1]")
@@ -15,17 +15,17 @@ pow_corr = function (n = NULL, r = NULL, power = NULL, null = 0,
   p=0
   alternative <- match.arg(alternative)
   tside <- switch(alternative, less = 1, two.sided = 2, greater = 3)
-  if (tside == 2 && !is.null(r))
-    r <- abs(r)
+  if (tside == 2 && !is.null(rho))
+    rho <- abs(rho)
   if (tside == 3) {
     p.body <- quote({
-      delta <- sqrt(n - 3 - p) * (log((1 + r)/(1 - r))/2 +
-                                    r/(n - 1 - p)/2 * (1 + (5 + r^2)/(n - 1 - p)/4 +
-                                                         (11 + 2 * r^2 + 3 * r^4)/(n - 1 - p)^2/8) -
+      delta <- sqrt(n - 3 - p) * (log((1 + rho)/(1 - rho))/2 +
+                                    rho/(n - 1 - p)/2 * (1 + (5 + rho^2)/(n - 1 - p)/4 +
+                                                         (11 + 2 * rho^2 + 3 * rho^4)/(n - 1 - p)^2/8) -
                                     log((1 + null)/(1 - null))/2 - null/(n - 1 -
                                                                            p)/2)
-      v <- (n - 3 - p)/(n - 1 - p) * (1 + (4 - r^2)/(n -
-                                                       1 - p)/2 + (22 - 6 * r^2 - 3 * r^4)/(n - 1 -
+      v <- (n - 3 - p)/(n - 1 - p) * (1 + (4 - rho^2)/(n -
+                                                       1 - p)/2 + (22 - 6 * rho^2 - 3 * rho^4)/(n - 1 -
                                                                                               p)^2/6)
       zalpha <- qnorm(1 - alpha)
       pnorm((delta - zalpha)/sqrt(v))
@@ -33,13 +33,13 @@ pow_corr = function (n = NULL, r = NULL, power = NULL, null = 0,
   }
   if (tside == 1) {
     p.body <- quote({
-      delta <- sqrt(n - 3 - p) * (log((1 + r)/(1 - r))/2 +
-                                    r/(n - 1 - p)/2 * (1 + (5 + r^2)/(n - 1 - p)/4 +
-                                                         (11 + 2 * r^2 + 3 * r^4)/(n - 1 - p)^2/8) -
+      delta <- sqrt(n - 3 - p) * (log((1 + rho)/(1 - rho))/2 +
+                                    rho/(n - 1 - p)/2 * (1 + (5 + rho^2)/(n - 1 - p)/4 +
+                                                         (11 + 2 * rho^2 + 3 * rho^4)/(n - 1 - p)^2/8) -
                                     log((1 + null)/(1 - null))/2 - null/(n - 1 -
                                                                            p)/2)
-      v <- (n - 3 - p)/(n - 1 - p) * (1 + (4 - r^2)/(n -
-                                                       1 - p)/2 + (22 - 6 * r^2 - 3 * r^4)/(n - 1 -
+      v <- (n - 3 - p)/(n - 1 - p) * (1 + (4 - rho^2)/(n -
+                                                       1 - p)/2 + (22 - 6 * rho^2 - 3 * rho^4)/(n - 1 -
                                                                                               p)^2/6)
       zalpha <- qnorm(1 - alpha)
       pnorm((-delta - zalpha)/sqrt(v))
@@ -47,13 +47,13 @@ pow_corr = function (n = NULL, r = NULL, power = NULL, null = 0,
   }
   if (tside == 2) {
     p.body <- quote({
-      delta <- sqrt(n - 3 - p) * (log((1 + r)/(1 - r))/2 +
-                                    r/(n - 1 - p)/2 * (1 + (5 + r^2)/(n - 1 - p)/4 +
-                                                         (11 + 2 * r^2 + 3 * r^4)/(n - 1 - p)^2/8) -
+      delta <- sqrt(n - 3 - p) * (log((1 + rho)/(1 - rho))/2 +
+                                    rho/(n - 1 - p)/2 * (1 + (5 + rho^2)/(n - 1 - p)/4 +
+                                                         (11 + 2 * rho^2 + 3 * rho^4)/(n - 1 - p)^2/8) -
                                     log((1 + null)/(1 - null))/2 - null/(n - 1 -
                                                                            p)/2)
-      v <- (n - 3 - p)/(n - 1 - p) * (1 + (4 - r^2)/(n -
-                                                       1 - p)/2 + (22 - 6 * r^2 - 3 * r^4)/(n - 1 -
+      v <- (n - 3 - p)/(n - 1 - p) * (1 + (4 - rho^2)/(n -
+                                                       1 - p)/2 + (22 - 6 * rho^2 - 3 * rho^4)/(n - 1 -
                                                                                               p)^2/6)
       zalpha <- qnorm(1 - alpha/2)
       pnorm((delta - zalpha)/sqrt(v)) + pnorm((-delta -
@@ -65,13 +65,13 @@ pow_corr = function (n = NULL, r = NULL, power = NULL, null = 0,
   else if (is.null(n))
     n <- uniroot(function(n) eval(p.body) - power, c(4 +
                                                        p + 1e-10, 1e+07))$root
-  else if (is.null(r)) {
+  else if (is.null(rho)) {
     if (tside == 2) {
-      r <- uniroot(function(r) eval(p.body) - power, c(1e-10,
+      rho <- uniroot(function(rho) eval(p.body) - power, c(1e-10,
                                                        1 - 1e-10))$root
     }
     else {
-      r <- uniroot(function(r) eval(p.body) - power, c(-1 +
+      rho <- uniroot(function(rho) eval(p.body) - power, c(-1 +
                                                          1e-10, 1 - 1e-10))$root
     }
   }
@@ -81,21 +81,21 @@ pow_corr = function (n = NULL, r = NULL, power = NULL, null = 0,
   else stop("internal error")
   METHOD <- "Approximate Power for Pearson Product-Moment Correlation (z-test)"
 
-  structure(list(n = n, rho = r,
+  structure(list(n = n, rho = rho,
                  alpha = alpha, beta = 1-power, power = power,
                  null = null, alternative = alternative,
                  method = METHOD),
             class = "power.htest")
 }
 
-pow_corr_tost = function (n = NULL, r = 0, power = NULL, null = NULL,
+pow_corr_tost = function (n = NULL, rho = 0, power = NULL, null = NULL,
                        alpha = NULL)
 {
 
-  if (sum(sapply(list(n, r, power, alpha), is.null)) != 1)
-    stop("exactly one of n, r, power, and alpha must be NULL")
-  if(is.null(r)){
-    stop("r cannot be set to NULL at this time.")
+  if (sum(sapply(list(n, rho, power, alpha), is.null)) != 1)
+    stop("exactly one of n, rho, power, and alpha must be NULL")
+  if(is.null(rho)){
+    stop("rho cannot be set to NULL at this time.")
   }
   if (!is.null(alpha) && !is.numeric(alpha) || any(0 > alpha |
                                                    alpha > 1))
@@ -127,7 +127,7 @@ pow_corr_tost = function (n = NULL, r = 0, power = NULL, null = NULL,
   else stop("internal error")
   METHOD <- "Approximate Power for Pearson Product-Moment Correlation (z-test)"
 
-  structure(list(n = n, rho = r,
+  structure(list(n = n, rho = rho,
                  alpha = alpha, beta = 1-power, power = power,
                  null = null, alternative = alternative,
                  method = METHOD),

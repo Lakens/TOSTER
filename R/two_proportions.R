@@ -17,6 +17,7 @@
 #' The hypothesis test for differences in proportions can be made on the raw proportions scale, the odds ratio, or the risk ratio (details below).
 #' This function uses the large sample size asymptotic approximations for both the p-value and confidence interval calculations.
 #' There should be a good deal of caution when sample sizes are small.
+#' The p-values for the differences in proportions will differ from base [prop.test] due to the use of the unpooled standard error (see below).
 #'
 #' ## Differences in Proportions
 #'
@@ -367,7 +368,7 @@ test_odds_ratio = function(p1, p2, n1, n2,
 
   NVAL = null
   names(NVAL) = rep("Odds Ratio", length(null))
-  METHOD = "Odds Ratio z-test"
+  METHOD = "approximate Odds Ratio z-test"
   list(STATISTIC = STATISTIC,
        PVAL = PVAL,
        NVAL = NVAL,
@@ -478,7 +479,7 @@ test_risk_ratio = function(p1, p2, n1, n2,
   NVAL = null
   names(NVAL) = rep("Risk Ratio", length(null))
 
-  METHOD = "Risk Ratio z-test"
+  METHOD = "approximate Risk Ratio z-test"
 
   list(STATISTIC = STATISTIC,
        PVAL = PVAL,

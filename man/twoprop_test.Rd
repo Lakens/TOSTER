@@ -41,6 +41,7 @@ This function utilizes a z-test to calculate the p-values (may be inaccurate wit
 The hypothesis test for differences in proportions can be made on the raw proportions scale, the odds ratio, or the risk ratio (details below).
 This function uses the large sample size asymptotic approximations for both the p-value and confidence interval calculations.
 There should be a good deal of caution when sample sizes are small.
+The p-values for the differences in proportions will differ from base \link{prop.test} due to the use of the unpooled standard error (see below).
 \subsection{Differences in Proportions}{
 
 Differences in proportions test is based on the following calculation:

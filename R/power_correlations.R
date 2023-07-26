@@ -63,10 +63,10 @@ power_z_cor = function(n = NULL,
       null = c(null,-1 * null)
 
     }
-    pow_corr_tost(n = n, r = rho, power = power, null = null,
+    pow_corr_tost(n = n, rho = rho, power = power, null = null,
                   alpha = alpha)
   } else{
-    pow_corr(n = null, r = r, power = power, null = null,
+    pow_corr(n = null, rho = rho, power = power, null = null,
              alpha = alpha, alternative = alternative)
   }
 }

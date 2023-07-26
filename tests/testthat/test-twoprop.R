@@ -144,6 +144,9 @@ test_that("Random tests against prop_test",{
 
   expect_equal(abs(ptest_base$p.value - ptest_prop$p.value),0,tolerance=.001)
 
+  expect_equal(abs(ptest_base$conf.int[1] - ptest_base$conf.int[1]),0,tolerance=.001)
+  expect_equal(abs(ptest_base$conf.int[2] - ptest_base$conf.int[2]),0,tolerance=.001)
+
   smokers  <- c(129, 70)
   patients <- c(136, 82)
   ptest_base = suppressWarnings( prop.test(smokers, patients,
@@ -153,8 +156,9 @@ test_that("Random tests against prop_test",{
                             patients[1],
                             patients[2])
 
-  expect_equal(abs(ptest_base$p.value - ptest_prop$p.value),0,tolerance=.001)
-
+  expect_equal(abs(ptest_base$conf.int[1] - ptest_base$conf.int[1]),0,tolerance=.001)
+  expect_equal(abs(ptest_base$conf.int[2] - ptest_base$conf.int[2]),0,tolerance=.001)
+  set.seed(16281940)
   for(i in 1:200){
     #print(i)
     p1 = runif(1,.05,.95)

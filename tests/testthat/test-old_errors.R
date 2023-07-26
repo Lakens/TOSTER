@@ -9,7 +9,8 @@ test_that("Errors for TOSTtwo functions",{
 
   hush(suppressMessages( {
 
-    withr::local_options(lifecycle_verbosity = "quiet")
+    #withr::local_options(lifecycle_verbosity = "quiet")
+
   expect_warning(TOSTtwo.raw(m1 = 5.25, m2 = 5.22,
                      sd1 = 0.95, sd2 = 0.83,
                      n1 = 95, n2 = 89,
