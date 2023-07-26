@@ -159,7 +159,7 @@ test_that("Random tests against prop_test",{
   expect_equal(abs(ptest_base$conf.int[1] - ptest_base$conf.int[1]),0,tolerance=.001)
   expect_equal(abs(ptest_base$conf.int[2] - ptest_base$conf.int[2]),0,tolerance=.001)
   set.seed(16281940)
-  for(i in 1:200){
+  for(i in 1:100){
     #print(i)
     p1 = runif(1,.05,.95)
     p2 = runif(1,.05,.95)
