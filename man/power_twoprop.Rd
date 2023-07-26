@@ -22,7 +22,7 @@ power_twoprop(
   null = 0,
   alpha = NULL,
   power = NULL,
-  alternative = c("two.sided", "less", "greater", "equivalence")
+  alternative = c("two.sided", "one.sided", "equivalence")
 )
 }
 \arguments{
@@ -48,7 +48,7 @@ power_twoprop(
 
 \item{power}{statistical power (1-beta).}
 
-\item{alternative}{a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater", "less", or "equivalence" (TOST). You can specify just the initial letter.}
+\item{alternative}{equivalence, one-sided, or two-sided test. Can be abbreviated.}
 }
 \value{
 Calculate either achieved power, equivalence bounds, or required N, assuming a true effect size of 0.

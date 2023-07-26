@@ -224,8 +224,8 @@ pow_prop_tost = function (p1, p2,
   alternative <- "equivalence"
 
   p.body =  quote({
-    statistical_power1<-2*(pnorm((abs(p1-p2)-min(null))/sqrt(p1*(1-p1)/N+p2*(1-p2)/N)-qnorm(1-alpha))+pnorm(-(abs(p1-p2)-min(null))/sqrt(p1*(1-p1)/N+p2*(1-p2)/N)-qnorm(1-alpha)))-1
-    statistical_power2<-2*(pnorm((abs(p1-p2)-max(null))/sqrt(p1*(1-p1)/N+p2*(1-p2)/N)-qnorm(1-alpha))+pnorm(-(abs(p1-p2)-max(null))/sqrt(p1*(1-p1)/N+p2*(1-p2)/N)-qnorm(1-alpha)))-1
+    statistical_power1<-2*(pnorm((abs(p1-p2)-min(null))/sqrt(p1*(1-p1)/n+p2*(1-p2)/n)-qnorm(1-alpha))+pnorm(-(abs(p1-p2)-min(null))/sqrt(p1*(1-p1)/n+p2*(1-p2)/n)-qnorm(1-alpha)))-1
+    statistical_power2<-2*(pnorm((abs(p1-p2)-max(null))/sqrt(p1*(1-p1)/n+p2*(1-p2)/n)-qnorm(1-alpha))+pnorm(-(abs(p1-p2)-max(null))/sqrt(p1*(1-p1)/n+p2*(1-p2)/n)-qnorm(1-alpha)))-1
     statistical_power<-min(statistical_power1,statistical_power2)
     if(statistical_power<0) {statistical_power<-0}
     statistical_power

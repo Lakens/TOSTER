@@ -263,11 +263,84 @@ test_that("power",{
                         null = 0,
                         alpha = 0.05,
                         power = NULL,
-                        alternative = "g")
+                        alternative = "o")
   test3_power = power_twoprop(p1 = .1, p2 = .25,
                         n = 55,
                         null = 0,
                         alpha = 0.05,
                         power = NULL,
-                        alternative = "l")
+                        alternative = "o")
+
+  test1_n = power_twoprop(p1 = .1, p2 = .25,
+                              n = NULL,
+                              null = 0,
+                              alpha = 0.05,
+                              power = .8)
+  test2_n = power_twoprop(p1 = .25, p2 = .1,
+                              n = NULL,
+                              null = 0,
+                              alpha = 0.05,
+                              power = .8,
+                              alternative = "o")
+  test3_n = power_twoprop(p1 = .1, p2 = .25,
+                              n = NULL,
+                              null = 0,
+                              alpha = 0.05,
+                              power = .8,
+                              alternative = "o")
+
+  test1_alpha = power_twoprop(p1 = .1, p2 = .25,
+                          n = 55,
+                          null = 0,
+                          alpha = NULL,
+                          power = .8)
+  test2_alpha = power_twoprop(p1 = .25, p2 = .1,
+                          n = 55,
+                          null = 0,
+                          alpha = NULL,
+                          power = .8,
+                          alternative = "o")
+  test3_alpha = power_twoprop(p1 = .1, p2 = .25,
+                          n = 55,
+                          null = 0,
+                          alpha = NULL,
+                          power = .8,
+                          alternative = "o")
+
+  test_e1 = power_twoprop(p1 = .5, p2 = .5,
+                              n = NULL,
+                              null = .15,
+                              alpha = .05,
+                              power = .8,
+                              alternative = "e")
+
+  test_e2 = power_twoprop(p1 = .5, p2 = .5,
+                          n = 100,
+                          null = .15,
+                          alpha = NULL,
+                          power = .8,
+                          alternative = "e")
+
+  test_e3 = power_twoprop(p1 = .5, p2 = .5,
+                          n = 100,
+                          null = .15,
+                          alpha = .06,
+                          power = NULL,
+                          alternative = "e")
+
+})
+
+test_that("power #2",{
+  for(i in 1:7){
+    n_lvl = c(50,150,250,350,450,550,650)
+    pow_lvl = c(.08073,.14513,.21093,.27652,.34064,.40234,.46095)
+    n = n_lvl[i]
+    test1_power = power_twoprop(p1 = .6, p2 = .65,
+                                n = n,
+                                null = 0,
+                                alpha = 0.05,
+                                power = NULL)
+    expect_equal(test1_power$power, pow_lvl[i], tolerance = .01)
+  }
+
 })
