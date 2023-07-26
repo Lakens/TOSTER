@@ -218,9 +218,7 @@ pow_prop_tost = function (p1, p2,
 
   if (sum(sapply(list(n, power, alpha), is.null)) != 1)
     stop("exactly one of n, power, and alpha must be NULL")
-  if(is.null(r)){
-    stop("r cannot be set to NULL at this time.")
-  }
+
   if (!is.null(alpha) && !is.numeric(alpha) || any(0 > alpha |
                                                    alpha > 1))
     stop(sQuote("alpha"), " must be numeric in [0, 1]")
@@ -233,8 +231,8 @@ pow_prop_tost = function (p1, p2,
   alternative <- "equivalence"
 
   p.body =  quote({
-    statistical_power1<-2*(pnorm((abs(prop1-prop2)-min(null))/sqrt(prop1*(1-prop1)/N+prop2*(1-prop2)/N)-qnorm(1-alpha))+pnorm(-(abs(prop1-prop2)-min(null))/sqrt(prop1*(1-prop1)/N+prop2*(1-prop2)/N)-qnorm(1-alpha)))-1
-    statistical_power2<-2*(pnorm((abs(prop1-prop2)-max(null))/sqrt(prop1*(1-prop1)/N+prop2*(1-prop2)/N)-qnorm(1-alpha))+pnorm(-(abs(prop1-prop2)-max(null))/sqrt(prop1*(1-prop1)/N+prop2*(1-prop2)/N)-qnorm(1-alpha)))-1
+    statistical_power1<-2*(pnorm((abs(p1-p2)-min(null))/sqrt(p1*(1-p1)/N+p2*(1-p2)/N)-qnorm(1-alpha))+pnorm(-(abs(p1-p2)-min(null))/sqrt(p1*(1-p1)/N+p2*(1-p2)/N)-qnorm(1-alpha)))-1
+    statistical_power2<-2*(pnorm((abs(p1-p2)-max(null))/sqrt(p1*(1-p1)/N+p2*(1-p2)/N)-qnorm(1-alpha))+pnorm(-(abs(p1-p2)-max(null))/sqrt(p1*(1-p1)/N+p2*(1-p2)/N)-qnorm(1-alpha)))-1
     statistical_power<-min(statistical_power1,statistical_power2)
     if(statistical_power<0) {statistical_power<-0}
     statistical_power
@@ -250,8 +248,10 @@ pow_prop_tost = function (p1, p2,
   else stop("internal error")
   METHOD <- "Power for Test of Differences in Two Proportions (z-test)"
   NOTE = "Sample sizes for EACH group"
-  structure(list(n = n, rho = r,
-                 alpha = alpha, beta = 1-power, power = power,
+  structure(list(n = n,
+                 proportions = c(p1,p2),
+                 alpha = alpha,
+                 beta = 1-power, power = power,
                  null = null, alternative = alternative,
                  method = METHOD,
                  NOTE = NOTE),
