@@ -8,6 +8,7 @@
 #'
 #' Power analysis for TOST for difference between two proportions using Z-test (pooled)
 #' @param n Sample size per group.
+#' @param alternative equivalence, one-sided, or two-sided test. Can be abbreviated.
 #' @inheritParams power_z_cor
 #' @inheritParams twoprop_test
 #' @param prop1 Deprecated. expected proportion in group 1.
@@ -98,8 +99,7 @@ power_twoprop = function(p1, p2,
                          alpha = NULL,
                          power = NULL,
                          alternative = c("two.sided",
-                                         "less",
-                                         "greater",
+                                         "one.sided",
                                          "equivalence")){
   if(missing(p1) || missing(p2)){
     stop("proportions (p1 & p2) must be supplied")
@@ -140,9 +140,7 @@ pow_prop = function (p1, p2,
                      null = 0,
                      alpha = NULL,
                      power = NULL,
-                     alternative = c("two.sided",
-                                     "less",
-                                     "greater"))
+                     alternative = c("two.sided","one.sided"))
 {
   if (sum(sapply(list(n, power, alpha), is.null)) != 1)
     stop("exactly one of n, power, and alpha must be NULL")
@@ -155,32 +153,27 @@ pow_prop = function (p1, p2,
                                                    1))
     stop(sQuote("power"), " must be numeric in [0, 1]")
   alternative <- match.arg(alternative)
-  tside <- switch(alternative, less = 1, two.sided = 2, greater = 3)
+  tside <- switch(alternative, one.sided = 1, two.sided = 2)
 
-  if (tside == 3) {
-    p.body <- quote({
-      prop_se <- sqrt((p1*(1-p1))/n + (p2*(1-p2))/n)
-      prop_dif <- p1 - p2 - null
-      zval = qnorm(alpha)
-      pnorm(qnorm(alpha, lower = FALSE) - (zval*prop_se+prop_dif)/prop_se, lower = FALSE)
-    })
-  }
   if (tside == 2) {
 
     p.body <- quote({
       prop_se <- sqrt((p1*(1-p1))/n + (p2*(1-p2))/n)
       prop_dif <- p1 - p2 - null
-      zval = qnorm(alpha/2)
-      pnorm(qnorm(alpha/2, lower = FALSE) - (zval*prop_se+prop_dif)/prop_se, lower = FALSE) +
-        pnorm(qnorm(alpha/2, lower = TRUE) - (zval*prop_se+prop_dif)/prop_se, lower = TRUE)
+      zval = qnorm(1-alpha/2)
+
+      (pnorm((abs(p1-p2)-(null))/sqrt(p1*(1-p1)/n+p2*(1-p2)/n)-qnorm(1-alpha/2))+pnorm(-(abs(p1-p2)-(null))/sqrt(p1*(1-p1)/n+p2*(1-p2)/n)-qnorm(1-alpha/2)))
+
     })
+
+
   }
   if (tside == 1) {
     p.body <- quote({
       prop_se <- sqrt((p1*(1-p1))/n + (p2*(1-p2))/n)
       prop_dif <- p1 - p2 - null
-      zval = qnorm(alpha)
-      pnorm(qnorm(alpha, lower = TRUE) - (zval*prop_se+prop_dif)/prop_se, lower = TRUE)
+      zval = qnorm(1-alpha)
+      (pnorm((abs(p1-p2)-(null))/sqrt(p1*(1-p1)/n+p2*(1-p2)/n)-qnorm(1-alpha))+pnorm(-(abs(p1-p2)-(null))/sqrt(p1*(1-p1)/n+p2*(1-p2)/n)-qnorm(1-alpha)))
     })
   }
 

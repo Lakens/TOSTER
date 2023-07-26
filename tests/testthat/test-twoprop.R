@@ -205,3 +205,69 @@ test_that("Random tests against prop_test",{
 
   }
 })
+
+
+test_that("power",{
+  expect_error(power_twoprop(p1 = .1,
+                             n = 55,
+                             null = 0,
+                             alpha = 0.05,
+                             power = .8))
+  expect_error(power_twoprop(p1 = .1, p2 = .2,
+                             n = 55,
+                             null = 0,
+                             alpha = NULL,
+                             power = NULL))
+  expect_error(power_twoprop(p1 = .1, p2 = .25,
+                            n = 55,
+                            null = 0,
+                            alpha = 1.05,
+                            power = NULL))
+  expect_error(power_twoprop(p1 = .1, p2 = .25,
+                             n = 55,
+                             null = 0,
+                             alpha = NULL,
+                             power = 1.1))
+
+  expect_error(power_twoprop(p1 = .1,
+                             n = 55,
+                             null = 0,
+                             alpha = 0.05,
+                             power = .8,
+                             alternative = "e"))
+  expect_error(power_twoprop(p1 = .1, p2 = .2,
+                             n = 55,
+                             null = .1,
+                             alpha = NULL,
+                             power = NULL,
+                             alternative = "e"))
+  expect_error(power_twoprop(p1 = .1, p2 = .25,
+                             n = 55,
+                             null = .1,
+                             alpha = 1.05,
+                             power = NULL,
+                             alternative = "e"))
+  expect_error(power_twoprop(p1 = .1, p2 = .25,
+                             n = 55,
+                             null = .1,
+                             alpha = NULL,
+                             power = 1.1,
+                             alternative = "e"))
+  test1_power = power_twoprop(p1 = .1, p2 = .25,
+                           n = 55,
+                           null = 0,
+                           alpha = 0.05,
+                           power = NULL)
+  test2_power = power_twoprop(p1 = .25, p2 = .1,
+                        n = 55,
+                        null = 0,
+                        alpha = 0.05,
+                        power = NULL,
+                        alternative = "g")
+  test3_power = power_twoprop(p1 = .1, p2 = .25,
+                        n = 55,
+                        null = 0,
+                        alpha = 0.05,
+                        power = NULL,
+                        alternative = "l")
+})
