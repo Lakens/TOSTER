@@ -330,7 +330,7 @@ test_that("power",{
 
 })
 
-test_that("power #2",{
+test_that("power prop #2",{
   for(i in 1:7){
     n_lvl = c(50,150,250,350,450,550,650)
     pow_lvl = c(.08073,.14513,.21093,.27652,.34064,.40234,.46095)
@@ -342,5 +342,13 @@ test_that("power #2",{
                                 power = NULL)
     expect_equal(test1_power$power, pow_lvl[i], tolerance = .01)
   }
+
+  test1 = power.prop.test(n = 150, p1 = .6, p2 = .65, alternative = "o")
+  test1_power = power_twoprop(p1 = .6, p2 = .65,
+                              n = n,
+                              null = 0,
+                              alternative = "o",
+                              alpha = 0.05,
+                              power = NULL)
 
 })
