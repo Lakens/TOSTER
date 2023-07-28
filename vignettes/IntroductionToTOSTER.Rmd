@@ -156,9 +156,16 @@ It is clear I should have been more tentative in my conclusions in this study. N
 Olson, Fazio, and Hermann (2007) reported correlations between implicit and explicit measures of self-esteem, such as the IAT, Rosenberg's self-esteem scale, a feeling thermometer, and trait ratings. In Study 1 71 participants completed the self-esteem measures. Because no equivalence bounds are mentioned, we can see which equivalence bounds the researchers would have 80% power to detect. 
 
 ```{r, fig.width=6}
-# No new code for correlations (yet)
-powerTOSTr(alpha=0.05, statistical_power=0.8, low_eqbound_r=-0.24, high_eqbound_r=0.24)
+# OLD
+powerTOSTr(alpha=0.05, statistical_power=0.8, 
+           low_eqbound_r=-0.24, high_eqbound_r=0.24)
 
+# NEW
+power_z_cor(alpha=0.05, 
+            power=0.8, 
+            rho = 0,
+            null=0.24,
+            alternative = "equ")
 ```
 
 With 71 pairs of observations between measures, the researchers have 80% power for equivalence bounds of r = -0.24 and r = 0.24. 
