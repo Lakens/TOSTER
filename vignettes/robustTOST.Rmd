@@ -174,7 +174,7 @@ A studentized test statistic can be calculated as:
 $$
 t = \sqrt{N} \cdot \frac{\hat p -p_{null}}{s}
 $$
-Wherein the default is typically $p_{null}$ is typically 0.5 (50% probability of superiority is the default null), and $\sigma_N$ refers the rank-based Brunner-Munzel standard error. The null can be modified therefore allowing for equivalence testing *directly based on the relative effect*. Additionally, for paired samples the probability of superiority is based on a *hypothesis of exchangability* and is not based on the differences scores^[This means the relative effect will *not* match the concordance probability provided by `ses_calc`].
+Wherein the default null hypothesis $p_{null}$ is typically 0.5 (50% probability of superiority is the default null), and $\sigma_N$ refers the rank-based Brunner-Munzel standard error. The null can be modified therefore allowing for equivalence testing *directly based on the relative effect*. Additionally, for paired samples the probability of superiority is based on a *hypothesis of exchangability* and is not based on the differences scores^[This means the relative effect will *not* match the concordance probability provided by `ses_calc`].
 
 For more details on the calculative approach, I suggest reading @karch2021. At small sample sizes, it is recommended that the permutation version of the test (`perm = TRUE`) be used rather than the basic test statistic approach.
 
