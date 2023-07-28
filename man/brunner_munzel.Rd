@@ -64,10 +64,10 @@ A list with class \code{"htest"} containing the following components:
 \item "statistic": the value of the test statistic.
 \item "parameter": the degrees of freedom for the test statistic.
 \item "p.value": the p-value for the test.
-\item "conf.int": a confidence interval for the mean appropriate to the specified alternative hypothesis.
-\item "estimate": the estimated mean or difference in means depending on whether it was a one-sample test or a two-sample test.
-\item "null.value": the specified hypothesized value of the mean or mean difference. May be 2 values.
-\item "stderr": the standard error.
+\item "conf.int": a confidence interval for the relative effect appropriate to the specified alternative hypothesis.
+\item "estimate": the estimated relative effect.
+\item "null.value": the specified hypothesized value of the relative effect.
+\item "stderr": the standard error of the relative effect.
 \item "alternative": a character string describing the alternative hypothesis.
 \item "method": a character string indicating what type of test was performed.
 \item "data.name": a character string giving the name(s) of the data.
@@ -85,7 +85,7 @@ This tests the hypothesis that the relative effect, discussed below, is equal to
 
 The estimate of the relative effect, which can be considered as value similar to the probability of superiority, refers to the following:
 
-p = p(X<Y) + .5*P(X=Y)
+\deqn{\hat p = p(X<Y) + \frac{1}{2} \cdot P(X=Y)}
 
 Note, for paired samples, this does \emph{not} refer to the probability of an increase/decrease in paired sample but rather the probability that a randomly sampled value of X.
 This is also referred to as the "relative" effect in the literature. Therefore, the results will differ from the concordance probability provided by the ses_calc function.
