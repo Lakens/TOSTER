@@ -212,6 +212,10 @@ test_prop_dif = function(p1,p2,n1,n2,
     if(length(null) != 1){
       stop("null must have length of 1 if alternative is not a TOST test.")
     }
+
+    if(null == 0){
+      message("For nil-hypothesis tests (null = 0), it is recommended that prop.test be utilized.")
+    }
     ZTEST = (prop_dif - null) / prop_se
     PVAL = p_from_z(ZTEST,
                     alternative = alternative)
@@ -324,6 +328,9 @@ test_odds_ratio = function(p1, p2, n1, n2,
   } else{
     if(length(null) != 1){
       stop("null must have length of 1 if alternative is not a TOST test.")
+    }
+    if(null == 1){
+      message("For nil-hypothesis tests (null = 1), it is recommended that prop.test be utilized.")
     }
     ZTEST = (log(OR) - log(null)) / se_logodds
     PVAL = p_from_z(ZTEST,
@@ -438,6 +445,10 @@ test_risk_ratio = function(p1, p2, n1, n2,
   } else{
     if(length(null) != 1){
       stop("null must have length of 1 if alternative is not a TOST test.")
+    }
+
+    if(null == 1){
+      message("For nil-hypothesis tests (null = 1), it is recommended that prop.test be utilized.")
     }
     ZTEST = (log(phi) - log(null)) / se_val
     PVAL = p_from_z(ZTEST,
