@@ -1,7 +1,7 @@
-#' TOST function for two proportions (raw scores)
+#' @title TOST function for two proportions (raw scores)
 #'
-#' #' @description
-#' `r lifecycle::badge('deprecated')`
+#' @description
+#' `r lifecycle::badge('superseded')`
 #'
 #' Development on `TOSTtwo.prop` is complete, and for new code we recommend
 #' switching to [twoprop_test], which is easier to use, more featureful,

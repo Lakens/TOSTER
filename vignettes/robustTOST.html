@@ -12,7 +12,7 @@
 
 <meta name="author" content="Aaron R. Caldwell" />
 
-<meta name="date" content="2023-07-28" />
+<meta name="date" content="2023-07-31" />
 
 <title>Robust TOST Procedures</title>
 
@@ -355,7 +355,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Robust TOST Procedures</h1>
 <h4 class="author">Aaron R. Caldwell</h4>
-<h4 class="date">2023-07-28</h4>
+<h4 class="date">2023-07-31</h4>
 
 
 <div id="TOC">
@@ -369,6 +369,8 @@ sizes</a></li>
 </ul></li>
 <li><a href="#brunner-munzel" id="toc-brunner-munzel">Brunner-Munzel</a>
 <ul>
+<li><a href="#basics-of-the-calculative-approach" id="toc-basics-of-the-calculative-approach">Basics of the Calculative
+Approach</a></li>
 <li><a href="#example" id="toc-example">Example</a></li>
 </ul></li>
 <li><a href="#bootstrap-tost" id="toc-bootstrap-tost">Bootstrap TOST</a>
@@ -624,13 +626,15 @@ effect, and answers a question akin to “what is the probability that a
 randomly sampled value of Y will be greater than X?”</p>
 <p><span class="math display">\[
 \hat p = P(X&lt;Y) + 0.5 \cdot P(X=Y)
-\]</span> ## Basics of the Calculative Approach</p>
+\]</span></p>
+<div id="basics-of-the-calculative-approach" class="section level2">
+<h2>Basics of the Calculative Approach</h2>
 <p>In this section, I will quickly detail the calculative approach that
 underlies the Brunner-Munzel test in <code>TOSTER</code>.</p>
 <p>A studentized test statistic can be calculated as:</p>
 <p><span class="math display">\[
 t = \sqrt{N} \cdot \frac{\hat p -p_{null}}{s}
-\]</span> Wherein the default is typically <span class="math inline">\(p_{null}\)</span> is typically 0.5 (50%
+\]</span> Wherein the default null hypothesis <span class="math inline">\(p_{null}\)</span> is typically 0.5 (50%
 probability of superiority is the default null), and <span class="math inline">\(\sigma_N\)</span> refers the rank-based
 Brunner-Munzel standard error. The null can be modified therefore
 allowing for equivalence testing <em>directly based on the relative
@@ -641,6 +645,7 @@ not based on the differences scores<a href="#fn3" class="footnote-ref" id="fnref
 recommended that the permutation version of the test
 (<code>perm = TRUE</code>) be used rather than the basic test statistic
 approach.</p>
+</div>
 <div id="example" class="section level2">
 <h2>Example</h2>
 <p>The interface for the function is very similar to the
@@ -672,10 +677,10 @@ alternative hypothesis for “two.sided”, “less”, or “greater”.</p>
 ##  two-sample Brunner-Munzel permutation test
 ## 
 ## data:  extra by group
-## t = -2.1447, df = 16.898, p-value = 0.057
+## t = -2.1447, df = 16.898, p-value = 0.0578
 ## alternative hypothesis: true relative effect is not equal to 0.5
 ## 95 percent confidence interval:
-##  0.0007267494 0.5100000000
+##  0.009242221 0.514456432
 ## sample estimates:
 ## p(X&lt;Y) + .5*P(X=Y) 
 ##              0.255</code></pre>
@@ -695,13 +700,13 @@ can be set with the <code>mu</code> argument.</p>
 ##  two-sample Brunner-Munzel permutation test
 ## 
 ## data:  extra by group
-## t = -3.8954, df = 16.898, p-value = 0.9975
+## t = -3.8954, df = 16.898, p-value = 0.9979
 ## alternative hypothesis: equivalence
 ## null values:
 ## relative effect relative effect 
 ##             0.3             0.7 
 ## 90 percent confidence interval:
-##  0.05218729 0.45708290
+##  0.0574034 0.4629105
 ## sample estimates:
 ## p(X&lt;Y) + .5*P(X=Y) 
 ##              0.255</code></pre>
@@ -782,11 +787,11 @@ instability of Hedges’ d(z).</p>
 ## 
 ## Effect Sizes 
 ##               Estimate     SE               C.I. Conf. Level
-## Raw             -1.580 0.3791     [-2.27, -1.03]         0.9
-## Hedges&#39;s g(z)   -1.174 0.8676 [-2.6256, -0.9261]         0.9
+## Raw             -1.580 0.3819    [-2.291, -1.05]         0.9
+## Hedges&#39;s g(z)   -1.174 0.7465 [-2.6958, -0.9037]         0.9
 ## Note: percentile bootstrap method utilized.</code></pre>
 <div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="fu">plot</span>(test1)</span></code></pre></div>
-<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
 </div>
 </div>
 <div id="ratio-of-difference-log-transformed" class="section level1">
@@ -861,7 +866,7 @@ precise test.</p>
 <pre><code>## 
 ## Bootstrapped Log Welch Two Sample t-test
 ## 
-## The equivalence test was non-significant, t(23.96) = -1.363, p = 9.64e-01
+## The equivalence test was non-significant, t(23.96) = -1.363, p = 9.4e-01
 ## The null hypothesis test was significant, t(23.96) = -3.826, p = 0e+00
 ## NHST: reject null significance hypothesis that the effect is equal to 1 
 ## TOST: don&#39;t reject null equivalence hypothesis
@@ -869,13 +874,13 @@ precise test.</p>
 ## TOST Results 
 ##                 t    df p.value
 ## t-test     -3.826 23.96 &lt; 0.001
-## TOST Lower -1.363 23.96   0.964
+## TOST Lower -1.363 23.96    0.94
 ## TOST Upper -6.288 23.96 &lt; 0.001
 ## 
 ## Effect Sizes 
-##                  Estimate      SE               C.I. Conf. Level
-## log(Means Ratio)  -0.3466 0.08492 [-0.4856, -0.2056]         0.9
-## Means Ratio        0.7071 0.05988   [0.6153, 0.8142]         0.9
+##                  Estimate      SE              C.I. Conf. Level
+## log(Means Ratio)  -0.3466 0.09036 [-0.494, -0.2034]         0.9
+## Means Ratio        0.7071 0.06412  [0.6102, 0.8159]         0.9
 ## Note: percentile bootstrap method utilized.</code></pre>
 </div>
 </div>

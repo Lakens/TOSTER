@@ -71,6 +71,8 @@ An S3 object of class
 }
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+
 A function for a bootstrap method for TOST with all types of t-tests.
 }
 \details{

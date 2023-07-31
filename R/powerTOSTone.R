@@ -1,7 +1,7 @@
 #' Power One Sample t-test
 #'
 #' @description
-#' `r lifecycle::badge("deprecated")`
+#' `r lifecycle::badge("superseded")`
 #'
 #' Power analysis for TOST for one-sample t-test (Cohen's d).
 #' This function is no longer maintained please use [power_t_TOST].

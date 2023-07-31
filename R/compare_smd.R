@@ -1,5 +1,8 @@
 #' @title Comparing SMDs between independent studies
-#' @description A function to compare standardized mean differences (SMDs) between studies. This function is intended to be used to compare the compatibility of original studies with replication studies (lower p-values indicating lower compatibility).
+#' @description
+#' `r lifecycle::badge('stable')`
+#'
+#' A function to compare standardized mean differences (SMDs) between studies. This function is intended to be used to compare the compatibility of original studies with replication studies (lower p-values indicating lower compatibility).
 #' @param smd1,smd2 SMDs from study 1 & 2, respectively.
 #' @param n1,n2 sample size(s) from study 1 & 2, respectively (can be 1 number or vector of 2 numbers).
 #' @param se1,se2 User supplied standard errors (SEs). This will override the internal calculations.

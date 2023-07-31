@@ -52,6 +52,8 @@ estimated. See \link[stats:wilcox.test]{stats::wilcox.test}.}
 A data frame containing the standardized effect size.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+
 Standardized effect size (SES), these are the effect sizes not considered SMDs.
 }
 \details{

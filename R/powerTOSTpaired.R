@@ -4,7 +4,7 @@
 #' @title Power Paired Sample t-test
 #'
 #' @description
-#' `r lifecycle::badge("deprecated")`
+#' `r lifecycle::badge("superseded")`
 #'
 #' Power analysis for TOST for dependent t-test (Cohen's dz).
 #' This function is no longer maintained please use [power_t_TOST].

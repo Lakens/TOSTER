@@ -35,9 +35,16 @@ TOSTone(m=5.71,mu=6,sd=1.79,n=20,low_eqbound_d=-0.68, high_eqbound_d=0.68, alpha
 tsum_TOST(m1=5.71-6,sd1=1.79,n1=20,eqb=0.68, eqbound_type = "SMD")
 
 ## ---- fig.width=6-------------------------------------------------------------
-# No new code for correlations (yet)
-powerTOSTr(alpha=0.05, statistical_power=0.8, low_eqbound_r=-0.24, high_eqbound_r=0.24)
+# OLD
+powerTOSTr(alpha=0.05, statistical_power=0.8, 
+           low_eqbound_r=-0.24, high_eqbound_r=0.24)
 
+# NEW
+power_z_cor(alpha=0.05, 
+            power=0.8, 
+            rho = 0,
+            null=0.24,
+            alternative = "equ")
 
 ## ---- fig.width=6-------------------------------------------------------------
 # OLD CODE
