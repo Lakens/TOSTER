@@ -2,12 +2,13 @@
 #' @description
 #' `r lifecycle::badge('stable')`
 #'
-#' Test for association between paired samples, using one of Pearson's product moment correlation coefficient,Kendall's tau or Spearman's rho.
-#' This is the updated version of the TOSTr function.
+#' Test for association between paired samples, using one of Pearson's product moment correlation coefficient, Kendall's \eqn{\tau} (tau) or Spearman's \eqn{\rho} (rho).
+#' This is the updated version of the [TOSTr] function.
 #' @inheritParams TOSTr
 #' @inheritParams z_cor_test
 #' @details
-#' This function uses Fisher's z transformation for the correlations, but uses Fieller's correction of the standard error for Spearman's rho and Kendall's tau.
+#' This function uses Fisher's z transformation for the correlations,
+#' but uses Fieller's correction of the standard error for Spearman's \eqn{\rho} and Kendall's \eqn{\tau}.
 #'
 #' @return A list with class "htest" containing the following components:
 #'

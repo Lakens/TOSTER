@@ -40,7 +40,7 @@ Object of class '"htest"
 Performs equivalence test on the partial eta-squared (pes) value for using an F-test.
 }
 \details{
-For details on the calculations in this function see vignette("the_ftestTOSTER").
+For details on the calculations in this function see \code{vignette("the_ftestTOSTER")}.
 }
 \section{References}{
 

@@ -57,7 +57,7 @@ A data frame containing the standardized effect size.
 Standardized effect size (SES), these are the effect sizes not considered SMDs.
 }
 \details{
-For details on the calculations in this function see vignette("robustTOST").
+For details on the calculations in this function see \code{vignette("robustTOST")}.
 }
 \examples{
 \dontrun{

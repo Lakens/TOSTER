@@ -2,7 +2,8 @@
 #' @description
 #' `r lifecycle::badge('stable')`
 #'
-#' Test for association between paired samples, using one of Pearson's product moment correlation coefficient,Kendall's tau or Spearman's rho.
+#' Test for association between paired samples,
+#' using one of Pearson's product moment correlation coefficient, Kendall's \eqn{\tau} (tau) or Spearman's \eqn{\rho} (rho).
 #' Unlike the stats version of cor.test, this function allows users to set the null to a value other than zero.
 #' @param x,y numeric vectors of data values. x and y must have the same length.
 #' @param method a character string indicating which correlation coefficient is to be used for the test. One of "pearson", "kendall", or "spearman", can be abbreviated.
@@ -10,7 +11,11 @@
 #' @param alternative a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater", "less", "equivalence" (TOST), or "minimal.effect" (TOST). You can specify just the initial letter.
 #' @param alpha alpha level (default = 0.05)
 #'
-#' @details This function uses Fisher's z transformation for the correlations, but uses Fieller's correction of the standard error for Spearman's rho and Kendall's tau.
+#' @details This function uses Fisher's z transformation for the correlations,
+#' but uses Fieller's correction of the standard error for Spearman's \eqn{\rho} and Kendall's \eqn{\tau}.
+#' See `vignette("correlations")` for more details.
+#'
+#'
 #' @return  A list with class "htest" containing the following components:
 #'
 #'   - "p.value": the p-value of the test.

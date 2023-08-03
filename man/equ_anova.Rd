@@ -38,7 +38,7 @@ Eta-Squared measure of effect size.
 Performs equivalence test on the partial eta-squared (pes) value from ANOVA results.
 }
 \details{
-For details on the calculations in this function see vignette("the_ftestTOSTER").
+For details on the calculations in this function see \code{vignette("the_ftestTOSTER")}.
 }
 \section{References}{
 

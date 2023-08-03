@@ -1,8 +1,12 @@
-#' @title Comparing Correlations between independent studies with Bootstrapping
+#' @title Comparing Correlations between independent studies with bootstrapping
 #' @description
 #' `r lifecycle::badge('stable')`
 #'
-#' A function to compare standardized mean differences (SMDs) between studies. This function is intended to be used to compare the compatibility of original studies with replication studies (lower p-values indicating lower compatibility)
+#' A function to compare standardized mean differences (SMDs) between studies.
+#' This function is intended to be used to compare the compatibility of original studies with replication studies
+#' (lower p-values indicating lower compatibility).
+#'
+#'
 #' @param x1,y1 numeric vectors of data values. x and y must have the same length from study 1.
 #' @param x2,y2 numeric vectors of data values. x and y must have the same length from study 2.
 #' @inheritParams boot_cor_test
@@ -19,6 +23,7 @@
 #'   - "call": the matched call.
 #'
 #' @name boot_compare_cor
+#' @family compare studies
 #' @importFrom stats median
 #' @export boot_compare_cor
 #'

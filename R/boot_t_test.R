@@ -2,10 +2,9 @@
 #' @description
 #' `r lifecycle::badge('stable')`
 #'
-#'  A function for a bootstrap method for Tt-tests.
+#'  A function for a bootstrap method for t-tests.
 #' @inheritParams simple_htest
 #' @inheritParams boot_t_TOST
-#' @details For details on the calculations in this function see vignette("robustTOST").
 #' @return A list with class `"htest"` containing the following components:
 #'
 #'   - "statistic": the value of the t-statistic.
@@ -21,7 +20,7 @@
 #'
 #' @details The implemented test(s) corresponds to the proposal of Chapter 16 of Efron and Tibshirani (1994).
 #'
-#' For details on the calculations in this function see vignette("robustTOST").
+#' For details on the calculations in this function see `vignette("robustTOST")`.
 #'
 #' @examples
 #' # example code

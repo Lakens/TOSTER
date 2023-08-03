@@ -81,7 +81,7 @@ An S3 object of class
 A function for TOST on the log-transformed data using parametric t-tests.
 }
 \details{
-For details on the calculations in this function see vignette("robustTOST").
+For details on the calculations in this function see \code{vignette("robustTOST")}.
 }
 \examples{
 data(mtcars)

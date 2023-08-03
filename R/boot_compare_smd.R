@@ -1,8 +1,12 @@
-#' @title Comparing SMDs between independent studies with Bootstrapping
+#' @title Comparing SMDs between ndependent studies with bootstrapping
 #' @description
 #' `r lifecycle::badge('stable')`
 #'
-#' A function to compare standardized mean differences (SMDs) between studies. This function is intended to be used to compare the compatibility of original studies with replication studies (lower p-values indicating lower compatibility)
+#' A function to compare standardized mean differences (SMDs) between studies.
+#' This function is intended to be used to compare the compatibility of original studies with replication studies
+#' (lower p-values indicating lower compatibility).
+#'
+#'
 #' @param x1 	a (non-empty) numeric vector of data values from study 1.
 #' @param y1 an optional (non-empty) numeric vector of data values from study 1.
 #' @param x2 a (non-empty) numeric vector of data values from study 2.

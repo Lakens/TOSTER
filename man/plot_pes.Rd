@@ -29,7 +29,7 @@ Returns plot of the distribution of partial eta-squared
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 
-Function to produce plots of the distribution of partial eta-squared
+Function to produce plots of the distribution of partial eta-squared.
 }
 \details{
 This function was created so that users could create consonance plots of partial eta-squared from ANOVA-level effects.

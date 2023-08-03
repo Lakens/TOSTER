@@ -10,7 +10,7 @@
 #' @param eqbound Defunct argument for quivalence bound for the partial eta-squared. Default is NULL.
 #' @param MET logical indicator to perform a minimal effect test rather than equivalence test (default is FALSE).
 #' @param alpha alpha used for the test (e.g., 0.05).
-#' @details For details on the calculations in this function see vignette("the_ftestTOSTER").
+#' @details For details on the calculations in this function see `vignette("the_ftestTOSTER")`.
 #' @return Object of class '"htest"
 #'
 #'   - "statistic": The value of the F-statistic.

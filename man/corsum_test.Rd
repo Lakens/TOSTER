@@ -42,11 +42,12 @@ A list with class "htest" containing the following components:
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 
-Test for association between paired samples, using one of Pearson's product moment correlation coefficient,Kendall's tau or Spearman's rho.
-This is the updated version of the TOSTr function.
+Test for association between paired samples, using one of Pearson's product moment correlation coefficient, Kendall's \eqn{\tau} (tau) or Spearman's \eqn{\rho} (rho).
+This is the updated version of the \link{TOSTr} function.
 }
 \details{
-This function uses Fisher's z transformation for the correlations, but uses Fieller's correction of the standard error for Spearman's rho and Kendall's tau.
+This function uses Fisher's z transformation for the correlations,
+but uses Fieller's correction of the standard error for Spearman's \eqn{\rho} and Kendall's \eqn{\tau}.
 }
 \references{
 Goertzen, J. R., & Cribbie, R. A. (2010). Detecting a lack of association: An equivalence testing approach. British Journal of Mathematical and Statistical Psychology, 63(3), 527-537. https://doi.org/10.1348/000711009X475853, formula page 531.

@@ -28,7 +28,7 @@ An estimate of the correlation.
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 
 A function for estimating the correlation from a paired samples t-test.
-Useful for tsum_TOST when the correlation is not available.
+Useful for when using \link{tsum_TOST} and the correlation is not available.
 }
 \references{
 Lajeunesse, M. J. (2011). On the meta‐analysis of response ratios for studies with correlated and multi‐group designs. Ecology, 92(11), 2049-2055

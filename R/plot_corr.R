@@ -2,7 +2,9 @@
 #' @description
 #' `r lifecycle::badge('stable')`
 #'
-#' Function to produce plots of the distribution of standard correlation coefficients
+#' Function to produce plots of the distribution of standard correlation coefficients.
+#'
+#'
 #' @param r The observed correlation coefficient.
 #' @param n Total number of observations (sample size).
 #' @param method The method by which the coefficient was calculated: pearson, spearman, or kendall (default is "pearson")

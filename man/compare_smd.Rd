@@ -53,10 +53,12 @@ A list with class "htest" containing the following components:
 A function to compare standardized mean differences (SMDs) between studies. This function is intended to be used to compare the compatibility of original studies with replication studies (lower p-values indicating lower compatibility).
 }
 \details{
-This function tests for differences between correlations.
+This function tests for differences between SMDs from independent studies (e.g., original vs replication).
 }
 \seealso{
 Other compare studies: 
-\code{\link{boot_compare_smd}()}
+\code{\link{boot_compare_cor}()},
+\code{\link{boot_compare_smd}()},
+\code{\link{compare_cor}()}
 }
 \concept{compare studies}

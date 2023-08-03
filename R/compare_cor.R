@@ -28,6 +28,7 @@
 #' Anderson, S., & Hauck, W. W. (1983). A new procedure for testing equivalence in comparative bioavailability and other clinical trials. Communications in Statistics-Theory and Methods, 12(23), 2663-2692.
 #'
 #' @name compare_cor
+#' @family compare studies
 #' @import R6
 #' @export compare_cor
 #'

@@ -8,7 +8,7 @@
 #' @param eqbound Equivalence bound for the partial eta-squared.
 #' @param MET logical indicator to perform a minimal effect test rather than equivalence test (default is FALSE).
 #' @param alpha alpha used for the test (e.g., 0.05).
-#' @details For details on the calculations in this function see vignette("the_ftestTOSTER").
+#' @details For details on the calculations in this function see `vignette("the_ftestTOSTER")`.
 #'@return Returns a data frame containing the ANOVA results with equivalence tests added.
 #'
 #'  The following abbreviations are used in the table:

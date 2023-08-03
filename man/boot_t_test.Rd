@@ -67,14 +67,12 @@ A list with class \code{"htest"} containing the following components:
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 
-A function for a bootstrap method for Tt-tests.
+A function for a bootstrap method for t-tests.
 }
 \details{
-For details on the calculations in this function see vignette("robustTOST").
-
 The implemented test(s) corresponds to the proposal of Chapter 16 of Efron and Tibshirani (1994).
 
-For details on the calculations in this function see vignette("robustTOST").
+For details on the calculations in this function see \code{vignette("robustTOST")}.
 }
 \section{References}{
 

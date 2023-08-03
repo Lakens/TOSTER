@@ -2,7 +2,7 @@
 % Please edit documentation in R/boot_compare_smd.R
 \name{boot_compare_smd}
 \alias{boot_compare_smd}
-\title{Comparing SMDs between independent studies with Bootstrapping}
+\title{Comparing SMDs between ndependent studies with bootstrapping}
 \usage{
 boot_compare_smd(
   x1,
@@ -55,10 +55,14 @@ A list with class "htest" containing the following components:
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 
-A function to compare standardized mean differences (SMDs) between studies. This function is intended to be used to compare the compatibility of original studies with replication studies (lower p-values indicating lower compatibility)
+A function to compare standardized mean differences (SMDs) between studies.
+This function is intended to be used to compare the compatibility of original studies with replication studies
+(lower p-values indicating lower compatibility).
 }
 \seealso{
 Other compare studies: 
+\code{\link{boot_compare_cor}()},
+\code{\link{compare_cor}()},
 \code{\link{compare_smd}()}
 }
 \concept{compare studies}

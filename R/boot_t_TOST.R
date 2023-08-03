@@ -5,7 +5,6 @@
 #' A function for a bootstrap method for TOST with all types of t-tests.
 #' @param R number of bootstrap replicates
 #' @inheritParams t_TOST
-#' @details For details on the calculations in this function see vignette("robustTOST").
 #' @return An S3 object of class
 #'   `"TOSTt"` is returned containing the following slots:
 #'
@@ -24,7 +23,7 @@
 #'  Returns TOSTt class object with bootstrapped based results.
 #'  Please note that the repeated measures "corrected" effect size is not available.
 #'
-#' For details on the calculations in this function see vignette("robustTOST").
+#' For details on the calculations in this function see `vignette("robustTOST")`.
 #' @section References:
 #'
 #' Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press.

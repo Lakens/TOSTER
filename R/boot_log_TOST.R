@@ -6,7 +6,6 @@
 #' A function for a bootstrap method for TOST with all types of t-tests.
 #' @inheritParams boot_t_TOST
 #' @inheritParams log_TOST
-#' @details For details on the calculations in this function see vignette("robustTOST").
 #' @return An S3 object of class
 #'   `"TOSTt"` is returned containing the following slots:
 #'
@@ -26,7 +25,7 @@
 #' Returns TOSTt class object with bootstrapped based results.
 #' This is approximately equivalent to the percentile bootstrap method mentioned by He et al (2014).
 #'
-#' For details on the calculations in this function see vignette("robustTOST").
+#' For details on the calculations in this function see `vignette("robustTOST")`.
 #' @references
 #' Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press
 #'

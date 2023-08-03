@@ -3,6 +3,8 @@
 #' `r lifecycle::badge('stable')`
 #'
 #' A function to compare standardized mean differences (SMDs) between studies. This function is intended to be used to compare the compatibility of original studies with replication studies (lower p-values indicating lower compatibility).
+#'
+#'
 #' @param smd1,smd2 SMDs from study 1 & 2, respectively.
 #' @param n1,n2 sample size(s) from study 1 & 2, respectively (can be 1 number or vector of 2 numbers).
 #' @param se1,se2 User supplied standard errors (SEs). This will override the internal calculations.
@@ -10,7 +12,9 @@
 #' @param null a number indicating the null hypothesis. For TOST, this would be equivalence bound.
 #' @param alternative a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater", "less", "equivalence" (TOST), or "minimal.effect" (TOST). You can specify just the initial letter.
 #' @param TOST Defunct: use alternative argument. Logical indicator (default = FALSE) to perform two one-sided tests of equivalence (TOST).
-#' @details This function tests for differences between correlations.
+#'
+#' @details This function tests for differences between SMDs from independent studies (e.g., original vs replication).
+#'
 #' @return A list with class "htest" containing the following components:
 #'
 #'   - "statistic": z-score.

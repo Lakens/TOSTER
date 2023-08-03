@@ -76,7 +76,7 @@ A list with class \code{"htest"} containing the following components:
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#maturing}{\figure{lifecycle-maturing.svg}{options: alt='[Maturing]'}}}{\strong{[Maturing]}}
 
-This is a generic function that performs a generalized asymptotic Brunner-Munzel test in a fashion similar to \code{"t.test"}.
+This is a generic function that performs a generalized asymptotic Brunner-Munzel test in a fashion similar to \link{t.test}.
 }
 \details{
 This function is made to provide a test of stochastic equality between two samples (paired or independent), and is referred to as the Brunner-Munzel test.

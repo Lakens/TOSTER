@@ -31,10 +31,13 @@ install.packages("TOSTER")
 
 ## Educational Material
 
-For educational material on setting the smallest effect size of interest and equivalence tests, see week 2 of my MOOC "Improving Your Statistical Questions". https://www.coursera.org/teach/improving-statistical-questions. 
+For educational material on setting the smallest effect size of interest and equivalence tests, see week 2 of the MOOC "Improving Your Statistical Questions". https://www.coursera.org/teach/improving-statistical-questions. 
 
 For an introduction to equivalence testing and the TOSTER package (this is recommended reading material to understand the basics of equivalence tests) see: 
 Lakens, D. (2017). Equivalence Tests: A Practical Primer for t Tests, Correlations, and Meta-Analyses. Social Psychological and Personality Science, 8(4), 355–362. https://doi.org/10.1177/1948550617697177
+
+For an in-depth description of the newer functions in the TOSTER package since Lakens 2017 see:
+Caldwell, A. R. (2022). Exploring equivalence testing with the updated TOSTER R Package. PsyArXiv. https://doi.org/10.31234/osf.io/ty8de
 
 For a tutorial paper (this is the recommended reading material if you want to start using equivalence testing) see:
 Lakens, D., Scheel, A. M., & Isager, P. M. (2018). Equivalence Testing for Psychological Research: A Tutorial. Advances in Methods and Practices in Psychological Science, 1(2), 259–269. https://doi.org/10.1177/2515245918770963

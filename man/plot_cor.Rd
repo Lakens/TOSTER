@@ -29,7 +29,7 @@ Returns plot of the distribution of the correlation coefficient.
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 
-Function to produce plots of the distribution of standard correlation coefficients
+Function to produce plots of the distribution of standard correlation coefficients.
 }
 \details{
 This function was created so that users could create consonance plots of Pearson's correlation coefficient.

@@ -7,7 +7,8 @@
 #' @inheritParams z_cor_test
 #' @param method a character string indicating which correlation coefficient is to be used for the test. One of "winsorized", "bendpercent","pearson", "kendall", or "spearman", can be abbreviated.
 #' @details This function uses a percentile bootstrap methods for the confidence intervals.
-#' The returned p-values are calculated from a re-sampled null distribution (similar to boot_t_TOST).
+#' The returned p-values are calculated from a re-sampled null distribution (similar to [boot_t_TOST]).
+#' See `vignette("correlations")` for more details.
 #'
 #' The bootstrap correlation methods in this package offer two other correlations: a Winsorized correlation and a percentage bend correlation (see Wilcox 2017).
 #' These two can modified by adding the trim (Winsorized) or beta (percentage bend) arguments.

@@ -54,3 +54,10 @@ Counsell, A., & Cribbie, R. A. (2015). Equivalence tests for comparing correlati
 
 Anderson, S., & Hauck, W. W. (1983). A new procedure for testing equivalence in comparative bioavailability and other clinical trials. Communications in Statistics-Theory and Methods, 12(23), 2663-2692.
 }
+\seealso{
+Other compare studies: 
+\code{\link{boot_compare_cor}()},
+\code{\link{boot_compare_smd}()},
+\code{\link{compare_smd}()}
+}
+\concept{compare studies}

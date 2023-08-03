@@ -6,7 +6,7 @@
 #' @param eqb Equivalence bound; default is 1.25 (FDA guidelines). Can provide 1 value (reciprical value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds.
 #' @param null Null hypothesis value for a two-tailed test (default is 1).
 #' @inheritParams t_TOST
-#' @details For details on the calculations in this function see vignette("robustTOST").
+#' @details For details on the calculations in this function see `vignette("robustTOST")`.
 #' @return An S3 object of class
 #'   `"TOSTt`" is returned containing the following slots:
 #'
