@@ -25,7 +25,10 @@
 #' Returns TOSTt class object with bootstrapped based results.
 #' This is approximately equivalent to the percentile bootstrap method mentioned by He et al (2014).
 #'
-#' This function tests \eqn{(log(x)-log(y)}.
+#' For two-sample tests, the test is of \eqn{\bar log(x) - \bar log(y)} (mean of x minus mean of y).
+#' For paired samples, the test is of the difference scores (z),
+#' wherein \eqn{z =  log(x) - log(y) = log(x)/log(y)}, and the test is of \eqn{\bar z} (mean of the difference/ratio scores).
+#'
 #'
 #'
 #' For details on the calculations in this function see `vignette("robustTOST")`.
@@ -39,7 +42,8 @@
 #' https://www.fda.gov/regulatory-information/search-fda-guidance-documents/bioavailability-and-bioequivalence-studies-submitted-ndas-or-inds-general-considerations
 #' @importFrom stats var quantile
 #' @name boot_log_TOST
-#' @family Robust TOST
+#' @family Robust tests
+#' @family TOST
 #' @export boot_log_TOST
 
 boot_log_TOST <- function(x, ...){

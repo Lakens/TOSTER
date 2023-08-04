@@ -18,6 +18,8 @@
 #' If \code{alternative = "equivalence"} then the alternative is that the difference between x and y is between the two null values `mu`..
 #' If \code{alternative = "minimal.effect"} then the alternative is that the difference between x and y is less than the lowest null value or greater than the highest.
 #'
+#' For more details on each possible test ([brunner_munzel], [stats::t.test], or [stats::wilcox.test]), please read their individual documentation.
+#'
 #' @return A list with class `"htest"` containing the following components:
 #'
 #'   - statistic: the value of the t-statistic.

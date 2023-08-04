@@ -81,7 +81,9 @@ and recommended by He et al (2022).
 Returns TOSTt class object with bootstrapped based results.
 This is approximately equivalent to the percentile bootstrap method mentioned by He et al (2014).
 
-This function tests \eqn{(log(x)-log(y)}.
+For two-sample tests, the test is of \eqn{\bar log(x) - \bar log(y)} (mean of x minus mean of y).
+For paired samples, the test is of the difference scores (z),
+wherein \eqn{z =  log(x) - log(y) = log(x)/log(y)}, and the test is of \eqn{\bar z} (mean of the difference/ratio scores).
 
 For details on the calculations in this function see \code{vignette("robustTOST")}.
 }
@@ -95,10 +97,19 @@ Center for Drug Evaluation and Research. Docket: FDA-2014-D-0204.
 https://www.fda.gov/regulatory-information/search-fda-guidance-documents/bioavailability-and-bioequivalence-studies-submitted-ndas-or-inds-general-considerations
 }
 \seealso{
-Other Robust TOST: 
+Other Robust tests: 
 \code{\link{boot_t_TOST}()},
 \code{\link{boot_t_test}()},
+\code{\link{brunner_munzel}()},
 \code{\link{log_TOST}()},
 \code{\link{wilcox_TOST}()}
+
+Other TOST: 
+\code{\link{boot_t_TOST}()},
+\code{\link{simple_htest}()},
+\code{\link{t_TOST}()},
+\code{\link{tsum_TOST}()},
+\code{\link{wilcox_TOST}()}
 }
-\concept{Robust TOST}
+\concept{Robust tests}
+\concept{TOST}

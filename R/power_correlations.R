@@ -42,6 +42,7 @@
 #'
 #' @importFrom stats pnorm pt qnorm qt integrate uniroot qnorm pnorm dnorm
 #' @importFrom graphics abline plot points segments title
+#' @family Correlations
 #' @family power
 #' @export
 

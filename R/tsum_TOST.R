@@ -1,4 +1,4 @@
-#' @title TOSTt with Summary Statistics
+#' @title TOST with t-tests from Summary Statistics
 #' @description
 #' `r lifecycle::badge('stable')`
 #'
@@ -11,7 +11,15 @@
 #' @param n2 sample size in group 2.
 #' @param r12 correlation of dependent variable between group 1 and group 2.
 #' @inheritParams t_TOST
-#' @details For details on the calculations in this function see `vignette("IntroTOSTt")` & `vignette("SMD_calcs")`.
+#' @details
+#' For details on the calculations in this function see
+#' `vignette("IntroTOSTt")` & `vignette("SMD_calcs")`.
+#'
+#' For two-sample tests, the test is of \eqn{m1 - m2} (mean of 1 minus mean of 2).
+#' For paired samples, the test is of the difference scores (z),
+#' wherein \eqn{z =  m1 - m2}, and the test is of \eqn{\bar z} (mean of the difference scores).
+#' For one-sample tests, the test is of \eqn{\bar m1 } (mean of group 1).
+#'
 #' @return An S3 object of class
 #'  `"TOSTt"` is returned containing the following slots:
 #'

@@ -6,7 +6,13 @@
 #' @param eqb Equivalence bound; default is 1.25 (FDA guidelines). Can provide 1 value (reciprical value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds.
 #' @param null Null hypothesis value for a two-tailed test (default is 1).
 #' @inheritParams t_TOST
-#' @details For details on the calculations in this function see `vignette("robustTOST")`. his function tests \eqn{(log(x)-log(y)}.
+#' @details
+#' For details on the calculations in this function see `vignette("robustTOST")`.
+#'
+#' For two-sample tests, the test is of \eqn{\bar log(x) - \bar log(y)} (mean of x minus mean of y).
+#' For paired samples, the test is of the difference scores (z),
+#' wherein \eqn{z =  log(x) - log(y) = log(x)/log(y)}, and the test is of \eqn{\bar z} (mean of the difference/ratio scores).
+#'
 #' @return An S3 object of class
 #'   `"TOSTt`" is returned containing the following slots:
 #'
@@ -31,7 +37,7 @@
 #' # Default FDA bioequivalence bounds
 #' log_TOST(mpg ~ am,
 #' data = mtcars)
-#' @family Robust TOST
+#' @family Robust tests
 #' @name log_TOST
 #' @export log_TOST
 

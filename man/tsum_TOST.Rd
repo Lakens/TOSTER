@@ -2,7 +2,7 @@
 % Please edit documentation in R/tsum_TOST.R
 \name{tsum_TOST}
 \alias{tsum_TOST}
-\title{TOSTt with Summary Statistics}
+\title{TOST with t-tests from Summary Statistics}
 \usage{
 tsum_TOST(
   m1,
@@ -91,7 +91,13 @@ An S3 object of class
 A function for TOST with all types of t-tests from summary statistics.
 }
 \details{
-For details on the calculations in this function see \code{vignette("IntroTOSTt")} & \code{vignette("SMD_calcs")}.
+For details on the calculations in this function see
+\code{vignette("IntroTOSTt")} & \code{vignette("SMD_calcs")}.
+
+For two-sample tests, the test is of \eqn{m1 - m2} (mean of 1 minus mean of 2).
+For paired samples, the test is of the difference scores (z),
+wherein \eqn{z =  m1 - m2}, and the test is of \eqn{\bar z} (mean of the difference scores).
+For one-sample tests, the test is of \eqn{\bar m1 } (mean of group 1).
 }
 \examples{
 # example code
@@ -100,8 +106,10 @@ tsum_TOST(m1 = 0.55, n1 = 18, sd1 = 4, eqb  = 2)
 }
 \seealso{
 Other TOST: 
-\code{\link{brunner_munzel}()},
+\code{\link{boot_log_TOST}()},
+\code{\link{boot_t_TOST}()},
 \code{\link{simple_htest}()},
-\code{\link{t_TOST}()}
+\code{\link{t_TOST}()},
+\code{\link{wilcox_TOST}()}
 }
 \concept{TOST}

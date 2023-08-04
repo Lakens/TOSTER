@@ -68,3 +68,11 @@ Communications in Statistics - Simulation and Computation, 38, 2220–2234.
 Wilcox, R.R. (2017) Introduction to Robust Estimation and Hypothesis Testing, 4th edition. Academic Press.
 }
 
+\seealso{
+Other Correlations: 
+\code{\link{corsum_test}()},
+\code{\link{plot_cor}()},
+\code{\link{power_z_cor}()},
+\code{\link{z_cor_test}()}
+}
+\concept{Correlations}

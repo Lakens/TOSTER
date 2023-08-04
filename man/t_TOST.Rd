@@ -110,8 +110,10 @@ A function for TOST with all types of t-tests.
 \details{
 For details on the calculations in this function see vignette("IntroTOSTt") & vignette("SMD_calcs").
 
-For two-sample or paired samples tests, the test is of \eqn{(x-y)-\mu}.
-For one-sample tests, the test is of \eqn{(x)-\mu}.
+For two-sample tests, the test is of \eqn{\bar x - \bar y} (mean of x minus mean of y).
+For paired samples, the test is of the difference scores (z),
+wherein \eqn{z =  x - y}, and the test is of \eqn{\bar z} (mean of the difference scores).
+For one-sample tests, the test is of \eqn{\bar x } (mean of x).
 }
 \examples{
 data(mtcars)
@@ -121,8 +123,10 @@ eqb = 3)
 }
 \seealso{
 Other TOST: 
-\code{\link{brunner_munzel}()},
+\code{\link{boot_log_TOST}()},
+\code{\link{boot_t_TOST}()},
 \code{\link{simple_htest}()},
-\code{\link{tsum_TOST}()}
+\code{\link{tsum_TOST}()},
+\code{\link{wilcox_TOST}()}
 }
 \concept{TOST}

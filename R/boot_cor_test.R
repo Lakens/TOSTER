@@ -31,6 +31,7 @@
 #' Communications in Statistics - Simulation and Computation, 38, 2220–2234.
 #'
 #' Wilcox, R.R. (2017) Introduction to Robust Estimation and Hypothesis Testing, 4th edition. Academic Press.
+#' @family Correlations
 #' @export
 
 

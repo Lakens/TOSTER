@@ -92,6 +92,14 @@ This function uses the normal approximation and applies a continuity correction 
 }
 \details{
 For details on the calculations in this function see \code{vignette("robustTOST")}.
+
+If only x is given, or if both x and y are given and paired is TRUE,
+a Wilcoxon signed rank test of the null that the distribution of x (in the one sample case)
+or of x - y (in the paired two sample case) is symmetric about mu is performed.
+
+Otherwise, if both x and y are given and paired is FALSE,
+a Wilcoxon rank sum test (equivalent to the Mann-Whitney test: see the Note) is carried out.
+In this case, the null hypothesis is that the distributions of x and y differ by a location shift.
 }
 \section{References}{
 
@@ -107,10 +115,19 @@ data = mtcars,
 eqb = 3)
 }
 \seealso{
-Other Robust TOST: 
+Other Robust tests: 
 \code{\link{boot_log_TOST}()},
 \code{\link{boot_t_TOST}()},
 \code{\link{boot_t_test}()},
+\code{\link{brunner_munzel}()},
 \code{\link{log_TOST}()}
+
+Other TOST: 
+\code{\link{boot_log_TOST}()},
+\code{\link{boot_t_TOST}()},
+\code{\link{simple_htest}()},
+\code{\link{t_TOST}()},
+\code{\link{tsum_TOST}()}
 }
-\concept{Robust TOST}
+\concept{Robust tests}
+\concept{TOST}

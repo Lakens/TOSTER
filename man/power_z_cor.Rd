@@ -65,8 +65,15 @@ power_z_cor(alternative = "equivalence", alpha = .05, null = .1, n = 536, rho = 
 
 }
 \seealso{
+Other Correlations: 
+\code{\link{boot_cor_test}()},
+\code{\link{corsum_test}()},
+\code{\link{plot_cor}()},
+\code{\link{z_cor_test}()}
+
 Other power: 
 \code{\link{power_eq_f}()},
 \code{\link{power_t_TOST}()}
 }
+\concept{Correlations}
 \concept{power}

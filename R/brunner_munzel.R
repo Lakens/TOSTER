@@ -55,8 +55,8 @@
 #' Munzel, U., Brunner, E. (2002). An Exact Paired Rank Test. Biometrical Journal 44, 584-593.
 #'
 #' Konietschke, F., Placzek, M., Schaarschmidt, F., & Hothorn, L. A. (2015). nparcomp: an R software package for nonparametric multiple comparisons and simultaneous confidence intervals. Journal of Statistical Software 64 (2015), Nr. 9, 64(9), 1-17. http://www.jstatsoft.org/v64/i09/
-#' @family TOST
 #' @name brunner_munzel
+#' @family Robust tests
 #' @export brunner_munzel
 
 #brunner_munzel <- setClass("brunner_munzel")

@@ -36,8 +36,15 @@ This function was created so that users could create consonance plots of Pearson
 These types of plots are discussed by Schweder T, Hjort NL. (2016, ISBN:9781316445051) and Rafi Z, Greenland S. (2020) \url{doi:10.1186/s12874-020-01105-9}.
 }
 \seealso{
+Other Correlations: 
+\code{\link{boot_cor_test}()},
+\code{\link{corsum_test}()},
+\code{\link{power_z_cor}()},
+\code{\link{z_cor_test}()}
+
 Other plotting functions: 
 \code{\link{plot_pes}()},
 \code{\link{plot_smd}()}
 }
+\concept{Correlations}
 \concept{plotting functions}

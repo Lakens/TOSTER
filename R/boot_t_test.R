@@ -19,8 +19,11 @@
 #'   - "data.name": a character string giving the name(s) of the data.
 #'
 #' @details The implemented test(s) corresponds to the proposal of Chapter 16 of Efron and Tibshirani (1994).
-#' For two-sample or paired samples tests, the test is of \eqn{(x-y)-\mu}.
-#' For one-sample tests, the test is of \eqn{(x)-\mu}.
+#'
+#' For two-sample tests, the test is of \eqn{\bar x - \bar y} (mean of x minus mean of y).
+#' For paired samples, the test is of the difference scores (z),
+#' wherein \eqn{z =  x - y}, and the test is of \eqn{\bar z} (mean of the difference scores).
+#' For one-sample tests, the test is of \eqn{\bar x } (mean of x).
 #'
 #' For details on the calculations in this function see `vignette("robustTOST")`.
 #'
@@ -31,7 +34,7 @@
 #' @section References:
 #'
 #' Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press.
-#' @family Robust TOST
+#' @family Robust tests
 #' @importFrom stats var quantile
 #' @name boot_t_test
 #' @export boot_t_test

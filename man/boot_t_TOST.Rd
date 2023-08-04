@@ -92,8 +92,10 @@ The implemented test(s) corresponds to the proposal of Chapter 16 of Efron and T
 Returns TOSTt class object with bootstrapped based results.
 Please note that the repeated measures "corrected" effect size is not available.
 
-For two-sample or paired samples tests, the test is of \eqn{(x-y)-\mu}.
-For one-sample tests, the test is of \eqn{(x)-\mu}.
+For two-sample tests, the test is of \eqn{\bar x - \bar y} (mean of x minus mean of y).
+For paired samples, the test is of the difference scores (z),
+wherein \eqn{z =  x - y}, and the test is of \eqn{\bar z} (mean of the difference scores).
+For one-sample tests, the test is of \eqn{\bar x } (mean of x).
 
 For details on the calculations in this function see \code{vignette("robustTOST")}.
 }
@@ -104,10 +106,19 @@ Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC pre
 }
 
 \seealso{
-Other Robust TOST: 
+Other Robust tests: 
 \code{\link{boot_log_TOST}()},
 \code{\link{boot_t_test}()},
+\code{\link{brunner_munzel}()},
 \code{\link{log_TOST}()},
 \code{\link{wilcox_TOST}()}
+
+Other TOST: 
+\code{\link{boot_log_TOST}()},
+\code{\link{simple_htest}()},
+\code{\link{t_TOST}()},
+\code{\link{tsum_TOST}()},
+\code{\link{wilcox_TOST}()}
 }
-\concept{Robust TOST}
+\concept{Robust tests}
+\concept{TOST}

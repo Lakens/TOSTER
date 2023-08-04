@@ -79,6 +79,8 @@ The type of test, t-test/Wilcoxon-Mann-Whitney/Brunner-Munzel, can be selected w
 \code{alternative = "greater"} is the alternative that x is larger than y (on average).
 If \code{alternative = "equivalence"} then the alternative is that the difference between x and y is between the two null values \code{mu}..
 If \code{alternative = "minimal.effect"} then the alternative is that the difference between x and y is less than the lowest null value or greater than the highest.
+
+For more details on each possible test (\link{brunner_munzel}, \link[stats:t.test]{stats::t.test}, or \link[stats:wilcox.test]{stats::wilcox.test}), please read their individual documentation.
 }
 \examples{
 data(mtcars)
@@ -89,9 +91,11 @@ mu = 3)
 }
 \seealso{
 Other TOST: 
-\code{\link{brunner_munzel}()},
+\code{\link{boot_log_TOST}()},
+\code{\link{boot_t_TOST}()},
 \code{\link{t_TOST}()},
-\code{\link{tsum_TOST}()}
+\code{\link{tsum_TOST}()},
+\code{\link{wilcox_TOST}()}
 
 Other htest: 
 \code{\link{as_htest}()},

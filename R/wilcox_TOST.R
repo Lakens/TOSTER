@@ -12,7 +12,17 @@
 #' correlation. Options also include "cstat" for concordance probability, or
 #' "odds" for Wilcoxon-Mann-Whitney odds (otherwise known as Agresti's
 #' generalized odds ratio).
-#' @details For details on the calculations in this function see `vignette("robustTOST")`.
+#' @details
+#' For details on the calculations in this function see `vignette("robustTOST")`.
+#'
+#' If only x is given, or if both x and y are given and paired is TRUE,
+#' a Wilcoxon signed rank test of the null that the distribution of x (in the one sample case)
+#' or of x - y (in the paired two sample case) is symmetric about mu is performed.
+#'
+#' Otherwise, if both x and y are given and paired is FALSE,
+#' a Wilcoxon rank sum test (equivalent to the Mann-Whitney test: see the Note) is carried out.
+#' In this case, the null hypothesis is that the distributions of x and y differ by a location shift.
+#'
 #' @return An S3 object of class
 #'   `"TOSTnp"` is returned containing the following slots:
 #'
@@ -35,7 +45,8 @@
 #'
 #' Myles Hollander and Douglas A. Wolfe (1973). Nonparametric Statistical Methods. New York: John Wiley & Sons. Pages 27–33 (one-sample), 68–75 (two-sample). Or second edition (1999).
 #' @importFrom stats wilcox.test
-#' @family Robust TOST
+#' @family Robust tests
+#' @family TOST
 #' @name wilcox_TOST
 #' @export wilcox_TOST
 

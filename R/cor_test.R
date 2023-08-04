@@ -37,6 +37,7 @@
 #' @references
 #' Goertzen, J. R., & Cribbie, R. A. (2010). Detecting a lack of association: An equivalence testing approach. British Journal of Mathematical and Statistical Psychology, 63(3), 527-537. https://doi.org/10.1348/000711009X475853, formula page 531.
 #' @name z_cor_test
+#' @family Correlations
 #' @export z_cor_test
 
 z_cor_test = function(x,

@@ -60,3 +60,11 @@ z_cor_test(x, y, method = "kendall", alternative = "min", null = .2)
 \references{
 Goertzen, J. R., & Cribbie, R. A. (2010). Detecting a lack of association: An equivalence testing approach. British Journal of Mathematical and Statistical Psychology, 63(3), 527-537. https://doi.org/10.1348/000711009X475853, formula page 531.
 }
+\seealso{
+Other Correlations: 
+\code{\link{boot_cor_test}()},
+\code{\link{corsum_test}()},
+\code{\link{plot_cor}()},
+\code{\link{power_z_cor}()}
+}
+\concept{Correlations}

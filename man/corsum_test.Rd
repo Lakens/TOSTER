@@ -52,3 +52,11 @@ but uses Fieller's correction of the standard error for Spearman's \eqn{\rho} an
 \references{
 Goertzen, J. R., & Cribbie, R. A. (2010). Detecting a lack of association: An equivalence testing approach. British Journal of Mathematical and Statistical Psychology, 63(3), 527-537. https://doi.org/10.1348/000711009X475853, formula page 531.
 }
+\seealso{
+Other Correlations: 
+\code{\link{boot_cor_test}()},
+\code{\link{plot_cor}()},
+\code{\link{power_z_cor}()},
+\code{\link{z_cor_test}()}
+}
+\concept{Correlations}

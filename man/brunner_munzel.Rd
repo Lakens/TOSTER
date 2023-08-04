@@ -107,9 +107,11 @@ Munzel, U., Brunner, E. (2002). An Exact Paired Rank Test. Biometrical Journal 4
 Konietschke, F., Placzek, M., Schaarschmidt, F., & Hothorn, L. A. (2015). nparcomp: an R software package for nonparametric multiple comparisons and simultaneous confidence intervals. Journal of Statistical Software 64 (2015), Nr. 9, 64(9), 1-17. http://www.jstatsoft.org/v64/i09/
 }
 \seealso{
-Other TOST: 
-\code{\link{simple_htest}()},
-\code{\link{t_TOST}()},
-\code{\link{tsum_TOST}()}
+Other Robust tests: 
+\code{\link{boot_log_TOST}()},
+\code{\link{boot_t_TOST}()},
+\code{\link{boot_t_test}()},
+\code{\link{log_TOST}()},
+\code{\link{wilcox_TOST}()}
 }
-\concept{TOST}
+\concept{Robust tests}

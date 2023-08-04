@@ -81,7 +81,11 @@ An S3 object of class
 A function for TOST on the log-transformed data using parametric t-tests.
 }
 \details{
-For details on the calculations in this function see \code{vignette("robustTOST")}. his function tests \eqn{(log(x)-log(y)}.
+For details on the calculations in this function see \code{vignette("robustTOST")}.
+
+For two-sample tests, the test is of \eqn{\bar log(x) - \bar log(y)} (mean of x minus mean of y).
+For paired samples, the test is of the difference scores (z),
+wherein \eqn{z =  log(x) - log(y) = log(x)/log(y)}, and the test is of \eqn{\bar z} (mean of the difference/ratio scores).
 }
 \examples{
 data(mtcars)
@@ -97,10 +101,11 @@ Center for Drug Evaluation and Research. Docket: FDA-2014-D-0204.
 https://www.fda.gov/regulatory-information/search-fda-guidance-documents/bioavailability-and-bioequivalence-studies-submitted-ndas-or-inds-general-considerations
 }
 \seealso{
-Other Robust TOST: 
+Other Robust tests: 
 \code{\link{boot_log_TOST}()},
 \code{\link{boot_t_TOST}()},
 \code{\link{boot_t_test}()},
+\code{\link{brunner_munzel}()},
 \code{\link{wilcox_TOST}()}
 }
-\concept{Robust TOST}
+\concept{Robust tests}
