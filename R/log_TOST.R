@@ -1,21 +1,31 @@
 #' @title TOST with log transformed t-tests
-#' @description A function for TOST on the log-transformed data using parametric t-tests.
+#' @description
+#' `r lifecycle::badge('stable')`
+#'
+#'A function for TOST on the log-transformed data using parametric t-tests.
 #' @param eqb Equivalence bound; default is 1.25 (FDA guidelines). Can provide 1 value (reciprical value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds.
 #' @param null Null hypothesis value for a two-tailed test (default is 1).
 #' @inheritParams t_TOST
-#' @details For details on the calculations in this function see vignette("robustTOST").
+#' @details
+#' For details on the calculations in this function see `vignette("robustTOST")`.
+#'
+#' For two-sample tests, the test is of \eqn{\bar log(x) - \bar log(y)} (mean of x minus mean of y).
+#' For paired samples, the test is of the difference scores (z),
+#' wherein \eqn{z =  log(x) - log(y) = log(x)/log(y)}, and the test is of \eqn{\bar z} (mean of the difference/ratio scores).
+#'
 #' @return An S3 object of class
-#'   \code{"TOSTt"} is returned containing the following slots:
-#' \describe{
-#'   \item{\code{"TOST"}}{A table of class \code{"data.frame"} containing two-tailed t-test and both one-tailed results.}
-#'   \item{\code{"eqb"}}{A table of class \code{"data.frame"} containing equivalence bound settings.}
-#'   \item{\code{"effsize"}}{ table of class \code{"data.frame"} containing effect size estimates}
-#'   \item{\code{"hypothesis"}}{String stating the hypothesis being tested}
-#'   \item{\code{"smd"}}{List containing the results of the means ratio calculation.Items include: d (means ratio estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation)}
-#'   \item{\code{"alpha"}}{Alpha level set for the analysis.}
-#'   \item{\code{"method"}}{Type of t-test.}
-#'   \item{\code{"decision"}}{List included text regarding the decisions for statistical inference.}
-#' }
+#'   `"TOSTt`" is returned containing the following slots:
+#'
+#'   - "TOST": A table of class \code{"data.frame"} containing two-tailed t-test and both one-tailed results.
+#'   - "eqb": A table of class \code{"data.frame"} containing equivalence bound settings.
+#'   - "effsize":  table of class \code{"data.frame"} containing effect size estimates.
+#'   - "hypothesis": String stating the hypothesis being tested
+#'   - "smd": List containing the results of the means ratio calculation.
+#'      - Items include: d (means ratio estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation)
+#'   - "alpha": Alpha level set for the analysis.
+#'   - "method": Type of t-test.
+#'   - "decision": List included text regarding the decisions for statistical inference.
+#'
 #' @references
 #' He, Y., Deng, Y., You, C., & Zhou, X. H. (2022). Equivalence tests for ratio of means in bioequivalence studies under crossover design. Statistical Methods in Medical Research, 09622802221093721.
 #'
@@ -27,7 +37,7 @@
 #' # Default FDA bioequivalence bounds
 #' log_TOST(mpg ~ am,
 #' data = mtcars)
-#' @family Robust TOST
+#' @family Robust tests
 #' @name log_TOST
 #' @export log_TOST
 

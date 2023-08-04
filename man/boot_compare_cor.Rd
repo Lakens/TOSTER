@@ -2,7 +2,7 @@
 % Please edit documentation in R/boot_compare_cor.R
 \name{boot_compare_cor}
 \alias{boot_compare_cor}
-\title{Comparing Correlations between independent studies with Bootstrapping}
+\title{Comparing Correlations between independent studies with bootstrapping}
 \usage{
 boot_compare_cor(
   x1,
@@ -36,18 +36,29 @@ boot_compare_cor(
 }
 \value{
 A list with class "htest" containing the following components:
-\describe{
-  \item{\code{"p.value"}}{numeric scalar containing the p-value for the test under the null hypothesis.}
-  \item{\code{"estimate"}}{difference in correlations between studies.}
-  \item{\code{"conf.int"}}{percentile (bootstrap) confidence interval for difference in correlations.}
-  \item{\code{"null.value"}}{the specified hypothesized value for the null hypothesis.}
-  \item{\code{"alternative"}}{character string indicating the alternative hypothesis (the value of the input argument alternative). Possible values are "greater", "less", or "two-sided".}
-  \item{\code{"method"}}{a character string indicating how the association was measured.}
-  \item{\code{"data.name"}}{Names of input values..}
-  \item{\code{"boot_res"}}{List of bootstrapped results.}
-  \item{\code{"call"}}{the matched call.}
+\itemize{
+\item "p.value": numeric scalar containing the p-value for the test under the null hypothesis.
+\item "estimate": difference in correlations between studies.
+\item "conf.int": percentile (bootstrap) confidence interval for difference in correlations.
+\item "null.value": the specified hypothesized value for the null hypothesis.
+\item "alternative": character string indicating the alternative hypothesis (the value of the input argument alternative). Possible values are "greater", "less", or "two-sided".
+\item "method": a character string indicating how the association was measured.
+\item "data.name": Names of input values.
+\item "boot_res": List of bootstrapped results.
+\item "call": the matched call.
 }
 }
 \description{
-A function to compare standardized mean differences (SMDs) between studies. This function is intended to be used to compare the compatibility of original studies with replication studies (lower p-values indicating lower compatibility)
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+
+A function to compare standardized mean differences (SMDs) between studies.
+This function is intended to be used to compare the compatibility of original studies with replication studies
+(lower p-values indicating lower compatibility).
 }
+\seealso{
+Other compare studies: 
+\code{\link{boot_compare_smd}()},
+\code{\link{compare_cor}()},
+\code{\link{compare_smd}()}
+}
+\concept{compare studies}

@@ -66,30 +66,38 @@ boot_t_TOST(x, ...)
 }
 \value{
 An S3 object of class
-  \code{"TOSTt"} is returned containing the following slots:
-\describe{
-  \item{\code{"TOST"}}{A table of class \code{"data.frame"} containing two-tailed t-test and both one-tailed results.}
-  \item{\code{"eqb"}}{A table of class \code{"data.frame"} containing equivalence bound settings.}
-  \item{\code{"effsize"}}{ table of class \code{"data.frame"} containing effect size estimates}
-  \item{\code{"hypothesis"}}{String stating the hypothesis being tested}
-  \item{\code{"smd"}}{List containing the results of the standardized mean difference calculations (e.g., Cohen's d).Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation)}
-  \item{\code{"alpha"}}{Alpha level set for the analysis.}
-  \item{\code{"method"}}{Type of t-test.}
-  \item{\code{"decision"}}{List included text regarding the decisions for statistical inference.}
-  \item{\code{"boot"}}{List containing the bootstrap samples.}
+\code{"TOSTt"} is returned containing the following slots:
+\itemize{
+\item "TOST": A table of class "data.frame" containing two-tailed t-test and both one-tailed results.
+\item "eqb": A table of class "data.frame" containing equivalence bound settings.
+\item "effsize":  table of class "data.frame" containing effect size estimates.
+\item "hypothesis": String stating the hypothesis being tested
+\item "smd": List containing the results of the standardized mean difference calculations (e.g., Cohen's d).
+\itemize{
+\item Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation)
+}
+\item "alpha": Alpha level set for the analysis.
+\item "method": Type of t-test.
+\item "decision": List included text regarding the decisions for statistical inference.
+\item "boot": List containing the bootstrap samples.
 }
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+
 A function for a bootstrap method for TOST with all types of t-tests.
 }
 \details{
-For details on the calculations in this function see vignette("robustTOST").
-
 The implemented test(s) corresponds to the proposal of Chapter 16 of Efron and Tibshirani (1994).
- Returns TOSTt class object with bootstrapped based results.
- Please note that the repeated measures "corrected" effect size is not available.
+Returns TOSTt class object with bootstrapped based results.
+Please note that the repeated measures "corrected" effect size is not available.
 
-For details on the calculations in this function see vignette("robustTOST").
+For two-sample tests, the test is of \eqn{\bar x - \bar y} (mean of x minus mean of y).
+For paired samples, the test is of the difference scores (z),
+wherein \eqn{z =  x - y}, and the test is of \eqn{\bar z} (mean of the difference scores).
+For one-sample tests, the test is of \eqn{\bar x } (mean of x).
+
+For details on the calculations in this function see \code{vignette("robustTOST")}.
 }
 \section{References}{
 
@@ -98,10 +106,19 @@ Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC pre
 }
 
 \seealso{
-Other Robust TOST: 
+Other Robust tests: 
 \code{\link{boot_log_TOST}()},
 \code{\link{boot_t_test}()},
+\code{\link{brunner_munzel}()},
 \code{\link{log_TOST}()},
 \code{\link{wilcox_TOST}()}
+
+Other TOST: 
+\code{\link{boot_log_TOST}()},
+\code{\link{simple_htest}()},
+\code{\link{t_TOST}()},
+\code{\link{tsum_TOST}()},
+\code{\link{wilcox_TOST}()}
 }
-\concept{Robust TOST}
+\concept{Robust tests}
+\concept{TOST}

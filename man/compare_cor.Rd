@@ -30,21 +30,23 @@ compare_cor(
 \item{null}{a number indicating the null hypothesis. For TOST, this would be equivalence bound.}
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+
 A function to compare correlations between studies. This function is intended to be used to compare the compatibility of original studies with replication studies (lower p-values indicating lower compatibility).
 }
 \details{
 This function tests for differences between correlations.
- @return A list with class "htest" containing the following components:
-\describe{
-  \item{\code{"statistic"}}{z-score}
-  \item{\code{"p.value"}}{numeric scalar containing the p-value for the test under the null hypothesis.}
-  \item{\code{"estimate"}}{difference in SMD between studies}
-  \item{\code{"null.value"}}{the specified hypothesized value for the null hypothesis.}
-  \item{\code{"alternative"}}{character string indicating the alternative hypothesis (the value of the input argument alternative). Possible values are "greater", "less", or "two-sided".}
-  \item{\code{"method"}}{Type of SMD}
-  \item{\code{"data.name"}}{"Summary Statistics" to denote summary statistics were utilized to obtain results.}
-  \item{\code{"cor"}}{Correlation input for the function.}
-  \item{\code{"call"}}{the matched call.}
+@return A list with class "htest" containing the following components:
+\itemize{
+\item "statistic":  z-score
+\item "p.value":  numeric scalar containing the p-value for the test under the null hypothesis.
+\item "estimate":  difference in SMD between studies.
+\item "null.value":  the specified hypothesized value for the null hypothesis.
+\item "alternative":  character string indicating the alternative hypothesis (the value of the input argument alternative). Possible values are "greater", "less", or "two-sided".
+\item "method":  Type of SMD.
+\item "data.name":  "Summary Statistics" to denote summary statistics were utilized to obtain results.
+\item "cor":  Correlation input for the function.
+\item "call":  the matched call.
 }
 }
 \references{
@@ -52,3 +54,10 @@ Counsell, A., & Cribbie, R. A. (2015). Equivalence tests for comparing correlati
 
 Anderson, S., & Hauck, W. W. (1983). A new procedure for testing equivalence in comparative bioavailability and other clinical trials. Communications in Statistics-Theory and Methods, 12(23), 2663-2692.
 }
+\seealso{
+Other compare studies: 
+\code{\link{boot_compare_cor}()},
+\code{\link{boot_compare_smd}()},
+\code{\link{compare_smd}()}
+}
+\concept{compare studies}

@@ -19,19 +19,26 @@ equ_anova(object, eqbound, MET = FALSE, alpha = 0.05)
 \value{
 Returns a data frame containing the ANOVA results with equivalence tests added.
 
- The following abbreviations are used in the table:
-
- \itemize{ \item effect: name of the effect. \item df1:	Degrees of Freedom in the numerator (i.e. DF effect).
- \item df2:	Degrees of Freedom in the denominator (i.e., DF error). \item F:	F-value. \item p.null:	p-value
- (probability of the data given the null hypothesis).  \item pes:	partial
- Eta-Squared measure of effect size. \item eqbound: equivalence bound. \item p.equ: p-value
- (probability of the data given the equivalence hypothesis) }
+The following abbreviations are used in the table:
+\itemize{
+\item effect: name of the effect.
+\item df1:	Degrees of Freedom in the numerator (i.e. DF effect).
+\item df2:	Degrees of Freedom in the denominator (i.e., DF error).
+\item F:	F-value.
+\item p.null:	p-value (probability of the data given the null hypothesis).
+\item pes:	partial
+Eta-Squared measure of effect size.
+\item eqbound: equivalence bound.
+\item p.equ: p-value (probability of the data given the equivalence hypothesis)
+}
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+
 Performs equivalence test on the partial eta-squared (pes) value from ANOVA results.
 }
 \details{
-For details on the calculations in this function see vignette("the_ftestTOSTER").
+For details on the calculations in this function see \code{vignette("the_ftestTOSTER")}.
 }
 \section{References}{
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/tsum_TOST.R
 \name{tsum_TOST}
 \alias{tsum_TOST}
-\title{TOSTt with Summary Statistics}
+\title{TOST with t-tests from Summary Statistics}
 \usage{
 tsum_TOST(
   m1,
@@ -28,19 +28,19 @@ tsum_TOST(
 )
 }
 \arguments{
-\item{m1}{mean of group 1}
+\item{m1}{mean of group 1.}
 
-\item{sd1}{standard deviation of group 1}
+\item{sd1}{standard deviation of group 1.}
 
-\item{n1}{sample size in group 1}
+\item{n1}{sample size in group 1.}
 
-\item{m2}{mean of group 2}
+\item{m2}{mean of group 2.}
 
-\item{sd2}{standard deviation of group 2}
+\item{sd2}{standard deviation of group 2.}
 
-\item{n2}{sample size in group 2}
+\item{n2}{sample size in group 2.}
 
-\item{r12}{correlation of dependent variable between group 1 and group 2}
+\item{r12}{correlation of dependent variable between group 1 and group 2.}
 
 \item{hypothesis}{'EQU' for equivalence (default), or 'MET' for minimal effects test, the alternative hypothesis.}
 
@@ -70,23 +70,34 @@ tsum_TOST(
 }
 \value{
 An S3 object of class
-  \code{"TOSTt"} is returned containing the following slots:
-\describe{
-  \item{\code{"TOST"}}{A table of class \code{"data.frame"} containing two-tailed t-test and both one-tailed results.}
-  \item{\code{"eqb"}}{A table of class \code{"data.frame"} containing equivalence bound settings.}
-  \item{\code{"effsize"}}{ table of class \code{"data.frame"} containing effect size estimates}
-  \item{\code{"hypothesis"}}{String stating the hypothesis being tested}
-  \item{\code{"smd"}}{List containing the results of the standardized mean difference calculations (e.g., Cohen's d).Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation)}
-  \item{\code{"alpha"}}{Alpha level set for the analysis.}
-  \item{\code{"method"}}{Type of t-test.}
-  \item{\code{"decision"}}{List included text regarding the decisions for statistical inference.}
+\code{"TOSTt"} is returned containing the following slots:
+\itemize{
+\item "TOST":  A table of class \code{"data.frame"} containing two-tailed t-test and both one-tailed results.
+\item "eqb":  A table of class \code{"data.frame"} containing equivalence bound settings.
+\item "effsize":   table of class \code{"data.frame"} containing effect size estimates.
+\item "hypothesis":  String stating the hypothesis being tested.
+\item "smd":  List containing the results of the standardized mean difference calculations (e.g., Cohen's d).
+\itemize{
+\item Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation)
+}
+\item "alpha":  Alpha level set for the analysis.
+\item "method":  Type of t-test.
+\item "decision":  List included text regarding the decisions for statistical inference.
 }
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+
 A function for TOST with all types of t-tests from summary statistics.
 }
 \details{
-For details on the calculations in this function see vignette("IntroTOSTt") & vignette("SMD_calcs").
+For details on the calculations in this function see
+\code{vignette("IntroTOSTt")} & \code{vignette("SMD_calcs")}.
+
+For two-sample tests, the test is of \eqn{m1 - m2} (mean of 1 minus mean of 2).
+For paired samples, the test is of the difference scores (z),
+wherein \eqn{z =  m1 - m2}, and the test is of \eqn{\bar z} (mean of the difference scores).
+For one-sample tests, the test is of \eqn{\bar m1 } (mean of group 1).
 }
 \examples{
 # example code
@@ -95,7 +106,10 @@ tsum_TOST(m1 = 0.55, n1 = 18, sd1 = 4, eqb  = 2)
 }
 \seealso{
 Other TOST: 
+\code{\link{boot_log_TOST}()},
+\code{\link{boot_t_TOST}()},
 \code{\link{simple_htest}()},
-\code{\link{t_TOST}()}
+\code{\link{t_TOST}()},
+\code{\link{wilcox_TOST}()}
 }
 \concept{TOST}

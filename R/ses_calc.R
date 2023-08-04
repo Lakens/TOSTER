@@ -1,5 +1,8 @@
 #' @title SES Calculation
-#' @description Standardized effect size (SES), these are the effect sizes not considered SMDs.
+#' @description
+#' `r lifecycle::badge('stable')`
+#'
+#' Standardized effect size (SES), these are the effect sizes not considered SMDs.
 #' @param x a (non-empty) numeric vector of data values.
 #' @param y an optional (non-empty) numeric vector of data values.
 #' @param formula a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.
@@ -16,7 +19,7 @@
 #' @param subset an optional vector specifying a subset of observations to be used.
 #' @param na.action a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").
 #' @param ...  further arguments to be passed to or from methods.
-#' @details For details on the calculations in this function see vignette("robustTOST").
+#' @details For details on the calculations in this function see `vignette("robustTOST")`.
 #' @return A data frame containing the standardized effect size.
 #' @examples
 #' \dontrun{

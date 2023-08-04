@@ -600,8 +600,22 @@ test_that("Run examples for corsum_test",{
   expect_equal(test1$p.value,
                0.1529,
                tolerance = .001)
+  test1 = corsum_test(n=71, r=0.12, null=0.24, alpha=0.05,
+                      alternative = "e")
+  expect_equal(test1$p.value,
+               0.1529,
+               tolerance = .001)
+
   test1 = corsum_test(n=71, r=-0.12, null=0.24, alpha=0.05,
                       alternative = "m")
+  expect_equal(test1$p.value,
+               0.8471113,
+               tolerance = .001)
+  test1 = corsum_test(n=71, r=0.12, null=0.24, alpha=0.05,
+                      alternative = "m")
+  expect_equal(test1$p.value,
+               0.8471113,
+               tolerance = .001)
 
   test1 = corsum_test(n=71, r=-0.12,  alpha=0.05)
 

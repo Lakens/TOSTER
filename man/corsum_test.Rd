@@ -28,25 +28,35 @@ corsum_test(
 }
 \value{
 A list with class "htest" containing the following components:
-
-\describe{
-  \item{\code{"statistic"}}{z-score}
-  \item{\code{"p.value"}}{the p-value of the test.}
-  \item{\code{"estimate"}}{the estimated measure of association, with name "cor", "tau", or "rho" corresponding to the method employed.}
-  \item{\code{"null.value"}}{the value of the association measure under the null hypothesis.}
-  \item{\code{"alternative"}}{character string indicating the alternative hypothesis (the value of the input argument alternative). }
-  \item{\code{"method"}}{a character string indicating how the association was measured.}
-  \item{\code{"data.name"}}{a character string giving the names of the data.}
-  \item{\code{"call"}}{the matched call.}
+\itemize{
+\item "statistic": z-score.
+\item "p.value": the p-value of the test.
+\item "estimate": the estimated measure of association, with name "cor", "tau", or "rho" corresponding to the method employed.
+\item "null.value": the value of the association measure under the null hypothesis.
+\item "alternative": character string indicating the alternative hypothesis (the value of the input argument alternative).
+\item "method": a character string indicating how the association was measured.
+\item "data.name": a character string giving the names of the data.
+\item "call": the matched call.
 }
 }
 \description{
-Test for association between paired samples, using one of Pearson's product moment correlation coefficient,Kendall's \eqn{\tau}{tau} or Spearman's \eqn{\rho}{rho}.
-This is the updated version of the TOSTr function.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+
+Test for association between paired samples, using one of Pearson's product moment correlation coefficient, Kendall's \eqn{\tau} (tau) or Spearman's \eqn{\rho} (rho).
+This is the updated version of the \link{TOSTr} function.
 }
 \details{
-This function uses Fisher's z transformation for the correlations, but uses Fieller's correction of the standard error for Spearman's rho and Kendall's tau.
+This function uses Fisher's z transformation for the correlations,
+but uses Fieller's correction of the standard error for Spearman's \eqn{\rho} and Kendall's \eqn{\tau}.
 }
 \references{
 Goertzen, J. R., & Cribbie, R. A. (2010). Detecting a lack of association: An equivalence testing approach. British Journal of Mathematical and Statistical Psychology, 63(3), 527-537. https://doi.org/10.1348/000711009X475853, formula page 531.
 }
+\seealso{
+Other Correlations: 
+\code{\link{boot_cor_test}()},
+\code{\link{plot_cor}()},
+\code{\link{power_z_cor}()},
+\code{\link{z_cor_test}()}
+}
+\concept{Correlations}

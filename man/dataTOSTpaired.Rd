@@ -63,14 +63,14 @@ effect size is biased (d) or bias-corrected (g).}
 \value{
 A results object containing:
 \tabular{llllll}{
-  \code{results$text} \tab \tab \tab \tab \tab a html \cr
-  \code{results$tost} \tab \tab \tab \tab \tab a table \cr
-  \code{results$eqb} \tab \tab \tab \tab \tab a table \cr
-  \code{results$effsize} \tab \tab \tab \tab \tab a table \cr
-  \code{results$desc} \tab \tab \tab \tab \tab a table \cr
-  \code{results$plots} \tab \tab \tab \tab \tab an image \cr
-  \code{results$indplot} \tab \tab \tab \tab \tab an image \cr
-  \code{results$diffplot} \tab \tab \tab \tab \tab an image \cr
+\code{results$text} \tab \tab \tab \tab \tab a html \cr
+\code{results$tost} \tab \tab \tab \tab \tab a table \cr
+\code{results$eqb} \tab \tab \tab \tab \tab a table \cr
+\code{results$effsize} \tab \tab \tab \tab \tab a table \cr
+\code{results$desc} \tab \tab \tab \tab \tab a table \cr
+\code{results$plots} \tab \tab \tab \tab \tab an image \cr
+\code{results$indplot} \tab \tab \tab \tab \tab an image \cr
+\code{results$diffplot} \tab \tab \tab \tab \tab an image \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -80,12 +80,12 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$tost)}
 }
 \description{
-TOST Paired Samples T-Test in jamovi. This function is not meant to be 
+TOST Paired Samples T-Test in jamovi. This function is not meant to be
 utilized in R. See t_TOST function.
 }
 \section{References}{
 
-Mara, C. A., & Cribbie, R. A. (2012). Paired-Samples Tests of Equivalence. Communications in Statistics - Simulation and Computation, 41(10), 1928-1943. <https://doi.org/10.1080/03610918.2011.626545>, formula page 1932. Note there is a typo in the formula: n-1 should be n (personal communication, 31-08-2016)
+Mara, C. A., & Cribbie, R. A. (2012). Paired-Samples Tests of Equivalence. Communications in Statistics - Simulation and Computation, 41(10), 1928-1943. \url{https://doi.org/10.1080/03610918.2011.626545}, formula page 1932. Note there is a typo in the formula: n-1 should be n (personal communication, 31-08-2016)
 }
 
 \examples{

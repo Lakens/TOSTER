@@ -1,10 +1,14 @@
 #' @title Bootstrapped correlation coefficients
-#' @description A function for a bootstrap, percentile, method for correlation coefficients.
+#' @description
+#' `r lifecycle::badge('stable')`
+#'
+#'  A function for a bootstrap, percentile, method for correlation coefficients.
 #' @inheritParams boot_t_TOST
 #' @inheritParams z_cor_test
 #' @param method a character string indicating which correlation coefficient is to be used for the test. One of "winsorized", "bendpercent","pearson", "kendall", or "spearman", can be abbreviated.
 #' @details This function uses a percentile bootstrap methods for the confidence intervals.
-#' The returned p-values are calculated from a re-sampled null distribution (similar to boot_t_TOST).
+#' The returned p-values are calculated from a re-sampled null distribution (similar to [boot_t_TOST]).
+#' See `vignette("correlations")` for more details.
 #'
 #' The bootstrap correlation methods in this package offer two other correlations: a Winsorized correlation and a percentage bend correlation (see Wilcox 2017).
 #' These two can modified by adding the trim (Winsorized) or beta (percentage bend) arguments.
@@ -12,21 +16,22 @@
 #' These calculations are based on Rand Wilcox's R functions for his book (Wilcox, 2017), and adapted from their implementation in Guillaume Rousselet's R package "bootcorci".
 #'
 #' @return A list with class "htest" containing the following components:
-#' \describe{
-#'   \item{\code{"p.value"}}{the p-value of the test.}
-#'   \item{\code{"estimate"}}{the estimated measure of association, with name "pb", "wincor", "cor", "tau", or "rho" corresponding to the method employed.}
-#'   \item{\code{"null.value"}}{the value of the association measure under the null hypothesis.}
-#'   \item{\code{"alternative"}}{character string indicating the alternative hypothesis (the value of the input argument alternative). }
-#'   \item{\code{"method"}}{a character string indicating how the association was measured.}
-#'   \item{\code{"data.name"}}{a character string giving the names of the data.}
-#'   \item{\code{"call"}}{the matched call.}
-#' }
+#'
+#'   - "p.value": the p-value of the test.
+#'   - "estimate": the estimated measure of association, with name "pb", "wincor", "cor", "tau", or "rho" corresponding to the method employed.
+#'   - "null.value": the value of the association measure under the null hypothesis.
+#'   - "alternative": character string indicating the alternative hypothesis (the value of the input argument alternative).
+#'   - "method": a character string indicating how the association was measured.
+#'   - "data.name": a character string giving the names of the data.
+#'   - "call": the matched call.
+#'
 #' @section References:
 #'
 #' Wilcox, R.R. (2009) Comparing Pearson Correlations: Dealing with Heteroscedasticity and Nonnormality.
 #' Communications in Statistics - Simulation and Computation, 38, 2220–2234.
 #'
 #' Wilcox, R.R. (2017) Introduction to Robust Estimation and Hypothesis Testing, 4th edition. Academic Press.
+#' @family Correlations
 #' @export
 
 

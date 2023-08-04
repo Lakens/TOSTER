@@ -45,10 +45,10 @@ statistics}
 \value{
 A results object containing:
 \tabular{llllll}{
-  \code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
-  \code{results$tost} \tab \tab \tab \tab \tab a table \cr
-  \code{results$desc} \tab \tab \tab \tab \tab a table \cr
-  \code{results$plots} \tab \tab \tab \tab \tab an array of images \cr
+\code{results$text} \tab \tab \tab \tab \tab a preformatted \cr
+\code{results$tost} \tab \tab \tab \tab \tab a table \cr
+\code{results$desc} \tab \tab \tab \tab \tab a table \cr
+\code{results$plots} \tab \tab \tab \tab \tab an array of images \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -58,6 +58,6 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 \code{as.data.frame(results$tost)}
 }
 \description{
-TOST for correlations in jamovi. This function is not meant to be utilized 
+TOST for correlations in jamovi. This function is not meant to be utilized
 in R.
 }

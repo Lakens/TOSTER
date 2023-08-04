@@ -1,26 +1,38 @@
-#' @title TOSTt with Summary Statistics
-#' @description A function for TOST with all types of t-tests from summary statistics.
-#' @param m1 mean of group 1
-#' @param m2 mean of group 2
-#' @param sd1 standard deviation of group 1
-#' @param sd2 standard deviation of group 2
-#' @param n1 sample size in group 1
-#' @param n2 sample size in group 2
-#' @param r12 correlation of dependent variable between group 1 and group 2
+#' @title TOST with t-tests from Summary Statistics
+#' @description
+#' `r lifecycle::badge('stable')`
+#'
+#'  A function for TOST with all types of t-tests from summary statistics.
+#' @param m1 mean of group 1.
+#' @param m2 mean of group 2.
+#' @param sd1 standard deviation of group 1.
+#' @param sd2 standard deviation of group 2.
+#' @param n1 sample size in group 1.
+#' @param n2 sample size in group 2.
+#' @param r12 correlation of dependent variable between group 1 and group 2.
 #' @inheritParams t_TOST
-#' @details For details on the calculations in this function see vignette("IntroTOSTt") & vignette("SMD_calcs").
+#' @details
+#' For details on the calculations in this function see
+#' `vignette("IntroTOSTt")` & `vignette("SMD_calcs")`.
+#'
+#' For two-sample tests, the test is of \eqn{m1 - m2} (mean of 1 minus mean of 2).
+#' For paired samples, the test is of the difference scores (z),
+#' wherein \eqn{z =  m1 - m2}, and the test is of \eqn{\bar z} (mean of the difference scores).
+#' For one-sample tests, the test is of \eqn{\bar m1 } (mean of group 1).
+#'
 #' @return An S3 object of class
-#'   \code{"TOSTt"} is returned containing the following slots:
-#' \describe{
-#'   \item{\code{"TOST"}}{A table of class \code{"data.frame"} containing two-tailed t-test and both one-tailed results.}
-#'   \item{\code{"eqb"}}{A table of class \code{"data.frame"} containing equivalence bound settings.}
-#'   \item{\code{"effsize"}}{ table of class \code{"data.frame"} containing effect size estimates}
-#'   \item{\code{"hypothesis"}}{String stating the hypothesis being tested}
-#'   \item{\code{"smd"}}{List containing the results of the standardized mean difference calculations (e.g., Cohen's d).Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation)}
-#'   \item{\code{"alpha"}}{Alpha level set for the analysis.}
-#'   \item{\code{"method"}}{Type of t-test.}
-#'   \item{\code{"decision"}}{List included text regarding the decisions for statistical inference.}
-#' }
+#'  `"TOSTt"` is returned containing the following slots:
+#'
+#'   - "TOST":  A table of class `"data.frame"` containing two-tailed t-test and both one-tailed results.
+#'   - "eqb":  A table of class `"data.frame"` containing equivalence bound settings.
+#'   - "effsize":   table of class `"data.frame"` containing effect size estimates.
+#'   - "hypothesis":  String stating the hypothesis being tested.
+#'   - "smd":  List containing the results of the standardized mean difference calculations (e.g., Cohen's d).
+#'      - Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation)
+#'   - "alpha":  Alpha level set for the analysis.
+#'   - "method":  Type of t-test.
+#'   - "decision":  List included text regarding the decisions for statistical inference.
+#'
 #' @examples
 #' # example code
 #' # One sample test

@@ -2,6 +2,7 @@
 % Please edit documentation in R/TOSTtwo.R
 \name{TOSTtwo}
 \alias{TOSTtwo}
+\alias{TOSTtwo.raw}
 \title{TOST function for an independent t-test (Cohen's d)}
 \usage{
 TOSTtwo(
@@ -13,6 +14,21 @@ TOSTtwo(
   n2,
   low_eqbound_d,
   high_eqbound_d,
+  alpha,
+  var.equal,
+  plot = TRUE,
+  verbose = TRUE
+)
+
+TOSTtwo.raw(
+  m1,
+  m2,
+  sd1,
+  sd2,
+  n1,
+  n2,
+  low_eqbound,
+  high_eqbound,
   alpha,
   var.equal,
   plot = TRUE,
@@ -43,12 +59,20 @@ TOSTtwo(
 \item{plot}{set whether results should be plotted (plot = TRUE) or not (plot = FALSE) - defaults to TRUE}
 
 \item{verbose}{logical variable indicating whether text output should be generated (verbose = TRUE) or not (verbose = FALSE) - default to TRUE}
+
+\item{low_eqbound}{lower equivalence bounds (e.g., -0.5) expressed in raw scale units (e.g., scalepoints)}
+
+\item{high_eqbound}{upper equivalence bounds (e.g., 0.5) expressed in raw scale units (e.g., scalepoints)}
 }
 \value{
 Returns TOST t-value 1, TOST p-value 1, TOST t-value 2, TOST p-value 2, degrees of freedom, low equivalence bound, high equivalence bound, low equivalence bound in Cohen's d, high equivalence bound in Cohen's d, Lower limit confidence interval TOST, Upper limit confidence interval TOST
 }
 \description{
-TOST function for an independent t-test (Cohen's d)
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}}
+
+Development on \code{TOSTtwo} is complete, and for new code we recommend
+switching to \link{tsum_TOST}, which is easier to use, more featureful,
+and still under active development.
 }
 \section{References}{
 

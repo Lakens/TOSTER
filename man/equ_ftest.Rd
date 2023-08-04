@@ -23,22 +23,24 @@ equ_ftest(Fstat, df1, df2, eqbound = NULL, eqb, MET = FALSE, alpha = 0.05)
 }
 \value{
 Object of class '"htest"
-\describe{
-  \item{\code{"statistic"}}{The value of the F-statistic.}
-  \item{\code{"parameter"}}{The degrees of freedom for the F-statistic.}
-  \item{\code{"p.value"}}{The he p-value for the test.}
-  \item{\code{"conf.int"}}{A confidence interval for the partial eta-squared statistic.}
-  \item{\code{"estimate"}}{Estimate of partial eta-squared.}
-  \item{\code{"null.value"}}{The specified for the equivalence test.}
-  \item{\code{"method"}}{A string indicating the type of F-test.}
-  \item{\code{"data.name"}}{A required string indicating that this was calculated from summary statistics.}
+\itemize{
+\item "statistic": The value of the F-statistic.
+\item "parameter": The degrees of freedom for the F-statistic.
+\item "p.value": The he p-value for the test.
+\item "conf.int": A confidence interval for the partial eta-squared statistic.
+\item "estimate": Estimate of partial eta-squared.
+\item "null.value": The specified for the equivalence test.
+\item "method": A string indicating the type of F-test.
+\item "data.name": A required string indicating that this was calculated from summary statistics.
 }
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+
 Performs equivalence test on the partial eta-squared (pes) value for using an F-test.
 }
 \details{
-For details on the calculations in this function see vignette("the_ftestTOSTER").
+For details on the calculations in this function see \code{vignette("the_ftestTOSTER")}.
 }
 \section{References}{
 

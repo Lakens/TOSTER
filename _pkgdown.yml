@@ -34,12 +34,13 @@ reference:
 
 - subtitle: "Robust"
   desc: >
-    Functions that are (mostly) robust to the assumptions of t-tests
+    Functions that are robust alternatives to the t-test
   contents:
   - wilcox_TOST
   - boot_t_TOST
   - log_TOST
   - boot_log_TOST
+  - brunner_munzel
 
 - subtitle: "ANOVA"
   desc: >
@@ -47,6 +48,10 @@ reference:
   contents:
   - equ_anova
   - equ_ftest
+
+- subtitle: "Proportions"
+  contents:
+  - twoprop_test
 
 - subtitle: "Methods"
   desc: >
@@ -98,6 +103,8 @@ reference:
   contents:
   - power_t_TOST
   - power_eq_f
+  - power_z_cor
+  - power_twoprop
 
 - title: "Data"
   contents:

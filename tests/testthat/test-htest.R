@@ -4,38 +4,38 @@ test_that("simple_htest: t-test & wilcox", {
 
   set.seed(3164964)
 
-  expect_equal(t.test(1:10, y = c(7:20))$pvalue,
-               simple_htest(1:10, y = c(7:20))$pvalue)
-  expect_equal(t.test(1:10, y = c(7:20, 200))$pvalue,
-               simple_htest(1:10, y = c(7:20, 200))$pvalue)
+  expect_equal(t.test(1:10, y = c(7:20))$p.value,
+               simple_htest(1:10, y = c(7:20))$p.value)
+  expect_equal(t.test(1:10, y = c(7:20, 200))$p.value,
+               simple_htest(1:10, y = c(7:20, 200))$p.value)
 
   testy1 = describe_htest(simple_htest(1:10, y = c(7:20, 200)))
   testy2 = describe_htest(t.test(1:10, y = c(7:20, 200)))
-  expect_equivalent(testy1,testy2)
+  expect_equal(testy1,testy2)
 
   testy1 = df_htest(simple_htest(1:10, y = c(7:20, 200)))
   testy2 = df_htest(t.test(1:10, y = c(7:20, 200)))
-  expect_equivalent(testy1,testy2)
+  expect_equal(testy1,testy2)
 
   testy1 = describe_htest(as_htest(t_TOST(1:10, y = c(7:20, 200), eqb = 3)))
   testy1 = describe_htest(as_htest(t_TOST(1:10, y = c(7:20, 200), eqb = 3,
                                           hypothesis = "MET")))
 
   # wilcox -- same data
-  expect_equal(wilcox.test(1:10, y = c(7:20))$pvalue,
-               simple_htest(1:10, y = c(7:20), test = "w")$pvalue)
-  expect_equal(wilcox.test(1:10, y = c(7:20, 200))$pvalue,
-               simple_htest(1:10, y = c(7:20, 200), test = "w")$pvalue)
+  expect_equal(wilcox.test(1:10, y = c(7:20))$p.value,
+               simple_htest(1:10, y = c(7:20), test = "w")$p.value)
+  expect_equal(wilcox.test(1:10, y = c(7:20, 200))$p.value,
+               simple_htest(1:10, y = c(7:20, 200), test = "w")$p.value)
 
   testy1 = describe_htest(simple_htest(1:10, y = c(7:20, 200), test = "w"))
   testy2 = describe_htest(wilcox.test(1:10, y = c(7:20, 200),
                                       conf.int = TRUE))
-  expect_equivalent(testy1,testy2)
+  expect_equal(testy1,testy2)
 
   testy1 = df_htest(simple_htest(1:10, y = c(7:20, 200), test = "w"))
   testy2 = df_htest(wilcox.test(1:10, y = c(7:20, 200),
                                       conf.int = TRUE))
-  expect_equivalent(testy1,testy2)
+  expect_equal(testy1,testy2)
 
   testy1 = describe_htest(as_htest(wilcox_TOST(1:10, y = c(7:20, 200), eqb = 3)))
   testy1 = describe_htest(as_htest(wilcox_TOST(1:10, y = c(7:20, 200), eqb = 3,
@@ -112,6 +112,243 @@ test_that("simple_htest: t-test & wilcox", {
                NULL)
   expect_equal(df_htest(testy2, test_statistics = FALSE)$t,
                NULL)
+})
+
+test_that("brunner_munzel",{
+
+  set.seed(2808)
+
+  expect_equal(brunner_munzel(1:10, y = c(7:20))$p.value,
+               simple_htest(1:10, y = c(7:20),
+                            test = "b",
+                            mu = .5)$p.value)
+  expect_equal(brunner_munzel(1:10, y = c(7:20, 200))$p.value,
+               simple_htest(1:10, y = c(7:20, 200),
+                            test = "b",
+                            mu = .5)$p.value)
+
+  testy1 = describe_htest(simple_htest(1:10, y = c(7:20, 200),
+                                       test = "b",
+                                       mu = .5))
+  testy2 = describe_htest(brunner_munzel(1:10, y = c(7:20, 200)))
+  expect_equal(testy1,testy2)
+
+  testy1 = df_htest(simple_htest(1:10, y = c(7:20, 200),
+                                 test = "b",
+                                 mu = .5))
+  testy2 = df_htest(brunner_munzel(1:10, y = c(7:20, 200)))
+  expect_equal(testy1,testy2)
+
+  testy1 = simple_htest(data = mtcars,
+                        mpg ~ am,
+                        test = "b",
+                        mu = .75,
+                        alternative = "e")
+  testy2 = brunner_munzel(data = mtcars,
+                       mpg ~ am,
+                       mu = .25,
+                       alternative = "g")
+  expect_equal(testy1$p.value,testy2$p.value)
+  set.seed(1944)
+  testy1 = simple_htest(data = mtcars,
+                        mpg ~ am,
+                        test = "b",
+                        mu = .25,
+                        alternative = "g",
+                        perm = TRUE)
+  set.seed(1944)
+  testy2 = brunner_munzel(data = mtcars,
+                          mpg ~ am,
+                          mu = .25,
+                          alternative = "g",
+                          perm = TRUE)
+  expect_equal(testy1$p.value,testy2$p.value)
+
+  set.seed(1945)
+  testy1 = simple_htest(data = mtcars,
+                        mpg ~ am,
+                        test = "b",
+                        mu = .25,
+                        alternative = "l",
+                        perm = TRUE)
+  set.seed(1945)
+  testy2 = brunner_munzel(data = mtcars,
+                          mpg ~ am,
+                          mu = .25,
+                          alternative = "l",
+                          perm = TRUE)
+  expect_equal(testy1$p.value,testy2$p.value)
+
+  set.seed(1946)
+  testy1 = simple_htest(data = mtcars,
+                        mpg ~ am,
+                        test = "b",
+                        mu = .5,
+                        alternative = "t",
+                        perm = TRUE)
+  set.seed(1946)
+  testy2 = brunner_munzel(data = mtcars,
+                          mpg ~ am,
+                          mu = .5,
+                          alternative = "t",
+                          perm = TRUE)
+  expect_equal(testy1$p.value,testy2$p.value)
+
+  # Test equivalence -----
+  testy1 = simple_htest(data = mtcars,
+                        mpg ~ am, test = "b",
+                        mu = .4,
+                        alternative = "e")
+  testy2 = brunner_munzel(data = mtcars,
+                       mpg ~ am,
+                       mu = .4,
+                       alternative = "g")
+  expect_equal(testy1$p.value,testy2$p.value)
+  testy1 = simple_htest(data = mtcars,
+                        mpg ~ am, test = "b",
+                        mu = .3,
+                        alternative = "e")
+  testy2 = brunner_munzel(data = mtcars,
+                  mpg ~ am,
+                  mu = .3,
+                  alternative = "g")
+  expect_equal(testy1$p.value,testy2$p.value)
+
+
+  # Test MET -----
+  testy1 = simple_htest(data = mtcars,
+                        mpg ~ am, test = "b",
+                        mu = .3,
+                        alternative = "m")
+  testy2 = brunner_munzel(data = mtcars,
+                       mpg ~ am,
+                       mu = .3,
+                       alternative = "l")
+  testydf = df_htest(testy1)
+  expect_equal(testy1$p.value,testy2$p.value)
+  expect_equal(testy1$p.value, testydf$p.value)
+
+  # Paired ------
+  data(sleep)
+
+  set.seed(1944)
+  testy1 = simple_htest(data = sleep,
+                        extra ~ group,
+                        test = "b",
+                        mu = .25,
+                        alternative = "g",
+                        perm = TRUE,
+                        paired = TRUE)
+  set.seed(1944)
+  testy2 = brunner_munzel(data = sleep,
+                          extra ~ group,
+                          mu = .25,
+                          alternative = "g",
+                          perm = TRUE,
+                          paired = TRUE)
+  expect_equal(testy1$p.value,testy2$p.value)
+
+  test_big = brunner_munzel(x = rnorm(100),
+                            y = rnorm(100),
+                          mu = .25,
+                          alternative = "t",
+                          perm = TRUE,
+                          paired = TRUE)
+
+  set.seed(1945)
+  testy1 = simple_htest(data = sleep,
+                        extra ~ group,
+                        test = "b",
+                        mu = .25,
+                        alternative = "l",
+                        perm = TRUE,
+                        paired = TRUE)
+  set.seed(1945)
+  testy2 = brunner_munzel(data = sleep,
+                          extra ~ group,
+                          mu = .25,
+                          alternative = "l",
+                          perm = TRUE,
+                          paired = TRUE)
+  expect_equal(testy1$p.value,testy2$p.value)
+
+  set.seed(1946)
+  testy1 = simple_htest(data = sleep,
+                        extra ~ group,
+                        test = "b",
+                        mu = .5,
+                        alternative = "t",
+                        perm = TRUE,
+                        paired = TRUE)
+  set.seed(1946)
+  testy2 = brunner_munzel(data = sleep,
+                          extra ~ group,
+                          mu = .5,
+                          alternative = "t",
+                          perm = TRUE,
+                          paired = TRUE)
+  expect_equal(testy1$p.value,testy2$p.value)
+
+  ## Equ ---
+  testy1 = simple_htest(data = sleep,
+                        extra ~ group, paired = TRUE,
+                        test = "b",
+                        mu = .3,
+                        alternative = "e")
+  testy2 = brunner_munzel(data = sleep,
+                          extra ~ group,
+                          paired = TRUE,
+                          mu = .3,
+                          alternative = "g")
+  expect_equal(testy1$p.value,testy2$p.value)
+
+
+  ## MET -----
+  testy1 = simple_htest(data = sleep, paired = TRUE,
+                        extra ~ group, test = "b",
+                        mu = .3,
+                        alternative = "m")
+  testy2 = brunner_munzel(data = sleep,
+                          extra ~ group,paired = TRUE,
+                          mu = .3,
+                          alternative = "l")
+  testydf = df_htest(testy1)
+  expect_equal(testy1$p.value,testy2$p.value)
+  expect_equal(testy1$p.value, testydf$p.value)
+
+  # Errors ----
+
+  expect_error(brunner_munzel(x = rnorm(100),
+                              #y = rnorm(100),
+                              mu = .25,
+                              alternative = "t",
+                              perm = TRUE,
+                              paired = TRUE))
+
+  expect_error(brunner_munzel(x = "error",
+                              #y = rnorm(100),
+                              mu = .25,
+                              alternative = "t",
+                              perm = TRUE,
+                              paired = TRUE))
+
+  expect_error(brunner_munzel(x = rnorm(100),
+                              y = rnorm(99),
+                              mu = .25,
+                              alternative = "t",
+                              perm = TRUE,
+                              paired = TRUE))
+
+  expect_message(brunner_munzel(x = rnorm(300),
+                              y = rnorm(300),
+                              mu = .25,
+                              alternative = "t",
+                              perm = TRUE,
+                              #paired = TRUE
+                              ))
+
+
+
 })
 
 test_that("All other htests",{

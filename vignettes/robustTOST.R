@@ -36,6 +36,28 @@ wilcox_TOST(formula = extra ~ group,
 
 
 ## -----------------------------------------------------------------------------
+# studentized test
+brunner_munzel(formula = extra ~ group,
+                      data = sleep,
+                      paired = FALSE)
+# permutation
+brunner_munzel(formula = extra ~ group,
+                      data = sleep,
+                      paired = FALSE,
+               perm = TRUE)
+
+## -----------------------------------------------------------------------------
+# permutation based Brunner-Munzel test of equivalence
+simple_htest(formula = extra ~ group,
+             test = "brunner",
+             data = sleep,
+             paired = FALSE,
+             alternative = "equ",
+             mu = .7,
+             perm = TRUE)
+
+
+## -----------------------------------------------------------------------------
 data('sleep')
 
 test1 = boot_t_TOST(formula = extra ~ group,

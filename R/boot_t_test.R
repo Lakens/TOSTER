@@ -1,24 +1,31 @@
 #' @title Bootstrapped t-test
-#' @description A function for a bootstrap method for Tt-tests.
+#' @description
+#' `r lifecycle::badge('stable')`
+#'
+#'  A function for a bootstrap method for t-tests.
 #' @inheritParams simple_htest
 #' @inheritParams boot_t_TOST
-#' @details For details on the calculations in this function see vignette("robustTOST").
-#' @return A list with class \code{"htest"} containing the following components:
-#' \describe{
-#'   \item{\code{statistic}}{the value of the t-statistic.}
-#'   \item{\code{parameter}}{the degrees of freedom for the t-statistic.}
-#'   \item{\code{p.value}}{the p-value for the test.}
-#'   \item{\code{conf.int}}{a confidence interval for the mean appropriate to the specified alternative hypothesis.}
-#'   \item{\code{estimate}}{the estimated mean or difference in means depending on whether it was a one-sample test or a two-sample test.}
-#'   \item{\code{null.value}}{the specified hypothesized value of the mean or mean difference. May be 2 values.}
-#'   \item{\code{stderr}}{the standard error of the mean (difference), used as denominator in the t-statistic formula.}
-#'   \item{\code{alternative}}{a character string describing the alternative hypothesis.}
-#'   \item{\code{method}}{a character string indicating what type of t-test was performed.}
-#'   \item{\code{data.name}}{a character string giving the name(s) of the data..}
-#' }
+#' @return A list with class `"htest"` containing the following components:
+#'
+#'   - "statistic": the value of the t-statistic.
+#'   - "parameter": the degrees of freedom for the t-statistic.
+#'   - "p.value": the p-value for the test.
+#'   - "conf.int": a confidence interval for the mean appropriate to the specified alternative hypothesis.
+#'   - "estimate": the estimated mean or difference in means depending on whether it was a one-sample test or a two-sample test.
+#'   - "null.value": the specified hypothesized value of the mean or mean difference. May be 2 values.
+#'   - "stderr": the standard error of the mean (difference), used as denominator in the t-statistic formula.
+#'   - "alternative": a character string describing the alternative hypothesis.
+#'   - "method": a character string indicating what type of t-test was performed.
+#'   - "data.name": a character string giving the name(s) of the data.
+#'
 #' @details The implemented test(s) corresponds to the proposal of Chapter 16 of Efron and Tibshirani (1994).
 #'
-#' For details on the calculations in this function see vignette("robustTOST").
+#' For two-sample tests, the test is of \eqn{\bar x - \bar y} (mean of x minus mean of y).
+#' For paired samples, the test is of the difference scores (z),
+#' wherein \eqn{z =  x - y}, and the test is of \eqn{\bar z} (mean of the difference scores).
+#' For one-sample tests, the test is of \eqn{\bar x } (mean of x).
+#'
+#' For details on the calculations in this function see `vignette("robustTOST")`.
 #'
 #' @examples
 #' # example code
@@ -27,7 +34,7 @@
 #' @section References:
 #'
 #' Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press.
-#' @family Robust TOST
+#' @family Robust tests
 #' @importFrom stats var quantile
 #' @name boot_t_test
 #' @export boot_t_test

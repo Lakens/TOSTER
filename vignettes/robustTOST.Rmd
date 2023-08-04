@@ -153,8 +153,64 @@ wilcox_TOST(formula = extra ~ group,
 
 ```
 
+# Brunner-Munzel
 
-# Boostrap TOST
+As @karch2021 explained, there are some reasons to dislike the WMW family of tests as the non-parametric alternative to the t-test. Regardless of the underlying statistical arguments^[I would like to note that I think the statistical properties of the WMW tests are sound, and Frank Harrell has written [many](https://www.fharrell.com/post/po/) [blogposts](https://www.fharrell.com/post/wpo/) outlined their sound application in biomedicine. ], it can be argued that the interpretation of the WMW tests, especially when involving equivalence testing, is a tad difficult.
+Some may want a non-parametric alternative to the WMW test, and the Brunner-Munzel test(s) may be a useful option.
+
+The Brunner-Munzel test [@brunner2000; @neubert2007] is based on calculating the "stochastic superiority" [@karch2021, i.e., probability of superiority], which is usually referred to as the relative effect, based on the ranks of the two groups being compared (X and Y). A Brunner-Munzel type test is then a directional test of an effect, and answers a question akin to "what is the probability that a randomly sampled value of Y will be greater than X?"
+
+$$
+\hat p = P(X<Y) + 0.5 \cdot P(X=Y)
+$$
+
+
+## Basics of the Calculative Approach
+
+In this section, I will quickly detail the calculative approach that underlies the Brunner-Munzel test in `TOSTER`.
+
+A studentized test statistic can be calculated as:
+
+$$
+t = \sqrt{N} \cdot \frac{\hat p -p_{null}}{s}
+$$
+Wherein the default null hypothesis $p_{null}$ is typically 0.5 (50% probability of superiority is the default null), and $\sigma_N$ refers the rank-based Brunner-Munzel standard error. The null can be modified therefore allowing for equivalence testing *directly based on the relative effect*. Additionally, for paired samples the probability of superiority is based on a *hypothesis of exchangability* and is not based on the differences scores^[This means the relative effect will *not* match the concordance probability provided by `ses_calc`].
+
+For more details on the calculative approach, I suggest reading @karch2021. At small sample sizes, it is recommended that the permutation version of the test (`perm = TRUE`) be used rather than the basic test statistic approach.
+
+## Example
+
+The interface for the function is very similar to the `t.test` function. The `brunner_munzel` function itself does not allow for equivalence tests, but you can set an alternative hypothesis for "two.sided", "less", or "greater".
+
+```{r}
+# studentized test
+brunner_munzel(formula = extra ~ group,
+                      data = sleep,
+                      paired = FALSE)
+# permutation
+brunner_munzel(formula = extra ~ group,
+                      data = sleep,
+                      paired = FALSE,
+               perm = TRUE)
+```
+
+The `simple_htest` function allows TOST tests using a Brunner-Munzel test by setting the alternative to "equivalence" or "minimal.effect". The equivalence bounds, based on the relative effect, can be set with the `mu` argument.
+
+
+```{r}
+# permutation based Brunner-Munzel test of equivalence
+simple_htest(formula = extra ~ group,
+             test = "brunner",
+             data = sleep,
+             paired = FALSE,
+             alternative = "equ",
+             mu = .7,
+             perm = TRUE)
+
+```
+
+
+# Bootstrap TOST
 
 The bootstrap is a simulation based technique, derived from re-sampling with replacement, designed for statistical estimation and inference. Bootstrapping techniques are very useful because they are considered somewhat robust to the violations of assumptions for a simple t-test. Therefore we added a bootstrap option, `boot_t_TOST` to the package to provide another robust alternative to the `t_TOST` function. 
 

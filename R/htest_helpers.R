@@ -1,11 +1,11 @@
-#' Helpers for \code{htest} objects
+#' Helpers for `htest` objects
 #'
-#' Functions to help interpret or display objects of the class \code{htest}
+#' Functions to help interpret or display objects of the class `htest`
 #'
-#' @param htest A S3 object of the class \code{htest}
+#' @param htest A S3 object of the class `htest`
 #' @param test_statistics A logical variable to display the test statistics.
 #' @param show_ci A logical variable to display the confidence interval.
-#' @param extract_names A logical variable to take the names from the S3 object (i.e., statistic for \code{t.test} would be "t")
+#' @param extract_names A logical variable to take the names from the S3 object (i.e., statistic for `t.test` would be "t")
 #' @inheritParams t_TOST
 #' @param digits integer indicating the number of decimal places.
 #' @examples

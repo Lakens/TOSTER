@@ -1,5 +1,10 @@
 #' @title Comparing SMDs between independent studies
-#' @description A function to compare standardized mean differences (SMDs) between studies. This function is intended to be used to compare the compatibility of original studies with replication studies (lower p-values indicating lower compatibility)
+#' @description
+#' `r lifecycle::badge('stable')`
+#'
+#' A function to compare standardized mean differences (SMDs) between studies. This function is intended to be used to compare the compatibility of original studies with replication studies (lower p-values indicating lower compatibility).
+#'
+#'
 #' @param smd1,smd2 SMDs from study 1 & 2, respectively.
 #' @param n1,n2 sample size(s) from study 1 & 2, respectively (can be 1 number or vector of 2 numbers).
 #' @param se1,se2 User supplied standard errors (SEs). This will override the internal calculations.
@@ -7,20 +12,22 @@
 #' @param null a number indicating the null hypothesis. For TOST, this would be equivalence bound.
 #' @param alternative a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater", "less", "equivalence" (TOST), or "minimal.effect" (TOST). You can specify just the initial letter.
 #' @param TOST Defunct: use alternative argument. Logical indicator (default = FALSE) to perform two one-sided tests of equivalence (TOST).
-#' @details This function tests for differences between correlations.
+#'
+#' @details This function tests for differences between SMDs from independent studies (e.g., original vs replication).
+#'
 #' @return A list with class "htest" containing the following components:
-#' \describe{
-#'   \item{\code{"statistic"}}{z-score}
-#'   \item{\code{"p.value"}}{numeric scalar containing the p-value for the test under the null hypothesis.}
-#'   \item{\code{"estimate"}}{difference in SMD between studies}
-#'   \item{\code{"null.value"}}{the specified hypothesized value for the null hypothesis.}
-#'   \item{\code{"alternative"}}{character string indicating the alternative hypothesis (the value of the input argument alternative). Possible values are "greater", "less", or "two-sided".}
-#'   \item{\code{"method"}}{Type of SMD}
-#'   \item{\code{"data.name"}}{"Summary Statistics" to denote summary statistics were utilized to obtain results.}
-#'   \item{\code{"smd"}}{SMDs input for the function.}
-#'   \item{\code{"sample_sizes"}}{Sample sizes input for the function.}
-#'   \item{\code{"call"}}{the matched call.}
-#' }
+#'
+#'   - "statistic": z-score.
+#'   - "p.value": numeric scalar containing the p-value for the test under the null hypothesis.
+#'   - "estimate": difference in SMD between studies.
+#'   - "null.value": the specified hypothesized value for the null hypothesis.
+#'   - "alternative": character string indicating the alternative hypothesis (the value of the input argument alternative). Possible values are "greater", "less", or "two-sided".
+#'   - "method": Type of SMD.
+#'   - "data.name": "Summary Statistics" to denote summary statistics were utilized to obtain results.
+#'   - "smd": SMDs input for the function.
+#'   - "sample_sizes": Sample sizes input for the function.
+#'   - "call": the matched call.
+#'
 #' @name compare_smd
 #' @family compare studies
 #' @export compare_smd

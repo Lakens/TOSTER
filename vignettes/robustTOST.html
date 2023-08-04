@@ -12,7 +12,7 @@
 
 <meta name="author" content="Aaron R. Caldwell" />
 
-<meta name="date" content="2023-04-04" />
+<meta name="date" content="2023-07-31" />
 
 <title>Robust TOST Procedures</title>
 
@@ -355,7 +355,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Robust TOST Procedures</h1>
 <h4 class="author">Aaron R. Caldwell</h4>
-<h4 class="date">2023-04-04</h4>
+<h4 class="date">2023-07-31</h4>
 
 
 <div id="TOC">
@@ -367,11 +367,17 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <li><a href="#conversion-to-other-effect-sizes" id="toc-conversion-to-other-effect-sizes">Conversion to other effect
 sizes</a></li>
 </ul></li>
-<li><a href="#boostrap-tost" id="toc-boostrap-tost">Boostrap TOST</a>
+<li><a href="#brunner-munzel" id="toc-brunner-munzel">Brunner-Munzel</a>
+<ul>
+<li><a href="#basics-of-the-calculative-approach" id="toc-basics-of-the-calculative-approach">Basics of the Calculative
+Approach</a></li>
+<li><a href="#example" id="toc-example">Example</a></li>
+</ul></li>
+<li><a href="#bootstrap-tost" id="toc-bootstrap-tost">Bootstrap TOST</a>
 <ul>
 <li><a href="#two-sample-algorithm" id="toc-two-sample-algorithm">Two
 Sample Algorithm</a></li>
-<li><a href="#example" id="toc-example">Example</a></li>
+<li><a href="#example-1" id="toc-example-1">Example</a></li>
 </ul></li>
 <li><a href="#ratio-of-difference-log-transformed" id="toc-ratio-of-difference-log-transformed">Ratio of Difference (Log
 Transformed)</a>
@@ -408,16 +414,16 @@ sample, and paired samples). Also, there is no plotting capability at
 this time for the output of this function.</p>
 <p>As an example, we can use the sleep data to make a non-parametric
 comparison of equivalence.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&#39;sleep&#39;</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(TOSTER)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>test1 <span class="ot">=</span> <span class="fu">wilcox_TOST</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>                      <span class="at">data =</span> sleep,</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>                      <span class="at">paired =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>                      <span class="at">eqb =</span> .<span class="dv">5</span>)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(test1)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&#39;sleep&#39;</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(TOSTER)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>test1 <span class="ot">=</span> <span class="fu">wilcox_TOST</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>                      <span class="at">data =</span> sleep,</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>                      <span class="at">paired =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>                      <span class="at">eqb =</span> .<span class="dv">5</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="fu">print</span>(test1)</span></code></pre></div>
 <pre><code>## 
 ## Wilcoxon rank sum test with continuity correction
 ## 
@@ -525,12 +531,12 @@ WMW_{odds} = e^{logit(c)}
 \]</span></p>
 <p>Either effect size is available by simply modifying the
 <code>ses</code> argument for the <code>wilcox_TOST</code> function.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Rank biserial</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">wilcox_TOST</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>                      <span class="at">data =</span> sleep,</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>                      <span class="at">paired =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>                      <span class="at">ses =</span> <span class="st">&quot;r&quot;</span>,</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>                      <span class="at">eqb =</span> .<span class="dv">5</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># Rank biserial</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">wilcox_TOST</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>                      <span class="at">data =</span> sleep,</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>                      <span class="at">paired =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>                      <span class="at">ses =</span> <span class="st">&quot;r&quot;</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>                      <span class="at">eqb =</span> .<span class="dv">5</span>)</span></code></pre></div>
 <pre><code>## 
 ## Wilcoxon rank sum test with continuity correction
 ## 
@@ -549,13 +555,13 @@ WMW_{odds} = e^{logit(c)}
 ##                           Estimate               C.I. Conf. Level
 ## Median of Differences       -1.346       [-3.4, -0.1]         0.9
 ## Rank-Biserial Correlation   -0.490 [-0.7493, -0.1005]         0.9</code></pre>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Odds</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">wilcox_TOST</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>                      <span class="at">data =</span> sleep,</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>                      <span class="at">paired =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>                      <span class="at">ses =</span> <span class="st">&quot;o&quot;</span>,</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>                      <span class="at">eqb =</span> .<span class="dv">5</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># Odds</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="fu">wilcox_TOST</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>                      <span class="at">data =</span> sleep,</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>                      <span class="at">paired =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>                      <span class="at">ses =</span> <span class="st">&quot;o&quot;</span>,</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>                      <span class="at">eqb =</span> .<span class="dv">5</span>)</span></code></pre></div>
 <pre><code>## 
 ## Wilcoxon rank sum test with continuity correction
 ## 
@@ -574,13 +580,13 @@ WMW_{odds} = e^{logit(c)}
 ##                       Estimate             C.I. Conf. Level
 ## Median of Differences  -1.3464     [-3.4, -0.1]         0.9
 ## WMW Odds                0.3423 [0.1433, 0.8173]         0.9</code></pre>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Concordance</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">wilcox_TOST</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>                      <span class="at">data =</span> sleep,</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>                      <span class="at">paired =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>                      <span class="at">ses =</span> <span class="st">&quot;c&quot;</span>,</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>                      <span class="at">eqb =</span> .<span class="dv">5</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># Concordance</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="fu">wilcox_TOST</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>                      <span class="at">data =</span> sleep,</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>                      <span class="at">paired =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>                      <span class="at">ses =</span> <span class="st">&quot;c&quot;</span>,</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>                      <span class="at">eqb =</span> .<span class="dv">5</span>)</span></code></pre></div>
 <pre><code>## 
 ## Wilcoxon rank sum test with continuity correction
 ## 
@@ -601,8 +607,113 @@ WMW_{odds} = e^{logit(c)}
 ## Concordance              0.255 [0.1254, 0.4497]         0.9</code></pre>
 </div>
 </div>
-<div id="boostrap-tost" class="section level1">
-<h1>Boostrap TOST</h1>
+<div id="brunner-munzel" class="section level1">
+<h1>Brunner-Munzel</h1>
+<p>As <span class="citation">Karch (2021)</span> explained, there are
+some reasons to dislike the WMW family of tests as the non-parametric
+alternative to the t-test. Regardless of the underlying statistical
+arguments<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>, it can be argued that the interpretation
+of the WMW tests, especially when involving equivalence testing, is a
+tad difficult. Some may want a non-parametric alternative to the WMW
+test, and the Brunner-Munzel test(s) may be a useful option.</p>
+<p>The Brunner-Munzel test <span class="citation">(Brunner and Munzel
+2000; Neubert and Brunner 2007)</span> is based on calculating the
+“stochastic superiority” <span class="citation">(Karch 2021, i.e.,
+probability of superiority)</span>, which is usually referred to as the
+relative effect, based on the ranks of the two groups being compared (X
+and Y). A Brunner-Munzel type test is then a directional test of an
+effect, and answers a question akin to “what is the probability that a
+randomly sampled value of Y will be greater than X?”</p>
+<p><span class="math display">\[
+\hat p = P(X&lt;Y) + 0.5 \cdot P(X=Y)
+\]</span></p>
+<div id="basics-of-the-calculative-approach" class="section level2">
+<h2>Basics of the Calculative Approach</h2>
+<p>In this section, I will quickly detail the calculative approach that
+underlies the Brunner-Munzel test in <code>TOSTER</code>.</p>
+<p>A studentized test statistic can be calculated as:</p>
+<p><span class="math display">\[
+t = \sqrt{N} \cdot \frac{\hat p -p_{null}}{s}
+\]</span> Wherein the default null hypothesis <span class="math inline">\(p_{null}\)</span> is typically 0.5 (50%
+probability of superiority is the default null), and <span class="math inline">\(\sigma_N\)</span> refers the rank-based
+Brunner-Munzel standard error. The null can be modified therefore
+allowing for equivalence testing <em>directly based on the relative
+effect</em>. Additionally, for paired samples the probability of
+superiority is based on a <em>hypothesis of exchangability</em> and is
+not based on the differences scores<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a>.</p>
+<p>For more details on the calculative approach, I suggest reading <span class="citation">Karch (2021)</span>. At small sample sizes, it is
+recommended that the permutation version of the test
+(<code>perm = TRUE</code>) be used rather than the basic test statistic
+approach.</p>
+</div>
+<div id="example" class="section level2">
+<h2>Example</h2>
+<p>The interface for the function is very similar to the
+<code>t.test</code> function. The <code>brunner_munzel</code> function
+itself does not allow for equivalence tests, but you can set an
+alternative hypothesis for “two.sided”, “less”, or “greater”.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># studentized test</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>                      <span class="at">data =</span> sleep,</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>                      <span class="at">paired =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<pre><code>## Sample size in at least one group is small. Permutation test (perm = TRUE) is highly recommended.</code></pre>
+<pre><code>## 
+##  two-sample Brunner-Munzel test
+## 
+## data:  extra by group
+## t = -2.1447, df = 16.898, p-value = 0.04682
+## alternative hypothesis: true relative effect is not equal to 0.5
+## 95 percent confidence interval:
+##  0.01387048 0.49612952
+## sample estimates:
+## p(X&lt;Y) + .5*P(X=Y) 
+##              0.255</code></pre>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="co"># permutation</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>                      <span class="at">data =</span> sleep,</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>                      <span class="at">paired =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>               <span class="at">perm =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<pre><code>## 
+##  two-sample Brunner-Munzel permutation test
+## 
+## data:  extra by group
+## t = -2.1447, df = 16.898, p-value = 0.0578
+## alternative hypothesis: true relative effect is not equal to 0.5
+## 95 percent confidence interval:
+##  0.009242221 0.514456432
+## sample estimates:
+## p(X&lt;Y) + .5*P(X=Y) 
+##              0.255</code></pre>
+<p>The <code>simple_htest</code> function allows TOST tests using a
+Brunner-Munzel test by setting the alternative to “equivalence” or
+“minimal.effect”. The equivalence bounds, based on the relative effect,
+can be set with the <code>mu</code> argument.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="co"># permutation based Brunner-Munzel test of equivalence</span></span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="fu">simple_htest</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>             <span class="at">test =</span> <span class="st">&quot;brunner&quot;</span>,</span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>             <span class="at">data =</span> sleep,</span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>             <span class="at">paired =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>             <span class="at">alternative =</span> <span class="st">&quot;equ&quot;</span>,</span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a>             <span class="at">mu =</span> .<span class="dv">7</span>,</span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a>             <span class="at">perm =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<pre><code>## 
+##  two-sample Brunner-Munzel permutation test
+## 
+## data:  extra by group
+## t = -3.8954, df = 16.898, p-value = 0.9979
+## alternative hypothesis: equivalence
+## null values:
+## relative effect relative effect 
+##             0.3             0.7 
+## 90 percent confidence interval:
+##  0.0574034 0.4629105
+## sample estimates:
+## p(X&lt;Y) + .5*P(X=Y) 
+##              0.255</code></pre>
+</div>
+</div>
+<div id="bootstrap-tost" class="section level1">
+<h1>Bootstrap TOST</h1>
 <p>The bootstrap is a simulation based technique, derived from
 re-sampling with replacement, designed for statistical estimation and
 inference. Bootstrapping techniques are very useful because they are
@@ -645,21 +756,21 @@ one sample solution for the equation outlined by <span class="math inline">\(t(z
 bootstrap procedure is equivalent to the one sample solution because the
 test is based on the difference scores.</p>
 </div>
-<div id="example" class="section level2">
+<div id="example-1" class="section level2">
 <h2>Example</h2>
 <p>We can use the sleep data to see the bootstrapped results. Notice
 that the plots show how the re-sampling via bootstrapping indicates the
 instability of Hedges’ d(z).</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&#39;sleep&#39;</span>)</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>test1 <span class="ot">=</span> <span class="fu">boot_t_TOST</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>                      <span class="at">data =</span> sleep,</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>                      <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>                      <span class="at">eqb =</span> .<span class="dv">5</span>,</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>                    <span class="at">R =</span> <span class="dv">999</span>)</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(test1)</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&#39;sleep&#39;</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>test1 <span class="ot">=</span> <span class="fu">boot_t_TOST</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>                      <span class="at">data =</span> sleep,</span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>                      <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a>                      <span class="at">eqb =</span> .<span class="dv">5</span>,</span>
+<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a>                    <span class="at">R =</span> <span class="dv">999</span>)</span>
+<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a></span>
+<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a></span>
+<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a><span class="fu">print</span>(test1)</span></code></pre></div>
 <pre><code>## 
 ## Bootstrapped Paired t-test
 ## 
@@ -676,11 +787,11 @@ instability of Hedges’ d(z).</p>
 ## 
 ## Effect Sizes 
 ##               Estimate     SE               C.I. Conf. Level
-## Raw             -1.580 0.3716   [-2.222, -1.039]         0.9
-## Hedges&#39;s g(z)   -1.174 0.7411 [-2.8575, -0.9304]         0.9
+## Raw             -1.580 0.3819    [-2.291, -1.05]         0.9
+## Hedges&#39;s g(z)   -1.174 0.7465 [-2.6958, -0.9037]         0.9
 ## Note: percentile bootstrap method utilized.</code></pre>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(test1)</span></code></pre></div>
-<p><img src="data:image/png;base64,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" /><!-- --></p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="fu">plot</span>(test1)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
 </div>
 </div>
 <div id="ratio-of-difference-log-transformed" class="section level1">
@@ -692,7 +803,7 @@ two means.</p>
 <p><span class="math display">\[
 log ( \frac{y}{x} ) = log(y) - log(x)
 \]</span> The <a href="https://www.fda.gov/regulatory-information/search-fda-guidance-documents/bioavailability-and-bioequivalence-studies-submitted-ndas-or-inds-general-considerations">United
-States Food and Drug Administration (FDA)</a><a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a> hs stated a rationale
+States Food and Drug Administration (FDA)</a><a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a> hs stated a rationale
 for using the log transformed values:</p>
 <blockquote>
 <p>Using logarithmic transformation, the general linear statistical
@@ -711,10 +822,10 @@ which is the default equivalence bound for the log functions.</p>
 <p>For example, we could compare whether the cars of different
 transmissions are “equivalent” with regards to gas mileage. We can use
 the default equivalence bounds (<code>eqb = 1.25</code>).</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">log_TOST</span>(</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  mpg <span class="sc">~</span> am,</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> mtcars</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="fu">log_TOST</span>(</span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a>  mpg <span class="sc">~</span> am,</span>
+<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a>  <span class="at">data =</span> mtcars</span>
+<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a>)</span></code></pre></div>
 <pre><code>## 
 ## Log-transformed Welch Two Sample t-test
 ## 
@@ -747,15 +858,15 @@ on the logarithmic scale can be biased, and it is recommended that
 bootstrapped tests be utilized instead. Therefore, the
 <code>boot_log_TOST</code> function can be utilized to perform a more
 precise test.</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">boot_log_TOST</span>(</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  mpg <span class="sc">~</span> am,</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> mtcars,</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">R =</span> <span class="dv">499</span></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="fu">boot_log_TOST</span>(</span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a>  mpg <span class="sc">~</span> am,</span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a>  <span class="at">data =</span> mtcars,</span>
+<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a>  <span class="at">R =</span> <span class="dv">499</span></span>
+<span id="cb21-5"><a href="#cb21-5" tabindex="-1"></a>)</span></code></pre></div>
 <pre><code>## 
 ## Bootstrapped Log Welch Two Sample t-test
 ## 
-## The equivalence test was non-significant, t(23.96) = -1.363, p = 9.58e-01
+## The equivalence test was non-significant, t(23.96) = -1.363, p = 9.4e-01
 ## The null hypothesis test was significant, t(23.96) = -3.826, p = 0e+00
 ## NHST: reject null significance hypothesis that the effect is equal to 1 
 ## TOST: don&#39;t reject null equivalence hypothesis
@@ -763,13 +874,13 @@ precise test.</p>
 ## TOST Results 
 ##                 t    df p.value
 ## t-test     -3.826 23.96 &lt; 0.001
-## TOST Lower -1.363 23.96   0.958
+## TOST Lower -1.363 23.96    0.94
 ## TOST Upper -6.288 23.96 &lt; 0.001
 ## 
 ## Effect Sizes 
-##                  Estimate      SE               C.I. Conf. Level
-## log(Means Ratio)  -0.3466 0.08493 [-0.4879, -0.2207]         0.9
-## Means Ratio        0.7071 0.05976   [0.6139, 0.8019]         0.9
+##                  Estimate      SE              C.I. Conf. Level
+## log(Means Ratio)  -0.3466 0.09036 [-0.494, -0.2034]         0.9
+## Means Ratio        0.7071 0.06412  [0.6102, 0.8159]         0.9
 ## Note: percentile bootstrap method utilized.</code></pre>
 </div>
 </div>
@@ -780,10 +891,10 @@ robust effect size. Therefore, I created the <code>ses_calc</code>
 function as robust effect size calculation. The interface is almost the
 same as <code>wilcox_TOST</code> but you don’t set an equivalence
 bound.</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ses_calc</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>         <span class="at">data =</span> sleep,</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">ses =</span> <span class="st">&quot;r&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="fu">ses_calc</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a>         <span class="at">data =</span> sleep,</span>
+<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a>         <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb23-4"><a href="#cb23-4" tabindex="-1"></a>         <span class="at">ses =</span> <span class="st">&quot;r&quot;</span>)</span></code></pre></div>
 <pre><code>##                            estimate lower.ci  upper.ci conf.level
 ## Rank-Biserial Correlation 0.9818182 0.928369 0.9954785       0.95</code></pre>
 </div>
@@ -793,6 +904,11 @@ bound.</p>
 <div id="ref-agresti" class="csl-entry">
 Agresti, Alan. 1980. <span>“Generalized Odds Ratios for Ordinal
 Data.”</span> <em>Biometrics</em>, 59–67. <a href="https://doi.org/10.2307/2530495">https://doi.org/10.2307/2530495</a>.
+</div>
+<div id="ref-brunner2000" class="csl-entry">
+Brunner, Edgar, and Ullrich Munzel. 2000. <span>“The Nonparametric
+Behrens-Fisher Problem: Asymptotic Theory and a Small-Sample
+Approximation.”</span> <em>Biometrical Journal</em> 42 (1): 17–25. <a href="https://doi.org/10.1002/(sici)1521-4036(200001)42:1&lt;17::aid-bimj17&gt;3.0.co;2-u">https://doi.org/10.1002/(sici)1521-4036(200001)42:1&lt;17::aid-bimj17&gt;3.0.co;2-u</a>.
 </div>
 <div id="ref-efron93" class="csl-entry">
 Efron, Bradley, and Robert J. Tibshirani. 1993. <em>An Introduction to
@@ -805,10 +921,22 @@ Ratio of Means in Bioequivalence Studies Under Crossover
 Designs.”</span> <em>Statistical Methods in Medical Research</em>,
 09622802221093721. <a href="https://doi.org/10.1177/09622802221093721">https://doi.org/10.1177/09622802221093721</a>.
 </div>
+<div id="ref-karch2021" class="csl-entry">
+Karch, Julian D. 2021. <span>“Psychologists Should Use Brunner-Munzel’s
+Instead of Mann-Whitney’s <span class="math inline">\(\less\)</span>i<span class="math inline">\(\greater\)</span>u<span class="math inline">\(\less\)</span>/i<span class="math inline">\(\greater\)</span> Test as the Default
+Nonparametric Procedure.”</span> <em>Advances in Methods and Practices
+in Psychological Science</em> 4 (2): 251524592199960. <a href="https://doi.org/10.1177/2515245921999602">https://doi.org/10.1177/2515245921999602</a>.
+</div>
 <div id="ref-Kerby_2014" class="csl-entry">
 Kerby, Dave S. 2014. <span>“The Simple Difference Formula: An Approach
 to Teaching Nonparametric Correlation.”</span> <em>Comprehensive
 Psychology</em> 3 (January): 11.IT.3.1. <a href="https://doi.org/10.2466/11.it.3.1">https://doi.org/10.2466/11.it.3.1</a>.
+</div>
+<div id="ref-neubert2007" class="csl-entry">
+Neubert, Karin, and Edgar Brunner. 2007. <span>“A Studentized
+Permutation Test for the Non-Parametric Behrens<span></span>fisher
+Problem.”</span> <em>Computational Statistics <span>&amp;</span>Amp<span class="math inline">\(\mathsemicolon\)</span> Data Analysis</em> 51
+(10): 5192–5204. <a href="https://doi.org/10.1016/j.csda.2006.05.024">https://doi.org/10.1016/j.csda.2006.05.024</a>.
 </div>
 <div id="ref-wmwodds" class="csl-entry">
 O’Brien, Ralph G, and John Castelloe. 2006. <span>“Exploiting the Link
@@ -822,10 +950,15 @@ Statistic,”</span> 209–31.
 <ol>
 <li id="fn1"><p>Directly inspired by this blog post from Professor Frank
 Harrell <a href="https://hbiostat.org/blog/post/wpo/" class="uri">https://hbiostat.org/blog/post/wpo/</a><a href="#fnref1" class="footnote-back">↩︎</a></p></li>
-<li id="fn2"><p>Food and Drug Administration (2014). Bioavailability and
+<li id="fn2"><p>I would like to note that I think the statistical
+properties of the WMW tests are sound, and Frank Harrell has written <a href="https://www.fharrell.com/post/po/">many</a> <a href="https://www.fharrell.com/post/wpo/">blogposts</a> outlined their
+sound application in biomedicine. <a href="#fnref2" class="footnote-back">↩︎</a></p></li>
+<li id="fn3"><p>This means the relative effect will <em>not</em> match
+the concordance probability provided by <code>ses_calc</code><a href="#fnref3" class="footnote-back">↩︎</a></p></li>
+<li id="fn4"><p>Food and Drug Administration (2014). Bioavailability and
 Bioequivalence Studies Submitted in NDAs or INDs — General
 Considerations.Center for Drug Evaluation and Research. Docket:
-FDA-2014-D-0204<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
+FDA-2014-D-0204<a href="#fnref4" class="footnote-back">↩︎</a></p></li>
 </ol>
 </div>
 

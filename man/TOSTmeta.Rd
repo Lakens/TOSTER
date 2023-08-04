@@ -36,7 +36,9 @@ TOSTmeta(
 Returns TOST Z-value 1, TOST p-value 1, TOST Z-value 2, TOST p-value 2,  alpha, low equivalence bound d, high equivalence bound d, Lower limit confidence interval TOST, Upper limit confidence interval TOST
 }
 \description{
-TOST function for meta-analysis
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+
+A function for providing TOST tests of equivlance from meta-analysis results.
 }
 \section{References}{
 

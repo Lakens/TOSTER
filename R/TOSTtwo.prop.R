@@ -1,4 +1,12 @@
-#' TOST function for two proportions (raw scores)
+#' @title TOST function for two proportions (raw scores)
+#'
+#' @description
+#' `r lifecycle::badge('superseded')`
+#'
+#' Development on `TOSTtwo.prop` is complete, and for new code we recommend
+#' switching to [twoprop_test], which is easier to use, more featureful,
+#' and still under active development.
+#'
 #' @param prop1 proportion of group 1
 #' @param prop2 proportion of group 2
 #' @param n1 sample size in group 1
@@ -19,12 +27,19 @@
 #' TOSTtwo.prop(prop1 = .65, prop2 = .70, n1 = 100, n2 = 100,
 #'    low_eqbound = -0.1, high_eqbound = 0.1, alpha = .05)
 #'
-#' @section References:
+#' @references
 #' Tunes da Silva, G., Logan, B. R., & Klein, J. P. (2008). Methods for Equivalence and Noninferiority Testing. Biology of Blood Marrow Transplant, 15(1 Suppl), 120-127.
+#'
 #' Yin, G. (2012). Clinical Trial Design: Bayesian and Frequentist Adaptive Methods. Hoboken, New Jersey: John Wiley & Sons, Inc.
 #' @export
 
-TOSTtwo.prop <- function(prop1, prop2, n1, n2, low_eqbound, high_eqbound, alpha, ci_type = "normal", plot = TRUE, verbose = TRUE) {
+TOSTtwo.prop <- function(prop1,
+                         prop2,
+                         n1, n2,
+                         low_eqbound, high_eqbound,
+                         alpha, ci_type = "normal",
+                         plot = TRUE, verbose = TRUE) {
+  lifecycle::deprecate_soft("0.8.0", "TOSTtwo.prop()", "twoprop_test()")
   if(missing(alpha)) {
     alpha <- 0.05
   }

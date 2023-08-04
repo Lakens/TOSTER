@@ -7,13 +7,13 @@
 extract_r_paired(m1, sd1, m2, sd2 = NULL, n, tstat = NULL, pvalue = NULL)
 }
 \arguments{
-\item{m1}{mean of group 1}
+\item{m1}{mean of group 1.}
 
-\item{sd1}{standard deviation of group 1}
+\item{sd1}{standard deviation of group 1.}
 
-\item{m2}{mean of group 2}
+\item{m2}{mean of group 2.}
 
-\item{sd2}{standard deviation of group 2}
+\item{sd2}{standard deviation of group 2.}
 
 \item{n}{Sample size (number of pairs)}
 
@@ -25,8 +25,10 @@ extract_r_paired(m1, sd1, m2, sd2 = NULL, n, tstat = NULL, pvalue = NULL)
 An estimate of the correlation.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+
 A function for estimating the correlation from a paired samples t-test.
-Useful for tsum_TOST when the correlation is not available.
+Useful for when using \link{tsum_TOST} and the correlation is not available.
 }
 \references{
 Lajeunesse, M. J. (2011). On the meta‐analysis of response ratios for studies with correlated and multi‐group designs. Ecology, 92(11), 2049-2055

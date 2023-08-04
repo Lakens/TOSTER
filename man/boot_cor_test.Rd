@@ -34,22 +34,25 @@ boot_cor_test(
 }
 \value{
 A list with class "htest" containing the following components:
-\describe{
-  \item{\code{"p.value"}}{the p-value of the test.}
-  \item{\code{"estimate"}}{the estimated measure of association, with name "pb", "wincor", "cor", "tau", or "rho" corresponding to the method employed.}
-  \item{\code{"null.value"}}{the value of the association measure under the null hypothesis.}
-  \item{\code{"alternative"}}{character string indicating the alternative hypothesis (the value of the input argument alternative). }
-  \item{\code{"method"}}{a character string indicating how the association was measured.}
-  \item{\code{"data.name"}}{a character string giving the names of the data.}
-  \item{\code{"call"}}{the matched call.}
+\itemize{
+\item "p.value": the p-value of the test.
+\item "estimate": the estimated measure of association, with name "pb", "wincor", "cor", "tau", or "rho" corresponding to the method employed.
+\item "null.value": the value of the association measure under the null hypothesis.
+\item "alternative": character string indicating the alternative hypothesis (the value of the input argument alternative).
+\item "method": a character string indicating how the association was measured.
+\item "data.name": a character string giving the names of the data.
+\item "call": the matched call.
 }
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+
 A function for a bootstrap, percentile, method for correlation coefficients.
 }
 \details{
 This function uses a percentile bootstrap methods for the confidence intervals.
-The returned p-values are calculated from a re-sampled null distribution (similar to boot_t_TOST).
+The returned p-values are calculated from a re-sampled null distribution (similar to \link{boot_t_TOST}).
+See \code{vignette("correlations")} for more details.
 
 The bootstrap correlation methods in this package offer two other correlations: a Winsorized correlation and a percentage bend correlation (see Wilcox 2017).
 These two can modified by adding the trim (Winsorized) or beta (percentage bend) arguments.
@@ -65,3 +68,11 @@ Communications in Statistics - Simulation and Computation, 38, 2220–2234.
 Wilcox, R.R. (2017) Introduction to Robust Estimation and Hypothesis Testing, 4th edition. Academic Press.
 }
 
+\seealso{
+Other Correlations: 
+\code{\link{corsum_test}()},
+\code{\link{plot_cor}()},
+\code{\link{power_z_cor}()},
+\code{\link{z_cor_test}()}
+}
+\concept{Correlations}

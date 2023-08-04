@@ -3,6 +3,15 @@ NEWS
 
 **TOSTER R package and jamovi module**
 
+# TOSTER v0.8.0
+
+- Added Brunner-Munzel test
+- Updated documentation to include lifecycle labels
+- Created new function for two proportions tests (`twoprop_test`)
+  - And power `power_twoprop`
+- Created new function for power for correlations (`power_z_cor`)
+- Deprecated old functions
+
 # TOSTER v0.7.1
 
 - Fixing the ggplot2 error related to `after_stat` update from that package.

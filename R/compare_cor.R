@@ -1,5 +1,8 @@
 #' @title Comparing two independent correlation coefficients
-#' @description A function to compare correlations between studies. This function is intended to be used to compare the compatibility of original studies with replication studies (lower p-values indicating lower compatibility).
+#' @description
+#' `r lifecycle::badge('stable')`
+#'
+#' A function to compare correlations between studies. This function is intended to be used to compare the compatibility of original studies with replication studies (lower p-values indicating lower compatibility).
 #' @param r1 Correlation study 1.
 #' @param df1 Degrees of freedom from study 1 (if a simple correlation the df is N-2).
 #' @param r2 Correlation study 2.
@@ -8,23 +11,24 @@
 #' @inheritParams compare_smd
 #' @details This function tests for differences between correlations.
 #'  @return A list with class "htest" containing the following components:
-#' \describe{
-#'   \item{\code{"statistic"}}{z-score}
-#'   \item{\code{"p.value"}}{numeric scalar containing the p-value for the test under the null hypothesis.}
-#'   \item{\code{"estimate"}}{difference in SMD between studies}
-#'   \item{\code{"null.value"}}{the specified hypothesized value for the null hypothesis.}
-#'   \item{\code{"alternative"}}{character string indicating the alternative hypothesis (the value of the input argument alternative). Possible values are "greater", "less", or "two-sided".}
-#'   \item{\code{"method"}}{Type of SMD}
-#'   \item{\code{"data.name"}}{"Summary Statistics" to denote summary statistics were utilized to obtain results.}
-#'   \item{\code{"cor"}}{Correlation input for the function.}
-#'   \item{\code{"call"}}{the matched call.}
-#' }
+#'
+#'   - "statistic":  z-score
+#'   - "p.value":  numeric scalar containing the p-value for the test under the null hypothesis.
+#'   - "estimate":  difference in SMD between studies.
+#'   - "null.value":  the specified hypothesized value for the null hypothesis.
+#'   - "alternative":  character string indicating the alternative hypothesis (the value of the input argument alternative). Possible values are "greater", "less", or "two-sided".
+#'   - "method":  Type of SMD.
+#'   - "data.name":  "Summary Statistics" to denote summary statistics were utilized to obtain results.
+#'   - "cor":  Correlation input for the function.
+#'   - "call":  the matched call.
+#'
 #' @references
 #' Counsell, A., & Cribbie, R. A. (2015). Equivalence tests for comparing correlation and regression coefficients. The British journal of mathematical and statistical psychology, 68(2), 292–309. https://doi.org/10.1111/bmsp.12045
 #'
 #' Anderson, S., & Hauck, W. W. (1983). A new procedure for testing equivalence in comparative bioavailability and other clinical trials. Communications in Statistics-Theory and Methods, 12(23), 2663-2692.
 #'
 #' @name compare_cor
+#' @family compare studies
 #' @import R6
 #' @export compare_cor
 #'

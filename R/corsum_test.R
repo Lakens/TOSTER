@@ -1,25 +1,29 @@
 #' @title  Association/Correlation Test from Summary Statistics
-#' @description   Test for association between paired samples, using one of Pearson's product moment correlation coefficient,Kendall's \eqn{\tau}{tau} or Spearman's \eqn{\rho}{rho}.
-#' This is the updated version of the TOSTr function.
+#' @description
+#' `r lifecycle::badge('stable')`
+#'
+#' Test for association between paired samples, using one of Pearson's product moment correlation coefficient, Kendall's \eqn{\tau} (tau) or Spearman's \eqn{\rho} (rho).
+#' This is the updated version of the [TOSTr] function.
 #' @inheritParams TOSTr
 #' @inheritParams z_cor_test
 #' @details
-#' This function uses Fisher's z transformation for the correlations, but uses Fieller's correction of the standard error for Spearman's rho and Kendall's tau.
+#' This function uses Fisher's z transformation for the correlations,
+#' but uses Fieller's correction of the standard error for Spearman's \eqn{\rho} and Kendall's \eqn{\tau}.
 #'
 #' @return A list with class "htest" containing the following components:
 #'
-#' \describe{
-#'   \item{\code{"statistic"}}{z-score}
-#'   \item{\code{"p.value"}}{the p-value of the test.}
-#'   \item{\code{"estimate"}}{the estimated measure of association, with name "cor", "tau", or "rho" corresponding to the method employed.}
-#'   \item{\code{"null.value"}}{the value of the association measure under the null hypothesis.}
-#'   \item{\code{"alternative"}}{character string indicating the alternative hypothesis (the value of the input argument alternative). }
-#'   \item{\code{"method"}}{a character string indicating how the association was measured.}
-#'   \item{\code{"data.name"}}{a character string giving the names of the data.}
-#'   \item{\code{"call"}}{the matched call.}
-#' }
+#'   - "statistic": z-score.
+#'   - "p.value": the p-value of the test.
+#'   - "estimate": the estimated measure of association, with name "cor", "tau", or "rho" corresponding to the method employed.
+#'   - "null.value": the value of the association measure under the null hypothesis.
+#'   - "alternative": character string indicating the alternative hypothesis (the value of the input argument alternative).
+#'   - "method": a character string indicating how the association was measured.
+#'   - "data.name": a character string giving the names of the data.
+#'   - "call": the matched call.
+#'
 #' @references
 #' Goertzen, J. R., & Cribbie, R. A. (2010). Detecting a lack of association: An equivalence testing approach. British Journal of Mathematical and Statistical Psychology, 63(3), 527-537. https://doi.org/10.1348/000711009X475853, formula page 531.
+#' @family Correlations
 #' @export
 #'
 

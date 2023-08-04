@@ -35,7 +35,7 @@ boot_t_test(x, ...)
 
 \item{alternative}{a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater", "less", "equivalence" (TOST), or "minimal.effect" (TOST). You can specify just the initial letter.}
 
-\item{mu}{a number indicating the true value of the mean for the two tailed test (or difference in means if you are performing a two sample test).}
+\item{mu}{a number specifying an optional parameter used to form the null hypothesis. See ‘Details’.}
 
 \item{alpha}{alpha level (default = 0.05)}
 
@@ -51,28 +51,33 @@ boot_t_test(x, ...)
 }
 \value{
 A list with class \code{"htest"} containing the following components:
-\describe{
-  \item{\code{statistic}}{the value of the t-statistic.}
-  \item{\code{parameter}}{the degrees of freedom for the t-statistic.}
-  \item{\code{p.value}}{the p-value for the test.}
-  \item{\code{conf.int}}{a confidence interval for the mean appropriate to the specified alternative hypothesis.}
-  \item{\code{estimate}}{the estimated mean or difference in means depending on whether it was a one-sample test or a two-sample test.}
-  \item{\code{null.value}}{the specified hypothesized value of the mean or mean difference. May be 2 values.}
-  \item{\code{stderr}}{the standard error of the mean (difference), used as denominator in the t-statistic formula.}
-  \item{\code{alternative}}{a character string describing the alternative hypothesis.}
-  \item{\code{method}}{a character string indicating what type of t-test was performed.}
-  \item{\code{data.name}}{a character string giving the name(s) of the data..}
+\itemize{
+\item "statistic": the value of the t-statistic.
+\item "parameter": the degrees of freedom for the t-statistic.
+\item "p.value": the p-value for the test.
+\item "conf.int": a confidence interval for the mean appropriate to the specified alternative hypothesis.
+\item "estimate": the estimated mean or difference in means depending on whether it was a one-sample test or a two-sample test.
+\item "null.value": the specified hypothesized value of the mean or mean difference. May be 2 values.
+\item "stderr": the standard error of the mean (difference), used as denominator in the t-statistic formula.
+\item "alternative": a character string describing the alternative hypothesis.
+\item "method": a character string indicating what type of t-test was performed.
+\item "data.name": a character string giving the name(s) of the data.
 }
 }
 \description{
-A function for a bootstrap method for Tt-tests.
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+
+A function for a bootstrap method for t-tests.
 }
 \details{
-For details on the calculations in this function see vignette("robustTOST").
-
 The implemented test(s) corresponds to the proposal of Chapter 16 of Efron and Tibshirani (1994).
 
-For details on the calculations in this function see vignette("robustTOST").
+For two-sample tests, the test is of \eqn{\bar x - \bar y} (mean of x minus mean of y).
+For paired samples, the test is of the difference scores (z),
+wherein \eqn{z =  x - y}, and the test is of \eqn{\bar z} (mean of the difference scores).
+For one-sample tests, the test is of \eqn{\bar x } (mean of x).
+
+For details on the calculations in this function see \code{vignette("robustTOST")}.
 }
 \section{References}{
 
@@ -86,10 +91,11 @@ Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC pre
 boot_t_test(extra ~ group, data = sleep)
 }
 \seealso{
-Other Robust TOST: 
+Other Robust tests: 
 \code{\link{boot_log_TOST}()},
 \code{\link{boot_t_TOST}()},
+\code{\link{brunner_munzel}()},
 \code{\link{log_TOST}()},
 \code{\link{wilcox_TOST}()}
 }
-\concept{Robust TOST}
+\concept{Robust tests}

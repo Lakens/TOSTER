@@ -38,7 +38,7 @@ generalized odds ratio).}
 
 \item{mu}{number indicating the value around which (a-)symmetry (for
 one-sample or paired samples) or shift (for independent samples) is to be
-estimated. See [stats::wilcox.test].}
+estimated. See \link[stats:wilcox.test]{stats::wilcox.test}.}
 
 \item{formula}{a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.}
 
@@ -52,10 +52,12 @@ estimated. See [stats::wilcox.test].}
 A data frame containing the standardized effect size.
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+
 Standardized effect size (SES), these are the effect sizes not considered SMDs.
 }
 \details{
-For details on the calculations in this function see vignette("robustTOST").
+For details on the calculations in this function see \code{vignette("robustTOST")}.
 }
 \examples{
 \dontrun{

@@ -1,61 +1,71 @@
-#' TOST function for a dependent t-test (raw scores)
-#' @param m1 mean of group 1
-#' @param m2 mean of group 2
-#' @param sd1 standard deviation of group 1
-#' @param sd2 standard deviation of group 2
-#' @param n sample size (pairs)
-#' @param r12 correlation of dependent variable between group 1 and  group 2
-#' @param low_eqbound lower equivalence bounds (e.g., -0.5) expressed in raw scores
-#' @param high_eqbound upper equivalence bounds (e.g., 0.5) expressed in raw scores
+#' TOST function for a one-sample t-test (raw scores)
+#' @description
+#' `r lifecycle::badge('superseded')`
+#'
+#' Development on this function is complete, and for new code we recommend
+#' switching to [tsum_TOST], which is easier to use, more featureful,
+#' and still under active development.
+#'
+#' @param m mean
+#' @param mu value to compare against
+#' @param sd standard deviation
+#' @param n sample size
+#' @param low_eqbound lower equivalence bounds (e.g., -0.5) expressed in raw units
+#' @param high_eqbound upper equivalence bounds (e.g., 0.5) expressed in raw units
 #' @param alpha alpha level (default = 0.05)
 #' @param plot set whether results should be plotted (plot = TRUE) or not (plot = FALSE) - defaults to TRUE
 #' @param verbose logical variable indicating whether text output should be generated (verbose = TRUE) or not (verbose = FALSE) - default to TRUE
 #' @return Returns TOST t-value 1, TOST p-value 1, TOST t-value 2, TOST p-value 2, degrees of freedom, low equivalence bound, high equivalence bound, Lower limit confidence interval TOST, Upper limit confidence interval TOST
 #' @examples
-#' ## Test means of 5.83 and 5.75, standard deviations of 1.17 and 1.30 in sample of 65 pairs
-#' ## with correlation between observations of 0.745 using equivalence bounds in raw units of
-#' ## -0.34 and 0.34, (with default alpha setting of = 0.05).
-#' TOSTpaired.raw(n=65,m1=5.83,m2=5.75,sd1=1.17,sd2=1.30,r12=0.745,low_eqbound=-0.34,high_eqbound=0.34)
-#' @section References:
-#' Mara, C. A., & Cribbie, R. A. (2012). Paired-Samples Tests of Equivalence. Communications in Statistics - Simulation and Computation, 41(10), 1928-1943. https://doi.org/10.1080/03610918.2011.626545, formula page 1932. Note there is a typo in the formula: n-1 should be n (personal communication, 31-8-2016)
+#' ## Test observed mean of 0.52 and standard deviation of 0.52 in sample of 300 participants
+#' ## against 0.5 given equivalence bounds in raw units of -0.1 and 0.1, with an alpha = 0.05.
+#' TOSTone.raw(m=0.52,mu=0.5,sd=0.5,n=300,low_eqbound=-0.1, high_eqbound=0.1, alpha=0.05)
 #' @importFrom stats pnorm pt qnorm qt
 #' @importFrom graphics abline plot points segments title
 #' @export
 #'
 
-TOSTpaired.raw<-function(n,m1,m2,sd1,sd2,r12,low_eqbound, high_eqbound, alpha, plot = TRUE, verbose = TRUE){
-  message("Note: this function is defunct. Please use tsum_TOST instead")
+TOSTone.raw <-
+  function(m,
+           mu,
+           sd,
+           n,
+           low_eqbound,
+           high_eqbound,
+           alpha,
+           plot = TRUE,
+           verbose = TRUE) {
+    message("Note: this function is defunct. Please use tsum_TOST instead")
   if(missing(alpha)) {
-    alpha <- 0.05
+    alpha<-0.05
   }
   if(low_eqbound >= high_eqbound) warning("The lower bound is equal to or larger than the upper bound. Check the plot and output to see if the bounds are specified as you intended.")
   if(n < 2) stop("The sample size should be larger than 1.")
   if(1 <= alpha | alpha <= 0) stop("The alpha level should be a positive value between 0 and 1.")
-  if(sd1 <= 0 | sd2 <= 0) stop("The standard deviation should be a positive value.")
-  if(1 < r12 | r12 < -1) stop("The correlation should be a value between -1 and 1.")
+  if(sd <= 0) stop("The standard deviation should be a positive value.")
   # Calculate TOST, t-test, 90% CIs and 95% CIs
-  sdif<-sqrt(sd1^2+sd2^2-2*r12*sd1*sd2)
-  se<-sdif/sqrt(n)
-  t<-(m1-m2)/se
   degree_f<-n-1
-  pttest<-2*pt(abs(t), degree_f, lower.tail=FALSE)
-  t1<-((m1-m2)-(low_eqbound))/se
+  t1<-(m-mu-low_eqbound)/(sd/sqrt(n))# t-test
   p1<-pt(t1, degree_f, lower.tail=FALSE)
-  t2<-((m1-m2)-(high_eqbound))/se
+  t2<-(m-mu-high_eqbound)/(sd/sqrt(n)) #t-test
   p2<-pt(t2, degree_f, lower.tail=TRUE)
-  ttost<-ifelse(abs(t1) < abs(t2), t1, t2)
-  LL90<-((m1-m2)-qt(1-alpha, degree_f)*se)
-  UL90<-((m1-m2)+qt(1-alpha, degree_f)*se)
-  ptost<-max(p1,p2)
-  dif<-(m1-m2)
-  LL95<-((m1-m2)-qt(1-(alpha/2), degree_f)*se)
-  UL95<-((m1-m2)+qt(1-(alpha/2), degree_f)*se)
+  t<-(m-mu)/(sd/sqrt(n))
+  pttest<-2*pt(-abs(t), df=degree_f)
+  LL90<-(m-mu)-qt(1-alpha, degree_f)*(sd/sqrt(n))
+  UL90<-(m-mu)+qt(1-alpha, degree_f)*(sd/sqrt(n))
+  LL95<-(m-mu)-qt(1-(alpha/2), degree_f)*(sd/sqrt(n))
+  UL95<-(m-mu)+qt(1-(alpha/2), degree_f)*(sd/sqrt(n))
+  ptost<-max(p1,p2) #Get highest p-value for summary TOST result
+  ttost<-ifelse(abs(t1) < abs(t2), t1, t2) #Get lowest t-value for summary TOST result
+  results<-data.frame(t1,p1,t2,p2,degree_f,LL90,UL90)
+  colnames(results) <- c("t-value 1","p-value 1","t-value 2","p-value 2","df", paste("Lower Limit ",100*(1-alpha*2),"% CI",sep=""),paste("Upper Limit ",100*(1-alpha*2),"% CI",sep=""))
+  dif<-(m-mu)
   testoutcome<-ifelse(pttest<alpha,"significant","non-significant")
   TOSToutcome<-ifelse(ptost<alpha,"significant","non-significant")
 
   # Plot results
   if (plot == TRUE) {
-  plot(NA, ylim=c(0,1), xlim=c(min(LL90,low_eqbound)-max(UL90-LL90, high_eqbound-low_eqbound)/10, max(UL90,high_eqbound)+max(UL90-LL90, high_eqbound-low_eqbound)/10), bty="l", yaxt="n", ylab="",xlab="Mean Difference")
+  plot(NA, ylim=c(0,1), xlim=c(min(LL95,low_eqbound,dif)-max(UL95-LL95, high_eqbound-low_eqbound,dif)/10, max(UL95,high_eqbound,dif)+max(UL95-LL95, high_eqbound-low_eqbound, dif)/10), bty="l", yaxt="n", ylab="",xlab="Mean Difference")
   points(x=dif, y=0.5, pch=15, cex=2)
   abline(v=high_eqbound, lty=2)
   abline(v=low_eqbound, lty=2)
@@ -110,7 +120,8 @@ TOSTpaired.raw<-function(n,m1,m2,sd1,sd2,r12,low_eqbound, high_eqbound, alpha, p
                                   "TOST: don't reject null equivalence hypothesis")
     }
     cat("\n")
-    message(combined_outcome)}
-  # Return results in list()
+    message(combined_outcome)
+    }
+  # Return results in list(),NHST_t = t, NHST_p = pttest
   invisible(list(diff=dif,TOST_t1=t1,TOST_p1=p1,TOST_t2=t2,TOST_p2=p2, TOST_df=degree_f,alpha=alpha,low_eqbound=low_eqbound,high_eqbound=high_eqbound, LL_CI_TOST=LL90,UL_CI_TOST=UL90, LL_CI_TTEST=LL95, UL_CI_TTEST=UL95,NHST_t = t, NHST_p = pttest))
 }

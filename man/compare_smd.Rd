@@ -34,27 +34,31 @@ compare_smd(
 }
 \value{
 A list with class "htest" containing the following components:
-\describe{
-  \item{\code{"statistic"}}{z-score}
-  \item{\code{"p.value"}}{numeric scalar containing the p-value for the test under the null hypothesis.}
-  \item{\code{"estimate"}}{difference in SMD between studies}
-  \item{\code{"null.value"}}{the specified hypothesized value for the null hypothesis.}
-  \item{\code{"alternative"}}{character string indicating the alternative hypothesis (the value of the input argument alternative). Possible values are "greater", "less", or "two-sided".}
-  \item{\code{"method"}}{Type of SMD}
-  \item{\code{"data.name"}}{"Summary Statistics" to denote summary statistics were utilized to obtain results.}
-  \item{\code{"smd"}}{SMDs input for the function.}
-  \item{\code{"sample_sizes"}}{Sample sizes input for the function.}
-  \item{\code{"call"}}{the matched call.}
+\itemize{
+\item "statistic": z-score.
+\item "p.value": numeric scalar containing the p-value for the test under the null hypothesis.
+\item "estimate": difference in SMD between studies.
+\item "null.value": the specified hypothesized value for the null hypothesis.
+\item "alternative": character string indicating the alternative hypothesis (the value of the input argument alternative). Possible values are "greater", "less", or "two-sided".
+\item "method": Type of SMD.
+\item "data.name": "Summary Statistics" to denote summary statistics were utilized to obtain results.
+\item "smd": SMDs input for the function.
+\item "sample_sizes": Sample sizes input for the function.
+\item "call": the matched call.
 }
 }
 \description{
-A function to compare standardized mean differences (SMDs) between studies. This function is intended to be used to compare the compatibility of original studies with replication studies (lower p-values indicating lower compatibility)
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+
+A function to compare standardized mean differences (SMDs) between studies. This function is intended to be used to compare the compatibility of original studies with replication studies (lower p-values indicating lower compatibility).
 }
 \details{
-This function tests for differences between correlations.
+This function tests for differences between SMDs from independent studies (e.g., original vs replication).
 }
 \seealso{
 Other compare studies: 
-\code{\link{boot_compare_smd}()}
+\code{\link{boot_compare_cor}()},
+\code{\link{boot_compare_smd}()},
+\code{\link{compare_cor}()}
 }
 \concept{compare studies}

@@ -1,30 +1,38 @@
 #' @title One, two, and paired samples hypothesis tests
-#' @description Performs one or two sample t-tests or Wilcoxon-Mann-Whitney rank-based tests with expanded options compared to \code{t.test} or \code{wilcox.test}.
-#' @param test a character string specifying what type of hypothesis test to use. Options are limited to "wilcox.test" and "t.test". You can specify just the initial letter.
+#'
+#' @description
+#' `r lifecycle::badge("maturing")`
+#'
+#' Performs one or two sample t-tests or Wilcoxon-Mann-Whitney rank-based tests with expanded options compared to [t.test], [brunner_munzel], or [wilcox.test].
+#' @param test a character string specifying what type of hypothesis test to use. Options are limited to "wilcox.test", "t.test", or "brunner_munzel". You can specify just the initial letter.
 #' @inheritParams t_TOST
 #' @inheritParams z_cor_test
+#' @inheritParams brunner_munzel
+#' @param 	mu a number specifying an optional parameter used to form the null hypothesis. See ‘Details’.
 #' @param ...  further arguments to be passed to or from methods.
-#' @details Currently, this function allows for traditional or TOST hypothesis tests using \code{"t.test"} or \code{"wilcox.test"}.
-#' The type of test, t-test or Wilcoxon-Mann-whitney, can be selected with the \code{"test"} argument.
-#' More information on the tests can be found in the documentation for the \code{"t.test"} and \code{"wilcox.test"} functions.
+#' @details
+#' The type of test, t-test/Wilcoxon-Mann-Whitney/Brunner-Munzel, can be selected with the `"test"` argument.
+#'
 #'
 #' \code{alternative = "greater"} is the alternative that x is larger than y (on average).
-#' If \code{alternative = "equivalence"} then the alternative is that the difference between x and y is between the two null values (\code{mu}).
+#' If \code{alternative = "equivalence"} then the alternative is that the difference between x and y is between the two null values `mu`..
 #' If \code{alternative = "minimal.effect"} then the alternative is that the difference between x and y is less than the lowest null value or greater than the highest.
 #'
-#' @return A list with class \code{"htest"} containing the following components:
-#' \describe{
-#'   \item{\code{statistic}}{the value of the t-statistic.}
-#'   \item{\code{parameter}}{the degrees of freedom for the t-statistic.}
-#'   \item{\code{p.value}}{the p-value for the test.}
-#'   \item{\code{conf.int}}{a confidence interval for the mean appropriate to the specified alternative hypothesis.}
-#'   \item{\code{estimate}}{the estimated mean or difference in means depending on whether it was a one-sample test or a two-sample test.}
-#'   \item{\code{null.value}}{the specified hypothesized value of the mean or mean difference. May be 2 values.}
-#'   \item{\code{stderr}}{the standard error of the mean (difference), used as denominator in the t-statistic formula.}
-#'   \item{\code{alternative}}{a character string describing the alternative hypothesis.}
-#'   \item{\code{method}}{a character string indicating what type of t-test was performed.}
-#'   \item{\code{data.name}}{a character string giving the name(s) of the data..}
-#' }
+#' For more details on each possible test ([brunner_munzel], [stats::t.test], or [stats::wilcox.test]), please read their individual documentation.
+#'
+#' @return A list with class `"htest"` containing the following components:
+#'
+#'   - statistic: the value of the t-statistic.
+#'   - parameter: the degrees of freedom for the t-statistic.
+#'   - p.value: the p-value for the test.
+#'   - conf.int: a confidence interval for the mean appropriate to the specified alternative hypothesis.
+#'   - estimate: the estimated mean or difference in means depending on whether it was a one-sample test or a two-sample test.
+#'   - null.value: the specified hypothesized value of the mean or mean difference. May be 2 values.
+#'   - stderr: the standard error of the mean (difference), used as denominator in the t-statistic formula.
+#'   - alternative: a character string describing the alternative hypothesis.
+#'   - method: a character string indicating what type of t-test was performed.
+#'   - data.name: a character string giving the name(s) of the data.
+#'
 #' @examples
 #' data(mtcars)
 #' simple_htest(mpg ~ am,
@@ -55,7 +63,7 @@ simple_htest <- function(x, ...,
 # @method simple_htest default
 simple_htest.default = function(x,
                                 y = NULL,
-                                test = c("t.test","wilcox.test"),
+                                test = c("t.test","wilcox.test","brunner_munzel"),
                                 paired = FALSE,
                                 alternative = c("two.sided",
                                                 "less",
@@ -71,10 +79,19 @@ simple_htest.default = function(x,
  if(alternative %in% c("equivalence","minimal.effect")){
 
    if(length(mu) == 1){
-     if(mu ==  0){
+     if(mu ==  0 && test %in% c("t.test","wilcox.test")){
        stop("mu cannot be zero if alternative is equivalence or minimal.effect")
      }
-     mu = c(mu, -1*mu)
+
+     if(mu ==  0.5 && test %in% c("brunner_munzel")){
+       stop("mu cannot be zero if alternative is equivalence or minimal.effect")
+     }
+
+     if(test %in% c("t.test","wilcox.test")){
+       mu = c(mu, -1*mu)
+     } else {
+       mu = c(mu, abs(mu-1))
+     }
    }
 
 
@@ -101,6 +118,16 @@ simple_htest.default = function(x,
        conf.level = 1 - alpha * 2,
        alternative = "two.sided",
        ...
+     ),
+     brunner_munzel = brunner_munzel(
+       x = x,
+       y = y,
+       paired = paired,
+       mu = 0.5,
+       #conf.int = TRUE,
+       alpha = alpha*2,
+       alternative = "two.sided",
+       ...
      )
    )
 
@@ -122,6 +149,13 @@ simple_htest.default = function(x,
        paired = paired,
        mu = lo_bound,
        alternative = "greater",
+       ...),
+     brunner_munzel = brunner_munzel(
+       x = x,
+       y = y,
+       paired = paired,
+       mu = lo_bound,
+       alternative = "greater",
        ...))
      hi_test = switch(
        test,
@@ -134,6 +168,13 @@ simple_htest.default = function(x,
          ...
        ),
        wilcox.test = wilcox.test(
+         x = x,
+         y = y,
+         paired = paired,
+         mu = hi_bound,
+         alternative = "less",
+         ...),
+       brunner_munzel = brunner_munzel(
          x = x,
          y = y,
          paired = paired,
@@ -174,7 +215,15 @@ simple_htest.default = function(x,
          paired = paired,
          mu = lo_bound,
          alternative = "less",
+         ...),
+       brunner_munzel = brunner_munzel(
+         x = x,
+         y = y,
+         paired = paired,
+         mu = lo_bound,
+         alternative = "less",
          ...))
+
      hi_test = switch(
        test,
        t.test = t.test(
@@ -186,6 +235,13 @@ simple_htest.default = function(x,
          ...
        ),
        wilcox.test = wilcox.test(
+         x = x,
+         y = y,
+         paired = paired,
+         mu = hi_bound,
+         alternative = "greater",
+         ...),
+       brunner_munzel = brunner_munzel(
          x = x,
          y = y,
          paired = paired,
@@ -226,7 +282,16 @@ simple_htest.default = function(x,
        conf.int = TRUE,
        conf.level = 1 - alpha,
        alternative = alternative,
-       null = mu,
+       mu = mu,
+       ...
+     ),
+     brunner_munzel = brunner_munzel(
+       x = x,
+       y = y,
+       paired = paired,
+       alpha = alpha,
+       alternative = alternative,
+       mu = mu,
        ...
      )
    )

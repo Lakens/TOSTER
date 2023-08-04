@@ -1,27 +1,37 @@
 #' @title Bootstrapped TOST with log transformed t-tests
-#' @description A function for a bootstrap method for TOST with all types of t-tests.
+
+#' @description
+#' `r lifecycle::badge('stable')`
+#'
+#' A function for a bootstrap method for TOST with all types of t-tests.
 #' @inheritParams boot_t_TOST
 #' @inheritParams log_TOST
-#' @details For details on the calculations in this function see vignette("robustTOST").
 #' @return An S3 object of class
-#'   \code{"TOSTt"} is returned containing the following slots:
-#' \describe{
-#'   \item{\code{"TOST"}}{A table of class \code{"data.frame"} containing two-tailed t-test and both one-tailed results.}
-#'   \item{\code{"eqb"}}{A table of class \code{"data.frame"} containing equivalence bound settings.}
-#'   \item{\code{"effsize"}}{ table of class \code{"data.frame"} containing effect size estimates}
-#'   \item{\code{"hypothesis"}}{String stating the hypothesis being tested}
-#'   \item{\code{"smd"}}{List containing the results of the means ratio calculation.Items include: d (means ratio estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation)}
-#'   \item{\code{"alpha"}}{Alpha level set for the analysis.}
-#'   \item{\code{"method"}}{Type of t-test.}
-#'   \item{\code{"decision"}}{List included text regarding the decisions for statistical inference.}
-#'   \item{\code{"boot"}}{List containing the bootstrap samples.}
-#' }
+#'   `"TOSTt"` is returned containing the following slots:
+#'
+#'   - "TOST": A table of class `"data.frame"` containing two-tailed t-test and both one-tailed results.
+#'   - "eqb": A table of class `"data.frame"` containing equivalence bound settings.
+#'   - "effsize":  table of class `"data.frame"` containing effect size estimates.
+#'   - "hypothesis": String stating the hypothesis being tested.
+#'   - "smd": List containing the results of the means ratio calculation.
+#'      - Items include: d (means ratio estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation)
+#'   - "alpha": Alpha level set for the analysis.
+#'   - "method": Type of t-test.
+#'   - "decision": List included text regarding the decisions for statistical inference.
+#'   - "boot": List containing the bootstrap samples.
+#'
 #' @details The implemented test(s) corresponds to the proposal of Chapter 16 of Efron and Tibshirani (1994),
 #' and recommended by He et al (2022).
 #' Returns TOSTt class object with bootstrapped based results.
 #' This is approximately equivalent to the percentile bootstrap method mentioned by He et al (2014).
 #'
-#' For details on the calculations in this function see vignette("robustTOST").
+#' For two-sample tests, the test is of \eqn{\bar log(x) - \bar log(y)} (mean of x minus mean of y).
+#' For paired samples, the test is of the difference scores (z),
+#' wherein \eqn{z =  log(x) - log(y) = log(x)/log(y)}, and the test is of \eqn{\bar z} (mean of the difference/ratio scores).
+#'
+#'
+#'
+#' For details on the calculations in this function see `vignette("robustTOST")`.
 #' @references
 #' Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press
 #'
@@ -32,7 +42,8 @@
 #' https://www.fda.gov/regulatory-information/search-fda-guidance-documents/bioavailability-and-bioequivalence-studies-submitted-ndas-or-inds-general-considerations
 #' @importFrom stats var quantile
 #' @name boot_log_TOST
-#' @family Robust TOST
+#' @family Robust tests
+#' @family TOST
 #' @export boot_log_TOST
 
 boot_log_TOST <- function(x, ...){

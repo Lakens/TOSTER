@@ -1,4 +1,10 @@
-#' TOST function for meta-analysis
+#' @title TOST function for meta-analysis
+#' @description
+#'
+#' `r lifecycle::badge('stable')`
+#'
+#' A function for providing TOST tests of equivlance from meta-analysis results.
+#'
 #' @param ES meta-analytic effect size
 #' @param var meta-analytic variance
 #' @param se standard error
