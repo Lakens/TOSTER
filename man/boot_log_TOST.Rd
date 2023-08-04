@@ -81,6 +81,8 @@ and recommended by He et al (2022).
 Returns TOSTt class object with bootstrapped based results.
 This is approximately equivalent to the percentile bootstrap method mentioned by He et al (2014).
 
+This function tests \eqn{(log(x)-log(y)}.
+
 For details on the calculations in this function see \code{vignette("robustTOST")}.
 }
 \references{

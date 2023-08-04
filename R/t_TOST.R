@@ -24,6 +24,10 @@
 #' @param na.action a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").
 #' @param ...  further arguments to be passed to or from methods.
 #' @details For details on the calculations in this function see vignette("IntroTOSTt") & vignette("SMD_calcs").
+#'
+#' For two-sample or paired samples tests, the test is of \eqn{(x-y)-\mu}.
+#' For one-sample tests, the test is of \eqn{(x)-\mu}.
+#'
 #' @return An S3 object of class
 #'   `"TOSTt"` is returned containing the following slots:
 #'

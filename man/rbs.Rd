@@ -35,7 +35,7 @@ estimated. See \link[stats:wilcox.test]{stats::wilcox.test}.}
 Returns a list of results including the rank biserial correlation, logical indicator if it was a paired method, setting for mu, and confidence interval.
 }
 \description{
-\verb{r lifecycle::badge('superceded')}
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#superseded}{\figure{lifecycle-superseded.svg}{options: alt='[Superseded]'}}}{\strong{[Superseded]}}
 
 Effect sizes for simple (one or two sample) non-parametric tests. Suggested to use \link{ses_calc} function instead.
 }

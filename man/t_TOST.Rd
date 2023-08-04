@@ -109,6 +109,9 @@ A function for TOST with all types of t-tests.
 }
 \details{
 For details on the calculations in this function see vignette("IntroTOSTt") & vignette("SMD_calcs").
+
+For two-sample or paired samples tests, the test is of \eqn{(x-y)-\mu}.
+For one-sample tests, the test is of \eqn{(x)-\mu}.
 }
 \examples{
 data(mtcars)
