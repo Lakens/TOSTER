@@ -8,7 +8,7 @@
 #' @param r The observed correlation coefficient.
 #' @param n Total number of observations (sample size).
 #' @param method The method by which the coefficient was calculated: pearson, spearman, or kendall (default is "pearson")
-#' @param type Choose whether to plot a "consonance" function ("c"), consonance density ("cd"), or both (c("c","cd"); defualt option).
+#' @param type Choose whether to plot a "consonance" function ("c"), consonance density ("cd"), or both (c("c","cd"); default option).
 #' @param levels Numeric vector of confidence levels to display
 #' @details
 #' This function was created so that users could create consonance plots of Pearson's correlation coefficient.

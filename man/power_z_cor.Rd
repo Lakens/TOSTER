@@ -19,7 +19,7 @@ powerTOSTr(alpha, statistical_power, N, low_eqbound_r, high_eqbound_r)
 \arguments{
 \item{n}{number of observations.}
 
-\item{rho}{true correlation value (alternative hypothsis).}
+\item{rho}{true correlation value (alternative hypothesis).}
 
 \item{power}{statistical power (1-beta).}
 

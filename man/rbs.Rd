@@ -29,7 +29,7 @@ estimated. See \link[stats:wilcox.test]{stats::wilcox.test}.}
 
 \item{paired}{a logical indicating whether you want to calculate a paired test.}
 
-\item{ses}{Rank-biserial (rb), odds (odds), and concordance probablity (cstat).}
+\item{ses}{Rank-biserial (rb), odds (odds), and concordance probability (cstat).}
 }
 \value{
 Returns a list of results including the rank biserial correlation, logical indicator if it was a paired method, setting for mu, and confidence interval.

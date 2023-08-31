@@ -38,7 +38,7 @@ Returns TOST Z-value 1, TOST p-value 1, TOST Z-value 2, TOST p-value 2,  alpha, 
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 
-A function for providing TOST tests of equivlance from meta-analysis results.
+A function for providing TOST tests of equivalence from meta-analysis results.
 }
 \section{References}{
 

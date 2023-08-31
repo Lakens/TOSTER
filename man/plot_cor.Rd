@@ -19,7 +19,7 @@ plot_cor(
 
 \item{method}{The method by which the coefficient was calculated: pearson, spearman, or kendall (default is "pearson")}
 
-\item{type}{Choose whether to plot a "consonance" function ("c"), consonance density ("cd"), or both (c("c","cd"); defualt option).}
+\item{type}{Choose whether to plot a "consonance" function ("c"), consonance density ("cd"), or both (c("c","cd"); default option).}
 
 \item{levels}{Numeric vector of confidence levels to display}
 }

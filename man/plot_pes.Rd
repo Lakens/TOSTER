@@ -19,7 +19,7 @@ plot_pes(
 
 \item{df2}{Degrees of freedom for the denominator.}
 
-\item{type}{Choose whether to plot a "consonance" function ("c"), consonance density ("cd"), or both (c("c","cd"); defualt option).}
+\item{type}{Choose whether to plot a "consonance" function ("c"), consonance density ("cd"), or both (c("c","cd"); default option).}
 
 \item{levels}{Numeric vector of confidence levels to display}
 }

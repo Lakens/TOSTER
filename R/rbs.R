@@ -9,7 +9,7 @@
 #'   one-sample or paired samples) or shift (for independent samples) is to be
 #'   estimated. See [stats::wilcox.test].
 #' @param paired a logical indicating whether you want to calculate a paired test.
-#' @param ses Rank-biserial (rb), odds (odds), and concordance probablity (cstat).
+#' @param ses Rank-biserial (rb), odds (odds), and concordance probability (cstat).
 #' @param conf.level confidence level of the interval.
 #'
 #' @details

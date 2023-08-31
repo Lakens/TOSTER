@@ -32,7 +32,8 @@ Suggests:
     broom,
     car,
     afex,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    spelling
 VignetteBuilder: knitr
 Encoding: UTF-8
 LazyData: true
@@ -40,3 +41,4 @@ Config/testthat/edition: 3
 Depends: 
     R (>= 3.5)
 RoxygenNote: 7.2.3
+Language: en-US

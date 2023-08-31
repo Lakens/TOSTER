@@ -28,7 +28,7 @@ plot_smd(
 
 \item{smd_label}{Label for the x-axis indicating the SMD measure}
 
-\item{type}{Choose whether to plot a "consonance" function ("c"), consonance density ("cd"), or both (c("c","cd"); defualt option).}
+\item{type}{Choose whether to plot a "consonance" function ("c"), consonance density ("cd"), or both (c("c","cd"); default option).}
 
 \item{levels}{Numeric vector of confidence levels to display}
 }

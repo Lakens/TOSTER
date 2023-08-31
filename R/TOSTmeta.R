@@ -3,7 +3,7 @@
 #'
 #' `r lifecycle::badge('stable')`
 #'
-#' A function for providing TOST tests of equivlance from meta-analysis results.
+#' A function for providing TOST tests of equivalence from meta-analysis results.
 #'
 #' @param ES meta-analytic effect size
 #' @param var meta-analytic variance

@@ -9,7 +9,7 @@
 #' Calculates the approximate power for a z-test based on a Pearson product-moment correlation.
 #'
 #' @param n number of observations.
-#' @param rho true correlation value (alternative hypothsis).
+#' @param rho true correlation value (alternative hypothesis).
 #' @param null the null hypothesis value.
 #' @param alpha a priori alpha-level (i.e., significance level).
 #' @param power statistical power (1-beta).

@@ -8,7 +8,7 @@
 #' @param Fstat The F-statistic from the F-test.
 #' @param df1 Degrees of freedom for the numerator.
 #' @param df2 Degrees of freedom for the denominator.
-#' @param type Choose whether to plot a "consonance" function ("c"), consonance density ("cd"), or both (c("c","cd"); defualt option).
+#' @param type Choose whether to plot a "consonance" function ("c"), consonance density ("cd"), or both (c("c","cd"); default option).
 #' @param levels Numeric vector of confidence levels to display
 #' @details
 #' This function was created so that users could create consonance plots of partial eta-squared from ANOVA-level effects.
