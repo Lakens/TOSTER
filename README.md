@@ -2,7 +2,7 @@
 # 	TOSTER: Two one-sided tests (TOST) equivalence testing
  <!-- badges: start -->
   [![R-CMD-check](https://github.com/Lakens/TOSTER/workflows/R-CMD-check/badge.svg)](https://github.com/Lakens/TOSTER/actions)
-  [![Coverage status](https://codecov.io/gh/Lakens/TOSTER/branch/master/graph/badge.svg)](https://codecov.io/github/Lakens/TOSTER?branch=master)
+  [![Coverage status](https://codecov.io/gh/Lakens/TOSTER/branch/master/graph/badge.svg)](https://app.codecov.io/github/Lakens/TOSTER?branch=master)
   [![CRAN_Status_Badge_version_last_release](https://www.r-pkg.org/badges/version-last-release/TOSTER)](https://cran.r-project.org/package=TOSTER)
   [![documentation](https://img.shields.io/badge/website-active-blue)](https://aaroncaldwell.us/TOSTERpkg/)
   <!-- badges: end -->
