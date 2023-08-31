@@ -97,7 +97,6 @@ data(mtcars)
 brunner_munzel(mpg ~ am, data = mtcars)
 }
 \references{
-reference
 Brunner, E., Munzel, U. (2000). The Nonparametric Behrens-Fisher Problem: Asymptotic Theory and a Small Sample Approximation. Biometrical Journal 42, 17 -25.
 
 Neubert, K., Brunner, E., (2006). A Studentized Permutation Test for the Nonparametric Behrens-Fisher Problem. Computational Statistics and Data Analysis.
