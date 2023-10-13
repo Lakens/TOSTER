@@ -3,6 +3,10 @@ NEWS
 
 **TOSTER R package and jamovi module**
 
+# TOSTER v0.8.1
+
+- Small correction to the displayed equation for Cohen's ds standard error. Thank you to Matthew B Jané for finding this error.
+
 # TOSTER v0.8.0
 
 - Added Brunner-Munzel test
