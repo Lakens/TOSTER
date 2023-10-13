@@ -219,7 +219,7 @@ wherein $J$ represents the Hedges correction (calculation above).
 2. Under all other methods (nct, t, or z):
 
 $$
-\sigma_{SMD} = \sqrt{\frac{n_1+n_2}{n_1 \cdot n_2} \cdot \frac{d^2}{2 \cdot(n_1+n_2)} \cdot J^2}
+\sigma_{SMD} = \sqrt{\frac{n_1+n_2}{n_1 \cdot n_2} + \frac{d^2}{2 \cdot(n_1+n_2)} \cdot J^2}
 $$
 
 ## Glass's Delta
