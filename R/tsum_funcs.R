@@ -48,7 +48,7 @@ tsum_test = function (m1, sd1 = NULL, n1 = NULL,
     ret.val <- list(statistic = (conf.int.xbar - mu)/conf.int.s,
                     parameter = n1 - 1, estimate = conf.int.xbar,
                     stderr = conf.int.s,
-                    null.value = mu, alternative = alt.expanded, method = "One-sample t-Test",
+                    null.value = mu, alternative = alt.expanded, method = "One-sample t-test",
                     data.name = c("Summarized x"))
     names(ret.val$estimate) <- "mean of x"
     names(ret.val$null.value) <- "mean"
@@ -81,8 +81,8 @@ tsum_test = function (m1, sd1 = NULL, n1 = NULL,
       sqrt((((n1 - 1) * var.x + (n2 - 1) * var.y) *
               (1/n1 + 1/n2))/(n1 + n2 - 2))
     else sqrt((var.x/n1) + (var.y/n2))
-    ret.val <- c(if (var.equal) list(method = "Standard Two-Sample t-Test",
-                                     parameter = n1 + n2 - 2) else list(method = "Welch Modified Two-Sample t-Test",
+    ret.val <- c(if (var.equal) list(method = "Two Sample t-test",
+                                     parameter = n1 + n2 - 2) else list(method = "Welch Two Sample t-test",
                                                                            parameter = {
                                                                              const <- 1/(1 + (n1 * var.y)/(n2 * var.x))
                                                                              1/((const^2)/(n1 - 1) + ((1 - const)^2)/(n2 -
