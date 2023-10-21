@@ -130,7 +130,11 @@ df_htest = function(htest,
 #' @rdname htest-helpers
 #' @export
 
-describe_htest = function(htest,alpha = NULL,digits = 3){
+describe_htest = function(htest,
+                          alpha = NULL,
+                          digits = 3,
+                          framework = c("significance","compatibility")){
+  framework = match.arg(framework)
   if(!(class(htest) %in% c("htest"))){
     stop("htest must be of the class htest")
   }
@@ -152,11 +156,56 @@ describe_htest = function(htest,alpha = NULL,digits = 3){
       }
     }
   }
-  sig_state = ifelse(
-    htest$p.value < alpha,
-    "statistically significant",
-    "not statistically significant"
-  )
+  if(framework == "significance"){
+    sig_state = ifelse(
+      htest$p.value < alpha,
+      "statistically significant",
+      "not statistically significant"
+    )
+  } else {
+    s_value = s_value(htest$p.value)
+    decision = "indiscernable from the null"
+    if(s_value == 1){
+      sig_state = "only 1 bit of information against the null"
+    } else {
+      sig_state = "less than 1 bit of information against the null"
+    }
+
+
+
+    if(s_value > 1){
+      decision = "trivially incompatible with the null"
+      sig_state = paste0(round(s_value,digits = digits), " bits of information against the null")
+    }
+    if(s_value > 2){
+      decision = "negligibly incompatible with the null"
+    }
+    if(s_value > 3){
+      decision = "slightly incompatible with the null"
+    }
+    if(s_value > 4){
+      decision = "maringally incompatible with the null"
+    }
+    if(s_value > 5){
+      decision = "moderately incompatible with the null"
+    }
+    if(s_value > 6){
+      decision = "appreciably incompatible with the null"
+    }
+    if(s_value > 7){
+      decision = "substantially incompatible with the null"
+    }
+    if(s_value > 8){
+      decision = "highly incompatible with the null"
+    }
+    if(s_value > 9){
+      decision = "severely incompatible with the null"
+    }
+    if(s_value > 10){
+      decision = "extremely incompatible with the null"
+    }
+  }
+
 
   hyp_state = ifelse(
     htest$p.value < alpha,
@@ -181,8 +230,14 @@ describe_htest = function(htest,alpha = NULL,digits = 3){
   }
 
   if(!is.null(htest$p.value)){
-    pval_state = printable_pval(htest$p.value,
-                                digits = digits)
+    if(framework == "significance"){
+      pval_state = printable_pval(htest$p.value,
+                                  digits = digits)
+    } else {
+      pval_state = printable_sval(s_value,
+                                   digits = digits)
+    }
+
   }else{
     pval_state = ""
   }
@@ -236,6 +291,8 @@ describe_htest = function(htest,alpha = NULL,digits = 3){
     stat_state = paste0(stat_state,", ", est_state)
 
   }
+
+  if(framework == "significance"){
 
   if(!is.null(htest$alternative)){
 
@@ -342,6 +399,111 @@ describe_htest = function(htest,alpha = NULL,digits = 3){
                          stat_state, ", at a ", alpha, " alpha-level. ",
                          hyp_state)
   }
+  }
+
+  if(framework == "compatibility"){
+    if(!is.null(htest$alternative)){
+
+      if(!is.null(htest$null.value)) {
+        if(length(htest$null.value) == 1) {
+          alt.char <-
+            switch(htest$alternative,
+                   two.sided = "equal to",
+                   less = "greater than or equal to",
+                   greater = "less than or equal to")
+          alt_state = paste0("the ",
+                             names(htest$null.value),
+                             " is ",
+                             alt.char,
+                             " ",
+                             htest$null.value)
+
+          print_state = paste0("The ",
+                               htest$method,
+                               " indicates ",
+                               sig_state,
+                               " (",
+                               stat_state, "). ",
+                               "Given the underlying model and its assumptions being true, the data are ",
+                               #" Based on the alternative hypothesis,",
+                               decision,
+                               " hypothesis that ",
+                               alt_state, ".")
+        } else {
+
+          if(htest$alternative %in% c("equivalence","minimal.effect")){
+            if(htest$alternative == "equivalence"){
+
+              alt_state = paste0(" that the ",
+                                 names(htest$null.value)[1],
+                                 " is ",
+                                 "not between",
+                                 " ",
+                                 htest$null.value[1], " and ",
+                                 htest$null.value[2])
+
+            }
+            if(htest$alternative == "minimal.effect"){
+
+              alt_state = paste0(" that the ",
+                                 names(htest$null.value)[1],
+                                 " is ",
+                                 "greater than ",
+                                 htest$null.value[1], " or ",
+                                 "less than ",
+                                 htest$null.value[2])
+
+            }
+            #decision = ifelse(htest$p.value < alpha,
+            #                  " At the desired error rate, it can be stated that the ",
+            #                  " At the desired error rate, it cannot be stated that the ")
+
+            print_state = paste0("The ",
+                                 htest$method,
+                                 " indicates ",
+                                 sig_state,
+                                 " (",
+                                 stat_state,  ". ",
+                                 "Given the underlying model and its assumptions being true, the data are ",
+                                 #" Based on the alternative hypothesis,",
+                                 decision,
+                                 " hypothesis that ",
+                                 alt_state, ".")
+          } else{
+            print_state = paste0("The ",
+                                 htest$method,
+                                 " indicates ",
+                                 sig_state,
+                                 " effect, ",
+                                 stat_state,  ". ",
+                                 " alternative: ", htest$alternative, " with ",
+                                 htest$null.value,
+                                 ".")
+          }
+
+
+        }
+      } else {
+        print_state = paste0("The ",
+                             htest$method,
+                             " indicates ",
+                             sig_state,
+                             ", ",
+                             stat_state, ". ",
+                             " alternative: ", htest$alternative,".")
+
+      }
+
+
+    } else{
+      print_state = paste0("The ",
+                           htest$method,
+                           " indicates ",
+                           sig_state,
+                           ", ",
+                           stat_state, ". ")
+    }
+  }
 
   return(print_state)
 }
@@ -372,4 +534,20 @@ printable_pval = function(pval,
   }
 
   return(pval)
+}
+
+printable_sval = function(sval,
+                          digits = 3){
+  cutoff = 1*10^(-1*digits)
+  if(sval < cutoff){
+    sval = paste0("binary-S < ",cutoff)
+  } else{
+    sval = paste0("binary-S = ",round(sval, digits = digits))
+  }
+
+  if(sval == 0){
+    sval = paste0("binary-S = 0")
+  }
+
+  return(sval)
 }

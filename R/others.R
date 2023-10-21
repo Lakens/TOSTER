@@ -50,3 +50,8 @@ tost_decision = function(hypothesis = "EQU",
   return(combined_outcome)
 }
 
+
+s_value = function(x){
+  -1 * log2(x)
+}
+
