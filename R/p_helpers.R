@@ -3,6 +3,7 @@
 #' Functions to help convert p-values that can be reported alongside test results.
 #'
 #' @param p.value The p-value. Must be numeric and between 0 and 1.
+#' @param calc The calculative approach.
 #' @param log_base The base for the logarithm. Default is log base 2.
 #' @param bf Bayes factor.
 #' @param df degrees of freedom.
@@ -49,15 +50,29 @@ s_base = function(base = c("2","10","exp(1)","none")){
 #' @name p_calibrate
 #' @export
 
-minbf_p = function(p.value){
+minbf_pvalue = function(p.value,
+                        calc = c("plog","qlog")){
+  calc = match.arg(calc)
   if(min(p.value) <=0 || max(p.value) >1){
     stop("All elements of p.value must lie in (0,1]!")
   }
-  if(p.value < 1/exp(1)){
-    val = (-exp(1) * p.value * log(p.value, base = exp(1)))
-  } else {
-    val = 1
+
+  if(calc == "plog"){
+    if(p.value < 1/exp(1)){
+      val = (-exp(1) * p.value * log(p.value, base = exp(1)))
+    } else {
+      val = 1
+    }
   }
+
+  if(calc = "qlog"){
+    if(p.value < 1-1/exp(1)){
+      val = (-exp(1) * (1-p.value) * log(1-p.value, base = exp(1)))
+    } else {
+      val = 1
+    }
+  }
+
   names(val) = "minBF[null]"
   return(val)
 }
