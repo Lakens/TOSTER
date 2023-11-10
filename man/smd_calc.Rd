@@ -4,6 +4,8 @@
 \alias{smd_calc}
 \alias{smd_calc.default}
 \alias{smd_calc.formula}
+\alias{boot_smd_calc}
+\alias{boot_smd_calc.formula}
 \title{SMD Calculation}
 \usage{
 smd_calc(
@@ -30,6 +32,21 @@ smd_calc(
   glass = NULL,
   smd_ci = c("nct", "goulet", "t", "z"),
   ...
+)
+
+\method{smd_calc}{formula}(formula, data, subset, na.action, ...)
+
+boot_smd_calc(
+  x,
+  ...,
+  paired = FALSE,
+  var.equal = FALSE,
+  alpha = 0.05,
+  bias_correction = TRUE,
+  rm_correction = FALSE,
+  glass = NULL,
+  boot_ci = c("bca", "perc"),
+  R = 1999
 )
 
 \method{smd_calc}{formula}(formula, data, subset, na.action, ...)
@@ -64,6 +81,10 @@ smd_calc(
 \item{subset}{an optional vector specifying a subset of observations to be used.}
 
 \item{na.action}{a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").}
+
+\item{boot_ci}{type of bootstrap confidence interval. Options include bias-corrected and accelerated (bca) and percentile (perc) confidence intervals.}
+
+\item{R}{number of bootstrap replicates}
 }
 \value{
 A data frame containing the SMD estimates.

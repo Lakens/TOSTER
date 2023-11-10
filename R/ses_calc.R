@@ -3,22 +3,11 @@
 #' `r lifecycle::badge('stable')`
 #'
 #' Standardized effect size (SES), these are the effect sizes not considered SMDs.
-#' @param x a (non-empty) numeric vector of data values.
-#' @param y an optional (non-empty) numeric vector of data values.
-#' @param formula a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.
-#' @param data an optional matrix or data frame (or similar: see model.frame) containing the variables in the formula formula. By default the variables are taken from environment(formula).
-#' @param paired a logical indicating whether you want to calculate a paired test.
-#' @param alpha alpha level (default = 0.05)
+#' @inheritParams wilcox_TOST
+#' @inheritParams boot_t_TOST
 #' @param mu  number indicating the value around which (a-)symmetry (for
 #'   one-sample or paired samples) or shift (for independent samples) is to be
 #'   estimated. See [stats::wilcox.test].
-#' @param ses Standardized effect size. Default is "rb" for rank-biserial
-#' correlation. Options also include "cstat" for concordance probability, or
-#' "odds" for Wilcoxon-Mann-Whitney odds (otherwise known as Agresti's
-#' generalized odds ratio).
-#' @param subset an optional vector specifying a subset of observations to be used.
-#' @param na.action a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").
-#' @param ...  further arguments to be passed to or from methods.
 #' @details For details on the calculations in this function see `vignette("robustTOST")`.
 #' @return A data frame containing the standardized effect size.
 #' @examples
@@ -31,9 +20,9 @@
 
 #ses_calc <- setClass("ses_calc")
 ses_calc <- function(x, ...,
-                   paired = FALSE,
-                   ses = "rb",
-                   alpha = 0.05){
+                     paired = FALSE,
+                     ses = "rb",
+                     alpha = 0.05){
   UseMethod("ses_calc")
 }
 
@@ -137,3 +126,161 @@ ses_calc.formula = function(formula,
 
 }
 
+# Bootstrap -------
+
+#' @rdname ses_calc
+
+#ses_calc <- setClass("ses_calc")
+boot_ses_calc <- function(x, ...,
+                          paired = FALSE,
+                          ses = "rb",
+                          alpha = 0.05,
+                          boot_ci = c("bca","perc"),
+                          R = 1999){
+  UseMethod("boot_ses_calc")
+}
+
+
+
+# @method ses_calc default
+boot_ses_calc.default = function(x,
+                                 y = NULL,
+                                 paired = FALSE,
+                                 ses = c("rb","odds","logodds","cstat"),
+                                 alpha = 0.05,
+                                 boot_ci = c("bca", "perc"),
+                                 R = 1999,
+                                 ...) {
+  boot_ci = match.arg(boot_ci)
+  ses = match.arg(ses)
+  if(paired == TRUE && !missing(y)){
+    i1 <- x
+    i2 <- y
+    data <- data.frame(x = i1, y = i2)
+    data <- na.omit(data)
+    raw_ses = ses_calc(x = data$x,
+                       y = data$y,
+                       paired = paired,
+                       ses = ses,
+                       alpha = alpha)
+
+    boots = c()
+
+    for(i in 1:R){
+      sampler = sample(1:nrow(data), replace = TRUE)
+      res_boot = ses_calc(x = data$x[sampler],
+                          y = data$y[sampler],
+                          paired = paired,
+                          ses = ses,
+                          alpha = alpha)
+      boots = c(boots, res_boot$estimate)
+    }
+
+
+  } else if(!missing(y)){
+
+    i1 <- na.omit(x)
+    i2 <- na.omit(y)
+    data <- data.frame(values = c(i1,i2),
+                       group = c(rep("x",length(i1)),
+                                 rep(i2)))
+
+    raw_ses = ses_calc(x = i1,
+                       y = i2,
+                       paired = paired,
+                       ses = ses,
+                       alpha = alpha)
+
+    boots = c()
+
+    for(i in 1:R){
+      sampler = sample(1:nrow(data), replace = TRUE)
+      boot_dat = data[sampler,]
+      x_boot = subset(boot_dat,
+                      group == "x")
+      y_boot = subset(boot_dat,
+                      group == "y")
+      res_boot = ses_calc(x = x_boot,
+                          y = y_boot,
+                          paired = paired,
+                          ses = ses,
+                          alpha = alpha)
+      boots = c(boots, res_boot$estimate)
+    }
+
+  } else {
+
+    x1 = na.omit(x)
+    n1 = length(x1)
+    raw_ses = ses_calc(x = x1,
+                       paired = paired,
+                       ses = ses,
+                       alpha = alpha)
+
+    boots = c()
+
+    for(i in 1:R){
+      sampler = sample(1:nrow(x1), replace = TRUE)
+      x_boot = x1[sampler]
+
+      res_boot = ses_calc(x = x_boot,
+                          paired = paired,
+                          ses = ses,
+                          alpha = alpha)
+      boots = c(boots, res_boot$estimate)
+    }
+
+  }
+
+  ci = switch(boot_ci,
+              "perc" = perc(boots, alpha),
+              "bca" = bca(boots, alpha))
+
+  effsize = data.frame(
+    estimate = raw_ses$estimate,
+    bias = raw_ses$estimate - median(boots),
+    SE = sd(boots),
+    lower.ci = ci[1],
+    upper.ci = ci[2],
+    conf.level = c((1-alpha)),
+    boot_ci = boot_ci,
+    row.names = c(raw_ses$ses_label)
+  )
+
+
+  return(effsize)
+
+}
+
+#' @rdname ses_calc
+#' @method ses_calc formula
+#' @export
+
+boot_ses_calc.formula = function(formula,
+                                 data,
+                                 subset,
+                                 na.action, ...) {
+
+  if(missing(formula)
+     || (length(formula) != 3L)
+     || (length(attr(terms(formula[-2L]), "term.labels")) != 1L))
+    stop("'formula' missing or incorrect")
+  m <- match.call(expand.dots = FALSE)
+  if(is.matrix(eval(m$data, parent.frame())))
+    m$data <- as.data.frame(data)
+  ## need stats:: for non-standard evaluation
+  m[[1L]] <- quote(stats::model.frame)
+  m$... <- NULL
+  mf <- eval(m, parent.frame())
+  DNAME <- paste(names(mf), collapse = " by ")
+  names(mf) <- NULL
+  response <- attr(attr(mf, "terms"), "response")
+  g <- factor(mf[[-response]])
+  if(nlevels(g) != 2L)
+    stop("grouping factor must have exactly 2 levels")
+  DATA <- setNames(split(mf[[response]], g), c("x", "y"))
+  y <- do.call("boot_ses_calc", c(DATA, list(...)))
+  #y$data.name <- DNAME
+  y
+
+}

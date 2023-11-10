@@ -17,6 +17,7 @@ boot_log_TOST(x, ...)
   eqb = 1.25,
   alpha = 0.05,
   null = 1,
+  boot_ci = c("bca", "perc"),
   R = 1999,
   ...
 )
@@ -41,6 +42,8 @@ boot_log_TOST(x, ...)
 \item{alpha}{alpha level (default = 0.05)}
 
 \item{null}{Null hypothesis value for a two-tailed test (default is 1).}
+
+\item{boot_ci}{type of bootstrap confidence interval. Options include bias-corrected and accelerated (bca) and percentile (perc) confidence intervals.}
 
 \item{R}{number of bootstrap replicates}
 

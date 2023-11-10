@@ -58,9 +58,10 @@ boot_t_test.default <- function(x,
                                                 "minimal.effect"),
                                 mu = 0,
                                 alpha = 0.05,
+                                boot_ci = c("bca", "perc"),
                                 R = 1999, ...){
   alternative = match.arg(alternative)
-
+  boot_ci = match.arg(boot_ci)
 
   if(!missing(alpha) && (length(alpha) != 1 || !is.finite(alpha) ||
                               alpha < 0 || alpha > 1)) {
@@ -255,31 +256,42 @@ boot_t_test.default <- function(x,
 
     boot.pval <- mean(TSTAT < tstat)
 
-    boot.cint <- quantile(m_vec, c(alpha,1-alpha))
+    boot.cint <- switch(boot_ci,
+                        "bca" = bca(m_vec, alpha*2),
+                        "perc" = perc(m_vec, alpha*2))
+
   }
 
   if(alternative == "greater") {
     boot.pval <- mean(TSTAT > tstat)
-    boot.cint <- quantile(m_vec, c(alpha,1-alpha))
+    boot.cint <- switch(boot_ci,
+                        "bca" = bca(m_vec, alpha*2),
+                        "perc" = perc(m_vec, alpha*2))
   }
 
   if(alternative == "two.sided"){
     boot.pval <- 2*min(mean(TSTAT <= tstat), mean(TSTAT > tstat))
-    boot.cint <- quantile(m_vec, c(alpha/2,1-alpha/2))
+    boot.cint <- switch(boot_ci,
+                        "bca" = bca(m_vec, alpha),
+                        "perc" = perc(m_vec, alpha))
   }
 
   if(alternative == "equivalence") {
     p_l = mean(TSTAT > tstat_l)
     p_u = mean(TSTAT < tstat_u)
     boot.pval <- max(p_l, p_u)
-    boot.cint <- quantile(m_vec, c(alpha,1-alpha))
+    boot.cint <- switch(boot_ci,
+                        "bca" = bca(m_vec, alpha*2),
+                        "perc" = perc(m_vec, alpha*2))
   }
 
   if(alternative == "minimal.effect") {
     p_l = mean(TSTAT < tstat_l)
     p_u = mean(TSTAT > tstat_u)
     boot.pval <- min(p_l,p_u)
-    boot.cint <- quantile(m_vec, c(alpha,1-alpha))
+    boot.cint <- switch(boot_ci,
+                        "bca" = bca(m_vec, alpha*2),
+                        "perc" = perc(m_vec, alpha*2))
   }
 
   boot.se = sd(m_vec, na.rm = TRUE)

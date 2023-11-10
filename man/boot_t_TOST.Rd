@@ -63,6 +63,8 @@ boot_t_TOST(x, ...)
 \item{subset}{an optional vector specifying a subset of observations to be used.}
 
 \item{na.action}{a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").}
+
+\item{boot_ci}{type of bootstrap confidence interval. Options include bias-corrected and accelerated (bca) and percentile (perc) confidence intervals.}
 }
 \value{
 An S3 object of class

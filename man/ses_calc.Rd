@@ -4,6 +4,8 @@
 \alias{ses_calc}
 \alias{ses_calc.default}
 \alias{ses_calc.formula}
+\alias{boot_ses_calc}
+\alias{boot_ses_calc.formula}
 \title{SES Calculation}
 \usage{
 ses_calc(x, ..., paired = FALSE, ses = "rb", alpha = 0.05)
@@ -12,10 +14,22 @@ ses_calc(x, ..., paired = FALSE, ses = "rb", alpha = 0.05)
   x,
   y = NULL,
   paired = FALSE,
-  ses = c("rb", "odds", "cstat"),
+  ses = c("rb", "odds", "logodds", "cstat"),
   alpha = 0.05,
   mu = 0,
   ...
+)
+
+\method{ses_calc}{formula}(formula, data, subset, na.action, ...)
+
+boot_ses_calc(
+  x,
+  ...,
+  paired = FALSE,
+  ses = "rb",
+  alpha = 0.05,
+  boot_ci = c("bca", "perc"),
+  R = 1999
 )
 
 \method{ses_calc}{formula}(formula, data, subset, na.action, ...)
@@ -25,7 +39,7 @@ ses_calc(x, ..., paired = FALSE, ses = "rb", alpha = 0.05)
 
 \item{...}{further arguments to be passed to or from methods.}
 
-\item{paired}{a logical indicating whether you want to calculate a paired test.}
+\item{paired}{a logical indicating whether you want a paired t-test.}
 
 \item{ses}{Standardized effect size. Default is "rb" for rank-biserial
 correlation. Options also include "cstat" for concordance probability, or
@@ -47,6 +61,10 @@ estimated. See \link[stats:wilcox.test]{stats::wilcox.test}.}
 \item{subset}{an optional vector specifying a subset of observations to be used.}
 
 \item{na.action}{a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").}
+
+\item{boot_ci}{type of bootstrap confidence interval. Options include bias-corrected and accelerated (bca) and percentile (perc) confidence intervals.}
+
+\item{R}{number of bootstrap replicates}
 }
 \value{
 A data frame containing the standardized effect size.

@@ -4,6 +4,7 @@
 #'
 #' A function for a bootstrap method for TOST with all types of t-tests.
 #' @param R number of bootstrap replicates
+#' @param boot_ci type of bootstrap confidence interval. Options include bias-corrected and accelerated (bca) and percentile (perc) confidence intervals.
 #' @inheritParams t_TOST
 #' @return An S3 object of class
 #'   `"TOSTt"` is returned containing the following slots:
@@ -376,8 +377,12 @@ boot_t_TOST.default <- function(x,
   }
 
   boot.se = sd(m_vec)
-  boot.cint <- quantile(m_vec, c(alpha, 1 - alpha ))
-  d.cint <- quantile(d_vec, c(alpha, 1 - alpha ))
+  boot.cint <- switch(boot_ci,
+                      "bca" = bca(m_vec, alpha*2),
+                      "perc" = perc(m_vec, alpha*2))
+  d.cint <- switch(boot_ci,
+                   "bca" = bca(d_vec, alpha*2),
+                   "perc" = perc(d_vec, alpha*2))
   d.se = sd(d_vec)
 
   TOST = nullTOST$TOST

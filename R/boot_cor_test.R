@@ -43,8 +43,10 @@ boot_cor_test <- function(x,
                                      "winsorized", "bendpercent"),
                           alpha = 0.05,
                           null = 0,
+                          boot_ci = c("bca","perc"),
                           R = 1999,
                           ...) {
+  boot_ci = match.arg(boot_ci)
   DNAME <- paste(deparse(substitute(x)), "and", deparse(substitute(y)))
   alternative = match.arg(alternative)
 
@@ -115,9 +117,13 @@ boot_cor_test <- function(x,
     data <- matrix(sample(n, size=n*nboot, replace=TRUE), nrow=nboot)
     bvec <- apply(data, 1, .corboot, x, y, method = method, ...) # get bootstrap results corr
   }
-
-
-  boot.cint = quantile(bvec, c((1 - ci) / 2, 1 - (1 - ci) / 2))
+  alpha2 = ifelse(alternative != "two.sided",
+                  alpha*2,
+                  alpha)
+  boot.cint = switch(boot_ci,
+                     "bca" = bca(bvec, alpha2),
+                     "perc" = perc(bvec, alpha2))
+  #quantile(bvec, c((1 - ci) / 2, 1 - (1 - ci) / 2))
   attr(boot.cint, "conf.level") <- ci
   if(alternative == "two.sided"){
     phat <- (sum(bvec < null.value)+.5*sum(bvec==null.value))/nboot

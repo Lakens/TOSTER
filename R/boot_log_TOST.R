@@ -62,8 +62,10 @@ boot_log_TOST.default <- function(x,
                                 eqb = 1.25,
                                 alpha = 0.05,
                                 null = 1,
+                                boot_ci = c("bca", "perc"),
                                 R = 1999, ...){
   hypothesis = match.arg(hypothesis)
+  boot_ci = match.arg(boot_ci)
   if(!missing(null) && (length(null) != 1 || is.na(null))) {
     stop("'null' must be a single number")
   }
@@ -336,8 +338,12 @@ if(!paired){
   }
 
   boot.se = sd(m_vec)
-  boot.cint <- quantile(m_vec, c(alpha, 1 - alpha ))
-  d.cint <- quantile(d_vec, c(alpha, 1 - alpha ))
+  boot.cint <- switch(boot_ci,
+                      "bca" = bca(m_vec, alpha*2),
+                      "perc" = perc(m_vec, alpha*2))
+  d.cint <- switch(boot_ci,
+                   "bca" = bca(d_vec, alpha*2),
+                   "perc" = perc(d_vec, alpha*2))
   d.se = sd(d_vec)
 
   TOST = nullTOST$TOST

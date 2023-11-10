@@ -3,21 +3,9 @@
 #' `r lifecycle::badge('stable')`
 #'
 #' A function to only calculate standardized mean differences.
-#' @param x a (non-empty) numeric vector of data values.
-#' @param y an optional (non-empty) numeric vector of data values.
-#' @param formula a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.
-#' @param data an optional matrix or data frame (or similar: see model.frame) containing the variables in the formula formula. By default the variables are taken from environment(formula).
-#' @param paired a logical indicating whether you want a paired t-test.
-#' @param var.equal  a logical variable indicating whether to treat the two variances as being equal. If TRUE then the pooled variance is used to estimate the variance otherwise the Welch (or Satterthwaite) approximation to the degrees of freedom is used.
-#' @param alpha alpha level (default = 0.05)
-#' @param bias_correction Apply Hedges' correction for bias (default is TRUE).
-#' @param rm_correction Repeated measures correction to make standardized mean difference Cohen's d(rm). This only applies to repeated/paired samples. Default is FALSE.
+#' @inheritParams t_TOST
+#' @inheritParams boot_t_TOST
 #' @param mu Null value. Deviating from zero will give the x-y-mu.
-#' @param glass A option to calculate Glass's delta as an alternative to Cohen's d type SMD. Default is NULL to not calculate Glass's delta, "glass1" will use the first group's SD as the denominator whereas "glass2" will use the 2nd group's SD.
-#' @param smd_ci Method for calculating SMD confidence intervals. Methods include Goulet, noncentral t (nct), central t (t), and normal method (z).
-#' @param subset an optional vector specifying a subset of observations to be used.
-#' @param na.action a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").
-#' @param ...  further arguments to be passed to or from methods.
 #' @details For details on the calculations in this function see vignette("SMD_calcs").
 #' @return A data frame containing the SMD estimates.
 #' @examples
@@ -234,19 +222,37 @@ smd_calc.formula = function(formula,
 
 # Bootstrap -------
 
+#' @rdname smd_calc
+
+#smd_calc <- setClass("smd_calc")
+boot_smd_calc <- function(x, ...,
+                     paired = FALSE,
+                     var.equal = FALSE,
+                     alpha = 0.05,
+                     bias_correction = TRUE,
+                     rm_correction = FALSE,
+                     glass = NULL,
+                     boot_ci = c("bca","perc"),
+                     R = 1999){
+  UseMethod("boot_smd_calc")
+}
+
+
+
 # @method smd_calc default
 boot_smd_calc.default = function(x,
-                            y = NULL,
-                            paired = FALSE,
-                            var.equal = FALSE,
-                            alpha = 0.05,
-                            mu = 0,
-                            bias_correction = TRUE,
-                            rm_correction = FALSE,
-                            glass = NULL,
-                            ...) {
-
-
+                                 y = NULL,
+                                 paired = FALSE,
+                                 var.equal = FALSE,
+                                 alpha = 0.05,
+                                 mu = 0,
+                                 bias_correction = TRUE,
+                                 rm_correction = FALSE,
+                                 glass = NULL,
+                                 boot_ci = c("bca", "perc"),
+                                 R = 1999,
+                                 ...) {
+  boot_ci = match.arg(boot_ci)
   if(paired == TRUE && !missing(y)){
     i1 <- x
     i2 <- y
@@ -356,12 +362,18 @@ boot_smd_calc.default = function(x,
 
   }
 
+  ci = switch(boot_ci,
+              "perc" = perc(boots, alpha),
+              "bca" = bca(boots, alpha))
+
   effsize = data.frame(
     estimate = raw_smd$estimate,
+    bias = raw_smd$estimate - median(boots),
     SE = sd(boots),
-    lower.ci = quantile(boots,alpha),
-    upper.ci = quantile(boots,1-alpha),
+    lower.ci = ci[1],
+    upper.ci = ci[2],
     conf.level = c((1-alpha)),
+    boot_ci = boot_ci,
     row.names = c(raw_smd$smd_label)
   )
 
@@ -370,3 +382,35 @@ boot_smd_calc.default = function(x,
 
 }
 
+#' @rdname smd_calc
+#' @method smd_calc formula
+#' @export
+
+boot_smd_calc.formula = function(formula,
+                            data,
+                            subset,
+                            na.action, ...) {
+
+  if(missing(formula)
+     || (length(formula) != 3L)
+     || (length(attr(terms(formula[-2L]), "term.labels")) != 1L))
+    stop("'formula' missing or incorrect")
+  m <- match.call(expand.dots = FALSE)
+  if(is.matrix(eval(m$data, parent.frame())))
+    m$data <- as.data.frame(data)
+  ## need stats:: for non-standard evaluation
+  m[[1L]] <- quote(stats::model.frame)
+  m$... <- NULL
+  mf <- eval(m, parent.frame())
+  DNAME <- paste(names(mf), collapse = " by ")
+  names(mf) <- NULL
+  response <- attr(attr(mf, "terms"), "response")
+  g <- factor(mf[[-response]])
+  if(nlevels(g) != 2L)
+    stop("grouping factor must have exactly 2 levels")
+  DATA <- setNames(split(mf[[response]], g), c("x", "y"))
+  y <- do.call("boot_smd_calc", c(DATA, list(...)))
+  #y$data.name <- DNAME
+  y
+
+}
