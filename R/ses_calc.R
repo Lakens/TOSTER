@@ -46,7 +46,7 @@ ses_calc <- function(x, ...,
 ses_calc.default = function(x,
                           y = NULL,
                           paired = FALSE,
-                          ses = c("rb","odds","cstat"),
+                          ses = c("rb","odds","logodds","cstat"),
                           alpha = 0.05,
                           mu = 0,
                           ...) {
@@ -89,6 +89,7 @@ ses_calc.default = function(x,
   ses_name = switch(ses,
                     "rb" = "Rank-Biserial Correlation",
                     "odds" = "WMW Odds",
+                    "logodds" = "WMW Log-Odds",
                     "cstat" = "Concordance")
 
   effsize = data.frame(

@@ -232,3 +232,141 @@ smd_calc.formula = function(formula,
 
 }
 
+# Bootstrap -------
+
+# @method smd_calc default
+boot_smd_calc.default = function(x,
+                            y = NULL,
+                            paired = FALSE,
+                            var.equal = FALSE,
+                            alpha = 0.05,
+                            mu = 0,
+                            bias_correction = TRUE,
+                            rm_correction = FALSE,
+                            glass = NULL,
+                            ...) {
+
+
+  if(paired == TRUE && !missing(y)){
+    i1 <- x
+    i2 <- y
+    data <- data.frame(x = i1, y = i2)
+    data <- na.omit(data)
+    raw_smd = smd_calc(x = data$x,
+                       y = data$y,
+                       paired = paired,
+                       var.equal = var.equal,
+                       alpha = alpha,
+                       mu = mu,
+                       bias_correction = bias_correction,
+                       rm_correction = rm_correction,
+                       glass = glass,
+                       smd_ci = "z")
+
+    boots = c()
+
+    for(i in 1:R){
+      sampler = sample(1:nrow(data), replace = TRUE)
+      res_boot = smd_calc(x = data$x[sampler],
+                         y = data$y[sampler],
+                         paired = paired,
+                         var.equal = var.equal,
+                         alpha = alpha,
+                         mu = mu,
+                         bias_correction = bias_correction,
+                         rm_correction = rm_correction,
+                         glass = glass,
+                         smd_ci = "z")
+      boots = c(boots, res_boot$estimate)
+    }
+
+
+  } else if(!missing(y)){
+
+    i1 <- na.omit(x)
+    i2 <- na.omit(y)
+    data <- data.frame(values = c(i1,i2),
+                       group = c(rep("x",length(i1)),
+                                      rep(i2)))
+
+    raw_smd = smd_calc(x = i1,
+                       y = i2,
+                       paired = paired,
+                       var.equal = var.equal,
+                       alpha = alpha,
+                       mu = mu,
+                       bias_correction = bias_correction,
+                       rm_correction = rm_correction,
+                       glass = glass,
+                       smd_ci = "z")
+
+    boots = c()
+
+    for(i in 1:R){
+      sampler = sample(1:nrow(data), replace = TRUE)
+      boot_dat = data[sampler,]
+      x_boot = subset(boot_dat,
+                      group == "x")
+      y_boot = subset(boot_dat,
+                      group == "y")
+      res_boot = smd_calc(x = x_boot,
+                          y = y_boot,
+                          paired = paired,
+                          var.equal = var.equal,
+                          alpha = alpha,
+                          mu = mu,
+                          bias_correction = bias_correction,
+                          rm_correction = rm_correction,
+                          glass = glass,
+                          smd_ci = "z")
+      boots = c(boots, res_boot$estimate)
+    }
+
+  } else {
+
+    x1 = na.omit(x)
+    n1 = length(x1)
+    raw_smd = smd_calc(x = x1,
+                       paired = paired,
+                       var.equal = var.equal,
+                       alpha = alpha,
+                       mu = mu,
+                       bias_correction = bias_correction,
+                       rm_correction = rm_correction,
+                       glass = glass,
+                       smd_ci = "z")
+
+    boots = c()
+
+    for(i in 1:R){
+      sampler = sample(1:nrow(x1), replace = TRUE)
+      x_boot = x1[sampler]
+
+      res_boot = smd_calc(x = x_boot,
+                          paired = paired,
+                          var.equal = var.equal,
+                          alpha = alpha,
+                          mu = mu,
+                          bias_correction = bias_correction,
+                          rm_correction = rm_correction,
+                          glass = glass,
+                          smd_ci = "z")
+      boots = c(boots, res_boot$estimate)
+    }
+
+  }
+
+  effsize = data.frame(
+    estimate = raw_smd$estimate,
+    SE = sd(boots),
+    lower.ci = quantile(boots,alpha),
+    upper.ci = quantile(boots,1-alpha),
+    conf.level = c((1-alpha)),
+    row.names = c(raw_smd$smd_label)
+  )
+
+
+  return(effsize)
+
+}
+
