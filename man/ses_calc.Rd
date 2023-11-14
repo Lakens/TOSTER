@@ -28,7 +28,7 @@ boot_ses_calc(
   paired = FALSE,
   ses = "rb",
   alpha = 0.05,
-  boot_ci = c("bca", "perc"),
+  boot_ci = c("basic", "perc"),
   R = 1999
 )
 
@@ -62,7 +62,7 @@ estimated. See \link[stats:wilcox.test]{stats::wilcox.test}.}
 
 \item{na.action}{a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").}
 
-\item{boot_ci}{type of bootstrap confidence interval. Options include bias-corrected and accelerated (bca) and percentile (perc) confidence intervals.}
+\item{boot_ci}{type of bootstrap confidence interval. Options include studentized (stud), empirical/basic (basic) and percentile (perc) confidence intervals.}
 
 \item{R}{number of bootstrap replicates}
 }

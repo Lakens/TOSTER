@@ -58,7 +58,7 @@ boot_t_test.default <- function(x,
                                                 "minimal.effect"),
                                 mu = 0,
                                 alpha = 0.05,
-                                boot_ci = c("bca", "perc"),
+                                boot_ci = c("stud","basic","perc"),
                                 R = 1999, ...){
   alternative = match.arg(alternative)
   boot_ci = match.arg(boot_ci)
@@ -87,6 +87,7 @@ boot_t_test.default <- function(x,
                            alpha = 0.05)
   mu = null_test$null.value
   m_vec <- rep(NA, times=length(R)) # mean difference vector
+  m_se_vec <- rep(NA, times=length(R)) # mean difference vector
   if(alternative %in% c("equivalence","minimal.effect")){
     conf.level = 1-alpha*2
   } else {
@@ -151,6 +152,7 @@ boot_t_test.default <- function(x,
       dat = X[i,]
 
       m_vec[i] <- mean(dat, na.rm=TRUE) # mean difference vector
+      m_se_vec[i] <- sd(dat, na.rm = TRUE)/sqrt(length(dat), na.rm=TRUE)
 
     }
   }
@@ -199,6 +201,7 @@ boot_t_test.default <- function(x,
         dat_y = Y[i,]#dat[(nx+1):(nx+ny)]
 
         m_vec[i] <- mean(dat_x, na.rm=TRUE) - mean(dat_y,na.rm=TRUE)  # mean difference vector
+        m_se_vec[i] <- sqrt(sd(dat_x, na.rm=TRUE)^2/length(na.rm(dat_x)) + sd(dat_y, na.rm=TRUE)^2/length(na.rm(dat_y)))
 
       }
     }else{
@@ -225,6 +228,7 @@ boot_t_test.default <- function(x,
         dat_y = Y[i,]#dat[(nx+1):(nx+ny)]
 
         m_vec[i] <- mean(dat_x, na.rm=TRUE) - mean(dat_y,na.rm=TRUE)  # mean difference vector
+        m_se_vec[i] <- sqrt(sd(dat_x, na.rm=TRUE)^2/length(na.rm(dat_x)) + sd(dat_y, na.rm=TRUE)^2/length(na.rm(dat_y)))
 
       }
     }
@@ -257,7 +261,12 @@ boot_t_test.default <- function(x,
     boot.pval <- mean(TSTAT < tstat)
 
     boot.cint <- switch(boot_ci,
-                        "bca" = bca(m_vec, alpha*2),
+                        "stud" = stud(m_vec,
+                                      se = m_se_vec,
+                                      t0 = diff,
+                                      se0 = null_test$stderr,
+                                      alpha*2),
+                        "basic" = basic(m_vec, t0 = diff, alpha*2),
                         "perc" = perc(m_vec, alpha*2))
 
   }
@@ -265,14 +274,24 @@ boot_t_test.default <- function(x,
   if(alternative == "greater") {
     boot.pval <- mean(TSTAT > tstat)
     boot.cint <- switch(boot_ci,
-                        "bca" = bca(m_vec, alpha*2),
+                        "stud" = stud(m_vec,
+                                      se = m_se_vec,
+                                      t0 = diff,
+                                      se0 = null_test$stderr,
+                                      alpha*2),
+                        "basic" = basic(m_vec, t0 = diff, alpha*2),
                         "perc" = perc(m_vec, alpha*2))
   }
 
   if(alternative == "two.sided"){
     boot.pval <- 2*min(mean(TSTAT <= tstat), mean(TSTAT > tstat))
     boot.cint <- switch(boot_ci,
-                        "bca" = bca(m_vec, alpha),
+                        "stud" = stud(m_vec,
+                                      se = m_se_vec,
+                                      t0 = diff,
+                                      se0 = null_test$stderr,
+                                      alpha),
+                        "basic" = basic(m_vec, t0 = diff, alpha),
                         "perc" = perc(m_vec, alpha))
   }
 
@@ -281,7 +300,12 @@ boot_t_test.default <- function(x,
     p_u = mean(TSTAT < tstat_u)
     boot.pval <- max(p_l, p_u)
     boot.cint <- switch(boot_ci,
-                        "bca" = bca(m_vec, alpha*2),
+                        "stud" = stud(m_vec,
+                                      se = m_se_vec,
+                                      t0 = diff,
+                                      se0 = null_test$stderr,
+                                      alpha*2),
+                        "basic" = basic(m_vec, t0 = diff, alpha*2),
                         "perc" = perc(m_vec, alpha*2))
   }
 
@@ -290,7 +314,12 @@ boot_t_test.default <- function(x,
     p_u = mean(TSTAT > tstat_u)
     boot.pval <- min(p_l,p_u)
     boot.cint <- switch(boot_ci,
-                        "bca" = bca(m_vec, alpha*2),
+                        "stud" = stud(m_vec,
+                                      se = m_se_vec,
+                                      t0 = diff,
+                                      se0 = null_test$stderr,
+                                      alpha*2),
+                        "basic" = basic(m_vec, t0 = diff, alpha*2),
                         "perc" = perc(m_vec, alpha*2))
   }
 

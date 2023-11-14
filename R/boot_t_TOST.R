@@ -4,7 +4,7 @@
 #'
 #' A function for a bootstrap method for TOST with all types of t-tests.
 #' @param R number of bootstrap replicates
-#' @param boot_ci type of bootstrap confidence interval. Options include bias-corrected and accelerated (bca) and percentile (perc) confidence intervals.
+#' @param boot_ci type of bootstrap confidence interval. Options include studentized (stud), empirical/basic (basic) and percentile (perc) confidence intervals.
 #' @inheritParams t_TOST
 #' @return An S3 object of class
 #'   `"TOSTt"` is returned containing the following slots:
@@ -59,7 +59,10 @@ boot_t_TOST.default <- function(x,
                                 alpha = 0.05,
                                 bias_correction = TRUE,
                                 mu = 0,
-                                R = 1999, ...){
+                                R = 1999,
+                                boot_ci = c("stud", "basic", "perc"),
+                                ...){
+  boot_ci = match.arg(boot_ci)
 
   if(!missing(mu) && (length(mu) != 1 || is.na(mu))) {
     stop("'mu' must be a single number")
@@ -121,6 +124,8 @@ boot_t_TOST.default <- function(x,
   }
   d_vec <- rep(NA, times=length(R)) # smd vector
   m_vec <- rep(NA, times=length(R)) # mean difference vector
+  d_se_vec <- rep(NA, times=length(R)) # smd vector SE
+  m_se_vec <- rep(NA, times=length(R)) # mean difference vector SE
   #t_vec <- rep(NA, times=length(R)) # t-test vector
   #tl_vec <- rep(NA, times=length(R)) # lower bound vector
   #tu_vec <- rep(NA, times=length(R)) # upper bound vector
@@ -203,6 +208,8 @@ boot_t_TOST.default <- function(x,
 
       d_vec[i] <- runTOST$smd$d # smd vector
       m_vec[i] <- runTOST$effsize$estimate[1] # mean difference vector
+      d_se_vec[i] <- runTOST$effsize$SE[2] # smd vector
+      m_se_vec[i] <- runTOST$effsize$SE[1] # mean difference vector
       #t_vec[i] <- runTOST$TOST$t[1] - mx # t-test vector
       #tl_vec[i] <- runTOST$TOST$t[2] - mx # lower bound vector
       #tu_vec[i] <- runTOST$TOST$t[3] - mx # upper bound vector
@@ -303,6 +310,8 @@ boot_t_TOST.default <- function(x,
 
         d_vec[i] <- runTOST$smd$d # smd vector
         m_vec[i] <- runTOST$effsize$estimate[1] # mean difference vector
+        d_se_vec[i] <- runTOST$effsize$SE[2] # smd vector
+        m_se_vec[i] <- runTOST$effsize$SE[1] # mean difference vector
         #t_vec[i] <- runTOST$TOST$t[1] # t-test vector
         #tl_vec[i] <- runTOST$TOST$t[2] # lower bound vector
         #tu_vec[i] <- runTOST$TOST$t[3] # upper bound vector
@@ -344,6 +353,8 @@ boot_t_TOST.default <- function(x,
 
         d_vec[i] <- runTOST$smd$d # smd vector
         m_vec[i] <- runTOST$effsize$estimate[1] # mean difference vector
+        d_se_vec[i] <- runTOST$effsize$SE[2] # smd vector
+        m_se_vec[i] <- runTOST$effsize$SE[1] # mean difference vector
         #t_vec[i] <- runTOST$TOST$t[1] # t-test vector
         #tl_vec[i] <- runTOST$TOST$t[2] # lower bound vector
         #tu_vec[i] <- runTOST$TOST$t[3] # upper bound vector
@@ -378,10 +389,20 @@ boot_t_TOST.default <- function(x,
 
   boot.se = sd(m_vec)
   boot.cint <- switch(boot_ci,
-                      "bca" = bca(m_vec, alpha*2),
+                      "stud" = stud(m_vec,
+                                    se = m_se_vec,
+                                    t0 = nullTOST$effsize$estimate[1],
+                                    se0 = nullTOST$effsize$SE[1],
+                                    alpha*2),
+                      "basic" = basic(m_vec, t0 = nullTOST$effsize$estimate[1], alpha*2),
                       "perc" = perc(m_vec, alpha*2))
   d.cint <- switch(boot_ci,
-                   "bca" = bca(d_vec, alpha*2),
+                   "stud" = stud(d_vec,
+                                 se = d_se_vec,
+                                 t0 = nullTOST$effsize$estimate[2],
+                                 se0 = nullTOST$effsize$SE[2],
+                                 alpha*2),
+                   "basic" = basic(d_vec,t0 = nullTOST$effsize$estimate[2], alpha*2),
                    "perc" = perc(d_vec, alpha*2))
   d.se = sd(d_vec)
 

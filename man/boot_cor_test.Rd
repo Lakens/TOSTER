@@ -11,7 +11,7 @@ boot_cor_test(
   method = c("pearson", "kendall", "spearman", "winsorized", "bendpercent"),
   alpha = 0.05,
   null = 0,
-  boot_ci = c("bca", "perc"),
+  boot_ci = c("basic", "perc"),
   R = 1999,
   ...
 )
@@ -29,7 +29,7 @@ boot_cor_test(
 
 \item{null}{a number indicating the null hypothesis. Default is a correlation of zero.}
 
-\item{boot_ci}{type of bootstrap confidence interval. Options include bias-corrected and accelerated (bca) and percentile (perc) confidence intervals.}
+\item{boot_ci}{type of bootstrap confidence interval. Options include studentized (stud), empirical/basic (basic) and percentile (perc) confidence intervals.}
 
 \item{R}{number of bootstrap replicates}
 

@@ -232,7 +232,7 @@ boot_smd_calc <- function(x, ...,
                      bias_correction = TRUE,
                      rm_correction = FALSE,
                      glass = NULL,
-                     boot_ci = c("bca","perc"),
+                     boot_ci = c("stud","basic","perc"),
                      R = 1999){
   UseMethod("boot_smd_calc")
 }
@@ -249,7 +249,7 @@ boot_smd_calc.default = function(x,
                                  bias_correction = TRUE,
                                  rm_correction = FALSE,
                                  glass = NULL,
-                                 boot_ci = c("bca", "perc"),
+                                 boot_ci = c("stud","basic","perc"),
                                  R = 1999,
                                  ...) {
   boot_ci = match.arg(boot_ci)
@@ -270,6 +270,7 @@ boot_smd_calc.default = function(x,
                        smd_ci = "z")
 
     boots = c()
+    boots_se = c()
 
     for(i in 1:R){
       sampler = sample(1:nrow(data), replace = TRUE)
@@ -284,6 +285,7 @@ boot_smd_calc.default = function(x,
                          glass = glass,
                          smd_ci = "z")
       boots = c(boots, res_boot$estimate)
+      boots_se = c(boots_se, res_boot$SE)
     }
 
 
@@ -307,7 +309,7 @@ boot_smd_calc.default = function(x,
                        smd_ci = "z")
 
     boots = c()
-
+    boots_se = c()
     for(i in 1:R){
       sampler = sample(1:nrow(data), replace = TRUE)
       boot_dat = data[sampler,]
@@ -326,6 +328,7 @@ boot_smd_calc.default = function(x,
                           glass = glass,
                           smd_ci = "z")
       boots = c(boots, res_boot$estimate)
+      boots_se = c(boots_se, res_boot$SE)
     }
 
   } else {
@@ -343,7 +346,7 @@ boot_smd_calc.default = function(x,
                        smd_ci = "z")
 
     boots = c()
-
+    boots_se = c()
     for(i in 1:R){
       sampler = sample(1:nrow(x1), replace = TRUE)
       x_boot = x1[sampler]
@@ -358,13 +361,17 @@ boot_smd_calc.default = function(x,
                           glass = glass,
                           smd_ci = "z")
       boots = c(boots, res_boot$estimate)
+      boots_se = c(boots_se, res_boot$SE)
     }
 
   }
 
   ci = switch(boot_ci,
+              "stud" = stud(boots, boots_se,
+                            se0=raw_smd$SE, t0 = raw_smd$estimate,
+                            alpha),
               "perc" = perc(boots, alpha),
-              "bca" = bca(boots, alpha))
+              "basic" = basic(boots, t0 = raw_smd$estimate, alpha))
 
   effsize = data.frame(
     estimate = raw_smd$estimate,

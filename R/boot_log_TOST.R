@@ -6,6 +6,7 @@
 #' A function for a bootstrap method for TOST with all types of t-tests.
 #' @inheritParams boot_t_TOST
 #' @inheritParams log_TOST
+#' @param boot_ci type of bootstrap confidence interval. Options include empirical/basic (basic) and percentile (perc) confidence intervals.
 #' @return An S3 object of class
 #'   `"TOSTt"` is returned containing the following slots:
 #'
@@ -62,7 +63,7 @@ boot_log_TOST.default <- function(x,
                                 eqb = 1.25,
                                 alpha = 0.05,
                                 null = 1,
-                                boot_ci = c("bca", "perc"),
+                                boot_ci = c("basic", "perc"),
                                 R = 1999, ...){
   hypothesis = match.arg(hypothesis)
   boot_ci = match.arg(boot_ci)
@@ -339,10 +340,10 @@ if(!paired){
 
   boot.se = sd(m_vec)
   boot.cint <- switch(boot_ci,
-                      "bca" = bca(m_vec, alpha*2),
+                      "basic" = basic(m_vec, t0 = nullTOST$effsize$estimate[1], alpha*2),
                       "perc" = perc(m_vec, alpha*2))
   d.cint <- switch(boot_ci,
-                   "bca" = bca(d_vec, alpha*2),
+                   "basic" = basic(d_vec, t0 = nullTOST$effsize$estimate[2], alpha*2),
                    "perc" = perc(d_vec, alpha*2))
   d.se = sd(d_vec)
 

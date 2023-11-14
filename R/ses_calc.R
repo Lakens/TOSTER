@@ -5,6 +5,7 @@
 #' Standardized effect size (SES), these are the effect sizes not considered SMDs.
 #' @inheritParams wilcox_TOST
 #' @inheritParams boot_t_TOST
+#' @param boot_ci type of bootstrap confidence interval. Options include studentized (stud), empirical/basic (basic) and percentile (perc) confidence intervals.
 #' @param mu  number indicating the value around which (a-)symmetry (for
 #'   one-sample or paired samples) or shift (for independent samples) is to be
 #'   estimated. See [stats::wilcox.test].
@@ -135,7 +136,7 @@ boot_ses_calc <- function(x, ...,
                           paired = FALSE,
                           ses = "rb",
                           alpha = 0.05,
-                          boot_ci = c("bca","perc"),
+                          boot_ci = c("basic","perc"),
                           R = 1999){
   UseMethod("boot_ses_calc")
 }
@@ -148,7 +149,7 @@ boot_ses_calc.default = function(x,
                                  paired = FALSE,
                                  ses = c("rb","odds","logodds","cstat"),
                                  alpha = 0.05,
-                                 boot_ci = c("bca", "perc"),
+                                 boot_ci = c("basic", "perc"),
                                  R = 1999,
                                  ...) {
   boot_ci = match.arg(boot_ci)
@@ -234,7 +235,7 @@ boot_ses_calc.default = function(x,
 
   ci = switch(boot_ci,
               "perc" = perc(boots, alpha),
-              "bca" = bca(boots, alpha))
+              "basic" = basic(boots, t0 = raw_ses$estimate, alpha))
 
   effsize = data.frame(
     estimate = raw_ses$estimate,

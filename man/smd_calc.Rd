@@ -45,7 +45,7 @@ boot_smd_calc(
   bias_correction = TRUE,
   rm_correction = FALSE,
   glass = NULL,
-  boot_ci = c("bca", "perc"),
+  boot_ci = c("stud", "basic", "perc"),
   R = 1999
 )
 
@@ -82,7 +82,7 @@ boot_smd_calc(
 
 \item{na.action}{a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").}
 
-\item{boot_ci}{type of bootstrap confidence interval. Options include bias-corrected and accelerated (bca) and percentile (perc) confidence intervals.}
+\item{boot_ci}{type of bootstrap confidence interval. Options include studentized (stud), empirical/basic (basic) and percentile (perc) confidence intervals.}
 
 \item{R}{number of bootstrap replicates}
 }

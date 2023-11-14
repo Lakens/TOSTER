@@ -22,6 +22,7 @@ boot_t_TOST(x, ...)
   bias_correction = TRUE,
   mu = 0,
   R = 1999,
+  boot_ci = c("stud", "basic", "perc"),
   ...
 )
 
@@ -56,6 +57,8 @@ boot_t_TOST(x, ...)
 
 \item{R}{number of bootstrap replicates}
 
+\item{boot_ci}{type of bootstrap confidence interval. Options include studentized (stud), empirical/basic (basic) and percentile (perc) confidence intervals.}
+
 \item{formula}{a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.}
 
 \item{data}{an optional matrix or data frame (or similar: see model.frame) containing the variables in the formula formula. By default the variables are taken from environment(formula).}
@@ -63,8 +66,6 @@ boot_t_TOST(x, ...)
 \item{subset}{an optional vector specifying a subset of observations to be used.}
 
 \item{na.action}{a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").}
-
-\item{boot_ci}{type of bootstrap confidence interval. Options include bias-corrected and accelerated (bca) and percentile (perc) confidence intervals.}
 }
 \value{
 An S3 object of class
