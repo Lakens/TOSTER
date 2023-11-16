@@ -53,66 +53,66 @@ tost_decision = function(hypothesis = "EQU",
 # Bootstrap CI functions ------
 
 ## only an approximation... rather useless
-bca <- function(vector, alpha = 0.05){
+bca <- function(boots_est, alpha = 0.05){
   conf.level = 1-alpha
-  if(var(vector)==0){
-    lower <- mean(vector)
-    upper <- mean(vector)
+  if(var(boots_est)==0){
+    lower <- mean(boots_est)
+    upper <- mean(boots_est)
     return(c(lower, upper))
   }
 
-  if(max(vector)==Inf | min(vector)==-Inf){
+  if(max(boots_est)==Inf | min(boots_est)==-Inf){
     stop("bca bootstrap CIs do not work when some values are infinite")
   }
 
   low <- (1 - conf.level)/2
   high <- 1 - low
-  sims <- length(vector)
-  z.inv <- length(vector[vector < mean(vector)])/sims
+  sims <- length(boots_est)
+  z.inv <- length(boots_est[boots_est < mean(boots_est)])/sims
   z <- qnorm(z.inv)
-  U <- (sims - 1) * (mean(vector, na.rm=TRUE) - vector)
+  U <- (sims - 1) * (mean(boots_est, na.rm=TRUE) - boots_est)
   top <- sum(U^3)
   under <- 6 * (sum(U^2))^{3/2}
   a <- top / under
   lower.inv <-  pnorm(z + (z + qnorm(low))/(1 - a * (z + qnorm(low))))
-  lower <- quantile(vector, lower.inv, names=FALSE)
+  lower <- quantile(boots_est, lower.inv, names=FALSE)
   upper.inv <-  pnorm(z + (z + qnorm(high))/(1 - a * (z + qnorm(high))))
-  upper <- quantile(vector, upper.inv, names=FALSE)
+  upper <- quantile(boots_est, upper.inv, names=FALSE)
   return(c(lower, upper))
 }
 
 
-basic <- function(vector, t0, alpha){
+basic <- function(boots_est, t0, alpha){
   conf = 1-alpha
-  qq <- norm.inter(vector, (1 + c(conf, -conf))/2)
+  qq <- norm.inter(boots_est, (1 + c(conf, -conf))/2)
   c((2 *  t0 - qq[, 2L]))
 }
 
-perc <- function(vector, alpha = 0.05){
+perc <- function(boots_est, alpha = 0.05){
   conf.level = 1-alpha
-  if(var(vector)==0){
-    lower <- mean(vector)
-    upper <- mean(vector)
+  if(var(boots_est)==0){
+    lower <- mean(boots_est)
+    upper <- mean(boots_est)
     return(c(lower, upper))
   }
 
   low <- (1 - conf.level)/2
   high <- 1 - low
 
-  lower <- quantile(vector, low, names=FALSE)
-  upper <- quantile(vector, high, names=FALSE)
+  lower <- quantile(boots_est, low, names=FALSE)
+  upper <- quantile(boots_est, high, names=FALSE)
   return(c(lower, upper))
 }
 
-stud <- function(vector, se, se0, t0, alpha){
+stud <- function(boots_est, boots_se, se0, t0, alpha){
   conf = 1-alpha
-  z <- (vector - t0)/(se)
+  z <- (boots_est - t0)/(boots_se)
   qq <- norm.inter(z, (1 + c(conf, -conf))/2)
   c( ((t0 - (se0) * qq[, 2L])))
+
 }
 
-norm.inter = function (t, alpha)
-{
+norm.inter = function (t, alpha) {
   t <- t[is.finite(t)]
   R <- length(t)
   rk <- (R + 1) * alpha

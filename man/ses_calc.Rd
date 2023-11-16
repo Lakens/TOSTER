@@ -84,6 +84,7 @@ ses_calc(formula = extra ~ group, data = sleep, paired = TRUE, ses = "r")
 }
 \seealso{
 Other effect sizes: 
+\code{\link{boot_smd_calc}()},
 \code{\link{smd_calc}()}
 }
 \concept{effect sizes}

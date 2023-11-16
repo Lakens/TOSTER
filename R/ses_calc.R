@@ -184,7 +184,7 @@ boot_ses_calc.default = function(x,
     i2 <- na.omit(y)
     data <- data.frame(values = c(i1,i2),
                        group = c(rep("x",length(i1)),
-                                 rep(i2)))
+                                 rep("y",length(i2))))
 
     raw_ses = ses_calc(x = i1,
                        y = i2,
@@ -201,8 +201,8 @@ boot_ses_calc.default = function(x,
                       group == "x")
       y_boot = subset(boot_dat,
                       group == "y")
-      res_boot = ses_calc(x = x_boot,
-                          y = y_boot,
+      res_boot = ses_calc(x = x_boot$values,
+                          y = y_boot$values,
                           paired = paired,
                           ses = ses,
                           alpha = alpha)
