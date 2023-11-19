@@ -142,6 +142,14 @@ boot_t_test.default <- function(x,
     X <- matrix(sample(x, size = nx*R, replace = TRUE), nrow = R)
     MX <- rowMeans(X - mx)
     VX <- rowSums((X - MX) ^ 2) / (nx - 1)
+    MZ2 = NA
+    VZ2 = NA
+    for(i in 1:R){
+      zi = X[i,]
+      MZ2[i] = mean(zi - mx)
+      VZ2[i] <- sum((zi - MZ2[i]) ^ 2) / (nx - 1) #rowSums((X - MX) ^ 2) / (nx - 1)
+    }
+
     STDERR <- sqrt(VX/nx)
     TSTAT <- (MX)/STDERR
     #TSTAT_low <- (MX-low_eqbound)/STDERR
