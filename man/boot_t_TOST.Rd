@@ -20,6 +20,8 @@ boot_t_TOST(x, ...)
   eqbound_type = "raw",
   alpha = 0.05,
   bias_correction = TRUE,
+  rm_correction = FALSE,
+  glass = NULL,
   mu = 0,
   R = 1999,
   boot_ci = c("stud", "basic", "perc"),
@@ -52,6 +54,10 @@ boot_t_TOST(x, ...)
 \item{alpha}{alpha level (default = 0.05)}
 
 \item{bias_correction}{Apply Hedges' correction for bias (default is TRUE).}
+
+\item{rm_correction}{Repeated measures correction to make standardized mean difference Cohen's d(rm). This only applies to repeated/paired samples. Default is FALSE.}
+
+\item{glass}{A option to calculate Glass's delta as an alternative to Cohen's d type SMD. Default is NULL to not calculate Glass's delta, "glass1" will use the first group's SD as the denominator whereas "glass2" will use the 2nd group's SD.}
 
 \item{mu}{a number indicating the true value of the mean for the two tailed test (or difference in means if you are performing a two sample test).}
 

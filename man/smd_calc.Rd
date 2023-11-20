@@ -83,6 +83,7 @@ smd_calc(formula = extra ~ group,data = sleep, paired = TRUE, smd_ci = "nct")
 }
 \seealso{
 Other effect sizes: 
+\code{\link{boot_ses_calc}()},
 \code{\link{boot_smd_calc}()},
 \code{\link{ses_calc}()}
 }
