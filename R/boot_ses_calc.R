@@ -48,12 +48,13 @@ boot_ses_calc.default = function(x,
   ses = match.arg(ses)
 
   # paired ----
-  if(paired == TRUE && !missing(y)){
+  if(paired == TRUE && !is.null(y)){
     i1 <- x
     i2 <- y
     data <- data.frame(x = i1, y = i2)
     data <- na.omit(data)
     nd = nrow(data)
+    maxw <- (nd^2 + nd) / 2
     raw_SE = sqrt((2 * nd^3 + 3 * nd^2 + nd) / 6) / maxw
     raw_ses = ses_calc(x = data$x,
                        y = data$y,
@@ -78,7 +79,7 @@ boot_ses_calc.default = function(x,
     }
 
 
-  } else if(!missing(y)){
+  } else if(!is.null(y)){
     # two sample -----
     i1 <- na.omit(x)
     i2 <- na.omit(y)
@@ -121,6 +122,7 @@ boot_ses_calc.default = function(x,
     # one-sample -----
     x1 = na.omit(x)
     n1 = nd =  length(x1)
+    maxw <- (nd^2 + nd) / 2
     raw_SE = sqrt((2 * nd^3 + 3 * nd^2 + nd) / 6) / maxw
     raw_ses = ses_calc(x = x1,
                        paired = paired,
@@ -130,7 +132,7 @@ boot_ses_calc.default = function(x,
     boots = c()
     boots_se = c()
     for(i in 1:R){
-      sampler = sample(1:nrow(x1), replace = TRUE)
+      sampler = sample(1:length(x1), replace = TRUE)
       x_boot = x1[sampler]
 
       res_boot = ses_calc(x = x_boot,
@@ -152,7 +154,7 @@ boot_ses_calc.default = function(x,
                              alpha),
                "perc" = perc(boots, alpha),
                "basic" = basic(boots, t0 = raw_ses$estimate, alpha))
-  rci = tanh(ci)
+  rci = tanh(zci)
 
   rboots = tanh(boots)
 

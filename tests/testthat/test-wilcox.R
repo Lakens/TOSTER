@@ -28,6 +28,15 @@ test_that("Run examples for one sample", {
                test1_ses$lower.ci)
   expect_equal(test1$effsize$upper.ci[2],
                test1_ses$upper.ci)
+
+  test1_ses  = boot_ses_calc(x = samp1,
+                        alpha = .1,
+                        boot_ci = "s")
+  test1_ses  = boot_ses_calc(x = samp1,
+                        alpha = .1,
+                        boot_ci = "p")
+  test1_ses  = boot_ses_calc(x = samp1,
+                        alpha = .1)
   ash = as_htest(test1)
 
   test3 = wilcox_TOST(x = samp1,
@@ -138,6 +147,10 @@ test_that("Run examples for paired samples", {
                       y = samp2,
                       paired = TRUE,
                       eqb =  .5)
+
+  test1_ses = boot_ses_calc(x = samp1,
+                      y = samp2,
+                      paired = TRUE)
 
   test3 = wilcox_TOST(x = samp1,
                  y = samp2,
