@@ -5,9 +5,6 @@
 #' Standardized effect size (SES), these are the effect sizes not considered SMDs.
 #' @inheritParams wilcox_TOST
 #' @inheritParams boot_t_TOST
-#' @param mu  number indicating the value around which (a-)symmetry (for
-#'   one-sample or paired samples) or shift (for independent samples) is to be
-#'   estimated. See [stats::wilcox.test].
 #' @details For details on the calculations in this function see `vignette("robustTOST")`.
 #' @return A data frame containing the standardized effect size.
 #' @examples
@@ -150,7 +147,7 @@ boot_ses_calc.default = function(x,
 
   zci = switch(boot_ci,
                "stud" = stud(boots_est = boots, boots_se = boots_se,
-                             se0=raw_SE, t0 = atanh(raw_smd$estimate[1L]),
+                             se0=raw_SE, t0 = atanh(raw_ses$estimate[1L]),
                              alpha),
                "perc" = perc(boots, alpha),
                "basic" = basic(boots, t0 = raw_ses$estimate, alpha))

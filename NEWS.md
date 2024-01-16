@@ -6,6 +6,7 @@ NEWS
 # TOSTER v0.8.1
 
 - Small correction to the displayed equation for Cohen's ds standard error. Thank you to Matthew B Jané for finding this error.
+- Added bootstrap options
 
 # TOSTER v0.8.0
 

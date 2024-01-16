@@ -122,7 +122,7 @@ boot_cor_test <- function(x,
                   alpha*2,
                   alpha)
   boot.cint = switch(boot_ci,
-                     "basic" = basic(m_vec, t0 = est, alpha2),
+                     "basic" = basic(bvec, t0 = est, alpha2),
                      "perc" = perc(bvec, alpha2))
   #quantile(bvec, c((1 - ci) / 2, 1 - (1 - ci) / 2))
   attr(boot.cint, "conf.level") <- ci

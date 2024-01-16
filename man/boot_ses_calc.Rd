@@ -56,10 +56,6 @@ generalized odds ratio).}
 \item{subset}{an optional vector specifying a subset of observations to be used.}
 
 \item{na.action}{a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").}
-
-\item{mu}{number indicating the value around which (a-)symmetry (for
-one-sample or paired samples) or shift (for independent samples) is to be
-estimated. See \link[stats:wilcox.test]{stats::wilcox.test}.}
 }
 \value{
 A data frame containing the standardized effect size.
