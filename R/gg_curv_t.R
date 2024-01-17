@@ -63,7 +63,7 @@ gg_curv_t <- function(data_list,
                  size = 1.75, shape = 18) +
       geom_line(data = interval,
                 mapping = aes(x = limits, y = 1 - levels, group = levels),
-                size = .30) +
+                linewidth = .30) +
       labs(
         x = xaxis,
         y = yaxis1

@@ -53,33 +53,33 @@ tost_decision = function(hypothesis = "EQU",
 # Bootstrap CI functions ------
 
 ## only an approximation... rather useless
-bca <- function(boots_est, alpha = 0.05){
-  conf.level = 1-alpha
-  if(var(boots_est)==0){
-    lower <- mean(boots_est)
-    upper <- mean(boots_est)
-    return(c(lower, upper))
-  }
-
-  if(max(boots_est)==Inf | min(boots_est)==-Inf){
-    stop("bca bootstrap CIs do not work when some values are infinite")
-  }
-
-  low <- (1 - conf.level)/2
-  high <- 1 - low
-  sims <- length(boots_est)
-  z.inv <- length(boots_est[boots_est < mean(boots_est)])/sims
-  z <- qnorm(z.inv)
-  U <- (sims - 1) * (mean(boots_est, na.rm=TRUE) - boots_est)
-  top <- sum(U^3)
-  under <- 6 * (sum(U^2))^{3/2}
-  a <- top / under
-  lower.inv <-  pnorm(z + (z + qnorm(low))/(1 - a * (z + qnorm(low))))
-  lower <- quantile(boots_est, lower.inv, names=FALSE)
-  upper.inv <-  pnorm(z + (z + qnorm(high))/(1 - a * (z + qnorm(high))))
-  upper <- quantile(boots_est, upper.inv, names=FALSE)
-  return(c(lower, upper))
-}
+# bca <- function(boots_est, alpha = 0.05){
+#   conf.level = 1-alpha
+#   if(var(boots_est)==0){
+#     lower <- mean(boots_est)
+#     upper <- mean(boots_est)
+#     return(c(lower, upper))
+#   }
+#
+#   if(max(boots_est)==Inf | min(boots_est)==-Inf){
+#     stop("bca bootstrap CIs do not work when some values are infinite")
+#   }
+#
+#   low <- (1 - conf.level)/2
+#   high <- 1 - low
+#   sims <- length(boots_est)
+#   z.inv <- length(boots_est[boots_est < mean(boots_est)])/sims
+#   z <- qnorm(z.inv)
+#   U <- (sims - 1) * (mean(boots_est, na.rm=TRUE) - boots_est)
+#   top <- sum(U^3)
+#   under <- 6 * (sum(U^2))^{3/2}
+#   a <- top / under
+#   lower.inv <-  pnorm(z + (z + qnorm(low))/(1 - a * (z + qnorm(low))))
+#   lower <- quantile(boots_est, lower.inv, names=FALSE)
+#   upper.inv <-  pnorm(z + (z + qnorm(high))/(1 - a * (z + qnorm(high))))
+#   upper <- quantile(boots_est, upper.inv, names=FALSE)
+#   return(c(lower, upper))
+# }
 
 
 basic <- function(boots_est, t0, alpha){

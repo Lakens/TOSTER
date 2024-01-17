@@ -143,7 +143,7 @@ boot_smd_calc.default = function(x,
     boots = c()
     boots_se = c()
     for(i in 1:R){
-      sampler = sample(1:nrow(x1), replace = TRUE)
+      sampler = sample(1:length(x1), replace = TRUE)
       x_boot = x1[sampler]
 
       res_boot = smd_calc(x = x_boot,
@@ -180,9 +180,7 @@ boot_smd_calc.default = function(x,
   )
 
 
-  return(list(effsize = effsize,
-              boots = list(est = boots,
-                           se = boots_se)))
+  return(effsize = effsize)
 
 }
 

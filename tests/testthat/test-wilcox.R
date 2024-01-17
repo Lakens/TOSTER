@@ -15,8 +15,6 @@ test_that("Run examples for one sample", {
 
   expect_error(wilcox_TOST())
 
-  # Normal one sample ----
-
   test1 = wilcox_TOST(x = samp1,
                  low_eqbound = -.5,
                  high_eqbound = .5)
@@ -57,6 +55,7 @@ test_that("Run examples for one sample", {
 
 })
 
+# Two sample ----
 test_that("Run examples for two sample", {
 
   set.seed(651466441)
@@ -88,6 +87,11 @@ test_that("Run examples for two sample", {
                       high_eqbound = .5)
   test1_smd = ses_calc(formula = y ~ group,
                       data = df_samp)
+  test1_smd_boot = boot_ses_calc(formula = y ~ group,
+                       data = df_samp,
+                       R = 99)
+  expect_equal(test1_smd_boot$estimate,
+               test1_smd$estimate)
   expect_error(ses_calc(formula = y ~ group,
                         data = df_samp,
                         alpha = 1.1))
