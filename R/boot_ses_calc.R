@@ -48,6 +48,7 @@ boot_ses_calc.default = function(x,
   if(paired == TRUE && !is.null(y)){
     i1 <- x
     i2 <- y
+
     data <- data.frame(x = i1, y = i2)
     data <- na.omit(data)
     nd = nrow(data)
@@ -144,13 +145,16 @@ boot_ses_calc.default = function(x,
     }
 
   }
+  if(any(is.infinite(boots))){
+    message("Bootstrapped results contain extreme results (i.e., no overlap), caution advised interpreting the with confidence intervals.")
+  }
 
   zci = switch(boot_ci,
                "stud" = stud(boots_est = boots, boots_se = boots_se,
                              se0=raw_SE, t0 = atanh(raw_ses$estimate[1L]),
-                             alpha),
+                             alpha), # extreme problems with extreme
                "perc" = perc(boots, alpha),
-               "basic" = basic(boots, t0 = raw_ses$estimate, alpha))
+               "basic" = basic(boots, t0 = atanh(raw_ses$estimate), alpha))
   rci = tanh(zci)
 
   rboots = tanh(boots)

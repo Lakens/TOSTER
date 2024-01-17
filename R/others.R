@@ -90,11 +90,6 @@ basic <- function(boots_est, t0, alpha){
 
 perc <- function(boots_est, alpha = 0.05){
   conf.level = 1-alpha
-  if(var(boots_est)==0){
-    lower <- mean(boots_est)
-    upper <- mean(boots_est)
-    return(c(lower, upper))
-  }
 
   low <- (1 - conf.level)/2
   high <- 1 - low
