@@ -1,0 +1,4 @@
+- source: template.qmd
+  quarto-pub:
+    - id: bb34fb00-6b6e-4ece-8466-7dddb6856a48
+      url: 'https://quartopub.com/sites/mike/demo-taylor-and-francis-template'

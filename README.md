@@ -29,6 +29,24 @@ The stable release can be downloaded from [CRAN](https://cran.r-project.org/pack
 install.packages("TOSTER")
 ```
 
+# Contributing
+
+We are happy to receive bug reports, suggestions, questions, and (most
+of all) contributions to fix problems and add features. Pull Requests
+for contributions are encouraged.
+
+Here are some simple ways in which you can contribute (in the increasing
+order of commitment):
+
+-   Read and correct any inconsistencies in the documentation
+-   Raise issues about bugs or wanted features
+-   Review code
+-   Add new functionality
+
+## Code of Conduct
+
+Please note that the TOSTER project is released with a [Contributor Code of Conduct](https://contributor-covenant.org/version/2/1/CODE_OF_CONDUCT.html). By contributing to this project, you agree to abide by its terms.
+
 ## Educational Material
 
 For educational material on setting the smallest effect size of interest and equivalence tests, see week 2 of the MOOC "Improving Your Statistical Questions". https://www.coursera.org/teach/improving-statistical-questions. 

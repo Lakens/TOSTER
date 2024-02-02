@@ -1,18 +1,18 @@
 ---
 title: |
-  Exploring Equivalence Testing with the Updated "TOSTER" R Package
-subtitle: "Updated TOSTER R Package"
-author:
-- name: Aaron R. Caldwell
-  affil: a
-  email: arcaldwell49@gmail.com
-type: PREPRINT
-output:
-  papaja::apa6_docx: default
-  rticles::tf_article: 
+  Exploring Equivalence Testing with the Updated TOSTER R Package
+header: "Updated TOSTER R Package"
+format:
+  tandf-pdf:
+    keep-tex: true 
     extra_dependencies: ["float"]
+    include-in-header: 
+      text: |
+        \usepackage{scrlayer-scrpage}
+        \rohead{Preprint: Not Peer Reviewed}
+  tandf-html: default
+  docx: default
 bibliography: interactcadsample.bib
-#appendix: appendix.tex
 abstract: |
   Equivalence testing is arguably under utilized by experimental
   researchers. Due to limited software support for such analyses, and
@@ -22,29 +22,32 @@ abstract: |
   The TOSTER R package and jamovi module, originally developed by 
   Daniel Lakens in 2017, was created to make TOST 
   more accessible to the average researcher. 
-  In the past two years, I have made significant changes to the TOSTER package
+  In the past four years, I have made significant changes to the TOSTER package
   in order to increase its accessibility and provide more robust analysis 
   options for researchers. In this paper, I will detail the changes to the 
   package and highlight new analysis options that will make TOST easier for the 
   average quantitative researcher.
 keywords: |
-  statistics, bootstrap, minimal effects test, NHST, TOST
-header-includes: |
-  \usepackage{hyperref}
-  \usepackage[utf8]{inputenc}
-  \def\tightlist{}
-  \hypersetup{
-    colorlinks=true,
-    citecolor = cyan,
-    linkcolor=blue,
-    filecolor=magenta,      
-    urlcolor=blue
-    }
-affiliation:
-- num: a
-  address: |
-    Natick, MA,  <https://orcid.org/0000-0002-4541-6283>
+  statistics, bootstrap, minimal effects test, NHST, TOST, R
+author:
+  - name: Aaron R. Caldwell
+    affiliations:
+      - ref: UAMS
+    orcid: 0000-0002-4541-6283
+    email: caldwellaaron@uams.edu
+    url: https://aaroncaldwell.us/
+affiliations:
+  - id: UAMS
+    name: Fay W. Boozman College of Public Health, University of Arkansas for Medical Sciences Northwest
+    department: Office of Community Health and Research
+    address: 2708 S 48th St
+    city: Springdale, AR
+    country: USA
+    postal-code: 72762
+editor_options: 
+  chunk_output_type: console
 ---
+
 
 ```{r setup, echo=FALSE}
 knitr::opts_chunk$set(
@@ -66,7 +69,7 @@ library(patchwork)
 Researchers often erroneously declare that no statistical effect exists based on a single "non-significant" p-value [@blandaltman95]. 
 In many of these cases, the data may corroborate the researcher's claim, but the interpretation of a null hypothesis significance test (NHST), wherein the lack of significance is considered evidence of "no effect", is nonetheless incorrect. 
 In order to statistically test for whether there is practically no effect, researchers could use equivalence testing. 
-Equivalence testing is used when the goal of a statistical test is to demonstrate that the difference between two conditions is too small to be meaningful. For example, if a researcher wanted to test whether a new drug was no worse than a standard drug, the null hypothesis would be that the new drug is worse than the standard drug by more than a meaningful amount, and the alternative hypothesis would be that the difference between the two drugs is small enough to be meaningless. A very simple equivalence testing approach is the use of “two one-sided tests” (TOST) [@schuirmann1987]. 
+Equivalence testing is used when the goal of a statistical test is to demonstrate that the difference between two conditions is too small to be meaningful. For example, if a researcher wanted to test whether a new drug was no worse than a standard drug, the null hypothesis would be that the new drug is worse than the standard drug by more than a meaningful amount, and the alternative hypothesis would be that the difference between the two drugs is small enough to be meaningless. A very simple equivalence testing approach is the use of two one-sided tests (TOST) [@schuirmann1987]. 
 
 The TOST procedure is a statistical test of whether a parameter (e.g., mean difference) is within a specified interval. The TOST procedure can be used to test the equivalence of two means, two proportions, two regression coefficients, and even two variances.
 An upper ($\Delta_U$) and lower ($\Delta_L$) equivalence bound is specified based on the smallest effect size of interest (SESOI).
@@ -397,7 +400,7 @@ In the following sections, I will briefly outline the available robust TOST func
 
 ## Tests of Symmetry (rank based tests)
 
-The WMW group of tests (e.g., Mann-Whitney U-test) provide a non-parametric test of differences between groups, or within samples, based on *ranks*. This provides a test of location shift, which is a fancy way of saying differences in the center of the distribution (i.e., in parametric tests the location is mean). Within the TOST framework, there are two separate tests of directional location shift to determine if the location shift is within (equivalence) or outside (minimal effect) the equivalence bounds. Many researchers mistakenly think these are tests of medians, but this is not the case (See @median_test for details). Using a WMW-based TOST is useful for testing whether the differences between groups/conditions is symmetric around the equivalence bounds^[Care should be taken when considering paired samples; a test on the rank transformed data [@kornbrot1990rank] or another robust test may be more prudent.]. For equivalence testing, the TOST would be testing whether there is asymmetry towards no effect with a null hypothesis of symmetry at the equivalence bound.
+The WMW group of tests (e.g., Mann-Whitney U-test) provide a non-parametric test of differences between groups, or within samples, based on *ranks*. This provides a test of location shift, which is a fancy way of saying differences in the center of the distribution (e.g., in parametric tests the location is the mean). Within the TOST framework, there are two separate tests of directional location shift to determine if the location shift is within (equivalence) or outside (minimal effect) the equivalence bounds. Many researchers mistakenly think these are tests of medians, but this is not the case (See @median_test for details). Using a WMW-based TOST is useful for testing whether the differences between groups/conditions is symmetric around the equivalence bounds^[Care should be taken when considering paired samples; a test on the rank transformed data [@kornbrot1990rank] or another robust test may be more prudent.]. For equivalence testing, the TOST would be testing whether there is asymmetry towards no effect with a null hypothesis of symmetry at the equivalence bound.
 
 In the TOSTER package, we accomplish this "test of symmetry" with the `wilcox_TOST` function. 
 This function operates in an extremely similar implementation to the `t_TOST` function. 
@@ -667,8 +670,8 @@ boot_test
 # Conclusions
 
 In this manuscript I have demonstrated most of the new functions and features within the TOSTER R package. 
-This constitutes a major update to the package over the past 2 years. 
-I hope that updates to the package builds upon the original impact of the TOSTER package^[In my opinion, the impact of the @lakens_ori cannot be overstated considering it is cited by over 1000 other papers!], 
+This constitutes a major update to the package over the past 4 years. 
+I hope that updates to the package build upon the original impact of the TOSTER package^[In my opinion, the impact of the @lakens_ori cannot be overstated considering it is cited by over 1000 other papers!], 
 and has been made TOST more accessible to the average researcher.
 In addition, I have added a number of other functions that offer robust alternatives to
 the t-test for performing TOST analyses.
@@ -682,11 +685,11 @@ Overall, this package and its functions offer an easily accessible option for re
 
 # Additional Information
 
-All analyses/code in this manuscript are from TOSTER v0.6.0:
+All analyses/code in this manuscript are from TOSTER v0.8.1:
 
 ```
 # Install the exact release with this code
-devtools::install_github("Lakens/TOSTER@v0.6.0")
+devtools::install_github("Lakens/TOSTER@v0.8.1")
 ```
 
 ## Acknowledgement(s) {-}
@@ -706,7 +709,7 @@ No funding was provided for this work.
 
 Daniel Lakens provided a review of many of the materials that have been incorporated
 into the update of TOSTER, and was the original author of this package.
-Without his help and encouragment, the TOSTER package and this update would not exist.
+Without his help and encouragement, the TOSTER package and this update would not exist.
 
 ## Nomenclature/Notation {-}
 
@@ -728,3 +731,5 @@ The R package is also (partially) implemented in jamovi as the TOSTER module.
 
 # References
 
+::: {#refs}
+:::

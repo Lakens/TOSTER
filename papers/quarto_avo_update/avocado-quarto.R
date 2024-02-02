@@ -1,4 +1,4 @@
-## ----setup, echo=FALSE--------------------------------------------------------
+## ----r setup, echo=FALSE------------------------------------------------------
 knitr::opts_chunk$set(
   warning = FALSE,
   message = FALSE,
@@ -11,7 +11,7 @@ library(ggplot2)
 library(ggdist)
 library(patchwork)
 
-## ----hypplot, fig.width=6, fig.height=2.75, echo=FALSE, message = FALSE, warning = FALSE, fig.show='hold', fig.cap = "Type of Hypothesis"----
+## ----r hypplot, fig.width=6, fig.height=2.75, echo=FALSE, message = FALSE, warning = FALSE, fig.show='hold', fig.cap = "Type of Hypothesis"----
 
 p1 = ggplot() +
   geom_vline(aes(xintercept = -.5),
@@ -136,15 +136,15 @@ theme_tidybayes() +
 
 p1 + p2 + plot_annotation(tag_levels = 'A')
 
-## -----------------------------------------------------------------------------
+## ----r------------------------------------------------------------------------
 data('sleep')
 library(jmv)
 data('bugs')
 
-## -----------------------------------------------------------------------------
+## ----r------------------------------------------------------------------------
 head(sleep,2)
 
-## -----------------------------------------------------------------------------
+## ----r------------------------------------------------------------------------
 # Formula Interface
 res1 = t_TOST(formula = extra ~ group, data = sleep, 
               eqb = .5, smd_ci = "t")
@@ -152,35 +152,35 @@ res1 = t_TOST(formula = extra ~ group, data = sleep,
 res1a = t_TOST(x = subset(sleep,group==1)$extra,
                y = subset(sleep,group==2)$extra, eqb =.5)
 
-## -----------------------------------------------------------------------------
+## ----r------------------------------------------------------------------------
 print(res1)
 
-## ----cdplot,fig.width=6, fig.height=5,fig.cap="Example of consonance density plot."----
+## ----r cdplot,fig.width=6, fig.height=5,fig.cap="Example of consonance density plot."----
 plot(res1, type = "cd")
 
-## ----shadeplot,fig.width=6, fig.height=5, fig.cap = "Demonstrating the shading in plot method."----
+## ----r shadeplot,fig.width=6, fig.height=5, fig.cap = "Demonstrating the shading in plot method."----
 plot(res1, type = "cd",
      ci_shades = c(.9,.95))
 
-## ----conplot,fig.width=6, fig.height=5, fig.cap = "Example of consonance plot."----
+## ----r conplot,fig.width=6, fig.height=5, fig.cap = "Example of consonance plot."----
 plot(res1, type = "c",
      ci_lines =  c(.9,.95))
 
-## -----------------------------------------------------------------------------
+## ----r------------------------------------------------------------------------
 res2 = t_TOST(formula = extra ~ group,
               data = sleep,
               paired = TRUE,
               eqb = .5)
 res2
 
-## -----------------------------------------------------------------------------
+## ----r------------------------------------------------------------------------
 res3 = t_TOST(x = bugs$LDHF,
               y = bugs$LDLF,
               paired = TRUE,
               eqb = 1)
 res3
 
-## -----------------------------------------------------------------------------
+## ----r------------------------------------------------------------------------
 res3a = t_TOST(x = bugs$LDHF,
                y = bugs$LDLF,
                paired = TRUE,
@@ -188,14 +188,14 @@ res3a = t_TOST(x = bugs$LDHF,
                eqb = 1)
 res3a
 
-## -----------------------------------------------------------------------------
+## ----r------------------------------------------------------------------------
 res4 = t_TOST(x = bugs$LDHF,
               hypothesis = "EQU",
               mu = 7.5,
               eqb = c(5.5,8.5))
 res4
 
-## -----------------------------------------------------------------------------
+## ----r------------------------------------------------------------------------
 res_tsum = tsum_TOST(
   m1 = mean(bugs$LDHF, na.rm=TRUE), sd1 = sd(bugs$LDHF, na.rm=TRUE),
   n1 = length(na.omit(bugs$LDHF)),
@@ -204,14 +204,14 @@ res_tsum = tsum_TOST(
 
 res_tsum
 
-## -----------------------------------------------------------------------------
+## ----r------------------------------------------------------------------------
 test1 = wilcox_TOST(formula = extra ~ group,
                       data = sleep,
                       paired = FALSE,
                       eqb = .5)
 print(test1)
 
-## -----------------------------------------------------------------------------
+## ----r------------------------------------------------------------------------
 set.seed(891111)
 test1 = boot_t_TOST(formula = extra ~ group,
                     data = sleep,
@@ -222,29 +222,29 @@ test1 = boot_t_TOST(formula = extra ~ group,
 
 print(test1)
 
-## -----------------------------------------------------------------------------
+## ----r------------------------------------------------------------------------
 x = 7; y = 10.5
 log(y) - log(x)
 log(y/x)
 exp(log(y) - log(x))
 y/x
 
-## ----error=FALSE--------------------------------------------------------------
+## ----r, error=FALSE-----------------------------------------------------------
 log_TOST(mpg ~ am, data = mtcars)
 
-## ----error=FALSE--------------------------------------------------------------
+## ----r, error=FALSE-----------------------------------------------------------
 boot_log_TOST(mpg ~ am, data = mtcars, R=999)
 
-## ----warning=FALSE, message=FALSE---------------------------------------------
+## ----r warning=FALSE, message=FALSE-------------------------------------------
 data("InsectSprays")
 aovtest = aov(count ~ spray, data = InsectSprays)
 anova(aovtest)
 
 
-## -----------------------------------------------------------------------------
+## ----r------------------------------------------------------------------------
 equ_ftest(Fstat = 34.70228,  df1 = 5, df2 = 66,  eqb = 0.35)
 
-## -----------------------------------------------------------------------------
+## ----r------------------------------------------------------------------------
 # Example using a purely within-subjects design 
 # (Maxwell & Delaney, 2004, Chapter 12, Table 12.5, p. 578):
 library(afex)
@@ -254,18 +254,18 @@ aovtest2 = aov_ez("id", "rt", md_12.1, within = c("angle", "noise"),
 equ_anova(aovtest2,
           eqb = 0.35)
 
-## -----------------------------------------------------------------------------
+## ----r------------------------------------------------------------------------
 compare_smd(smd1 = 0.95,
             n1 = 25,
             smd2 = 0.23,
             n2 = 50,
             paired = TRUE)
 
-## -----------------------------------------------------------------------------
+## ----r------------------------------------------------------------------------
 compare_smd(smd1 = 0.95, n1 = 25, smd2 = 0.23,n2 = 50,
             paired = TRUE, TOST = TRUE, null = .25)
 
-## -----------------------------------------------------------------------------
+## ----r------------------------------------------------------------------------
 set.seed(4522)
 boot_test = boot_compare_smd(x1 = rnorm(25,.95), x2 = rnorm(50), 
                              paired = TRUE, alpha = .1)

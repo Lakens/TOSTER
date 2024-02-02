@@ -1,0 +1,38 @@
+title: Taylor and Francis "Interact" Format
+author: Mike Mahoney
+version: 0.1.3
+contributes:
+  formats:
+    common:
+      # define below YAML configuration common to all formats
+      number-sections: true
+#      filters:
+        # You can include here Lua filters from your extension format 
+      shortcodes:
+        # You can include here Lua filters defining shortcodes from your extension
+        - shortcodes.lua
+      knitr:
+        opts_chunk:
+          echo: false
+    pdf:
+      # define default configuration for the pdf version of your format
+      documentclass: interact
+      colorlinks: true
+      # Content to add in header that your format is using
+      header-includes: |
+        \usepackage{orcidlink}
+      template-partials:
+        # Add here the partials your format is using
+        - "partials/title.tex"
+        - "partials/before-body.tex"
+        - "partials/_authors.tex"
+        - "partials/_affiliations.tex"
+      format-resources:
+        # Add here the resources required for the PDF rendering
+        - interact.cls
+        - orcidlink.sty
+    html:
+      # define default configuration for the html version of your format
+      toc: true
+      # Use a CSL file to style (https://www.zotero.org/styles/)
+      csl: https://www.zotero.org/styles/taylor-and-francis-chicago-author-date
