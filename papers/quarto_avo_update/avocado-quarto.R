@@ -153,7 +153,15 @@ res1a = t_TOST(x = subset(sleep,group==1)$extra,
                y = subset(sleep,group==2)$extra, eqb =.5)
 
 ## ----r------------------------------------------------------------------------
+res_1_simple = simple_htest(formula = extra ~ group, 
+                            data = sleep, 
+                            alternative = "equivalence", # set hypothesis test
+                            mu = .5) # sets equivalence bound
+
+## ----r------------------------------------------------------------------------
 print(res1)
+
+print(res_1_simple)
 
 ## ----r cdplot,fig.width=6, fig.height=5,fig.cap="Example of consonance density plot."----
 plot(res1, type = "cd")
@@ -167,11 +175,23 @@ plot(res1, type = "c",
      ci_lines =  c(.9,.95))
 
 ## ----r------------------------------------------------------------------------
-res2 = t_TOST(formula = extra ~ group,
-              data = sleep,
-              paired = TRUE,
-              eqb = .5)
+res2 = t_TOST(
+  formula = extra ~ group,
+  data = sleep,
+  paired = TRUE,
+  eqb = .5
+)
 res2
+
+res2_simple = simple_htest(
+  formula = extra ~ group,
+  data = sleep,
+  paired = TRUE,
+  alternative = "equivalence",
+  # set hypothesis test
+  mu = .5
+)
+res2_simple
 
 ## ----r------------------------------------------------------------------------
 res3 = t_TOST(x = bugs$LDHF,
@@ -187,6 +207,13 @@ res3a = t_TOST(x = bugs$LDHF,
                hypothesis = "MET",
                eqb = 1)
 res3a
+
+res3a_simple = simple_htest(x = bugs$LDHF,
+               y = bugs$LDLF,
+               paired = TRUE,
+               alternative = "m",
+               mu = 1)
+res3a_simple
 
 ## ----r------------------------------------------------------------------------
 res4 = t_TOST(x = bugs$LDHF,
