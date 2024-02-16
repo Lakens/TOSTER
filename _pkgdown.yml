@@ -76,7 +76,9 @@ reference:
     Functions that calculate standarized effect sizes
   contents:
   - smd_calc
+  - boot_smd_calc
   - ses_calc
+  - boot_ses_calc
   - rbs
   - np_ses
 

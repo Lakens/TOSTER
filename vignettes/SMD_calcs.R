@@ -15,6 +15,15 @@ smd_calc(formula = extra ~ group,
          smd_ci = "nct",
          bias_correction = F)
 
+# Setting bootstrap replications low to
+## reduce compiling time of vignette
+boot_smd_calc(formula = extra ~ group,
+         data = sleep,
+         R = 199,
+         paired = TRUE,
+         boot_ci = "stud",
+         bias_correction = F)
+
 ## ----fig.width=6, fig.height=6------------------------------------------------
 plot_smd(d = .43,
          df = 58,

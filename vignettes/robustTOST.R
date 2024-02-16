@@ -90,3 +90,12 @@ ses_calc(formula = extra ~ group,
          paired = TRUE,
          ses = "r")
 
+# Setting bootstrap replications low to
+## reduce compiling time of vignette
+boot_ses_calc(formula = extra ~ group,
+         data = sleep,
+         paired = TRUE,
+         R = 1990,
+         boot_ci = "perc", # recommend percentile bootstrap for paired SES
+         ses = "r") 
+
