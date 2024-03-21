@@ -20,8 +20,11 @@ boot_t_TOST(x, ...)
   eqbound_type = "raw",
   alpha = 0.05,
   bias_correction = TRUE,
+  rm_correction = FALSE,
+  glass = NULL,
   mu = 0,
   R = 1999,
+  boot_ci = c("stud", "basic", "perc"),
   ...
 )
 
@@ -52,9 +55,15 @@ boot_t_TOST(x, ...)
 
 \item{bias_correction}{Apply Hedges' correction for bias (default is TRUE).}
 
+\item{rm_correction}{Repeated measures correction to make standardized mean difference Cohen's d(rm). This only applies to repeated/paired samples. Default is FALSE.}
+
+\item{glass}{A option to calculate Glass's delta as an alternative to Cohen's d type SMD. Default is NULL to not calculate Glass's delta, "glass1" will use the first group's SD as the denominator whereas "glass2" will use the 2nd group's SD.}
+
 \item{mu}{a number indicating the true value of the mean for the two tailed test (or difference in means if you are performing a two sample test).}
 
 \item{R}{number of bootstrap replicates}
+
+\item{boot_ci}{type of bootstrap confidence interval. Options include studentized (stud), empirical/basic (basic) and percentile (perc) confidence intervals.}
 
 \item{formula}{a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.}
 

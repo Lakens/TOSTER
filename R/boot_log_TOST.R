@@ -62,8 +62,10 @@ boot_log_TOST.default <- function(x,
                                 eqb = 1.25,
                                 alpha = 0.05,
                                 null = 1,
+                                boot_ci = c("stud","basic", "perc"),
                                 R = 1999, ...){
   hypothesis = match.arg(hypothesis)
+  boot_ci = match.arg(boot_ci)
   if(!missing(null) && (length(null) != 1 || is.na(null))) {
     stop("'null' must be a single number")
   }
@@ -145,6 +147,7 @@ if(!paired){
 
   d_vec <- rep(NA, times=length(R)) # smd vector
   m_vec <- rep(NA, times=length(R)) # mean difference vector
+  se_vec <- NA # Standard error vector
   #t_vec <- rep(NA, times=length(R)) # t-test vector
   #tl_vec <- rep(NA, times=length(R)) # lower bound vector
   #tu_vec <- rep(NA, times=length(R)) # upper bound vector
@@ -207,6 +210,7 @@ if(!paired){
 
       d_vec[i] <- runTOST$smd$d # smd vector
       m_vec[i] <- runTOST$effsize$estimate[1] # mean difference vector
+      se_vec[i] = runTOST$effsize$SE[1] # SE
       #t_vec[i] <- runTOST$TOST$t[1] - mx # t-test vector
       #tl_vec[i] <- runTOST$TOST$t[2] - mx # lower bound vector
       #tu_vec[i] <- runTOST$TOST$t[3] - mx # upper bound vector
@@ -266,6 +270,7 @@ if(!paired){
 
         d_vec[i] <- runTOST$smd$d # smd vector
         m_vec[i] <- runTOST$effsize$estimate[1] # mean difference vector
+        se_vec[i] = runTOST$effsize$SE[1] # SE
         #t_vec[i] <- runTOST$TOST$t[1] # t-test vector
         #tl_vec[i] <- runTOST$TOST$t[2] # lower bound vector
         #tu_vec[i] <- runTOST$TOST$t[3] # upper bound vector
@@ -303,6 +308,7 @@ if(!paired){
 
         d_vec[i] <- runTOST$smd$d # smd vector
         m_vec[i] <- runTOST$effsize$estimate[1] # mean difference vector
+        se_vec[i] = runTOST$effsize$SE[1] # SE
         #t_vec[i] <- runTOST$TOST$t[1] # t-test vector
         #tl_vec[i] <- runTOST$TOST$t[2] # lower bound vector
         #tu_vec[i] <- runTOST$TOST$t[3] # upper bound vector
@@ -336,9 +342,18 @@ if(!paired){
   }
 
   boot.se = sd(m_vec)
-  boot.cint <- quantile(m_vec, c(alpha, 1 - alpha ))
-  d.cint <- quantile(d_vec, c(alpha, 1 - alpha ))
-  d.se = sd(d_vec)
+  d.se = sd(exp(m_vec))
+  boot.cint <- switch(boot_ci,
+                      "stud" = stud(boots_est = m_vec, boots_se = se_vec,
+                                    se0=nullTOST$effsize$SE[1], t0 = nullTOST$effsize$estimate[1],
+                                    alpha),
+                      "basic" = basic(m_vec, t0 = nullTOST$effsize$estimate[1], alpha*2),
+                      "perc" = perc(m_vec, alpha*2))
+  d.cint = exp(boot.cint)
+  #d.cint <- switch(boot_ci,
+  #                 "basic" = basic(d_vec, t0 = nullTOST$effsize$estimate[2], alpha*2),
+  #                 "perc" = perc(d_vec, alpha*2))
+  #d.se = sd(d_vec)
 
   TOST = nullTOST$TOST
   TOST$p.value = c(boot.pval, p_l, p_u)

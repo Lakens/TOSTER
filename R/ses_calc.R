@@ -3,22 +3,11 @@
 #' `r lifecycle::badge('stable')`
 #'
 #' Standardized effect size (SES), these are the effect sizes not considered SMDs.
-#' @param x a (non-empty) numeric vector of data values.
-#' @param y an optional (non-empty) numeric vector of data values.
-#' @param formula a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.
-#' @param data an optional matrix or data frame (or similar: see model.frame) containing the variables in the formula formula. By default the variables are taken from environment(formula).
-#' @param paired a logical indicating whether you want to calculate a paired test.
-#' @param alpha alpha level (default = 0.05)
+#' @inheritParams wilcox_TOST
+#' @inheritParams boot_t_TOST
 #' @param mu  number indicating the value around which (a-)symmetry (for
 #'   one-sample or paired samples) or shift (for independent samples) is to be
 #'   estimated. See [stats::wilcox.test].
-#' @param ses Standardized effect size. Default is "rb" for rank-biserial
-#' correlation. Options also include "cstat" for concordance probability, or
-#' "odds" for Wilcoxon-Mann-Whitney odds (otherwise known as Agresti's
-#' generalized odds ratio).
-#' @param subset an optional vector specifying a subset of observations to be used.
-#' @param na.action a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").
-#' @param ...  further arguments to be passed to or from methods.
 #' @details For details on the calculations in this function see `vignette("robustTOST")`.
 #' @return A data frame containing the standardized effect size.
 #' @examples
@@ -31,9 +20,9 @@
 
 #ses_calc <- setClass("ses_calc")
 ses_calc <- function(x, ...,
-                   paired = FALSE,
-                   ses = "rb",
-                   alpha = 0.05){
+                     paired = FALSE,
+                     ses = "rb",
+                     alpha = 0.05){
   UseMethod("ses_calc")
 }
 
@@ -46,7 +35,7 @@ ses_calc <- function(x, ...,
 ses_calc.default = function(x,
                           y = NULL,
                           paired = FALSE,
-                          ses = c("rb","odds","cstat"),
+                          ses = c("rb","odds","logodds","cstat"),
                           alpha = 0.05,
                           mu = 0,
                           ...) {
@@ -89,6 +78,7 @@ ses_calc.default = function(x,
   ses_name = switch(ses,
                     "rb" = "Rank-Biserial Correlation",
                     "odds" = "WMW Odds",
+                    "logodds" = "WMW Log-Odds",
                     "cstat" = "Concordance")
 
   effsize = data.frame(

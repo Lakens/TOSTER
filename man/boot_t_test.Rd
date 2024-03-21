@@ -16,6 +16,7 @@ boot_t_test(x, ...)
   alternative = c("two.sided", "less", "greater", "equivalence", "minimal.effect"),
   mu = 0,
   alpha = 0.05,
+  boot_ci = c("stud", "basic", "perc"),
   R = 1999,
   ...
 )
@@ -38,6 +39,8 @@ boot_t_test(x, ...)
 \item{mu}{a number specifying an optional parameter used to form the null hypothesis. See ‘Details’.}
 
 \item{alpha}{alpha level (default = 0.05)}
+
+\item{boot_ci}{type of bootstrap confidence interval. Options include studentized (stud), empirical/basic (basic) and percentile (perc) confidence intervals.}
 
 \item{R}{number of bootstrap replicates}
 

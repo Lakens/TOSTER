@@ -579,7 +579,7 @@ $$
 # Just Estimate the SMD
 
 It was requested that a function be provided that only calculates the SMD.
-Therefore, I created the `smd_calc` function.
+Therefore, I created the `smd_calc` and `boot_smd_calc` functions^[The results differ greatly because the bootstrap CI method, studentized, is more conservative than the parametric method. This difference is more apparent with extremely small samples like that in the `sleep` dataset.].
 The interface is almost the same as `t_TOST` but you don't set an equivalence bound.
 
 ```{r}
@@ -587,6 +587,15 @@ smd_calc(formula = extra ~ group,
          data = sleep,
          paired = TRUE,
          smd_ci = "nct",
+         bias_correction = F)
+
+# Setting bootstrap replications low to
+## reduce compiling time of vignette
+boot_smd_calc(formula = extra ~ group,
+         data = sleep,
+         R = 199,
+         paired = TRUE,
+         boot_ci = "stud",
          bias_correction = F)
 ```
 

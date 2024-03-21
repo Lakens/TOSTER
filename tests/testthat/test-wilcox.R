@@ -15,8 +15,6 @@ test_that("Run examples for one sample", {
 
   expect_error(wilcox_TOST())
 
-  # Normal one sample ----
-
   test1 = wilcox_TOST(x = samp1,
                  low_eqbound = -.5,
                  high_eqbound = .5)
@@ -28,6 +26,15 @@ test_that("Run examples for one sample", {
                test1_ses$lower.ci)
   expect_equal(test1$effsize$upper.ci[2],
                test1_ses$upper.ci)
+
+  test1_ses  = boot_ses_calc(x = samp1,
+                        alpha = .1,
+                        boot_ci = "s")
+  test1_ses  = boot_ses_calc(x = samp1,
+                        alpha = .1,
+                        boot_ci = "p")
+  test1_ses  = boot_ses_calc(x = samp1,
+                        alpha = .1)
   ash = as_htest(test1)
 
   test3 = wilcox_TOST(x = samp1,
@@ -48,6 +55,7 @@ test_that("Run examples for one sample", {
 
 })
 
+# Two sample ----
 test_that("Run examples for two sample", {
 
   set.seed(651466441)
@@ -79,6 +87,11 @@ test_that("Run examples for two sample", {
                       high_eqbound = .5)
   test1_smd = ses_calc(formula = y ~ group,
                       data = df_samp)
+  test1_smd_boot = boot_ses_calc(formula = y ~ group,
+                       data = df_samp,
+                       R = 99)
+  expect_equal(test1_smd_boot$estimate,
+               test1_smd$estimate)
   expect_error(ses_calc(formula = y ~ group,
                         data = df_samp,
                         alpha = 1.1))
@@ -138,6 +151,10 @@ test_that("Run examples for paired samples", {
                       y = samp2,
                       paired = TRUE,
                       eqb =  .5)
+
+  test1_ses = boot_ses_calc(x = samp1,
+                      y = samp2,
+                      paired = TRUE)
 
   test3 = wilcox_TOST(x = samp1,
                  y = samp2,

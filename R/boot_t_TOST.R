@@ -4,6 +4,7 @@
 #'
 #' A function for a bootstrap method for TOST with all types of t-tests.
 #' @param R number of bootstrap replicates
+#' @param boot_ci type of bootstrap confidence interval. Options include studentized (stud), empirical/basic (basic) and percentile (perc) confidence intervals.
 #' @inheritParams t_TOST
 #' @return An S3 object of class
 #'   `"TOSTt"` is returned containing the following slots:
@@ -57,8 +58,13 @@ boot_t_TOST.default <- function(x,
                                 eqbound_type = "raw",
                                 alpha = 0.05,
                                 bias_correction = TRUE,
+                                rm_correction = FALSE,
+                                glass = NULL,
                                 mu = 0,
-                                R = 1999, ...){
+                                R = 1999,
+                                boot_ci = c("stud", "basic", "perc"),
+                                ...){
+  boot_ci = match.arg(boot_ci)
 
   if(!missing(mu) && (length(mu) != 1 || is.na(mu))) {
     stop("'mu' must be a single number")
@@ -104,7 +110,8 @@ boot_t_TOST.default <- function(x,
                       eqbound_type = eqbound_type,
                       alpha = alpha,
                       mu = mu,
-                      bias_correction = bias_correction)
+                      bias_correction = bias_correction,
+                      smd_ci = "z")
   } else{
     nullTOST = t_TOST(x = x,
                       hypothesis = hypothesis,
@@ -116,10 +123,13 @@ boot_t_TOST.default <- function(x,
                       alpha = alpha,
                       mu = mu,
                       bias_correction = bias_correction,
-                      rm_correction = FALSE)
+                      rm_correction = FALSE,
+                      smd_ci = "z")
   }
   d_vec <- rep(NA, times=length(R)) # smd vector
   m_vec <- rep(NA, times=length(R)) # mean difference vector
+  d_se_vec <- rep(NA, times=length(R)) # smd vector SE
+  m_se_vec <- rep(NA, times=length(R)) # mean difference vector SE
   #t_vec <- rep(NA, times=length(R)) # t-test vector
   #tl_vec <- rep(NA, times=length(R)) # lower bound vector
   #tu_vec <- rep(NA, times=length(R)) # upper bound vector
@@ -135,18 +145,19 @@ boot_t_TOST.default <- function(x,
   if(!is.null(y)){
     dname <- paste(deparse(substitute(x)), "and", deparse(substitute(y)))
     if (paired) {
-      i1 <- y
-      i2 <- x
+      i1 <- x
+      i2 <- y
       data <- data.frame(i1 = i1, i2 = i2)
       data <- na.omit(data)
-      y <- data$i1
-      x <- data$i2
+      x <- data$i1
+      y <- data$i2
     }
     yok <- !is.na(y)
     xok <- !is.na(x)
     y <- y[yok]
 
   }else{
+    # One sample ----
     dname <- deparse(substitute(x))
     #if (paired) {
     #  stop("'y' is missing for paired test")
@@ -156,10 +167,10 @@ boot_t_TOST.default <- function(x,
     yok <- NULL
   }
   x <- x[xok]
-  if(paired && !is.null(y)){
-    x <- x - y
-    y <- NULL
-  }
+  #if(paired && !is.null(y)){
+  #  x <- x - y
+  #  y <- NULL
+  #}
   nx <- length(x)
   mx <- mean(x)
   vx <- var(x)
@@ -174,7 +185,8 @@ boot_t_TOST.default <- function(x,
     #tstat <- (mx - mu)/stderr
     #tstat_low = (mx - low_eqbound)/stderr
     #tstat_high = (mx - high_eqbound)/stderr
-    method <- if (paired) "Bootstrapped Paired t-test" else "Bootstrapped One Sample t-test"
+
+    method <-  "Bootstrapped One Sample t-test"
     #estimate <- setNames(mx, if (paired) "mean of the differences" else "mean of x")
     #x.cent <- x - mx # remove to have an untransformed matrix
     X <- matrix(sample(x, size = nx*R, replace = TRUE), nrow = R)
@@ -198,53 +210,94 @@ boot_t_TOST.default <- function(x,
                          alpha = alpha,
                          mu = mu,
                          bias_correction = bias_correction,
-                         rm_correction = FALSE)
+                         rm_correction = FALSE,
+                        smd_ci = "z")
 
       d_vec[i] <- runTOST$smd$d # smd vector
       m_vec[i] <- runTOST$effsize$estimate[1] # mean difference vector
+      d_se_vec[i] <- runTOST$effsize$SE[2] # smd vector
+      m_se_vec[i] <- runTOST$effsize$SE[1] # mean difference vector
       #t_vec[i] <- runTOST$TOST$t[1] - mx # t-test vector
       #tl_vec[i] <- runTOST$TOST$t[2] - mx # lower bound vector
       #tu_vec[i] <- runTOST$TOST$t[3] - mx # upper bound vector
     }
   }
-  # Next chunk useless for now skipped automatically
-  #if(!is.null(y) && paired) {
-  #  ny <- length(y)
-  #  my <- mean(y)
-  #  vy <- var(y)
-  #  diff <- x - y
-  #  method <-  "Bootstrapped Paired t-test"
-  #  estimate <- setNames(mx, "mean of the differences")
-  #  x.cent <- diff - mx
-  #  df = length(x.cent) - 1
-  #  z <- c(x, y)
-  #  Z <- matrix(sample(z, size = (nx+ny)*R, replace = TRUE), nrow = R)
+  # paired -----
+  if (paired){
 
-  #  for(i in 1:nrow(Z)){
-  #    dat = Z[i,]
-  #    dat_x = dat[1:nx]
-  #    dat_y = dat[(nx+1):(nx+ny)]
-  #    runTOST =  t_TOST(x = dat_x,
-  #                      y = dat_y,
-  #                      hypothesis = hypothesis,
-  #                      paired = paired,
-  #                      var.equal = var.equal,
-  #                      low_eqbound = low_eqbound,
-  #                      high_eqbound = high_eqbound,
-  #                      eqbound_type = eqbound_type,
-  #                      alpha = alpha,
-  #                      mu = mu,
-  #                      bias_correction = bias_correction,
-  #                      rm_correction = rm_correction)
-  #
+    ny <- length(y)
+    if(nx < 1 || (!var.equal && nx < 2))
+      stop("not enough 'x' observations")
+    if(ny < 1 || (!var.equal && ny < 2))
+      stop("not enough 'y' observations")
+    if(var.equal && nx + ny < 3)
+      stop("not enough observations")
+    my <- mean(y)
+    vy <- var(y)
 
-  #    d_vec[i] <- runTOST$smd$d # smd vector
-  #    m_vec[i] <- runTOST$effsize$estimate[1] # mean difference vector
-  #    t_vec[i] <- runTOST$TOST$t[1] # t-test vector
-  #    tl_vec[i] <- runTOST$TOST$t[2] # lower bound vector
-  #    tu_vec[i] <- runTOST$TOST$t[3] # upper bound vector
-  #  }
- # }
+    z <- x - y
+
+    nz <- length(z)
+    mz <- mean(z)
+    vz <- var(z)
+
+    if (nz < 2)
+      stop("not enough 'x' observations")
+    df <- nz - 1
+    stderr <- sqrt(vz/nz)
+    if (stderr < 10 * .Machine$double.eps * abs(mz)){
+      stop("data are essentially constant")
+    }
+
+    method <- "Bootstrapped Paired t-test"
+    #estimate <- setNames(mx, if (paired) "mean of the differences" else "mean of x")
+    #x.cent <- x - mx # remove to have an untransformed matrix
+    #Z <- matrix(sample(z, size = nz*R, replace = TRUE), nrow = R)
+    MZ <- rep(NA, times=length(R)) # Means
+    VZ <- rep(NA, times=length(R)) # Variance
+    STDERR <- rep(NA, times=length(R))
+    TSTAT <- rep(NA, times=length(R))
+    EFF <- rep(NA, times=length(R))
+    #VZ <- rowSums((Z - MZ) ^ 2) / (nz - 1)
+    #STDERR <- sqrt(VZ/nz)
+    #TSTAT <- (MZ)/STDERR
+    #TSTAT_low <- (MX-low_eqbound)/STDERR
+    #TSTAT_high <- (MX-high_eqbound)/STDERR
+    #EFF <- MZ+mz
+
+    for(i in 1:R){
+      sampler = sample(1:nrow(data), replace = TRUE)
+      zi = data$i1[sampler]-data$i2[sampler]
+      runTOST = t_TOST(x = data$i1[sampler],
+                          y = data$i2[sampler],
+                        hypothesis = hypothesis,
+                        paired = TRUE,
+                        var.equal = FALSE,
+                        low_eqbound = low_eqbound,
+                        high_eqbound = high_eqbound,
+                        eqbound_type = eqbound_type,
+                        alpha = alpha,
+                        mu = mu,
+                        bias_correction = bias_correction,
+                       glass = glass,
+                        rm_correction = rm_correction,
+                       smd_ci = "z")
+      MZ[i] = mean(zi - mz)
+      VZ[i] <- sum((zi - MZ[i]) ^ 2) / (nz - 1) #rowSums((X - MX) ^ 2) / (nx - 1)
+      STDERR[i] <- sqrt(VZ[i]/nz)
+      TSTAT[i] <- MZ[i]/STDERR[i]
+      EFF[i] <- MZ[i] + mz
+      d_vec[i] <- runTOST$smd$d # smd vector
+      m_vec[i] <- runTOST$effsize$estimate[1] # mean difference vector
+      d_se_vec[i] <- runTOST$effsize$SE[2] # smd vector
+      m_se_vec[i] <- runTOST$effsize$SE[1] # mean difference vector
+    }
+
+
+
+  }
+
+  # two sample -----
   if(!is.null(y) && !paired){
     ny <- length(y)
     if(nx < 1 || (!var.equal && nx < 2))
@@ -259,6 +312,7 @@ boot_t_TOST.default <- function(x,
     estimate <- c(mx, my)
     names(estimate) <- c("mean of x", "mean of y")
     if(var.equal){
+      ## var equal true ----
       df <- nx + ny - 2
       v <- 0
       if (nx > 1){
@@ -284,6 +338,7 @@ boot_t_TOST.default <- function(x,
 
       #d_vec <- rep(NA, times=length(R))
       for(i in 1:nrow(X)){
+
         #dat = Z[i,]
         dat_x = X[i,]#dat[1:nx]
         dat_y = Y[i,]#dat[(nx+1):(nx+ny)]
@@ -298,15 +353,19 @@ boot_t_TOST.default <- function(x,
                           alpha = alpha,
                           mu = mu,
                           bias_correction = bias_correction,
-                          rm_correction = FALSE)
+                          rm_correction = FALSE,
+                          smd_ci = "z")
 
         d_vec[i] <- runTOST$smd$d # smd vector
         m_vec[i] <- runTOST$effsize$estimate[1] # mean difference vector
+        d_se_vec[i] <- runTOST$effsize$SE[2] # smd vector
+        m_se_vec[i] <- runTOST$effsize$SE[1] # mean difference vector
         #t_vec[i] <- runTOST$TOST$t[1] # t-test vector
         #tl_vec[i] <- runTOST$TOST$t[2] # lower bound vector
         #tu_vec[i] <- runTOST$TOST$t[3] # upper bound vector
       }
     }else{
+      ## welch -----
       stderrx <- sqrt(vx/nx)
       stderry <- sqrt(vy/ny)
       stderr <- sqrt(stderrx^2 + stderry^2)
@@ -343,6 +402,8 @@ boot_t_TOST.default <- function(x,
 
         d_vec[i] <- runTOST$smd$d # smd vector
         m_vec[i] <- runTOST$effsize$estimate[1] # mean difference vector
+        d_se_vec[i] <- runTOST$effsize$SE[2] # smd vector
+        m_se_vec[i] <- runTOST$effsize$SE[1] # mean difference vector
         #t_vec[i] <- runTOST$TOST$t[1] # t-test vector
         #tl_vec[i] <- runTOST$TOST$t[2] # lower bound vector
         #tu_vec[i] <- runTOST$TOST$t[3] # upper bound vector
@@ -376,8 +437,22 @@ boot_t_TOST.default <- function(x,
   }
 
   boot.se = sd(m_vec)
-  boot.cint <- quantile(m_vec, c(alpha, 1 - alpha ))
-  d.cint <- quantile(d_vec, c(alpha, 1 - alpha ))
+  boot.cint <- switch(boot_ci,
+                      "stud" = stud(m_vec,
+                                    boots_se = m_se_vec,
+                                    t0 = nullTOST$effsize$estimate[1],
+                                    se0 = nullTOST$effsize$SE[1],
+                                    alpha*2),
+                      "basic" = basic(m_vec, t0 = nullTOST$effsize$estimate[1], alpha*2),
+                      "perc" = perc(m_vec, alpha*2))
+  d.cint <- switch(boot_ci,
+                   "stud" = stud(d_vec,
+                                 boots_se = d_se_vec,
+                                 t0 = nullTOST$effsize$estimate[2],
+                                 se0 = nullTOST$effsize$SE[2],
+                                 alpha*2),
+                   "basic" = basic(d_vec,t0 = nullTOST$effsize$estimate[2], alpha*2),
+                   "perc" = perc(d_vec, alpha*2))
   d.se = sd(d_vec)
 
   TOST = nullTOST$TOST

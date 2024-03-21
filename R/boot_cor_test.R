@@ -6,6 +6,7 @@
 #' @inheritParams boot_t_TOST
 #' @inheritParams z_cor_test
 #' @param method a character string indicating which correlation coefficient is to be used for the test. One of "winsorized", "bendpercent","pearson", "kendall", or "spearman", can be abbreviated.
+#' @param boot_ci type of bootstrap confidence interval. Options include studentized (stud), empirical/basic (basic) and percentile (perc) confidence intervals.
 #' @details This function uses a percentile bootstrap methods for the confidence intervals.
 #' The returned p-values are calculated from a re-sampled null distribution (similar to [boot_t_TOST]).
 #' See `vignette("correlations")` for more details.
@@ -43,8 +44,10 @@ boot_cor_test <- function(x,
                                      "winsorized", "bendpercent"),
                           alpha = 0.05,
                           null = 0,
+                          boot_ci = c("basic","perc"),
                           R = 1999,
                           ...) {
+  boot_ci = match.arg(boot_ci)
   DNAME <- paste(deparse(substitute(x)), "and", deparse(substitute(y)))
   alternative = match.arg(alternative)
 
@@ -115,9 +118,13 @@ boot_cor_test <- function(x,
     data <- matrix(sample(n, size=n*nboot, replace=TRUE), nrow=nboot)
     bvec <- apply(data, 1, .corboot, x, y, method = method, ...) # get bootstrap results corr
   }
-
-
-  boot.cint = quantile(bvec, c((1 - ci) / 2, 1 - (1 - ci) / 2))
+  alpha2 = ifelse(alternative != "two.sided",
+                  alpha*2,
+                  alpha)
+  boot.cint = switch(boot_ci,
+                     "basic" = basic(bvec, t0 = est, alpha2),
+                     "perc" = perc(bvec, alpha2))
+  #quantile(bvec, c((1 - ci) / 2, 1 - (1 - ci) / 2))
   attr(boot.cint, "conf.level") <- ci
   if(alternative == "two.sided"){
     phat <- (sum(bvec < null.value)+.5*sum(bvec==null.value))/nboot

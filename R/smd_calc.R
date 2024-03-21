@@ -3,21 +3,9 @@
 #' `r lifecycle::badge('stable')`
 #'
 #' A function to only calculate standardized mean differences.
-#' @param x a (non-empty) numeric vector of data values.
-#' @param y an optional (non-empty) numeric vector of data values.
-#' @param formula a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.
-#' @param data an optional matrix or data frame (or similar: see model.frame) containing the variables in the formula formula. By default the variables are taken from environment(formula).
-#' @param paired a logical indicating whether you want a paired t-test.
-#' @param var.equal  a logical variable indicating whether to treat the two variances as being equal. If TRUE then the pooled variance is used to estimate the variance otherwise the Welch (or Satterthwaite) approximation to the degrees of freedom is used.
-#' @param alpha alpha level (default = 0.05)
-#' @param bias_correction Apply Hedges' correction for bias (default is TRUE).
-#' @param rm_correction Repeated measures correction to make standardized mean difference Cohen's d(rm). This only applies to repeated/paired samples. Default is FALSE.
+#' @inheritParams t_TOST
+#' @inheritParams boot_t_TOST
 #' @param mu Null value. Deviating from zero will give the x-y-mu.
-#' @param glass A option to calculate Glass's delta as an alternative to Cohen's d type SMD. Default is NULL to not calculate Glass's delta, "glass1" will use the first group's SD as the denominator whereas "glass2" will use the 2nd group's SD.
-#' @param smd_ci Method for calculating SMD confidence intervals. Methods include Goulet, noncentral t (nct), central t (t), and normal method (z).
-#' @param subset an optional vector specifying a subset of observations to be used.
-#' @param na.action a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").
-#' @param ...  further arguments to be passed to or from methods.
 #' @details For details on the calculations in this function see vignette("SMD_calcs").
 #' @return A data frame containing the SMD estimates.
 #' @examples

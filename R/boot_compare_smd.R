@@ -171,7 +171,7 @@ boot_compare_smd = function(x1,
     n2_2 = nrow(subset(df2, group == "y"))
     se1 = se_ds(smd1, c(n1_1, n2_1))
     se2 = se_ds(smd2, c(n1_2, n2_2))
-    d_diff = smd1 - smd2
+    d_diff = smd1 - smd2 - null
     z_se = sqrt(se1^2+se2^2)
     z_stat = d_diff/z_se
     for(i in 1:R){
@@ -198,7 +198,7 @@ boot_compare_smd = function(x1,
       smd2_boot = md2_boot/sd2_boot
       se1_boot = se_ds(smd1_boot, nrow(df1_boot))
       se2_boot = se_ds(smd2_boot, nrow(df2_boot))
-      d_diff_boot = smd1_boot - smd2_boot
+      d_diff_boot = smd1_boot - smd2_boot - null
       z_se_boot = sqrt(se1_boot^2+se2_boot^2)
       z_stat_boot = d_diff_boot/z_se_boot
       zdiff_stat_boot = (d_diff_boot - d_diff) / z_se_boot

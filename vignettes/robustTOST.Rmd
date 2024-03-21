@@ -308,7 +308,7 @@ boot_log_TOST(
 # Just Estimate an Effect Size
 
 It was requested that a function be provided that only calculates a robust effect size.
-Therefore, I created the `ses_calc` function as robust effect size calculation.
+Therefore, I created the `ses_calc` and `boot_ses_calc` functions as robust effect size calculation^[The results differ greatly because the bootstrap CI method, basic bootstrap, is more conservative than the parametric method. This difference is more apparent with extremely small samples like that in the `sleep` dataset.].
 The interface is almost the same as `wilcox_TOST` but you don't set an equivalence bound.
 
 ```{r}
@@ -316,6 +316,15 @@ ses_calc(formula = extra ~ group,
          data = sleep,
          paired = TRUE,
          ses = "r")
+
+# Setting bootstrap replications low to
+## reduce compiling time of vignette
+boot_ses_calc(formula = extra ~ group,
+         data = sleep,
+         paired = TRUE,
+         R = 1990,
+         boot_ci = "perc", # recommend percentile bootstrap for paired SES
+         ses = "r") 
 ```
 
 # References

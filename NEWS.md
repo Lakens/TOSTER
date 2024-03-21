@@ -6,6 +6,8 @@ NEWS
 # TOSTER v0.8.1
 
 - Small correction to the displayed equation for Cohen's ds standard error. Thank you to Matthew B Jané for finding this error.
+- Added bootstrap options such as `boot_smd_calc` and `boot_ses_calc`.
+  - Many functions also now allow for different CI methods for bootstrapped results.
 
 # TOSTER v0.8.0
 

@@ -58,9 +58,10 @@ boot_t_test.default <- function(x,
                                                 "minimal.effect"),
                                 mu = 0,
                                 alpha = 0.05,
+                                boot_ci = c("stud","basic","perc"),
                                 R = 1999, ...){
   alternative = match.arg(alternative)
-
+  boot_ci = match.arg(boot_ci)
 
   if(!missing(alpha) && (length(alpha) != 1 || !is.finite(alpha) ||
                               alpha < 0 || alpha > 1)) {
@@ -86,6 +87,7 @@ boot_t_test.default <- function(x,
                            alpha = 0.05)
   mu = null_test$null.value
   m_vec <- rep(NA, times=length(R)) # mean difference vector
+  m_se_vec <- rep(NA, times=length(R)) # mean difference vector
   if(alternative %in% c("equivalence","minimal.effect")){
     conf.level = 1-alpha*2
   } else {
@@ -140,6 +142,14 @@ boot_t_test.default <- function(x,
     X <- matrix(sample(x, size = nx*R, replace = TRUE), nrow = R)
     MX <- rowMeans(X - mx)
     VX <- rowSums((X - MX) ^ 2) / (nx - 1)
+    MZ2 = NA
+    VZ2 = NA
+    for(i in 1:R){
+      zi = X[i,]
+      MZ2[i] = mean(zi - mx)
+      VZ2[i] <- sum((zi - MZ2[i]) ^ 2) / (nx - 1) #rowSums((X - MX) ^ 2) / (nx - 1)
+    }
+
     STDERR <- sqrt(VX/nx)
     TSTAT <- (MX)/STDERR
     #TSTAT_low <- (MX-low_eqbound)/STDERR
@@ -150,6 +160,7 @@ boot_t_test.default <- function(x,
       dat = X[i,]
 
       m_vec[i] <- mean(dat, na.rm=TRUE) # mean difference vector
+      m_se_vec[i] <- sd(dat, na.rm = TRUE)/sqrt(length(na.omit(dat)))
 
     }
   }
@@ -198,6 +209,7 @@ boot_t_test.default <- function(x,
         dat_y = Y[i,]#dat[(nx+1):(nx+ny)]
 
         m_vec[i] <- mean(dat_x, na.rm=TRUE) - mean(dat_y,na.rm=TRUE)  # mean difference vector
+        m_se_vec[i] <- sqrt(sd(dat_x, na.rm=TRUE)^2/length(na.omit(dat_x)) + sd(dat_y, na.rm=TRUE)^2/length(na.omit(dat_y)))
 
       }
     }else{
@@ -224,6 +236,7 @@ boot_t_test.default <- function(x,
         dat_y = Y[i,]#dat[(nx+1):(nx+ny)]
 
         m_vec[i] <- mean(dat_x, na.rm=TRUE) - mean(dat_y,na.rm=TRUE)  # mean difference vector
+        m_se_vec[i] <- sqrt(sd(dat_x, na.rm=TRUE)^2/length(na.omit(dat_x)) + sd(dat_y, na.rm=TRUE)^2/length(na.omit(dat_y)))
 
       }
     }
@@ -240,12 +253,14 @@ boot_t_test.default <- function(x,
     #TSTAT_high <- (MX-high_eqbound)/STDERR
   }
 
+  if(is.null(y)){
+    diff = mx
+  }else{
+    diff = mx-my
+  }
+
   if(alternative %in% c("equivalence", "minimal.effect")){
-    if(is.null(y)){
-      diff = mx
-    }else{
-      diff = mx-my
-    }
+
 
     tstat_l = (diff-min(mu))/stderr
     tstat_u = (diff-max(mu))/stderr
@@ -255,31 +270,67 @@ boot_t_test.default <- function(x,
 
     boot.pval <- mean(TSTAT < tstat)
 
-    boot.cint <- quantile(m_vec, c(alpha,1-alpha))
+    boot.cint <- switch(boot_ci,
+                        "stud" = stud(m_vec,
+                                      boots_se = m_se_vec,
+                                      t0 = diff,
+                                      se0 = null_test$stderr,
+                                      alpha = alpha*2),
+                        "basic" = basic(m_vec, t0 = diff, alpha*2),
+                        "perc" = perc(m_vec, alpha*2))
+
   }
 
   if(alternative == "greater") {
     boot.pval <- mean(TSTAT > tstat)
-    boot.cint <- quantile(m_vec, c(alpha,1-alpha))
+    boot.cint <- switch(boot_ci,
+                        "stud" = stud(m_vec,
+                                      boots_se = m_se_vec,
+                                      t0 = diff,
+                                      se0 = null_test$stderr,
+                                      alpha*2),
+                        "basic" = basic(m_vec, t0 = diff, alpha*2),
+                        "perc" = perc(m_vec, alpha*2))
   }
 
   if(alternative == "two.sided"){
     boot.pval <- 2*min(mean(TSTAT <= tstat), mean(TSTAT > tstat))
-    boot.cint <- quantile(m_vec, c(alpha/2,1-alpha/2))
+    boot.cint <- switch(boot_ci,
+                        "stud" = stud(m_vec,
+                                      boots_se = m_se_vec,
+                                      t0 = diff,
+                                      se0 = null_test$stderr,
+                                      alpha),
+                        "basic" = basic(m_vec, t0 = diff, alpha),
+                        "perc" = perc(m_vec, alpha))
   }
 
   if(alternative == "equivalence") {
     p_l = mean(TSTAT > tstat_l)
     p_u = mean(TSTAT < tstat_u)
     boot.pval <- max(p_l, p_u)
-    boot.cint <- quantile(m_vec, c(alpha,1-alpha))
+    boot.cint <- switch(boot_ci,
+                        "stud" = stud(m_vec,
+                                      boots_se = m_se_vec,
+                                      t0 = diff,
+                                      se0 = null_test$stderr,
+                                      alpha*2),
+                        "basic" = basic(m_vec, t0 = diff, alpha*2),
+                        "perc" = perc(m_vec, alpha*2))
   }
 
   if(alternative == "minimal.effect") {
     p_l = mean(TSTAT < tstat_l)
     p_u = mean(TSTAT > tstat_u)
     boot.pval <- min(p_l,p_u)
-    boot.cint <- quantile(m_vec, c(alpha,1-alpha))
+    boot.cint <- switch(boot_ci,
+                        "stud" = stud(m_vec,
+                                      boots_se = m_se_vec,
+                                      t0 = diff,
+                                      se0 = null_test$stderr,
+                                      alpha*2),
+                        "basic" = basic(m_vec, t0 = diff, alpha*2),
+                        "perc" = perc(m_vec, alpha*2))
   }
 
   boot.se = sd(m_vec, na.rm = TRUE)

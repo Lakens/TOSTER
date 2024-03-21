@@ -170,15 +170,18 @@ np_ses <- function(x,
   rb2 = switch(ses,
               "rb" = rb$rbs,
               "cstat" = rb_to_cstat(rb$rbs),
-              "odds" = rb_to_odds(rb$rbs))
+              "odds" = rb_to_odds(rb$rbs),
+              "logodds" = log(rb_to_odds(rb$rbs)))
   confint = switch(ses,
               "rb" = rb$conf.int,
               "cstat" = rb_to_cstat(rb$conf.int),
-              "odds" = rb_to_odds(rb$conf.int))
+              "odds" = rb_to_odds(rb$conf.int),
+              "logodds" = log(rb_to_odds(rb$conf.int)))
   type = switch(ses,
                 "rb" = "rb",
                 "cstat" = "cstat",
-                "odds" = "odds")
+                "odds" = "odds",
+                "logodds" = "logodds")
 
   rval = list(
     type = ses,
