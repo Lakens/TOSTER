@@ -322,7 +322,7 @@ ses_calc(formula = extra ~ group,
 boot_ses_calc(formula = extra ~ group,
          data = sleep,
          paired = TRUE,
-         R = 1990,
+         R = 199,
          boot_ci = "perc", # recommend percentile bootstrap for paired SES
          ses = "r") 
 ```

@@ -20,6 +20,7 @@ build/js
 NUL
 ^CRAN-RELEASE$
 ^cran-comments\.md$
+^CODE_OF_CONDUCT\.md$
 ^CRAN-SUBMISSION$
 .covrignore
 ^papers

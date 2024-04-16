@@ -3,6 +3,10 @@ NEWS
 
 **TOSTER R package and jamovi module**
 
+# TOSTER v0.8.2
+
+- Fixed error with `describe` method for minimal effects test for `TOSTt` objects.
+
 # TOSTER v0.8.1
 
 - Small correction to the displayed equation for Cohen's ds standard error. Thank you to Matthew B Jané for finding this error.

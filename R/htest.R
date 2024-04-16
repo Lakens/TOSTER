@@ -29,11 +29,17 @@ as_htest = function(TOST) {
     stop("Class cannot be converted to htest with this function.")
   }
 
-
+  alt_text = ifelse(grepl("equ", TOST$hypothesis,
+                          ignore.case = TRUE),
+                    "equivalence",
+                    "minimal.effect")
   # get row
 
   TOSTp = TOST$TOST[2:3, ]
-  TOSTp = TOSTp[which.max(TOSTp$p.value), ]
+  TOSTp = switch(alt_text,
+                 "equivalence" = TOSTp[which.max(TOSTp$p.value), ],
+                 "minimal.effect" = TOSTp[which.min(TOSTp$p.value), ]
+  )
 
   # assign
   statistic <- switch(class(TOST),
@@ -91,10 +97,7 @@ as_htest = function(TOST) {
   alt_bound <-
     ifelse(grepl("Lower", which_row), "lower", "upper")
 
-  alt_text = ifelse(grepl("equ", TOST$hypothesis,
-                          ignore.case = TRUE),
-                    "equivalence",
-                    "minimal.effect")
+
 
 
     conf.int <- c(TOST$effsize$lower.ci[1],
