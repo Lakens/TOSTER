@@ -3,6 +3,10 @@ NEWS
 
 **TOSTER R package and jamovi module**
 
+# TOSTER v0.8.3
+- Change in the standard error formulation to Glass delta for independent samples
+  - Hat tip to Paul Dudgeon for catching an error in the code that led to this development
+
 # TOSTER v0.8.2
 
 - Fixed error with `describe` method for minimal effects test for `TOSTt` objects.

@@ -274,8 +274,12 @@ d_est_ind <- function(n1,
   } else{
     if (denom %in% c("glass1", "glass2")) {
       N = n1 + n2
-      d_sigma = sqrt((1 / ntilde) * ((N - 2) / (N - 4)) * (1 + ntilde *
-                                                             cohend ^ 2) - cohend ^ 2 / J ^ 2)
+      # morris and deshon 2002
+      # d_sigma = sqrt((1 / ntilde) * ((N - 2) / (N - 4)) * (1 + ntilde *
+      #                                                        cohend ^ 2) - cohend ^ 2 / J ^ 2)
+      # Algina, Keselman, and Penfield (2006) from Delacre et al 2021
+      d_sigma2 = d_df / (d_df -2) * (1/n_glass + sdn_glass^2/(nn_glass*denomSD^2))+ cohend^2 * (d_df/(d_df-2)-J^2)
+      d_sigma = sqrt(d_sigma2)
     } else {
       if (var.equal) {
         d_sigma = sqrt(((n1 + n2) / (n1 * n2) + d ^ 2 / (2 * (n1 + n2))) * J ^ 2)

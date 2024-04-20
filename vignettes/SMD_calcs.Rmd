@@ -274,11 +274,10 @@ $$
 
 wherein $J$ represents the Hedges correction (calculation above).
 
-2. Under all other methods (nct, t, or z):
+2. Under all other methods^[Originally, I used an estimate of the standard error from Morris and DeShon. However, it was pointed out by colleague that this wasn't very accurate. We now use what is reported by derived from @delacre2021 wherein $\sigma_e$ is the variance of the group *not* used as the denominator for Glass's delta] (nct, t, or z) derived from derived from @delacre2021:
 
 $$
-\sigma_{SMD} = \sqrt{\frac{1}{\tilde n} \cdot \frac{N - 2}{N - 4} \cdot (1 + \tilde n \cdot
-                                                             d ^ 2) - \frac{d^2}{J^2}}
+\sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot (\frac{1}{n_c} + \frac{\sigma^2_e}{n_e \cdot \sigma_c^2}) + d^2 \cdot (\frac{df}{df-2}- J^2)}
 $$
 
 
