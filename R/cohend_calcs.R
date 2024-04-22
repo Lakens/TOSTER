@@ -83,8 +83,15 @@ d_est_pair <- function(n,
     #sep2 = (2*(1-r12)+cohend^2*n)
     #sep3 = cohend^2/(J)^2
     # Borenstein 2009 --- adopted from metafor
-    d_s1 = J^2*(2*(((1-r12)/n)+((cohend^2*J^(-1))/(2*n))))
+    # # abadoned 22 April in favor of heteroscedastic option from Bonett (below)
+    #d_s1 = J^2*(2*(((1-r12)/n)+((cohend^2*J^(-1))/(2*n))))
       #sqrt(sep1*sep2-sep3)
+    #d_sigma = sqrt(d_s1)
+    # vi[i] <- sddiffi[i]^2/(sd1i[i]^2*(ni[i]-1)) + yi[i]^2 / (2*(ni[i]-1))
+    ## Bonett, 2008a, equation 13
+    # note: Bonett (2008a) plugs the uncorrected yi into the equation for vi;
+    #  here, the corrected value is plugged in for consistency with [a]
+    d_s1 = sdif^2/(d_denom^2*(df)) + cohend^2 / (2*(df))
     d_sigma = sqrt(d_s1)
   }
 

@@ -454,12 +454,11 @@ $$
 $$ 
 
 The standard error ($\sigma$) of Glass's delta is calculated as the
-following:
+following derived^[Originally, @borenstein was utilized for this SE calculation. However, upon finding the estimate from @bonett2008, which is utilized in the `metafor` R package for heterogenous variance estimates, we have opted to use this estimate instead.] from @bonett2008:
 
 $$
-\sigma_{SMD} =     \sqrt{J^2 \cdot (\frac{1-r_{12}}{N} + \frac{d^2}{2 \cdot N \cdot J})}
+\sigma_{SMD} =     \sqrt{\frac{s_{diff}^2}{s_c^2 \cdot df} + \frac{d^2}{2 \cdot df}}
 $$
-
 
 # One Sample
 
