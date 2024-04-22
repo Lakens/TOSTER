@@ -278,7 +278,11 @@ d_est_ind <- function(n1,
       # d_sigma = sqrt((1 / ntilde) * ((N - 2) / (N - 4)) * (1 + ntilde *
       #                                                        cohend ^ 2) - cohend ^ 2 / J ^ 2)
       # Algina, Keselman, and Penfield (2006) from Delacre et al 2021
-      d_sigma2 = d_df / (d_df -2) * (1/n_glass + sdn_glass^2/(nn_glass*denomSD^2))+ cohend^2 * (d_df/(d_df-2)-J^2)
+      #d_sigma2 = d_df / (d_df -2) * (1/n_glass + sdn_glass^2/(nn_glass*denomSD^2))+ cohend^2 * (d_df/(d_df-2)-J^2)
+      #  # Bonett, 2008a, equation 12
+      ### adapted from metafor SMD1H
+      ### vi <- (sd1i^2/sd2i^2)/(n1i-1) + 1/(n2i-1) + yi^2/(2*(n2i-1))
+      d_sigma2 = (sdn_glass^2/denomSD^2)/(nn_glass-1) + 1/(n_glass-1) + cohend^2/(2*(n_glass-1))
       d_sigma = sqrt(d_sigma2)
     } else {
       if (var.equal) {

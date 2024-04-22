@@ -274,10 +274,10 @@ $$
 
 wherein $J$ represents the Hedges correction (calculation above).
 
-2. Under all other methods^[Originally, I used an estimate of the standard error from Morris and DeShon. However, it was pointed out by colleague that this wasn't very accurate. We now use what is reported by @delacre2021 wherein $\sigma_e$ is the variance of the group *not* used as the denominator for Glass's delta] (nct, t, or z) derived from derived from @delacre2021:
+2. Under all other methods^[Originally, I used an estimate of the standard error from Morris and DeShon. However, it was pointed out by colleague that this wasn't very accurate. We now use what is used in the metafor R package for the "SMD1H" which is the use of one sample SD as the denominator under the assumption of heterogeneous variances] (nct, t, or z) derived from @bonett2008:
 
 $$
-\sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot (\frac{1}{n_c} + \frac{\sigma^2_e}{n_e \cdot \sigma_c^2}) + d^2 \cdot (\frac{df}{df-2}- J^2)}
+\sigma_{SMD} = \sqrt{\frac{s_e^2 \div s_c^2}{n_e-1}+ \frac{1}{n_c-1}+ \frac{d^2}{2 \cdot (n_c-1)}}
 $$
 
 
