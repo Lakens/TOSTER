@@ -157,10 +157,10 @@ $$
 \lambda = \frac{2 \cdot (n_2 \cdot \sigma_1^2 + n_1 \cdot \sigma_2^2)} {n_1 \cdot n_2 \cdot (\sigma_1^2 + \sigma_2^2)}
 $$
 The standard error ($\sigma$) of Cohen's d(av) is calculated as the
-following:
+following from @bonett2009meta^[This changed from the original formulation, I believe the current version is a better estimate]:
 
 $$
-\sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{2}{\tilde n} (1+d^2 \cdot \frac{\tilde n}{2}) -\frac{d^2}{J^2}}
+\sigma_{SMD} = \sqrt{d^2 \cdot (\frac{s_1^4}{n_1-1}+\frac{s_2^4}{n_2-1}) \div 8 \cdot s_{av}^4 + (\frac{s_1^2}{n_1-1}+\frac{s_2^2}{n_2-1}) \div s_{av}^2}
 $$ 
 
 wherein $J$ represents the Hedges correction (calculation above).

@@ -295,9 +295,15 @@ d_est_ind <- function(n1,
       if (var.equal) {
         d_sigma = sqrt(((n1 + n2) / (n1 * n2) + d ^ 2 / (2 * (n1 + n2))) * J ^ 2)
       } else{
-        par1 = 2*(sd1^2/n1+sd2^2/n2)/(sd1^2+sd2^2)
-        par2 = d_df/(d_df-2)-J^2
-        d_sigma = sqrt(d_df/(d_df-2)*par1+cohend^2*par2)
+        # par1 = 2*(sd1^2/n1+sd2^2/n2)/(sd1^2+sd2^2)
+        # par2 = d_df/(d_df-2)-J^2
+        # d_sigma = sqrt(d_df/(d_df-2)*par1+cohend^2*par2)
+        # Adopted from metfor
+        # vi[i] <- yi[i]^2 * (sd1i[i]^4 / (n1i[i]-1) + sd2i[i]^4 / (n2i[i]-1)) / (8*sdpi[i]^4) +
+        #(sd1i[i]^2 / (n1i[i]-1) + sd2i[i]^2 / (n2i[i]-1)) / sdpi[i]^2 # Bonett, 2008a, equation 8; Bonett, 2009, equation 5
+        d_sigma2 = cohend^2 * (sd1^4 / (n1-1) + sd2^4 / (n2-1)) / (8*denomSD^4) +
+          (sd1^2 / (n1-1) + sd2^2 / (n2-1)) / denomSD^2 # Bonett, 2008a, equation 8; Bonett, 2009, equation 5
+        d_sigma = sqrt(d_sigma2)
       }
     }
 
