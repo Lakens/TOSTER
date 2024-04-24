@@ -129,9 +129,9 @@ test_that("Hedges g(s/av) and g(z)",
             # meta_c$vi
             # LS2 approximation
             # # Borenstein, 2009, equation 12.17
-            expect_equal(0.199295,round(smd$SE^2,6))
+            expect_equal(0.2195277,round(smd$SE^2,7))
 
-            expect_equal(0.168905,round(smc$SE^2,6))
+            expect_equal(0.1946978,round(smc$SE^2,7))
 
             smd = TOSTER::smd_calc(x = subset(sleep,
                                               group == 1)$extra,

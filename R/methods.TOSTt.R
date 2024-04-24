@@ -85,7 +85,17 @@ print.TOSTt <- function(x,
     cat("\n")
   } else {
   if("boot" %in% names(x)){
-    cat("Note: percentile bootstrap method utilized.")
+    if(x$call$boot_ci == "perc"){
+      cat("Note: percentile bootstrap ci method utilized.")
+    }
+    if(x$call$boot_ci == "basic"){
+      cat("Note: basic bootstrap ci method utilized.")
+    }
+
+    if(x$call$boot_ci == "stud"){
+      cat("Note: studentized bootstrap ci method utilized.")
+    }
+
   }else{
     cat("Note: SMD confidence intervals are an approximation. See vignette(\"SMD_calcs\").")
   }
