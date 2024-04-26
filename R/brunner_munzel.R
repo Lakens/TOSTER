@@ -353,7 +353,7 @@ brunner_munzel.default = function(x,
                                    1-alpha,
                                    1-2*alpha)
   estimate = pd
-  names(estimate) = "p(X<Y) + .5*P(X=Y)"
+  names(estimate) = "p(X>Y) + .5*P(X=Y)"
 
   rval <- list(statistic = test_stat,
                parameter = df.sw,

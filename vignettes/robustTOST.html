@@ -12,7 +12,7 @@
 
 <meta name="author" content="Aaron R. Caldwell" />
 
-<meta name="date" content="2024-04-20" />
+<meta name="date" content="2024-04-26" />
 
 <title>Robust TOST Procedures</title>
 
@@ -362,7 +362,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Robust TOST Procedures</h1>
 <h4 class="author">Aaron R. Caldwell</h4>
-<h4 class="date">2024-04-20</h4>
+<h4 class="date">2024-04-26</h4>
 
 
 <div id="TOC">
@@ -630,9 +630,9 @@ probability of superiority)</span>, which is usually referred to as the
 relative effect, based on the ranks of the two groups being compared (X
 and Y). A Brunner-Munzel type test is then a directional test of an
 effect, and answers a question akin to “what is the probability that a
-randomly sampled value of Y will be greater than X?”</p>
+randomly sampled value of X will be greater than Y?”</p>
 <p><span class="math display">\[
-\hat p = P(X&lt;Y) + 0.5 \cdot P(X=Y)
+\hat p = P(X&gt;Y) + 0.5 \cdot P(X=Y)
 \]</span></p>
 <div id="basics-of-the-calculative-approach" class="section level2">
 <h2>Basics of the Calculative Approach</h2>
@@ -673,7 +673,7 @@ alternative hypothesis for “two.sided”, “less”, or “greater”.</p>
 ## 95 percent confidence interval:
 ##  0.01387048 0.49612952
 ## sample estimates:
-## p(X&lt;Y) + .5*P(X=Y) 
+## p(X&gt;Y) + .5*P(X=Y) 
 ##              0.255</code></pre>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="co"># permutation</span></span>
 <span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
@@ -689,7 +689,7 @@ alternative hypothesis for “two.sided”, “less”, or “greater”.</p>
 ## 95 percent confidence interval:
 ##  0.0000000 0.5089213
 ## sample estimates:
-## p(X&lt;Y) + .5*P(X=Y) 
+## p(X&gt;Y) + .5*P(X=Y) 
 ##              0.255</code></pre>
 <p>The <code>simple_htest</code> function allows TOST tests using a
 Brunner-Munzel test by setting the alternative to “equivalence” or
@@ -715,7 +715,7 @@ can be set with the <code>mu</code> argument.</p>
 ## 90 percent confidence interval:
 ##  0.0588093 0.4555339
 ## sample estimates:
-## p(X&lt;Y) + .5*P(X=Y) 
+## p(X&gt;Y) + .5*P(X=Y) 
 ##              0.255</code></pre>
 </div>
 </div>
