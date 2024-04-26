@@ -12,7 +12,7 @@
 
 <meta name="author" content="Aaron R. Caldwell" />
 
-<meta name="date" content="2024-04-22" />
+<meta name="date" content="2024-04-25" />
 
 <title>Standardized Mean Differences</title>
 
@@ -363,7 +363,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <h1 class="title toc-ignore">Standardized Mean Differences</h1>
 <h3 class="subtitle">The calculation of Cohen’s d type effect sizes</h3>
 <h4 class="author">Aaron R. Caldwell</h4>
-<h4 class="date">2024-04-22</h4>
+<h4 class="date">2024-04-25</h4>
 
 
 <div id="TOC">
@@ -531,13 +531,12 @@ n_2(\sigma^2_1+\sigma^2_2)}{2 \cdot (n_2 \cdot \sigma^2_1+n_1 \cdot
 \lambda = \frac{2 \cdot (n_2 \cdot \sigma_1^2 + n_1 \cdot \sigma_2^2)}
 {n_1 \cdot n_2 \cdot (\sigma_1^2 + \sigma_2^2)}
 \]</span> The standard error (<span class="math inline">\(\sigma\)</span>) of Cohen’s d(av) is calculated as
-the following:</p>
+the following from <span class="citation">Bonett (2009)</span><a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a>:</p>
 <p><span class="math display">\[
-\sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{2}{\tilde n} (1+d^2
-\cdot \frac{\tilde n}{2}) -\frac{d^2}{J^2}}
+\sigma_{SMD} = \sqrt{d^2 \cdot (\frac{s_1^4}{n_1-1}+\frac{s_2^4}{n_2-1})
+\div 8 \cdot s_{av}^4 + (\frac{s_1^2}{n_1-1}+\frac{s_2^2}{n_2-1}) \div
+s_{av}^2}
 \]</span></p>
-<p>wherein <span class="math inline">\(J\)</span> represents the Hedges
-correction (calculation above).</p>
 </div>
 <div id="variances-assumed-equal-cohens-d" class="section level2">
 <h2>Variances Assumed Equal: Cohen’s d</h2>
@@ -584,14 +583,15 @@ Cohen’s d is calculated as the following:</p>
 <p><span class="math display">\[
 \sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{2}{\tilde n} (1+d^2
 \cdot \frac{\tilde n}{2}) -\frac{d^2}{J}}
-\]</span> wherein <span class="math inline">\(J\)</span> represents the
-Hedges correction (calculation above).</p>
+\]</span></p>
 <ol start="2" style="list-style-type: decimal">
-<li>Under all other methods (nct, t, or z):</li>
+<li>Under all other methods (nct, t, or z) it is calculated using the
+“unbiased” estimate from <span class="citation">Viechtbauer
+(2007)</span> (table 1; equation 26)<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a>:</li>
 </ol>
 <p><span class="math display">\[
-\sigma_{SMD} = \sqrt{\frac{n_1+n_2}{n_1 \cdot n_2} + \frac{d^2}{2
-\cdot(n_1+n_2)} \cdot J^2}
+\sigma_{SMD} = \sqrt{\frac{1}{n_1} + \frac{1}{n_2} + (1 - \frac{df-2}{df
+\cdot J^2}) \cdot d_s^2}
 \]</span></p>
 </div>
 <div id="glasss-delta" class="section level2">
@@ -641,10 +641,8 @@ Glass’s delta is calculated as the following:</p>
 \sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{2}{\tilde n} (1+d^2
 \cdot \frac{\tilde n}{2}) -\frac{d^2}{J}}
 \]</span></p>
-<p>wherein <span class="math inline">\(J\)</span> represents the Hedges
-correction (calculation above).</p>
 <ol start="2" style="list-style-type: decimal">
-<li>Under all other methods<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a> (nct, t, or z) derived from <span class="citation">Bonett (2008)</span>:</li>
+<li>Under all other methods<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a> (nct, t, or z) derived from <span class="citation">Bonett (2008)</span>:</li>
 </ol>
 <p><span class="math display">\[
 \sigma_{SMD} = \sqrt{\frac{s_e^2 \div s_c^2}{n_e-1}+ \frac{1}{n_c-1}+
@@ -657,7 +655,7 @@ correction (calculation above).</p>
 <p>For paired samples there are two calculative approaches supported by
 <code>TOSTER</code>. One the denominator is the standard deviation of
 the change score (Cohen’s d(z)), the correlation corrected effect size
-(Cohen’s d(av)), and the standard deviation of the control condition
+(Cohen’s d(rm)), and the standard deviation of the control condition
 (Glass’s <span class="math inline">\(\Delta\)</span>). Currently, the
 choice is made by the function based on whether or not the user sets
 <code>rm_correction</code> to TRUE. If <code>rm_correction</code> is set
@@ -719,10 +717,13 @@ Cohen’s d(z) is calculated as the following:</p>
 \space \times \space \sqrt {2 \cdot (1-r_{12})}
 \]</span></p>
 <ol start="2" style="list-style-type: decimal">
-<li>Under all other methods (nct, t, or z):</li>
+<li>Under all other methods (nct, t, or z) it calculated using the
+“unbiased” estimate from <span class="citation">Viechtbauer
+(2007)</span> (table 1; equation 26)<a href="#fn6" class="footnote-ref" id="fnref6"><sup>6</sup></a>:</li>
 </ol>
 <p><span class="math display">\[
-\sigma_{SMD} = \sqrt{\frac{1}{n} + \frac{d_z^2}{(2 \cdot n)}}
+\sigma_{SMD} = \sqrt{\frac{1}{N} + (1 - \frac{df-2}{df \cdot J^2}) \cdot
+d_z^2}
 \]</span></p>
 </div>
 <div id="cohens-drm-correlation-corrected" class="section level2">
@@ -738,7 +739,7 @@ s_{diff} =  \sqrt{sd_1^2 + sd_2^2 - 2 \cdot r_{12} \cdot sd_1 \cdot
 sd_2}
 \]</span></p>
 <p>The SMD, Cohen’s d(rm), is then calculated with a small change to the
-denominator<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a>:</p>
+denominator<a href="#fn7" class="footnote-ref" id="fnref7"><sup>7</sup></a>:</p>
 <p><span class="math display">\[
 d_{rm} = \frac {\bar{x}_1 - \bar{x}_2}{s_{diff}} \cdot \sqrt {2 \cdot
 (1-r_{12})}
@@ -822,7 +823,7 @@ following:</p>
 \lambda = \frac{1}{N}
 \]</span></p>
 <p>The standard error (<span class="math inline">\(\sigma\)</span>) of
-Glass’s delta is calculated as the following derived<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a> from <span class="citation">Bonett (2008)</span>:</p>
+Glass’s delta is calculated as the following derived<a href="#fn8" class="footnote-ref" id="fnref8"><sup>8</sup></a> from <span class="citation">Bonett (2008)</span>:</p>
 <p><span class="math display">\[
 \sigma_{SMD} =     \sqrt{\frac{s_{diff}^2}{s_c^2 \cdot df} +
 \frac{d^2}{2 \cdot df}}
@@ -868,24 +869,27 @@ Cohen’s d is calculated as the following:</p>
 <p><span class="math display">\[
 \sigma_{SMD} = \sqrt{\frac{1}{n} + \frac{d^2}{(2 \cdot n)}}
 \]</span></p>
-<ul>
-<li>Wherein <span class="math inline">\(J\)</span> represents the Hedges
-correction (calculation above).</li>
-</ul>
 </div>
 <div id="confidence-intervals" class="section level1">
 <h1>Confidence Intervals</h1>
 <p>For the SMDs calculated in this package we use the non-central
-<em>t</em> method outlined by <span class="citation">Goulet-Pelletier
-and Cousineau (2018)</span>. These calculations are only approximations
-and newer formulations may provide better coverage <span class="citation">(Cousineau and Goulet-Pelletier 2021)</span>. In any
-case, if the calculation of confidence intervals for SMDs is of the
-utmost importance then I would strongly recommend using bootstrapping
-techniques rather than any calculative approach whenever possible <span class="citation">(Kirby and Gerlanc 2013)</span>.</p>
-<p>The calculations of the confidence intervals in this package involve
-a two step process: 1) using the noncentral <em>t</em>-distribution to
-calculate the lower and upper bounds of <span class="math inline">\(\lambda\)</span>, and 2) transforming this back to
-the effect size estimate.</p>
+<em>t</em> method, those outlined by <span class="citation">Goulet-Pelletier and Cousineau (2018)</span>, and
+approximate methods using the <em>t</em> and normal distributions. These
+calculations are only approximations and newer formulations may provide
+better coverage <span class="citation">(e.g., Cousineau and
+Goulet-Pelletier 2021)</span>. In any case, if the calculation of
+confidence intervals for SMDs is of the utmost importance then I would
+strongly recommend using bootstrapping techniques rather than any of
+these approximations whenever possible <span class="citation">(Kirby and
+Gerlanc 2013)</span>.</p>
+<p>The calculations of the confidence intervals for the
+<code>goulet</code> and <code>nct</code> methods involve a two step
+process: 1) using the noncentral <em>t</em>-distribution to calculate
+the lower and upper bounds of <span class="math inline">\(\lambda\)</span>, and 2) transforming this back to
+the effect size estimate. These noncentrality methods are not without
+their detractors <span class="citation">(Spanos 2021)</span>. The normal
+and <em>t</em> methods are much simpler and less computationally
+intensive, but may have varying levels of accuracy <span class="citation">(see Viechtbauer 2007 for more details)</span>.</p>
 <div id="cousineau2021-method-smd_ci-goulet" class="section level2">
 <h2><span class="citation">Cousineau and Goulet-Pelletier (2021)</span>
 Method (smd_ci = “goulet”)</h2>
@@ -902,9 +906,13 @@ d_U = \frac{t_U}{\lambda} \cdot d
 </div>
 <div id="the-non-central-t-method-smd_ci-nct" class="section level2">
 <h2>The non-central t-method (smd_ci = “nct”)</h2>
-<p>Calculate the non-centrality parameters necessary to form confidence
-intervals wherein the observed t-statistic (<span class="math inline">\(t_{obs}\)</span>) (note: the standard error is
-slightly altered for d_{rm}) is utilized.</p>
+<p>This method is commonly reported in the literature and in other R
+packages (e.g., <code>effectsize</code>). However, it is not without
+criticism <span class="citation">(Spanos 2021; Viechtbauer
+2007)</span>.</p>
+<p>In thise method, you calculate the non-centrality parameters
+necessary to form confidence intervals wherein the observed t-statistic
+(<span class="math inline">\(t_{obs}\)</span>)is utilized.</p>
 <p><span class="math display">\[
 t_L = t_{(1-alpha,\space df, \space t_{obs})} \\
 t_U = t_{(alpha,\space df, \space  t_{obs})}
@@ -917,7 +925,9 @@ d_U = t_U \cdot \sqrt{\lambda} \cdot J
 </div>
 <div id="central-t-method" class="section level2">
 <h2>Central t-method</h2>
-<p>Full warning this method provides sub-optimal coverage.</p>
+<p>This is less commonly used though it might perform alright in some
+scenarios, and as <span class="citation">Bonett (2008)</span> and <span class="citation">Viechtbauer (2007)</span> report it might perform
+adequately under with an adequately large sample size.</p>
 <p>The limits of the t-distribution at the given alpha-level and degrees
 of freedom (<code>qt(1-alpha,df)</code>) are multiplied by the standard
 error of the calculated SMD.</p>
@@ -927,8 +937,12 @@ CI = SMD \space \pm \space t_{(1-\alpha,df)} \cdot \sigma_{SMD}
 </div>
 <div id="normal-method" class="section level2">
 <h2>Normal method</h2>
-<p>Full warning this method provides atrocious coverage at most sample
-sizes in my opinion.</p>
+<p>This method will often be the most liberal estimate for the
+confidence interval. But as <span class="citation">Bonett (2008)</span>
+and <span class="citation">Viechtbauer (2007)</span> report, it might
+perform adequately under with an adequately large sample size. The use
+of the normal distribution can be justified by the fact that SMDs are
+asympototically normal.</p>
 <p>The limits of the z-distribution at the given alpha-level
 (<code>qnorm(1-alpha)</code>) are multiplied by the standard error of
 the calculated SMD.</p>
@@ -941,7 +955,7 @@ CI = SMD \space \pm \space z_{(1-\alpha)} \cdot \sigma_{SMD}
 <h1>Just Estimate the SMD</h1>
 <p>It was requested that a function be provided that only calculates the
 SMD. Therefore, I created the <code>smd_calc</code> and
-<code>boot_smd_calc</code> functions<a href="#fn6" class="footnote-ref" id="fnref6"><sup>6</sup></a>. The interface is almost the same as
+<code>boot_smd_calc</code> functions<a href="#fn9" class="footnote-ref" id="fnref9"><sup>9</sup></a>. The interface is almost the same as
 <code>t_TOST</code> but you don’t set an equivalence bound.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">smd_calc</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>         <span class="at">data =</span> sleep,</span>
@@ -949,7 +963,7 @@ SMD. Therefore, I created the <code>smd_calc</code> and
 <span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>         <span class="at">smd_ci =</span> <span class="st">&quot;nct&quot;</span>,</span>
 <span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>         <span class="at">bias_correction =</span> F)</span>
 <span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&gt;               estimate        SE  lower.ci   upper.ci conf.level</span></span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt; Cohen&#39;s d(z) -1.284558 0.4272053 -2.118017 -0.4146278       0.95</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt; Cohen&#39;s d(z) -1.284558 0.6831444 -2.118017 -0.4146278       0.95</span></span>
 <span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a></span>
 <span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co"># Setting bootstrap replications low to</span></span>
 <span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="do">## reduce compiling time of vignette</span></span>
@@ -959,8 +973,8 @@ SMD. Therefore, I created the <code>smd_calc</code> and
 <span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>         <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
 <span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>         <span class="at">boot_ci =</span> <span class="st">&quot;stud&quot;</span>,</span>
 <span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a>         <span class="at">bias_correction =</span> F)</span>
-<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="co">#&gt;               estimate      bias        SE  lower.ci upper.ci conf.level</span></span>
-<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="co">#&gt; Cohen&#39;s d(z) -1.284558 0.1196332 0.6359288 -1.706427 1.440263       0.95</span></span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="co">#&gt;               estimate       bias        SE  lower.ci upper.ci conf.level</span></span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="co">#&gt; Cohen&#39;s d(z) -1.284558 0.08257419 0.7038372 -1.625446 1.514296       0.95</span></span>
 <span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a><span class="co">#&gt;              boot_ci</span></span>
 <span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a><span class="co">#&gt; Cohen&#39;s d(z)    stud</span></span></code></pre></div>
 </div>
@@ -970,18 +984,23 @@ SMD. Therefore, I created the <code>smd_calc</code> and
 or you may only have the summary statistics from another study. For this
 reason, I have included a way to plot the SMD based on just three
 values: the estimate of the SMD, the degrees of freedom, and the
-non-centrality parameter. So long as all three are reported, or can be
-estimated, then a plot of the SMD can be produced.</p>
+non-centrality parameter/standard error. So long as all three are
+reported, or can be estimated, then a plot of the SMD can be produced.
+The non-centrality parameter is needed if you want to plot the estimates
+using the <code>&quot;goulet&quot;</code> method while the standard error is
+needed if you want to plot the <code>z</code> (normal) or <code>t</code>
+(t-distribution) methods.</p>
 <p>Two types of plots can be produced: consonance
 (<code>type = &quot;c&quot;</code>), consonance density
 (<code>type = &quot;cd&quot;</code>), or both (the default option;
 (<code>type = c(&quot;c&quot;,&quot;cd&quot;)</code>))</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">plot_smd</span>(<span class="at">d =</span> .<span class="dv">43</span>,</span>
 <span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>         <span class="at">df =</span> <span class="dv">58</span>,</span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>         <span class="at">lambda =</span> <span class="fl">1.66</span>,</span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>         <span class="at">smd_label =</span> <span class="st">&quot;Cohen&#39;s d&quot;</span></span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>         )</span></code></pre></div>
-<p><img src="data:image/png;base64,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" /><!-- --></p>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>         <span class="at">sigma =</span> .<span class="dv">33</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>         <span class="at">smd_label =</span> <span class="st">&quot;Cohen&#39;s d&quot;</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>         <span class="at">smd_ci =</span> <span class="st">&quot;z&quot;</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>         )</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
 </div>
 <div id="comparing-smds" class="section level1">
 <h1>Comparing SMDs</h1>
@@ -1121,6 +1140,11 @@ Bonett, Douglas G. 2008. <span>“Confidence Intervals for Standardized
 Linear Contrasts of Means.”</span> <em>Psychological Methods</em> 13
 (2): 99.
 </div>
+<div id="ref-bonett2009meta" class="csl-entry">
+———. 2009. <span>“Meta-Analytic Interval Estimation for Standardized and
+Unstandardized Mean Differences.”</span> <em>Psychological Methods</em>
+14 (3): 225.
+</div>
 <div id="ref-borenstein" class="csl-entry">
 Borenstein, Michael, Larry V Hedges, Julian PT Higgins, and Hannah R
 Rothstein. 2021. <em>Introduction to Meta-Analysis</em>. John Wiley
@@ -1139,9 +1163,9 @@ Default Effect Sizes in Sport and Exercise Science.”</span>
 </div>
 <div id="ref-Cousineau2021" class="csl-entry">
 Cousineau, Denis, and Jean-Christophe Goulet-Pelletier. 2021. <span>“A
-Study of Confidence Intervals for Cohen<span></span>s Dp in
-Within-Subject Designs with New Proposals.”</span> <em>The Quantitative
-Methods for Psychology</em> 17 (1): 51–75. <a href="https://doi.org/10.20982/tqmp.17.1.p051">https://doi.org/10.20982/tqmp.17.1.p051</a>.
+Study of Confidence Intervals for Cohen’s Dp in Within-Subject Designs
+with New Proposals.”</span> <em>The Quantitative Methods for
+Psychology</em> 17 (1): 51–75. <a href="https://doi.org/10.20982/tqmp.17.1.p051">https://doi.org/10.20982/tqmp.17.1.p051</a>.
 </div>
 <div id="ref-delacre2021" class="csl-entry">
 Delacre, Marie, Daniel Lakens, Christophe Ley, Limin Liu, and Christophe
@@ -1165,6 +1189,17 @@ Lakens, Daniël. 2013. <span>“Calculating and Reporting Effect Sizes to
 Facilitate Cumulative Science: A Practical Primer for t-Tests and
 ANOVAs.”</span> <em>Frontiers in Psychology</em> 4: 863.
 </div>
+<div id="ref-spanos2021" class="csl-entry">
+Spanos, Aris. 2021. <span>“Revisiting Noncentrality-Based Confidence
+Intervals, Error Probabilities and Estimation-Based Effect
+Sizes.”</span> <em>Journal of Mathematical Psychology</em> 104: 102580.
+</div>
+<div id="ref-viechtbauer2007approximate" class="csl-entry">
+Viechtbauer, Wolfgang. 2007. <span>“Approximate Confidence Intervals for
+Standardized Effect Sizes in the Two-Independent and Two-Dependent
+Samples Design.”</span> <em>Journal of Educational and Behavioral
+Statistics</em> 32 (1): 39–60.
+</div>
 </div>
 </div>
 <div class="footnotes footnotes-end-of-document">
@@ -1177,23 +1212,27 @@ as SMD<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
 <li id="fn2"><p>This calculation was derived from the supplementary
 material of <span class="citation">Cousineau and Goulet-Pelletier
 (2021)</span>.<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
-<li id="fn3"><p>Originally, I used an estimate of the standard error
+<li id="fn3"><p>This changed from the original formulation, I believe
+the current version is a better estimate<a href="#fnref3" class="footnote-back">↩︎</a></p></li>
+<li id="fn4"><p>This assumes degrees of freedom of N-2<a href="#fnref4" class="footnote-back">↩︎</a></p></li>
+<li id="fn5"><p>Originally, I used an estimate of the standard error
 from Morris and DeShon. However, it was pointed out by colleague that
 this wasn’t very accurate. We now use what is used in the metafor R
 package for the “SMD1H” which is the use of one sample SD as the
-denominator under the assumption of heterogeneous variances<a href="#fnref3" class="footnote-back">↩︎</a></p></li>
-<li id="fn4"><p>This is incorrectly stated in the article by <span class="citation">Goulet-Pelletier and Cousineau (2018)</span>; the
+denominator under the assumption of heterogeneous variances<a href="#fnref5" class="footnote-back">↩︎</a></p></li>
+<li id="fn6"><p>This assumes degrees of freedom of N-1<a href="#fnref6" class="footnote-back">↩︎</a></p></li>
+<li id="fn7"><p>This is incorrectly stated in the article by <span class="citation">Goulet-Pelletier and Cousineau (2018)</span>; the
 correct notation is provided by <span class="citation">Lakens
-(2013)</span><a href="#fnref4" class="footnote-back">↩︎</a></p></li>
-<li id="fn5"><p>Originally, <span class="citation">Borenstein et al.
+(2013)</span><a href="#fnref7" class="footnote-back">↩︎</a></p></li>
+<li id="fn8"><p>Originally, <span class="citation">Borenstein et al.
 (2021)</span> was utilized for this SE calculation. However, upon
 finding the estimate from <span class="citation">Bonett (2008)</span>,
 which is utilized in the <code>metafor</code> R package for heterogenous
-variance estimates, we have opted to use this estimate instead.<a href="#fnref5" class="footnote-back">↩︎</a></p></li>
-<li id="fn6"><p>The results differ greatly because the bootstrap CI
+variance estimates, we have opted to use this estimate instead.<a href="#fnref8" class="footnote-back">↩︎</a></p></li>
+<li id="fn9"><p>The results differ greatly because the bootstrap CI
 method, studentized, is more conservative than the parametric method.
 This difference is more apparent with extremely small samples like that
-in the <code>sleep</code> dataset.<a href="#fnref6" class="footnote-back">↩︎</a></p></li>
+in the <code>sleep</code> dataset.<a href="#fnref9" class="footnote-back">↩︎</a></p></li>
 </ol>
 </div>
 

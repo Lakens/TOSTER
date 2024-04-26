@@ -236,7 +236,7 @@ The same process is completed for the one sample case but with the one sample so
 
 ## Example
 
-We can use the sleep data to see the bootstrapped results. Notice that the plots show how the re-sampling via bootstrapping indicates the instability of Hedges' d(z).
+We can use the sleep data to see the bootstrapped results. Notice that the plots show how the re-sampling via bootstrapping indicates the instability of Hedges's d~z~.
 
 ```{r}
 data('sleep')

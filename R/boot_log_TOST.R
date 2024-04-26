@@ -418,7 +418,8 @@ if(!paired){
     ttest = ttest_restext,
     combined = combined_outcome
   )
-
+  call2 = match.call()
+  call2$boot_ci = boot_ci
   rval = list(
     TOST = TOST,
     eqb = nullTOST$eqb,
@@ -431,7 +432,7 @@ if(!paired){
     boot = list(SMD = d_vec,
                 raw = m_vec),
     data.name = dname,
-    call = match.call()
+    call = call2
   )
 
   class(rval) = "TOSTt"
