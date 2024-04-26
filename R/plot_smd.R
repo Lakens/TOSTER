@@ -30,12 +30,25 @@ plot_smd <- function(d,
                      levels = c(.5,.9,.95,.999)){
   smd_ci = match.arg(smd_ci)
   if(smd_ci == "nct"){
-    stop("nct method not supported for this function.")
+    stop("nct method not supported for this function at this time.")
   }
 
-  if(is.null(lambda) && is.null(sigma)){
-    stop("sigma or lambda must be provided")
+  if(smd_ci == "goulet"){
+    sigma = NULL
   }
+
+  if(smd_ci %in% c("t","z")){
+    lambda = NULL
+  }
+
+  if(is.null(lambda) && smd_ci == "goulet"){
+    stop("lambda must be provided when smd_ci is goulet.")
+  }
+
+  if(is.null(sigma) && smd_ci %in% c("t","z")){
+    stop("sigma must be provided when smd_ci is goulet.")
+  }
+
 
   if(length(d) > 1 || length(df) >1 || length(lambda) >1 || length(smd_label) >1){
     stop("length of d, df, lambda, and smd_label arguments can only be 1")

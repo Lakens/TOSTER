@@ -27,8 +27,9 @@ boot_smd_calc(formula = extra ~ group,
 ## ----fig.width=6, fig.height=6------------------------------------------------
 plot_smd(d = .43,
          df = 58,
-         lambda = 1.66,
-         smd_label = "Cohen's d"
+         sigma = .33,
+         smd_label = "Cohen's d",
+         smd_ci = "z"
          )
 
 ## -----------------------------------------------------------------------------

@@ -158,10 +158,10 @@ wilcox_TOST(formula = extra ~ group,
 As @karch2021 explained, there are some reasons to dislike the WMW family of tests as the non-parametric alternative to the t-test. Regardless of the underlying statistical arguments^[I would like to note that I think the statistical properties of the WMW tests are sound, and Frank Harrell has written [many](https://www.fharrell.com/post/po/) [blogposts](https://www.fharrell.com/post/wpo/) outlined their sound application in biomedicine. ], it can be argued that the interpretation of the WMW tests, especially when involving equivalence testing, is a tad difficult.
 Some may want a non-parametric alternative to the WMW test, and the Brunner-Munzel test(s) may be a useful option.
 
-The Brunner-Munzel test [@brunner2000; @neubert2007] is based on calculating the "stochastic superiority" [@karch2021, i.e., probability of superiority], which is usually referred to as the relative effect, based on the ranks of the two groups being compared (X and Y). A Brunner-Munzel type test is then a directional test of an effect, and answers a question akin to "what is the probability that a randomly sampled value of Y will be greater than X?"
+The Brunner-Munzel test [@brunner2000; @neubert2007] is based on calculating the "stochastic superiority" [@karch2021, i.e., probability of superiority], which is usually referred to as the relative effect, based on the ranks of the two groups being compared (X and Y). A Brunner-Munzel type test is then a directional test of an effect, and answers a question akin to "what is the probability that a randomly sampled value of X will be greater than Y?"
 
 $$
-\hat p = P(X<Y) + 0.5 \cdot P(X=Y)
+\hat p = P(X>Y) + 0.5 \cdot P(X=Y)
 $$
 
 
@@ -236,7 +236,7 @@ The same process is completed for the one sample case but with the one sample so
 
 ## Example
 
-We can use the sleep data to see the bootstrapped results. Notice that the plots show how the re-sampling via bootstrapping indicates the instability of Hedges' d(z).
+We can use the sleep data to see the bootstrapped results. Notice that the plots show how the re-sampling via bootstrapping indicates the instability of Hedges's d~z~.
 
 ```{r}
 data('sleep')

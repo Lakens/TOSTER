@@ -157,13 +157,13 @@ $$
 \lambda = \frac{2 \cdot (n_2 \cdot \sigma_1^2 + n_1 \cdot \sigma_2^2)} {n_1 \cdot n_2 \cdot (\sigma_1^2 + \sigma_2^2)}
 $$
 The standard error ($\sigma$) of Cohen's d(av) is calculated as the
-following:
+following from @bonett2009meta^[This changed from the original formulation, I believe the current version is a better estimate]:
 
 $$
-\sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{2}{\tilde n} (1+d^2 \cdot \frac{\tilde n}{2}) -\frac{d^2}{J^2}}
+\sigma_{SMD} = \sqrt{d^2 \cdot (\frac{s_1^4}{n_1-1}+\frac{s_2^4}{n_2-1}) \div 8 \cdot s_{av}^4 + (\frac{s_1^2}{n_1-1}+\frac{s_2^2}{n_2-1}) \div s_{av}^2}
 $$ 
 
-wherein $J$ represents the Hedges correction (calculation above).
+
 
 
 ## Variances Assumed Equal: Cohen's d
@@ -214,12 +214,12 @@ following:
 $$
 \sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{2}{\tilde n} (1+d^2 \cdot \frac{\tilde n}{2}) -\frac{d^2}{J}}
 $$ 
-wherein $J$ represents the Hedges correction (calculation above).
 
-2. Under all other methods (nct, t, or z):
+
+2. Under all other methods (nct, t, or z) it is calculated using the "unbiased" estimate from @viechtbauer2007approximate (table 1; equation 26)^[This assumes degrees of freedom of N-2]:
 
 $$
-\sigma_{SMD} = \sqrt{\frac{n_1+n_2}{n_1 \cdot n_2} + \frac{d^2}{2 \cdot(n_1+n_2)} \cdot J^2}
+\sigma_{SMD} = \sqrt{\frac{1}{n_1} + \frac{1}{n_2} + (1 - \frac{df-2}{df \cdot J^2}) \cdot d_s^2}
 $$
 
 ## Glass's Delta
@@ -272,13 +272,11 @@ $$
 \sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{2}{\tilde n} (1+d^2 \cdot \frac{\tilde n}{2}) -\frac{d^2}{J}}
 $$ 
 
-wherein $J$ represents the Hedges correction (calculation above).
 
-2. Under all other methods (nct, t, or z):
+2. Under all other methods^[Originally, I used an estimate of the standard error from Morris and DeShon. However, it was pointed out by colleague that this wasn't very accurate. We now use what is used in the metafor R package for the "SMD1H" which is the use of one sample SD as the denominator under the assumption of heterogeneous variances] (nct, t, or z) derived from @bonett2008:
 
 $$
-\sigma_{SMD} = \sqrt{\frac{1}{\tilde n} \cdot \frac{N - 2}{N - 4} \cdot (1 + \tilde n \cdot
-                                                             d ^ 2) - \frac{d^2}{J^2}}
+\sigma_{SMD} = \sqrt{\frac{s_e^2 \div s_c^2}{n_e-1}+ \frac{1}{n_c-1}+ \frac{d^2}{2 \cdot (n_c-1)}}
 $$
 
 
@@ -288,7 +286,7 @@ $$
 For paired samples there are two calculative approaches supported by
 `TOSTER`. One the denominator is the standard deviation of the change
 score (Cohen's d(z)), the correlation corrected effect
-size (Cohen's d(av)), and the standard deviation of the control condition 
+size (Cohen's d(rm)), and the standard deviation of the control condition 
 (Glass's $\Delta$). Currently, the choice is made by the function
 based on whether or not the user sets `rm_correction` to TRUE. If
 `rm_correction` is set to t TRUE then Cohen's d(rm) will be returned,
@@ -348,10 +346,10 @@ $$
 \sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{2 \cdot (1-r_{12})}{n} \cdot (1+d^2 \cdot \frac{n}{2 \cdot (1-r_{12})}) -\frac{d^2}{J^2}} \space \times \space \sqrt {2 \cdot (1-r_{12})}
 $$
 
-2. Under all other methods (nct, t, or z):
+2. Under all other methods (nct, t, or z) it calculated using the "unbiased" estimate from @viechtbauer2007approximate (table 1; equation 26)^[This assumes degrees of freedom of N-1]:
 
 $$
-\sigma_{SMD} = \sqrt{\frac{1}{n} + \frac{d_z^2}{(2 \cdot n)}}
+\sigma_{SMD} = \sqrt{\frac{1}{N} + (1 - \frac{df-2}{df \cdot J^2}) \cdot d_z^2}
 $$
 
 ## Cohen's d(rm): Correlation Corrected
@@ -455,12 +453,11 @@ $$
 $$ 
 
 The standard error ($\sigma$) of Glass's delta is calculated as the
-following:
+following derived^[Originally, @borenstein was utilized for this SE calculation. However, upon finding the estimate from @bonett2008, which is utilized in the `metafor` R package for heterogenous variance estimates, we have opted to use this estimate instead.] from @bonett2008:
 
 $$
-\sigma_{SMD} =     \sqrt{J^2 \cdot (\frac{1-r_{12}}{N} + \frac{d^2}{2 \cdot N \cdot J})}
+\sigma_{SMD} =     \sqrt{\frac{s_{diff}^2}{s_c^2 \cdot df} + \frac{d^2}{2 \cdot df}}
 $$
-
 
 # One Sample
 
@@ -506,22 +503,20 @@ $$
 \sigma_{SMD} = \sqrt{\frac{1}{n} + \frac{d^2}{(2 \cdot n)}}
 $$
 
-- Wherein $J$ represents the Hedges correction (calculation above).
 
 # Confidence Intervals
 
 For the SMDs calculated in this package we use the non-central *t*
-method outlined by @Goulet_2018. These calculations are only
+method, those outlined by @Goulet_2018, and approximate methods using the *t* and normal distributions. These calculations are only
 approximations and newer formulations may provide better coverage
-[@Cousineau2021]. In any case, if the calculation of confidence
+[e.g., @Cousineau2021]. In any case, if the calculation of confidence
 intervals for SMDs is of the utmost importance then I would strongly
-recommend using bootstrapping techniques rather than any calculative
-approach whenever possible [@Kirby2013].
+recommend using bootstrapping techniques rather than any of these approximations whenever possible [@Kirby2013].
 
-The calculations of the confidence intervals in this package involve a
+The calculations of the confidence intervals for the `goulet` and `nct` methods involve a
 two step process: 1) using the noncentral *t*-distribution to calculate
 the lower and upper bounds of $\lambda$, and 2) transforming this back
-to the effect size estimate.
+to the effect size estimate. These noncentrality methods are not without their detractors [@spanos2021]. The normal and *t* methods are much simpler and less computationally intensive, but may have varying levels of accuracy [see @viechtbauer2007approximate for more details].
 
 ## @Cousineau2021 Method (smd_ci = "goulet")
 
@@ -541,7 +536,9 @@ $$
 
 ## The non-central t-method (smd_ci = "nct")
 
-Calculate the non-centrality parameters necessary to form confidence intervals wherein the observed t-statistic ($t_{obs}$) (note: the standard error is slightly altered for d_{rm}) is utilized.
+This method is commonly reported in the literature and in other R packages (e.g., `effectsize`). However, it is not without criticism [@spanos2021; @viechtbauer2007approximate].
+
+In thise method, you calculate the non-centrality parameters necessary to form confidence intervals wherein the observed t-statistic ($t_{obs}$)is utilized.
 
 $$
 t_L = t_{(1-alpha,\space df, \space t_{obs})} \\
@@ -558,7 +555,7 @@ $$
 
 ## Central t-method
 
-Full warning this method provides sub-optimal coverage.
+This is less commonly used though it might perform alright in some scenarios, and as @bonett2008 and @viechtbauer2007approximate report it might perform adequately under with an adequately large sample size.
 
 The limits of the t-distribution at the given alpha-level and degrees of freedom (`qt(1-alpha,df)`) are multiplied by the standard error of the calculated SMD.
 
@@ -568,7 +565,7 @@ $$
 
 ## Normal method
 
-Full warning this method provides atrocious coverage at most sample sizes in my opinion.
+This method will often be the most liberal estimate for the confidence interval. But as @bonett2008 and @viechtbauer2007approximate report, it might perform adequately under with an adequately large sample size. The use of the normal distribution can be justified by the fact that SMDs are asympototically normal.
 
 The limits of the z-distribution at the given alpha-level (`qnorm(1-alpha)`) are multiplied by the standard error of the calculated SMD.
 
@@ -606,8 +603,8 @@ Sometimes you may take a different approach to calculating the SMD, or
 you may only have the summary statistics from another study. For this
 reason, I have included a way to plot the SMD based on just three
 values: the estimate of the SMD, the degrees of freedom, and the
-non-centrality parameter. So long as all three are reported, or can be
-estimated, then a plot of the SMD can be produced.
+non-centrality parameter/standard error. So long as all three are reported, or can be
+estimated, then a plot of the SMD can be produced. The non-centrality parameter is needed if you want to plot the estimates using the `"goulet"` method while the standard error is needed if you want to plot the `z` (normal) or `t` (t-distribution) methods.
 
 Two types of plots can be produced: consonance (`type = "c"`),
 consonance density (`type = "cd"`), or both (the default option;
@@ -616,8 +613,9 @@ consonance density (`type = "cd"`), or both (the default option;
 ```{r fig.width=6, fig.height=6}
 plot_smd(d = .43,
          df = 58,
-         lambda = 1.66,
-         smd_label = "Cohen's d"
+         sigma = .33,
+         smd_label = "Cohen's d",
+         smd_ci = "z"
          )
 ```
 

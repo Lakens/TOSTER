@@ -76,15 +76,27 @@ d_est_pair <- function(n,
   }
   if(smd_ci == "nct" && denom != "rm"){
     #d_sigma = d_denom / sqrt(n)
-    d_sigma = sqrt(1/n + (cohend^2/(2*n)))
+    # d_sigma = sqrt(1/n + (cohend^2/(2*n)))
+    # from metafor
+    # vi[i] <- 1/ni[i] + (1 - (mi[i]-2)/(mi[i]*cmi[i]^2)) * yi[i]^2 # Viechtbauer, 2007d, equation 26; see [c]
+    d_sigma2 =  1/n + (1 - (d_df-2)/(d_df*J^2)) * cohend^2
+    d_sigma = sqrt(d_sigma2)
   }
   if(denom %in% c("glass1","glass2")){
     #sep1 = (n-1)/(n*(n-3))
     #sep2 = (2*(1-r12)+cohend^2*n)
     #sep3 = cohend^2/(J)^2
     # Borenstein 2009 --- adopted from metafor
-    d_s1 = J^2*(2*(((1-r12)/n)+((cohend^2*J^(-1))/(2*n))))
+    # # abadoned 22 April 2024 in favor of heteroscedastic option from Bonett (below)
+    #d_s1 = J^2*(2*(((1-r12)/n)+((cohend^2*J^(-1))/(2*n))))
       #sqrt(sep1*sep2-sep3)
+    #d_sigma = sqrt(d_s1)
+    ## From metafor
+    # vi[i] <- sddiffi[i]^2/(sd1i[i]^2*(ni[i]-1)) + yi[i]^2 / (2*(ni[i]-1))
+    ## Bonett, 2008a, equation 13
+    # note: Bonett (2008a) plugs the uncorrected yi into the equation for vi;
+    #  here, the corrected value is plugged in for consistency with [a]
+    d_s1 = sdif^2/(d_denom^2*(df)) + cohend^2 / (2*(df))
     d_sigma = sqrt(d_s1)
   }
 
@@ -274,15 +286,32 @@ d_est_ind <- function(n1,
   } else{
     if (denom %in% c("glass1", "glass2")) {
       N = n1 + n2
-      d_sigma = sqrt((1 / ntilde) * ((N - 2) / (N - 4)) * (1 + ntilde *
-                                                             cohend ^ 2) - cohend ^ 2 / J ^ 2)
+      # morris and deshon 2002
+      # d_sigma = sqrt((1 / ntilde) * ((N - 2) / (N - 4)) * (1 + ntilde *
+      #                                                        cohend ^ 2) - cohend ^ 2 / J ^ 2)
+      # Algina, Keselman, and Penfield (2006) from Delacre et al 2021
+      #d_sigma2 = d_df / (d_df -2) * (1/n_glass + sdn_glass^2/(nn_glass*denomSD^2))+ cohend^2 * (d_df/(d_df-2)-J^2)
+      #  # Bonett, 2008a, equation 12
+      ### adapted from metafor SMD1H
+      ### vi <- (sd1i^2/sd2i^2)/(n1i-1) + 1/(n2i-1) + yi^2/(2*(n2i-1))
+      d_sigma2 = (sdn_glass^2/denomSD^2)/(nn_glass-1) + 1/(n_glass-1) + cohend^2/(2*(n_glass-1))
+      d_sigma = sqrt(d_sigma2)
     } else {
       if (var.equal) {
-        d_sigma = sqrt(((n1 + n2) / (n1 * n2) + d ^ 2 / (2 * (n1 + n2))) * J ^ 2)
+        #d_sigma = sqrt(((n1 + n2) / (n1 * n2) + d ^ 2 / (2 * (n1 + n2))) * J ^ 2)
+        #vi[i] <- 1/n1i[i] + 1/n2i[i] + (1 - (mi[i]-2)/(mi[i]*cmi[i]^2)) * yi[i]^2 # Hedges, 1983b, equation 9; see [c]
+        d_sigma2 =  1/n1 + 1/n2 + (1 - (d_df-2)/(d_df*J^2)) * cohend^2
+        d_sigma = sqrt(d_sigma2)
       } else{
-        par1 = 2*(sd1^2/n1+sd2^2/n2)/(sd1^2+sd2^2)
-        par2 = d_df/(d_df-2)-J^2
-        d_sigma = sqrt(d_df/(d_df-2)*par1+cohend^2*par2)
+        # par1 = 2*(sd1^2/n1+sd2^2/n2)/(sd1^2+sd2^2)
+        # par2 = d_df/(d_df-2)-J^2
+        # d_sigma = sqrt(d_df/(d_df-2)*par1+cohend^2*par2)
+        # Adopted from metfor
+        # vi[i] <- yi[i]^2 * (sd1i[i]^4 / (n1i[i]-1) + sd2i[i]^4 / (n2i[i]-1)) / (8*sdpi[i]^4) +
+        #(sd1i[i]^2 / (n1i[i]-1) + sd2i[i]^2 / (n2i[i]-1)) / sdpi[i]^2 # Bonett, 2008a, equation 8; Bonett, 2009, equation 5
+        d_sigma2 = cohend^2 * (sd1^4 / (n1-1) + sd2^4 / (n2-1)) / (8*denomSD^4) +
+          (sd1^2 / (n1-1) + sd2^2 / (n2-1)) / denomSD^2 # Bonett, 2008a, equation 8; Bonett, 2009, equation 5
+        d_sigma = sqrt(d_sigma2)
       }
     }
 

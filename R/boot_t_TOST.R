@@ -523,7 +523,8 @@ boot_t_TOST.default <- function(x,
     ttest = ttest_restext,
     combined = combined_outcome
   )
-
+  call2 = match.call()
+  call2$boot_ci = boot_ci
   rval = list(
     TOST = TOST,
     eqb = nullTOST$eqb,
@@ -536,7 +537,7 @@ boot_t_TOST.default <- function(x,
     boot = list(SMD = d_vec,
                 raw = m_vec),
     data.name = dname,
-    call = match.call()
+    call = call2
   )
 
   class(rval) = "TOSTt"
