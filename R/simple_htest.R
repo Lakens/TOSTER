@@ -78,8 +78,10 @@ simple_htest.default = function(x,
  if(is.null(mu)){
    if(test == "brunner_munzel"){
      mu = 0.5
+     message(paste0("mu set to ", mu))
    } else{
      mu = 0
+     message(paste0("mu set to ", mu))
    }
  }
 
