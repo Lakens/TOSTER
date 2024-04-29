@@ -351,7 +351,12 @@ brunner_munzel.default = function(x,
   }
 
   names(mu) <- "relative effect"
-  names(test_stat) = "t"
+  if(perm){
+    names(test_stat) = "t-observed"
+  } else {
+    names(test_stat) = "t"
+  }
+
   names(df.sw) = "df"
   cint = c(pd.lower,pd.upper)
   attr(cint,"conf.level") = ifelse(alternative == "two.sided",
