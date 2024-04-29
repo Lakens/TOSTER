@@ -11,7 +11,7 @@ simple_htest(
   ...,
   paired = FALSE,
   alternative = c("two.sided", "less", "greater", "equivalence", "minimal.effect"),
-  mu = 0,
+  mu = NULL,
   alpha = 0.05
 )
 
@@ -21,7 +21,7 @@ simple_htest(
   test = c("t.test", "wilcox.test", "brunner_munzel"),
   paired = FALSE,
   alternative = c("two.sided", "less", "greater", "equivalence", "minimal.effect"),
-  mu = 0,
+  mu = NULL,
   alpha = 0.05,
   ...
 )
