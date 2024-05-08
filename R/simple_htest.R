@@ -51,7 +51,7 @@ simple_htest <- function(x, ...,
                                          "greater",
                                          "equivalence",
                                          "minimal.effect"),
-                         mu = 0,
+                         mu = NULL,
                          alpha = 0.05){
   UseMethod("simple_htest")
 }
@@ -70,11 +70,20 @@ simple_htest.default = function(x,
                                                 "greater",
                                                 "equivalence",
                                                 "minimal.effect"),
-                                mu = 0,
+                                mu = NULL,
                                 alpha = 0.05,
                                 ...) {
  alternative = match.arg(alternative)
  test = match.arg(test)
+ if(is.null(mu)){
+   if(test == "brunner_munzel"){
+     mu = 0.5
+     message(paste0("mu set to ", mu))
+   } else{
+     mu = 0
+     message(paste0("mu set to ", mu))
+   }
+ }
 
  if(alternative %in% c("equivalence","minimal.effect")){
 

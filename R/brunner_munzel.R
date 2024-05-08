@@ -97,6 +97,11 @@ brunner_munzel.default = function(x,
     ( mu < 0 || mu > 1))
     stop("'mu' must be a single number between 0 and 1.")
 
+  if(alternative == "two.sided"){
+    if(mu == 0 | mu == 1){
+      stop("'mu' cannot be 0 or 1 when alternative is 'two.sided'")
+    }
+  }
   if(!is.numeric(x)) stop("'x' must be numeric")
   if(!missing(y)) {
     if(!is.numeric(y)) stop("'y' must be numeric")
@@ -346,7 +351,12 @@ brunner_munzel.default = function(x,
   }
 
   names(mu) <- "relative effect"
-  names(test_stat) = "t"
+  if(perm){
+    names(test_stat) = "t-observed"
+  } else {
+    names(test_stat) = "t"
+  }
+
   names(df.sw) = "df"
   cint = c(pd.lower,pd.upper)
   attr(cint,"conf.level") = ifelse(alternative == "two.sided",
