@@ -371,7 +371,8 @@ dataTOSTpairedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                 revision = revision,
                 pause = NULL,
                 completeWhenFilled = FALSE,
-                requiresMissings = FALSE)
+                requiresMissings = FALSE,
+                weightsSupport = 'auto')
         }))
 
 #' TOST Paired Samples T-Test
@@ -380,7 +381,7 @@ dataTOSTpairedBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
 #' utilized in R. See t_TOST function.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' library("TOSTER")
 #'
 #' dataTOSTpaired(data = randu, pair1 = "x", pair2="y", low_eqbound = -0.3,

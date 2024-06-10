@@ -211,7 +211,7 @@ dataTOSTtwoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                         `name`="b[1]", 
                         `title`="", 
                         `type`="text", 
-                        `content`="TOST Upper"),
+                        `content`="TOST Lower"),
                     list(
                         `name`="t[1]", 
                         `title`="t", 
@@ -229,7 +229,7 @@ dataTOSTtwoResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class
                         `name`="b[2]", 
                         `title`="", 
                         `type`="text", 
-                        `content`="TOST Lower"),
+                        `content`="TOST Upper"),
                     list(
                         `name`="t[2]", 
                         `title`="t", 
@@ -453,7 +453,8 @@ dataTOSTtwoBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Class(
                 revision = revision,
                 pause = NULL,
                 completeWhenFilled = FALSE,
-                requiresMissings = FALSE)
+                requiresMissings = FALSE,
+                weightsSupport = 'auto')
         }))
 
 #' TOST Independent Samples T-Test

@@ -1,7 +1,7 @@
 ---
 title: TOSTER
 name: TOSTER
-version: 0.4.0
+version: 0.4.1
 jms: '1.0'
 authors:
   - Daniel Lakens <D.Lakens@tue.nl>

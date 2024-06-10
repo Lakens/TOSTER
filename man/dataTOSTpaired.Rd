@@ -89,7 +89,7 @@ Mara, C. A., & Cribbie, R. A. (2012). Paired-Samples Tests of Equivalence. Commu
 }
 
 \examples{
-\dontrun{
+\donttest{
 library("TOSTER")
 
 dataTOSTpaired(data = randu, pair1 = "x", pair2="y", low_eqbound = -0.3,
