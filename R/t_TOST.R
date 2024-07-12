@@ -394,7 +394,7 @@ t_TOST.default = function(x,
 
   ttest_restext = paste0("The null hypothesis test was ",
                          testoutcome,", t(",rounder_stat(tresult$parameter, digits=2),") = ",
-                         rounder_stat(tresult$statistic, digits = 3),
+                         rounder_stat(tresult$statistic, digits = 3), ", ",
                          printable_pval(tresult$p.value, digits = digits),sep="")
   combined_outcome = tost_decision(
     hypothesis = hypothesis,
