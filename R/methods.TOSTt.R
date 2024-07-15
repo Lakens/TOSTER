@@ -183,14 +183,6 @@ plot.TOSTt <- function(x,
     # Get estimates for SMD ----
     df_d = x$effsize[2,]
 
-    TOST$p.value = ifelse(TOST$p.value < 0.001,
-                          "< 0.001",
-                          round(TOST$p.value, 3))
-
-    TOST$p.value = ifelse(TOST$p.value < 0.001,
-                          "< 0.001",
-                          round(TOST$p.value, 3))
-
     t_plot <-
       ggplot(df_t,
              aes(x=estimate,
@@ -237,6 +229,10 @@ plot.TOSTt <- function(x,
             axis.text.y=element_blank(),
             axis.ticks.y=element_blank())
 
+
+
+    # add the legend to the row we made earlier. Give it one-third of
+    # the width of one plot (via rel_widths).
 
     if("SMD" %in% estimates && "raw" %in% estimates){
       plts = plot_grid(d_plot,
@@ -327,8 +323,10 @@ plot.TOSTt <- function(x,
     }
 
     if("SMD" %in% estimates && "raw" %in% estimates){
+      #legboth = get_legend(d_plot)
       plts = plot_grid(d_plot,
                        t_plot,
+                       #rel_heights = c(.1,.4,.4),
                        ncol = 1)
     }
 
@@ -402,7 +400,7 @@ plot.TOSTt <- function(x,
       facet_wrap( ~ type) +
       theme_tidybayes() +
       theme(
-        legend.position = "top",
+        legend.position = "bottom",
         strip.text = element_text(face = "bold", size = 11),
         legend.text = element_text(face = "bold", size = 11),
         legend.title = element_text(face = "bold", size = 11),
@@ -457,7 +455,7 @@ plot.TOSTt <- function(x,
         labs(y = "")+
         theme_tidybayes() +
         theme(
-          legend.position = "top",
+          legend.position = "bottom",
           strip.text = element_text(face = "bold", size = 11),
           legend.text = element_text(face = "bold", size = 11),
           legend.title = element_text(face = "bold", size = 11),
@@ -512,7 +510,7 @@ plot.TOSTt <- function(x,
         facet_wrap( ~ type) +
         theme_tidybayes() +
         theme(
-          legend.position = "top",
+          legend.position = "bottom",
           strip.text = element_text(face = "bold", size = 11),
           legend.text = element_text(face = "bold", size = 11),
           legend.title = element_text(face = "bold", size = 11),
@@ -551,7 +549,7 @@ plot.TOSTt <- function(x,
         facet_wrap( ~ type) +
         theme_tidybayes() +
         theme(
-          legend.position = "top",
+          legend.position = "bottom",
           strip.text = element_text(face = "bold", size = 11),
           legend.text = element_text(face = "bold", size = 11),
           legend.title = element_text(face = "bold", size = 11),
@@ -570,21 +568,11 @@ plot.TOSTt <- function(x,
         )))
     }
 
-    # extract the legend from one of the plots
-    legend <- get_legend(t_plot)
-
-    prow <- plot_grid(
-      d_plot + theme(legend.position = "none"),
-      t_plot + theme(legend.position = "none"),
-      ncol = 1
-    )
-
-    # add the legend to the row we made earlier. Give it one-third of
-    # the width of one plot (via rel_widths).
 
     if("SMD" %in% estimates && "raw" %in% estimates){
-      plts = plot_grid(legend, prow, ncol = 1,
-                       rel_heights = c(.1, 1))
+      plts = plot_grid(d_plot,
+                       t_plot,
+                       ncol = 1)
     }
 
     if("SMD" %in% estimates && !("raw" %in% estimates)){

@@ -259,6 +259,10 @@ test_that("Run examples for one sample", {
   p1 = plot(test4)
   p2 = plot(test4,
             type = "c")
+  p3 = plot(test4,
+            type = "tnull")
+  p4 = plot(test4,
+            type = "cd")
 
 })
 

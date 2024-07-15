@@ -12,7 +12,7 @@
 
 \method{plot}{TOSTt}(
   x,
-  type = c("cd", "c", "tnull"),
+  type = c("simple", "cd", "c", "tnull"),
   estimates = c("raw", "SMD"),
   ci_lines,
   ci_shades,
