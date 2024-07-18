@@ -182,7 +182,7 @@ res1a = t_TOST(x = subset(sleep,group==1)$extra,
                eqb = .5)
 ```
 
-We can also using the "simpler" approach with `simple_htest`.
+We can also use the "simpler" approach with `simple_htest`.
 
 ```{r}
 # Simple htest
@@ -195,7 +195,7 @@ res1b = simple_htest(formula = extra ~ group,
 
 ```
 
-Once the function has run, we can print the results with the `print` command. This provides a verbose summary of the results.
+Once the function has run, we can print the results with the `print` command. This provides a verbose summary of the results. Note that the results from `simple_htest` are much more concise than that of `t_TOST`.
 
 ```{r}
 
@@ -213,15 +213,15 @@ print(res1b)
 Another nice feature is the generic `plot` method that can provide a visual summary of the results (only available for `t_TOST`). All of the plots in this package were inspired by the [concurve](https://cran.r-project.org/package=concurve) R package. There are four types of plots that can be produced. 
 
 
-The next is the consonance density plot (`type = "cd"`).
+The default is a dot-and-whisker plot (`type = "simple"`).
 
 ```{r fig.width=6, fig.height=6}
 plot(res1, type = "simple")
 ```
 
-The shading pattern can be modified with the `ci_shades`.
+The next is a "consonance density" plot (`type = "cd"`). The shading pattern can be modified with the `ci_shades`.
 
-```{r fig.width=6, fig.height=6, eval=FALSE}
+```{r fig.width=6, fig.height=6, eval=TRUE}
 # Set to shade only the 90% and 95% CI areas
 plot(res1, type = "cd",
      ci_shades = c(.9,.95))
