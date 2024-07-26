@@ -115,7 +115,7 @@ print.TOSTt <- function(x,
 #' @export
 
 plot.TOSTt <- function(x,
-                       type = c("cd","c","tnull"),
+                       type = c("simple","cd","c","tnull"),
                        estimates = c("raw","SMD"),
                        ci_lines,
                        ci_shades,
@@ -172,7 +172,84 @@ plot.TOSTt <- function(x,
     x_label = "log(Means Ratio)"
   }
 
+  if(type == "simple"){
+    # type simple --------
 
+    ci_print = x$effsize$conf.level[1]
+
+    # Get estimates for mean ----
+    df_t = x$effsize[1,]
+
+    # Get estimates for SMD ----
+    df_d = x$effsize[2,]
+
+    t_plot <-
+      ggplot(df_t,
+             aes(x=estimate,
+                 y = 1,
+                 xmin=lower.ci,
+                 xmax=upper.ci)) +
+      geom_pointrange() +
+      geom_vline(xintercept = low_eqt,linetype = "dashed")+
+      geom_vline(xintercept = high_eqt, linetype ="dashed")+
+      scale_x_continuous(sec.axis = dup_axis(breaks=c(round(low_eqt,round_t),
+                                                      round(high_eqt,round_t)),
+                                             name = "")) +
+      facet_grid(~as.character(x_label)) +
+      theme_tidybayes() +
+      labs(caption = paste0(ci_print*100,"% Confidence Interval"),
+           subtitle = paste0(x$decision$TOST, " \n", x$decision$ttest)) +
+      theme(strip.text = element_text(face = "bold",
+                                      size = 10),
+            plot.subtitle = element_text(size = 10),
+            axis.title.x = element_blank(),
+            axis.title.y=element_blank(),
+            axis.text.y=element_blank(),
+            axis.ticks.y=element_blank())
+
+    d_plot <-
+      ggplot(df_d,
+             aes(x=estimate,
+                 y = 1,
+                 xmin=lower.ci,
+                 xmax=upper.ci)) +
+      geom_pointrange() +
+      geom_vline(xintercept = low_eqd,linetype = "dashed")+
+      geom_vline(xintercept = high_eqd, linetype ="dashed")+
+      scale_x_continuous(sec.axis = dup_axis(breaks=c(round(low_eqd,round_t),
+                                                      round(high_eqd,round_t)),
+                                             name = "")) +
+      facet_grid(~as.character(x$smd$smd_label)) +
+      labs(caption = paste0(ci_print*100,"% Confidence Interval")) +
+      theme_tidybayes() +
+      theme(strip.text = element_text(face = "bold",
+                                      size = 10),
+            axis.title.x = element_blank(),
+            axis.title.y=element_blank(),
+            axis.text.y=element_blank(),
+            axis.ticks.y=element_blank())
+
+
+
+    # add the legend to the row we made earlier. Give it one-third of
+    # the width of one plot (via rel_widths).
+
+    if("SMD" %in% estimates && "raw" %in% estimates){
+      plts = plot_grid(d_plot,
+                       t_plot,
+                       ncol = 1)
+    }
+
+    if("SMD" %in% estimates && !("raw" %in% estimates)){
+      plts = d_plot
+    }
+
+    if(!("SMD" %in% estimates) && "raw" %in% estimates){
+      plts = t_plot
+    }
+
+    return(plts)
+  }
   if(type == "c"){
     # type c --------
 
@@ -246,8 +323,10 @@ plot.TOSTt <- function(x,
     }
 
     if("SMD" %in% estimates && "raw" %in% estimates){
+      #legboth = get_legend(d_plot)
       plts = plot_grid(d_plot,
                        t_plot,
+                       #rel_heights = c(.1,.4,.4),
                        ncol = 1)
     }
 
@@ -321,7 +400,7 @@ plot.TOSTt <- function(x,
       facet_wrap( ~ type) +
       theme_tidybayes() +
       theme(
-        legend.position = "top",
+        legend.position = "bottom",
         strip.text = element_text(face = "bold", size = 11),
         legend.text = element_text(face = "bold", size = 11),
         legend.title = element_text(face = "bold", size = 11),
@@ -376,7 +455,7 @@ plot.TOSTt <- function(x,
         labs(y = "")+
         theme_tidybayes() +
         theme(
-          legend.position = "top",
+          legend.position = "bottom",
           strip.text = element_text(face = "bold", size = 11),
           legend.text = element_text(face = "bold", size = 11),
           legend.title = element_text(face = "bold", size = 11),
@@ -431,7 +510,7 @@ plot.TOSTt <- function(x,
         facet_wrap( ~ type) +
         theme_tidybayes() +
         theme(
-          legend.position = "top",
+          legend.position = "bottom",
           strip.text = element_text(face = "bold", size = 11),
           legend.text = element_text(face = "bold", size = 11),
           legend.title = element_text(face = "bold", size = 11),
@@ -470,7 +549,7 @@ plot.TOSTt <- function(x,
         facet_wrap( ~ type) +
         theme_tidybayes() +
         theme(
-          legend.position = "top",
+          legend.position = "bottom",
           strip.text = element_text(face = "bold", size = 11),
           legend.text = element_text(face = "bold", size = 11),
           legend.title = element_text(face = "bold", size = 11),
@@ -489,21 +568,11 @@ plot.TOSTt <- function(x,
         )))
     }
 
-    # extract the legend from one of the plots
-    legend <- get_legend(t_plot)
-
-    prow <- plot_grid(
-      d_plot + theme(legend.position = "none"),
-      t_plot + theme(legend.position = "none"),
-      ncol = 1
-    )
-
-    # add the legend to the row we made earlier. Give it one-third of
-    # the width of one plot (via rel_widths).
 
     if("SMD" %in% estimates && "raw" %in% estimates){
-      plts = plot_grid(legend, prow, ncol = 1,
-                       rel_heights = c(.1, 1))
+      plts = plot_grid(d_plot,
+                       t_plot,
+                       ncol = 1)
     }
 
     if("SMD" %in% estimates && !("raw" %in% estimates)){
@@ -518,6 +587,7 @@ plot.TOSTt <- function(x,
   }
 
   if(type == "tnull"){
+    # tnull ------
     if("SMD" %in% estimates){
       message("SMD cannot be plotted if type = \"tnull\" ")
     }

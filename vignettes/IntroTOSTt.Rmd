@@ -169,20 +169,20 @@ For this example, we will use the sleep data. In this data there is a `group` va
 head(sleep)
 ```
 
-We will assume the data are independent, and that we have equivalence bounds of +/- 0.5 raw units. All we need to do is provide the `formula`, `data`, and  `eqb` arguments for the function to run appropriately. In addition, we can set the `var.equal` argument (to assume equal variance), and the `paired` argument (sets if the data is paired or not). Both are logical indicators that can be set to TRUE or FALSE. The `alpha` is automatically set to 0.05 but this can also be adjusted by the user. The Hedges correction is also automatically calculated, but this can be overridden with the `bias_correction` argument. The `hypothesis` is automatically set to "EQU" for equivalence but if a minimal effect is of interest then "MET" can be supplied. Note: for this example, we will set `smd_ci` to "goulet" since it will reduce the time to produce plots.
+We will assume the data are independent, and that we have equivalence bounds of +/- 0.5 raw units. All we need to do is provide the `formula`, `data`, and  `eqb` arguments for the function to run appropriately. In addition, we can set the `var.equal` argument (to assume equal variance), and the `paired` argument (sets if the data is paired or not). Both are logical indicators that can be set to TRUE or FALSE. The `alpha` is automatically set to 0.05 but this can also be adjusted by the user. The Hedges correction is also automatically calculated, but this can be overridden with the `bias_correction` argument. The `hypothesis` is automatically set to "EQU" for equivalence but if a minimal effect is of interest then "MET" can be supplied. Note: for this example, we will set `smd_ci` to "t" indicating that the t-distribution and the standard error of the SMD will be used to create SMD confidence intervals. This is done to reduce the time to produce plots.
 
 ```{r}
 res1 = t_TOST(formula = extra ~ group,
               data = sleep,
               eqb = .5,
-              smd_ci = "goulet")
+              smd_ci = "t")
 
 res1a = t_TOST(x = subset(sleep,group==1)$extra,
                y = subset(sleep,group==2)$extra,
                eqb = .5)
 ```
 
-We can also using the "simpler" approach with `simple_htest`.
+We can also use the "simpler" approach with `simple_htest`.
 
 ```{r}
 # Simple htest
@@ -195,7 +195,7 @@ res1b = simple_htest(formula = extra ~ group,
 
 ```
 
-Once the function has run, we can print the results with the `print` command. This provides a verbose summary of the results.
+Once the function has run, we can print the results with the `print` command. This provides a verbose summary of the results. Note that the results from `simple_htest` are much more concise than that of `t_TOST`.
 
 ```{r}
 
@@ -210,15 +210,18 @@ print(res1b)
 
 ## Plots
 
-Another nice feature is the generic `plot` method that can provide a visual summary of the results (only available for `t_TOST`). All of the plots in this package were inspired by the [concurve](https://cran.r-project.org/package=concurve) R package. There are two types of plots that can be produced. The first, and default, is the consonance density plot (`type = "cd"`).
+Another nice feature is the generic `plot` method that can provide a visual summary of the results (only available for `t_TOST`). All of the plots in this package were inspired by the [concurve](https://cran.r-project.org/package=concurve) R package. There are four types of plots that can be produced. 
+
+
+The default is a dot-and-whisker plot (`type = "simple"`).
 
 ```{r fig.width=6, fig.height=6}
-plot(res1, type = "cd")
+plot(res1, type = "simple")
 ```
 
-The shading pattern can be modified with the `ci_shades`.
+The next is a "consonance density" plot (`type = "cd"`). The shading pattern can be modified with the `ci_shades`.
 
-```{r fig.width=6, fig.height=6, eval=FALSE}
+```{r fig.width=6, fig.height=6, eval=TRUE}
 # Set to shade only the 90% and 95% CI areas
 plot(res1, type = "cd",
      ci_shades = c(.9,.95))
@@ -229,6 +232,12 @@ Consonance plots, where all confidence intervals can be simultaneous plotted, ca
 ```{r fig.width=6, fig.height=6}
 plot(res1, type = "c",
      ci_lines =  c(.9,.95))
+```
+
+The null distribution can also be visualized with `type = "tnull"`, but notice how it can only plot the mean difference (no SMD).
+
+```{r fig.width=6, fig.height=6}
+plot(res1, type = "tnull")
 ```
 
 ## Descriptions
