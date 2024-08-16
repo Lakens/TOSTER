@@ -6,6 +6,7 @@ NEWS
 # TOSTER v0.8.4
 - Added simple plot for `TOSTt` methods
 - Small fix to output for printed method for `TOSTt`
+- Added fix to `power_z_cor` to provide "zero" power for scenarios where the effect is undetectable
 
 # TOSTER v0.8.3
 - Change in the standard error formulation to Glass delta for independent samples

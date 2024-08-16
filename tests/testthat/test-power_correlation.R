@@ -138,4 +138,10 @@ test_that("Matching known results",{
               alternative = "t")
 
   expect_equal(abs(test1$power-.094),0, tolerance = .01)
+
+  test2 = power_z_cor(n = 10, rho = 0, power = NULL,
+                      null = .001, alpha = .05,
+                      alternative = "equivalence")
+
+  expect_equal(test2$power,0)
 })
