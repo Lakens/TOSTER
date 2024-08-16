@@ -132,6 +132,12 @@ pow_corr = function (n = NULL, rho = NULL, power = NULL, null = 0,
     stop(sQuote("power"), " must be numeric in [0, 1]")
   if (!is.null(n) && n < 4)
     stop("number of observations must be at least 4")
+
+  if (!is.null(rho) && !is.numeric(rho) || any(-1 > rho |
+                                                   rho > 1))
+    stop(sQuote("rho"), " must be numeric in [-1, 1]")
+
+
   p=0
   alternative <- match.arg(alternative)
   tside <- switch(alternative, less = 1, two.sided = 2, greater = 3)
@@ -237,7 +243,15 @@ pow_corr_tost = function (n = NULL, rho = 0, power = NULL, null = NULL,
     C2 = 0.5 * log((1+max(null))/(1-max(null)))
     statistical_power1 <- 2 * (pnorm((abs(C1)/se) - qnorm(1-alpha)) + pnorm(-(abs(C1)/se) - qnorm(1-alpha))) - 1
     statistical_power2 <- 2 * (pnorm((abs(C2)/se) - qnorm(1-alpha)) + pnorm(-(abs(C2)/se) - qnorm(1-alpha))) - 1
-    min(statistical_power1, statistical_power2)
+    min_pw = min(statistical_power1, statistical_power2)
+    if(min_pw < 0) {
+      min_pw = 0
+    }
+
+    if(min_pw > 1) {
+      min_pw = 1
+    }
+    min_pw
   })
 
   if (is.null(power))
