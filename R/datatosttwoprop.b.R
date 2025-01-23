@@ -59,11 +59,14 @@ datatosttwopropClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           props <- counts / ns
 
           prop_dif <- as.numeric(props[1] - props[2])
+
+
           prop_se <- as.numeric(sqrt((props[1]*(1-props[1]))/ns[1] + (props[2]*(1-props[2]))/ns[2]))
 
           low_eqbound <- self$options$low_eqbound
           high_eqbound <- self$options$high_eqbound
           alpha <- self$options$alpha
+
 
           # calculating z-statistic
           z1 <- (prop_dif - low_eqbound)/prop_se
@@ -79,10 +82,35 @@ datatosttwopropClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           if(self$options$hypothesis == "EQU"){
               p1 <- 1 - pnorm(z1)
               p2 <- pnorm(z2)
+              hyp = "equivalence"
+              test_hypothesis = "Hypothesis Tested: Equivalence"
           } else if(self$options$hypothesis == "MET"){
               p1 <- pnorm(z1)
               p2 <- 1-pnorm(z2)
+              hyp = "minimal.effect"
+              test_hypothesis = "Hypothesis Tested: Minimal Effect"
           }
+
+          nhst_test = twoprop_test(
+              p1 = props[1],
+              p2 = props[2],
+              n1 = ns[1],
+              n2 = ns[2],
+              null = 0,
+              alpha = alpha,
+              alternative = "t",
+              effect_size = "difference"
+          )
+          tost_test = twoprop_test(
+              p1 = props[1],
+              p2 = props[2],
+              n1 = ns[1],
+              n2 = ns[2],
+              null = c(low_eqbound, high_eqbound),
+              alpha = alpha,
+              alternative = hyp,
+              effect_size = "difference"
+          )
 
           # calculating CIs
           CI_lb <- prop_dif - (qnorm(1-alpha) * prop_se)
@@ -90,10 +118,28 @@ datatosttwopropClass <- if (requireNamespace('jmvcore')) R6::R6Class(
           CI_lb95 <- prop_dif - (qnorm(1-(alpha/2)) * prop_se)
           CI_ub95 <- prop_dif + (qnorm(1-(alpha/2)) * prop_se)
 
+          decision = ifelse(tost_test$p.value < alpha, " At the desired error rate, it can be stated that the ",
+                            " At the desired error rate, it cannot be stated that the ")
+
+          if (tost_test$alternative == "equivalence") {
+              alt_state = paste0("true ", names(tost_test$null.value)[1],
+                                 " is ", "between", " ", tost_test$null.value[1],
+                                 " and ", tost_test$null.value[2])
+          }
+          if (tost_test$alternative == "minimal.effect") {
+              alt_state = paste0("true ", names(tost_test$null.value)[1],
+                                 " is ", "less than ", tost_test$null.value[1],
+                                 " or ", "greater than ", tost_test$null.value[2])
+          }
+
+          text_res = paste0(test_hypothesis,
+                            "<br> <br>",
+                            decision, alt_state,". ", "<br>")
+          self$results$text$setContent(text_res)
+          #TOSTER::describe_htest()
           tt$setRow(rowNo=1, list(
-            `z[0]`=z,  `p[0]`=ztest,
-            `z[1]`=z1, `p[1]`=p1,
-            `z[2]`=z2, `p[2]`=p2))
+            `z[0]`=nhst_test$statistic,  `p[0]`=nhst_test$p.value,
+            `z[1]`=tost_test$statistic, `p[1]`=tost_test$p.value))
 
           eqb$setRow(rowNo=1, list(
             `low`=low_eqbound, `high`=high_eqbound, `cil`=CI_lb, `ciu`=CI_ub))
