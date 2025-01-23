@@ -13,7 +13,7 @@ refs:
         type: 'software'
         author: Caldwell, A.R.
         year: 2022
-        title: "TOSTER R package 0.5.1"
+        title: "TOSTER R package 0.8.4"
         publisher: "CRAN"
         url: 'https://aaroncaldwell.us/TOSTERpkg/'
 
