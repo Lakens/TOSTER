@@ -142,7 +142,7 @@ datatosttwopropClass <- if (requireNamespace('jmvcore')) R6::R6Class(
             `z[1]`=tost_test$statistic, `p[1]`=tost_test$p.value))
 
           eqb$setRow(rowNo=1, list(
-            `low`=low_eqbound, `high`=high_eqbound, `cil`=CI_lb, `ciu`=CI_ub))
+            `low`=low_eqbound, `high`=high_eqbound, `estimate`=prop_dif, `cil`=CI_lb, `ciu`=CI_ub))
 
           desc$setRow(rowNo=1, list(
             `count[1]`=counts[1], `n[1]`=ns[1], `prop[1]`=props[1],

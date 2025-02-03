@@ -184,6 +184,9 @@ datatosttwopropResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                         `title`="High", 
                         `type`="number"),
                     list(
+                        `name`="estimate", 
+                        `title`="Estimate"),
+                    list(
                         `name`="cil", 
                         `title`="Lower", 
                         `superTitle`="Confidence interval"),
