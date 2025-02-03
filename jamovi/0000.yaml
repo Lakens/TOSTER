@@ -1,13 +1,13 @@
 ---
 title: TOSTER
 name: TOSTER
-version: 0.4.1
+version: 0.8.4
 jms: '1.0'
 authors:
   - Daniel Lakens <D.Lakens@tue.nl>
   - Aaron Caldwell <arcaldwell49@gmail.com>
 maintainer: Daniel Lakens <D.Lakens@tue.nl>
-date: '2021-04-30'
+date: '2025-01-23'
 type: R
 description: >-
   Two one-sided tests (TOST) procedures to test equivalence for t-tests and

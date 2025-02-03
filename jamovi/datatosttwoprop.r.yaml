@@ -4,8 +4,12 @@ title: TOST Two Proportions
 jrs:   '1.1'
 
 items:
+    - name:  text
+      type:  Html
+      refs: [TOSTER]
+
     - name:  tost
-      title: TOST Results
+      title: Hypothesis Tests Results
       type:  Table
       rows: 1
       clearWith:
@@ -19,7 +23,7 @@ items:
         - name: b[0]
           title: ''
           type: text
-          content: Z-test
+          content: NHST
         - name: z[0]
           title: Z
           type: number
@@ -30,7 +34,7 @@ items:
         - name: b[1]
           title: ''
           type: text
-          content: TOST Upper
+          content: TOST
         - name: z[1]
           title: Z
           type: number
@@ -38,17 +42,7 @@ items:
           title: p
           type: number
           format: zto,pvalue
-        - name: b[2]
-          title: ''
-          type: text
-          content: TOST Lower
-        - name: z[2]
-          title: Z
-          type: number
-        - name: p[2]
-          title: p
-          type: number
-          format: zto,pvalue
+
 
     - name:  eqb
       title: Equivalence Bounds
@@ -68,6 +62,8 @@ items:
         - name: high
           title: High
           type: number
+        - name: estimate
+          title: Estimate
         - name: cil
           title: Lower
           superTitle: Confidence interval

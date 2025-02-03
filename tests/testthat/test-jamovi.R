@@ -479,8 +479,8 @@ test_that("dataTOSTr",{
 
 test_that("datatosttwoprop tests",{
   set.seed(8020)
-  d1 = rbinom(10,1,.5)
-  d2 = rbinom(10,1,.25)
+  d1 = rbinom(100,1,.5)
+  d2 = rbinom(100,1,.25)
   df1 = data.frame(
     d1 = d1,
     d2 = d2
@@ -546,8 +546,8 @@ test_that("plot functions for jamovi work",{
   #skip_on_cran()
 
   set.seed(8020)
-  d1 = rbinom(10,1,.5)
-  d2 = rbinom(10,1,.25)
+  d1 = rbinom(100,1,.5)
+  d2 = rbinom(100,1,.25)
   df1 = data.frame(
     d1 = d1,
     d2 = d2

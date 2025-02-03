@@ -104,6 +104,7 @@ datatosttwopropResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
     "datatosttwopropResults",
     inherit = jmvcore::Group,
     active = list(
+        text = function() private$.items[["text"]],
         tost = function() private$.items[["tost"]],
         eqb = function() private$.items[["eqb"]],
         desc = function() private$.items[["desc"]],
@@ -115,10 +116,15 @@ datatosttwopropResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                 options=options,
                 name="",
                 title="TOST Two Proportions")
+            self$add(jmvcore::Html$new(
+                options=options,
+                name="text",
+                refs=list(
+                    "TOSTER")))
             self$add(jmvcore::Table$new(
                 options=options,
                 name="tost",
-                title="TOST Results",
+                title="Hypothesis Tests Results",
                 rows=1,
                 clearWith=list(
                     "level",
@@ -132,7 +138,7 @@ datatosttwopropResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                         `name`="b[0]", 
                         `title`="", 
                         `type`="text", 
-                        `content`="Z-test"),
+                        `content`="NHST"),
                     list(
                         `name`="z[0]", 
                         `title`="Z", 
@@ -146,27 +152,13 @@ datatosttwopropResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                         `name`="b[1]", 
                         `title`="", 
                         `type`="text", 
-                        `content`="TOST Upper"),
+                        `content`="TOST"),
                     list(
                         `name`="z[1]", 
                         `title`="Z", 
                         `type`="number"),
                     list(
                         `name`="p[1]", 
-                        `title`="p", 
-                        `type`="number", 
-                        `format`="zto,pvalue"),
-                    list(
-                        `name`="b[2]", 
-                        `title`="", 
-                        `type`="text", 
-                        `content`="TOST Lower"),
-                    list(
-                        `name`="z[2]", 
-                        `title`="Z", 
-                        `type`="number"),
-                    list(
-                        `name`="p[2]", 
                         `title`="p", 
                         `type`="number", 
                         `format`="zto,pvalue"))))
@@ -191,6 +183,9 @@ datatosttwopropResults <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6C
                         `name`="high", 
                         `title`="High", 
                         `type`="number"),
+                    list(
+                        `name`="estimate", 
+                        `title`="Estimate"),
                     list(
                         `name`="cil", 
                         `title`="Lower", 
@@ -298,6 +293,7 @@ datatosttwopropBase <- if (requireNamespace("jmvcore", quietly=TRUE)) R6::R6Clas
 #' @param plot \code{TRUE} or \code{FALSE} (default), provide plot
 #' @return A results object containing:
 #' \tabular{llllll}{
+#'   \code{results$text} \tab \tab \tab \tab \tab a html \cr
 #'   \code{results$tost} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$eqb} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$desc} \tab \tab \tab \tab \tab a table \cr
