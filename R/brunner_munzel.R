@@ -167,6 +167,7 @@ brunner_munzel.default = function(x,
 
     if(perm == TRUE){
       METHOD = "Paired Brunner-Munzel permutation test"
+      message("NOTE: Confidence intervals derived from permutation tests may differ from conclusions drawn from p-values. When discrepancies occur, consider additional diagnostics or alternative inference methods.")
       # Directly from nparcomp
       if(n<=13){
         max_n_perm=2^n
@@ -284,7 +285,7 @@ brunner_munzel.default = function(x,
 
       ## permutation -----
       METHOD = "two-sample Brunner-Munzel permutation test"
-
+      message("NOTE: Confidence intervals derived from permutation tests may differ from conclusions drawn from p-values. When discrepancies occur, consider additional diagnostics or alternative inference methods.")
       Tprob<-qnorm(pd)*exp(-0.5*qnorm(pd)^2)*sqrt(N/(V*2*pi))
       P<-apply(matrix(rep(1:N,max_n_perm),ncol=max_n_perm),2,sample)
       Px<-matrix(c(x,y)[P],ncol=max_n_perm)

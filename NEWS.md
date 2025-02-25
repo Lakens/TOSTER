@@ -3,6 +3,10 @@ NEWS
 
 **TOSTER R package and jamovi module**
 
+# TOSTER v0.8.5
+- Slight update to robust TOST vignette to fix some typos
+- Added extra message when permutation tests are used for the Brunner-Munzel test.
+
 # TOSTER v0.8.4
 - Added simple plot for `TOSTt` methods
 - Small fix to output for printed method for `TOSTt`

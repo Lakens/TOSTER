@@ -174,7 +174,7 @@ A studentized test statistic can be calculated as:
 $$
 t = \sqrt{N} \cdot \frac{\hat p -p_{null}}{s}
 $$
-Wherein the default null hypothesis $p_{null}$ is typically 0.5 (50% probability of superiority is the default null), and $\sigma_N$ refers the rank-based Brunner-Munzel standard error. The null can be modified therefore allowing for equivalence testing *directly based on the relative effect*. Additionally, for paired samples the probability of superiority is based on a *hypothesis of exchangability* and is not based on the differences scores^[This means the relative effect will *not* match the concordance probability provided by `ses_calc`].
+Wherein the default null hypothesis $p_{null}$ is typically 0.5 (50% probability of superiority is the default null), and $s$ refers the rank-based Brunner-Munzel standard error. The null can be modified therefore allowing for equivalence testing *directly based on the relative effect*. Additionally, for paired samples the probability of superiority is based on a *hypothesis of exchangability* and is not based on the differences scores^[This means the relative effect will *not* match the concordance probability provided by `ses_calc`].
 
 For more details on the calculative approach, I suggest reading @karch2021. At small sample sizes, it is recommended that the permutation version of the test (`perm = TRUE`) be used rather than the basic test statistic approach.
 
@@ -214,7 +214,7 @@ simple_htest(formula = extra ~ group,
 
 The bootstrap is a simulation based technique, derived from re-sampling with replacement, designed for statistical estimation and inference. Bootstrapping techniques are very useful because they are considered somewhat robust to the violations of assumptions for a simple t-test. Therefore we added a bootstrap option, `boot_t_TOST` to the package to provide another robust alternative to the `t_TOST` function. 
 
-In this function, we provide the percentile bootstrap solution outlined by @efron93 (see chapter 16, page 220). The bootstrapped p-values are derived from the "studentized" version of a test of mean differences outlined by @efron93. Overall, the results should be similar to the results of `t_TOST`. **However**, for paired samples, the Cohen's d(rm) effect size *cannot* be calculated.
+In this function, we provide the percentile bootstrap solution outlined by @efron93 (see chapter 16, page 220). The bootstrapped p-values are derived from the "studentized" version of a test of mean differences outlined by @efron93. Overall, the results should be similar to the results of `t_TOST`. 
 
 ## Two Sample Algorithm
 
