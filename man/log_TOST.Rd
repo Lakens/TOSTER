@@ -36,7 +36,7 @@ log_TOST(
 
 \item{...}{further arguments to be passed to or from methods.}
 
-\item{hypothesis}{'EQU' for equivalence (default), or 'MET' for minimal effects test, the alternative hypothesis.}
+\item{hypothesis}{'EQU' for equivalence (default), or 'MET' for minimal effects test.}
 
 \item{paired}{a logical indicating whether you want a paired t-test.}
 

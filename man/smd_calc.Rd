@@ -49,9 +49,9 @@ smd_calc(
 
 \item{rm_correction}{Repeated measures correction to make standardized mean difference Cohen's d(rm). This only applies to repeated/paired samples. Default is FALSE.}
 
-\item{glass}{A option to calculate Glass's delta as an alternative to Cohen's d type SMD. Default is NULL to not calculate Glass's delta, "glass1" will use the first group's SD as the denominator whereas "glass2" will use the 2nd group's SD.}
+\item{glass}{An option to calculate Glass's delta as an alternative to Cohen's d type SMD. Default is NULL to not calculate Glass's delta, 'glass1' will use the first group's SD as the denominator whereas 'glass2' will use the 2nd group's SD.}
 
-\item{smd_ci}{Method for calculating SMD confidence intervals. Methods include Goulet, noncentral t (nct), central t (t), and normal method (z).}
+\item{smd_ci}{Method for calculating SMD confidence intervals. Methods include 'goulet', 'noncentral t' (nct), 'central t' (t), and 'normal method' (z).}
 
 \item{y}{an optional (non-empty) numeric vector of data values.}
 

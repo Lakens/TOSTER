@@ -1,53 +1,112 @@
-#' @title TOST with t-tests
+#' @title Two One-Sided T-tests (TOST) with t-tests
 #' @description
 #' `r lifecycle::badge('stable')`
 #'
-#'  A function for TOST with all types of t-tests.
+#' Performs equivalence testing using the Two One-Sided Tests (TOST) procedure with t-tests.
+#' This function supports one-sample, two-sample (independent), and paired t-tests, providing
+#' a comprehensive framework for testing equivalence or minimal effects hypotheses.
+#'
+#' The TOST procedure is designed for situations where you want to demonstrate that an effect
+#' falls within specified bounds (equivalence testing) or exceeds specified bounds (minimal effects testing).
+#'
+#' @section Purpose:
+#' Use this function when:
+#' \itemize{
+#'   \item You want to show that two groups are practically equivalent
+#'   \item You need to demonstrate that an effect is at least as large as a meaningful threshold
+#'   \item You want to test if an observed effect is too small to be of practical importance
+#' }
+#'
 #' @param x a (non-empty) numeric vector of data values.
 #' @param y an optional (non-empty) numeric vector of data values.
 #' @param formula a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.
 #' @param data an optional matrix or data frame (or similar: see model.frame) containing the variables in the formula formula. By default the variables are taken from environment(formula).
 #' @param paired a logical indicating whether you want a paired t-test.
-#' @param var.equal  a logical variable indicating whether to treat the two variances as being equal. If TRUE then the pooled variance is used to estimate the variance otherwise the Welch (or Satterthwaite) approximation to the degrees of freedom is used.
-#' @param eqb Equivalence bound. Can provide 1 value (negative value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds.
-#' @param low_eqbound lower equivalence bounds (deprecated).
-#' @param high_eqbound upper equivalence bounds (deprecated).
-#' @param hypothesis 'EQU' for equivalence (default), or 'MET' for minimal effects test, the alternative hypothesis.
-#' @param eqbound_type Type of equivalence bound. Can be set to "SMD" for standardized mean difference (i.e., Cohen's d) or  "raw" for the mean difference. Default is "raw". Raw is strongly recommended as SMD bounds will produce biased results.
+#' @param var.equal a logical variable indicating whether to treat the two variances as being equal. If TRUE then the pooled variance is used to estimate the variance otherwise the Welch (or Satterthwaite) approximation to the degrees of freedom is used.
+#' @param eqb Equivalence bound. Can provide 1 value (symmetric bound, negative value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds.
+#' @param low_eqbound lower equivalence bounds (deprecated, use `eqb` instead).
+#' @param high_eqbound upper equivalence bounds (deprecated, use `eqb` instead).
+#' @param hypothesis 'EQU' for equivalence (default), or 'MET' for minimal effects test.
+#' @param eqbound_type Type of equivalence bound. Can be 'SMD' for standardized mean difference (e.g., Cohen's d) or 'raw' for the mean difference. Default is 'raw'. Raw is strongly recommended as SMD bounds will produce biased results.
 #' @param alpha alpha level (default = 0.05)
 #' @param bias_correction Apply Hedges' correction for bias (default is TRUE).
 #' @param rm_correction Repeated measures correction to make standardized mean difference Cohen's d(rm). This only applies to repeated/paired samples. Default is FALSE.
-#' @param mu a number indicating the true value of the mean for the two tailed test (or difference in means if you are performing a two sample test).
-#' @param glass A option to calculate Glass's delta as an alternative to Cohen's d type SMD. Default is NULL to not calculate Glass's delta, "glass1" will use the first group's SD as the denominator whereas "glass2" will use the 2nd group's SD.
-#' @param smd_ci Method for calculating SMD confidence intervals. Methods include Goulet, noncentral t (nct), central t (t), and normal method (z).
+#' @param mu a number indicating the true value of the mean for the two-tailed test (or difference in means if you are performing a two sample test).
+#' @param glass An option to calculate Glass's delta as an alternative to Cohen's d type SMD. Default is NULL to not calculate Glass's delta, 'glass1' will use the first group's SD as the denominator whereas 'glass2' will use the 2nd group's SD.
+#' @param smd_ci Method for calculating SMD confidence intervals. Methods include 'goulet', 'noncentral t' (nct), 'central t' (t), and 'normal method' (z).
 #' @param subset an optional vector specifying a subset of observations to be used.
 #' @param na.action a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").
-#' @param ...  further arguments to be passed to or from methods.
-#' @details For details on the calculations in this function see vignette("IntroTOSTt") & vignette("SMD_calcs").
+#' @param ... further arguments to be passed to or from methods.
+#'
+#' @details
+#' For details on the calculations in this function see vignette("IntroTOSTt") & vignette("SMD_calcs").
 #'
 #' For two-sample tests, the test is of \eqn{\bar x - \bar y} (mean of x minus mean of y).
 #' For paired samples, the test is of the difference scores (z),
-#' wherein \eqn{z =  x - y}, and the test is of \eqn{\bar z} (mean of the difference scores).
-#' For one-sample tests, the test is of \eqn{\bar x } (mean of x).
+#' wherein \eqn{z = x - y}, and the test is of \eqn{\bar z} (mean of the difference scores).
+#' For one-sample tests, the test is of \eqn{\bar x} (mean of x).
 #'
-#' @return An S3 object of class
-#'   `"TOSTt"` is returned containing the following slots:
+#' The output combines three statistical tests:
+#' \enumerate{
+#'   \item A traditional two-tailed t-test (null hypothesis: difference = `mu`)
+#'   \item Lower bound test (one-tailed t-test against the lower equivalence bound)
+#'   \item Upper bound test (one-tailed t-test against the upper equivalence bound)
+#' }
+#'
+#' For equivalence testing (`hypothesis = "EQU"`):
+#' \itemize{
+#'   \item **Significant TOST**: Both one-sided tests are significant (p < alpha), indicating the effect is within the equivalence bounds
+#' }
+#'
+#' For minimal effects testing (`hypothesis = "MET"`):
+#' \itemize{
+#'   \item **Significant TOST**: At least one one-sided test is significant (p < alpha), indicating the effect is outside at least one of the bounds
+#' }
+#'
+#' Notes:
+#' \itemize{
+#'   \item For equivalence testing, the equivalence bounds represent the smallest effect sizes considered meaningful by the user.
+#'   \item When using `eqbound_type = "SMD"`, be aware that this can produce biased results and raw bounds are generally recommended.
+#'   \item The function provides standardized effect sizes (Cohen's d or Hedges' g) along with their confidence intervals.
+#'   \item For paired/repeated measures designs, setting `rm_correction = TRUE` adjusts the standardized effect size calculation to account for the correlation between measures.
+#' }
+#'
+#' @return An S3 object of class `"TOSTt"` is returned containing the following slots:
 #'
 #'   - "TOST": A table of class `"data.frame"` containing two-tailed t-test and both one-tailed results.
 #'   - "eqb": A table of class `"data.frame`" containing equivalence bound settings.
-#'   - "effsize":  table of class `"data.frame"` containing effect size estimates.
-#'   - "hypothesis": String stating the hypothesis being tested
+#'   - "effsize": Table of class `"data.frame"` containing effect size estimates.
+#'   - "hypothesis": String stating the hypothesis being tested.
 #'   - "smd": List containing the results of the standardized mean difference calculations (e.g., Cohen's d).
-#'      - Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation)
+#'      - Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation).
 #'   - "alpha": Alpha level set for the analysis.
 #'   - "method": Type of t-test.
 #'   - "decision": List included text regarding the decisions for statistical inference.
 #'
 #' @examples
+#' # Example 1: Basic Two-Sample Test
 #' data(mtcars)
-#' t_TOST(mpg ~ am,
-#' data = mtcars,
-#' eqb = 3)
+#' # Testing if the difference in mpg between automatic and manual
+#' # transmission cars falls within ±3 mpg
+#' result <- t_TOST(mpg ~ am, data = mtcars, eqb = 3)
+#'
+#' # Example 2: Paired Sample Test with Specific Bounds
+#' data(sleep)
+#' result <- t_TOST(x = sleep$extra[sleep$group == 1],
+#'                 y = sleep$extra[sleep$group == 2],
+#'                 paired = TRUE,
+#'                 eqb = c(-0.5, 2))  # Asymmetric bounds
+#'
+#' # Example 3: One Sample Equivalence Test
+#' result <- t_TOST(x = rnorm(30, mean = 0.1, sd = 1),
+#'                 eqb = 1)
+#'
+#' # Example 4: Minimal Effects Test
+#' result <- t_TOST(mpg ~ am,
+#'                 data = mtcars,
+#'                 eqb = 1.5,
+#'                 hypothesis = "MET")
+#'
 #' @family TOST
 #' @name t_TOST
 #' @export t_TOST

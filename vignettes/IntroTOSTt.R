@@ -142,7 +142,7 @@ head(sleep)
 res1 = t_TOST(formula = extra ~ group,
               data = sleep,
               eqb = .5,
-              smd_ci = "goulet")
+              smd_ci = "t")
 
 res1a = t_TOST(x = subset(sleep,group==1)$extra,
                y = subset(sleep,group==2)$extra,
@@ -168,18 +168,21 @@ print(res1)
 print(res1b)
 
 ## ----fig.width=6, fig.height=6------------------------------------------------
-plot(res1, type = "cd")
+plot(res1, type = "simple")
 
-## ----fig.width=6, fig.height=6, eval=FALSE------------------------------------
-#  # Set to shade only the 90% and 95% CI areas
-#  plot(res1, type = "cd",
-#       ci_shades = c(.9,.95))
+## ----fig.width=6, fig.height=6, eval=TRUE-------------------------------------
+# Set to shade only the 90% and 95% CI areas
+plot(res1, type = "cd",
+     ci_shades = c(.9,.95))
 
 ## ----fig.width=6, fig.height=6------------------------------------------------
 plot(res1, type = "c",
      ci_lines =  c(.9,.95))
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----fig.width=6, fig.height=6------------------------------------------------
+plot(res1, type = "tnull")
+
+## ----eval = FALSE-------------------------------------------------------------
 #  describe(res1)
 #  
 #  describe_htest(res1b)
@@ -231,7 +234,7 @@ res_metb = simple_htest(x = iris$Sepal.Length,
                        alternative = "minimal.effect")
 res_metb
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 #  describe(res_met)
 #  
 #  describe_htest(res_metb)

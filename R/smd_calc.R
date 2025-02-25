@@ -1,19 +1,88 @@
-#' @title SMD Calculation
+#' @title Standardized Mean Difference (SMD) Calculation
 #' @description
 #' `r lifecycle::badge('stable')`
 #'
-#' A function to only calculate standardized mean differences.
+#' Calculates standardized mean difference (SMD) effect sizes and their confidence intervals
+#' from raw data. This function focuses solely on effect size estimation without performing
+#' hypothesis tests.
+#'
+#' @section Purpose:
+#' Use this function when:
+#' \itemize{
+#'   \item You need to calculate standardized effect sizes (Cohen's d, Hedges' g, Glass's delta)
+#'   \item You want confidence intervals for your effect size estimates
+#'   \item You need effect sizes for meta-analysis or reporting
+#'   \item You want to compare effect sizes across different studies or measures
+#'   \item You don't need the hypothesis testing components of the TOST functions
+#' }
+#'
 #' @inheritParams t_TOST
 #' @inheritParams boot_t_TOST
-#' @param mu Null value. Deviating from zero will give the x-y-mu.
-#' @details For details on the calculations in this function see vignette("SMD_calcs").
-#' @return A data frame containing the SMD estimates.
-#' @examples
-#' \dontrun{
-#' smd_calc(formula = extra ~ group,data = sleep, paired = TRUE, smd_ci = "nct")
+#' @param ... further arguments to be passed to or from methods.
+#'
+#' @details
+#' This function calculates standardized mean differences (SMD) for various study designs:
+#'
+#' \itemize{
+#'   \item One-sample design: Standardizes the difference between the sample mean and zero (or other specified value)
+#'   \item Two-sample independent design: Standardizes the difference between two group means
+#'   \item Paired samples design: Standardizes the mean difference between paired observations
 #' }
-#' @name smd_calc
+#'
+#' The function supports multiple SMD variants:
+#' \itemize{
+#'   \item Cohen's d: Classic standardized mean difference (bias_correction = FALSE)
+#'   \item Hedges' g: Bias-corrected version of Cohen's d (bias_correction = TRUE)
+#'   \item Glass's delta: Uses only one group's standard deviation as the denominator (glass = "glass1" or "glass2")
+#'   \item Repeated measures d: Accounts for correlation in paired designs (rm_correction = TRUE)
+#' }
+#'
+#' Different confidence interval calculation methods are available:
+#' \itemize{
+#'   \item "nct": Uses the noncentral t-distribution (most accurate in most cases)
+#'   \item "goulet": Uses the Goulet-Pelletier method
+#'   \item "t": Uses the central t-distribution
+#'   \item "z": Uses the normal distribution
+#' }
+#'
+#' Note that unlike the t_TOST and related functions, smd_calc only calculates effect sizes and
+#' their confidence intervals without performing hypothesis tests.
+#'
+#' For detailed information on calculation methods, see `vignette("SMD_calcs")`.
+#'
+#' @return A data frame containing the following information:
+#' \itemize{
+#'   \item estimate: The standardized mean difference estimate (Cohen's d, Hedges' g, or Glass's delta)
+#'   \item SE: Standard error of the estimate
+#'   \item lower.ci: Lower bound of the confidence interval
+#'   \item upper.ci: Upper bound of the confidence interval
+#'   \item conf.level: Confidence level (1-alpha)
+#' }
+#'
+#' @examples
+#' # Example 1: Independent groups comparison (Cohen's d)
+#' set.seed(123)
+#' group1 <- rnorm(30, mean = 100, sd = 15)
+#' group2 <- rnorm(30, mean = 110, sd = 18)
+#' smd_calc(x = group1, y = group2, bias_correction = FALSE)
+#'
+#' # Example 2: Independent groups with formula notation (Hedges' g)
+#' df <- data.frame(
+#'   value = c(group1, group2),
+#'   group = factor(rep(c("A", "B"), each = 30))
+#' )
+#' smd_calc(formula = value ~ group, data = df)
+#'
+#' # Example 3: Paired samples with repeated measures correction
+#' before <- c(5.1, 4.8, 6.2, 5.7, 6.0, 5.5, 4.9, 5.8)
+#' after <- c(5.6, 5.2, 6.7, 6.1, 6.5, 5.8, 5.3, 6.2)
+#' smd_calc(x = before, y = after, paired = TRUE, rm_correction = TRUE)
+#'
+#' # Example 4: Glass's delta (using only first group's SD)
+#' smd_calc(x = group1, y = group2, glass = "glass1")
+#'
 #' @family effect sizes
+#' @name smd_calc
 #' @export smd_calc
 
 #smd_calc <- setClass("smd_calc")

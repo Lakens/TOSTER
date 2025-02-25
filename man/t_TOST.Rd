@@ -4,7 +4,7 @@
 \alias{t_TOST}
 \alias{t_TOST.default}
 \alias{t_TOST.formula}
-\title{TOST with t-tests}
+\title{Two One-Sided T-tests (TOST) with t-tests}
 \usage{
 t_TOST(
   x,
@@ -49,19 +49,19 @@ t_TOST(
 
 \item{...}{further arguments to be passed to or from methods.}
 
-\item{hypothesis}{'EQU' for equivalence (default), or 'MET' for minimal effects test, the alternative hypothesis.}
+\item{hypothesis}{'EQU' for equivalence (default), or 'MET' for minimal effects test.}
 
 \item{paired}{a logical indicating whether you want a paired t-test.}
 
 \item{var.equal}{a logical variable indicating whether to treat the two variances as being equal. If TRUE then the pooled variance is used to estimate the variance otherwise the Welch (or Satterthwaite) approximation to the degrees of freedom is used.}
 
-\item{eqb}{Equivalence bound. Can provide 1 value (negative value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds.}
+\item{eqb}{Equivalence bound. Can provide 1 value (symmetric bound, negative value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds.}
 
-\item{low_eqbound}{lower equivalence bounds (deprecated).}
+\item{low_eqbound}{lower equivalence bounds (deprecated, use \code{eqb} instead).}
 
-\item{high_eqbound}{upper equivalence bounds (deprecated).}
+\item{high_eqbound}{upper equivalence bounds (deprecated, use \code{eqb} instead).}
 
-\item{eqbound_type}{Type of equivalence bound. Can be set to "SMD" for standardized mean difference (i.e., Cohen's d) or  "raw" for the mean difference. Default is "raw". Raw is strongly recommended as SMD bounds will produce biased results.}
+\item{eqbound_type}{Type of equivalence bound. Can be 'SMD' for standardized mean difference (i.e., Cohen's d) or 'raw' for the mean difference. Default is 'raw'. Raw is strongly recommended as SMD bounds will produce biased results.}
 
 \item{alpha}{alpha level (default = 0.05)}
 
@@ -69,13 +69,13 @@ t_TOST(
 
 \item{rm_correction}{Repeated measures correction to make standardized mean difference Cohen's d(rm). This only applies to repeated/paired samples. Default is FALSE.}
 
-\item{glass}{A option to calculate Glass's delta as an alternative to Cohen's d type SMD. Default is NULL to not calculate Glass's delta, "glass1" will use the first group's SD as the denominator whereas "glass2" will use the 2nd group's SD.}
+\item{glass}{An option to calculate Glass's delta as an alternative to Cohen's d type SMD. Default is NULL to not calculate Glass's delta, 'glass1' will use the first group's SD as the denominator whereas 'glass2' will use the 2nd group's SD.}
 
-\item{smd_ci}{Method for calculating SMD confidence intervals. Methods include Goulet, noncentral t (nct), central t (t), and normal method (z).}
+\item{smd_ci}{Method for calculating SMD confidence intervals. Methods include 'goulet', 'noncentral t' (nct), 'central t' (t), and 'normal method' (z).}
 
 \item{y}{an optional (non-empty) numeric vector of data values.}
 
-\item{mu}{a number indicating the true value of the mean for the two tailed test (or difference in means if you are performing a two sample test).}
+\item{mu}{a number indicating the true value of the mean for the two-tailed test (or difference in means if you are performing a two sample test).}
 
 \item{formula}{a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.}
 
@@ -86,16 +86,15 @@ t_TOST(
 \item{na.action}{a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").}
 }
 \value{
-An S3 object of class
-\code{"TOSTt"} is returned containing the following slots:
+An S3 object of class \code{"TOSTt"} is returned containing the following slots:
 \itemize{
 \item "TOST": A table of class \code{"data.frame"} containing two-tailed t-test and both one-tailed results.
 \item "eqb": A table of class \verb{"data.frame}" containing equivalence bound settings.
-\item "effsize":  table of class \code{"data.frame"} containing effect size estimates.
-\item "hypothesis": String stating the hypothesis being tested
+\item "effsize": Table of class \code{"data.frame"} containing effect size estimates.
+\item "hypothesis": String stating the hypothesis being tested.
 \item "smd": List containing the results of the standardized mean difference calculations (e.g., Cohen's d).
 \itemize{
-\item Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation)
+\item Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation).
 }
 \item "alpha": Alpha level set for the analysis.
 \item "method": Type of t-test.
@@ -105,21 +104,82 @@ An S3 object of class
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 
-A function for TOST with all types of t-tests.
+Performs equivalence testing using the Two One-Sided Tests (TOST) procedure with t-tests.
+This function supports one-sample, two-sample (independent), and paired t-tests, providing
+a comprehensive framework for testing equivalence or minimal effects hypotheses.
+
+The TOST procedure is designed for situations where you want to demonstrate that an effect
+falls within specified bounds (equivalence testing) or exceeds specified bounds (minimal effects testing).
 }
 \details{
 For details on the calculations in this function see vignette("IntroTOSTt") & vignette("SMD_calcs").
 
 For two-sample tests, the test is of \eqn{\bar x - \bar y} (mean of x minus mean of y).
 For paired samples, the test is of the difference scores (z),
-wherein \eqn{z =  x - y}, and the test is of \eqn{\bar z} (mean of the difference scores).
-For one-sample tests, the test is of \eqn{\bar x } (mean of x).
+wherein \eqn{z = x - y}, and the test is of \eqn{\bar z} (mean of the difference scores).
+For one-sample tests, the test is of \eqn{\bar x} (mean of x).
+
+The output combines three statistical tests:
+\enumerate{
+\item A traditional two-tailed t-test (null hypothesis: difference = \code{mu})
+\item Lower bound test (one-tailed t-test against the lower equivalence bound)
+\item Upper bound test (one-tailed t-test against the upper equivalence bound)
 }
+
+For equivalence testing (\code{hypothesis = "EQU"}):
+\itemize{
+\item \strong{Significant TOST}: Both one-sided tests are significant (p < alpha), indicating the effect is significantly within the equivalence bounds
+\item \strong{Non-significant t-test}: The traditional null hypothesis (difference = \code{mu}) cannot be rejected
+}
+
+For minimal effects testing (\code{hypothesis = "MET"}):
+\itemize{
+\item \strong{Significant TOST}: At least one one-sided test is significant (p < alpha), indicating the effect is significantly outside at least one of the bounds
+\item \strong{Significant t-test}: The traditional null hypothesis (difference = \code{mu}) is rejected
+}
+
+Notes:
+\itemize{
+\item For equivalence testing, the equivalence bounds represent the smallest effect sizes considered meaningful by the user.
+\item When using \code{eqbound_type = "SMD"}, be aware that this can produce biased results and raw bounds are generally recommended.
+\item The function provides standardized effect sizes (Cohen's d or Hedges' g) along with their confidence intervals.
+\item For paired/repeated measures designs, setting \code{rm_correction = TRUE} adjusts the standardized effect size calculation to account for the correlation between measures.
+}
+}
+\section{Purpose}{
+
+Use this function when:
+\itemize{
+\item You want to show that two groups are practically equivalent
+\item You need to demonstrate that an effect is at least as large as a meaningful threshold
+\item You want to test if an observed effect is too small to be of practical importance
+}
+}
+
 \examples{
+# Example 1: Basic Two-Sample Test
 data(mtcars)
-t_TOST(mpg ~ am,
-data = mtcars,
-eqb = 3)
+# Testing if the difference in mpg between automatic and manual
+# transmission cars falls within ±3 mpg
+result <- t_TOST(mpg ~ am, data = mtcars, eqb = 3)
+
+# Example 2: Paired Sample Test with Specific Bounds
+data(sleep)
+result <- t_TOST(x = sleep$extra[sleep$group == 1],
+                y = sleep$extra[sleep$group == 2],
+                paired = TRUE,
+                eqb = c(-0.5, 2))  # Asymmetric bounds
+
+# Example 3: One Sample Equivalence Test
+result <- t_TOST(x = rnorm(30, mean = 0.1, sd = 1),
+                eqb = 1)
+
+# Example 4: Minimal Effects Test
+result <- t_TOST(mpg ~ am,
+                data = mtcars,
+                eqb = 1.5,
+                hypothesis = "MET")
+
 }
 \seealso{
 Other TOST: 

@@ -39,15 +39,15 @@ wilcox_TOST(
 
 \item{...}{further arguments to be passed to or from methods.}
 
-\item{hypothesis}{'EQU' for equivalence (default), or 'MET' for minimal effects test, the alternative hypothesis.}
+\item{hypothesis}{'EQU' for equivalence (default), or 'MET' for minimal effects test.}
 
 \item{paired}{a logical indicating whether you want a paired t-test.}
 
-\item{eqb}{Equivalence bound. Can provide 1 value (negative value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds.}
+\item{eqb}{Equivalence bound. Can provide 1 value (symmetric bound, negative value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds.}
 
-\item{low_eqbound}{lower equivalence bounds (deprecated).}
+\item{low_eqbound}{lower equivalence bounds (deprecated, use \code{eqb} instead).}
 
-\item{high_eqbound}{upper equivalence bounds (deprecated).}
+\item{high_eqbound}{upper equivalence bounds (deprecated, use \code{eqb} instead).}
 
 \item{ses}{Standardized effect size. Default is "rb" for rank-biserial
 correlation. Options also include "cstat" for concordance probability, or
