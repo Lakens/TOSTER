@@ -6,6 +6,7 @@ NEWS
 # TOSTER v0.8.5
 - Big update to package documentation to make things more detailed.
 - Added extra message when permutation tests are used for the Brunner-Munzel test.
+- Added more alternative hypotheses to `boot_compare_smd`.
 
 # TOSTER v0.8.4
 - Added simple plot for `TOSTt` methods

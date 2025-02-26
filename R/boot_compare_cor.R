@@ -1,26 +1,88 @@
-#' @title Comparing Correlations between independent studies with bootstrapping
+#' @title Comparing Correlations Between Independent Studies with Bootstrapping
 #' @description
 #' `r lifecycle::badge('stable')`
 #'
-#' A function to compare standardized mean differences (SMDs) between studies.
-#' This function is intended to be used to compare the compatibility of original studies with replication studies
-#' (lower p-values indicating lower compatibility).
+#' A function to compare correlation coefficients between independent studies using bootstrap methods.
+#' This function is intended to be used to compare the compatibility of original studies
+#' with replication studies (lower p-values indicating lower compatibility).
 #'
-#'
-#' @param x1,y1 numeric vectors of data values. x and y must have the same length from study 1.
-#' @param x2,y2 numeric vectors of data values. x and y must have the same length from study 2.
+#' @param x1,y1 Numeric vectors of data values from study 1. x1 and y1 must have the same length.
+#' @param x2,y2 Numeric vectors of data values from study 2. x2 and y2 must have the same length.
+#' @param ... Additional arguments passed to the correlation functions.
 #' @inheritParams boot_cor_test
+#'
+#' @details
+#' This function tests for differences between correlation coefficients from independent studies
+#' using bootstrap resampling methods. Unlike the `compare_cor` function, which uses Fisher's z
+#' transformation or the Kraatz method with summary statistics, this function works with raw
+#' data and uses bootstrapping to estimate confidence intervals and p-values.
+#'
+#' It is particularly useful for:
+#'
+#' * Comparing correlations when assumptions for parametric tests may not be met
+#' * Obtaining robust confidence intervals for the difference between correlations
+#' * Comparing an original study with its replication using raw data
+#' * Testing if correlations from different samples are equivalent
+#'
+#' The function supports multiple correlation methods:
+#'
+#' * Standard correlation coefficients (Pearson, Kendall, Spearman)
+#' * Robust correlation measures (Winsorized, percentage bend)
+#'
+#' The function also supports both standard hypothesis testing and equivalence/minimal effect testing:
+#'
+#' * For standard tests (two.sided, less, greater), the function tests whether the difference
+#'   between correlations differs from the null value (typically 0).
+#'
+#' * For equivalence testing ("equivalence"), it determines whether the difference falls within
+#'   the specified bounds, which can be set asymmetrically.
+#'
+#' * For minimal effect testing ("minimal.effect"), it determines whether the difference falls
+#'   outside the specified bounds.
+#'
+#' When performing equivalence or minimal effect testing:
+#' * If a single value is provided for `null`, symmetric bounds ±value will be used
+#' * If two values are provided for `null`, they will be used as the lower and upper bounds
+#'
 #' @return A list with class "htest" containing the following components:
 #'
-#'   - "p.value": numeric scalar containing the p-value for the test under the null hypothesis.
-#'   - "estimate": difference in correlations between studies.
-#'   - "conf.int": percentile (bootstrap) confidence interval for difference in correlations.
-#'   - "null.value": the specified hypothesized value for the null hypothesis.
-#'   - "alternative": character string indicating the alternative hypothesis (the value of the input argument alternative). Possible values are "greater", "less", or "two-sided".
-#'   - "method": a character string indicating how the association was measured.
-#'   - "data.name": Names of input values.
-#'   - "boot_res": List of bootstrapped results.
-#'   - "call": the matched call.
+#' * **p.value**: The p-value for the test under the null hypothesis.
+#' * **parameter**: Sample sizes from each study.
+#' * **conf.int**: Bootstrap confidence interval for the difference in correlations.
+#' * **estimate**: Difference in correlations between studies.
+#' * **stderr**: Standard error of the difference (estimated from bootstrap distribution).
+#' * **null.value**: The specified hypothesized value(s) for the null hypothesis.
+#' * **alternative**: Character string indicating the alternative hypothesis.
+#' * **method**: Description of the correlation method used.
+#' * **data.name**: Names of the input data vectors.
+#' * **boot_res**: List containing the bootstrap samples for the difference and individual correlations.
+#' * **call**: The matched call.
+#'
+#' @examples
+#' # Example 1: Comparing Pearson correlations (standard test)
+#' set.seed(123)
+#' x1 <- rnorm(30)
+#' y1 <- x1 * 0.6 + rnorm(30, 0, 0.8)
+#' x2 <- rnorm(25)
+#' y2 <- x2 * 0.3 + rnorm(25, 0, 0.9)
+#'
+#' # Two-sided test with Pearson correlation (use fewer bootstraps for example)
+#' boot_compare_cor(x1, y1, x2, y2, method = "pearson",
+#'                 alternative = "two.sided", R = 500)
+#'
+#' # Example 2: Testing for equivalence with Spearman correlation
+#' # Testing if the difference in correlations is within ±0.2
+#' boot_compare_cor(x1, y1, x2, y2, method = "spearman",
+#'                 alternative = "equivalence", null = 0.2, R = 500)
+#'
+#' # Example 3: Testing with robust correlation measure
+#' # Using percentage bend correlation for non-normal data
+#' boot_compare_cor(x1, y1, x2, y2, method = "bendpercent",
+#'                 alternative = "greater", R = 500)
+#'
+#' # Example 4: Using asymmetric bounds for equivalence testing
+#' boot_compare_cor(x1, y1, x2, y2, method = "pearson",
+#'                 alternative = "equivalence", null = c(-0.1, 0.3), R = 500)
 #'
 #' @name boot_compare_cor
 #' @family compare studies

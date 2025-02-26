@@ -2,7 +2,7 @@
 % Please edit documentation in R/boot_compare_smd.R
 \name{boot_compare_smd}
 \alias{boot_compare_smd}
-\title{Comparing SMDs between ndependent studies with bootstrapping}
+\title{Comparing Standardized Mean Differences (SMDs) Between Independent Studies with Bootstrapping}
 \usage{
 boot_compare_smd(
   x1,
@@ -11,53 +11,160 @@ boot_compare_smd(
   y2 = NULL,
   null = 0,
   paired = FALSE,
-  alternative = c("two.sided", "less", "greater"),
+  alternative = c("two.sided", "less", "greater", "equivalence", "minimal.effect"),
   R = 1999,
   alpha = 0.05
 )
 }
 \arguments{
-\item{x1}{a (non-empty) numeric vector of data values from study 1.}
+\item{x1}{A numeric vector of data values from study 1 (first group for two-sample designs,
+or the only group for one-sample/paired designs).}
 
-\item{y1}{an optional (non-empty) numeric vector of data values from study 1.}
+\item{y1}{An optional numeric vector of data values from study 1 (second group for two-sample designs,
+or second measurement for paired designs). Set to NULL for one-sample designs.}
 
-\item{x2}{a (non-empty) numeric vector of data values from study 2.}
+\item{x2}{A numeric vector of data values from study 2 (first group for two-sample designs,
+or the only group for one-sample/paired designs).}
 
-\item{y2}{an optional (non-empty) numeric vector of data values from study 2.}
+\item{y2}{An optional numeric vector of data values from study 2 (second group for two-sample designs,
+or second measurement for paired designs). Set to NULL for one-sample designs.}
 
-\item{null}{a number indicating the null hypothesis. For TOST, this would be equivalence bound.}
+\item{null}{A number or vector indicating the null hypothesis value(s):
+\itemize{
+\item For standard tests: a single value representing the null difference (default = 0)
+\item For equivalence/minimal effect tests: either a single value (symmetric bounds ±value will be created)
+or a vector of two values representing the lower and upper bounds
+}}
 
-\item{paired}{a logical indicating whether the SMD is from a paired or independent samples design.}
+\item{paired}{A logical indicating whether the SMD is from a paired or independent samples design.
+If a one-sample design, then paired must be set to TRUE.}
 
-\item{alternative}{a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater" or "less". You can specify just the initial letter.}
+\item{alternative}{A character string specifying the alternative hypothesis:
+\itemize{
+\item "two.sided": difference is not equal to null (default)
+\item "greater": difference is greater than null
+\item "less": difference is less than null
+\item "equivalence": difference is within the equivalence bounds (TOST)
+\item "minimal.effect": difference is outside the equivalence bounds (TOST)
+}
 
-\item{R}{number of bootstrap replicates}
+You can specify just the initial letter.}
+
+\item{R}{number of bootstrap replications (default = 1999).}
 
 \item{alpha}{alpha level (default = 0.05)}
 }
 \value{
 A list with class "htest" containing the following components:
 \itemize{
-\item "statistic": z-score.
-\item "p.value": numeric scalar containing the p-value for the test under the null hypothesis.
-\item "estimate": difference in SMD between studies
-\item "conf.int": percentile (bootstrap) confidence interval for difference in SMDs
-\item "null.value": the specified hypothesized value for the null hypothesis.
-\item "alternative": character string indicating the alternative hypothesis (the value of the input argument alternative). Possible values are "greater", "less", or "two-sided".
-\item "method": Type of SMD.
-\item "data.name": "Boostrapped" to denote summary statistics were utilized to obtain results.
-\item "smd": SMDs input for the function.
-\item "df_ci": Data frame of confidence intervals.
-\item "boot_res": List of bootstrapped results.
-\item "call": the matched call.
+\item \strong{statistic}: z-score (observed) with name "z (observed)"
+\item \strong{p.value}: The p-value for the test under the null hypothesis
+\item \strong{conf.int}: Bootstrap confidence interval for the difference in SMDs
+\item \strong{estimate}: Difference in SMD between studies
+\item \strong{null.value}: The specified hypothesized value(s) for the null hypothesis
+\item \strong{alternative}: Character string indicating the alternative hypothesis
+\item \strong{method}: Description of the SMD type and design used
+\item \strong{df_ci}: Data frame containing confidence intervals for the difference and individual SMDs
+\item \strong{boot_res}: List containing the bootstrap samples for SMDs, their difference, and test statistics
+\item \strong{data.name}: "Bootstrapped" to indicate bootstrap methods were used
+\item \strong{call}: The matched call
 }
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 
-A function to compare standardized mean differences (SMDs) between studies.
-This function is intended to be used to compare the compatibility of original studies with replication studies
-(lower p-values indicating lower compatibility).
+A function to compare standardized mean differences (SMDs) between independent studies using
+bootstrap methods. This function is intended to be used to compare the compatibility of
+original studies with replication studies (lower p-values indicating lower compatibility).
+}
+\details{
+This function tests for differences between standardized mean differences (SMDs) from
+independent studies using bootstrap resampling methods. Unlike the \code{compare_smd} function,
+which works with summary statistics, this function works with raw data and uses
+bootstrapping to estimate confidence intervals and p-values.
+
+The function supports both paired/one-sample designs and independent samples designs:
+\itemize{
+\item For \strong{paired/one-sample designs} (\code{paired = TRUE}):
+\itemize{
+\item If \code{y1} and \code{y2} are provided, the function calculates differences between paired measures
+\item If \code{y1} and \code{y2} are NULL, the function treats \code{x1} and \code{x2} as one-sample data
+\item SMDs are calculated as Cohen's dz (mean divided by standard deviation of differences)
+}
+\item For \strong{independent samples designs} (\code{paired = FALSE}):
+\itemize{
+\item Requires \code{x1}, \code{y1}, \code{x2}, and \code{y2} (first and second groups for both studies)
+\item If \code{y1} and \code{y2} are NULL, the function treats \code{x1} and \code{x2} as one-sample data with paired = TRUE
+\item SMDs are calculated as Cohen's ds (mean difference divided by pooled standard deviation)
+}
+}
+
+The function supports both standard hypothesis testing and equivalence/minimal effect testing:
+\itemize{
+\item For standard tests (two.sided, less, greater), the function tests whether the difference
+between SMDs differs from the null value (typically 0).
+\item For equivalence testing ("equivalence"), it determines whether the difference falls within
+the specified bounds, which can be set asymmetrically.
+\item For minimal effect testing ("minimal.effect"), it determines whether the difference falls
+outside the specified bounds.
+}
+
+When performing equivalence or minimal effect testing:
+\itemize{
+\item If a single value is provided for \code{null}, symmetric bounds ±value will be used
+\item If two values are provided for \code{null}, they will be used as the lower and upper bounds
+}
+
+The bootstrap procedure follows these steps:
+\enumerate{
+\item Calculate SMDs for both studies using the original data
+\item Calculate the difference between SMDs and its standard error
+\item Generate R bootstrap samples by resampling with replacement
+\item Calculate SMDs and their difference for each bootstrap sample
+\item Calculate confidence intervals using the percentile method
+\item Compute p-values by comparing the observed statistic to the bootstrap distribution
+}
+}
+\examples{
+# Example 1: Comparing two independent samples SMDs (standard test)
+set.seed(123)
+# Study 1 data
+x1 <- rnorm(30, mean = 0)
+y1 <- rnorm(30, mean = 0.5, sd = 1)
+# Study 2 data
+x2 <- rnorm(25, mean = 0)
+y2 <- rnorm(25, mean = 0.3, sd = 1)
+
+# Two-sided test for independent samples (use fewer bootstraps for example)
+boot_compare_smd(x1, y1, x2, y2, paired = FALSE,
+                alternative = "two.sided", R = 99)
+
+# Example 2: Testing for equivalence between SMDs
+# Testing if the difference between SMDs is within ±0.2
+boot_compare_smd(x1, y1, x2, y2, paired = FALSE,
+                alternative = "equivalence", null = 0.2, R = 99)
+
+# Example 3: Testing for minimal effects
+# Testing if the difference between SMDs is outside ±0.3
+boot_compare_smd(x1, y1, x2, y2, paired = FALSE,
+                alternative = "minimal.effect", null = 0.3, R = 99)
+
+# Example 4: Comparing paired samples SMDs
+# Study 1 data (pre-post measurements)
+pre1 <- rnorm(20, mean = 10, sd = 2)
+post1 <- rnorm(20, mean = 12, sd = 2)
+# Study 2 data (pre-post measurements)
+pre2 <- rnorm(25, mean = 10, sd = 2)
+post2 <- rnorm(25, mean = 11, sd = 2)
+
+# Comparing paired designs
+boot_compare_smd(x1 = pre1, y1 = post1, x2 = pre2, y2 = post2,
+                paired = TRUE, alternative = "greater", R = 99)
+
+# Example 5: Using asymmetric bounds for equivalence testing
+boot_compare_smd(x1, y1, x2, y2, paired = FALSE,
+                alternative = "equivalence", null = c(-0.1, 0.3), R = 99)
+
 }
 \seealso{
 Other compare studies: 
