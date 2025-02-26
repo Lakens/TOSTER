@@ -9,59 +9,58 @@
 #'
 #' @section Purpose:
 #' Use this function when:
-#' \itemize{
-#'   \item You need a unified interface for different types of hypothesis tests
-#'   \item You want to perform equivalence testing or minimal effect testing with non-parametric methods
-#'   \item You need more flexibility in hypothesis testing than provided by standard functions
-#'   \item You want to easily switch between parametric and non-parametric methods
-#' }
+#'   - You need a unified interface for different types of hypothesis tests
+#'   - You want to perform equivalence testing or minimal effect testing with non-parametric methods
+#'   - You need more flexibility in hypothesis testing than provided by standard functions
+#'   - You want to easily switch between parametric and non-parametric methods
 #'
 #' @inheritParams t_TOST
 #' @inheritParams z_cor_test
 #' @inheritParams brunner_munzel
 #' @param test a character string specifying the type of hypothesis test to use:
-#'   \itemize{
-#'     \item "t.test": Student's t-test (parametric, default)
-#'     \item "wilcox.test": Wilcoxon-Mann-Whitney test (non-parametric)
-#'     \item "brunner_munzel": Brunner-Munzel test (non-parametric)
-#'   }
+#'     - "t.test": Student's t-test (parametric, default)
+#'     - "wilcox.test": Wilcoxon-Mann-Whitney test (non-parametric)
+#'     - "brunner_munzel": Brunner-Munzel test (non-parametric)
+#'
 #'   You can specify just the initial letter (e.g., "t" for "t.test").
+#' @param alternative the alternative hypothesis:
+#'     - "two.sided": different from mu (default)
+#'     - "less": less than mu
+#'     - "greater": greater than mu
+#'     - "equivalence": between specified bounds
+#'     - "minimal.effect": outside specified bounds
 #' @param mu a number or vector specifying the null hypothesis value(s):
-#'   \itemize{
-#'     \item For standard alternatives (two.sided, less, greater): a single value (default: 0 for t-test/wilcox.test, 0.5 for brunner_munzel)
-#'     \item For equivalence/minimal.effect: either a single value (symmetric bounds will be created) or a vector of two values representing the lower and upper bounds
-#'   }
+#'     - For standard alternatives (two.sided, less, greater): a single value (default: 0 for t-test/wilcox.test, 0.5 for brunner_munzel)
+#'     - For equivalence/minimal.effect: either a single value (symmetric bounds will be created) or a vector of two values representing the lower and upper bounds
 #' @param ... further arguments to be passed to or from the underlying test functions.
 #'
 #' @details
 #' This function provides a unified interface to several common hypothesis tests with expanded
 #' alternative hypotheses, particularly for equivalence testing and minimal effect testing.
 #'
-#' When \code{alternative = "equivalence"}, the test evaluates whether the effect is contained
-#' within the bounds specified by \code{mu}. This corresponds to the alternative hypothesis that
+#' When `alternative = "equivalence"`, the test evaluates whether the effect is contained
+#' within the bounds specified by `mu`. This corresponds to the alternative hypothesis that
 #' the true effect is between the specified bounds. The function performs two one-sided tests and
 #' returns the most conservative result (highest p-value).
 #'
-#' When \code{alternative = "minimal.effect"}, the test evaluates whether the effect is outside
-#' the bounds specified by \code{mu}. This corresponds to the alternative hypothesis that the true
+#' When `alternative = "minimal.effect"`, the test evaluates whether the effect is outside
+#' the bounds specified by `mu`. This corresponds to the alternative hypothesis that the true
 #' effect is either less than the lower bound or greater than the upper bound. The function performs
 #' two one-sided tests and returns the most significant result (lowest p-value).
 #'
 #' For standard alternatives ("two.sided", "less", "greater"), the function behaves similarly to
 #' the underlying test functions with some additional standardization in the output format.
 #'
-#' The interpretation of \code{mu} depends on the test used:
-#' \itemize{
-#'   \item For t-test and wilcox.test: mu represents the difference in means/medians (default: 0)
-#'   \item For brunner_munzel: mu represents the probability that a randomly selected value from the first sample exceeds a randomly selected value from the second sample (default: 0.5)
-#' }
+#' The interpretation of `mu` depends on the test used:
+#'   - For t-test and wilcox.test: mu represents the difference in means/medians (default: 0)
+#'   - For brunner_munzel: mu represents the probability that a randomly selected value from the first sample exceeds a randomly selected value from the second sample (default: 0.5)
 #'
-#' If \code{mu} is a single value for equivalence or minimal effect alternatives, symmetric bounds
+#'
+#' If `mu` is a single value for equivalence or minimal effect alternatives, symmetric bounds
 #' will be created automatically:
-#' \itemize{
-#'   \item For t-test and wilcox.test: bounds become c(mu, -mu)
-#'   \item For brunner_munzel: bounds become c(mu, abs(mu-1))
-#' }
+#'   - For t-test and wilcox.test: bounds become c(mu, -mu)
+#'   - For brunner_munzel: bounds become c(mu, abs(mu-1))
+#'
 #'
 #' @return A list with class `"htest"` containing the following components:
 #'

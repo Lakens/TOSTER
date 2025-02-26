@@ -2,40 +2,119 @@
 #' @description
 #' `r lifecycle::badge('stable')`
 #'
-#'  A function for a bootstrap method for t-tests.
+#' Performs t-tests with bootstrapped p-values and confidence intervals. This function supports
+#' standard hypothesis testing alternatives as well as equivalence and minimal effect testing,
+#' all with the familiar `htest` output structure.
+#'
+#' @section Purpose:
+#' Use this function when:
+#'   * You need more robust inference than provided by standard t-tests
+#'   * Your data don't meet the assumptions of normality or homogeneity
+#'   * You want to perform equivalence or minimal effect testing with bootstrap methods
+#'   * Sample sizes are small or standard parametric approaches may be unreliable
+#'   * You prefer the standard `htest` output format for compatibility with other R functions
+#'
 #' @inheritParams simple_htest
 #' @inheritParams boot_t_TOST
-#' @return A list with class `"htest"` containing the following components:
+#' @param alternative the alternative hypothesis:
+#'     * "two.sided": different from mu (default)
+#'     * "less": less than mu
+#'     * "greater": greater than mu
+#'     * "equivalence": between specified bounds
+#'     * "minimal.effect": outside specified bounds
 #'
-#'   - "statistic": the value of the t-statistic.
-#'   - "parameter": the degrees of freedom for the t-statistic.
-#'   - "p.value": the p-value for the test.
-#'   - "conf.int": a confidence interval for the mean appropriate to the specified alternative hypothesis.
-#'   - "estimate": the estimated mean or difference in means depending on whether it was a one-sample test or a two-sample test.
-#'   - "null.value": the specified hypothesized value of the mean or mean difference. May be 2 values.
-#'   - "stderr": the standard error of the mean (difference), used as denominator in the t-statistic formula.
-#'   - "alternative": a character string describing the alternative hypothesis.
-#'   - "method": a character string indicating what type of t-test was performed.
-#'   - "data.name": a character string giving the name(s) of the data.
+#' @param mu a number or vector specifying the null hypothesis value(s):
+#'     * For standard alternatives: a single value (default = 0)
+#'     * For equivalence/minimal.effect: two values representing the lower and upper bounds
 #'
-#' @details The implemented test(s) corresponds to the proposal of Chapter 16 of Efron and Tibshirani (1994).
+#' @details
+#' This function performs bootstrapped t-tests, providing more robust inference than standard
+#' parametric t-tests. It supports one-sample, two-sample (independent), and paired designs,
+#' as well as five different alternative hypotheses.
+#'
+#' The bootstrap procedure follows these steps:
+#'   * Calculate the test statistic from the original data
+#'   * Generate R bootstrap samples by resampling with replacement
+#'   * Calculate the test statistic for each bootstrap sample
+#'   * Compute the p-value by comparing the original test statistic to the bootstrap distribution
+#'   * Calculate confidence intervals using the specified bootstrap method
+#'
+#' Three bootstrap confidence interval methods are available:
+#'   - *Studentized bootstrap ("stud")*: Accounts for the variability in standard error estimates
+#'   - *Basic bootstrap ("basic")*: Uses the empirical distribution of bootstrap estimates
+#'   - *Percentile bootstrap ("perc")*: Uses percentiles of the bootstrap distribution directly
+#'
+#' For different alternatives, the p-values are calculated as follows:
+#'   * "two.sided": Proportion of bootstrap statistics at least as extreme as the observed statistic (in either direction), multiplied by 2
+#'   * "less": Proportion of bootstrap statistics less than or equal to the observed statistic
+#'   * "greater": Proportion of bootstrap statistics greater than or equal to the observed statistic
+#'   * "equivalence": Maximum of two one-sided p-values (for lower and upper bounds)
+#'   * "minimal.effect": Minimum of two one-sided p-values (for lower and upper bounds)
+#'
 #'
 #' For two-sample tests, the test is of \eqn{\bar x - \bar y} (mean of x minus mean of y).
 #' For paired samples, the test is of the difference scores (z),
-#' wherein \eqn{z =  x - y}, and the test is of \eqn{\bar z} (mean of the difference scores).
-#' For one-sample tests, the test is of \eqn{\bar x } (mean of x).
+#' wherein \eqn{z = x - y}, and the test is of \eqn{\bar z} (mean of the difference scores).
+#' For one-sample tests, the test is of \eqn{\bar x} (mean of x).
 #'
-#' For details on the calculations in this function see `vignette("robustTOST")`.
+#' Unlike the `t_TOST` function, this function returns a standard `htest` object for
+#' compatibility with other R functions, while still providing the benefits of bootstrapping.
+#'
+#' For detailed information on calculation methods, see `vignette("robustTOST")`.
+#'
+#' @return A list with class `"htest"` containing the following components:
+#'
+#'   - "p.value": the bootstrapped p-value for the test.
+#'   - "stderr": the bootstrapped standard error.
+#'   - "conf.int": a bootstrapped confidence interval for the mean appropriate to the specified alternative hypothesis.
+#'   - "estimate": the estimated mean or difference in means.
+#'   - "null.value": the specified hypothesized value(s) of the mean or mean difference.
+#'   - "alternative": a character string describing the alternative hypothesis.
+#'   - "method": a character string indicating what type of bootstrapped t-test was performed.
+#'   - "boot": the bootstrap samples of the mean or mean difference.
+#'   - "data.name": a character string giving the name(s) of the data.
+#'   - "call": the matched call.
 #'
 #' @examples
-#' # example code
+#' # Example 1: Basic two-sample test with formula notation
+#' data(sleep)
+#' result <- boot_t_test(extra ~ group, data = sleep)
+#' result  # Standard htest output format
 #'
-#' boot_t_test(extra ~ group, data = sleep)
-#' @section References:
+#' # Example 2: One-sample bootstrapped t-test
+#' set.seed(123)
+#' x <- rnorm(20, mean = 0.5, sd = 1)
+#' boot_t_test(x, mu = 0, R = 999) # Using fewer replicates for demonstration
 #'
+#' # Example 3: Paired samples test with percentile bootstrap CI
+#' before <- c(5.1, 4.8, 6.2, 5.7, 6.0, 5.5, 4.9, 5.8)
+#' after <- c(5.6, 5.2, 6.7, 6.1, 6.5, 5.8, 5.3, 6.2)
+#' boot_t_test(x = before, y = after,
+#'             paired = TRUE,
+#'             alternative = "less",  # Testing if before < after
+#'             boot_ci = "perc",
+#'             R = 999)
+#'
+#' # Example 4: Equivalence testing with bootstrapped t-test
+#' # Testing if the effect is within ±0.5 units
+#' data(mtcars)
+#' boot_t_test(mpg ~ am, data = mtcars,
+#'             alternative = "equivalence",
+#'             mu = c(-0.5, 0.5),
+#'             boot_ci = "stud",
+#'             R = 999)
+#'
+#' # Example 5: Minimal effect testing with bootstrapped t-test
+#' # Testing if the effect is outside ±3 units
+#' boot_t_test(mpg ~ am, data = mtcars,
+#'             alternative = "minimal.effect",
+#'             mu = c(-3, 3),
+#'             R = 999)
+#'
+#' @references
 #' Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press.
+#'
 #' @family Robust tests
-#' @importFrom stats var quantile
 #' @name boot_t_test
 #' @export boot_t_test
 

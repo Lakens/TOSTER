@@ -7,11 +7,9 @@
 #'
 #' @section Purpose:
 #' Use this function when:
-#' \itemize{
-#'   \item You want more robust confidence intervals for your effect sizes
-#'   \item Sample sizes are small and parametric assumptions may not hold
-#'   \item You want to avoid relying on asymptotic approximations
-#' }
+#'   * You want more robust confidence intervals for your effect sizes
+#'   * Sample sizes are small and parametric assumptions may not hold
+#'   * You want to avoid relying on asymptotic approximations
 #'
 #' @inheritParams t_TOST
 #' @param glass Option to calculate Glass's delta instead of Cohen's d style SMD ('glass1' uses first group's SD, 'glass2' uses second group's SD).
@@ -28,19 +26,15 @@
 #' meet standard assumptions.
 #'
 #' The bootstrap procedure follows these steps:
-#' \enumerate{
-#'   \item Resample with replacement from the original data to create R bootstrap samples
-#'   \item For each bootstrap sample, calculate test statistics and effect sizes
-#'   \item Use the distribution of bootstrap results to compute p-values and confidence intervals
-#'   \item Combine results using the specified bootstrap confidence interval method
-#' }
+#'   * Resample with replacement from the original data to create R bootstrap samples
+#'   * For each bootstrap sample, calculate test statistics and effect sizes
+#'   * Use the distribution of bootstrap results to compute p-values and confidence intervals
+#'   * Combine results using the specified bootstrap confidence interval method
 #'
 #' Three types of bootstrap confidence intervals are available:
-#' \itemize{
-#'   \item Studentized ("stud"): Accounts for the variability in the standard error estimate
-#'   \item Basic/Empirical ("basic"): Uses the empirical distribution of bootstrap estimates
-#'   \item Percentile ("perc"): Uses percentiles of the bootstrap distribution
-#' }
+#'   * Studentized ("stud"): Accounts for the variability in the standard error estimate
+#'   * Basic/Empirical ("basic"): Uses the empirical distribution of bootstrap estimates
+#'   * Percentile ("perc"): Uses percentiles of the bootstrap distribution
 #'
 #' For two-sample tests, the test is of \eqn{\bar x - \bar y} (mean of x minus mean of y).
 #' For paired samples, the test is of the difference scores (z),

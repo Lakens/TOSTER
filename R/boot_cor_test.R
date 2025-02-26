@@ -1,40 +1,112 @@
-#' @title Bootstrapped correlation coefficients
+#' @title Bootstrapped Correlation Coefficients
 #' @description
 #' `r lifecycle::badge('stable')`
 #'
-#'  A function for a bootstrap, percentile, method for correlation coefficients.
+#' A function for bootstrap-based correlation tests using various correlation coefficients
+#' including Pearson's, Kendall's, Spearman's, Winsorized, and percentage bend correlations.
+#' This function supports standard, equivalence, and minimal effect testing with robust bootstrap methods.
+#'
 #' @inheritParams boot_t_TOST
 #' @inheritParams z_cor_test
-#' @param method a character string indicating which correlation coefficient is to be used for the test. One of "winsorized", "bendpercent","pearson", "kendall", or "spearman", can be abbreviated.
-#' @param boot_ci type of bootstrap confidence interval. Options include studentized (stud), empirical/basic (basic) and percentile (perc) confidence intervals.
-#' @details This function uses a percentile bootstrap methods for the confidence intervals.
-#' The returned p-values are calculated from a re-sampled null distribution (similar to [boot_t_TOST]).
-#' See `vignette("correlations")` for more details.
+#' @param method a character string indicating which correlation coefficient to use:
+#'   * "pearson": standard Pearson product-moment correlation
+#'   * "kendall": Kendall's tau rank correlation
+#'   * "spearman": Spearman's rho rank correlation
+#'   * "winsorized": Winsorized correlation (robust to outliers)
+#'   * "bendpercent": percentage bend correlation (robust to marginal outliers)
 #'
-#' The bootstrap correlation methods in this package offer two other correlations: a Winsorized correlation and a percentage bend correlation (see Wilcox 2017).
-#' These two can modified by adding the trim (Winsorized) or beta (percentage bend) arguments.
-#' The default for both arguments is 0.2 but can be modified at the user's discretion.
-#' These calculations are based on Rand Wilcox's R functions for his book (Wilcox, 2017), and adapted from their implementation in Guillaume Rousselet's R package "bootcorci".
+#'   Can be abbreviated.
+#' @param boot_ci type of bootstrap confidence interval:
+#'   * "basic": basic/empirical bootstrap CI
+#'   * "perc": percentile bootstrap CI (default)
+#' @param R number of bootstrap replications (default = 1999).
+#' @param ... additional arguments passed to correlation functions, such as:
+#'   * trim: for Winsorized correlation (default = 0.2)
+#'   * beta: for percentage bend correlation (default = 0.2)
+#'
+#' @details
+#' This function uses bootstrap methods to calculate correlation coefficients and their
+#' confidence intervals. P-values are calculated from a re-sampled null distribution.
+#'
+#' The bootstrap correlation methods in this package offer two robust correlations beyond
+#' the standard methods:
+#'
+#' 1. **Winsorized correlation**: Replaces extreme values with less extreme values before
+#'    calculating the correlation. The `trim` parameter (default = 0.2) determines the
+#'    proportion of data to be Winsorized.
+#'
+#' 2. **Percentage bend correlation**: A robust correlation that downweights the influence
+#'    of outliers. The `beta` parameter (default = 0.2) determines the bending constant.
+#'
+#' These calculations are based on Rand Wilcox's R functions for his book (Wilcox, 2017),
+#' and adapted from their implementation in Guillaume Rousselet's R package "bootcorci".
+#'
+#' The function supports both standard hypothesis testing and equivalence/minimal effect testing:
+#'
+#' * For standard tests (two.sided, less, greater), the function tests whether the correlation
+#'   differs from the null value (typically 0).
+#'
+#' * For equivalence testing ("equivalence"), it determines whether the correlation falls within
+#'   the specified bounds, which can be set asymmetrically.
+#'
+#' * For minimal effect testing ("minimal.effect"), it determines whether the correlation falls
+#'   outside the specified bounds.
+#'
+#' When performing equivalence or minimal effect testing:
+#' * If a single value is provided for `null`, symmetric bounds ±value will be used
+#' * If two values are provided for `null`, they will be used as the lower and upper bounds
+#'
+#' See `vignette("correlations")` for more details.
 #'
 #' @return A list with class "htest" containing the following components:
 #'
-#'   - "p.value": the p-value of the test.
-#'   - "estimate": the estimated measure of association, with name "pb", "wincor", "cor", "tau", or "rho" corresponding to the method employed.
-#'   - "null.value": the value of the association measure under the null hypothesis.
-#'   - "alternative": character string indicating the alternative hypothesis (the value of the input argument alternative).
-#'   - "method": a character string indicating how the association was measured.
-#'   - "data.name": a character string giving the names of the data.
-#'   - "call": the matched call.
+#' * **p.value**: the bootstrap p-value of the test.
+#' * **parameter**: the number of observations used in the test.
+#' * **conf.int**: a bootstrap confidence interval for the correlation coefficient.
+#' * **estimate**: the estimated correlation coefficient, with name "cor", "tau", "rho", "pb", or "wincor"
+#'   corresponding to the method employed.
+#' * **stderr**: the bootstrap standard error of the correlation coefficient.
+#' * **null.value**: the value(s) of the correlation under the null hypothesis.
+#' * **alternative**: character string indicating the alternative hypothesis.
+#' * **method**: a character string indicating which bootstrapped correlation was measured.
+#' * **data.name**: a character string giving the names of the data.
+#' * **boot_res**: vector of bootstrap correlation estimates.
+#' * **call**: the matched call.
+#'
+#' @examples
+#' # Example 1: Standard bootstrap test with Pearson correlation
+#' x <- c(44.4, 45.9, 41.9, 53.3, 44.7, 44.1, 50.7, 45.2, 60.1)
+#' y <- c( 2.6,  3.1,  2.5,  5.0,  3.6,  4.0,  5.2,  2.8,  3.8)
+#' boot_cor_test(x, y, method = "pearson", alternative = "two.sided",
+#'               R = 999) # Fewer replicates for example
+#'
+#' # Example 2: Equivalence test with Spearman correlation
+#' # Testing if correlation is equivalent to zero within ±0.3
+#' boot_cor_test(x, y, method = "spearman", alternative = "equivalence",
+#'              null = 0.3, R = 999)
+#'
+#' # Example 3: Using robust correlation methods
+#' # Using Winsorized correlation with custom trim
+#' boot_cor_test(x, y, method = "winsorized", trim = 0.1,
+#'              R = 999)
+#'
+#' # Example 4: Using percentage bend correlation
+#' boot_cor_test(x, y, method = "bendpercent", beta = 0.2,
+#'              R = 999)
+#'
+#' # Example 5: Minimal effect test with asymmetric bounds
+#' # Testing if correlation is outside bounds of -0.1 and 0.4
+#' boot_cor_test(x, y, method = "pearson", alternative = "minimal.effect",
+#'              null = c(-0.1, 0.4), R = 999)
 #'
 #' @section References:
-#'
 #' Wilcox, R.R. (2009) Comparing Pearson Correlations: Dealing with Heteroscedasticity and Nonnormality.
 #' Communications in Statistics - Simulation and Computation, 38, 2220–2234.
 #'
 #' Wilcox, R.R. (2017) Introduction to Robust Estimation and Hypothesis Testing, 4th edition. Academic Press.
+#'
 #' @family Correlations
 #' @export
-
 
 boot_cor_test <- function(x,
                           y,

@@ -8,10 +8,10 @@
 #'
 #' @section Purpose:
 #' Use this function when:
-#' \itemize{
-#'   \item You only have access to summary statistics (means, standard deviations, sample sizes)
-#'   \item You need to reanalyze published results within an equivalence testing framework
-#' }
+#' * You only have access to summary statistics (means, standard deviations, sample sizes)
+#' * You want to perform meta-analyses using published results
+#' * You're conducting power analyses based on previous studies
+#' * You need to reanalyze published results within an equivalence testing framework
 #'
 #' @param m1 mean of group 1.
 #' @param m2 mean of group 2 (not required for one-sample tests).
@@ -28,17 +28,15 @@
 #' only summary statistics are available.
 #'
 #' The function supports three types of tests:
-#' \itemize{
-#'   \item One-sample test: Provide m1, sd1, and n1 only
-#'   \item Two-sample independent test: Provide all parameters except r12, with paired = FALSE
-#'   \item Paired samples test: Provide all parameters including r12, with paired = TRUE
-#' }
+#' * One-sample test: Provide m1, sd1, and n1 only
+#' * Two-sample independent test: Provide all parameters except r12, with paired = FALSE
+#' * Paired samples test: Provide all parameters including r12, with paired = TRUE
 #'
 #' For two-sample tests, the test is of \eqn{m1 - m2} (mean of group 1 minus mean of group 2).
-#' For paired samples, the test is of the difference scores, wherein \eqn{z = m1 - m2}, and the test is of \eqn{\bar z} (mean of the difference scores).
-#' For one-sample tests, the test is of \eqn{\bar m1} (mean of group 1).
+#' For paired samples, the test is of the difference scores, wherein \eqn{z = m1 - m2}, and the test is of \eqn{\bar{z}} (mean of the difference scores).
+#' For one-sample tests, the test is of \eqn{\bar{m1}} (mean of group 1).
 #'
-#' The function calculates both raw mean differences and standardized effect sizes (e.g., Cohen's d or Hedges' g),
+#' The function calculates both raw mean differences and standardized effect sizes (Cohen's d or Hedges' g),
 #' along with their confidence intervals.
 #'
 #' For details on the calculations in this function see
@@ -46,15 +44,15 @@
 #'
 #' @return An S3 object of class `"TOSTt"` is returned containing the following slots:
 #'
-#'   - "TOST": A table of class `"data.frame"` containing two-tailed t-test and both one-tailed results.
-#'   - "eqb": A table of class `"data.frame"` containing equivalence bound settings.
-#'   - "effsize": Table of class `"data.frame"` containing effect size estimates.
-#'   - "hypothesis": String stating the hypothesis being tested.
-#'   - "smd": List containing the results of the standardized mean difference calculations (e.g., Cohen's d).
-#'      - Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation).
-#'   - "alpha": Alpha level set for the analysis.
-#'   - "method": Type of t-test.
-#'   - "decision": List included text regarding the decisions for statistical inference.
+#' * **TOST**: A table of class `"data.frame"` containing two-tailed t-test and both one-tailed results.
+#' * **eqb**: A table of class `"data.frame"` containing equivalence bound settings.
+#' * **effsize**: Table of class `"data.frame"` containing effect size estimates.
+#' * **hypothesis**: String stating the hypothesis being tested.
+#' * **smd**: List containing the results of the standardized mean difference calculations (e.g., Cohen's d).
+#'   * Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation).
+#' * **alpha**: Alpha level set for the analysis.
+#' * **method**: Type of t-test.
+#' * **decision**: List included text regarding the decisions for statistical inference.
 #'
 #' @examples
 #' # Example 1: One-sample test

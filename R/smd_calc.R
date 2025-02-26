@@ -8,13 +8,11 @@
 #'
 #' @section Purpose:
 #' Use this function when:
-#' \itemize{
-#'   \item You need to calculate standardized effect sizes (Cohen's d, Hedges' g, Glass's delta)
-#'   \item You want confidence intervals for your effect size estimates
-#'   \item You need effect sizes for meta-analysis or reporting
-#'   \item You want to compare effect sizes across different studies or measures
-#'   \item You don't need the hypothesis testing components of the TOST functions
-#' }
+#'   * You need to calculate standardized effect sizes (Cohen's d, Hedges' g, Glass's delta)
+#'   * You want confidence intervals for your effect size estimates
+#'   * You need effect sizes for meta-analysis or reporting
+#'   * You want to compare effect sizes across different studies or measures
+#'   * You don't need the hypothesis testing components of the TOST functions
 #'
 #' @inheritParams t_TOST
 #' @inheritParams boot_t_TOST
@@ -23,27 +21,21 @@
 #' @details
 #' This function calculates standardized mean differences (SMD) for various study designs:
 #'
-#' \itemize{
-#'   \item One-sample design: Standardizes the difference between the sample mean and zero (or other specified value)
-#'   \item Two-sample independent design: Standardizes the difference between two group means
-#'   \item Paired samples design: Standardizes the mean difference between paired observations
-#' }
+#'   * One-sample design: Standardizes the difference between the sample mean and zero (or other specified value)
+#'   * Two-sample independent design: Standardizes the difference between two group means
+#'   * Paired samples design: Standardizes the mean difference between paired observations
 #'
 #' The function supports multiple SMD variants:
-#' \itemize{
-#'   \item Cohen's d: Classic standardized mean difference (bias_correction = FALSE)
-#'   \item Hedges' g: Bias-corrected version of Cohen's d (bias_correction = TRUE)
-#'   \item Glass's delta: Uses only one group's standard deviation as the denominator (glass = "glass1" or "glass2")
-#'   \item Repeated measures d: Accounts for correlation in paired designs (rm_correction = TRUE)
-#' }
+#'   * Cohen's d: Classic standardized mean difference (bias_correction = FALSE)
+#'   * Hedges' g: Bias-corrected version of Cohen's d (bias_correction = TRUE)
+#'   * Glass's delta: Uses only one group's standard deviation as the denominator (glass = "glass1" or "glass2")
+#'   * Repeated measures d: Accounts for correlation in paired designs (rm_correction = TRUE)
 #'
 #' Different confidence interval calculation methods are available:
-#' \itemize{
-#'   \item "nct": Uses the noncentral t-distribution (most accurate in most cases)
-#'   \item "goulet": Uses the Goulet-Pelletier method
-#'   \item "t": Uses the central t-distribution
-#'   \item "z": Uses the normal distribution
-#' }
+#'   * "nct": Uses the noncentral t-distribution (most accurate in most cases)
+#'   * "goulet": Uses the Goulet-Pelletier method
+#'   * "t": Uses the central t-distribution
+#'   * "z": Uses the normal distribution
 #'
 #' Note that unlike the t_TOST and related functions, smd_calc only calculates effect sizes and
 #' their confidence intervals without performing hypothesis tests.
@@ -51,13 +43,11 @@
 #' For detailed information on calculation methods, see `vignette("SMD_calcs")`.
 #'
 #' @return A data frame containing the following information:
-#' \itemize{
-#'   \item estimate: The standardized mean difference estimate (Cohen's d, Hedges' g, or Glass's delta)
-#'   \item SE: Standard error of the estimate
-#'   \item lower.ci: Lower bound of the confidence interval
-#'   \item upper.ci: Upper bound of the confidence interval
-#'   \item conf.level: Confidence level (1-alpha)
-#' }
+#'   * estimate: The standardized mean difference estimate (Cohen's d, Hedges' g, or Glass's delta)
+#'   * SE: Standard error of the estimate
+#'   * lower.ci: Lower bound of the confidence interval
+#'   * upper.ci: Upper bound of the confidence interval
+#'   * conf.level: Confidence level (1-alpha)
 #'
 #' @examples
 #' # Example 1: Independent groups comparison (Cohen's d)

@@ -4,7 +4,7 @@
 \alias{t_TOST}
 \alias{t_TOST.default}
 \alias{t_TOST.formula}
-\title{Two One-Sided T-tests (TOST) with t-tests}
+\title{Two One-Sided T-tests (TOST) for Equivalence Testing}
 \usage{
 t_TOST(
   x,
@@ -88,17 +88,17 @@ t_TOST(
 \value{
 An S3 object of class \code{"TOSTt"} is returned containing the following slots:
 \itemize{
-\item "TOST": A table of class \code{"data.frame"} containing two-tailed t-test and both one-tailed results.
-\item "eqb": A table of class \verb{"data.frame}" containing equivalence bound settings.
-\item "effsize": Table of class \code{"data.frame"} containing effect size estimates.
-\item "hypothesis": String stating the hypothesis being tested.
-\item "smd": List containing the results of the standardized mean difference calculations (e.g., Cohen's d).
+\item \strong{TOST}: A table of class \code{"data.frame"} containing two-tailed t-test and both one-tailed results.
+\item \strong{eqb}: A table of class \code{"data.frame"} containing equivalence bound settings.
+\item \strong{effsize}: Table of class \code{"data.frame"} containing effect size estimates.
+\item \strong{hypothesis}: String stating the hypothesis being tested.
+\item \strong{smd}: List containing the results of the standardized mean difference calculations (e.g., Cohen's d).
 \itemize{
 \item Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation).
 }
-\item "alpha": Alpha level set for the analysis.
-\item "method": Type of t-test.
-\item "decision": List included text regarding the decisions for statistical inference.
+\item \strong{alpha}: Alpha level set for the analysis.
+\item \strong{method}: Type of t-test.
+\item \strong{decision}: List included text regarding the decisions for statistical inference.
 }
 }
 \description{
@@ -114,10 +114,10 @@ falls within specified bounds (equivalence testing) or exceeds specified bounds 
 \details{
 For details on the calculations in this function see vignette("IntroTOSTt") & vignette("SMD_calcs").
 
-For two-sample tests, the test is of \eqn{\bar x - \bar y} (mean of x minus mean of y).
+For two-sample tests, the test is of \eqn{\bar{x} - \bar{y}} (mean of x minus mean of y).
 For paired samples, the test is of the difference scores (z),
-wherein \eqn{z = x - y}, and the test is of \eqn{\bar z} (mean of the difference scores).
-For one-sample tests, the test is of \eqn{\bar x} (mean of x).
+wherein $z = x - y$, and the test is of \eqn{\bar{z}} (mean of the difference scores).
+For one-sample tests, the test is of \eqn{\bar{x}} (mean of x).
 
 The output combines three statistical tests:
 \enumerate{
@@ -140,7 +140,7 @@ For minimal effects testing (\code{hypothesis = "MET"}):
 
 Notes:
 \itemize{
-\item For equivalence testing, the equivalence bounds represent the smallest effect sizes considered meaningful by the user.
+\item For equivalence testing, the equivalence bounds represent the smallest effect sizes considered meaningful.
 \item When using \code{eqbound_type = "SMD"}, be aware that this can produce biased results and raw bounds are generally recommended.
 \item The function provides standardized effect sizes (Cohen's d or Hedges' g) along with their confidence intervals.
 \item For paired/repeated measures designs, setting \code{rm_correction = TRUE} adjusts the standardized effect size calculation to account for the correlation between measures.

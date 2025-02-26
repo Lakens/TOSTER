@@ -4,6 +4,7 @@ home:
 
 
 template:
+  bootstrap: 5
   opengraph:
     image:
       src: docs/articles/IntroTOSTt_files/figure-html/tostplots-2.png

@@ -1,4 +1,4 @@
-#' @title Two One-Sided T-tests (TOST) with t-tests
+#' @title Two One-Sided T-tests (TOST) for Equivalence Testing
 #' @description
 #' `r lifecycle::badge('stable')`
 #'
@@ -11,11 +11,9 @@
 #'
 #' @section Purpose:
 #' Use this function when:
-#' \itemize{
-#'   \item You want to show that two groups are practically equivalent
-#'   \item You need to demonstrate that an effect is at least as large as a meaningful threshold
-#'   \item You want to test if an observed effect is too small to be of practical importance
-#' }
+#' * You want to show that two groups are practically equivalent
+#' * You need to demonstrate that an effect is at least as large as a meaningful threshold
+#' * You want to test if an observed effect is too small to be of practical importance
 #'
 #' @param x a (non-empty) numeric vector of data values.
 #' @param y an optional (non-empty) numeric vector of data values.
@@ -27,7 +25,7 @@
 #' @param low_eqbound lower equivalence bounds (deprecated, use `eqb` instead).
 #' @param high_eqbound upper equivalence bounds (deprecated, use `eqb` instead).
 #' @param hypothesis 'EQU' for equivalence (default), or 'MET' for minimal effects test.
-#' @param eqbound_type Type of equivalence bound. Can be 'SMD' for standardized mean difference (e.g., Cohen's d) or 'raw' for the mean difference. Default is 'raw'. Raw is strongly recommended as SMD bounds will produce biased results.
+#' @param eqbound_type Type of equivalence bound. Can be 'SMD' for standardized mean difference (i.e., Cohen's d) or 'raw' for the mean difference. Default is 'raw'. Raw is strongly recommended as SMD bounds will produce biased results.
 #' @param alpha alpha level (default = 0.05)
 #' @param bias_correction Apply Hedges' correction for bias (default is TRUE).
 #' @param rm_correction Repeated measures correction to make standardized mean difference Cohen's d(rm). This only applies to repeated/paired samples. Default is FALSE.
@@ -41,47 +39,41 @@
 #' @details
 #' For details on the calculations in this function see vignette("IntroTOSTt") & vignette("SMD_calcs").
 #'
-#' For two-sample tests, the test is of \eqn{\bar x - \bar y} (mean of x minus mean of y).
+#' For two-sample tests, the test is of \eqn{\bar{x} - \bar{y}} (mean of x minus mean of y).
 #' For paired samples, the test is of the difference scores (z),
-#' wherein \eqn{z = x - y}, and the test is of \eqn{\bar z} (mean of the difference scores).
-#' For one-sample tests, the test is of \eqn{\bar x} (mean of x).
+#' wherein $z = x - y$, and the test is of \eqn{\bar{z}} (mean of the difference scores).
+#' For one-sample tests, the test is of \eqn{\bar{x}} (mean of x).
 #'
 #' The output combines three statistical tests:
-#' \enumerate{
-#'   \item A traditional two-tailed t-test (null hypothesis: difference = `mu`)
-#'   \item Lower bound test (one-tailed t-test against the lower equivalence bound)
-#'   \item Upper bound test (one-tailed t-test against the upper equivalence bound)
-#' }
+#' 1. A traditional two-tailed t-test (null hypothesis: difference = `mu`)
+#' 2. Lower bound test (one-tailed t-test against the lower equivalence bound)
+#' 3. Upper bound test (one-tailed t-test against the upper equivalence bound)
 #'
 #' For equivalence testing (`hypothesis = "EQU"`):
-#' \itemize{
-#'   \item **Significant TOST**: Both one-sided tests are significant (p < alpha), indicating the effect is within the equivalence bounds
-#' }
+#' * **Significant TOST**: Both one-sided tests are significant (p < alpha), indicating the effect is significantly within the equivalence bounds
+#' * **Non-significant t-test**: The traditional null hypothesis (difference = `mu`) cannot be rejected
 #'
 #' For minimal effects testing (`hypothesis = "MET"`):
-#' \itemize{
-#'   \item **Significant TOST**: At least one one-sided test is significant (p < alpha), indicating the effect is outside at least one of the bounds
-#' }
+#' * **Significant TOST**: At least one one-sided test is significant (p < alpha), indicating the effect is significantly outside at least one of the bounds
+#' * **Significant t-test**: The traditional null hypothesis (difference = `mu`) is rejected
 #'
 #' Notes:
-#' \itemize{
-#'   \item For equivalence testing, the equivalence bounds represent the smallest effect sizes considered meaningful by the user.
-#'   \item When using `eqbound_type = "SMD"`, be aware that this can produce biased results and raw bounds are generally recommended.
-#'   \item The function provides standardized effect sizes (Cohen's d or Hedges' g) along with their confidence intervals.
-#'   \item For paired/repeated measures designs, setting `rm_correction = TRUE` adjusts the standardized effect size calculation to account for the correlation between measures.
-#' }
+#' * For equivalence testing, the equivalence bounds represent the smallest effect sizes considered meaningful.
+#' * When using `eqbound_type = "SMD"`, be aware that this can produce biased results and raw bounds are generally recommended.
+#' * The function provides standardized effect sizes (Cohen's d or Hedges' g) along with their confidence intervals.
+#' * For paired/repeated measures designs, setting `rm_correction = TRUE` adjusts the standardized effect size calculation to account for the correlation between measures.
 #'
 #' @return An S3 object of class `"TOSTt"` is returned containing the following slots:
 #'
-#'   - "TOST": A table of class `"data.frame"` containing two-tailed t-test and both one-tailed results.
-#'   - "eqb": A table of class `"data.frame`" containing equivalence bound settings.
-#'   - "effsize": Table of class `"data.frame"` containing effect size estimates.
-#'   - "hypothesis": String stating the hypothesis being tested.
-#'   - "smd": List containing the results of the standardized mean difference calculations (e.g., Cohen's d).
-#'      - Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation).
-#'   - "alpha": Alpha level set for the analysis.
-#'   - "method": Type of t-test.
-#'   - "decision": List included text regarding the decisions for statistical inference.
+#' - **TOST**: A table of class `"data.frame"` containing two-tailed t-test and both one-tailed results.
+#' - **eqb**: A table of class `"data.frame"` containing equivalence bound settings.
+#' - **effsize**: Table of class `"data.frame"` containing effect size estimates.
+#' - **hypothesis**: String stating the hypothesis being tested.
+#' - **smd**: List containing the results of the standardized mean difference calculations (e.g., Cohen's d).
+#'   * Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation).
+#' - **alpha**: Alpha level set for the analysis.
+#' - **method**: Type of t-test.
+#' - **decision**: List included text regarding the decisions for statistical inference.
 #'
 #' @examples
 #' # Example 1: Basic Two-Sample Test
@@ -110,7 +102,7 @@
 #' @family TOST
 #' @name t_TOST
 #' @export t_TOST
-
+#'
 #t_TOST <- setClass("t_TOST")
 t_TOST <- function(x, ...,
                    hypothesis = "EQU",

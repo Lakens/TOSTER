@@ -81,16 +81,16 @@ This is a generic function that performs a generalized asymptotic Brunner-Munzel
 \details{
 This function is made to provide a test of stochastic equality between two samples (paired or independent), and is referred to as the Brunner-Munzel test.
 
-This tests the hypothesis that the relative effect, discussed below, is equal to the null value (default is mu = 0.5).
+This tests the hypothesis that the relative effect, discussed below, is equal to the null value (default is \code{mu = 0.5}).
 
 The estimate of the relative effect, which can be considered as value similar to the probability of superiority, refers to the following:
 
-\deqn{\hat p = p(X<Y) + \frac{1}{2} \cdot P(X=Y)}
+\deqn{\hat p = p(X>Y) + \frac{1}{2} \cdot P(X=Y)}
 
 Note, for paired samples, this does \emph{not} refer to the probability of an increase/decrease in paired sample but rather the probability that a randomly sampled value of X.
 This is also referred to as the "relative" effect in the literature. Therefore, the results will differ from the concordance probability provided by the ses_calc function.
 
-The brunner_munzel function is based on the npar.t.test and npar.t.test.paired functions within the nparcomp package (Konietschke et al. 2015).
+The brunner_munzel function is based on the \code{npar.t.test} and \code{npar.t.test.paired} functions within the \code{nparcomp} package (Konietschke et al. 2015).
 }
 \examples{
 data(mtcars)

@@ -22,17 +22,44 @@ boot_compare_cor(
 
 \item{x2, y2}{numeric vectors of data values. x and y must have the same length from study 2.}
 
-\item{alternative}{a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater", "less", "equivalence" (TOST), or "minimal.effect" (TOST). You can specify just the initial letter.}
+\item{alternative}{a character string specifying the alternative hypothesis:
+\itemize{
+\item "two.sided": correlation is not equal to null (default)
+\item "greater": correlation is greater than null
+\item "less": correlation is less than null
+\item "equivalence": correlation is within the equivalence bounds (TOST)
+\item "minimal.effect": correlation is outside the equivalence bounds (TOST)
+}
 
-\item{method}{a character string indicating which correlation coefficient is to be used for the test. One of "winsorized", "bendpercent","pearson", "kendall", or "spearman", can be abbreviated.}
+You can specify just the initial letter.}
+
+\item{method}{a character string indicating which correlation coefficient to use:
+\itemize{
+\item "pearson": standard Pearson product-moment correlation
+\item "kendall": Kendall's tau rank correlation
+\item "spearman": Spearman's rho rank correlation
+\item "winsorized": Winsorized correlation (robust to outliers)
+\item "bendpercent": percentage bend correlation (robust to marginal outliers)
+}
+
+Can be abbreviated.}
 
 \item{alpha}{alpha level (default = 0.05)}
 
-\item{null}{a number indicating the null hypothesis. Default is a correlation of zero.}
+\item{null}{a number or vector indicating the null hypothesis value(s):
+\itemize{
+\item For standard tests: a single value (default = 0)
+\item For equivalence/minimal effect tests: either a single value (symmetric bounds ±value will be created)
+or a vector of two values representing the lower and upper bounds
+}}
 
-\item{R}{number of bootstrap replicates}
+\item{R}{number of bootstrap replications (default = 1999).}
 
-\item{...}{further arguments to be passed to or from methods.}
+\item{...}{additional arguments passed to correlation functions, such as:
+\itemize{
+\item trim: for Winsorized correlation (default = 0.2)
+\item beta: for percentage bend correlation (default = 0.2)
+}}
 }
 \value{
 A list with class "htest" containing the following components:

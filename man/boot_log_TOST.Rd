@@ -4,7 +4,7 @@
 \alias{boot_log_TOST}
 \alias{boot_log_TOST.default}
 \alias{boot_log_TOST.formula}
-\title{Bootstrapped TOST with log transformed t-tests}
+\title{Bootstrapped TOST with Log Transformed t-tests}
 \usage{
 boot_log_TOST(x, ...)
 
@@ -25,27 +25,29 @@ boot_log_TOST(x, ...)
 \method{boot_log_TOST}{formula}(formula, data, subset, na.action, ...)
 }
 \arguments{
-\item{x}{a (non-empty) numeric vector of data values.}
+\item{x}{a (non-empty) numeric vector of positive data values on a ratio scale.}
 
 \item{...}{further arguments to be passed to or from methods.}
 
-\item{y}{an optional (non-empty) numeric vector of data values.}
+\item{y}{an optional (non-empty) numeric vector of positive data values on a ratio scale.}
 
 \item{hypothesis}{'EQU' for equivalence (default), or 'MET' for minimal effects test.}
 
 \item{paired}{a logical indicating whether you want a paired t-test.}
 
-\item{var.equal}{a logical variable indicating whether to treat the two variances as being equal. If TRUE then the pooled variance is used to estimate the variance otherwise the Welch (or Satterthwaite) approximation to the degrees of freedom is used.}
+\item{var.equal}{a logical variable indicating whether to treat the two variances as being equal.}
 
-\item{eqb}{Equivalence bound. Can provide 1 value (symmetric bound, negative value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds.}
+\item{eqb}{Equivalence bound expressed as a ratio. Can provide 1 value (e.g., 1.25 for bounds of 0.8 and 1.25)
+or 2 specific values that represent the lower and upper equivalence bounds (e.g., c(0.8, 1.25)).}
 
-\item{alpha}{alpha level (default = 0.05)}
+\item{alpha}{alpha level (default = 0.05).}
 
-\item{null}{Null hypothesis value for a two-tailed test (default is 1).}
+\item{null}{the ratio value under the null hypothesis (default = 1).}
 
-\item{boot_ci}{type of bootstrap confidence interval. Options include studentized (stud), empirical/basic (basic) and percentile (perc) confidence intervals.}
+\item{boot_ci}{method for bootstrap confidence interval calculation: "stud" (studentized, default),
+"basic" (basic bootstrap), or "perc" (percentile bootstrap).}
 
-\item{R}{number of bootstrap replicates}
+\item{R}{number of bootstrap replications (default = 1999).}
 
 \item{formula}{a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.}
 
@@ -53,19 +55,18 @@ boot_log_TOST(x, ...)
 
 \item{subset}{an optional vector specifying a subset of observations to be used.}
 
-\item{na.action}{a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").}
+\item{na.action}{a function indicating what should happen when the data contain NAs.}
 }
 \value{
-An S3 object of class
-\code{"TOSTt"} is returned containing the following slots:
+An S3 object of class \code{"TOSTt"} is returned containing the following slots:
 \itemize{
 \item "TOST": A table of class \code{"data.frame"} containing two-tailed t-test and both one-tailed results.
 \item "eqb": A table of class \code{"data.frame"} containing equivalence bound settings.
-\item "effsize":  table of class \code{"data.frame"} containing effect size estimates.
+\item "effsize": Table of class \code{"data.frame"} containing effect size estimates.
 \item "hypothesis": String stating the hypothesis being tested.
 \item "smd": List containing the results of the means ratio calculation.
 \itemize{
-\item Items include: d (means ratio estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation)
+\item Items include: d (means ratio estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation).
 }
 \item "alpha": Alpha level set for the analysis.
 \item "method": Type of t-test.
@@ -76,22 +77,72 @@ An S3 object of class
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 
-A function for a bootstrap method for TOST with all types of t-tests.
+Performs equivalence testing using the Two One-Sided Tests (TOST) procedure with bootstrapped
+log-transformed t-tests. This approach is particularly useful for ratio-scale data where the
+equivalence bounds are expressed as ratios (e.g., bioequivalence studies).
 }
 \details{
-The implemented test(s) corresponds to the proposal of Chapter 16 of Efron and Tibshirani (1994),
-and recommended by He et al (2022).
-Returns TOSTt class object with bootstrapped based results.
-This is approximately equivalent to the percentile bootstrap method mentioned by He et al (2014).
+The function implements a bootstrap method for log-transformed TOST as recommended by
+He et al. (2022) and corresponds to the proposal in Chapter 16 of Efron and Tibshirani (1994).
+This is approximately equivalent to the percentile bootstrap method mentioned by He et al. (2014).
 
-For two-sample tests, the test is of \eqn{\bar log(x) - \bar log(y)} (mean of x minus mean of y).
-For paired samples, the test is of the difference scores (z),
-wherein \eqn{z =  log(x) - log(y) = log(x)/log(y)}, and the test is of \eqn{\bar z} (mean of the difference/ratio scores).
+For two-sample tests, the test is of \eqn{\bar log(x) - \bar log(y)} which corresponds to testing
+the ratio of geometric means. For paired samples, the test is of difference scores on the log scale,
+\eqn{z = log(x) - log(y) = log(x/y)}, which also corresponds to a ratio test.
+
+The bootstrap procedure follows these steps:
+\itemize{
+\item Log-transform the data
+\item Perform resampling with replacement to generate bootstrap samples
+\item For each bootstrap sample, calculate test statistics and effect sizes
+\item Use the distribution of bootstrap results to compute p-values and confidence intervals
+\item Back-transform for the ratio of means
+}
+
+Note that all input data must be positive (ratio scale with a true zero) since log transformation
+is applied. The function will stop with an error if any negative values are detected.
 
 For details on the calculations in this function see \code{vignette("robustTOST")}.
 }
+\section{Purpose}{
+
+Use this function when:
+\itemize{
+\item Your data is on a ratio scale (all values must be positive)
+\item You want to establish equivalence based on the ratio of means rather than their difference
+\item Traditional parametric methods may not be appropriate due to skewed distributions
+\item You need to analyze bioequivalence data where bounds are expressed as ratios
+}
+}
+
+\examples{
+# Example 1: Two-Sample Test for Bioequivalence
+# Generate ratio scale data (e.g., drug concentrations)
+test_group <- rlnorm(30, meanlog = 3.5, sdlog = 0.4)
+ref_group <- rlnorm(30, meanlog = 3.6, sdlog = 0.4)
+
+# FDA standard bioequivalence bounds (80\% to 125\%)
+result <- boot_log_TOST(x = test_group,
+                        y = ref_group,
+                        eqb = 1.25,  # Creates bounds of 0.8 and 1.25
+                        R = 999)     # Reduce for demonstration
+
+# Example 2: Paired Sample Test
+# Generate paired ratio scale data
+n <- 20
+baseline <- rlnorm(n, meanlog = 4, sdlog = 0.3)
+followup <- baseline * rlnorm(n, meanlog = 0.05, sdlog = 0.2)
+
+# Test with asymmetric bounds
+result <- boot_log_TOST(x = followup,
+                        y = baseline,
+                        paired = TRUE,
+                        eqb = c(0.85, 1.20),
+                        boot_ci = "perc")
+
+}
 \references{
-Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press
+Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press.
 
 He, Y., Deng, Y., You, C., & Zhou, X. H. (2022). Equivalence tests for ratio of means in bioequivalence studies under crossover design. Statistical Methods in Medical Research, 09622802221093721.
 

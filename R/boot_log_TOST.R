@@ -8,12 +8,10 @@
 #'
 #' @section Purpose:
 #' Use this function when:
-#' \itemize{
-#'   \item Your data is on a ratio scale (all values must be positive)
-#'   \item You want to establish equivalence based on the ratio of means rather than their difference
-#'   \item Traditional parametric methods may not be appropriate due to skewed distributions
-#'   \item You need to analyze bioequivalence data where bounds are expressed as ratios
-#' }
+#'   - Your data is on a ratio scale (all values must be positive)
+#'   - You want to establish equivalence based on the ratio of means rather than their difference
+#'   - Traditional parametric methods may not be appropriate due to skewed distributions
+#'   - You need to analyze bioequivalence data where bounds are expressed as ratios
 #'
 #' @inheritParams boot_t_TOST
 #' @inheritParams log_TOST
@@ -42,13 +40,12 @@
 #'
 #'
 #' The bootstrap procedure follows these steps:
-#' \enumerate{
-#'   \item Log-transform the data
-#'   \item Perform resampling with replacement to generate bootstrap samples
-#'   \item For each bootstrap sample, calculate test statistics and effect sizes
-#'   \item Use the distribution of bootstrap results to compute p-values and confidence intervals
-#'   \item Back-transform for the ratio of means
-#' }
+#'   - Log-transform the data
+#'   - Perform resampling with replacement to generate bootstrap samples
+#'   - For each bootstrap sample, calculate test statistics and effect sizes
+#'   - Use the distribution of bootstrap results to compute p-values and confidence intervals
+#'   - Back-transform for the ratio of means
+#'
 #'
 #' Note that all input data must be positive (ratio scale with a true zero) since log transformation
 #' is applied. The function will stop with an error if any negative values are detected.

@@ -1,21 +1,113 @@
-#' @title Bootstrap SES Calculation
+#' @title Bootstrapped Standardized Effect Size (SES) Calculation
 #' @description
 #' `r lifecycle::badge('maturing')`
 #'
-#' Standardized effect size (SES), these are the effect sizes not considered SMDs.
+#' Calculates non-SMD standardized effect sizes with bootstrap confidence intervals.
+#' This function provides more robust confidence intervals for rank-based and
+#' probability-based effect size measures through resampling methods.
+#'
+#' @section Purpose:
+#' Use this function when:
+#'   - You need more robust confidence intervals for non-parametric effect sizes
+#'   - You prefer resampling-based confidence intervals over asymptotic approximations
+#'   - You need to quantify uncertainty in rank-based effect sizes more accurately
+#'
 #' @inheritParams wilcox_TOST
 #' @inheritParams boot_t_TOST
-#' @details For details on the calculations in this function see `vignette("robustTOST")`.
-#' @return A data frame containing the standardized effect size.
+#' @inheritParams boot_smd_calc
+#' @param ses a character string specifying the effect size measure to calculate:
+#'     - "rb": rank-biserial correlation (default)
+#'     - "odds": Wilcoxon-Mann-Whitney odds
+#'     - "logodds": Wilcoxon-Mann-Whitney log-odds
+#'     - "cstat": concordance statistic (C-statistic/AUC)
+#' @param ... further arguments to be passed to or from methods.
+#'
+#' @details
+#' This function calculates bootstrapped confidence intervals for rank-based and probability-based
+#' effect size measures. It is an extension of the `ses_calc()` function that uses resampling
+#' to provide more robust confidence intervals, especially for small sample sizes.
+#'
+#' The function implements the following bootstrap approach:
+#'   - Calculate the raw effect size using the original data
+#'   - Create R bootstrap samples by resampling with replacement from the original data
+#'   - Calculate the effect size for each bootstrap sample
+#'   - Apply the Fisher z-transformation to stabilize variance for rank-biserial correlation values
+#'   - Calculate confidence intervals using the specified method
+#'   - Back-transform the confidence intervals to the original scale
+#'   - Convert to the requested effect size measure (if not rank-biserial)
+#'
+#'
+#' Three bootstrap confidence interval methods are available:
+#'   - **Basic bootstrap ("basic")**: Uses the empirical distribution of bootstrap estimates
+#'   - **Studentized bootstrap ("stud")**: Accounts for the variability in standard error estimates
+#'   - **Percentile bootstrap ("perc")**: Uses percentiles of the bootstrap distribution directly
+#'
+#' The function supports three study designs:
+#'   - One-sample design: Compares a single sample to a specified value
+#'   - Two-sample independent design: Compares two independent groups
+#'   - Paired samples design: Compares paired observations
+#'
+#' Note that extreme values (perfect separation between groups) can produce infinite values during
+#' the bootstrapping process. The function will issue a warning if this occurs, as it may affect
+#' the accuracy of the confidence intervals.
+#'
+#' For detailed information on calculation methods, see `vignette("robustTOST")`.
+#'
+#' @return A data frame containing the following information:
+#'   - estimate: The effect size estimate calculated from the original data
+#'   - bias: Estimated bias (difference between original estimate and median of bootstrap estimates)
+#'   - SE: Standard error estimated from the bootstrap distribution
+#'   - lower.ci: Lower bound of the bootstrap confidence interval
+#'   - upper.ci: Upper bound of the bootstrap confidence interval
+#'   - conf.level: Confidence level (1-alpha)
+#'   - boot_ci: The bootstrap confidence interval method used
+#'
 #' @examples
+#' # Example 1: Independent groups comparison with basic bootstrap CI
+#' set.seed(123)
+#' group1 <- c(1.2, 2.3, 3.1, 4.6, 5.2, 6.7)
+#' group2 <- c(3.5, 4.8, 5.6, 6.9, 7.2, 8.5)
+#'
+#' # Use fewer bootstrap replicates for a quick example
+#' result <- boot_ses_calc(x = group1, y = group2,
+#'                         ses = "rb",
+#'                         boot_ci = "basic",
+#'                         R = 99)
+#'
+#' # Example 2: Using formula notation to calculate concordance statistic
+#' data(mtcars)
+#' result <- boot_ses_calc(formula = mpg ~ am,
+#'                         data = mtcars,
+#'                         ses = "cstat",
+#'                         boot_ci = "perc",
+#'                         R = 99)
+#'
+#' # Example 3: Paired samples with studentized bootstrap CI
+#' data(sleep)
+#' with(sleep, boot_ses_calc(x = extra[group == 1],
+#'                           y = extra[group == 2],
+#'                           paired = TRUE,
+#'                           ses = "rb",
+#'                           boot_ci = "stud",
+#'                           R = 99))
+#'
+#' # Example 4: Comparing different bootstrap CI methods
 #' \dontrun{
-#' boot_ses_calc(formula = extra ~ group, data = sleep, paired = TRUE, ses = "r")
+#' # Basic bootstrap
+#' basic_ci <- boot_ses_calc(x = group1, y = group2, boot_ci = "basic")
+#'
+#' # Percentile bootstrap
+#' perc_ci <- boot_ses_calc(x = group1, y = group2, boot_ci = "perc")
+#'
+#' # Studentized bootstrap
+#' stud_ci <- boot_ses_calc(x = group1, y = group2, boot_ci = "stud")
+#'
+#' # Compare the results
+#' rbind(basic_ci, perc_ci, stud_ci)
 #' }
-
-# Bootstrap -------
-
-#' @name boot_ses_calc
+#'
 #' @family effect sizes
+#' @name boot_ses_calc
 #' @export boot_ses_calc
 
 #ses_calc <- setClass("ses_calc")
