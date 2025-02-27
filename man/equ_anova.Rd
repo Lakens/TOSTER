@@ -7,44 +7,79 @@
 equ_anova(object, eqbound, MET = FALSE, alpha = 0.05)
 }
 \arguments{
-\item{object}{an object of returned by either \code{Anova},
-\code{aov}, or \code{afex_aov}}
+\item{object}{An object returned by either \code{Anova}, \code{aov}, or \code{afex_aov}.}
 
-\item{eqbound}{Equivalence bound for the partial eta-squared.}
+\item{eqbound}{Equivalence bound for the partial eta-squared. This value represents
+the smallest effect size considered meaningful or practically significant.}
 
-\item{MET}{logical indicator to perform a minimal effect test rather than equivalence test (default is FALSE).}
+\item{MET}{Logical indicator to perform a minimal effect test rather than equivalence
+test (default is FALSE). When TRUE, the alternative hypothesis becomes that the effect
+is larger than the equivalence bound.}
 
-\item{alpha}{alpha used for the test (e.g., 0.05).}
+\item{alpha}{Alpha level used for the test (default = 0.05).}
 }
 \value{
 Returns a data frame containing the ANOVA results with equivalence tests added.
-
-The following abbreviations are used in the table:
+The following columns are included in the table:
 \itemize{
-\item effect: name of the effect.
-\item df1:	Degrees of Freedom in the numerator (i.e. DF effect).
-\item df2:	Degrees of Freedom in the denominator (i.e., DF error).
-\item F:	F-value.
-\item p.null:	p-value (probability of the data given the null hypothesis).
-\item pes:	partial
-Eta-Squared measure of effect size.
-\item eqbound: equivalence bound.
-\item p.equ: p-value (probability of the data given the equivalence hypothesis)
+\item \strong{effect}: Name of the effect.
+\item \strong{df1}: Degrees of Freedom in the numerator (i.e., DF effect).
+\item \strong{df2}: Degrees of Freedom in the denominator (i.e., DF error).
+\item \strong{F.value}: F-value.
+\item \strong{p.null}: p-value for the traditional null hypothesis test (probability of the data given the null hypothesis).
+\item \strong{pes}: Partial eta-squared measure of effect size.
+\item \strong{eqbound}: Equivalence bound used for testing.
+\item \strong{p.equ}: p-value for the equivalence or minimal effect test.
 }
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 
-Performs equivalence test on the partial eta-squared (pes) value from ANOVA results.
+Performs equivalence or minimal effect testing on the partial eta-squared (pes) value
+from ANOVA results to determine if effects are practically equivalent to zero or
+meaningfully different from zero.
 }
 \details{
+This function tests whether ANOVA effects are practically equivalent to zero (when
+\code{MET = FALSE}) or meaningfully different from zero (when \code{MET = TRUE}) using the approach
+described by Campbell & Lakens (2021).
+
+The function works by:
+\enumerate{
+\item Extracting ANOVA results from the input object
+\item Converting the equivalence bound for partial eta-squared to a non-centrality parameter
+\item Performing an equivalence test or minimal effect test for each effect in the ANOVA
+}
+
+For equivalence tests (\code{MET = FALSE}), a significant result (p < alpha) indicates that the
+effect is statistically equivalent to zero (smaller than the equivalence bound).
+
+For minimal effect tests (\code{MET = TRUE}), a significant result (p < alpha) indicates that
+the effect is meaningfully different from zero (larger than the equivalence bound).
+
 For details on the calculations in this function see \code{vignette("the_ftestTOSTER")}.
 }
-\section{References}{
+\examples{
+# One-way ANOVA
+data(iris)
+anova_result <- aov(Sepal.Length ~ Species, data = iris)
 
-Campbell, H., & Lakens, D. (2021). Can we disregard the whole model? Omnibus non‐inferiority testing for R2 in multi‐variable linear regression and in ANOVA. British Journal of Mathematical and Statistical Psychology, 74(1), 64-89. doi: 10.1111/bmsp.12201
+# Equivalence test with bound of 0.1
+equ_anova(anova_result, eqbound = 0.1)
+
+# Minimal effect test with bound of 0.1
+equ_anova(anova_result, eqbound = 0.1, MET = TRUE)
+
+# Two-way ANOVA with lower equivalence bound
+anova_result2 <- aov(Sepal.Length ~ Species * Petal.Width, data = iris)
+equ_anova(anova_result2, eqbound = 0.05)
+
 }
-
+\references{
+Campbell, H., & Lakens, D. (2021). Can we disregard the whole model? Omnibus non‐inferiority
+testing for R2 in multi‐variable linear regression and in ANOVA. British Journal of
+Mathematical and Statistical Psychology, 74(1), 64-89. doi: 10.1111/bmsp.12201
+}
 \seealso{
 Other f-test: 
 \code{\link{equ_ftest}()}

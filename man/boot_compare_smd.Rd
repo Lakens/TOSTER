@@ -37,7 +37,7 @@ or a vector of two values representing the lower and upper bounds
 }}
 
 \item{paired}{A logical indicating whether the SMD is from a paired or independent samples design.
-If a one-sample design, then paired must be set to TRUE.}
+If a one-sample design, then paired should be set to TRUE.}
 
 \item{alternative}{A character string specifying the alternative hypothesis:
 \itemize{
@@ -50,9 +50,9 @@ If a one-sample design, then paired must be set to TRUE.}
 
 You can specify just the initial letter.}
 
-\item{R}{number of bootstrap replications (default = 1999).}
+\item{R}{Number of bootstrap replications (default = 1999).}
 
-\item{alpha}{alpha level (default = 0.05)}
+\item{alpha}{Alpha level (default = 0.05).}
 }
 \value{
 A list with class "htest" containing the following components:
@@ -121,9 +121,15 @@ The bootstrap procedure follows these steps:
 \item Calculate the difference between SMDs and its standard error
 \item Generate R bootstrap samples by resampling with replacement
 \item Calculate SMDs and their difference for each bootstrap sample
+\item Calculate test statistics for each bootstrap sample
 \item Calculate confidence intervals using the percentile method
-\item Compute p-values by comparing the observed statistic to the bootstrap distribution
+\item Compute p-values by comparing the observed test statistics to their bootstrap distributions
 }
+
+\strong{Note on p-value calculation}: The function uses the bootstrap distribution of test statistics
+(z-scores) rather than the raw differences to calculate p-values. This approach is analogous to
+traditional hypothesis testing and estimates the probability of obtaining test statistics as
+extreme as those observed in the original data under repeated sampling.
 }
 \examples{
 # Example 1: Comparing two independent samples SMDs (standard test)

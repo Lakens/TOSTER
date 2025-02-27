@@ -203,6 +203,8 @@ boot_compare_cor <- function(
   boot.cint = quantile(bvec, c((1 - ci) / 2, 1 - (1 - ci) / 2))
   attr(boot.cint, "conf.level") <- ci
   # p value
+  ## note method different than Efron (e.g., t-test, SMDs, etc)
+  ## Derived from work of Wilcox
   if(alternative == "two.sided"){
     phat <- (sum(bvec < null.value)+.5*sum(bvec==0))/nboot
     sig <- 2 * min(phat, 1 - phat)

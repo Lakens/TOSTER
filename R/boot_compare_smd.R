@@ -320,9 +320,15 @@ boot_compare_smd = function(x1,
   }
 
   # Calculate confidence intervals
-  smd1_ci = ci_perc(smd1_vec, alternative = alternative, alpha = alpha)
-  smd2_ci = ci_perc(smd2_vec, alternative = alternative, alpha = alpha)
-  d_diff_ci = ci_perc(d_diff_vec, alternative = alternative, alpha = alpha)
+  smd1_ci = ci_perc(smd1_vec,
+                    alternative = alternative,
+                    alpha = alpha)
+  smd2_ci = ci_perc(smd2_vec,
+                    alternative = alternative,
+                    alpha = alpha)
+  d_diff_ci = ci_perc(d_diff_vec,
+                      alternative = alternative,
+                      alpha = alpha)
 
   # Create data frame of confidence intervals
   df_ci = data.frame(estimate = c(d_diff, smd1, smd2),
@@ -330,9 +336,7 @@ boot_compare_smd = function(x1,
                      upper.ci = c(d_diff_ci[2], smd1_ci[2], smd2_ci[2]),
                      row.names = c("Difference in SMD", "SMD1", "SMD2"))
 
-  # Calculate test statistics for original data
-  # # Calculate test statistics for bootstrap samples
-  z_stat_vec = (d_diff_vec - d_diff) / z_se_vec
+
   if(alternative == "equivalence"){
     # For equivalence, test if difference is within bounds
     z_stat_l = (d_diff - min(null)) / z_se  # Test statistic for lower bound
@@ -340,8 +344,8 @@ boot_compare_smd = function(x1,
 
 
     # Compute p-values comparing observed statistics to bootstrap distribution
-    p_l = mean(z_stat_vec <= z_stat_l)  # Proportion less than or equal to lower bound statistic
-    p_u = mean(z_stat_vec >= z_stat_u)  # Proportion greater than or equal to upper bound statistic
+    p_l = mean(zdiff_stat_vec <= z_stat_l)  # Proportion less than or equal to lower bound statistic
+    p_u = mean(zdiff_stat_vec >= z_stat_u)  # Proportion greater than or equal to upper bound statistic
 
     pval = max(p_l, p_u)  # Take the maximum (most conservative)
     z_stat = ifelse(p_l > p_u, z_stat_l, z_stat_u)  # Report the less significant statistic
@@ -364,18 +368,17 @@ boot_compare_smd = function(x1,
     # For standard hypothesis tests
     z_stat = (d_diff - null) / z_se  # Test statistic for null hypothesis
 
-    # Calculate test statistics for bootstrap samples
-    z_stat_vec = (d_diff_vec - d_diff) / z_se_vec
+
 
     if(alternative == "greater"){
       # Test if difference > null
-      pval = mean(z_stat_vec <= z_stat)
+      pval = mean(zdiff_stat_vec <= z_stat)
     } else if(alternative == "less"){
       # Test if difference < null
-      pval = mean(z_stat_vec >= z_stat)
+      pval = mean(zdiff_stat_vec >= z_stat)
     } else {  # "two.sided"
       # Test if difference ≠ null
-      pval = 2 * min(mean(z_stat_vec <= z_stat), mean(z_stat_vec >= z_stat))
+      pval = 2 * min(mean(zdiff_stat_vec <= z_stat), mean(zdiff_stat_vec >= z_stat))
       if(pval > 1){
         pval = 1
       }
