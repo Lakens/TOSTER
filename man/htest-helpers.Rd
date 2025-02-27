@@ -4,37 +4,81 @@
 \alias{htest-helpers}
 \alias{df_htest}
 \alias{describe_htest}
-\title{Helpers for \code{htest} objects}
+\title{Helper Functions for Working with 'htest' Objects}
 \usage{
 df_htest(htest, test_statistics = TRUE, show_ci = TRUE, extract_names = TRUE)
 
 describe_htest(htest, alpha = NULL, digits = 3)
 }
 \arguments{
-\item{htest}{A S3 object of the class \code{htest}}
+\item{htest}{An S3 object of class 'htest', such as (but not limited to) output from \code{t.test()}, \code{cor.test()},
+\code{wilcox.test()}, or TOSTER functions converted with \code{as_htest()}.}
 
-\item{test_statistics}{A logical variable to display the test statistics.}
+\item{test_statistics}{A logical variable indicating whether to display the test statistics
+in the output (default = TRUE).}
 
-\item{show_ci}{A logical variable to display the confidence interval.}
+\item{show_ci}{A logical variable indicating whether to display the confidence interval
+in the output (default = TRUE).}
 
-\item{extract_names}{A logical variable to take the names from the S3 object (i.e., statistic for \code{t.test} would be "t")}
+\item{extract_names}{A logical variable indicating whether to take the names from the S3 object
+(i.e., statistic for \code{t.test()} would be "t") (default = TRUE).}
 
-\item{alpha}{alpha level (default = 0.05)}
+\item{alpha}{The significance level to use for determining statistical significance.
+If NULL (default), it will be extracted from the confidence interval of the htest object
+or default to 0.05.}
 
-\item{digits}{integer indicating the number of decimal places.}
+\item{digits}{Integer indicating the number of decimal places to display in the output
+(default = 3).}
+}
+\value{
+\itemize{
+\item \code{df_htest()}: Returns a data frame containing the formatted test information.
+\item \code{describe_htest()}: Returns a character string with a formatted description of the test results.
+}
 }
 \description{
-Functions to help interpret or display objects of the class \code{htest}
+A collection of utility functions designed to help interpret, display, and standardize
+information from objects of class 'htest' (hypothesis test results). These functions
+make it easier to extract, format, and report statistical results from various test
+functions in R.
+}
+\details{
+The package provides two main helper functions:
+\enumerate{
+\item \code{df_htest()}: Converts an 'htest' object to a data frame with standardized columns,
+making it easier to combine multiple test results or export them for further analysis.
+\item \code{describe_htest()}: Generates a formatted text description of the test results,
+following APA style guidelines and providing a complete statistical report with
+test statistics, p-values, effect sizes, and confidence intervals.
+}
+
+These functions work with standard R hypothesis tests (e.g., \code{t.test()}, \code{wilcox.test()},
+\code{cor.test()}) as well as TOSTER-specific tests that have been converted to 'htest' format
+using the \code{as_htest()} function.
 }
 \examples{
-# simple example with t-test
-tres = t.test(extra ~ group, data = sleep)
+# Example 1: Working with a standard t-test
+t_result <- t.test(extra ~ group, data = sleep)
 
-# As a data frame
-df_htest(tres)
+# Convert to data frame
+df_htest(t_result)
 
-# Describe t-test results
-describe_htest(tres)
+# Generate formatted description
+describe_htest(t_result)
+
+# Example 2: Working with a TOST result
+tost_result <- t_TOST(extra ~ group, data = sleep, eqb = 1)
+htest_conv <- as_htest(tost_result)
+describe_htest(htest_conv)
+
+# Example 3: Customizing output format
+df_htest(t_result, test_statistics = TRUE, show_ci = FALSE)
+describe_htest(t_result, alpha = 0.01, digits = 2)
+
+# Example 4: Working with correlation tests
+cor_result <- cor.test(mtcars$mpg, mtcars$wt)
+df_htest(cor_result)
+describe_htest(cor_result)
 
 }
 \seealso{

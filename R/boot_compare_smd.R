@@ -240,15 +240,15 @@ boot_compare_smd = function(x1,
       df1_boot = df1[sample(row.names(df1), nrow(df1), replace=TRUE), ]
       df2_boot = df2[sample(row.names(df2), nrow(df2), replace=TRUE), ]
 
-      md1_boot = mean(df1_boot$z)
-      sd1_boot = sd(df1_boot$z)
-      md2_boot = mean(df2_boot$z)
-      sd2_boot = sd(df2_boot$z)
+      md1_boot = mean(df1_boot)
+      sd1_boot = sd(df1_boot)
+      md2_boot = mean(df2_boot)
+      sd2_boot = sd(df2_boot)
 
       smd1_boot = md1_boot/sd1_boot
       smd2_boot = md2_boot/sd2_boot
-      se1_boot = se_dz(smd1_boot, length(df1_boot$z))
-      se2_boot = se_dz(smd2_boot, length(df2_boot$z))
+      se1_boot = se_dz(smd1_boot, length(df1_boot))
+      se2_boot = se_dz(smd2_boot, length(df2_boot))
 
       # Calculate difference and its standard error for bootstrap sample
       d_diff_boot = smd1_boot - smd2_boot

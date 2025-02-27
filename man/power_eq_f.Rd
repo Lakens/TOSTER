@@ -2,37 +2,83 @@
 % Please edit documentation in R/powerTOSTanova.R
 \name{power_eq_f}
 \alias{power_eq_f}
-\title{F-test Power}
+\title{Power Analysis for F-test Equivalence Testing}
 \usage{
-power_eq_f(alpha = 0.05, df1, df2, eqbound)
+power_eq_f(alpha = 0.05, df1 = NULL, df2 = NULL, eqbound = NULL, power = NULL)
 }
 \arguments{
-\item{alpha}{alpha used for the test (e.g., 0.05)}
+\item{alpha}{Significance level (Type I error rate). Default is 0.05.}
 
-\item{df1}{Degrees of freedom for the numerator}
+\item{df1}{Numerator degrees of freedom (e.g., groups - 1 for one-way ANOVA).}
 
-\item{df2}{Degrees of freedom for the denominator}
+\item{df2}{Denominator degrees of freedom (e.g., N - groups for one-way ANOVA),
+where N is the total sample size.}
 
-\item{eqbound}{Equivalence bound for the partial eta-squared}
+\item{eqbound}{Equivalence bound for partial eta-squared. This represents the threshold
+for what effect size would be considered practically insignificant.}
+
+\item{power}{Desired statistical power (1 - Type II error rate). Default is NULL.}
 }
 \value{
-Object of class '"power.htest"
+An object of class "power.htest" containing the following components:
+\itemize{
+\item \strong{df1}: Numerator degrees of freedom
+\item \strong{df2}: Denominator degrees of freedom
+\item \strong{eqbound}: Equivalence bound for partial eta-squared
+\item \strong{sig.level}: Significance level (alpha)
+\item \strong{power}: Statistical power
+\item \strong{method}: Description of the test
+}
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
-Power analysis for TOST for an F-test
-}
-\section{References}{
 
-Campbell, H., & Lakens, D. (2021). Can we disregard the whole model? Omnibus non‐inferiority testing for R2 in multi‐variable linear regression and in ANOVA. British Journal of Mathematical and Statistical Psychology, 74(1), 64-89. doi: 10.1111/bmsp.12201
+Performs power analysis for equivalence testing with F-tests (ANOVA models). This function
+calculates statistical power, sample size, equivalence bound, or alpha level when the
+other parameters are specified.
+}
+\details{
+This function provides power analysis for the omnibus non-inferiority testing procedure
+described by Campbell & Lakens (2021). Exactly one of the parameters \code{alpha}, \code{df1},
+\code{df2}, \code{eqbound}, or \code{power} must be NULL, and the function will solve for that
+parameter.
+
+For one-way ANOVA:
+\itemize{
+\item \code{df1} = number of groups - 1
+\item \code{df2} = total N - number of groups
 }
 
+Common equivalence bounds (we do not recommend their use for choosing equivalence bounds) for partial eta-squared based on Cohen's benchmarks:
+\itemize{
+\item Small effect: 0.01
+\item Medium effect: 0.06
+\item Large effect: 0.14
+}
+
+Note that this function is primarily validated for one-way ANOVA designs; use with
+caution for more complex designs.
+}
 \examples{
-## Statistical power for alpha = 0.05, 3 groups, n = 80 per group, equivalence bound of
-## partial eta squared = 0.01, assuming true effect = 0.
-## df1 = number of groups - 1 = 3 - 1 = 2.
-## df2 = Total N - number of groups = 240 - 3 = 237.
-power_eq_f(alpha=0.05, df1=3, df2 = 237, eqbound = 0.01)
+# Example 1: Calculate power given degrees of freedom and equivalence bound
+# For a one-way ANOVA with 3 groups, 80 subjects per group, and equivalence bound of 0.01
+power_eq_f(df1 = 2, df2 = 237, eqbound = 0.01)
+
+# Example 2: Calculate required denominator df (related to sample size)
+# for 80\% power with equivalence bound of 0.05
+power_eq_f(df1 = 2, power = 0.8, eqbound = 0.05)
+
+# Example 3: Calculate detectable equivalence bound with 80\% power
+power_eq_f(df1 = 2, df2 = 100, power = 0.8)
+
+# Example 4: Calculate required alpha level for 90\% power
+power_eq_f(df1 = 2, df2 = 100, eqbound = 0.05, power = 0.9)
+
+}
+\references{
+Campbell, H., & Lakens, D. (2021). Can we disregard the whole model? Omnibus non‐inferiority
+testing for R2 in multi‐variable linear regression and in ANOVA. British Journal of
+Mathematical and Statistical Psychology, 74(1), 64-89. doi: 10.1111/bmsp.12201
 }
 \seealso{
 Other power: 

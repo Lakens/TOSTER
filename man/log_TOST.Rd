@@ -83,9 +83,9 @@ A function for TOST on the log-transformed data using parametric t-tests.
 \details{
 For details on the calculations in this function see \code{vignette("robustTOST")}.
 
-For two-sample tests, the test is of $\bar{log(x)} - \bar{log(y)}$ (mean of log(x) minus mean of log(y)).
+For two-sample tests, the test is of \eqn{\bar{log(x)} - \bar{log(y)}} (mean of log(x) minus mean of log(y)).
 For paired samples, the test is of the difference scores (z),
-wherein $z = log(x) - log(y) = log(x/y)$, and the test is of $\bar{z}$ (mean of the difference/ratio scores).
+wherein \eqn{z = log(x) - log(y) = log(x/y)}, and the test is of \eqn{\bar{z}} (mean of the difference/ratio scores).
 
 This approach is particularly useful for:
 \itemize{

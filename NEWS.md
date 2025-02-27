@@ -7,6 +7,7 @@ NEWS
 - Big update to package documentation to make things more detailed.
 - Added extra message when permutation tests are used for the Brunner-Munzel test.
 - Added more alternative hypotheses to `boot_compare_smd`.
+- Expanded functionality of `power_eq_f` function.
 
 # TOSTER v0.8.4
 - Added simple plot for `TOSTt` methods

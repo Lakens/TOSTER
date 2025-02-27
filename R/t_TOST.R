@@ -51,11 +51,9 @@
 #'
 #' For equivalence testing (`hypothesis = "EQU"`):
 #' * **Significant TOST**: Both one-sided tests are significant (p < alpha), indicating the effect is significantly within the equivalence bounds
-#' * **Non-significant t-test**: The traditional null hypothesis (difference = `mu`) cannot be rejected
 #'
 #' For minimal effects testing (`hypothesis = "MET"`):
 #' * **Significant TOST**: At least one one-sided test is significant (p < alpha), indicating the effect is significantly outside at least one of the bounds
-#' * **Significant t-test**: The traditional null hypothesis (difference = `mu`) is rejected
 #'
 #' Notes:
 #' * For equivalence testing, the equivalence bounds represent the smallest effect sizes considered meaningful.

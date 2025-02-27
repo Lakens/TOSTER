@@ -3,7 +3,7 @@
 #' `r lifecycle::badge('stable')`
 #'
 #' Test for association between paired samples, using one of Pearson's product moment correlation
-#' coefficient, Kendall's $\tau$ (tau) or Spearman's $\rho$ (rho). Unlike the stats version of
+#' coefficient, Kendall's \eqn{\tau} (tau) or Spearman's \eqn{\rho} (rho). Unlike the stats version of
 #' cor.test, this function allows users to set the null to a value other than zero and perform
 #' equivalence testing.
 #'
@@ -26,7 +26,7 @@
 #'
 #' @details
 #' This function uses Fisher's z transformation for the correlations, but uses Fieller's
-#' correction of the standard error for Spearman's $\rho$ and Kendall's $\tau$.
+#' correction of the standard error for Spearman's \eqn{\rho} and Kendall's \eqn{\tau}.
 #'
 #' The function supports both standard hypothesis testing and equivalence/minimal effect testing:
 #'

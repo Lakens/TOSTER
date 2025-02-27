@@ -129,13 +129,11 @@ The output combines three statistical tests:
 For equivalence testing (\code{hypothesis = "EQU"}):
 \itemize{
 \item \strong{Significant TOST}: Both one-sided tests are significant (p < alpha), indicating the effect is significantly within the equivalence bounds
-\item \strong{Non-significant t-test}: The traditional null hypothesis (difference = \code{mu}) cannot be rejected
 }
 
 For minimal effects testing (\code{hypothesis = "MET"}):
 \itemize{
 \item \strong{Significant TOST}: At least one one-sided test is significant (p < alpha), indicating the effect is significantly outside at least one of the bounds
-\item \strong{Significant t-test}: The traditional null hypothesis (difference = \code{mu}) is rejected
 }
 
 Notes:

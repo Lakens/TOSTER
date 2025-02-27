@@ -2,7 +2,7 @@
 % Please edit documentation in R/htest.R
 \name{as_htest}
 \alias{as_htest}
-\title{Convert to class 'htest'}
+\title{Convert TOSTER Results to Class 'htest'}
 \usage{
 as_htest(TOST)
 }
@@ -10,25 +10,49 @@ as_htest(TOST)
 \item{TOST}{A TOSTER result object of class 'TOSTt' or 'TOSTnp'.}
 }
 \value{
-Returns a list containing a list of class 'htest' for the result of each test with the following elements:
-\item{data.name}{A character string giving the names of the data.}
-\item{estimate}{Estimated difference in raw units.}
-\item{method}{A character string indicating the performed test.}
-\item{null.value}{Equivalence bound.}
-\item{alternative}{A character string describing the alternative hypothesis.}
-\item{parameter}{The degrees of freedom of the distribution of the test statistic.}
-\item{statistic}{The value of the test statistic.}
-\item{p.value}{The p-value of the test.}
-\item{conf.int}{The confidence interval of the difference.}
+Returns a list of class 'htest' containing the following components:
+\itemize{
+\item \strong{statistic}: The value of the test statistic (t for TOSTt, WMW for TOSTnp).
+\item \strong{parameter}: The degrees of freedom of the test statistic (df for TOSTt, NULL for TOSTnp).
+\item \strong{p.value}: The p-value of the test.
+\item \strong{estimate}: Estimated difference in raw units.
+\item \strong{null.value}: Equivalence bounds.
+\item \strong{alternative}: A character string describing the alternative hypothesis ("equivalence" or "minimal.effect").
+\item \strong{method}: A character string indicating the performed test.
+\item \strong{data.name}: A character string giving the names of the data.
+\item \strong{conf.int}: The confidence interval of the difference.
+}
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#maturing}{\figure{lifecycle-maturing.svg}{options: alt='[Maturing]'}}}{\strong{[Maturing]}}
 
-Convert a TOSTER result object of class 'TOSTt' or 'TOSTnp' to a list of class 'htest'.
+Converts a TOSTER result object of class 'TOSTt' or 'TOSTnp' to a list of class 'htest',
+making it compatible with standard R hypothesis testing functions and workflows.
+}
+\details{
+This function allows you to convert the specialized TOSTER result objects to the standard
+'htest' class used by most R hypothesis testing functions (e.g., \code{t.test()}, \code{cor.test()}).
+This enables:
+\itemize{
+\item Integration with other statistical functions that expect 'htest' objects
+\item Using helper functions like \code{df_htest()} or \code{describe_htest()}
+\item Consistent reporting and interpretation of results
+}
 }
 \examples{
-res1 = t_TOST(formula = extra ~ group,data = sleep,eqb = .5,smd_ci = "goulet")
-as_htest(res1)
+# Example 1: Converting TOST t-test results to htest
+res1 <- t_TOST(formula = extra ~ group, data = sleep, eqb = .5, smd_ci = "goulet")
+htest_result <- as_htest(res1)
+htest_result  # Print the htest object
+
+# Example 2: Using the converted result with htest helpers
+describe_htest(htest_result)
+df_htest(htest_result)
+
+# Example 3: Converting a non-parametric TOST result
+res2 <- wilcox_TOST(extra ~ group, data = sleep, eqb = 2)
+as_htest(res2)
+
 }
 \seealso{
 Other htest: 
