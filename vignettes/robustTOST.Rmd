@@ -14,13 +14,44 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
 ---
 
-Within TOSTER there are a few robust alternatives to the `t_TOST` function. 
+# Introduction to Robust TOST Methods
+
+The Two One-Sided Tests (TOST) procedure is a statistical approach used to test for equivalence between groups or conditions. Unlike traditional null hypothesis significance testing (NHST) which aims to detect differences, TOST is designed to statistically demonstrate similarity or equivalence within predefined bounds.
+
+While the standard `t_TOST` function in TOSTER provides a parametric approach to equivalence testing, it relies on assumptions of normality and homogeneity of variance. In real-world data analysis, these assumptions are often violated, necessitating more robust alternatives. This vignette introduces several robust TOST methods available in the TOSTER package that maintain their validity under a wider range of data conditions.
+
+## When to Use Robust TOST Methods
+
+Consider using the robust alternatives to `t_TOST` when:
+
+- Your data shows notable departures from normality (e.g., skewed distributions, heavy tails)
+- Potential outliers are a concern 
+- Sample sizes are small or unequal
+- You have concerns about violating the assumptions of parametric tests
+- You want to confirm parametric test results with complementary nonparametric approaches
+
+The following table provides a quick overview of the robust methods covered in this vignette:
+
+| Method | Function | Key Characteristics | Best Used When |
+|--------|----------|---------------------|---------------|
+| Wilcoxon TOST | `wilcox_TOST()` | Rank-based, nonparametric | Data is ordinal or non-normal |
+| Brunner-Munzel | `brunner_munzel()` with `simple_htest()` | Probability-based, robust to heteroscedasticity | Distribution shapes differ between groups |
+| Bootstrap TOST | `boot_t_TOST()` | Resampling-based, requires fewer assumptions | Sample size is small or distribution is unknown |
+| Log-Transformed TOST | `log_TOST()` | Ratio-based, for multiplicative comparisons | Comparing relative differences (e.g., bioequivalence) |
 
 # Wilcoxon TOST
 
 The Wilcoxon group of tests (includes Mann-Whitney U-test) provide a non-parametric test of differences between groups, or within samples, based on ranks. This provides a test of location shift, which is a fancy way of saying differences in the center of the distribution (i.e., in parametric tests the location is mean). With TOST, there are two separate tests of directional location shift to determine if the location shift is within (equivalence) or outside (minimal effect). The exact calculations can be explored via the documentation of the `wilcox.test` function.
 
-TOSTER's version  is the `wilcox_TOST` function. Overall, this function operates extremely similar to the `t_TOST` function. However, the standardized mean difference (SMD) is *not* calculated. Instead the rank-biserial correlation is calculated for *all* types of comparisons (e.g., two sample, one sample, and paired samples). Also, there is no plotting capability at this time for the output of this function.
+## Key Features and Usage
+
+TOSTER's version is the `wilcox_TOST` function. Overall, this function operates extremely similar to the `t_TOST` function. However, the standardized mean difference (SMD) is *not* calculated. Instead the rank-biserial correlation is calculated for *all* types of comparisons (e.g., two sample, one sample, and paired samples). Also, there is no plotting capability at this time for the output of this function.
+
+The `wilcox_TOST` function is particularly useful when:
+
+- You're working with ordinal data
+- You're concerned about outliers influencing your results
+- You need a test that makes minimal assumptions about the underlying distributions
 
 As an example, we can use the sleep data to make a non-parametric comparison of equivalence.
 
@@ -37,6 +68,20 @@ test1 = wilcox_TOST(formula = extra ~ group,
 print(test1)
 ```
 
+### Interpreting the Results
+
+When interpreting the output of `wilcox_TOST`, pay attention to:
+
+1. The p-values for both one-sided tests (`p1` and `p2`)
+2. The equivalence test p-value (`TOSTp`), which should be < alpha to claim equivalence
+3. The rank-biserial correlation (`rb`) and its confidence interval 
+
+A statistically significant equivalence test (p < alpha) indicates that the observed effect is statistically within your specified equivalence bounds. The rank-biserial correlation provides a measure of effect size, with values ranging from -1 to 1:
+
+- Values near 0 indicate negligible association
+- Values around ±0.3 indicate a small effect
+- Values around ±0.5 indicate a moderate effect
+- Values around ±0.7 or greater indicate a large effect
 
 ## Rank-Biserial Correlation
 
@@ -48,6 +93,10 @@ $$
 r_{biserial} = f_{pairs} - u_{pairs}
 $$
 
+Where:
+- $f_{pairs}$ is the proportion of favorable pairs
+- $u_{pairs}$ is the proportion of unfavorable pairs
+
 For the one sample or paired samples cases, the correlation is calculated with ties (values equal to zero) not being dropped. This provides a *conservative* estimate of the rank biserial correlation.
 
 It is calculated in the following steps wherein $z$ represents the values or difference between paired observations:
@@ -57,6 +106,12 @@ It is calculated in the following steps wherein $z$ represents the values or dif
 $$
 r_j = -1 \cdot sign(z_j) \cdot rank(|z_j|)
 $$
+
+Where:
+- $r_j$ is the signed rank for observation $j$
+- $sign(z_j)$ is the sign of observation $z_j$ (+1 or -1)
+- $rank(|z_j|)$ is the rank of the absolute value of observation $z_j$
+
 2. Calculate the positive and negative sums:
 
 $$
@@ -66,6 +121,11 @@ $$
 $$
     R_{-} = \sum_{1\le i \le n, \space z_i < 0}r_j 
 $$
+
+Where:
+- $R_{+}$ is the sum of ranks for positive observations
+- $R_{-}$ is the sum of ranks for negative observations
+
 3. Determine the smaller of the two rank sums:
 
 $$
@@ -75,11 +135,20 @@ $$
 $$
 S = \begin{cases} -4 & R_{+} \ge R_{-} \\ 4 & R_{+} < R_{-} \end{cases}
 $$
+
+Where:
+- $T$ is the smaller of the two rank sums
+- $S$ is a sign factor based on which rank sum is smaller
+
 4. Calculate rank-biserial correlation:
 
 $$
 r_{biserial} = S \cdot | \frac{\frac{T - \frac{(R_{+} + R_{-})}{2}}{n}}{n + 1} |
 $$
+
+Where:
+- $n$ is the number of observations (or pairs)
+- The final value ranges from -1 to 1
 
 ## Confidence Intervals
 
@@ -99,6 +168,9 @@ $$
 SE_r = \sqrt{\frac {(n1 + n2 + 1)} { (3 \cdot n1 \cdot n2)}}
 $$
 
+Where:
+- $n1$ and $n2$ are the sample sizes of the two groups
+
 The confidence intervals can then be calculated by transforming the estimate.
 
 $$
@@ -111,19 +183,29 @@ $$
 r_{CI} = tanh(r_z  \pm  Z_{(1 - \alpha / 2)} \cdot SE_r)
 $$
 
+Where:
+- $Z_{(1 - \alpha / 2)}$ is the critical value from the standard normal distribution
+- $\alpha$ is the significance level (typically 0.05)
+
 ## Conversion to other effect sizes
 
-Two other effect sizes can be calculated for non-parametric tests. First, there is the concordance probability, which is also known at the c-statistic, c-index, or probability of superiority^[Directly inspired by this blog post from Professor Frank Harrell https://hbiostat.org/blog/post/wpo/]. The c-statistic is converted from the correlation using the following formula:
+Two other effect sizes can be calculated for non-parametric tests. First, there is the concordance probability, which is also known as the c-statistic, c-index, or probability of superiority^[Directly inspired by this blog post from Professor Frank Harrell https://hbiostat.org/blog/post/wpo/]. The c-statistic is converted from the correlation using the following formula:
 
 $$
 c = \frac{(r_{biserial} + 1)}{2}
 $$
+
+The c-statistic can be interpreted as the probability that a randomly selected observation from one group will be greater than a randomly selected observation from another group. A value of 0.5 indicates no difference between groups, while values approaching 1 indicate perfect separation between groups.
 
 The Wilcoxon-Mann-Whitney odds [@wmwodds], also known as the "Generalized Odds Ratio" [@agresti], is calculated by converting the c-statistic using the following formula:
 
 $$
 WMW_{odds} = e^{logit(c)}
 $$
+
+Where $logit(c) = \ln\frac{c}{1-c}$
+
+The WMW odds can be interpreted similarly to a traditional odds ratio, representing the odds that an observation from one group is greater than an observation from another group.
 
 Either effect size is available by simply modifying the `ses` argument for the `wilcox_TOST` function.
 
@@ -153,17 +235,41 @@ wilcox_TOST(formula = extra ~ group,
 
 ```
 
+### Guidelines for Selecting Effect Size Measures
+
+- **Rank-biserial correlation (`"r"`)** is useful when you want a correlation-like measure that's easily interpretable and comparable to other correlation coefficients.
+- **Concordance probability (`"c"`)** is beneficial when you want to express the effect in terms of probability, making it accessible to non-statisticians.
+- **WMW odds (`"o"`)** is helpful when you want to express the effect in terms familiar to those who work with odds ratios in logistic regression or epidemiology.
+
 # Brunner-Munzel
 
 As @karch2021 explained, there are some reasons to dislike the WMW family of tests as the non-parametric alternative to the t-test. Regardless of the underlying statistical arguments^[I would like to note that I think the statistical properties of the WMW tests are sound, and Frank Harrell has written [many](https://www.fharrell.com/post/po/) [blogposts](https://www.fharrell.com/post/wpo/) outlined their sound application in biomedicine. ], it can be argued that the interpretation of the WMW tests, especially when involving equivalence testing, is a tad difficult.
 Some may want a non-parametric alternative to the WMW test, and the Brunner-Munzel test(s) may be a useful option.
 
-The Brunner-Munzel test [@brunner2000; @neubert2007] is based on calculating the "stochastic superiority" [@karch2021, i.e., probability of superiority], which is usually referred to as the relative effect, based on the ranks of the two groups being compared (X and Y). A Brunner-Munzel type test is then a directional test of an effect, and answers a question akin to "what is the probability that a randomly sampled value of X will be greater than Y?"
+## Overview and Advantages
+
+The Brunner-Munzel test [@brunner2000; @neubert2007] offers several advantages over the Wilcoxon-Mann-Whitney tests:
+
+1. It does not assume equal distributions (shapes) between groups
+2. It is robust to heteroscedasticity (unequal variances)
+3. It provides a more interpretable effect size measure ("relative effect")
+4. It maintains good statistical properties even with unequal sample sizes
+
+The Brunner-Munzel test is based on calculating the "stochastic superiority" [@karch2021, i.e., probability of superiority], which is usually referred to as the relative effect, based on the ranks of the two groups being compared (X and Y). A Brunner-Munzel type test is then a directional test of an effect, and answers a question akin to "what is the probability that a randomly sampled value of X will be greater than Y?"
 
 $$
 \hat p = P(X>Y) + 0.5 \cdot P(X=Y)
 $$
 
+Where:
+- $P(X>Y)$ is the probability that a random value from X exceeds a random value from Y
+- $P(X=Y)$ is the probability that random values from X and Y are equal
+- The 0.5 factor means ties contribute half their weight to the probability
+
+The relative effect $\hat p$ has an intuitive interpretation:
+- $\hat p = 0.5$ indicates no difference between groups
+- $\hat p > 0.5$ indicates values in X tend to be greater than values in Y
+- $\hat p < 0.5$ indicates values in X tend to be smaller than values in Y
 
 ## Basics of the Calculative Approach
 
@@ -174,7 +280,14 @@ A studentized test statistic can be calculated as:
 $$
 t = \sqrt{N} \cdot \frac{\hat p -p_{null}}{s}
 $$
-Wherein the default null hypothesis $p_{null}$ is typically 0.5 (50% probability of superiority is the default null), and $s$ refers the rank-based Brunner-Munzel standard error. The null can be modified therefore allowing for equivalence testing *directly based on the relative effect*. Additionally, for paired samples the probability of superiority is based on a *hypothesis of exchangability* and is not based on the differences scores^[This means the relative effect will *not* match the concordance probability provided by `ses_calc`].
+
+Where:
+- $N$ is the total sample size
+- $\hat p$ is the estimated relative effect
+- $p_{null}$ is the null hypothesis value (typically 0.5)
+- $s$ is the rank-based Brunner-Munzel standard error
+
+The default null hypothesis $p_{null}$ is typically 0.5 (50% probability of superiority is the default null), and $s$ refers the rank-based Brunner-Munzel standard error. The null can be modified therefore allowing for equivalence testing *directly based on the relative effect*. Additionally, for paired samples the probability of superiority is based on a *hypothesis of exchangability* and is not based on the differences scores^[This means the relative effect will *not* match the concordance probability provided by `ses_calc`].
 
 For more details on the calculative approach, I suggest reading @karch2021. At small sample sizes, it is recommended that the permutation version of the test (`perm = TRUE`) be used rather than the basic test statistic approach.
 
@@ -196,7 +309,6 @@ brunner_munzel(formula = extra ~ group,
 
 The `simple_htest` function allows TOST tests using a Brunner-Munzel test by setting the alternative to "equivalence" or "minimal.effect". The equivalence bounds, based on the relative effect, can be set with the `mu` argument.
 
-
 ```{r}
 # permutation based Brunner-Munzel test of equivalence
 simple_htest(formula = extra ~ group,
@@ -209,10 +321,37 @@ simple_htest(formula = extra ~ group,
 
 ```
 
+### Interpreting Brunner-Munzel Results
+
+When interpreting the Brunner-Munzel test results:
+
+1. The relative effect (p-hat) is the primary measure of interest
+2. For equivalence testing, you're testing whether this relative effect falls within your specified bounds
+3. A significant equivalence test suggests that the probability of superiority is statistically confined to your specified range
+
+### When to Use Permutation
+
+The permutation approach (`perm = TRUE`) is recommended when:
+
+- Sample sizes are small (generally n < 30 per group)
+- Data distributions are highly skewed or contain outliers
+- Precision is more important than computational speed
+
+Note that the permutation approach can be computationally intensive for large datasets, potentially increasing processing time significantly. Additionlly, with a permutation test you may observe situations where the confidence interval and the p-values would yield *different* conclusions.
 
 # Bootstrap TOST
 
 The bootstrap is a simulation based technique, derived from re-sampling with replacement, designed for statistical estimation and inference. Bootstrapping techniques are very useful because they are considered somewhat robust to the violations of assumptions for a simple t-test. Therefore we added a bootstrap option, `boot_t_TOST` to the package to provide another robust alternative to the `t_TOST` function. 
+
+## Advantages of Bootstrapping
+
+Bootstrap methods offer several advantages for equivalence testing:
+
+1. They make minimal assumptions about the underlying data distribution
+2. They are robust to deviations from normality
+3. They provide realistic confidence intervals even with small samples
+4. They can handle complex data structures and dependencies
+5. They often provide more accurate results when parametric assumptions are violated
 
 In this function, we provide the percentile bootstrap solution outlined by @efron93 (see chapter 16, page 220). The bootstrapped p-values are derived from the "studentized" version of a test of mean differences outlined by @efron93. Overall, the results should be similar to the results of `t_TOST`. 
 
@@ -220,11 +359,22 @@ In this function, we provide the percentile bootstrap solution outlined by @efro
 
 1. Form B bootstrap data sets from x* and y* wherein x* is sampled with replacement from $\tilde x_1,\tilde x_2, ... \tilde x_n$ and y* is sampled with replacement from $\tilde y_1,\tilde y_2, ... \tilde y_n$
 
+   Where:
+   - B is the number of bootstrap replications (set using the `R` parameter)
+   - $\tilde x_i$ and $\tilde y_i$ represent the original observations in each group
+
 2. t is then evaluated on each sample, but the mean of each sample (y or x) and the overall average (z) are subtracted from each 
 
 $$
 t(z^{*b}) = \frac {(\bar x^*-\bar x - \bar z) - (\bar y^*-\bar y - \bar z)}{\sqrt {sd_y^*/n_y + sd_x^*/n_x}}
 $$
+
+Where:
+- $\bar x^*$ and $\bar y^*$ are the means of the bootstrap samples
+- $\bar x$ and $\bar y$ are the means of the original samples
+- $\bar z$ is the overall mean
+- $sd_x^*$ and $sd_y^*$ are the standard deviations of the bootstrap samples
+- $n_x$ and $n_y$ are the sample sizes
 
 3. An approximate p-value can then be calculated as the number of bootstrapped results greater than the observed t-statistic from the sample.
 
@@ -232,7 +382,21 @@ $$
 p_{boot} = \frac {\#t(z^{*b}) \ge t_{sample}}{B}
 $$
 
+Where:
+- $\#t(z^{*b}) \ge t_{sample}$ is the count of bootstrap t-statistics that exceed the observed t-statistic
+- B is the total number of bootstrap replications
+
 The same process is completed for the one sample case but with the one sample solution for the equation outlined by $t(z^{*b})$. The paired sample case in this bootstrap procedure is equivalent to the one sample solution because the test is based on the difference scores.
+
+## Choosing the Number of Bootstrap Replications
+
+When using bootstrap methods, the choice of replications (the `R` parameter) is important:
+
+- **R = 999 or 1999**: Recommended for standard analyses
+- **R = 4999 or 9999**: Recommended for publication-quality results or when precise p-values are needed
+- **R < 500**: Acceptable only for exploratory analyses or when computational resources are limited
+
+Larger values of R provide more stable results but increase computation time. For most purposes, 999 or 1999 replications strike a good balance between precision and computational efficiency.
 
 ## Example
 
@@ -245,7 +409,7 @@ test1 = boot_t_TOST(formula = extra ~ group,
                       data = sleep,
                       paired = TRUE,
                       eqb = .5,
-                    R = 999)
+                    R = 499)
 
 
 print(test1)
@@ -253,24 +417,55 @@ print(test1)
 plot(test1)
 ```
 
+### Interpreting Bootstrap TOST Results
+
+When interpreting the results of `boot_t_TOST`:
+
+1. The bootstrap p-values (`p1` and `p2`) represent the empirical probability of observing the test statistic or more extreme values under repeated sampling
+2. The confidence intervals are derived directly from the empirical distribution of bootstrap samples
+3. The distribution plots provide visual insight into the variability of the effect size estimate
+
+For equivalence testing, examine whether both bootstrap p-values are significant (< alpha) and whether the confidence interval for the effect size falls entirely within the equivalence bounds.
+
 # Ratio of Difference (Log Transformed)
 
 In many bioequivalence studies, the differences between drugs are compared on the log scale [@he2022].
 The log scale allows researchers to compare the ratio of two means.
 
-
 $$
 log ( \frac{y}{x} ) = log(y) - log(x)
 $$
-The [United States Food and Drug Administration (FDA)](https://www.fda.gov/regulatory-information/search-fda-guidance-documents/bioavailability-and-bioequivalence-studies-submitted-ndas-or-inds-general-considerations)^[Food and Drug Administration (2014). Bioavailability and Bioequivalence Studies Submitted in NDAs or INDs — General Considerations.Center for Drug Evaluation and Research. Docket: FDA-2014-D-0204] hs stated a rationale for using the log transformed values:
+
+Where:
+- y and x are the means of the two groups being compared
+- The transformation converts multiplicative relationships into additive ones
+
+## Why Use Log Transformation?
+
+The [United States Food and Drug Administration (FDA)](https://www.fda.gov/regulatory-information/search-fda-guidance-documents/bioavailability-and-bioequivalence-studies-submitted-ndas-or-inds-general-considerations)^[Food and Drug Administration (2014). Bioavailability and Bioequivalence Studies Submitted in NDAs or INDs — General Considerations.Center for Drug Evaluation and Research. Docket: FDA-2014-D-0204] has stated a rationale for using the log transformed values:
 
 > Using logarithmic transformation, the general linear statistical model employed in the analysis of BE data allows inferences about the difference between the two means on the log scale, which can then be retransformed into inferences about the ratio of the two averages (means or medians) on the original scale. Logarithmic transformation thus achieves a general comparison based on the ratio rather than the differences. 
 
-In addition, the FDA, considers 
-two drugs as bioequivalent when the ratio between x and y is less than 1.25 and
-greater than 0.8 (1/1.25), which is the default equivalence bound for the log
-functions.
+Log transformation offers several advantages:
 
+1. It facilitates the analysis of **relative** rather than absolute differences
+2. It often makes right-skewed distributions more symmetric
+3. It stabilizes variance when variability increases with the mean
+4. It provides an easy-to-interpret interpretable effect size (ratio of means)
+
+In addition, the FDA considers two drugs as bioequivalent when the ratio between x and y is less than 1.25 and greater than 0.8 (1/1.25), which is the default equivalence bound for the log functions.
+
+## Applications Beyond Bioequivalence
+
+While log transformation is standard in bioequivalence studies, it's useful in many other contexts:
+
+- **Economics**: Comparing percentage changes in economic indicators
+- **Environmental science**: Analyzing concentration ratios of pollutants
+- **Biology**: Examining growth rates or concentration ratios
+- **Medicine**: Comparing relative efficacy of treatments
+- **Psychology**: Analyzing response time ratios
+
+Consider using log transformation whenever your research question is about relative rather than absolute differences, particularly when the data follow a multiplicative rather than additive pattern.
 
 ## log_TOST
 
@@ -290,6 +485,18 @@ provides two effect sizes. The means ratio on the log scale (the scale of the te
 and the means ratio. The means ratio is missing standard error because the
 confidence intervals and estimate are simply the log scale results exponentiated.
 
+### Interpreting the Means Ratio
+
+When interpreting the means ratio:
+
+- A ratio of 1.0 indicates perfect equivalence (no difference)
+- Ratios > 1.0 indicate that the first group has higher values than the second
+- Ratios < 1.0 indicate that the first group has lower values than the second
+
+For equivalence testing with the default bounds (0.8, 1.25):
+- Equivalence is established when the 90% confidence interval for the ratio falls entirely within (0.8, 1.25)
+- This range corresponds to a difference of ±20% on a relative scale
+
 ## Bootstrap + Log
 
 However, it has been noted in the statistics literature that t-tests on the
@@ -304,6 +511,12 @@ boot_log_TOST(
   R = 499
 )
 ```
+
+The bootstrapped version is particularly recommended when:
+
+- Sample sizes are small (n < 30 per group)
+- Data show notable deviations from log-normality
+- You want to ensure robust confidence intervals
 
 # Just Estimate an Effect Size
 
@@ -326,5 +539,29 @@ boot_ses_calc(formula = extra ~ group,
          boot_ci = "perc", # recommend percentile bootstrap for paired SES
          ses = "r") 
 ```
+
+## Choosing Between Different Bootstrap CI Methods
+
+The `boot_ses_calc` function offers several bootstrap confidence interval methods through the `boot_ci` parameter:
+
+- **"perc"** (Percentile): Simple and intuitive, works well for symmetric distributions
+- **"basic"**: Similar to percentile but adjusts for bias, more conservative
+- **"norm"** (Normal approximation): Assumes normality of the bootstrap distribution
+
+
+# Summary Comparison of Robust TOST Methods
+
+| Method | Key Advantages | Limitations | Best Use Cases |
+|--------|---------------|-------------|---------------|
+| **Wilcoxon TOST** | Simple, widely accepted, minimal assumptions | Less power than parametric tests with normal data | Ordinal data, non-normal distributions, presence of outliers |
+| **Brunner-Munzel** | Robust to unequal distributions, interpretable effect | Computationally intensive with permutation | Different distribution shapes between groups, heteroscedasticity |
+| **Bootstrap TOST** | Flexible, minimal assumptions, works with small samples | Computationally intensive, results vary slightly between runs | Small samples, complex data structures, when precise CIs are important |
+| **Log-Transformed** | Focuses on relative differences, often stabilizes variance | Requires positive data, can be biased with small samples | Bioequivalence studies, comparing ratios rather than absolute differences |
+
+# Conclusion
+
+The robust TOST procedures provided in the TOSTER package offer reliable alternatives to standard parametric equivalence testing when data violate typical assumptions. By selecting the appropriate robust method for your specific data characteristics and research question, you can ensure more valid statistical inferences about equivalence or minimal effects.
+
+Remember that no single method is universally superior - the choice depends on your data structure, sample size, and specific research question. When in doubt, running multiple approaches and comparing results can provide valuable insights into the robustness of your conclusions.
 
 # References
