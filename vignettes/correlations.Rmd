@@ -14,160 +14,227 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
 ---
 
-TOSTER has a few different functions to calculate correlations. 
-All the included functions are based on a few papers by @goertzen2010 (`z_cor_test` & `compare_cor`), and @wilcox2011introduction (`boot_cor_test`)^[Bootstrapped functions were based off code posted by Rand Wilcox on his website, and was modified after looking at Guillaume Rousselet's code, `bootcorci` R package, on GitHub https://github.com/GRousselet].
+The TOSTER package provides several functions for calculating and analyzing correlations. These functions extend beyond traditional correlation tests by offering equivalence testing capabilities and robust correlation methods. The included functions are based on research by @goertzen2010 (`z_cor_test` & `compare_cor`), and @wilcox2011introduction (`boot_cor_test`)^[The bootstrapped functions were adapted from code posted by Rand Wilcox on his website, with modifications inspired by Guillaume Rousselet's `bootcorci` R package, available on GitHub: https://github.com/GRousselet].
 
-# Simple Correlation Test
+## Simple Correlation Test
 
-Simple tests of association can be accomplished with the `z_cor_test` function. 
-This function was stylized after the `cor.test` function, but you will notice that the results may differ.
-This is caused by fact that `z_cor_test` uses Fisher's z transformation as the basis for all significance tests (i.e., p-values). However, notice that the confidence intervals are the same.
+Basic tests of association can be performed with the `z_cor_test` function. This function is styled after R's built-in `cor.test` function but uses Fisher's z transformation as the basis for all significance tests (p-values). Despite this difference in methodology, the confidence intervals are typically very similar to those produced by `cor.test`.
 
 ```{r}
 library(TOSTER)
-cor.test(mtcars$mpg,
-           mtcars$qsec)
+# Base R correlation test
+cor.test(mtcars$mpg, mtcars$qsec)
 
-z_cor_test(mtcars$mpg,
-           mtcars$qsec)
+# TOSTER's z-transformed correlation test
+z_cor_test(mtcars$mpg, mtcars$qsec)
 ```
 
-But, just as `cor.test`, the Spearman and Kendall correlation coefficients can be estimated.
+Like `cor.test`, the `z_cor_test` function supports Spearman and Kendall correlation coefficients:
 
 ```{r}
+# Spearman correlation
 z_cor_test(mtcars$mpg,
            mtcars$qsec,
-           method = "spear") # Don't need to spell full name
+           method = "spear") # Short form accepted; "spearman" also works
+
+# Kendall correlation
 z_cor_test(mtcars$mpg,
            mtcars$qsec,
            method = "kendall")
 ```
 
+### Advantages of z_cor_test
 
-The main advantage of `z_cor_test` is that it can perform equivalence testing (TOST), or any hypothesis test where the null isn't zero.
+The main advantage of `z_cor_test` over the standard `cor.test` is its ability to perform equivalence testing (TOST) or any hypothesis test where the null hypothesis isn't zero. This makes it particularly useful for research questions focused on demonstrating practical equivalence or testing against specific correlation thresholds.
 
 ```{r}
+# Equivalence test with null boundary of 0.4
 z_cor_test(mtcars$mpg,
            mtcars$qsec,
            alternative = "e", # e for equivalence
            null = .4)
 ```
 
-## Summary Statistics
+In this example, we're testing whether the correlation is equivalent to zero within the boundaries of ±0.4.
 
-If you only have the summary statistics you perform the same tests. Just imagine you are reviewing a study with an observed correlation of 0.121 with a sample size of 105 paired observations. You could then perform an equivalence test with the following code.
+## Using Summary Statistics
+
+A key advantage of TOSTER is the ability to perform correlation tests using only summary statistics, which is particularly useful when reviewing published literature or working with limited data access. The `corsum_test` function enables this functionality:
 
 ```{r}
+# Testing a correlation of 0.121 from a sample of 105 paired observations
 corsum_test(r = .121,
             n = 105,
             alternative = "e",
             null = .4)
 ```
 
+This example tests whether a correlation of 0.121 from a sample of 105 paired observations is equivalent to zero within the boundaries of ±0.4.
 
-# Bootstrapped Correlation Test
+## Bootstrapped Correlation Test
 
-If the raw data is available, I would *strongly* recommend using the bootstrapping function which should be more robust than the Fisher's z based function.
-Further, the `boot_cor_test` function also has 2 other correlations that can be estimated: a Winsorized correlation and the percentage bend correlation.
-The input for the function is fairly similar to the `z_cor_test` function.
+For more robust analyses when raw data is available, TOSTER provides the `boot_cor_test` function. This bootstrapping approach generally produces more reliable results than Fisher's z-based tests, especially with non-normal data or when outliers are present.
 
 ```{r}
-set.seed(993)
+set.seed(993) # Setting seed for reproducibility
 boot_cor_test(mtcars$mpg,
            mtcars$qsec,
            alternative = "e",
            null = .4)
 
+# Bootstrapped Spearman correlation
 boot_cor_test(mtcars$mpg,
            mtcars$qsec,
            method = "spear",
            alternative = "e",
            null = .4)
 
+# Bootstrapped Kendall correlation
 boot_cor_test(mtcars$mpg,
            mtcars$qsec,
-           method = "ken",
+           method = "ken", # Short form accepted
            alternative = "e",
            null = .4)
 ```
 
-Robust correlations, such as a winsorized correlation coefficient or percentage bend correlation, can also be tested.
+### Robust Correlation Methods
+
+The `boot_cor_test` function also provides access to robust correlation methods that are less sensitive to outliers and violations of normality:
 
 ```{r}
+# Winsorized correlation with 10% trimming
 boot_cor_test(mtcars$mpg,
            mtcars$qsec,
            method = "win",
            alternative = "e",
            null = .4,
-           tr = .1) # set trim
+           tr = .1) # Set trim amount (default is 0.2)
 
+# Percentage bend correlation
 boot_cor_test(mtcars$mpg,
            mtcars$qsec,
            method = "bend",
            alternative = "e",
            null = .4,
-           beta = .15) # bend argument
+           beta = .15) # Beta parameter controlling resistance to outliers
 ```
 
-# Compare Correlations
+The Winsorized correlation reduces the impact of outliers by replacing extreme values with less extreme values. The percentage bend correlation is another robust method that downweights the influence of outliers in the calculation.
 
-In some cases, researchers may want to compare two independent correlations. 
-Sometimes this may be used to compare correlations between two variables between two groups (e.g., the correlation between two variables between male and female subjects) or between two independent studies (e.g., replication study).
+## Comparing Correlations
 
-When only summary statistics are available the `compare_cor` function can be used. 
-All the user needs is the correlations (r1 and r2) and the degrees of freedom for each correlation.
-The degrees of freedom for most cases would the number of pairs minus 2 ($df = N-2$).
-*Note*: this function, similar to `z_cor_test` is an approximation. 
+TOSTER provides tools for comparing correlations between independent groups or studies. This is useful for testing differences in relationships across populations or for evaluating replication studies.
+
+### Summary Statistics Approach
+
+When only summary statistics are available, the `compare_cor` function can be used:
 
 ```{r}
+# Comparing correlation r1=0.8 from n=40 with r2=0.2 from n=100
 compare_cor(r1 = .8,
-            df1 = 38,
+            df1 = 38,  # df = n-2
             r2 = .2,
-            df2 = 98)
+            df2 = 98)  # df = n-2
 ```
 
-```{r}
-compare_cor(r1 = .8,
-            df1 = 38,
-            r2 = .2,
-            df2 = 98)
-```
-
-The methods included to compare correlations include Fisher's z transformation ("fisher"), and Kraatz's method ("kraatz"). The Fisher and Kraatz methods are appropriate for general significance tests, but may have low statistical power [@counsell2015equ]. The Fisher's method can test the difference between correlations on the z-transformed scale while Kraatz's methods directly measures the difference between the correlation coefficients. My personal recommendation would is Fisher's method.
+The `compare_cor` function supports different methods for comparing correlations:
 
 ```{r}
+# Testing equivalence using Fisher's method
 compare_cor(r1 = .8,
             df1 = 38,
             r2 = .2,
             df2 = 98,
             null = .2,
-            method = "f", # Fisher
-            alternative = "e") # Equivalence
+            method = "f", # Fisher (can also use "fisher")
+            alternative = "e") # Equivalence test
 ```
 
+Available methods include:
 
-## Bootstrapped 
+* **Fisher's z transformation** (`method = "fisher"` or `"f"`): Tests the difference between correlations on the z-transformed scale. This is generally recommended for most applications.
+* **Kraatz's method** (`method = "kraatz"` or `"k"`): Directly measures the difference between correlation coefficients.
 
-When data is available for both correlations then the `boot_compare_cor` function can be utilized.
+While both methods are appropriate for general significance testing, they may have limited statistical power in some scenarios [@counsell2015equ].
+
+### Bootstrapped Comparison
+
+When raw data is available for both correlations, the `boot_compare_cor` function offers a more robust approach through bootstrapping:
 
 ```{r}
-set.seed(8922)
+set.seed(8922) # Setting seed for reproducibility
+# Generating example data
 x1 = rnorm(40)
 y1 = rnorm(40)
 
 x2 = rnorm(100)
 y2 = rnorm(100)
 
+# Bootstrap comparison with winsorized correlation
 boot_compare_cor(
   x1 = x1,
   x2 = x2,
   y1 = y1,
   y2 = y2,
   null = .2,
-  alternative = "e", # Equivalence
+  alternative = "e", # Equivalence test
   method = "win" # Winsorized correlation
 )
 ```
 
 
-# References
+This approach has several advantages:
+
+- It does not rely on the Fisher's z transformation approximation
+- It can incorporate robust correlation methods
+- It can provide more accurate confidence intervals, especially when typical assumptions are violated
+
+
+## Practical Recommendations
+
+When choosing which correlation method to use in TOSTER:
+
+1. **If raw data is available:**
+   - For most cases, use `boot_cor_test` with Pearson, Spearman, or Kendall methods
+   - When outliers or non-normality are concerns, consider the robust methods (winsorized or percentage bend)
+
+2. **If only summary statistics are available:**
+   - Use `corsum_test` for single correlation analysis
+   - Use `compare_cor` with the Fisher method for comparing correlations
+
+3. **For equivalence testing:**
+   - Carefully select meaningful boundaries (null values) based on your research context
+   - Consider what effect size would be practically insignificant in your field
+
+## Advanced Usage
+
+### Custom Bootstrap Methods
+
+The bootstrapped functions in TOSTER allow customization of the bootstrap procedure:
+
+```{r, eval=FALSE}
+# Customizing the bootstrap procedure
+boot_cor_test(
+  x = mtcars$mpg,
+  y = mtcars$qsec,
+  method = "pearson",
+  R = 2000,  # Increasing number of bootstrap samples
+  alpha = 0.01,  # Using 99% confidence interval
+  alternative = "t"  # Two-sided test
+)
+```
+
+### Working with Missing Data
+
+By default, the correlation functions in TOSTER use pairwise complete observations:
+
+```{r, eval=FALSE}
+# Example with missing data
+x_with_na <- c(mtcars$mpg, NA, NA)
+y_with_na <- c(mtcars$qsec, 10, NA)
+
+# Default behavior handles NAs with pairwise deletion
+z_cor_test(x_with_na, y_with_na)
+```
+
+non# References

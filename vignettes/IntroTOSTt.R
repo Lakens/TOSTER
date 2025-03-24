@@ -7,7 +7,6 @@ library(TOSTER)
 library(ggplot2)
 library(ggdist)
 
-
 ## ----tostplots,echo=FALSE, message = FALSE, warning = FALSE, fig.show='hold'----
 
 ggplot() +
@@ -141,56 +140,51 @@ head(sleep)
 ## -----------------------------------------------------------------------------
 res1 = t_TOST(formula = extra ~ group,
               data = sleep,
-              eqb = .5,
-              smd_ci = "t")
+              eqb = .5,  # equivalence bounds of ±0.5 hours
+              smd_ci = "t")  # t-distribution for SMD confidence intervals
 
-res1a = t_TOST(x = subset(sleep,group==1)$extra,
-               y = subset(sleep,group==2)$extra,
+# Alternative syntax with separate vectors
+res1a = t_TOST(x = subset(sleep, group==1)$extra,
+               y = subset(sleep, group==2)$extra,
                eqb = .5)
 
 ## -----------------------------------------------------------------------------
-# Simple htest
-
+# Simple htest approach
 res1b = simple_htest(formula = extra ~ group,
                      data = sleep,
-                     mu = .5, # set equivalence bound
-                     alternative = "e")
-
-
+                     mu = .5,  # equivalence bound
+                     alternative = "e")  # "e" for equivalence
 
 ## -----------------------------------------------------------------------------
-
-# t_TOST
+# Comprehensive t_TOST output
 print(res1)
 
-# htest
-
+# Concise htest output
 print(res1b)
 
 ## ----fig.width=6, fig.height=6------------------------------------------------
 plot(res1, type = "simple")
 
 ## ----fig.width=6, fig.height=6, eval=TRUE-------------------------------------
-# Set to shade only the 90% and 95% CI areas
+# Shade the 90% and 95% CI areas
 plot(res1, type = "cd",
-     ci_shades = c(.9,.95))
+     ci_shades = c(.9, .95))
 
 ## ----fig.width=6, fig.height=6------------------------------------------------
 plot(res1, type = "c",
-     ci_lines =  c(.9,.95))
+     ci_lines = c(.9, .95))
 
 ## ----fig.width=6, fig.height=6------------------------------------------------
 plot(res1, type = "tnull")
 
 ## ----eval = FALSE-------------------------------------------------------------
 #  describe(res1)
-#  
 #  describe_htest(res1b)
 
 ## -----------------------------------------------------------------------------
 res2 = t_TOST(formula = extra ~ group,
               data = sleep,
-              paired = TRUE,
+              paired = TRUE,  # specify paired analysis
               eqb = .5)
 res2
 
@@ -221,10 +215,10 @@ res3a
 ## -----------------------------------------------------------------------------
 res_met = t_TOST(x = iris$Sepal.Length,
               y = iris$Sepal.Width,
-               paired = TRUE,
-               hypothesis = "MET",
-               eqb = 1,
-              smd_ci = "goulet")
+              paired = TRUE,
+              hypothesis = "MET",  # Change to minimal effect test
+              eqb = 1,
+              smd_ci = "t")
 res_met
 
 res_metb = simple_htest(x = iris$Sepal.Length,
@@ -236,23 +230,22 @@ res_metb
 
 ## ----eval = FALSE-------------------------------------------------------------
 #  describe(res_met)
-#  
 #  describe_htest(res_metb)
 
 ## -----------------------------------------------------------------------------
 res4 = t_TOST(x = iris$Sepal.Length,
               hypothesis = "EQU",
-              eqb = c(5.5,8.5),
-              smd_ci = "goulet")
+              eqb = c(5.5, 8.5),  # lower and upper bounds
+              smd_ci = "t")
 res4
 
 ## -----------------------------------------------------------------------------
 res_tsum = tsum_TOST(
-  m1 = mean(iris$Sepal.Length, na.rm=TRUE),
-  sd1 = sd(iris$Sepal.Length, na.rm=TRUE),
-  n1 = length(na.omit(iris$Sepal.Length)),
+  m1 = mean(iris$Sepal.Length, na.rm=TRUE),  # sample mean
+  sd1 = sd(iris$Sepal.Length, na.rm=TRUE),   # sample standard deviation
+  n1 = length(na.omit(iris$Sepal.Length)),  # sample size
   hypothesis = "EQU",
-  eqb = c(5.5,8.5)
+  eqb = c(5.5, 8.5)
 )
 
 res_tsum
@@ -265,10 +258,10 @@ describe(res_tsum)
 
 ## -----------------------------------------------------------------------------
 power_t_TOST(n = NULL,
-  delta = 1,
-  sd = 2.5,
-  eqb = 2.5,
-  alpha = .025,
-  power = .95,
-  type = "two.sample")
+  delta = 1,          # assumed true difference
+  sd = 2.5,           # assumed standard deviation
+  eqb = 2.5,          # equivalence bounds
+  alpha = .025,       # significance level
+  power = .95,        # desired power
+  type = "two.sample") # test type
 

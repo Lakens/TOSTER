@@ -60,8 +60,9 @@ plot_pes(Fstat = 2.36, df1 = 2, df2 = 87)
 
 ## -----------------------------------------------------------------------------
 power_eq_f(df1 = 2,         # Numerator df (groups - 1) 
-           df2 = 60,      # Set to NULL to solve for sample size
-           eqbound = 0.15)  # Equivalence bound)     
+           df2 = NULL,      # Set to NULL to solve for sample size
+           eqbound = 0.15,  # Equivalence bound
+           power = 0.8)     # Desired power
 
 ## -----------------------------------------------------------------------------
 power_eq_f(df1 = 2,         # Numerator df (groups - 1)
