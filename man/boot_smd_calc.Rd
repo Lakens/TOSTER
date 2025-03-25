@@ -161,8 +161,9 @@ result <- boot_smd_calc(formula = value ~ group,
                       R = 999)
 
 # Example 3: Paired samples with percentile bootstrap
-before <- c(5.1, 4.8, 6.2, 5.7, 6.0, 5.5, 4.9, 5.8)
-after <- c(5.6, 5.2, 6.7, 6.1, 6.5, 5.8, 5.3, 6.2)
+set.seed(456)
+before <- rnorm(30)
+after <- rnorm(30)
 result <- boot_smd_calc(x = before,
                       y = after,
                       paired = TRUE,

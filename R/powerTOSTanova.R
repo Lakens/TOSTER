@@ -121,25 +121,25 @@ power_eq_f <- function(alpha = 0.05,
     message(paste("Power =", round(power, 4)))
   } else if (is.null(df2)) {
     # Find df2 that gives desired power
-    f <- function(df2) calc_power(alpha, df1, df2, eqbound) - power
-    df2 <- uniroot(f, c(4, 1e5))$root
+    f1 <- function(df2) calc_power(alpha, df1, df2, eqbound) - power
+    df2 <- uniroot(f1, c(4, 1e5))$root
     message(paste("Required df2 =", round(df2, 2),
                   "(approximately", ceiling(df2 + df1 + 1),
                   "total observations for a one-way ANOVA with", df1 + 1, "groups)"))
   } else if (is.null(eqbound)) {
     # Find eqbound that gives desired power
-    f <- function(eqbound) calc_power(alpha, df1, df2, eqbound) - power
-    eqbound <- uniroot(f, c(0.001, 0.999))$root
+    f2 <- function(eqbound) calc_power(alpha, df1, df2, eqbound) - power
+    eqbound <- uniroot(f2, c(0.001, 0.999))$root
     message(paste("Detectable equivalence bound =", round(eqbound, 4)))
   } else if (is.null(alpha)) {
     # Find alpha that gives desired power
-    f <- function(alpha) calc_power(alpha, df1, df2, eqbound) - power
-    alpha <- uniroot(f, c(1e-10, 1-1e-10))$root
+    f3 <- function(alpha) calc_power(alpha, df1, df2, eqbound) - power
+    alpha <- uniroot(f3, c(1e-10, 1-1e-10))$root
     message(paste("Required alpha =", round(alpha, 4)))
   } else if (is.null(df1)) {
     # Find df1 that gives desired power
-    f <- function(df1) calc_power(alpha, df1, df2, eqbound) - power
-    df1 <- uniroot(f, c(1, 100))$root
+    f4 <- function(df1) calc_power(alpha, df1, df2, eqbound) - power
+    df1 <- uniroot(f4, c(1, 100))$root
     message(paste("Required df1 =", round(df1, 2)))
   }
 
