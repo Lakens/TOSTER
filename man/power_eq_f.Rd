@@ -72,7 +72,7 @@ power_eq_f(df1 = 2, power = 0.8, eqbound = 0.05)
 power_eq_f(df1 = 2, df2 = 100, power = 0.8)
 
 # Example 4: Calculate required alpha level for 90\% power
-power_eq_f(df1 = 2, df2 = 100, eqbound = 0.05, power = 0.9)
+power_eq_f(df1 = 2, df2 = 100, eqbound = 0.05, power = 0.9, alpha = NULL)
 
 }
 \references{
