@@ -25,7 +25,7 @@ knitr::opts_chunk$set(
 
 This vignette demonstrates how to perform equivalence testing for F-tests in ANOVA models using the TOSTER package. While traditional null hypothesis significance testing (NHST) helps determine if effects are different from zero, equivalence testing allows you to determine if effects are small enough to be considered practically equivalent to zero or meaningfully similar.
 
-For an open access tutorial paper explaining how to set equivalence bounds, and how to perform and report equivalence testing for ANOVA models, see Campbell & Lakens (2021). These functions are designed for omnibus tests, and additional testing may be necessary for specific comparisons between groups or conditions^[Russ Lenth's emmeans R package has some capacity for equivalence testing on the marginal means (i.e., a form of pairwise testing). See the emmeans package vignettes for details]. 
+For an open access tutorial paper explaining how to set equivalence bounds, and how to perform and report equivalence testing for ANOVA models, see @Campbell_2021. These functions are designed for omnibus tests, and additional testing may be necessary for specific comparisons between groups or conditions^[Russ Lenth's emmeans R package has some capacity for equivalence testing on the marginal means (i.e., a form of pairwise testing). See the emmeans package vignettes for details]. 
 
 ## The Theory Behind F-test Equivalence Testing
 
@@ -62,6 +62,7 @@ p_{eq} = p_F(F; df_1, df_2, \lambda_{eq})
 $$
 
 Where:
+
 - $F$ is the observed F-statistic
 - $df_1$ is the numerator degrees of freedom (effect df)
 - $df_2$ is the denominator degrees of freedom (error df)
@@ -142,10 +143,15 @@ The `equ_anova()` function conveniently provides a data frame with results for a
 
 You can also perform minimal effect testing instead of equivalence testing by setting `MET = TRUE`. This reverses the hypotheses:
 
+- Effect is not meaningfully large
+
 $$
-H_0: \space \eta^2_p \leq \Delta \quad \text{(Effect is not meaningfully large)}
-\\
-H_1: \space \eta^2_p > \Delta \quad \text{(Effect is meaningfully large)}
+H_0: \space \eta^2_p \leq \Delta 
+$$
+- Effect is meaningfully large
+
+$$
+H_1: \space \eta^2_p > \Delta 
 $$
 
 Let's see how to use this option:

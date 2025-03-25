@@ -116,7 +116,7 @@ For details on the calculations in this function see vignette("IntroTOSTt") & vi
 
 For two-sample tests, the test is of \eqn{\bar{x} - \bar{y}} (mean of x minus mean of y).
 For paired samples, the test is of the difference scores (z),
-wherein $z = x - y$, and the test is of \eqn{\bar{z}} (mean of the difference scores).
+wherein \eqn{z = x - y}, and the test is of \eqn{\bar{z}} (mean of the difference scores).
 For one-sample tests, the test is of \eqn{\bar{x}} (mean of x).
 
 The output combines three statistical tests:

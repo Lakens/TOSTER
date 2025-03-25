@@ -169,6 +169,7 @@ SE_r = \sqrt{\frac {(n1 + n2 + 1)} { (3 \cdot n1 \cdot n2)}}
 $$
 
 Where:
+
 - $n1$ and $n2$ are the sample sizes of the two groups
 
 The confidence intervals can then be calculated by transforming the estimate.
@@ -184,6 +185,7 @@ r_{CI} = tanh(r_z  \pm  Z_{(1 - \alpha / 2)} \cdot SE_r)
 $$
 
 Where:
+
 - $Z_{(1 - \alpha / 2)}$ is the critical value from the standard normal distribution
 - $\alpha$ is the significance level (typically 0.05)
 
@@ -262,11 +264,13 @@ $$
 $$
 
 Where:
+
 - $P(X>Y)$ is the probability that a random value from X exceeds a random value from Y
 - $P(X=Y)$ is the probability that random values from X and Y are equal
 - The 0.5 factor means ties contribute half their weight to the probability
 
 The relative effect $\hat p$ has an intuitive interpretation:
+
 - $\hat p = 0.5$ indicates no difference between groups
 - $\hat p > 0.5$ indicates values in X tend to be greater than values in Y
 - $\hat p < 0.5$ indicates values in X tend to be smaller than values in Y
@@ -282,6 +286,7 @@ t = \sqrt{N} \cdot \frac{\hat p -p_{null}}{s}
 $$
 
 Where:
+
 - $N$ is the total sample size
 - $\hat p$ is the estimated relative effect
 - $p_{null}$ is the null hypothesis value (typically 0.5)
@@ -370,6 +375,7 @@ t(z^{*b}) = \frac {(\bar x^*-\bar x - \bar z) - (\bar y^*-\bar y - \bar z)}{\sqr
 $$
 
 Where:
+
 - $\bar x^*$ and $\bar y^*$ are the means of the bootstrap samples
 - $\bar x$ and $\bar y$ are the means of the original samples
 - $\bar z$ is the overall mean
@@ -440,7 +446,7 @@ Where:
 - y and x are the means of the two groups being compared
 - The transformation converts multiplicative relationships into additive ones
 
-## Why Use Log Transformation?
+## Why Use The Natural Log Transformation?
 
 The [United States Food and Drug Administration (FDA)](https://www.fda.gov/regulatory-information/search-fda-guidance-documents/bioavailability-and-bioequivalence-studies-submitted-ndas-or-inds-general-considerations)^[Food and Drug Administration (2014). Bioavailability and Bioequivalence Studies Submitted in NDAs or INDs — General Considerations.Center for Drug Evaluation and Research. Docket: FDA-2014-D-0204] has stated a rationale for using the log transformed values:
 

@@ -12,7 +12,7 @@
 
 <meta name="author" content="Aaron R. Caldwell" />
 
-<meta name="date" content="2025-03-21" />
+<meta name="date" content="2025-03-25" />
 
 <title>Equivalence Testing for F-tests</title>
 
@@ -145,6 +145,29 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; }
 
 
 
+<style type="text/css">
+
+div.csl-bib-body { }
+div.csl-entry {
+clear: both;
+margin-bottom: 0em;
+}
+.hanging div.csl-entry {
+margin-left:2em;
+text-indent:-2em;
+}
+div.csl-left-margin {
+min-width:2em;
+float:left;
+}
+div.csl-right-inline {
+margin-left:2em;
+padding-left:1em;
+}
+div.csl-indent {
+margin-left: 2em;
+}
+</style>
 
 <style type="text/css">body {
 background-color: #fff;
@@ -340,7 +363,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Equivalence Testing for F-tests</h1>
 <h4 class="author">Aaron R. Caldwell</h4>
-<h4 class="date">2025-03-21</h4>
+<h4 class="date">2025-03-25</h4>
 
 
 <div id="TOC">
@@ -391,9 +414,9 @@ effects are small enough to be considered practically equivalent to zero
 or meaningfully similar.</p>
 <p>For an open access tutorial paper explaining how to set equivalence
 bounds, and how to perform and report equivalence testing for ANOVA
-models, see Campbell &amp; Lakens (2021). These functions are designed
-for omnibus tests, and additional testing may be necessary for specific
-comparisons between groups or conditions<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>.</p>
+models, see <span class="citation">Campbell and Lakens (2021)</span>.
+These functions are designed for omnibus tests, and additional testing
+may be necessary for specific comparisons between groups or conditions<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>.</p>
 </div>
 <div id="the-theory-behind-f-test-equivalence-testing" class="section level2">
 <h2>The Theory Behind F-test Equivalence Testing</h2>
@@ -432,12 +455,17 @@ traditional ANOVA results and the distribution function:</p>
 <p><span class="math display">\[
 p_{eq} = p_F(F; df_1, df_2, \lambda_{eq})
 \]</span></p>
-<p>Where: - <span class="math inline">\(F\)</span> is the observed
-F-statistic - <span class="math inline">\(df_1\)</span> is the numerator
-degrees of freedom (effect df) - <span class="math inline">\(df_2\)</span> is the denominator degrees of
-freedom (error df) - <span class="math inline">\(\lambda_{eq}\)</span>
-is the non-centrality parameter calculated from the equivalence
-bound</p>
+<p>Where:</p>
+<ul>
+<li><span class="math inline">\(F\)</span> is the observed
+F-statistic</li>
+<li><span class="math inline">\(df_1\)</span> is the numerator degrees
+of freedom (effect df)</li>
+<li><span class="math inline">\(df_2\)</span> is the denominator degrees
+of freedom (error df)</li>
+<li><span class="math inline">\(\lambda_{eq}\)</span> is the
+non-centrality parameter calculated from the equivalence bound</li>
+</ul>
 </div>
 <div id="practical-application-with-toster" class="section level2">
 <h2>Practical Application with TOSTER</h2>
@@ -576,12 +604,14 @@ eta-squared (<code>pes</code>), and the equivalence test p-value
 <p>You can also perform minimal effect testing instead of equivalence
 testing by setting <code>MET = TRUE</code>. This reverses the
 hypotheses:</p>
+<ul>
+<li>Effect is not meaningfully large</li>
+</ul>
 <p><span class="math display">\[
-H_0: \space \eta^2_p \leq \Delta \quad \text{(Effect is not meaningfully
-large)}
-\\
-H_1: \space \eta^2_p &gt; \Delta \quad \text{(Effect is meaningfully
-large)}
+H_0: \space \eta^2_p \leq \Delta
+\]</span> - Effect is meaningfully large</p>
+<p><span class="math display">\[
+H_1: \space \eta^2_p &gt; \Delta
 \]</span></p>
 <p>Let’s see how to use this option:</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">equ_anova</span>(aovtest,</span>
@@ -794,8 +824,16 @@ make more nuanced inferences about effect sizes and avoid the common
 pitfall of interpreting non-significant p-values as evidence for the
 absence of an effect.</p>
 </div>
-<div id="references" class="section level2">
-<h2>References</h2>
+<div id="references" class="section level2 unnumbered">
+<h2 class="unnumbered">References</h2>
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="ref-Campbell_2021" class="csl-entry">
+Campbell, Harlan, and Daniël Lakens. 2021. <span>“Can We Disregard the
+Whole Model? Omnibus Non-Inferiority Testing for R2 in Multi-Variable
+Linear Regression and in ANOVA.”</span> <em>British Journal of
+Mathematical and Statistical Psychology</em> 74 (1): e12201. <a href="https://doi.org/10.1111/bmsp.12201">https://doi.org/10.1111/bmsp.12201</a>.
+</div>
+</div>
 </div>
 <div class="footnotes footnotes-end-of-document">
 <hr />

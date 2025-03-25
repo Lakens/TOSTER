@@ -4,7 +4,7 @@ author: "Aaron R. Caldwell"
 date: "`r Sys.Date()`"
 output: 
   rmarkdown::html_vignette:
-    toc: True
+    toc: TRUE
 editor_options: 
   chunk_output_type: console
 bibliography: references.bib
@@ -73,7 +73,7 @@ This example tests whether a correlation of 0.121 from a sample of 105 paired ob
 
 ## Bootstrapped Correlation Test
 
-For more robust analyses when raw data is available, TOSTER provides the `boot_cor_test` function. This bootstrapping approach generally produces more reliable results than Fisher's z-based tests, especially with non-normal data or when outliers are present.
+For more robust analyses when raw data is available, TOSTER provides the `boot_cor_test` function. This bootstrapping approach generally produces more reliable results than Fisher's z-based tests, especially when outliers are present or distribution assumptions are violated.
 
 ```{r}
 set.seed(993) # Setting seed for reproducibility
@@ -185,7 +185,7 @@ boot_compare_cor(
 
 This approach has several advantages:
 
-- It does not rely on the Fisher's z transformation approximation
+- It does not rely on the Fisher's z-transformation approximation
 - It can incorporate robust correlation methods
 - It can provide more accurate confidence intervals, especially when typical assumptions are violated
 
@@ -196,7 +196,7 @@ When choosing which correlation method to use in TOSTER:
 
 1. **If raw data is available:**
    - For most cases, use `boot_cor_test` with Pearson, Spearman, or Kendall methods
-   - When outliers or non-normality are concerns, consider the robust methods (winsorized or percentage bend)
+   - When outliers or distribution assumptions are concerns, consider the robust methods (winsorized or percentage bend)
 
 2. **If only summary statistics are available:**
    - Use `corsum_test` for single correlation analysis
@@ -237,4 +237,4 @@ y_with_na <- c(mtcars$qsec, 10, NA)
 z_cor_test(x_with_na, y_with_na)
 ```
 
-non# References
+# References

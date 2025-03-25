@@ -12,7 +12,7 @@
 
 <meta name="author" content="Aaron R. Caldwell" />
 
-<meta name="date" content="2025-03-21" />
+<meta name="date" content="2025-03-25" />
 
 <title>Correlations</title>
 
@@ -363,7 +363,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Correlations</h1>
 <h4 class="author">Aaron R. Caldwell</h4>
-<h4 class="date">2025-03-21</h4>
+<h4 class="date">2025-03-25</h4>
 
 
 <div id="TOC">
@@ -531,7 +531,8 @@ reviewing published literature or working with limited data access. The
 <p>For more robust analyses when raw data is available, TOSTER provides
 the <code>boot_cor_test</code> function. This bootstrapping approach
 generally produces more reliable results than Fisher’s z-based tests,
-especially with non-normal data or when outliers are present.</p>
+especially when outliers are present or distribution assumptions are
+violated.</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">993</span>) <span class="co"># Setting seed for reproducibility</span></span>
 <span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="fu">boot_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
 <span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
@@ -737,10 +738,13 @@ through bootstrapping:</p>
 ## sample estimates:
 ##     wincor 
 ## 0.06383164</code></pre>
-<p>This approach has several advantages: - It does not rely on the
-Fisher’s z transformation approximation - It can incorporate robust
-correlation methods - It provides more accurate confidence intervals,
-especially with non-normal data</p>
+<p>This approach has several advantages:</p>
+<ul>
+<li>It does not rely on the Fisher’s z-transformation approximation</li>
+<li>It can incorporate robust correlation methods</li>
+<li>It can provide more accurate confidence intervals, especially when
+typical assumptions are violated</li>
+</ul>
 </div>
 </div>
 <div id="practical-recommendations" class="section level2">
@@ -751,8 +755,8 @@ especially with non-normal data</p>
 <ul>
 <li>For most cases, use <code>boot_cor_test</code> with Pearson,
 Spearman, or Kendall methods</li>
-<li>When outliers or non-normality are concerns, consider the robust
-methods (winsorized or percentage bend)</li>
+<li>When outliers or distribution assumptions are concerns, consider the
+robust methods (winsorized or percentage bend)</li>
 </ul></li>
 <li><strong>If only summary statistics are available:</strong>
 <ul>

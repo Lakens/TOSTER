@@ -38,6 +38,7 @@ In an effort to make `TOSTER` more informative and easier to use, I created the 
 2. `simple_htest` allows you to run equivalence testing or minimal effects testing using either t-tests or Wilcoxon-Mann-Whitney tests, with output in the familiar `htest` class format (like base R's statistical test functions).
 
 Both functions have versatile methods where you can supply:
+
 - Two vectors of data
 - A formula interface (e.g., `y ~ group`)
 - Various test configurations (two-sample, one-sample, or paired samples)
