@@ -84,11 +84,6 @@
 #'                      paired = TRUE,
 #'                      ses = "cstat"))
 #'
-#' # Example 4: Log-odds for skewed data
-#' skewed1 <- rlnorm(20, meanlog = 1, sdlog = 0.5)
-#' skewed2 <- rlnorm(20, meanlog = 1.5, sdlog = 0.6)
-#' ses_calc(x = skewed1, y = skewed2, ses = "logodds")
-#'
 #' @family effect sizes
 #' @name ses_calc
 #' @export ses_calc
