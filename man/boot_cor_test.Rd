@@ -62,7 +62,7 @@ or a vector of two values representing the lower and upper bounds
 
 \item{...}{additional arguments passed to correlation functions, such as:
 \itemize{
-\item trim: for Winsorized correlation (default = 0.2)
+\item tr: trim for Winsorized correlation (default = 0.2)
 \item beta: for percentage bend correlation (default = 0.2)
 }}
 }
@@ -98,7 +98,7 @@ The bootstrap correlation methods in this package offer two robust correlations 
 the standard methods:
 \enumerate{
 \item \strong{Winsorized correlation}: Replaces extreme values with less extreme values before
-calculating the correlation. The \code{trim} parameter (default = 0.2) determines the
+calculating the correlation. The \code{trim} parameter (default: \code{tr = 0.2}) determines the
 proportion of data to be Winsorized.
 \item \strong{Percentage bend correlation}: A robust correlation that downweights the influence
 of outliers. The \code{beta} parameter (default = 0.2) determines the bending constant.
@@ -147,7 +147,7 @@ boot_cor_test(x, y, method = "spearman", alternative = "equivalence",
 
 # Example 3: Using robust correlation methods
 # Using Winsorized correlation with custom trim
-boot_cor_test(x, y, method = "winsorized", trim = 0.1,
+boot_cor_test(x, y, method = "winsorized", tr = 0.1,
              R = 999)
 
 # Example 4: Using percentage bend correlation

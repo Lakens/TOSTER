@@ -109,6 +109,7 @@ boot_log_TOST <- function(x, ...){
 }
 
 #' @rdname boot_log_TOST
+#' @importFrom stats var
 #' @method boot_log_TOST default
 #' @export
 

@@ -94,6 +94,7 @@
 #'
 #' @family Robust tests
 #' @family TOST
+#' @importFrom stats var
 #' @name boot_t_TOST
 #' @export boot_t_TOST
 

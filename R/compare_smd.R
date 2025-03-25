@@ -108,6 +108,7 @@
 #'             paired = TRUE, alternative = "two.sided")
 #'
 #' @name compare_smd
+#' @importFrom stats var quantile
 #' @family compare studies
 #' @export compare_smd
 

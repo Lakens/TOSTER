@@ -50,6 +50,7 @@
 #'
 #' Konietschke, F., Placzek, M., Schaarschmidt, F., & Hothorn, L. A. (2015). nparcomp: an R software package for nonparametric multiple comparisons and simultaneous confidence intervals. Journal of Statistical Software 64 (2015), Nr. 9, 64(9), 1-17. http://www.jstatsoft.org/v64/i09/
 #' @name brunner_munzel
+#' @importFrom stats var quantile
 #' @family Robust tests
 #' @export brunner_munzel
 

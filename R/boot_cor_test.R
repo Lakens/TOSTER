@@ -21,7 +21,7 @@
 #'   * "perc": percentile bootstrap CI (default)
 #' @param R number of bootstrap replications (default = 1999).
 #' @param ... additional arguments passed to correlation functions, such as:
-#'   * trim: for Winsorized correlation (default = 0.2)
+#'   * tr: trim for Winsorized correlation (default = 0.2)
 #'   * beta: for percentage bend correlation (default = 0.2)
 #'
 #' @details
@@ -32,7 +32,7 @@
 #' the standard methods:
 #'
 #' 1. **Winsorized correlation**: Replaces extreme values with less extreme values before
-#'    calculating the correlation. The `trim` parameter (default = 0.2) determines the
+#'    calculating the correlation. The `trim` parameter (default: `tr = 0.2`) determines the
 #'    proportion of data to be Winsorized.
 #'
 #' 2. **Percentage bend correlation**: A robust correlation that downweights the influence
@@ -87,7 +87,7 @@
 #'
 #' # Example 3: Using robust correlation methods
 #' # Using Winsorized correlation with custom trim
-#' boot_cor_test(x, y, method = "winsorized", trim = 0.1,
+#' boot_cor_test(x, y, method = "winsorized", tr = 0.1,
 #'              R = 999)
 #'
 #' # Example 4: Using percentage bend correlation
