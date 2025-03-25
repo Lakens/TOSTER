@@ -129,11 +129,11 @@ plot_smd <- function(d,
   }
 
   if(is.null(lambda) && smd_ci == "goulet"){
-    stop("lambda must be provided when smd_ci is goulet.")
+    stop("lambda must be provided when smd_ci is set to goulet.")
   }
 
   if(is.null(sigma) && smd_ci %in% c("t","z")){
-    stop("sigma must be provided when smd_ci is goulet.")
+    stop("sigma must be provided when smd_ci is the t, z, and nct methods.")
   }
 
 
