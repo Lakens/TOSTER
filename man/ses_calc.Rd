@@ -126,11 +126,6 @@ with(sleep, ses_calc(x = extra[group == 1],
                      paired = TRUE,
                      ses = "cstat"))
 
-# Example 4: Log-odds for skewed data
-skewed1 <- rlnorm(20, meanlog = 1, sdlog = 0.5)
-skewed2 <- rlnorm(20, meanlog = 1.5, sdlog = 0.6)
-ses_calc(x = skewed1, y = skewed2, ses = "logodds")
-
 }
 \seealso{
 Other effect sizes: 
