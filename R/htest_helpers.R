@@ -65,6 +65,7 @@
 #'
 #' @name htest-helpers
 #' @family htest
+#' @export
 df_htest = function(htest,
                     test_statistics = TRUE,
                     show_ci = TRUE,
