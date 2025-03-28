@@ -2,43 +2,84 @@
 #' @description
 #' `r lifecycle::badge('stable')`
 #'
-#'  A function for TOST with all types of t-tests from summary statistics.
+#' Performs equivalence testing using the Two One-Sided Tests (TOST) procedure with t-tests
+#' based on summary statistics rather than raw data. This function allows TOST analysis when
+#' only descriptive statistics are available from published studies or reports.
+#'
+#' @section Purpose:
+#' Use this function when:
+#' * You only have access to summary statistics (means, standard deviations, sample sizes)
+#' * You want to perform meta-analyses using published results
+#' * You're conducting power analyses based on previous studies
+#' * You need to reanalyze published results within an equivalence testing framework
+#'
 #' @param m1 mean of group 1.
-#' @param m2 mean of group 2.
+#' @param m2 mean of group 2 (not required for one-sample tests).
 #' @param sd1 standard deviation of group 1.
-#' @param sd2 standard deviation of group 2.
+#' @param sd2 standard deviation of group 2 (not required for one-sample tests).
 #' @param n1 sample size in group 1.
-#' @param n2 sample size in group 2.
-#' @param r12 correlation of dependent variable between group 1 and group 2.
+#' @param n2 sample size in group 2 (not required for one-sample tests).
+#' @param r12 correlation between measurements for paired designs. Required when paired = TRUE.
 #' @inheritParams t_TOST
+#'
 #' @details
+#' This function performs TOST equivalence testing using summary statistics instead of raw data.
+#' It is particularly useful when analyzing published results or conducting meta-analyses where
+#' only summary statistics are available.
+#'
+#' The function supports three types of tests:
+#' * One-sample test: Provide m1, sd1, and n1 only
+#' * Two-sample independent test: Provide all parameters except r12, with paired = FALSE
+#' * Paired samples test: Provide all parameters including r12, with paired = TRUE
+#'
+#' For two-sample tests, the test is of \eqn{m1 - m2} (mean of group 1 minus mean of group 2).
+#' For paired samples, the test is of the difference scores, wherein \eqn{z = m1 - m2}, and the test is of \eqn{\bar{z}} (mean of the difference scores).
+#' For one-sample tests, the test is of \eqn{\bar{m1}} (mean of group 1).
+#'
+#' The function calculates both raw mean differences and standardized effect sizes (Cohen's d or Hedges' g),
+#' along with their confidence intervals.
+#'
 #' For details on the calculations in this function see
 #' `vignette("IntroTOSTt")` & `vignette("SMD_calcs")`.
 #'
-#' For two-sample tests, the test is of \eqn{m1 - m2} (mean of 1 minus mean of 2).
-#' For paired samples, the test is of the difference scores (z),
-#' wherein \eqn{z =  m1 - m2}, and the test is of \eqn{\bar z} (mean of the difference scores).
-#' For one-sample tests, the test is of \eqn{\bar m1 } (mean of group 1).
+#' @return An S3 object of class `"TOSTt"` is returned containing the following slots:
 #'
-#' @return An S3 object of class
-#'  `"TOSTt"` is returned containing the following slots:
-#'
-#'   - "TOST":  A table of class `"data.frame"` containing two-tailed t-test and both one-tailed results.
-#'   - "eqb":  A table of class `"data.frame"` containing equivalence bound settings.
-#'   - "effsize":   table of class `"data.frame"` containing effect size estimates.
-#'   - "hypothesis":  String stating the hypothesis being tested.
-#'   - "smd":  List containing the results of the standardized mean difference calculations (e.g., Cohen's d).
-#'      - Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation)
-#'   - "alpha":  Alpha level set for the analysis.
-#'   - "method":  Type of t-test.
-#'   - "decision":  List included text regarding the decisions for statistical inference.
+#' * **TOST**: A table of class `"data.frame"` containing two-tailed t-test and both one-tailed results.
+#' * **eqb**: A table of class `"data.frame"` containing equivalence bound settings.
+#' * **effsize**: Table of class `"data.frame"` containing effect size estimates.
+#' * **hypothesis**: String stating the hypothesis being tested.
+#' * **smd**: List containing the results of the standardized mean difference calculations (e.g., Cohen's d).
+#'   * Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation).
+#' * **alpha**: Alpha level set for the analysis.
+#' * **method**: Type of t-test.
+#' * **decision**: List included text regarding the decisions for statistical inference.
 #'
 #' @examples
-#' # example code
-#' # One sample test
-#' tsum_TOST(m1 = 0.55, n1 = 18, sd1 = 4, eqb  = 2)
+#' # Example 1: One-sample test
+#' # Testing if a sample with mean 0.55 and SD 4 (n=18) is equivalent to zero within ±2 units
+#' tsum_TOST(m1 = 0.55, n1 = 18, sd1 = 4, eqb = 2)
+#'
+#' # Example 2: Two-sample independent test
+#' # Testing if two groups with different means are equivalent within ±3 units
+#' tsum_TOST(m1 = 15.2, sd1 = 5.3, n1 = 30,
+#'          m2 = 13.8, sd2 = 4.9, n2 = 28,
+#'          eqb = 3)
+#'
+#' # Example 3: Paired samples test
+#' # Testing if pre-post difference is equivalent to zero within ±2.5 units
+#' # with correlation between measurements of 0.7
+#' tsum_TOST(m1 = 24.5, sd1 = 6.2, n1 = 25,
+#'          m2 = 26.1, sd2 = 5.8, n2 = 25,
+#'          r12 = 0.7, paired = TRUE,
+#'          eqb = 2.5)
+#'
+#' # Example 4: Two-sample test using standardized effect size bounds
+#' # Testing if the standardized mean difference is within ±0.5 SD
+#' tsum_TOST(m1 = 100, sd1 = 15, n1 = 40,
+#'          m2 = 104, sd2 = 16, n2 = 42,
+#'          eqb = 0.5, eqbound_type = "SMD")
+#'
 #' @family TOST
-#' @importFrom stats na.omit setNames terms
 #' @name tsum_TOST
 #' @export tsum_TOST
 

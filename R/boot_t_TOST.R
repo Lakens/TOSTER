@@ -2,40 +2,99 @@
 #' @description
 #' `r lifecycle::badge('stable')`
 #'
-#' A function for a bootstrap method for TOST with all types of t-tests.
-#' @param R number of bootstrap replicates
-#' @param boot_ci type of bootstrap confidence interval. Options include studentized (stud), empirical/basic (basic) and percentile (perc) confidence intervals.
+#' Performs equivalence testing using the Two One-Sided Tests (TOST) procedure with bootstrapped t-tests.
+#' This provides a robust alternative to traditional TOST when data may not meet all parametric assumptions.
+#'
+#' @section Purpose:
+#' Use this function when:
+#'   * You want more robust confidence intervals for your effect sizes
+#'   * Sample sizes are small and parametric assumptions may not hold
+#'   * You want to avoid relying on asymptotic approximations
+#'
 #' @inheritParams t_TOST
-#' @return An S3 object of class
-#'   `"TOSTt"` is returned containing the following slots:
+#' @param glass Option to calculate Glass's delta instead of Cohen's d style SMD ('glass1' uses first group's SD, 'glass2' uses second group's SD).
+#' @param mu a number indicating the true value of the mean for the two-tailed test (default = 0).
+#' @param R number of bootstrap replications (default = 1999).
+#' @param boot_ci method for bootstrap confidence interval calculation: "stud" (studentized, default), "basic" (basic bootstrap), or "perc" (percentile bootstrap).
+#' @param subset an optional vector specifying a subset of observations to be used.
+#' @param na.action a function indicating what should happen when the data contain NAs.
+#' @param ... further arguments to be passed to or from methods.
 #'
-#'   - "TOST": A table of class "data.frame" containing two-tailed t-test and both one-tailed results.
-#'   - "eqb": A table of class "data.frame" containing equivalence bound settings.
-#'   - "effsize":  table of class "data.frame" containing effect size estimates.
-#'   - "hypothesis": String stating the hypothesis being tested
-#'   - "smd": List containing the results of the standardized mean difference calculations (e.g., Cohen's d).
-#'      - Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation)
-#'   - "alpha": Alpha level set for the analysis.
-#'   - "method": Type of t-test.
-#'   - "decision": List included text regarding the decisions for statistical inference.
-#'   - "boot": List containing the bootstrap samples.
+#' @details
+#' The function implements a bootstrap method for TOST as described in Chapter 16 of Efron and Tibshirani (1994).
+#' This approach provides a robust alternative to traditional parametric TOST when data distributions may not
+#' meet standard assumptions.
 #'
-#' @details The implemented test(s) corresponds to the proposal of Chapter 16 of Efron and Tibshirani (1994).
-#'  Returns TOSTt class object with bootstrapped based results.
-#'  Please note that the repeated measures "corrected" effect size is not available.
+#' The bootstrap procedure follows these steps:
+#'   * Resample with replacement from the original data to create R bootstrap samples
+#'   * For each bootstrap sample, calculate test statistics and effect sizes
+#'   * Use the distribution of bootstrap results to compute p-values and confidence intervals
+#'   * Combine results using the specified bootstrap confidence interval method
+#'
+#' Three types of bootstrap confidence intervals are available:
+#'   * Studentized ("stud"): Accounts for the variability in the standard error estimate
+#'   * Basic/Empirical ("basic"): Uses the empirical distribution of bootstrap estimates
+#'   * Percentile ("perc"): Uses percentiles of the bootstrap distribution
 #'
 #' For two-sample tests, the test is of \eqn{\bar x - \bar y} (mean of x minus mean of y).
 #' For paired samples, the test is of the difference scores (z),
-#' wherein \eqn{z =  x - y}, and the test is of \eqn{\bar z} (mean of the difference scores).
-#' For one-sample tests, the test is of \eqn{\bar x } (mean of x).
+#' wherein \eqn{z = x - y}, and the test is of \eqn{\bar z} (mean of the difference scores).
+#' For one-sample tests, the test is of \eqn{\bar x} (mean of x).
+#'
 #'
 #' For details on the calculations in this function see `vignette("robustTOST")`.
-#' @section References:
 #'
+#' @return An S3 object of class `"TOSTt"` is returned containing the following slots:
+#'
+#'   - "TOST": A table of class "data.frame" containing two-tailed t-test and both one-tailed results.
+#'   - "eqb": A table of class "data.frame" containing equivalence bound settings.
+#'   - "effsize": Table of class "data.frame" containing effect size estimates.
+#'   - "hypothesis": String stating the hypothesis being tested.
+#'   - "smd": List containing the results of the standardized mean difference calculations (e.g., Cohen's d).
+#'      - Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation).
+#'   - "alpha": Alpha level set for the analysis.
+#'   - "method": Type of t-test.
+#'   - "decision": List included text regarding the decisions for statistical inference.
+#'   - "boot": List containing the bootstrap samples for SMD and raw effect sizes.
+#'
+#' @examples
+#' # Example 1: Two-Sample Test with Symmetric Bounds
+#' set.seed(1234)
+#' group1 <- rnorm(30, mean = 5, sd = 2)
+#' group2 <- rnorm(30, mean = 5.5, sd = 2.2)
+#'
+#' # Using symmetric bounds of ±1.5
+#' result <- boot_t_TOST(x = group1,
+#'                      y = group2,
+#'                      eqb = 1.5,
+#'                      R = 999)  # Using fewer replications for demonstration
+#'
+#' # Example 2: Paired Sample Test with Percentile Bootstrap
+#' set.seed(5678)
+#' pre <- rnorm(25, mean = 100, sd = 15)
+#' post <- pre + rnorm(25, mean = 3, sd = 10)
+#'
+#' result <- boot_t_TOST(x = pre,
+#'                      y = post,
+#'                      paired = TRUE,
+#'                      eqb = c(-5, 8),  # Asymmetric bounds
+#'                      boot_ci = "perc")
+#'
+#' # Example 3: One Sample Test
+#' set.seed(9101)
+#' scores <- rnorm(40, mean = 0.3, sd = 1)
+#'
+#' # Testing if mean is equivalent to zero within ±0.5 units
+#' result <- boot_t_TOST(x = scores,
+#'                      eqb = 0.5,
+#'                      boot_ci = "basic")
+#'
+#' @references
 #' Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press.
+#'
 #' @family Robust tests
 #' @family TOST
-#' @importFrom stats var quantile
+#' @importFrom stats var
 #' @name boot_t_TOST
 #' @export boot_t_TOST
 

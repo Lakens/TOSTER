@@ -64,7 +64,7 @@ test1 = boot_t_TOST(formula = extra ~ group,
                       data = sleep,
                       paired = TRUE,
                       eqb = .5,
-                    R = 999)
+                    R = 499)
 
 
 print(test1)

@@ -2,7 +2,7 @@
 % Please edit documentation in R/boot_compare_cor.R
 \name{boot_compare_cor}
 \alias{boot_compare_cor}
-\title{Comparing Correlations between independent studies with bootstrapping}
+\title{Comparing Correlations Between Independent Studies with Bootstrapping}
 \usage{
 boot_compare_cor(
   x1,
@@ -18,42 +18,130 @@ boot_compare_cor(
 )
 }
 \arguments{
-\item{x1, y1}{numeric vectors of data values. x and y must have the same length from study 1.}
+\item{x1, y1}{Numeric vectors of data values from study 1. x1 and y1 must have the same length.}
 
-\item{x2, y2}{numeric vectors of data values. x and y must have the same length from study 2.}
+\item{x2, y2}{Numeric vectors of data values from study 2. x2 and y2 must have the same length.}
 
-\item{alternative}{a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater", "less", "equivalence" (TOST), or "minimal.effect" (TOST). You can specify just the initial letter.}
+\item{alternative}{a character string specifying the alternative hypothesis:
+\itemize{
+\item "two.sided": correlation is not equal to null (default)
+\item "greater": correlation is greater than null
+\item "less": correlation is less than null
+\item "equivalence": correlation is within the equivalence bounds (TOST)
+\item "minimal.effect": correlation is outside the equivalence bounds (TOST)
+}
 
-\item{method}{a character string indicating which correlation coefficient is to be used for the test. One of "winsorized", "bendpercent","pearson", "kendall", or "spearman", can be abbreviated.}
+You can specify just the initial letter.}
+
+\item{method}{a character string indicating which correlation coefficient to use:
+\itemize{
+\item "pearson": standard Pearson product-moment correlation
+\item "kendall": Kendall's tau rank correlation
+\item "spearman": Spearman's rho rank correlation
+\item "winsorized": Winsorized correlation (robust to outliers)
+\item "bendpercent": percentage bend correlation (robust to marginal outliers)
+}
+
+Can be abbreviated.}
 
 \item{alpha}{alpha level (default = 0.05)}
 
-\item{null}{a number indicating the null hypothesis. Default is a correlation of zero.}
+\item{null}{a number or vector indicating the null hypothesis value(s):
+\itemize{
+\item For standard tests: a single value (default = 0)
+\item For equivalence/minimal effect tests: either a single value (symmetric bounds ±value will be created)
+or a vector of two values representing the lower and upper bounds
+}}
 
-\item{R}{number of bootstrap replicates}
+\item{R}{number of bootstrap replications (default = 1999).}
 
-\item{...}{further arguments to be passed to or from methods.}
+\item{...}{Additional arguments passed to the correlation functions.}
 }
 \value{
 A list with class "htest" containing the following components:
 \itemize{
-\item "p.value": numeric scalar containing the p-value for the test under the null hypothesis.
-\item "estimate": difference in correlations between studies.
-\item "conf.int": percentile (bootstrap) confidence interval for difference in correlations.
-\item "null.value": the specified hypothesized value for the null hypothesis.
-\item "alternative": character string indicating the alternative hypothesis (the value of the input argument alternative). Possible values are "greater", "less", or "two-sided".
-\item "method": a character string indicating how the association was measured.
-\item "data.name": Names of input values.
-\item "boot_res": List of bootstrapped results.
-\item "call": the matched call.
+\item \strong{p.value}: The p-value for the test under the null hypothesis.
+\item \strong{parameter}: Sample sizes from each study.
+\item \strong{conf.int}: Bootstrap confidence interval for the difference in correlations.
+\item \strong{estimate}: Difference in correlations between studies.
+\item \strong{stderr}: Standard error of the difference (estimated from bootstrap distribution).
+\item \strong{null.value}: The specified hypothesized value(s) for the null hypothesis.
+\item \strong{alternative}: Character string indicating the alternative hypothesis.
+\item \strong{method}: Description of the correlation method used.
+\item \strong{data.name}: Names of the input data vectors.
+\item \strong{boot_res}: List containing the bootstrap samples for the difference and individual correlations.
+\item \strong{call}: The matched call.
 }
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 
-A function to compare standardized mean differences (SMDs) between studies.
-This function is intended to be used to compare the compatibility of original studies with replication studies
-(lower p-values indicating lower compatibility).
+A function to compare correlation coefficients between independent studies using bootstrap methods.
+This function is intended to be used to compare the compatibility of original studies
+with replication studies (lower p-values indicating lower compatibility).
+}
+\details{
+This function tests for differences between correlation coefficients from independent studies
+using bootstrap resampling methods. Unlike the \code{compare_cor} function, which uses Fisher's z
+transformation or the Kraatz method with summary statistics, this function works with raw
+data and uses bootstrapping to estimate confidence intervals and p-values.
+
+It is particularly useful for:
+\itemize{
+\item Comparing correlations when assumptions for parametric tests may not be met
+\item Obtaining robust confidence intervals for the difference between correlations
+\item Comparing an original study with its replication using raw data
+\item Testing if correlations from different samples are equivalent
+}
+
+The function supports multiple correlation methods:
+\itemize{
+\item Standard correlation coefficients (Pearson, Kendall, Spearman)
+\item Robust correlation measures (Winsorized, percentage bend)
+}
+
+The function also supports both standard hypothesis testing and equivalence/minimal effect testing:
+\itemize{
+\item For standard tests (two.sided, less, greater), the function tests whether the difference
+between correlations differs from the null value (typically 0).
+\item For equivalence testing ("equivalence"), it determines whether the difference falls within
+the specified bounds, which can be set asymmetrically.
+\item For minimal effect testing ("minimal.effect"), it determines whether the difference falls
+outside the specified bounds.
+}
+
+When performing equivalence or minimal effect testing:
+\itemize{
+\item If a single value is provided for \code{null}, symmetric bounds ±value will be used
+\item If two values are provided for \code{null}, they will be used as the lower and upper bounds
+}
+}
+\examples{
+# Example 1: Comparing Pearson correlations (standard test)
+set.seed(123)
+x1 <- rnorm(30)
+y1 <- x1 * 0.6 + rnorm(30, 0, 0.8)
+x2 <- rnorm(25)
+y2 <- x2 * 0.3 + rnorm(25, 0, 0.9)
+
+# Two-sided test with Pearson correlation (use fewer bootstraps for example)
+boot_compare_cor(x1, y1, x2, y2, method = "pearson",
+                alternative = "two.sided", R = 500)
+
+# Example 2: Testing for equivalence with Spearman correlation
+# Testing if the difference in correlations is within ±0.2
+boot_compare_cor(x1, y1, x2, y2, method = "spearman",
+                alternative = "equivalence", null = 0.2, R = 500)
+
+# Example 3: Testing with robust correlation measure
+# Using percentage bend correlation for non-normal data
+boot_compare_cor(x1, y1, x2, y2, method = "bendpercent",
+                alternative = "greater", R = 500)
+
+# Example 4: Using asymmetric bounds for equivalence testing
+boot_compare_cor(x1, y1, x2, y2, method = "pearson",
+                alternative = "equivalence", null = c(-0.1, 0.3), R = 500)
+
 }
 \seealso{
 Other compare studies: 

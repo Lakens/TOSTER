@@ -2,7 +2,7 @@
 % Please edit documentation in R/compare_smd.R
 \name{compare_smd}
 \alias{compare_smd}
-\title{Comparing SMDs between independent studies}
+\title{Comparing Standardized Mean Differences (SMDs) Between Independent Studies}
 \usage{
 compare_smd(
   smd1,
@@ -20,40 +20,125 @@ compare_smd(
 \arguments{
 \item{smd1, smd2}{SMDs from study 1 & 2, respectively.}
 
-\item{n1, n2}{sample size(s) from study 1 & 2, respectively (can be 1 number or vector of 2 numbers).}
+\item{n1, n2}{Sample size(s) from study 1 & 2, respectively. Can be a single number (total sample size)
+or a vector of 2 numbers (group sizes) for independent samples designs.}
 
-\item{se1, se2}{User supplied standard errors (SEs). This will override the internal calculations.}
+\item{se1, se2}{User supplied standard errors (SEs). This will override the internal calculations for the standard error.}
 
-\item{paired}{a logical indicating whether the SMD is from a paired or independent samples design. If a one-sample design, then paired must be set to TRUE.}
+\item{paired}{A logical indicating whether the SMD is from a paired or independent samples design.
+If a one-sample design, then paired must be set to TRUE.}
 
-\item{alternative}{a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater", "less", "equivalence" (TOST), or "minimal.effect" (TOST). You can specify just the initial letter.}
+\item{alternative}{A character string specifying the alternative hypothesis:
+\itemize{
+\item "two.sided": difference is not equal to null (default)
+\item "greater": difference is greater than null
+\item "less": difference is less than null
+\item "equivalence": difference is within the equivalence bounds (TOST)
+\item "minimal.effect": difference is outside the equivalence bounds (TOST)
+}
 
-\item{null}{a number indicating the null hypothesis. For TOST, this would be equivalence bound.}
+You can specify just the initial letter.}
 
-\item{TOST}{Defunct: use alternative argument. Logical indicator (default = FALSE) to perform two one-sided tests of equivalence (TOST).}
+\item{null}{A number or vector indicating the null hypothesis value(s):
+\itemize{
+\item For standard tests: a single value representing the null difference (default = 0)
+\item For equivalence/minimal effect tests: either a single value (symmetric bounds ±value will be created)
+or a vector of two values representing the lower and upper bounds
+}}
+
+\item{TOST}{Defunct: use alternative argument. Logical indicator (default = FALSE) to perform
+two one-sided tests of equivalence (TOST).}
 }
 \value{
 A list with class "htest" containing the following components:
 \itemize{
-\item "statistic": z-score.
-\item "p.value": numeric scalar containing the p-value for the test under the null hypothesis.
-\item "estimate": difference in SMD between studies.
-\item "null.value": the specified hypothesized value for the null hypothesis.
-\item "alternative": character string indicating the alternative hypothesis (the value of the input argument alternative). Possible values are "greater", "less", or "two-sided".
-\item "method": Type of SMD.
-\item "data.name": "Summary Statistics" to denote summary statistics were utilized to obtain results.
-\item "smd": SMDs input for the function.
-\item "sample_sizes": Sample sizes input for the function.
-\item "call": the matched call.
+\item \strong{statistic}: z-score with name "z"
+\item \strong{p.value}: numeric scalar containing the p-value for the test under the null hypothesis
+\item \strong{estimate}: difference in SMD between studies
+\item \strong{null.value}: the specified hypothesized value(s) for the null hypothesis
+\item \strong{alternative}: character string indicating the alternative hypothesis
+\item \strong{method}: description of the method used for comparison
+\item \strong{data.name}: "Summary Statistics" to denote summary statistics were utilized
+\item \strong{smd}: list containing the SMDs used in the comparison
+\item \strong{sample_sizes}: list containing the sample sizes used in the comparison
+\item \strong{call}: the matched call
 }
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 
-A function to compare standardized mean differences (SMDs) between studies. This function is intended to be used to compare the compatibility of original studies with replication studies (lower p-values indicating lower compatibility).
+A function to compare standardized mean differences (SMDs) between independent studies.
+This function is intended to be used to compare the compatibility of original studies
+with replication studies (lower p-values indicating lower compatibility).
 }
 \details{
 This function tests for differences between SMDs from independent studies (e.g., original vs replication).
+It is particularly useful for:
+\itemize{
+\item Comparing effect sizes between an original study and its replication
+\item Meta-analytic comparisons between studies
+\item Testing if effect sizes from different samples are equivalent
+}
+
+The function handles both paired/one-sample designs and independent samples designs:
+\itemize{
+\item For paired/one-sample designs (\code{paired = TRUE}), standard errors are calculated
+for Cohen's dz, and n1 and n2 must be single values.
+\item For independent samples designs (\code{paired = FALSE}), standard errors are calculated
+for Cohen's ds, and n1 and n2 can be either single values (total sample size) or
+vectors of length 2 (group sizes).
+\item For all other SMDs, you should supply your own standard errors using the \code{se1} and \code{se2} arguments.
+}
+
+The function supports both standard hypothesis testing and equivalence/minimal effect testing:
+\itemize{
+\item For standard tests (two.sided, less, greater), the function tests whether the difference
+between SMDs differs from the null value (typically 0).
+\item For equivalence testing ("equivalence"), it determines whether the difference falls within
+the specified bounds, which can be set asymmetrically.
+\item For minimal effect testing ("minimal.effect"), it determines whether the difference falls
+outside the specified bounds.
+}
+
+When performing equivalence or minimal effect testing:
+\itemize{
+\item If a single value is provided for \code{null}, symmetric bounds ±value will be used
+\item If two values are provided for \code{null}, they will be used as the lower and upper bounds
+}
+}
+\examples{
+# Example 1: Comparing two independent samples SMDs (standard test)
+compare_smd(smd1 = 0.5, n1 = c(30, 30),
+            smd2 = 0.3, n2 = c(25, 25),
+            paired = FALSE, alternative = "two.sided")
+
+# Example 2: Comparing two paired samples SMDs
+compare_smd(smd1 = 0.6, n1 = 40,
+            smd2 = 0.4, n2 = 45,
+            paired = TRUE, alternative = "two.sided")
+
+# Example 3: Testing for equivalence between SMDs
+# Testing if the difference between SMDs is within ±0.2
+compare_smd(smd1 = 0.45, n1 = c(25, 25),
+            smd2 = 0.35, n2 = c(30, 30),
+            paired = FALSE, alternative = "equivalence", null = 0.2)
+
+# Example 4: Testing for minimal effects
+# Testing if the difference between SMDs is outside ±0.3
+compare_smd(smd1 = 0.7, n1 = 30,
+            smd2 = 0.3, n2 = 35,
+            paired = TRUE, alternative = "minimal.effect", null = 0.3)
+
+# Example 5: Using asymmetric bounds for equivalence testing
+compare_smd(smd1 = 0.45, n1 = c(30, 30),
+            smd2 = 0.35, n2 = c(25, 25),
+            paired = FALSE, alternative = "equivalence", null = c(-0.1, 0.3))
+
+# Example 6: Using user-supplied standard errors
+compare_smd(smd1 = 0.5, n1 = 50, se1 = 0.15,
+            smd2 = 0.7, n2 = 45, se2 = 0.16,
+            paired = TRUE, alternative = "two.sided")
+
 }
 \seealso{
 Other compare studies: 

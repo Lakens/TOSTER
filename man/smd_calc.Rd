@@ -4,7 +4,7 @@
 \alias{smd_calc}
 \alias{smd_calc.default}
 \alias{smd_calc.formula}
-\title{SMD Calculation}
+\title{Standardized Mean Difference (SMD) Calculation}
 \usage{
 smd_calc(
   x,
@@ -49,13 +49,13 @@ smd_calc(
 
 \item{rm_correction}{Repeated measures correction to make standardized mean difference Cohen's d(rm). This only applies to repeated/paired samples. Default is FALSE.}
 
-\item{glass}{A option to calculate Glass's delta as an alternative to Cohen's d type SMD. Default is NULL to not calculate Glass's delta, "glass1" will use the first group's SD as the denominator whereas "glass2" will use the 2nd group's SD.}
+\item{glass}{An option to calculate Glass's delta as an alternative to Cohen's d type SMD. Default is NULL to not calculate Glass's delta, 'glass1' will use the first group's SD as the denominator whereas 'glass2' will use the 2nd group's SD.}
 
-\item{smd_ci}{Method for calculating SMD confidence intervals. Methods include Goulet, noncentral t (nct), central t (t), and normal method (z).}
+\item{smd_ci}{Method for calculating SMD confidence intervals. Methods include 'goulet', 'noncentral t' (nct), 'central t' (t), and 'normal method' (z).}
 
 \item{y}{an optional (non-empty) numeric vector of data values.}
 
-\item{mu}{Null value. Deviating from zero will give the x-y-mu.}
+\item{mu}{a number indicating the true value of the mean for the two-tailed test (or difference in means if you are performing a two sample test).}
 
 \item{formula}{a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.}
 
@@ -66,20 +66,85 @@ smd_calc(
 \item{na.action}{a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").}
 }
 \value{
-A data frame containing the SMD estimates.
+A data frame containing the following information:
+\itemize{
+\item estimate: The standardized mean difference estimate (Cohen's d, Hedges' g, or Glass's delta)
+\item SE: Standard error of the estimate
+\item lower.ci: Lower bound of the confidence interval
+\item upper.ci: Upper bound of the confidence interval
+\item conf.level: Confidence level (1-alpha)
+}
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 
-A function to only calculate standardized mean differences.
+Calculates standardized mean difference (SMD) effect sizes and their confidence intervals
+from raw data. This function focuses solely on effect size estimation without performing
+hypothesis tests.
 }
 \details{
-For details on the calculations in this function see vignette("SMD_calcs").
+This function calculates standardized mean differences (SMD) for various study designs:
+\itemize{
+\item One-sample design: Standardizes the difference between the sample mean and zero (or other specified value)
+\item Two-sample independent design: Standardizes the difference between two group means
+\item Paired samples design: Standardizes the mean difference between paired observations
 }
+
+The function supports multiple SMD variants:
+\itemize{
+\item Cohen's d: Classic standardized mean difference (bias_correction = FALSE)
+\item Hedges' g: Bias-corrected version of Cohen's d (bias_correction = TRUE)
+\item Glass's delta: Uses only one group's standard deviation as the denominator (glass = "glass1" or "glass2")
+\item Repeated measures d: Accounts for correlation in paired designs (rm_correction = TRUE)
+}
+
+Different confidence interval calculation methods are available:
+\itemize{
+\item "nct": Uses the noncentral t-distribution (most accurate in most cases)
+\item "goulet": Uses the Goulet-Pelletier method
+\item "t": Uses the central t-distribution
+\item "z": Uses the normal distribution
+}
+
+Note that unlike the t_TOST and related functions, smd_calc only calculates effect sizes and
+their confidence intervals without performing hypothesis tests.
+
+For detailed information on calculation methods, see \code{vignette("SMD_calcs")}.
+}
+\section{Purpose}{
+
+Use this function when:
+\itemize{
+\item You need to calculate standardized effect sizes (Cohen's d, Hedges' g, Glass's delta)
+\item You want confidence intervals for your effect size estimates
+\item You need effect sizes for meta-analysis or reporting
+\item You want to compare effect sizes across different studies or measures
+\item You don't need the hypothesis testing components of the TOST functions
+}
+}
+
 \examples{
-\dontrun{
-smd_calc(formula = extra ~ group,data = sleep, paired = TRUE, smd_ci = "nct")
-}
+# Example 1: Independent groups comparison (Cohen's d)
+set.seed(123)
+group1 <- rnorm(30, mean = 100, sd = 15)
+group2 <- rnorm(30, mean = 110, sd = 18)
+smd_calc(x = group1, y = group2, bias_correction = FALSE)
+
+# Example 2: Independent groups with formula notation (Hedges' g)
+df <- data.frame(
+  value = c(group1, group2),
+  group = factor(rep(c("A", "B"), each = 30))
+)
+smd_calc(formula = value ~ group, data = df)
+
+# Example 3: Paired samples with repeated measures correction
+before <- c(5.1, 4.8, 6.2, 5.7, 6.0, 5.5, 4.9, 5.8)
+after <- c(5.6, 5.2, 6.7, 6.1, 6.5, 5.8, 5.3, 6.2)
+smd_calc(x = before, y = after, paired = TRUE, rm_correction = TRUE)
+
+# Example 4: Glass's delta (using only first group's SD)
+smd_calc(x = group1, y = group2, glass = "glass1")
+
 }
 \seealso{
 Other effect sizes: 

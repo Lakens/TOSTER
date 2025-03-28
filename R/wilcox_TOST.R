@@ -2,8 +2,9 @@
 #' @description
 #' `r lifecycle::badge('stable')`
 #'
-#'  A function for TOST using the non-parametric methods of the Wilcoxon-Mann-Whitney family of tests.
+#' A function for TOST using the non-parametric methods of the Wilcoxon-Mann-Whitney family of tests.
 #' This function uses the normal approximation and applies a continuity correction automatically.
+#'
 #' @inheritParams t_TOST
 #' @param mu  number indicating the value around which (a-)symmetry (for
 #'   one-sample or paired samples) or shift (for independent samples) is to be

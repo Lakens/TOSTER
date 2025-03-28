@@ -12,7 +12,7 @@
 
 <meta name="author" content="Aaron R. Caldwell" />
 
-<meta name="date" content="2023-04-04" />
+<meta name="date" content="2025-03-25" />
 
 <title>Correlations</title>
 
@@ -51,7 +51,7 @@ overflow: visible;
 </style>
 <style type="text/css" data-origin="pandoc">
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -62,7 +62,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
 { counter-reset: source-line 0; }
@@ -121,13 +121,20 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; }
   for (var i = 0; i < sheets.length; i++) {
     if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
     try { var rules = sheets[i].cssRules; } catch (e) { continue; }
-    for (var j = 0; j < rules.length; j++) {
+    var j = 0;
+    while (j < rules.length) {
       var rule = rules[j];
       // check if there is a div.sourceCode rule
-      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
       var style = rule.style.cssText;
       // check if color or background-color is set
-      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
       // replace div.sourceCode by a pre.sourceCode rule
       sheets[i].deleteRule(j);
       sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
@@ -143,6 +150,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; }
 div.csl-bib-body { }
 div.csl-entry {
 clear: both;
+margin-bottom: 0em;
 }
 .hanging div.csl-entry {
 margin-left:2em;
@@ -355,41 +363,53 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Correlations</h1>
 <h4 class="author">Aaron R. Caldwell</h4>
-<h4 class="date">2023-04-04</h4>
+<h4 class="date">2025-03-25</h4>
 
 
 <div id="TOC">
 <ul>
 <li><a href="#simple-correlation-test" id="toc-simple-correlation-test">Simple Correlation Test</a>
 <ul>
-<li><a href="#summary-statistics" id="toc-summary-statistics">Summary
-Statistics</a></li>
+<li><a href="#advantages-of-z_cor_test" id="toc-advantages-of-z_cor_test">Advantages of z_cor_test</a></li>
 </ul></li>
-<li><a href="#bootstrapped-correlation-test" id="toc-bootstrapped-correlation-test">Bootstrapped Correlation
-Test</a></li>
-<li><a href="#compare-correlations" id="toc-compare-correlations">Compare Correlations</a>
+<li><a href="#using-summary-statistics" id="toc-using-summary-statistics">Using Summary Statistics</a></li>
+<li><a href="#bootstrapped-correlation-test" id="toc-bootstrapped-correlation-test">Bootstrapped Correlation Test</a>
 <ul>
-<li><a href="#bootstrapped" id="toc-bootstrapped">Bootstrapped</a></li>
+<li><a href="#robust-correlation-methods" id="toc-robust-correlation-methods">Robust Correlation Methods</a></li>
+</ul></li>
+<li><a href="#comparing-correlations" id="toc-comparing-correlations">Comparing Correlations</a>
+<ul>
+<li><a href="#summary-statistics-approach" id="toc-summary-statistics-approach">Summary Statistics
+Approach</a></li>
+<li><a href="#bootstrapped-comparison" id="toc-bootstrapped-comparison">Bootstrapped Comparison</a></li>
+</ul></li>
+<li><a href="#practical-recommendations" id="toc-practical-recommendations">Practical Recommendations</a></li>
+<li><a href="#advanced-usage" id="toc-advanced-usage">Advanced Usage</a>
+<ul>
+<li><a href="#custom-bootstrap-methods" id="toc-custom-bootstrap-methods">Custom Bootstrap Methods</a></li>
+<li><a href="#working-with-missing-data" id="toc-working-with-missing-data">Working with Missing Data</a></li>
 </ul></li>
 <li><a href="#references" id="toc-references">References</a></li>
 </ul>
 </div>
 
-<p>TOSTER has a few different functions to calculate correlations. All
-the included functions are based on a few papers by <span class="citation">Goertzen and Cribbie (2010)</span>
+<p>The TOSTER package provides several functions for calculating and
+analyzing correlations. These functions extend beyond traditional
+correlation tests by offering equivalence testing capabilities and
+robust correlation methods. The included functions are based on research
+by <span class="citation">Goertzen and Cribbie (2010)</span>
 (<code>z_cor_test</code> &amp; <code>compare_cor</code>), and <span class="citation">Wilcox (2011)</span> (<code>boot_cor_test</code>)<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>.</p>
-<div id="simple-correlation-test" class="section level1">
-<h1>Simple Correlation Test</h1>
-<p>Simple tests of association can be accomplished with the
-<code>z_cor_test</code> function. This function was stylized after the
-<code>cor.test</code> function, but you will notice that the results may
-differ. This is caused by fact that <code>z_cor_test</code> uses
-Fisher’s z transformation as the basis for all significance tests (i.e.,
-p-values). However, notice that the confidence intervals are the
-same.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(TOSTER)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cor.test</span>(mtcars<span class="sc">$</span>mpg,</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec)</span></code></pre></div>
+<div id="simple-correlation-test" class="section level2">
+<h2>Simple Correlation Test</h2>
+<p>Basic tests of association can be performed with the
+<code>z_cor_test</code> function. This function is styled after R’s
+built-in <code>cor.test</code> function but uses Fisher’s z
+transformation as the basis for all significance tests (p-values).
+Despite this difference in methodology, the confidence intervals are
+typically very similar to those produced by <code>cor.test</code>.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(TOSTER)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="co"># Base R correlation test</span></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">cor.test</span>(mtcars<span class="sc">$</span>mpg, mtcars<span class="sc">$</span>qsec)</span></code></pre></div>
 <pre><code>## 
 ##  Pearson&#39;s product-moment correlation
 ## 
@@ -401,8 +421,8 @@ same.</p>
 ## sample estimates:
 ##      cor 
 ## 0.418684</code></pre>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">z_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># TOSTER&#39;s z-transformed correlation test</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">z_cor_test</span>(mtcars<span class="sc">$</span>mpg, mtcars<span class="sc">$</span>qsec)</span></code></pre></div>
 <pre><code>## 
 ##  Pearson&#39;s product-moment correlation
 ## 
@@ -414,11 +434,12 @@ same.</p>
 ## sample estimates:
 ##      cor 
 ## 0.418684</code></pre>
-<p>But, just as <code>cor.test</code>, the Spearman and Kendall
-correlation coefficients can be estimated.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">z_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">method =</span> <span class="st">&quot;spear&quot;</span>) <span class="co"># Don&#39;t need to spell full name</span></span></code></pre></div>
+<p>Like <code>cor.test</code>, the <code>z_cor_test</code> function
+supports Spearman and Kendall correlation coefficients:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="co"># Spearman correlation</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">z_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>           <span class="at">method =</span> <span class="st">&quot;spear&quot;</span>) <span class="co"># Short form accepted; &quot;spearman&quot; also works</span></span></code></pre></div>
 <pre><code>## 
 ##  Spearman&#39;s rank correlation rho
 ## 
@@ -430,9 +451,10 @@ correlation coefficients can be estimated.</p>
 ## sample estimates:
 ##       rho 
 ## 0.4669358</code></pre>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">z_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">method =</span> <span class="st">&quot;kendall&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># Kendall correlation</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="fu">z_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>           <span class="at">method =</span> <span class="st">&quot;kendall&quot;</span>)</span></code></pre></div>
 <pre><code>## 
 ##  Kendall&#39;s rank correlation tau
 ## 
@@ -444,13 +466,19 @@ correlation coefficients can be estimated.</p>
 ## sample estimates:
 ##       tau 
 ## 0.3153652</code></pre>
-<p>The main advantage of <code>z_cor_test</code> is that it can perform
-equivalence testing (TOST), or any hypothesis test where the null isn’t
-zero.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">z_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>, <span class="co"># e for equivalence</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">null =</span> .<span class="dv">4</span>)</span></code></pre></div>
+<div id="advantages-of-z_cor_test" class="section level3">
+<h3>Advantages of z_cor_test</h3>
+<p>The main advantage of <code>z_cor_test</code> over the standard
+<code>cor.test</code> is its ability to perform equivalence testing
+(TOST) or any hypothesis test where the null hypothesis isn’t zero. This
+makes it particularly useful for research questions focused on
+demonstrating practical equivalence or testing against specific
+correlation thresholds.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># Equivalence test with null boundary of 0.4</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="fu">z_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>           <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>, <span class="co"># e for equivalence</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>           <span class="at">null =</span> .<span class="dv">4</span>)</span></code></pre></div>
 <pre><code>## 
 ##  Pearson&#39;s product-moment correlation
 ## 
@@ -465,16 +493,21 @@ zero.</p>
 ## sample estimates:
 ##      cor 
 ## 0.418684</code></pre>
-<div id="summary-statistics" class="section level2">
-<h2>Summary Statistics</h2>
-<p>If you only have the summary statistics you perform the same tests.
-Just imagine you are reviewing a study with an observed correlation of
-0.121 with a sample size of 105 paired observations. You could then
-perform an equivalence test with the following code.</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">corsum_test</span>(<span class="at">r =</span> .<span class="dv">121</span>,</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">n =</span> <span class="dv">105</span>,</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>,</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">null =</span> .<span class="dv">4</span>)</span></code></pre></div>
+<p>In this example, we’re testing whether the correlation is equivalent
+to zero within the boundaries of ±0.4.</p>
+</div>
+</div>
+<div id="using-summary-statistics" class="section level2">
+<h2>Using Summary Statistics</h2>
+<p>A key advantage of TOSTER is the ability to perform correlation tests
+using only summary statistics, which is particularly useful when
+reviewing published literature or working with limited data access. The
+<code>corsum_test</code> function enables this functionality:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="co"># Testing a correlation of 0.121 from a sample of 105 paired observations</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="fu">corsum_test</span>(<span class="at">r =</span> .<span class="dv">121</span>,</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>            <span class="at">n =</span> <span class="dv">105</span>,</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>            <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>,</span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>            <span class="at">null =</span> .<span class="dv">4</span>)</span></code></pre></div>
 <pre><code>## 
 ##  Pearson&#39;s product-moment correlation
 ## 
@@ -489,22 +522,22 @@ perform an equivalence test with the following code.</p>
 ## sample estimates:
 ##   cor 
 ## 0.121</code></pre>
+<p>This example tests whether a correlation of 0.121 from a sample of
+105 paired observations is equivalent to zero within the boundaries of
+±0.4.</p>
 </div>
-</div>
-<div id="bootstrapped-correlation-test" class="section level1">
-<h1>Bootstrapped Correlation Test</h1>
-<p>If the raw data is available, I would <em>strongly</em> recommend
-using the bootstrapping function which should be more robust than the
-Fisher’s z based function. Further, the <code>boot_cor_test</code>
-function also has 2 other correlations that can be estimated: a
-Winsorized correlation and the percentage bend correlation. The input
-for the function is fairly similar to the <code>z_cor_test</code>
-function.</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">993</span>)</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">boot_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>,</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>           <span class="at">null =</span> .<span class="dv">4</span>)</span></code></pre></div>
+<div id="bootstrapped-correlation-test" class="section level2">
+<h2>Bootstrapped Correlation Test</h2>
+<p>For more robust analyses when raw data is available, TOSTER provides
+the <code>boot_cor_test</code> function. This bootstrapping approach
+generally produces more reliable results than Fisher’s z-based tests,
+especially when outliers are present or distribution assumptions are
+violated.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">993</span>) <span class="co"># Setting seed for reproducibility</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="fu">boot_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>           <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>,</span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>           <span class="at">null =</span> .<span class="dv">4</span>)</span></code></pre></div>
 <pre><code>## 
 ##  Bootstrapped Pearson&#39;s product-moment correlation
 ## 
@@ -515,15 +548,16 @@ function.</p>
 ## correlation correlation 
 ##         0.4        -0.4 
 ## 90 percent confidence interval:
-##  0.2445273 0.5848411
+##  0.2512992 0.5930089
 ## sample estimates:
 ##      cor 
 ## 0.418684</code></pre>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">boot_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">method =</span> <span class="st">&quot;spear&quot;</span>,</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>,</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>           <span class="at">null =</span> .<span class="dv">4</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="co"># Bootstrapped Spearman correlation</span></span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="fu">boot_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>           <span class="at">method =</span> <span class="st">&quot;spear&quot;</span>,</span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>           <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>,</span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>           <span class="at">null =</span> .<span class="dv">4</span>)</span></code></pre></div>
 <pre><code>## 
 ##  Bootstrapped Spearman&#39;s rank correlation rho
 ## 
@@ -534,15 +568,16 @@ function.</p>
 ##  rho  rho 
 ##  0.4 -0.4 
 ## 90 percent confidence interval:
-##  0.1983190 0.6656253
+##  0.2676957 0.7365611
 ## sample estimates:
 ##       rho 
 ## 0.4669358</code></pre>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">boot_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">method =</span> <span class="st">&quot;ken&quot;</span>,</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>,</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>           <span class="at">null =</span> .<span class="dv">4</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="co"># Bootstrapped Kendall correlation</span></span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a><span class="fu">boot_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a>           <span class="at">method =</span> <span class="st">&quot;ken&quot;</span>, <span class="co"># Short form accepted</span></span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a>           <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>,</span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a>           <span class="at">null =</span> .<span class="dv">4</span>)</span></code></pre></div>
 <pre><code>## 
 ##  Bootstrapped Kendall&#39;s rank correlation tau
 ## 
@@ -553,18 +588,22 @@ function.</p>
 ##  tau  tau 
 ##  0.4 -0.4 
 ## 90 percent confidence interval:
-##  0.1217169 0.4864510
+##  0.1442440 0.5090649
 ## sample estimates:
 ##       tau 
 ## 0.3153652</code></pre>
-<p>Robust correlations, such as a winsorized correlation coefficient or
-percentage bend correlation, can also be tested.</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">boot_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">method =</span> <span class="st">&quot;win&quot;</span>,</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>,</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>           <span class="at">null =</span> .<span class="dv">4</span>,</span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>           <span class="at">tr =</span> .<span class="dv">1</span>) <span class="co"># set trim</span></span></code></pre></div>
+<div id="robust-correlation-methods" class="section level3">
+<h3>Robust Correlation Methods</h3>
+<p>The <code>boot_cor_test</code> function also provides access to
+robust correlation methods that are less sensitive to outliers and
+violations of normality:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="co"># Winsorized correlation with 10% trimming</span></span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a><span class="fu">boot_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
+<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
+<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a>           <span class="at">method =</span> <span class="st">&quot;win&quot;</span>,</span>
+<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a>           <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>,</span>
+<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a>           <span class="at">null =</span> .<span class="dv">4</span>,</span>
+<span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a>           <span class="at">tr =</span> .<span class="dv">1</span>) <span class="co"># Set trim amount (default is 0.2)</span></span></code></pre></div>
 <pre><code>## 
 ##  Bootstrapped Winsorized correlation wincor
 ## 
@@ -575,16 +614,17 @@ percentage bend correlation, can also be tested.</p>
 ## wincor wincor 
 ##    0.4   -0.4 
 ## 90 percent confidence interval:
-##  0.2163284 0.6629980
+##  0.2651060 0.7125775
 ## sample estimates:
 ##   wincor 
 ## 0.464062</code></pre>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">boot_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">method =</span> <span class="st">&quot;bend&quot;</span>,</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>,</span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>           <span class="at">null =</span> .<span class="dv">4</span>,</span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>           <span class="at">beta =</span> .<span class="dv">15</span>) <span class="co"># bend argument</span></span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="co"># Percentage bend correlation</span></span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a><span class="fu">boot_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
+<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a>           <span class="at">method =</span> <span class="st">&quot;bend&quot;</span>,</span>
+<span id="cb21-5"><a href="#cb21-5" tabindex="-1"></a>           <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>,</span>
+<span id="cb21-6"><a href="#cb21-6" tabindex="-1"></a>           <span class="at">null =</span> .<span class="dv">4</span>,</span>
+<span id="cb21-7"><a href="#cb21-7" tabindex="-1"></a>           <span class="at">beta =</span> .<span class="dv">15</span>) <span class="co"># Beta parameter controlling resistance to outliers</span></span></code></pre></div>
 <pre><code>## 
 ##  Bootstrapped percentage bend correlation pb
 ## 
@@ -595,29 +635,31 @@ percentage bend correlation, can also be tested.</p>
 ##   pb   pb 
 ##  0.4 -0.4 
 ## 90 percent confidence interval:
-##  0.2341348 0.6455867
+##  0.2509131 0.6634791
 ## sample estimates:
 ##        pb 
 ## 0.4484488</code></pre>
+<p>The Winsorized correlation reduces the impact of outliers by
+replacing extreme values with less extreme values. The percentage bend
+correlation is another robust method that downweights the influence of
+outliers in the calculation.</p>
 </div>
-<div id="compare-correlations" class="section level1">
-<h1>Compare Correlations</h1>
-<p>In some cases, researchers may want to compare two independent
-correlations. Sometimes this may be used to compare correlations between
-two variables between two groups (e.g., the correlation between two
-variables between male and female subjects) or between two independent
-studies (e.g., replication study).</p>
-<p>When only summary statistics are available the
-<code>compare_cor</code> function can be used. All the user needs is the
-correlations (r1 and r2) and the degrees of freedom for each
-correlation. The degrees of freedom for most cases would the number of
-pairs minus 2 (<span class="math inline">\(df = N-2\)</span>).
-<em>Note</em>: this function, similar to <code>z_cor_test</code> is an
-approximation.</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">compare_cor</span>(<span class="at">r1 =</span> .<span class="dv">8</span>,</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">df1 =</span> <span class="dv">38</span>,</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">r2 =</span> .<span class="dv">2</span>,</span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">df2 =</span> <span class="dv">98</span>)</span></code></pre></div>
+</div>
+<div id="comparing-correlations" class="section level2">
+<h2>Comparing Correlations</h2>
+<p>TOSTER provides tools for comparing correlations between independent
+groups or studies. This is useful for testing differences in
+relationships across populations or for evaluating replication
+studies.</p>
+<div id="summary-statistics-approach" class="section level3">
+<h3>Summary Statistics Approach</h3>
+<p>When only summary statistics are available, the
+<code>compare_cor</code> function can be used:</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="co"># Comparing correlation r1=0.8 from n=40 with r2=0.2 from n=100</span></span>
+<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a><span class="fu">compare_cor</span>(<span class="at">r1 =</span> .<span class="dv">8</span>,</span>
+<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a>            <span class="at">df1 =</span> <span class="dv">38</span>,  <span class="co"># df = n-2</span></span>
+<span id="cb23-4"><a href="#cb23-4" tabindex="-1"></a>            <span class="at">r2 =</span> .<span class="dv">2</span>,</span>
+<span id="cb23-5"><a href="#cb23-5" tabindex="-1"></a>            <span class="at">df2 =</span> <span class="dv">98</span>)  <span class="co"># df = n-2</span></span></code></pre></div>
 <pre><code>## 
 ##  Difference between two independent correlations (Fisher&#39;s z transform)
 ## 
@@ -627,34 +669,16 @@ approximation.</p>
 ## sample estimates:
 ## difference between correlations 
 ##                             0.6</code></pre>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">compare_cor</span>(<span class="at">r1 =</span> .<span class="dv">8</span>,</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">df1 =</span> <span class="dv">38</span>,</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">r2 =</span> .<span class="dv">2</span>,</span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">df2 =</span> <span class="dv">98</span>)</span></code></pre></div>
-<pre><code>## 
-##  Difference between two independent correlations (Fisher&#39;s z transform)
-## 
-## data:  Summary Statistics
-## z = 4.6364, p-value = 3.545e-06
-## alternative hypothesis: true difference between correlations is not equal to 0
-## sample estimates:
-## difference between correlations 
-##                             0.6</code></pre>
-<p>The methods included to compare correlations include Fisher’s z
-transformation (“fisher”), and Kraatz’s method (“kraatz”). The Fisher
-and Kraatz methods are appropriate for general significance tests, but
-may have low statistical power <span class="citation">(Counsell and
-Cribbie 2015)</span>. The Fisher’s method can test the difference
-between correlations on the z-transformed scale while Kraatz’s methods
-directly measures the difference between the correlation coefficients.
-My personal recommendation would is Fisher’s method.</p>
-<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">compare_cor</span>(<span class="at">r1 =</span> .<span class="dv">8</span>,</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">df1 =</span> <span class="dv">38</span>,</span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">r2 =</span> .<span class="dv">2</span>,</span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">df2 =</span> <span class="dv">98</span>,</span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">null =</span> .<span class="dv">2</span>,</span>
-<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">method =</span> <span class="st">&quot;f&quot;</span>, <span class="co"># Fisher</span></span>
-<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>) <span class="co"># Equivalence</span></span></code></pre></div>
+<p>The <code>compare_cor</code> function supports different methods for
+comparing correlations:</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a><span class="co"># Testing equivalence using Fisher&#39;s method</span></span>
+<span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a><span class="fu">compare_cor</span>(<span class="at">r1 =</span> .<span class="dv">8</span>,</span>
+<span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a>            <span class="at">df1 =</span> <span class="dv">38</span>,</span>
+<span id="cb25-4"><a href="#cb25-4" tabindex="-1"></a>            <span class="at">r2 =</span> .<span class="dv">2</span>,</span>
+<span id="cb25-5"><a href="#cb25-5" tabindex="-1"></a>            <span class="at">df2 =</span> <span class="dv">98</span>,</span>
+<span id="cb25-6"><a href="#cb25-6" tabindex="-1"></a>            <span class="at">null =</span> .<span class="dv">2</span>,</span>
+<span id="cb25-7"><a href="#cb25-7" tabindex="-1"></a>            <span class="at">method =</span> <span class="st">&quot;f&quot;</span>, <span class="co"># Fisher (can also use &quot;fisher&quot;)</span></span>
+<span id="cb25-8"><a href="#cb25-8" tabindex="-1"></a>            <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>) <span class="co"># Equivalence test</span></span></code></pre></div>
 <pre><code>## 
 ##  Difference between two independent correlations (Fisher&#39;s z transform)
 ## 
@@ -667,26 +691,42 @@ My personal recommendation would is Fisher’s method.</p>
 ## sample estimates:
 ## difference between correlations 
 ##                             0.6</code></pre>
-<div id="bootstrapped" class="section level2">
-<h2>Bootstrapped</h2>
-<p>When data is available for both correlations then the
-<code>boot_compare_cor</code> function can be utilized.</p>
-<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">8922</span>)</span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>x1 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">40</span>)</span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>y1 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">40</span>)</span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>x2 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">100</span>)</span>
-<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>y2 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">100</span>)</span>
-<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a><span class="fu">boot_compare_cor</span>(</span>
-<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">x1 =</span> x1,</span>
-<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">x2 =</span> x2,</span>
-<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">y1 =</span> y1,</span>
-<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">y2 =</span> y2,</span>
-<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">null =</span> .<span class="dv">2</span>,</span>
-<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>, <span class="co"># Equivalence</span></span>
-<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">&quot;win&quot;</span> <span class="co"># Winsorized correlation</span></span>
-<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<p>Available methods include:</p>
+<ul>
+<li><strong>Fisher’s z transformation</strong>
+(<code>method = &quot;fisher&quot;</code> or <code>&quot;f&quot;</code>): Tests the
+difference between correlations on the z-transformed scale. This is
+generally recommended for most applications.</li>
+<li><strong>Kraatz’s method</strong> (<code>method = &quot;kraatz&quot;</code> or
+<code>&quot;k&quot;</code>): Directly measures the difference between correlation
+coefficients.</li>
+</ul>
+<p>While both methods are appropriate for general significance testing,
+they may have limited statistical power in some scenarios <span class="citation">(Counsell and Cribbie 2015)</span>.</p>
+</div>
+<div id="bootstrapped-comparison" class="section level3">
+<h3>Bootstrapped Comparison</h3>
+<p>When raw data is available for both correlations, the
+<code>boot_compare_cor</code> function offers a more robust approach
+through bootstrapping:</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">8922</span>) <span class="co"># Setting seed for reproducibility</span></span>
+<span id="cb27-2"><a href="#cb27-2" tabindex="-1"></a><span class="co"># Generating example data</span></span>
+<span id="cb27-3"><a href="#cb27-3" tabindex="-1"></a>x1 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">40</span>)</span>
+<span id="cb27-4"><a href="#cb27-4" tabindex="-1"></a>y1 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">40</span>)</span>
+<span id="cb27-5"><a href="#cb27-5" tabindex="-1"></a></span>
+<span id="cb27-6"><a href="#cb27-6" tabindex="-1"></a>x2 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">100</span>)</span>
+<span id="cb27-7"><a href="#cb27-7" tabindex="-1"></a>y2 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">100</span>)</span>
+<span id="cb27-8"><a href="#cb27-8" tabindex="-1"></a></span>
+<span id="cb27-9"><a href="#cb27-9" tabindex="-1"></a><span class="co"># Bootstrap comparison with winsorized correlation</span></span>
+<span id="cb27-10"><a href="#cb27-10" tabindex="-1"></a><span class="fu">boot_compare_cor</span>(</span>
+<span id="cb27-11"><a href="#cb27-11" tabindex="-1"></a>  <span class="at">x1 =</span> x1,</span>
+<span id="cb27-12"><a href="#cb27-12" tabindex="-1"></a>  <span class="at">x2 =</span> x2,</span>
+<span id="cb27-13"><a href="#cb27-13" tabindex="-1"></a>  <span class="at">y1 =</span> y1,</span>
+<span id="cb27-14"><a href="#cb27-14" tabindex="-1"></a>  <span class="at">y2 =</span> y2,</span>
+<span id="cb27-15"><a href="#cb27-15" tabindex="-1"></a>  <span class="at">null =</span> .<span class="dv">2</span>,</span>
+<span id="cb27-16"><a href="#cb27-16" tabindex="-1"></a>  <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>, <span class="co"># Equivalence test</span></span>
+<span id="cb27-17"><a href="#cb27-17" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">&quot;win&quot;</span> <span class="co"># Winsorized correlation</span></span>
+<span id="cb27-18"><a href="#cb27-18" tabindex="-1"></a>)</span></code></pre></div>
 <pre><code>## 
 ##  Bootstrapped difference in Winsorized correlation wincor
 ## 
@@ -698,11 +738,72 @@ My personal recommendation would is Fisher’s method.</p>
 ## sample estimates:
 ##     wincor 
 ## 0.06383164</code></pre>
+<p>This approach has several advantages:</p>
+<ul>
+<li>It does not rely on the Fisher’s z-transformation approximation</li>
+<li>It can incorporate robust correlation methods</li>
+<li>It can provide more accurate confidence intervals, especially when
+typical assumptions are violated</li>
+</ul>
+</div>
+</div>
+<div id="practical-recommendations" class="section level2">
+<h2>Practical Recommendations</h2>
+<p>When choosing which correlation method to use in TOSTER:</p>
+<ol style="list-style-type: decimal">
+<li><strong>If raw data is available:</strong>
+<ul>
+<li>For most cases, use <code>boot_cor_test</code> with Pearson,
+Spearman, or Kendall methods</li>
+<li>When outliers or distribution assumptions are concerns, consider the
+robust methods (winsorized or percentage bend)</li>
+</ul></li>
+<li><strong>If only summary statistics are available:</strong>
+<ul>
+<li>Use <code>corsum_test</code> for single correlation analysis</li>
+<li>Use <code>compare_cor</code> with the Fisher method for comparing
+correlations</li>
+</ul></li>
+<li><strong>For equivalence testing:</strong>
+<ul>
+<li>Carefully select meaningful boundaries (null values) based on your
+research context</li>
+<li>Consider what effect size would be practically insignificant in your
+field</li>
+</ul></li>
+</ol>
+</div>
+<div id="advanced-usage" class="section level2">
+<h2>Advanced Usage</h2>
+<div id="custom-bootstrap-methods" class="section level3">
+<h3>Custom Bootstrap Methods</h3>
+<p>The bootstrapped functions in TOSTER allow customization of the
+bootstrap procedure:</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" tabindex="-1"></a><span class="co"># Customizing the bootstrap procedure</span></span>
+<span id="cb29-2"><a href="#cb29-2" tabindex="-1"></a><span class="fu">boot_cor_test</span>(</span>
+<span id="cb29-3"><a href="#cb29-3" tabindex="-1"></a>  <span class="at">x =</span> mtcars<span class="sc">$</span>mpg,</span>
+<span id="cb29-4"><a href="#cb29-4" tabindex="-1"></a>  <span class="at">y =</span> mtcars<span class="sc">$</span>qsec,</span>
+<span id="cb29-5"><a href="#cb29-5" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">&quot;pearson&quot;</span>,</span>
+<span id="cb29-6"><a href="#cb29-6" tabindex="-1"></a>  <span class="at">R =</span> <span class="dv">2000</span>,  <span class="co"># Increasing number of bootstrap samples</span></span>
+<span id="cb29-7"><a href="#cb29-7" tabindex="-1"></a>  <span class="at">alpha =</span> <span class="fl">0.01</span>,  <span class="co"># Using 99% confidence interval</span></span>
+<span id="cb29-8"><a href="#cb29-8" tabindex="-1"></a>  <span class="at">alternative =</span> <span class="st">&quot;t&quot;</span>  <span class="co"># Two-sided test</span></span>
+<span id="cb29-9"><a href="#cb29-9" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+<div id="working-with-missing-data" class="section level3">
+<h3>Working with Missing Data</h3>
+<p>By default, the correlation functions in TOSTER use pairwise complete
+observations:</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a><span class="co"># Example with missing data</span></span>
+<span id="cb30-2"><a href="#cb30-2" tabindex="-1"></a>x_with_na <span class="ot">&lt;-</span> <span class="fu">c</span>(mtcars<span class="sc">$</span>mpg, <span class="cn">NA</span>, <span class="cn">NA</span>)</span>
+<span id="cb30-3"><a href="#cb30-3" tabindex="-1"></a>y_with_na <span class="ot">&lt;-</span> <span class="fu">c</span>(mtcars<span class="sc">$</span>qsec, <span class="dv">10</span>, <span class="cn">NA</span>)</span>
+<span id="cb30-4"><a href="#cb30-4" tabindex="-1"></a></span>
+<span id="cb30-5"><a href="#cb30-5" tabindex="-1"></a><span class="co"># Default behavior handles NAs with pairwise deletion</span></span>
+<span id="cb30-6"><a href="#cb30-6" tabindex="-1"></a><span class="fu">z_cor_test</span>(x_with_na, y_with_na)</span></code></pre></div>
 </div>
 </div>
 <div id="references" class="section level1 unnumbered">
 <h1 class="unnumbered">References</h1>
-<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
 <div id="ref-counsell2015equ" class="csl-entry">
 Counsell, Alyssa, and Robert A Cribbie. 2015. <span>“Equivalence Tests
 for Comparing Correlation and Regression Coefficients.”</span>
@@ -724,9 +825,9 @@ Hypothesis Testing</em>. Academic press.
 <div class="footnotes footnotes-end-of-document">
 <hr />
 <ol>
-<li id="fn1"><p>Bootstrapped functions were based off code posted by
-Rand Wilcox on his website, and was modified after looking at Guillaume
-Rousselet’s code, <code>bootcorci</code> R package, on GitHub <a href="https://github.com/GRousselet" class="uri">https://github.com/GRousselet</a><a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+<li id="fn1"><p>The bootstrapped functions were adapted from code posted
+by Rand Wilcox on his website, with modifications inspired by Guillaume
+Rousselet’s <code>bootcorci</code> R package, available on GitHub: <a href="https://github.com/GRousselet" class="uri">https://github.com/GRousselet</a><a href="#fnref1" class="footnote-back">↩︎</a></p></li>
 </ol>
 </div>
 

@@ -4,7 +4,7 @@
 \alias{boot_ses_calc}
 \alias{boot_ses_calc.default}
 \alias{boot_ses_calc.formula}
-\title{Bootstrap SES Calculation}
+\title{Bootstrapped Standardized Effect Size (SES) Calculation}
 \usage{
 boot_ses_calc(
   x,
@@ -36,16 +36,17 @@ boot_ses_calc(
 
 \item{paired}{a logical indicating whether you want a paired t-test.}
 
-\item{ses}{Standardized effect size. Default is "rb" for rank-biserial
-correlation. Options also include "cstat" for concordance probability, or
-"odds" for Wilcoxon-Mann-Whitney odds (otherwise known as Agresti's
-generalized odds ratio).}
+\item{ses}{a character string specifying the effect size measure to calculate:
+- "rb": rank-biserial correlation (default)
+- "odds": Wilcoxon-Mann-Whitney odds
+- "logodds": Wilcoxon-Mann-Whitney log-odds
+- "cstat": concordance statistic (C-statistic/AUC)}
 
 \item{alpha}{alpha level (default = 0.05)}
 
-\item{boot_ci}{type of bootstrap confidence interval. Options include studentized (stud), empirical/basic (basic) and percentile (perc) confidence intervals.}
+\item{boot_ci}{method for bootstrap confidence interval calculation: "stud" (studentized, default), "basic" (basic bootstrap), or "perc" (percentile bootstrap).}
 
-\item{R}{number of bootstrap replicates}
+\item{R}{number of bootstrap replications (default = 1999).}
 
 \item{y}{an optional (non-empty) numeric vector of data values.}
 
@@ -58,20 +59,114 @@ generalized odds ratio).}
 \item{na.action}{a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").}
 }
 \value{
-A data frame containing the standardized effect size.
+A data frame containing the following information:
+\itemize{
+\item estimate: The effect size estimate calculated from the original data
+\item bias: Estimated bias (difference between original estimate and median of bootstrap estimates)
+\item SE: Standard error estimated from the bootstrap distribution
+\item lower.ci: Lower bound of the bootstrap confidence interval
+\item upper.ci: Upper bound of the bootstrap confidence interval
+\item conf.level: Confidence level (1-alpha)
+\item boot_ci: The bootstrap confidence interval method used
+}
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#maturing}{\figure{lifecycle-maturing.svg}{options: alt='[Maturing]'}}}{\strong{[Maturing]}}
 
-Standardized effect size (SES), these are the effect sizes not considered SMDs.
+Calculates non-SMD standardized effect sizes with bootstrap confidence intervals.
+This function provides more robust confidence intervals for rank-based and
+probability-based effect size measures through resampling methods.
 }
 \details{
-For details on the calculations in this function see \code{vignette("robustTOST")}.
+This function calculates bootstrapped confidence intervals for rank-based and probability-based
+effect size measures. It is an extension of the \code{ses_calc()} function that uses resampling
+to provide more robust confidence intervals, especially for small sample sizes.
+
+The function implements the following bootstrap approach:
+\itemize{
+\item Calculate the raw effect size using the original data
+\item Create R bootstrap samples by resampling with replacement from the original data
+\item Calculate the effect size for each bootstrap sample
+\item Apply the Fisher z-transformation to stabilize variance for rank-biserial correlation values
+\item Calculate confidence intervals using the specified method
+\item Back-transform the confidence intervals to the original scale
+\item Convert to the requested effect size measure (if not rank-biserial)
 }
+
+Three bootstrap confidence interval methods are available:
+\itemize{
+\item \strong{Basic bootstrap ("basic")}: Uses the empirical distribution of bootstrap estimates
+\item \strong{Studentized bootstrap ("stud")}: Accounts for the variability in standard error estimates
+\item \strong{Percentile bootstrap ("perc")}: Uses percentiles of the bootstrap distribution directly
+}
+
+The function supports three study designs:
+\itemize{
+\item One-sample design: Compares a single sample to a specified value
+\item Two-sample independent design: Compares two independent groups
+\item Paired samples design: Compares paired observations
+}
+
+Note that extreme values (perfect separation between groups) can produce infinite values during
+the bootstrapping process. The function will issue a warning if this occurs, as it may affect
+the accuracy of the confidence intervals.
+
+For detailed information on calculation methods, see \code{vignette("robustTOST")}.
+}
+\section{Purpose}{
+
+Use this function when:
+\itemize{
+\item You need more robust confidence intervals for non-parametric effect sizes
+\item You prefer resampling-based confidence intervals over asymptotic approximations
+\item You need to quantify uncertainty in rank-based effect sizes more accurately
+}
+}
+
 \examples{
+# Example 1: Independent groups comparison with basic bootstrap CI
+set.seed(123)
+group1 <- c(1.2, 2.3, 3.1, 4.6, 5.2, 6.7)
+group2 <- c(3.5, 4.8, 5.6, 6.9, 7.2, 8.5)
+
+# Use fewer bootstrap replicates for a quick example
+result <- boot_ses_calc(x = group1, y = group2,
+                        ses = "rb",
+                        boot_ci = "basic",
+                        R = 99)
+
+# Example 2: Using formula notation to calculate concordance statistic
+data(mtcars)
+result <- boot_ses_calc(formula = mpg ~ am,
+                        data = mtcars,
+                        ses = "cstat",
+                        boot_ci = "perc",
+                        R = 99)
+
+# Example 3: Paired samples with studentized bootstrap CI
+data(sleep)
+with(sleep, boot_ses_calc(x = extra[group == 1],
+                          y = extra[group == 2],
+                          paired = TRUE,
+                          ses = "rb",
+                          boot_ci = "stud",
+                          R = 99))
+
+# Example 4: Comparing different bootstrap CI methods
 \dontrun{
-boot_ses_calc(formula = extra ~ group, data = sleep, paired = TRUE, ses = "r")
+# Basic bootstrap
+basic_ci <- boot_ses_calc(x = group1, y = group2, boot_ci = "basic")
+
+# Percentile bootstrap
+perc_ci <- boot_ses_calc(x = group1, y = group2, boot_ci = "perc")
+
+# Studentized bootstrap
+stud_ci <- boot_ses_calc(x = group1, y = group2, boot_ci = "stud")
+
+# Compare the results
+rbind(basic_ci, perc_ci, stud_ci)
 }
+
 }
 \seealso{
 Other effect sizes: 

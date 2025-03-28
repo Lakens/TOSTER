@@ -24,7 +24,16 @@ twoprop_test(
 
 \item{alpha}{alpha level (default = 0.05)}
 
-\item{alternative}{a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater", "less", "equivalence" (TOST), or "minimal.effect" (TOST). You can specify just the initial letter.}
+\item{alternative}{a character string specifying the alternative hypothesis:
+\itemize{
+\item "two.sided": correlation is not equal to null (default)
+\item "greater": correlation is greater than null
+\item "less": correlation is less than null
+\item "equivalence": correlation is within the equivalence bounds (TOST)
+\item "minimal.effect": correlation is outside the equivalence bounds (TOST)
+}
+
+You can specify just the initial letter.}
 
 \item{effect_size}{the effect size estimate, and confidence intervals, to calculate. Options include the difference between both proportions ("difference"), odds ratio ("odds.ratio"), or risk ratio ("risk.ratio").}
 }

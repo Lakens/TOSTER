@@ -12,7 +12,7 @@
 
 <meta name="author" content="Aaron R. Caldwell" />
 
-<meta name="date" content="2024-04-26" />
+<meta name="date" content="2025-03-25" />
 
 <title>Robust TOST Procedures</title>
 
@@ -51,7 +51,7 @@ overflow: visible;
 </style>
 <style type="text/css" data-origin="pandoc">
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -62,7 +62,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
 { counter-reset: source-line 0; }
@@ -150,6 +150,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; }
 div.csl-bib-body { }
 div.csl-entry {
 clear: both;
+margin-bottom: 0em;
 }
 .hanging div.csl-entry {
 margin-left:2em;
@@ -362,45 +363,159 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Robust TOST Procedures</h1>
 <h4 class="author">Aaron R. Caldwell</h4>
-<h4 class="date">2024-04-26</h4>
+<h4 class="date">2025-03-25</h4>
 
 
 <div id="TOC">
 <ul>
+<li><a href="#introduction-to-robust-tost-methods" id="toc-introduction-to-robust-tost-methods">Introduction to Robust TOST
+Methods</a>
+<ul>
+<li><a href="#when-to-use-robust-tost-methods" id="toc-when-to-use-robust-tost-methods">When to Use Robust TOST
+Methods</a></li>
+</ul></li>
 <li><a href="#wilcoxon-tost" id="toc-wilcoxon-tost">Wilcoxon TOST</a>
 <ul>
+<li><a href="#key-features-and-usage" id="toc-key-features-and-usage">Key Features and Usage</a>
+<ul>
+<li><a href="#interpreting-the-results" id="toc-interpreting-the-results">Interpreting the Results</a></li>
+</ul></li>
 <li><a href="#rank-biserial-correlation" id="toc-rank-biserial-correlation">Rank-Biserial Correlation</a></li>
 <li><a href="#confidence-intervals" id="toc-confidence-intervals">Confidence Intervals</a></li>
 <li><a href="#conversion-to-other-effect-sizes" id="toc-conversion-to-other-effect-sizes">Conversion to other effect
-sizes</a></li>
+sizes</a>
+<ul>
+<li><a href="#guidelines-for-selecting-effect-size-measures" id="toc-guidelines-for-selecting-effect-size-measures">Guidelines for
+Selecting Effect Size Measures</a></li>
+</ul></li>
 </ul></li>
 <li><a href="#brunner-munzel" id="toc-brunner-munzel">Brunner-Munzel</a>
 <ul>
+<li><a href="#overview-and-advantages" id="toc-overview-and-advantages">Overview and Advantages</a></li>
 <li><a href="#basics-of-the-calculative-approach" id="toc-basics-of-the-calculative-approach">Basics of the Calculative
 Approach</a></li>
-<li><a href="#example" id="toc-example">Example</a></li>
+<li><a href="#example" id="toc-example">Example</a>
+<ul>
+<li><a href="#interpreting-brunner-munzel-results" id="toc-interpreting-brunner-munzel-results">Interpreting Brunner-Munzel
+Results</a></li>
+<li><a href="#when-to-use-permutation" id="toc-when-to-use-permutation">When to Use Permutation</a></li>
+</ul></li>
 </ul></li>
 <li><a href="#bootstrap-tost" id="toc-bootstrap-tost">Bootstrap TOST</a>
 <ul>
+<li><a href="#advantages-of-bootstrapping" id="toc-advantages-of-bootstrapping">Advantages of
+Bootstrapping</a></li>
 <li><a href="#two-sample-algorithm" id="toc-two-sample-algorithm">Two
 Sample Algorithm</a></li>
-<li><a href="#example-1" id="toc-example-1">Example</a></li>
+<li><a href="#choosing-the-number-of-bootstrap-replications" id="toc-choosing-the-number-of-bootstrap-replications">Choosing the
+Number of Bootstrap Replications</a></li>
+<li><a href="#example-1" id="toc-example-1">Example</a>
+<ul>
+<li><a href="#interpreting-bootstrap-tost-results" id="toc-interpreting-bootstrap-tost-results">Interpreting Bootstrap TOST
+Results</a></li>
+</ul></li>
 </ul></li>
 <li><a href="#ratio-of-difference-log-transformed" id="toc-ratio-of-difference-log-transformed">Ratio of Difference (Log
 Transformed)</a>
 <ul>
-<li><a href="#log_tost" id="toc-log_tost">log_TOST</a></li>
+<li><a href="#why-use-the-natural-log-transformation" id="toc-why-use-the-natural-log-transformation">Why Use The Natural Log
+Transformation?</a></li>
+<li><a href="#applications-beyond-bioequivalence" id="toc-applications-beyond-bioequivalence">Applications Beyond
+Bioequivalence</a></li>
+<li><a href="#log_tost" id="toc-log_tost">log_TOST</a>
+<ul>
+<li><a href="#interpreting-the-means-ratio" id="toc-interpreting-the-means-ratio">Interpreting the Means
+Ratio</a></li>
+</ul></li>
 <li><a href="#bootstrap-log" id="toc-bootstrap-log">Bootstrap +
 Log</a></li>
 </ul></li>
-<li><a href="#just-estimate-an-effect-size" id="toc-just-estimate-an-effect-size">Just Estimate an Effect
-Size</a></li>
+<li><a href="#just-estimate-an-effect-size" id="toc-just-estimate-an-effect-size">Just Estimate an Effect Size</a>
+<ul>
+<li><a href="#choosing-between-different-bootstrap-ci-methods" id="toc-choosing-between-different-bootstrap-ci-methods">Choosing
+Between Different Bootstrap CI Methods</a></li>
+</ul></li>
+<li><a href="#summary-comparison-of-robust-tost-methods" id="toc-summary-comparison-of-robust-tost-methods">Summary Comparison of
+Robust TOST Methods</a></li>
+<li><a href="#conclusion" id="toc-conclusion">Conclusion</a></li>
 <li><a href="#references" id="toc-references">References</a></li>
 </ul>
 </div>
 
-<p>Within TOSTER there are a few robust alternatives to the
-<code>t_TOST</code> function.</p>
+<div id="introduction-to-robust-tost-methods" class="section level1">
+<h1>Introduction to Robust TOST Methods</h1>
+<p>The Two One-Sided Tests (TOST) procedure is a statistical approach
+used to test for equivalence between groups or conditions. Unlike
+traditional null hypothesis significance testing (NHST) which aims to
+detect differences, TOST is designed to statistically demonstrate
+similarity or equivalence within predefined bounds.</p>
+<p>While the standard <code>t_TOST</code> function in TOSTER provides a
+parametric approach to equivalence testing, it relies on assumptions of
+normality and homogeneity of variance. In real-world data analysis,
+these assumptions are often violated, necessitating more robust
+alternatives. This vignette introduces several robust TOST methods
+available in the TOSTER package that maintain their validity under a
+wider range of data conditions.</p>
+<div id="when-to-use-robust-tost-methods" class="section level2">
+<h2>When to Use Robust TOST Methods</h2>
+<p>Consider using the robust alternatives to <code>t_TOST</code>
+when:</p>
+<ul>
+<li>Your data shows notable departures from normality (e.g., skewed
+distributions, heavy tails)</li>
+<li>Potential outliers are a concern</li>
+<li>Sample sizes are small or unequal</li>
+<li>You have concerns about violating the assumptions of parametric
+tests</li>
+<li>You want to confirm parametric test results with complementary
+nonparametric approaches</li>
+</ul>
+<p>The following table provides a quick overview of the robust methods
+covered in this vignette:</p>
+<table>
+<colgroup>
+<col width="14%" />
+<col width="18%" />
+<col width="38%" />
+<col width="27%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Function</th>
+<th>Key Characteristics</th>
+<th>Best Used When</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Wilcoxon TOST</td>
+<td><code>wilcox_TOST()</code></td>
+<td>Rank-based, nonparametric</td>
+<td>Data is ordinal or non-normal</td>
+</tr>
+<tr class="even">
+<td>Brunner-Munzel</td>
+<td><code>brunner_munzel()</code> with <code>simple_htest()</code></td>
+<td>Probability-based, robust to heteroscedasticity</td>
+<td>Distribution shapes differ between groups</td>
+</tr>
+<tr class="odd">
+<td>Bootstrap TOST</td>
+<td><code>boot_t_TOST()</code></td>
+<td>Resampling-based, requires fewer assumptions</td>
+<td>Sample size is small or distribution is unknown</td>
+</tr>
+<tr class="even">
+<td>Log-Transformed TOST</td>
+<td><code>log_TOST()</code></td>
+<td>Ratio-based, for multiplicative comparisons</td>
+<td>Comparing relative differences (e.g., bioequivalence)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <div id="wilcoxon-tost" class="section level1">
 <h1>Wilcoxon TOST</h1>
 <p>The Wilcoxon group of tests (includes Mann-Whitney U-test) provide a
@@ -412,6 +527,8 @@ separate tests of directional location shift to determine if the
 location shift is within (equivalence) or outside (minimal effect). The
 exact calculations can be explored via the documentation of the
 <code>wilcox.test</code> function.</p>
+<div id="key-features-and-usage" class="section level2">
+<h2>Key Features and Usage</h2>
 <p>TOSTER’s version is the <code>wilcox_TOST</code> function. Overall,
 this function operates extremely similar to the <code>t_TOST</code>
 function. However, the standardized mean difference (SMD) is
@@ -419,6 +536,14 @@ function. However, the standardized mean difference (SMD) is
 calculated for <em>all</em> types of comparisons (e.g., two sample, one
 sample, and paired samples). Also, there is no plotting capability at
 this time for the output of this function.</p>
+<p>The <code>wilcox_TOST</code> function is particularly useful
+when:</p>
+<ul>
+<li>You’re working with ordinal data</li>
+<li>You’re concerned about outliers influencing your results</li>
+<li>You need a test that makes minimal assumptions about the underlying
+distributions</li>
+</ul>
 <p>As an example, we can use the sleep data to make a non-parametric
 comparison of equivalence.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&#39;sleep&#39;</span>)</span>
@@ -449,6 +574,30 @@ comparison of equivalence.</p>
 ##                           Estimate               C.I. Conf. Level
 ## Median of Differences       -1.346       [-3.4, -0.1]         0.9
 ## Rank-Biserial Correlation   -0.490 [-0.7493, -0.1005]         0.9</code></pre>
+<div id="interpreting-the-results" class="section level3">
+<h3>Interpreting the Results</h3>
+<p>When interpreting the output of <code>wilcox_TOST</code>, pay
+attention to:</p>
+<ol style="list-style-type: decimal">
+<li>The p-values for both one-sided tests (<code>p1</code> and
+<code>p2</code>)</li>
+<li>The equivalence test p-value (<code>TOSTp</code>), which should be
+&lt; alpha to claim equivalence</li>
+<li>The rank-biserial correlation (<code>rb</code>) and its confidence
+interval</li>
+</ol>
+<p>A statistically significant equivalence test (p &lt; alpha) indicates
+that the observed effect is statistically within your specified
+equivalence bounds. The rank-biserial correlation provides a measure of
+effect size, with values ranging from -1 to 1:</p>
+<ul>
+<li>Values near 0 indicate negligible association</li>
+<li>Values around ±0.3 indicate a small effect</li>
+<li>Values around ±0.5 indicate a moderate effect</li>
+<li>Values around ±0.7 or greater indicate a large effect</li>
+</ul>
+</div>
+</div>
 <div id="rank-biserial-correlation" class="section level2">
 <h2>Rank-Biserial Correlation</h2>
 <p>The standardized effect size reported for the
@@ -463,6 +612,9 @@ proportion of favorable pairs minus the unfavorable pairs.</p>
 <p><span class="math display">\[
 r_{biserial} = f_{pairs} - u_{pairs}
 \]</span></p>
+<p>Where: - <span class="math inline">\(f_{pairs}\)</span> is the
+proportion of favorable pairs - <span class="math inline">\(u_{pairs}\)</span> is the proportion of
+unfavorable pairs</p>
 <p>For the one sample or paired samples cases, the correlation is
 calculated with ties (values equal to zero) not being dropped. This
 provides a <em>conservative</em> estimate of the rank biserial
@@ -474,24 +626,45 @@ between paired observations:</p>
 </ol>
 <p><span class="math display">\[
 r_j = -1 \cdot sign(z_j) \cdot rank(|z_j|)
-\]</span> 2. Calculate the positive and negative sums:</p>
+\]</span></p>
+<p>Where: - <span class="math inline">\(r_j\)</span> is the signed rank
+for observation <span class="math inline">\(j\)</span> - <span class="math inline">\(sign(z_j)\)</span> is the sign of observation
+<span class="math inline">\(z_j\)</span> (+1 or -1) - <span class="math inline">\(rank(|z_j|)\)</span> is the rank of the absolute
+value of observation <span class="math inline">\(z_j\)</span></p>
+<ol start="2" style="list-style-type: decimal">
+<li>Calculate the positive and negative sums:</li>
+</ol>
 <p><span class="math display">\[
     R_{+} = \sum_{1\le i \le n, \space z_i &gt; 0}r_j
 \]</span></p>
 <p><span class="math display">\[
     R_{-} = \sum_{1\le i \le n, \space z_i &lt; 0}r_j
-\]</span> 3. Determine the smaller of the two rank sums:</p>
+\]</span></p>
+<p>Where: - <span class="math inline">\(R_{+}\)</span> is the sum of
+ranks for positive observations - <span class="math inline">\(R_{-}\)</span> is the sum of ranks for negative
+observations</p>
+<ol start="3" style="list-style-type: decimal">
+<li>Determine the smaller of the two rank sums:</li>
+</ol>
 <p><span class="math display">\[
 T = min(R_{+}, \space R_{-})
 \]</span></p>
 <p><span class="math display">\[
 S = \begin{cases} -4 &amp; R_{+} \ge R_{-} \\ 4 &amp; R_{+} &lt; R_{-}
 \end{cases}
-\]</span> 4. Calculate rank-biserial correlation:</p>
+\]</span></p>
+<p>Where: - <span class="math inline">\(T\)</span> is the smaller of the
+two rank sums - <span class="math inline">\(S\)</span> is a sign factor
+based on which rank sum is smaller</p>
+<ol start="4" style="list-style-type: decimal">
+<li>Calculate rank-biserial correlation:</li>
+</ol>
 <p><span class="math display">\[
 r_{biserial} = S \cdot | \frac{\frac{T - \frac{(R_{+} +
 R_{-})}{2}}{n}}{n + 1} |
 \]</span></p>
+<p>Where: - <span class="math inline">\(n\)</span> is the number of
+observations (or pairs) - The final value ranges from -1 to 1</p>
 </div>
 <div id="confidence-intervals" class="section level2">
 <h2>Confidence Intervals</h2>
@@ -510,6 +683,11 @@ following:</p>
 <p><span class="math display">\[
 SE_r = \sqrt{\frac {(n1 + n2 + 1)} { (3 \cdot n1 \cdot n2)}}
 \]</span></p>
+<p>Where:</p>
+<ul>
+<li><span class="math inline">\(n1\)</span> and <span class="math inline">\(n2\)</span> are the sample sizes of the two
+groups</li>
+</ul>
 <p>The confidence intervals can then be calculated by transforming the
 estimate.</p>
 <p><span class="math display">\[
@@ -520,22 +698,39 @@ transformed.</p>
 <p><span class="math display">\[
 r_{CI} = tanh(r_z  \pm  Z_{(1 - \alpha / 2)} \cdot SE_r)
 \]</span></p>
+<p>Where:</p>
+<ul>
+<li><span class="math inline">\(Z_{(1 - \alpha / 2)}\)</span> is the
+critical value from the standard normal distribution</li>
+<li><span class="math inline">\(\alpha\)</span> is the significance
+level (typically 0.05)</li>
+</ul>
 </div>
 <div id="conversion-to-other-effect-sizes" class="section level2">
 <h2>Conversion to other effect sizes</h2>
 <p>Two other effect sizes can be calculated for non-parametric tests.
-First, there is the concordance probability, which is also known at the
+First, there is the concordance probability, which is also known as the
 c-statistic, c-index, or probability of superiority<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>. The c-statistic is
 converted from the correlation using the following formula:</p>
 <p><span class="math display">\[
 c = \frac{(r_{biserial} + 1)}{2}
 \]</span></p>
+<p>The c-statistic can be interpreted as the probability that a randomly
+selected observation from one group will be greater than a randomly
+selected observation from another group. A value of 0.5 indicates no
+difference between groups, while values approaching 1 indicate perfect
+separation between groups.</p>
 <p>The Wilcoxon-Mann-Whitney odds <span class="citation">(O’Brien and
 Castelloe 2006)</span>, also known as the “Generalized Odds Ratio” <span class="citation">(Agresti 1980)</span>, is calculated by converting the
 c-statistic using the following formula:</p>
 <p><span class="math display">\[
 WMW_{odds} = e^{logit(c)}
 \]</span></p>
+<p>Where <span class="math inline">\(logit(c) =
+\ln\frac{c}{1-c}\)</span></p>
+<p>The WMW odds can be interpreted similarly to a traditional odds
+ratio, representing the odds that an observation from one group is
+greater than an observation from another group.</p>
 <p>Either effect size is available by simply modifying the
 <code>ses</code> argument for the <code>wilcox_TOST</code> function.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># Rank biserial</span></span>
@@ -612,6 +807,20 @@ WMW_{odds} = e^{logit(c)}
 ##                       Estimate             C.I. Conf. Level
 ## Median of Differences   -1.346     [-3.4, -0.1]         0.9
 ## Concordance              0.255 [0.1254, 0.4497]         0.9</code></pre>
+<div id="guidelines-for-selecting-effect-size-measures" class="section level3">
+<h3>Guidelines for Selecting Effect Size Measures</h3>
+<ul>
+<li><strong>Rank-biserial correlation (<code>&quot;r&quot;</code>)</strong> is
+useful when you want a correlation-like measure that’s easily
+interpretable and comparable to other correlation coefficients.</li>
+<li><strong>Concordance probability (<code>&quot;c&quot;</code>)</strong> is
+beneficial when you want to express the effect in terms of probability,
+making it accessible to non-statisticians.</li>
+<li><strong>WMW odds (<code>&quot;o&quot;</code>)</strong> is helpful when you
+want to express the effect in terms familiar to those who work with odds
+ratios in logistic regression or epidemiology.</li>
+</ul>
+</div>
 </div>
 </div>
 <div id="brunner-munzel" class="section level1">
@@ -623,17 +832,49 @@ arguments<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>, it ca
 of the WMW tests, especially when involving equivalence testing, is a
 tad difficult. Some may want a non-parametric alternative to the WMW
 test, and the Brunner-Munzel test(s) may be a useful option.</p>
+<div id="overview-and-advantages" class="section level2">
+<h2>Overview and Advantages</h2>
 <p>The Brunner-Munzel test <span class="citation">(Brunner and Munzel
-2000; Neubert and Brunner 2007)</span> is based on calculating the
-“stochastic superiority” <span class="citation">(Karch 2021, i.e.,
-probability of superiority)</span>, which is usually referred to as the
-relative effect, based on the ranks of the two groups being compared (X
-and Y). A Brunner-Munzel type test is then a directional test of an
-effect, and answers a question akin to “what is the probability that a
-randomly sampled value of X will be greater than Y?”</p>
+2000; Neubert and Brunner 2007)</span> offers several advantages over
+the Wilcoxon-Mann-Whitney tests:</p>
+<ol style="list-style-type: decimal">
+<li>It does not assume equal distributions (shapes) between groups</li>
+<li>It is robust to heteroscedasticity (unequal variances)</li>
+<li>It provides a more interpretable effect size measure (“relative
+effect”)</li>
+<li>It maintains good statistical properties even with unequal sample
+sizes</li>
+</ol>
+<p>The Brunner-Munzel test is based on calculating the “stochastic
+superiority” <span class="citation">(Karch 2021, i.e., probability of
+superiority)</span>, which is usually referred to as the relative
+effect, based on the ranks of the two groups being compared (X and Y). A
+Brunner-Munzel type test is then a directional test of an effect, and
+answers a question akin to “what is the probability that a randomly
+sampled value of X will be greater than Y?”</p>
 <p><span class="math display">\[
 \hat p = P(X&gt;Y) + 0.5 \cdot P(X=Y)
 \]</span></p>
+<p>Where:</p>
+<ul>
+<li><span class="math inline">\(P(X&gt;Y)\)</span> is the probability
+that a random value from X exceeds a random value from Y</li>
+<li><span class="math inline">\(P(X=Y)\)</span> is the probability that
+random values from X and Y are equal</li>
+<li>The 0.5 factor means ties contribute half their weight to the
+probability</li>
+</ul>
+<p>The relative effect <span class="math inline">\(\hat p\)</span> has
+an intuitive interpretation:</p>
+<ul>
+<li><span class="math inline">\(\hat p = 0.5\)</span> indicates no
+difference between groups</li>
+<li><span class="math inline">\(\hat p &gt; 0.5\)</span> indicates
+values in X tend to be greater than values in Y</li>
+<li><span class="math inline">\(\hat p &lt; 0.5\)</span> indicates
+values in X tend to be smaller than values in Y</li>
+</ul>
+</div>
 <div id="basics-of-the-calculative-approach" class="section level2">
 <h2>Basics of the Calculative Approach</h2>
 <p>In this section, I will quickly detail the calculative approach that
@@ -641,13 +882,24 @@ underlies the Brunner-Munzel test in <code>TOSTER</code>.</p>
 <p>A studentized test statistic can be calculated as:</p>
 <p><span class="math display">\[
 t = \sqrt{N} \cdot \frac{\hat p -p_{null}}{s}
-\]</span> Wherein the default null hypothesis <span class="math inline">\(p_{null}\)</span> is typically 0.5 (50%
-probability of superiority is the default null), and <span class="math inline">\(\sigma_N\)</span> refers the rank-based
-Brunner-Munzel standard error. The null can be modified therefore
-allowing for equivalence testing <em>directly based on the relative
-effect</em>. Additionally, for paired samples the probability of
-superiority is based on a <em>hypothesis of exchangability</em> and is
-not based on the differences scores<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a>.</p>
+\]</span></p>
+<p>Where:</p>
+<ul>
+<li><span class="math inline">\(N\)</span> is the total sample size</li>
+<li><span class="math inline">\(\hat p\)</span> is the estimated
+relative effect</li>
+<li><span class="math inline">\(p_{null}\)</span> is the null hypothesis
+value (typically 0.5)</li>
+<li><span class="math inline">\(s\)</span> is the rank-based
+Brunner-Munzel standard error</li>
+</ul>
+<p>The default null hypothesis <span class="math inline">\(p_{null}\)</span> is typically 0.5 (50%
+probability of superiority is the default null), and <span class="math inline">\(s\)</span> refers the rank-based Brunner-Munzel
+standard error. The null can be modified therefore allowing for
+equivalence testing <em>directly based on the relative effect</em>.
+Additionally, for paired samples the probability of superiority is based
+on a <em>hypothesis of exchangability</em> and is not based on the
+differences scores<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a>.</p>
 <p>For more details on the calculative approach, I suggest reading <span class="citation">Karch (2021)</span>. At small sample sizes, it is
 recommended that the permutation version of the test
 (<code>perm = TRUE</code>) be used rather than the basic test statistic
@@ -680,14 +932,15 @@ alternative hypothesis for “two.sided”, “less”, or “greater”.</p>
 <span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>                      <span class="at">data =</span> sleep,</span>
 <span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>                      <span class="at">paired =</span> <span class="cn">FALSE</span>,</span>
 <span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>               <span class="at">perm =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<pre><code>## NOTE: Confidence intervals derived from permutation tests may differ from conclusions drawn from p-values. When discrepancies occur, consider additional diagnostics or alternative inference methods.</code></pre>
 <pre><code>## 
 ##  two-sample Brunner-Munzel permutation test
 ## 
 ## data:  extra by group
-## t = -2.1447, df = 16.898, p-value = 0.055
+## t-observed = -2.1447, df = 16.898, p-value = 0.0482
 ## alternative hypothesis: true relative effect is not equal to 0.5
 ## 95 percent confidence interval:
-##  0.0000000 0.5089213
+##  0.00826466 0.49593164
 ## sample estimates:
 ## p(X&gt;Y) + .5*P(X=Y) 
 ##              0.255</code></pre>
@@ -695,28 +948,57 @@ alternative hypothesis for “two.sided”, “less”, or “greater”.</p>
 Brunner-Munzel test by setting the alternative to “equivalence” or
 “minimal.effect”. The equivalence bounds, based on the relative effect,
 can be set with the <code>mu</code> argument.</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="co"># permutation based Brunner-Munzel test of equivalence</span></span>
-<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="fu">simple_htest</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>             <span class="at">test =</span> <span class="st">&quot;brunner&quot;</span>,</span>
-<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>             <span class="at">data =</span> sleep,</span>
-<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>             <span class="at">paired =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>             <span class="at">alternative =</span> <span class="st">&quot;equ&quot;</span>,</span>
-<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a>             <span class="at">mu =</span> .<span class="dv">7</span>,</span>
-<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a>             <span class="at">perm =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="co"># permutation based Brunner-Munzel test of equivalence</span></span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="fu">simple_htest</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>             <span class="at">test =</span> <span class="st">&quot;brunner&quot;</span>,</span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>             <span class="at">data =</span> sleep,</span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>             <span class="at">paired =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>             <span class="at">alternative =</span> <span class="st">&quot;equ&quot;</span>,</span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a>             <span class="at">mu =</span> .<span class="dv">7</span>,</span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a>             <span class="at">perm =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<pre><code>## NOTE: Confidence intervals derived from permutation tests may differ from conclusions drawn from p-values. When discrepancies occur, consider additional diagnostics or alternative inference methods.
+## NOTE: Confidence intervals derived from permutation tests may differ from conclusions drawn from p-values. When discrepancies occur, consider additional diagnostics or alternative inference methods.
+## NOTE: Confidence intervals derived from permutation tests may differ from conclusions drawn from p-values. When discrepancies occur, consider additional diagnostics or alternative inference methods.</code></pre>
 <pre><code>## 
 ##  two-sample Brunner-Munzel permutation test
 ## 
 ## data:  extra by group
-## t = -3.8954, df = 16.898, p-value = 0.9972
+## t-observed = -3.8954, df = 16.898, p-value = 0.9974
 ## alternative hypothesis: equivalence
 ## null values:
 ## relative effect relative effect 
 ##             0.3             0.7 
 ## 90 percent confidence interval:
-##  0.0588093 0.4555339
+##  0.05824864 0.45564662
 ## sample estimates:
 ## p(X&gt;Y) + .5*P(X=Y) 
 ##              0.255</code></pre>
+<div id="interpreting-brunner-munzel-results" class="section level3">
+<h3>Interpreting Brunner-Munzel Results</h3>
+<p>When interpreting the Brunner-Munzel test results:</p>
+<ol style="list-style-type: decimal">
+<li>The relative effect (p-hat) is the primary measure of interest</li>
+<li>For equivalence testing, you’re testing whether this relative effect
+falls within your specified bounds</li>
+<li>A significant equivalence test suggests that the probability of
+superiority is statistically confined to your specified range</li>
+</ol>
+</div>
+<div id="when-to-use-permutation" class="section level3">
+<h3>When to Use Permutation</h3>
+<p>The permutation approach (<code>perm = TRUE</code>) is recommended
+when:</p>
+<ul>
+<li>Sample sizes are small (generally n &lt; 30 per group)</li>
+<li>Data distributions are highly skewed or contain outliers</li>
+<li>Precision is more important than computational speed</li>
+</ul>
+<p>Note that the permutation approach can be computationally intensive
+for large datasets, potentially increasing processing time
+significantly. Additionlly, with a permutation test you may observe
+situations where the confidence interval and the p-values would yield
+<em>different</em> conclusions.</p>
+</div>
 </div>
 </div>
 <div id="bootstrap-tost" class="section level1">
@@ -728,21 +1010,40 @@ considered somewhat robust to the violations of assumptions for a simple
 t-test. Therefore we added a bootstrap option, <code>boot_t_TOST</code>
 to the package to provide another robust alternative to the
 <code>t_TOST</code> function.</p>
+<div id="advantages-of-bootstrapping" class="section level2">
+<h2>Advantages of Bootstrapping</h2>
+<p>Bootstrap methods offer several advantages for equivalence
+testing:</p>
+<ol style="list-style-type: decimal">
+<li>They make minimal assumptions about the underlying data
+distribution</li>
+<li>They are robust to deviations from normality</li>
+<li>They provide realistic confidence intervals even with small
+samples</li>
+<li>They can handle complex data structures and dependencies</li>
+<li>They often provide more accurate results when parametric assumptions
+are violated</li>
+</ol>
 <p>In this function, we provide the percentile bootstrap solution
 outlined by <span class="citation">Efron and Tibshirani (1993)</span>
 (see chapter 16, page 220). The bootstrapped p-values are derived from
 the “studentized” version of a test of mean differences outlined by
 <span class="citation">Efron and Tibshirani (1993)</span>. Overall, the
-results should be similar to the results of <code>t_TOST</code>.
-<strong>However</strong>, for paired samples, the Cohen’s d(rm) effect
-size <em>cannot</em> be calculated.</p>
+results should be similar to the results of <code>t_TOST</code>.</p>
+</div>
 <div id="two-sample-algorithm" class="section level2">
 <h2>Two Sample Algorithm</h2>
 <ol style="list-style-type: decimal">
 <li><p>Form B bootstrap data sets from x* and y* wherein x* is sampled
 with replacement from <span class="math inline">\(\tilde x_1,\tilde x_2,
-... \tilde x_n\)</span> and y* is sampled with replacement from <span class="math inline">\(\tilde y_1,\tilde y_2, ... \tilde
-y_n\)</span></p></li>
+... \tilde x_n\)</span> and y* is sampled with replacement from <span class="math inline">\(\tilde y_1,\tilde y_2, ... \tilde y_n\)</span></p>
+<p>Where:</p>
+<ul>
+<li>B is the number of bootstrap replications (set using the
+<code>R</code> parameter)</li>
+<li><span class="math inline">\(\tilde x_i\)</span> and <span class="math inline">\(\tilde y_i\)</span> represent the original
+observations in each group</li>
+</ul></li>
 <li><p>t is then evaluated on each sample, but the mean of each sample
 (y or x) and the overall average (z) are subtracted from each</p></li>
 </ol>
@@ -750,6 +1051,17 @@ y_n\)</span></p></li>
 t(z^{*b}) = \frac {(\bar x^*-\bar x - \bar z) - (\bar y^*-\bar y - \bar
 z)}{\sqrt {sd_y^*/n_y + sd_x^*/n_x}}
 \]</span></p>
+<p>Where:</p>
+<ul>
+<li><span class="math inline">\(\bar x^*\)</span> and <span class="math inline">\(\bar y^*\)</span> are the means of the bootstrap
+samples</li>
+<li><span class="math inline">\(\bar x\)</span> and <span class="math inline">\(\bar y\)</span> are the means of the original
+samples</li>
+<li><span class="math inline">\(\bar z\)</span> is the overall mean</li>
+<li><span class="math inline">\(sd_x^*\)</span> and <span class="math inline">\(sd_y^*\)</span> are the standard deviations of the
+bootstrap samples</li>
+<li><span class="math inline">\(n_x\)</span> and <span class="math inline">\(n_y\)</span> are the sample sizes</li>
+</ul>
 <ol start="3" style="list-style-type: decimal">
 <li>An approximate p-value can then be calculated as the number of
 bootstrapped results greater than the observed t-statistic from the
@@ -758,26 +1070,46 @@ sample.</li>
 <p><span class="math display">\[
 p_{boot} = \frac {\#t(z^{*b}) \ge t_{sample}}{B}
 \]</span></p>
+<p>Where: - <span class="math inline">\(\#t(z^{*b}) \ge
+t_{sample}\)</span> is the count of bootstrap t-statistics that exceed
+the observed t-statistic - B is the total number of bootstrap
+replications</p>
 <p>The same process is completed for the one sample case but with the
 one sample solution for the equation outlined by <span class="math inline">\(t(z^{*b})\)</span>. The paired sample case in this
 bootstrap procedure is equivalent to the one sample solution because the
 test is based on the difference scores.</p>
 </div>
+<div id="choosing-the-number-of-bootstrap-replications" class="section level2">
+<h2>Choosing the Number of Bootstrap Replications</h2>
+<p>When using bootstrap methods, the choice of replications (the
+<code>R</code> parameter) is important:</p>
+<ul>
+<li><strong>R = 999 or 1999</strong>: Recommended for standard
+analyses</li>
+<li><strong>R = 4999 or 9999</strong>: Recommended for
+publication-quality results or when precise p-values are needed</li>
+<li><strong>R &lt; 500</strong>: Acceptable only for exploratory
+analyses or when computational resources are limited</li>
+</ul>
+<p>Larger values of R provide more stable results but increase
+computation time. For most purposes, 999 or 1999 replications strike a
+good balance between precision and computational efficiency.</p>
+</div>
 <div id="example-1" class="section level2">
 <h2>Example</h2>
 <p>We can use the sleep data to see the bootstrapped results. Notice
 that the plots show how the re-sampling via bootstrapping indicates the
-instability of Hedges’ d(z).</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&#39;sleep&#39;</span>)</span>
-<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a></span>
-<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>test1 <span class="ot">=</span> <span class="fu">boot_t_TOST</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>                      <span class="at">data =</span> sleep,</span>
-<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>                      <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a>                      <span class="at">eqb =</span> .<span class="dv">5</span>,</span>
-<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a>                    <span class="at">R =</span> <span class="dv">999</span>)</span>
-<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a></span>
-<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a></span>
-<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a><span class="fu">print</span>(test1)</span></code></pre></div>
+instability of Hedges’s d<sub>z</sub>.</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&#39;sleep&#39;</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a>test1 <span class="ot">=</span> <span class="fu">boot_t_TOST</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>                      <span class="at">data =</span> sleep,</span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a>                      <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a>                      <span class="at">eqb =</span> .<span class="dv">5</span>,</span>
+<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a>                    <span class="at">R =</span> <span class="dv">499</span>)</span>
+<span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a></span>
+<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a></span>
+<span id="cb18-10"><a href="#cb18-10" tabindex="-1"></a><span class="fu">print</span>(test1)</span></code></pre></div>
 <pre><code>## 
 ## Bootstrapped Paired t-test
 ## 
@@ -793,12 +1125,28 @@ instability of Hedges’ d(z).</p>
 ## TOST Upper -5.348  9 &lt; 0.001
 ## 
 ## Effect Sizes 
-##               Estimate     SE               C.I. Conf. Level
-## Raw             -1.580 0.3660 [-2.8516, -1.0707]         0.9
-## Hedges&#39;s g(z)   -1.174 0.7093  [-1.3955, 1.2428]         0.9
-## Note: percentile bootstrap method utilized.</code></pre>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="fu">plot</span>(test1)</span></code></pre></div>
-<p><img src="data:image/png;base64,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LVq0yB588EGbP3++bbfddrbnnnta27Ztw6ckXV+6dKn179/fxeOkk04qd95XX31lb7/9tu277762ww47lDvOjpJVMUt4RDtFQARyhsADDzxggwYNCuLTunVr69u3rzVu3DjYl2hl/Pjxdt555xmv+ZNPPmnt2rUrc9qFF15o48aNC/bVrl3bbrrpJttnn32CfclWEK6BAwcacXn22WfLnDZ37lw744wzbM6cOXb++ec78StzwpoNFcESUdE+EcghAtOmTbPBgwfb+uuv70SnY8eONnXqVHvxxRdTxnLx4sV2yy23OPGJP3HmzJnWu3fvQHw23nhju+qqq2z58uX28MMPJ7wmfI/PP/+8jCCGj33yySdOdBCfdCYBSkdIx0UgywRGjhzpBKFz586uKHPaaae5GA0fPjxlzPr162e//PKLNWzYsNx5l19+uY0ePTrY37RpUzv88MOtTZs2NnnyZPv++++DY/ErFNtuvfXWhPfl2osvvtgWLFhgW265Zfyl5bYlQOWQaIcI5BaBWbNmuQhttNFGZZa//vpr0ohSX0QOqUuXLgnrdHbaaSe78sory11PTgjzYZY7IbaDot/06dPtoosuKne4Ro0aduKJJ9qAAQNs++23L3c8focEKJ6ItkUgxwj4okydOnVczNZZZx23XLZsmctpxEeX3Mdtt91mLVq0sHPOOSf+sNu+5JJLjPqeePP39mHGH//www/t5ZdftmOPPdb+7//+L/6wy0FR51S/fv1yxxLtUCtYIiraJwJZIvDCCy+4F9wH361bN/OisHLlSrfbL9nwx/z5LO+77z4jd0TFdb169cKHyqx7QQvv9PdOdF+E7fbbb3fCdvbZZxtFscqaBKiyBHW9CFQhgd9++80mTZoU3HHevHnWpEkTt+1feL+kbideRBYuXGhvvPGG1axZ07VmcSEtUtill15qf/vb3+z4449324la0Lgeo6k/3mhSJ2dE7uaUU04xL1ZUkh933HFO8Mh1VcQkQBWhpXNFoJoJHHPMMbbffvsFoTRv3tzGjBnjtidOnOiW33zzjVuG++uUlpZaSUmJ+zRr1swd9z1swku/zgmtWrUy6mwQEq6nSEd/Ie6zySabBPfgOOchduF7h+8VXncXZvhHApQhKJ0mAlEQIOcRn/vo1KmTq/glB3L33XcbFcwYuQ7so48+sssuu8x23XVXu/fe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8aEe4M0333Qv4tFHH+0PF8wyEYN48bn//vsLUnz9l5iIgT9WbEvmN8LofhBe4q/e54rcgTz8k3MCRPM6WUtvlH979Ohh1HXQCoYx9ShWqOOC4hnwANL64XM+hdD86r7AFH8SMUhxekEfatu2rUvfxIkT3fKbb75xS7/fbeTpn5wToERlfOYUodKRbDnzodAZi9numBy7EC2eAfM9DxkyxCWVup+ePXsGye7evXtB1ofFMwgSXIQrnTp1cj9Ab7/9tt19991BBfxxxx2X9zTyohKa5ld6PpMD+Pjjj10xjC/CZ03z/ltIk4BRo0YFZ1DpiCD5j8+WBydopeAIMBfW7bff7p73oUOHOm8mtALTJSPfLS96QnvITMbOzIjFIjw+3VqKgCdAZ0w6JOZ73Y9PT14JkI+0liIgAoVBIC+KYIWBWqkQARGIJyABiieibREQgcgISIAiQ62AREAE4glIgOKJaFsERCAyAhKgyFArIBEQgXgCEqB4ItoWARGIjIAEKDLUCkgERCCegAQonoi2RUAEIiMgAYoMtQISARGIJyABiieibREQgcgISIAiQ62AREAE4glIgOKJaFsERCAyAhKgyFArIBEQgXgCEqB4ItoWARGIjIAEKDLUCkgERCCegAQonoi2RUAEIiMgAYoMtQISARGIJyABiieibREQgcgISIAiQ62AREAE4glIgOKJaFsERCAyAhKgyFArIBEQgXgCEqB4ItoWARGIjIAEKDLUCkgERCCegAQonoi2RUAEIiMgAYoMtQISARGIJyABiieibREQgcgISIAiQ62AREAE4glIgOKJaFsERCAyAhKgyFArIBEQgXgCEqB4ItoWARGIjIAEKDLUCkgERCCewP8D0YBDLa4tAr0AAAAASUVORK5CYII=" /><!-- --></p>
+##               Estimate     SE              C.I. Conf. Level
+## Raw             -1.580 0.3691 [-2.9073, -1.066]         0.9
+## Hedges&#39;s g(z)   -1.174 0.7202 [-1.4089, 1.1131]         0.9
+## Note: studentized bootstrap ci method utilized.</code></pre>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a><span class="fu">plot</span>(test1)</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+<div id="interpreting-bootstrap-tost-results" class="section level3">
+<h3>Interpreting Bootstrap TOST Results</h3>
+<p>When interpreting the results of <code>boot_t_TOST</code>:</p>
+<ol style="list-style-type: decimal">
+<li>The bootstrap p-values (<code>p1</code> and <code>p2</code>)
+represent the empirical probability of observing the test statistic or
+more extreme values under repeated sampling</li>
+<li>The confidence intervals are derived directly from the empirical
+distribution of bootstrap samples</li>
+<li>The distribution plots provide visual insight into the variability
+of the effect size estimate</li>
+</ol>
+<p>For equivalence testing, examine whether both bootstrap p-values are
+significant (&lt; alpha) and whether the confidence interval for the
+effect size falls entirely within the equivalence bounds.</p>
+</div>
 </div>
 </div>
 <div id="ratio-of-difference-log-transformed" class="section level1">
@@ -809,8 +1157,14 @@ compared on the log scale <span class="citation">(He et al.
 two means.</p>
 <p><span class="math display">\[
 log ( \frac{y}{x} ) = log(y) - log(x)
-\]</span> The <a href="https://www.fda.gov/regulatory-information/search-fda-guidance-documents/bioavailability-and-bioequivalence-studies-submitted-ndas-or-inds-general-considerations">United
-States Food and Drug Administration (FDA)</a><a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a> hs stated a rationale
+\]</span></p>
+<p>Where: - y and x are the means of the two groups being compared - The
+transformation converts multiplicative relationships into additive
+ones</p>
+<div id="why-use-the-natural-log-transformation" class="section level2">
+<h2>Why Use The Natural Log Transformation?</h2>
+<p>The <a href="https://www.fda.gov/regulatory-information/search-fda-guidance-documents/bioavailability-and-bioequivalence-studies-submitted-ndas-or-inds-general-considerations">United
+States Food and Drug Administration (FDA)</a><a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a> has stated a rationale
 for using the log transformed values:</p>
 <blockquote>
 <p>Using logarithmic transformation, the general linear statistical
@@ -821,18 +1175,47 @@ or medians) on the original scale. Logarithmic transformation thus
 achieves a general comparison based on the ratio rather than the
 differences.</p>
 </blockquote>
-<p>In addition, the FDA, considers two drugs as bioequivalent when the
+<p>Log transformation offers several advantages:</p>
+<ol style="list-style-type: decimal">
+<li>It facilitates the analysis of <strong>relative</strong> rather than
+absolute differences</li>
+<li>It often makes right-skewed distributions more symmetric</li>
+<li>It stabilizes variance when variability increases with the mean</li>
+<li>It provides an easy-to-interpret interpretable effect size (ratio of
+means)</li>
+</ol>
+<p>In addition, the FDA considers two drugs as bioequivalent when the
 ratio between x and y is less than 1.25 and greater than 0.8 (1/1.25),
 which is the default equivalence bound for the log functions.</p>
+</div>
+<div id="applications-beyond-bioequivalence" class="section level2">
+<h2>Applications Beyond Bioequivalence</h2>
+<p>While log transformation is standard in bioequivalence studies, it’s
+useful in many other contexts:</p>
+<ul>
+<li><strong>Economics</strong>: Comparing percentage changes in economic
+indicators</li>
+<li><strong>Environmental science</strong>: Analyzing concentration
+ratios of pollutants</li>
+<li><strong>Biology</strong>: Examining growth rates or concentration
+ratios</li>
+<li><strong>Medicine</strong>: Comparing relative efficacy of
+treatments</li>
+<li><strong>Psychology</strong>: Analyzing response time ratios</li>
+</ul>
+<p>Consider using log transformation whenever your research question is
+about relative rather than absolute differences, particularly when the
+data follow a multiplicative rather than additive pattern.</p>
+</div>
 <div id="log_tost" class="section level2">
 <h2>log_TOST</h2>
 <p>For example, we could compare whether the cars of different
 transmissions are “equivalent” with regards to gas mileage. We can use
 the default equivalence bounds (<code>eqb = 1.25</code>).</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="fu">log_TOST</span>(</span>
-<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a>  mpg <span class="sc">~</span> am,</span>
-<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a>  <span class="at">data =</span> mtcars</span>
-<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="fu">log_TOST</span>(</span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a>  mpg <span class="sc">~</span> am,</span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a>  <span class="at">data =</span> mtcars</span>
+<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a>)</span></code></pre></div>
 <pre><code>## 
 ## Log-transformed Welch Two Sample t-test
 ## 
@@ -857,6 +1240,21 @@ ratio on the log scale (the scale of the test statistics), and the means
 ratio. The means ratio is missing standard error because the confidence
 intervals and estimate are simply the log scale results
 exponentiated.</p>
+<div id="interpreting-the-means-ratio" class="section level3">
+<h3>Interpreting the Means Ratio</h3>
+<p>When interpreting the means ratio:</p>
+<ul>
+<li>A ratio of 1.0 indicates perfect equivalence (no difference)</li>
+<li>Ratios &gt; 1.0 indicate that the first group has higher values than
+the second</li>
+<li>Ratios &lt; 1.0 indicate that the first group has lower values than
+the second</li>
+</ul>
+<p>For equivalence testing with the default bounds (0.8, 1.25): -
+Equivalence is established when the 90% confidence interval for the
+ratio falls entirely within (0.8, 1.25) - This range corresponds to a
+difference of ±20% on a relative scale</p>
+</div>
 </div>
 <div id="bootstrap-log" class="section level2">
 <h2>Bootstrap + Log</h2>
@@ -865,15 +1263,15 @@ on the logarithmic scale can be biased, and it is recommended that
 bootstrapped tests be utilized instead. Therefore, the
 <code>boot_log_TOST</code> function can be utilized to perform a more
 precise test.</p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="fu">boot_log_TOST</span>(</span>
-<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a>  mpg <span class="sc">~</span> am,</span>
-<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a>  <span class="at">data =</span> mtcars,</span>
-<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a>  <span class="at">R =</span> <span class="dv">499</span></span>
-<span id="cb21-5"><a href="#cb21-5" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="fu">boot_log_TOST</span>(</span>
+<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a>  mpg <span class="sc">~</span> am,</span>
+<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a>  <span class="at">data =</span> mtcars,</span>
+<span id="cb23-4"><a href="#cb23-4" tabindex="-1"></a>  <span class="at">R =</span> <span class="dv">499</span></span>
+<span id="cb23-5"><a href="#cb23-5" tabindex="-1"></a>)</span></code></pre></div>
 <pre><code>## 
 ## Bootstrapped Log Welch Two Sample t-test
 ## 
-## The equivalence test was non-significant, t(23.96) = -1.363, p = 9.68e-01
+## The equivalence test was non-significant, t(23.96) = -1.363, p = 9.56e-01
 ## The null hypothesis test was significant, t(23.96) = -3.826, p = 0e+00
 ## NHST: reject null significance hypothesis that the effect is equal to 1 
 ## TOST: don&#39;t reject null equivalence hypothesis
@@ -881,14 +1279,20 @@ precise test.</p>
 ## TOST Results 
 ##                 t    df p.value
 ## t-test     -3.826 23.96 &lt; 0.001
-## TOST Lower -1.363 23.96   0.968
+## TOST Lower -1.363 23.96   0.956
 ## TOST Upper -6.288 23.96 &lt; 0.001
 ## 
 ## Effect Sizes 
 ##                  Estimate      SE               C.I. Conf. Level
-## log(Means Ratio)  -0.3466 0.08403 [-0.5182, -0.1702]         0.9
-## Means Ratio        0.7071 0.05979   [0.5956, 0.8435]         0.9
-## Note: percentile bootstrap method utilized.</code></pre>
+## log(Means Ratio)  -0.3466 0.08722 [-0.5449, -0.1522]         0.9
+## Means Ratio        0.7071 0.06209   [0.5799, 0.8588]         0.9
+## Note: studentized bootstrap ci method utilized.</code></pre>
+<p>The bootstrapped version is particularly recommended when:</p>
+<ul>
+<li>Sample sizes are small (n &lt; 30 per group)</li>
+<li>Data show notable deviations from log-normality</li>
+<li>You want to ensure robust confidence intervals</li>
+</ul>
 </div>
 </div>
 <div id="just-estimate-an-effect-size" class="section level1">
@@ -898,27 +1302,103 @@ robust effect size. Therefore, I created the <code>ses_calc</code> and
 <code>boot_ses_calc</code> functions as robust effect size calculation<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a>. The
 interface is almost the same as <code>wilcox_TOST</code> but you don’t
 set an equivalence bound.</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="fu">ses_calc</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a>         <span class="at">data =</span> sleep,</span>
-<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a>         <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb23-4"><a href="#cb23-4" tabindex="-1"></a>         <span class="at">ses =</span> <span class="st">&quot;r&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a><span class="fu">ses_calc</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a>         <span class="at">data =</span> sleep,</span>
+<span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a>         <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb25-4"><a href="#cb25-4" tabindex="-1"></a>         <span class="at">ses =</span> <span class="st">&quot;r&quot;</span>)</span></code></pre></div>
 <pre><code>##                            estimate lower.ci  upper.ci conf.level
 ## Rank-Biserial Correlation 0.9818182 0.928369 0.9954785       0.95</code></pre>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a><span class="co"># Setting bootstrap replications low to</span></span>
-<span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a><span class="do">## reduce compiling time of vignette</span></span>
-<span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a><span class="fu">boot_ses_calc</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb25-4"><a href="#cb25-4" tabindex="-1"></a>         <span class="at">data =</span> sleep,</span>
-<span id="cb25-5"><a href="#cb25-5" tabindex="-1"></a>         <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb25-6"><a href="#cb25-6" tabindex="-1"></a>         <span class="at">R =</span> <span class="dv">199</span>,</span>
-<span id="cb25-7"><a href="#cb25-7" tabindex="-1"></a>         <span class="at">boot_ci =</span> <span class="st">&quot;perc&quot;</span>, <span class="co"># recommend percentile bootstrap for paired SES</span></span>
-<span id="cb25-8"><a href="#cb25-8" tabindex="-1"></a>         <span class="at">ses =</span> <span class="st">&quot;r&quot;</span>) </span></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a><span class="co"># Setting bootstrap replications low to</span></span>
+<span id="cb27-2"><a href="#cb27-2" tabindex="-1"></a><span class="do">## reduce compiling time of vignette</span></span>
+<span id="cb27-3"><a href="#cb27-3" tabindex="-1"></a><span class="fu">boot_ses_calc</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb27-4"><a href="#cb27-4" tabindex="-1"></a>         <span class="at">data =</span> sleep,</span>
+<span id="cb27-5"><a href="#cb27-5" tabindex="-1"></a>         <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb27-6"><a href="#cb27-6" tabindex="-1"></a>         <span class="at">R =</span> <span class="dv">199</span>,</span>
+<span id="cb27-7"><a href="#cb27-7" tabindex="-1"></a>         <span class="at">boot_ci =</span> <span class="st">&quot;perc&quot;</span>, <span class="co"># recommend percentile bootstrap for paired SES</span></span>
+<span id="cb27-8"><a href="#cb27-8" tabindex="-1"></a>         <span class="at">ses =</span> <span class="st">&quot;r&quot;</span>) </span></code></pre></div>
 <pre><code>## Bootstrapped results contain extreme results (i.e., no overlap), caution advised interpreting the with confidence intervals.</code></pre>
 <pre><code>##    estimate bias         SE  lower.ci upper.ci conf.level boot_ci
-## 1 0.9818182    0 0.03733088 0.8909091        1       0.95    perc</code></pre>
+## 1 0.9818182    0 0.03743905 0.8880375        1       0.95    perc</code></pre>
+<div id="choosing-between-different-bootstrap-ci-methods" class="section level2">
+<h2>Choosing Between Different Bootstrap CI Methods</h2>
+<p>The <code>boot_ses_calc</code> function offers several bootstrap
+confidence interval methods through the <code>boot_ci</code>
+parameter:</p>
+<ul>
+<li><strong>“perc”</strong> (Percentile): Simple and intuitive, works
+well for symmetric distributions</li>
+<li><strong>“basic”</strong>: Similar to percentile but adjusts for
+bias, more conservative</li>
+<li><strong>“norm”</strong> (Normal approximation): Assumes normality of
+the bootstrap distribution</li>
+</ul>
+</div>
+</div>
+<div id="summary-comparison-of-robust-tost-methods" class="section level1">
+<h1>Summary Comparison of Robust TOST Methods</h1>
+<table>
+<colgroup>
+<col width="15%" />
+<col width="29%" />
+<col width="25%" />
+<col width="29%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Key Advantages</th>
+<th>Limitations</th>
+<th>Best Use Cases</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Wilcoxon TOST</strong></td>
+<td>Simple, widely accepted, minimal assumptions</td>
+<td>Less power than parametric tests with normal data</td>
+<td>Ordinal data, non-normal distributions, presence of outliers</td>
+</tr>
+<tr class="even">
+<td><strong>Brunner-Munzel</strong></td>
+<td>Robust to unequal distributions, interpretable effect</td>
+<td>Computationally intensive with permutation</td>
+<td>Different distribution shapes between groups,
+heteroscedasticity</td>
+</tr>
+<tr class="odd">
+<td><strong>Bootstrap TOST</strong></td>
+<td>Flexible, minimal assumptions, works with small samples</td>
+<td>Computationally intensive, results vary slightly between runs</td>
+<td>Small samples, complex data structures, when precise CIs are
+important</td>
+</tr>
+<tr class="even">
+<td><strong>Log-Transformed</strong></td>
+<td>Focuses on relative differences, often stabilizes variance</td>
+<td>Requires positive data, can be biased with small samples</td>
+<td>Bioequivalence studies, comparing ratios rather than absolute
+differences</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="conclusion" class="section level1">
+<h1>Conclusion</h1>
+<p>The robust TOST procedures provided in the TOSTER package offer
+reliable alternatives to standard parametric equivalence testing when
+data violate typical assumptions. By selecting the appropriate robust
+method for your specific data characteristics and research question, you
+can ensure more valid statistical inferences about equivalence or
+minimal effects.</p>
+<p>Remember that no single method is universally superior - the choice
+depends on your data structure, sample size, and specific research
+question. When in doubt, running multiple approaches and comparing
+results can provide valuable insights into the robustness of your
+conclusions.</p>
 </div>
 <div id="references" class="section level1 unnumbered">
 <h1 class="unnumbered">References</h1>
-<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
 <div id="ref-agresti" class="csl-entry">
 Agresti, Alan. 1980. <span>“Generalized Odds Ratios for Ordinal
 Data.”</span> <em>Biometrics</em>, 59–67. <a href="https://doi.org/10.2307/2530495">https://doi.org/10.2307/2530495</a>.
@@ -941,9 +1421,9 @@ Designs.”</span> <em>Statistical Methods in Medical Research</em>,
 </div>
 <div id="ref-karch2021" class="csl-entry">
 Karch, Julian D. 2021. <span>“Psychologists Should Use Brunner-Munzel’s
-Instead of Mann-Whitney’s <span class="math inline">\(\less\)</span>i<span class="math inline">\(\greater\)</span>u<span class="math inline">\(\less\)</span>/i<span class="math inline">\(\greater\)</span> Test as the Default
-Nonparametric Procedure.”</span> <em>Advances in Methods and Practices
-in Psychological Science</em> 4 (2): 251524592199960. <a href="https://doi.org/10.1177/2515245921999602">https://doi.org/10.1177/2515245921999602</a>.
+Instead of Mann-Whitney’s Test as the Default Nonparametric
+Procedure.”</span> <em>Advances in Methods and Practices in
+Psychological Science</em> 4 (2): 251524592199960. <a href="https://doi.org/10.1177/2515245921999602">https://doi.org/10.1177/2515245921999602</a>.
 </div>
 <div id="ref-Kerby_2014" class="csl-entry">
 Kerby, Dave S. 2014. <span>“The Simple Difference Formula: An Approach
@@ -953,7 +1433,7 @@ Psychology</em> 3 (January): 11.IT.3.1. <a href="https://doi.org/10.2466/11.it.3
 <div id="ref-neubert2007" class="csl-entry">
 Neubert, Karin, and Edgar Brunner. 2007. <span>“A Studentized
 Permutation Test for the Non-Parametric Behrens<span></span>fisher
-Problem.”</span> <em>Computational Statistics <span>&amp;</span>Amp<span class="math inline">\(\mathsemicolon\)</span> Data Analysis</em> 51
+Problem.”</span> <em>Computational Statistics and Data Analysis</em> 51
 (10): 5192–5204. <a href="https://doi.org/10.1016/j.csda.2006.05.024">https://doi.org/10.1016/j.csda.2006.05.024</a>.
 </div>
 <div id="ref-wmwodds" class="csl-entry">

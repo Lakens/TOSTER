@@ -4,6 +4,8 @@ home:
 
 
 template:
+  bootstrap: 5
+  math-rendering: mathjax
   opengraph:
     image:
       src: docs/articles/IntroTOSTt_files/figure-html/tostplots-2.png

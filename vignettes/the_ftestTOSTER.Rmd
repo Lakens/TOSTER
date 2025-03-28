@@ -14,52 +14,80 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
 ---
 
-For an open access tutorial paper explaining how to set equivalence bounds, and how to perform and report equivalence for ANOVA models see @Campbell_2021. These functions are meant to be omnibus tests, and additional testing may be necessary^[Russ Lenth's emmeans R package has some capacity for equivalence testing on the marginal means (i.e., a form of pairwise testing). See the emmeans package vignettes for details]. 
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
 
-# F-test Calculations
+## Introduction
 
-Statistical equivalence testing (or "omnibus non-inferiority testing" as stated by @Campbell_2021) for *F*-tests are special use case of the cumulative distribution function of the non-central *F* distribution.
+This vignette demonstrates how to perform equivalence testing for F-tests in ANOVA models using the TOSTER package. While traditional null hypothesis significance testing (NHST) helps determine if effects are different from zero, equivalence testing allows you to determine if effects are small enough to be considered practically equivalent to zero or meaningfully similar.
 
-As @Campbell_2021 state, these type of questions answer the question: "Can we reject the hypothesis that the total proportion of variance in outcome Y attributable to X is greater than or equal to the equivalence bound $\Delta$?"
+For an open access tutorial paper explaining how to set equivalence bounds, and how to perform and report equivalence testing for ANOVA models, see @Campbell_2021. These functions are designed for omnibus tests, and additional testing may be necessary for specific comparisons between groups or conditions^[Russ Lenth's emmeans R package has some capacity for equivalence testing on the marginal means (i.e., a form of pairwise testing). See the emmeans package vignettes for details]. 
+
+## The Theory Behind F-test Equivalence Testing
+
+Statistical equivalence testing (or "omnibus non-inferiority testing" as described by Campbell & Lakens, 2021) for *F*-tests is based on the cumulative distribution function of the non-central *F* distribution.
+
+These tests answer the question: "Can we reject the hypothesis that the total proportion of variance in outcome Y attributable to X is greater than or equal to the equivalence bound $\Delta$?"
+
+The null and alternative hypotheses for equivalence testing with F-tests are:
 
 $$
-H_0: \space 1 > \eta^2_p \geq \Delta
+H_0: \space \eta^2_p \geq \Delta \quad \text{(Effect is meaningfully large)}
 \\
-H_1: \space 0 \geq \eta^2_p < \Delta
+H_1: \space \eta^2_p < \Delta \quad \text{(Effect is practically equivalent to zero)}
 $$
 
-In `TOSTER` we go a tad farther and calculate a more generalization of the non-centrality parameter to allow for the equivalence test for *F*-tests to be applied to variety of designs.
+Where $\eta^2_p$ is the partial eta-squared value (proportion of variance explained) and $\Delta$ is the equivalence bound.
 
-@Campbell_2021 calculate the *p*-value as:
+Campbell & Lakens (2021) calculate the *p*-value for a one-way ANOVA as:
 
 $$
-p = p_f(F; J-1, N-J, \frac{N \cdot \Delta}{1-\Delta})
+p = p_F(F; J-1, N-J, \frac{N \cdot \Delta}{1-\Delta})
 $$
 
-However, this approach could not be applied to factorial ANOVA and the paper only outlines how to apply this approach to a one-way ANOVA and an extension to Welch's one-way ANOVA.
-
-However, the non-centrality parameter (ncp = $\lambda$) can be calculated with the equivalence bound and the degrees of freedom:
+In TOSTER, we use a more generalized approach that can be applied to a variety of designs, including factorial ANOVA. The non-centrality parameter (ncp = $\lambda$) is calculated with the equivalence bound and the degrees of freedom:
 
 $$
 \lambda_{eq} = \frac{\Delta}{1-\Delta} \cdot(df_1 + df_2 +1)
 $$
 
-The *p*-value for the equivalence test ($p_{eq}$) could then be calculated from traditional ANOVA results and the distribution function:
+The *p*-value for the equivalence test ($p_{eq}$) can then be calculated from traditional ANOVA results and the distribution function:
 
 $$
-p_{eq} = p_f(F; df_1, df_2, \lambda_{eq})
+p_{eq} = p_F(F; df_1, df_2, \lambda_{eq})
 $$
 
-## An Example
+Where:
 
-Using the `InsectSprays` data set in R and the base R `aov` function we can demonstrate how this omnibus equivalence testing can be applied with `TOSTER`.
+- $F$ is the observed F-statistic
+- $df_1$ is the numerator degrees of freedom (effect df)
+- $df_2$ is the denominator degrees of freedom (error df)
+- $\lambda_{eq}$ is the non-centrality parameter calculated from the equivalence bound
 
-From the initial analysis we an see a clear "significant" effect (the p-value listed is zero but it just very small) of the factor spray. However, we *may* be interested in testing if the effect is practically equivalent. I will arbitrarily set the equivalence bound to a partial eta-squared of 0.35 ($H_0: \eta^2_p > 0.35$).
+## Practical Application with TOSTER
+
+### Setting Up
+
+First, let's load the TOSTER package and examine our example dataset:
 
 ```{r warning=FALSE, message=FALSE}
 library(TOSTER)
 # Get Data
 data("InsectSprays")
+
+# Look at the data structure
+head(InsectSprays)
+```
+
+The `InsectSprays` dataset contains counts of insects in agricultural experimental units treated with different insecticides. Let's first run a traditional ANOVA to examine the effect of spray type on insect counts.
+
+### Traditional ANOVA
+
+```{r warning=FALSE, message=FALSE}
 # Build ANOVA
 aovtest = aov(count ~ spray,
               data = InsectSprays)
@@ -67,10 +95,15 @@ aovtest = aov(count ~ spray,
 # Display overall results
 knitr::kable(broom::tidy(aovtest),
             caption = "Traditional ANOVA Test")
-
 ```
 
-We can then use the information in the table above to perform an equivalence test using the `equ_ftest` function. This function returns an object of the S3 class `htest` and the output will look very familiar to the the t-test. The main difference is the estimates, and confidence interval, are for partial $\eta^2_p$.
+From the initial analysis, we can see a clear statistically significant effect of the factor `spray` (p-value < 0.001). The F-statistic is 34.7 with 5 and 66 degrees of freedom.
+
+### Equivalence Testing Using the Raw F-statistic
+
+Now, let's perform an equivalence test using the `equ_ftest()` function. This function requires the F-statistic, numerator and denominator degrees of freedom, and the equivalence bound.
+
+For this example, we'll set the equivalence bound to a partial eta-squared of 0.35. This means we're testing the null hypothesis that $\eta^2_p \geq 0.35$ against the alternative that $\eta^2_p < 0.35$.
 
 ```{r}
 equ_ftest(Fstat = 34.70228,
@@ -79,37 +112,172 @@ equ_ftest(Fstat = 34.70228,
           eqbound = 0.35)
 ```
 
-Based on the results above we would conclude there is a significant effect of "spray" and the differences due to spray are *not* statistically equivalent. In essence, we reject the traditional null hypothesis of "no effect" but accept the null hypothesis of the equivalence test.
+### Interpreting the Results
 
-The `equ_ftest` is very useful because all you need is very basic summary statistics. However, if you are doing all your analyses in R then you can use the `equ_anova` function. This function accepts objects produced from `stats::aov`, `car::Anova` and `afex::aov_car` (or any anova from `afex`).
+Looking at the results:
+
+1. The observed partial eta-squared is 0.724, which is quite large
+2. The equivalence test p-value is 0.999, which is far from significant (p > 0.05)
+3. The 95% confidence interval for partial eta-squared is [0.592, 0.776]
+
+Based on these results, we would conclude:
+
+1. There is a significant effect of "spray" (from the traditional ANOVA)
+2. The effect is *not* statistically equivalent to zero (using our equivalence bound of 0.35)
+3. The observed effect is larger than our equivalence bound of 0.35
+
+In essence, we reject the traditional null hypothesis of "no effect" but fail to reject the null hypothesis of the equivalence test. This could be taken as indication of a meaningfully large effect.
+
+### Equivalence Testing Using ANOVA Objects
+
+If you're doing all your analyses in R, you can use the `equ_anova()` function, which accepts objects produced from `stats::aov()`, `car::Anova()`, and `afex::aov_car()` (or any ANOVA from `afex`).
 
 ```{r}
 equ_anova(aovtest,
           eqbound = 0.35)
 ```
 
-### Visualize partial $\eta^2$
+The `equ_anova()` function conveniently provides a data frame with results for all effects in the model, including the traditional p-value (`p.null`), the estimated partial eta-squared (`pes`), and the equivalence test p-value (`p.equ`).
 
-Just like the standardized mean differences, `TOSTER` also has a function to visualize $\eta^2_p$. 
+### Minimal Effect Testing
 
-The function, `plot_pes`, operates in a fashion very similar to `equ_ftest`. In essence, all you have to do is provide the F-statistic, numerator degrees of freedom, and denominator degrees of freedom. We can also select the type of plot with the `type` argument. Users have the option of producing a consonance plot (`type = "c"`), a consonance density plot (`type = "cd"`), or both (`type = c("cd","c")`). By default, `plot_pes` will produce both plots.
+You can also perform minimal effect testing instead of equivalence testing by setting `MET = TRUE`. This reverses the hypotheses:
 
-```{r, fig.width=6, fig.height=6}
+- Effect is not meaningfully large
+
+$$
+H_0: \space \eta^2_p \leq \Delta 
+$$
+- Effect is meaningfully large
+
+$$
+H_1: \space \eta^2_p > \Delta 
+$$
+
+Let's see how to use this option:
+
+```{r}
+equ_anova(aovtest,
+          eqbound = 0.35,
+          MET = TRUE)
+```
+
+In this case, the minimal effect test is significant (p < 0.001), confirming that the effect is meaningfully larger than our bound of 0.35.
+
+## Visualizing Partial Eta-Squared
+
+TOSTER provides a function to visualize the uncertainty around partial eta-squared estimates through consonance plots. The `plot_pes()` function requires the F-statistic, numerator degrees of freedom, and denominator degrees of freedom.
+
+```{r, fig.width=7, fig.height=6}
 plot_pes(Fstat = 34.70228,
          df1 = 5,
          df2 = 66)
 ```
 
+The plots show:
 
-# Power Analysis for *F*-tests
+1. **Top plot (Confidence curve)**: The relationship between p-values and parameter values. The y-axis shows p-values, while the x-axis shows possible values of partial eta-squared. The horizontal lines represent different confidence levels.
 
-Power for an equivalence *F*-test can be calculated with the same equations supplied by @Campbell_2021. I have included these within the `power_eq_f` function.
+2. **Bottom plot (Consonance density)**: The distribution of plausible values for partial eta-squared. The peak of this distribution represents the most compatible value based on the observed data.
+
+These visualizations help you understand the precision of your effect size estimate and the range of plausible values.
+
+## A Second Example: Small Effect
+
+Let's create a second example with a smaller effect to demonstrate the other possible outcome:
 
 ```{r}
-power_eq_f(df1 = 2, 
-            df2 = 60,
-            eqbound = .15)
+# Simulate data with a small effect
+set.seed(123)
+groups <- factor(rep(1:3, each = 30))
+y <- rnorm(90) + rep(c(0, 0.3, 0.3), each = 30)
+small_aov <- aov(y ~ groups)
+
+# Traditional ANOVA
+knitr::kable(broom::tidy(small_aov),
+            caption = "Traditional ANOVA Test (Small Effect)")
+
+# Equivalence test
+equ_anova(small_aov, eqbound = 0.15)
+
+# Visualize
+plot_pes(Fstat = 2.36, df1 = 2, df2 = 87)
 ```
 
+In this example:
+1. The traditional ANOVA shows a marginally significant effect (p = 0.07)
+2. The partial eta-squared (0.051) is smaller than our equivalence bound
+3. The equivalence test is significant (p < 0.05), indicating the effect is practically equivalent (using our bound of 0.15)
 
-# References
+
+This demonstrates how equivalence testing can help establish that effects are too small to be practically meaningful.
+
+## Power Analysis for F-test Equivalence Testing
+
+TOSTER includes a function to calculate power for equivalence F-tests. The `power_eq_f()` function allows you to determine:
+
+1. The required sample size for a given power level
+2. The power for a given amount of degrees of freedom (from which we can infer sample size)
+3. The detectable equivalence bound for a given power and sample size
+
+### Sample Size Calculation
+
+To calculate the sample size needed for 80% power with a specific effect size and equivalence bound:
+
+```{r}
+power_eq_f(df1 = 2,         # Numerator df (groups - 1) 
+           df2 = NULL,      # Set to NULL to solve for sample size
+           eqbound = 0.15,  # Equivalence bound
+           power = 0.8)     # Desired power
+```
+
+This tells us we need approximately 60 total participants (yielding df2 = 57) to achieve 80% power for detecting equivalence with a bound of 0.15.
+
+
+### Power Calculation
+
+To calculate the power for a given sample size and equivalence bound:
+
+```{r}
+power_eq_f(df1 = 2,         # Numerator df (groups - 1)
+           df2 = 60,        # Error df (N - groups)
+           eqbound = 0.15)  # Equivalence bound
+```
+
+With 60 error degrees of freedom (about 63 total participants for 3 groups), we would have approximately 80% power to detect equivalence.
+
+
+### Detectable Equivalence Bound
+
+To find the smallest equivalence bound detectable with 80% power given a sample size:
+
+```{r}
+power_eq_f(df1 = 2,         # Numerator df (groups - 1)
+           df2 = 60,        # Error df (N - groups)
+           power = 0.8)     # Desired power
+```
+
+With 60 error degrees of freedom, we could detect equivalence at a bound of approximately 0.145 with 80% power.
+
+## Choosing Appropriate Equivalence Bounds
+
+Selecting an appropriate equivalence bound is crucial and should be based on:
+
+1. **Field-specific standards**: Some research areas have established conventions
+2. **Smallest effect size of interest**: What's the smallest effect that would be theoretically or practically meaningful?
+3. **Prior research**: What effect sizes have been reported in similar studies? Caution is warranted with this approach as previous research is likely to be an overestimate of any "real" effect (i.e., the winner's curse).
+4. **Resource constraints**: Smaller bounds require larger sample sizes
+
+Whatever your choice, it should be adjusted based on your specific research context and questions.
+
+## Conclusion
+
+Equivalence testing for F-tests provides a valuable complement to traditional NHST by allowing researchers to establish evidence for the absence of meaningful effects. The TOSTER package offers user-friendly functions for:
+
+1. Performing equivalence tests on ANOVA results (`equ_anova()` and `equ_ftest()`)
+2. Visualizing uncertainty around partial eta-squared estimates (`plot_pes()`)
+3. Conducting power analyses for planning studies (`power_eq_f()`)
+
+By incorporating these tools into your analysis workflow, you can make more nuanced inferences about effect sizes and avoid the common pitfall of interpreting non-significant p-values as evidence for the absence of an effect.
+
+## References

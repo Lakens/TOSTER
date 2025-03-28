@@ -37,19 +37,19 @@ boot_t_TOST(x, ...)
 
 \item{y}{an optional (non-empty) numeric vector of data values.}
 
-\item{hypothesis}{'EQU' for equivalence (default), or 'MET' for minimal effects test, the alternative hypothesis.}
+\item{hypothesis}{'EQU' for equivalence (default), or 'MET' for minimal effects test.}
 
 \item{paired}{a logical indicating whether you want a paired t-test.}
 
 \item{var.equal}{a logical variable indicating whether to treat the two variances as being equal. If TRUE then the pooled variance is used to estimate the variance otherwise the Welch (or Satterthwaite) approximation to the degrees of freedom is used.}
 
-\item{eqb}{Equivalence bound. Can provide 1 value (negative value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds.}
+\item{eqb}{Equivalence bound. Can provide 1 value (symmetric bound, negative value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds.}
 
-\item{low_eqbound}{lower equivalence bounds (deprecated).}
+\item{low_eqbound}{lower equivalence bounds (deprecated, use \code{eqb} instead).}
 
-\item{high_eqbound}{upper equivalence bounds (deprecated).}
+\item{high_eqbound}{upper equivalence bounds (deprecated, use \code{eqb} instead).}
 
-\item{eqbound_type}{Type of equivalence bound. Can be set to "SMD" for standardized mean difference (i.e., Cohen's d) or  "raw" for the mean difference. Default is "raw". Raw is strongly recommended as SMD bounds will produce biased results.}
+\item{eqbound_type}{Type of equivalence bound. Can be 'SMD' for standardized mean difference (i.e., Cohen's d) or 'raw' for the mean difference. Default is 'raw'. Raw is strongly recommended as SMD bounds will produce biased results.}
 
 \item{alpha}{alpha level (default = 0.05)}
 
@@ -57,13 +57,13 @@ boot_t_TOST(x, ...)
 
 \item{rm_correction}{Repeated measures correction to make standardized mean difference Cohen's d(rm). This only applies to repeated/paired samples. Default is FALSE.}
 
-\item{glass}{A option to calculate Glass's delta as an alternative to Cohen's d type SMD. Default is NULL to not calculate Glass's delta, "glass1" will use the first group's SD as the denominator whereas "glass2" will use the 2nd group's SD.}
+\item{glass}{Option to calculate Glass's delta instead of Cohen's d style SMD ('glass1' uses first group's SD, 'glass2' uses second group's SD).}
 
-\item{mu}{a number indicating the true value of the mean for the two tailed test (or difference in means if you are performing a two sample test).}
+\item{mu}{a number indicating the true value of the mean for the two-tailed test (default = 0).}
 
-\item{R}{number of bootstrap replicates}
+\item{R}{number of bootstrap replications (default = 1999).}
 
-\item{boot_ci}{type of bootstrap confidence interval. Options include studentized (stud), empirical/basic (basic) and percentile (perc) confidence intervals.}
+\item{boot_ci}{method for bootstrap confidence interval calculation: "stud" (studentized, default), "basic" (basic bootstrap), or "perc" (percentile bootstrap).}
 
 \item{formula}{a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.}
 
@@ -71,49 +71,104 @@ boot_t_TOST(x, ...)
 
 \item{subset}{an optional vector specifying a subset of observations to be used.}
 
-\item{na.action}{a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").}
+\item{na.action}{a function indicating what should happen when the data contain NAs.}
 }
 \value{
-An S3 object of class
-\code{"TOSTt"} is returned containing the following slots:
+An S3 object of class \code{"TOSTt"} is returned containing the following slots:
 \itemize{
 \item "TOST": A table of class "data.frame" containing two-tailed t-test and both one-tailed results.
 \item "eqb": A table of class "data.frame" containing equivalence bound settings.
-\item "effsize":  table of class "data.frame" containing effect size estimates.
-\item "hypothesis": String stating the hypothesis being tested
+\item "effsize": Table of class "data.frame" containing effect size estimates.
+\item "hypothesis": String stating the hypothesis being tested.
 \item "smd": List containing the results of the standardized mean difference calculations (e.g., Cohen's d).
 \itemize{
-\item Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation)
+\item Items include: d (estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation).
 }
 \item "alpha": Alpha level set for the analysis.
 \item "method": Type of t-test.
 \item "decision": List included text regarding the decisions for statistical inference.
-\item "boot": List containing the bootstrap samples.
+\item "boot": List containing the bootstrap samples for SMD and raw effect sizes.
 }
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 
-A function for a bootstrap method for TOST with all types of t-tests.
+Performs equivalence testing using the Two One-Sided Tests (TOST) procedure with bootstrapped t-tests.
+This provides a robust alternative to traditional TOST when data may not meet all parametric assumptions.
 }
 \details{
-The implemented test(s) corresponds to the proposal of Chapter 16 of Efron and Tibshirani (1994).
-Returns TOSTt class object with bootstrapped based results.
-Please note that the repeated measures "corrected" effect size is not available.
+The function implements a bootstrap method for TOST as described in Chapter 16 of Efron and Tibshirani (1994).
+This approach provides a robust alternative to traditional parametric TOST when data distributions may not
+meet standard assumptions.
+
+The bootstrap procedure follows these steps:
+\itemize{
+\item Resample with replacement from the original data to create R bootstrap samples
+\item For each bootstrap sample, calculate test statistics and effect sizes
+\item Use the distribution of bootstrap results to compute p-values and confidence intervals
+\item Combine results using the specified bootstrap confidence interval method
+}
+
+Three types of bootstrap confidence intervals are available:
+\itemize{
+\item Studentized ("stud"): Accounts for the variability in the standard error estimate
+\item Basic/Empirical ("basic"): Uses the empirical distribution of bootstrap estimates
+\item Percentile ("perc"): Uses percentiles of the bootstrap distribution
+}
 
 For two-sample tests, the test is of \eqn{\bar x - \bar y} (mean of x minus mean of y).
 For paired samples, the test is of the difference scores (z),
-wherein \eqn{z =  x - y}, and the test is of \eqn{\bar z} (mean of the difference scores).
-For one-sample tests, the test is of \eqn{\bar x } (mean of x).
+wherein \eqn{z = x - y}, and the test is of \eqn{\bar z} (mean of the difference scores).
+For one-sample tests, the test is of \eqn{\bar x} (mean of x).
 
 For details on the calculations in this function see \code{vignette("robustTOST")}.
 }
-\section{References}{
+\section{Purpose}{
 
-
-Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press.
+Use this function when:
+\itemize{
+\item You want more robust confidence intervals for your effect sizes
+\item Sample sizes are small and parametric assumptions may not hold
+\item You want to avoid relying on asymptotic approximations
+}
 }
 
+\examples{
+# Example 1: Two-Sample Test with Symmetric Bounds
+set.seed(1234)
+group1 <- rnorm(30, mean = 5, sd = 2)
+group2 <- rnorm(30, mean = 5.5, sd = 2.2)
+
+# Using symmetric bounds of ±1.5
+result <- boot_t_TOST(x = group1,
+                     y = group2,
+                     eqb = 1.5,
+                     R = 999)  # Using fewer replications for demonstration
+
+# Example 2: Paired Sample Test with Percentile Bootstrap
+set.seed(5678)
+pre <- rnorm(25, mean = 100, sd = 15)
+post <- pre + rnorm(25, mean = 3, sd = 10)
+
+result <- boot_t_TOST(x = pre,
+                     y = post,
+                     paired = TRUE,
+                     eqb = c(-5, 8),  # Asymmetric bounds
+                     boot_ci = "perc")
+
+# Example 3: One Sample Test
+set.seed(9101)
+scores <- rnorm(40, mean = 0.3, sd = 1)
+
+# Testing if mean is equivalent to zero within ±0.5 units
+result <- boot_t_TOST(x = scores,
+                     eqb = 0.5,
+                     boot_ci = "basic")
+
+}
+\references{
+Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press.
+}
 \seealso{
 Other Robust tests: 
 \code{\link{boot_log_TOST}()},

@@ -1,46 +1,104 @@
-#' @title Bootstrapped TOST with log transformed t-tests
-
+#' @title Bootstrapped TOST with Log Transformed t-tests
 #' @description
 #' `r lifecycle::badge('stable')`
 #'
-#' A function for a bootstrap method for TOST with all types of t-tests.
+#' Performs equivalence testing using the Two One-Sided Tests (TOST) procedure with bootstrapped
+#' log-transformed t-tests. This approach is particularly useful for ratio-scale data where the
+#' equivalence bounds are expressed as ratios (e.g., bioequivalence studies).
+#'
+#' @section Purpose:
+#' Use this function when:
+#'   - Your data is on a ratio scale (all values must be positive)
+#'   - You want to establish equivalence based on the ratio of means rather than their difference
+#'   - Traditional parametric methods may not be appropriate due to skewed distributions
+#'   - You need to analyze bioequivalence data where bounds are expressed as ratios
+#'
 #' @inheritParams boot_t_TOST
 #' @inheritParams log_TOST
-#' @return An S3 object of class
-#'   `"TOSTt"` is returned containing the following slots:
+#' @param x a (non-empty) numeric vector of positive data values on a ratio scale.
+#' @param y an optional (non-empty) numeric vector of positive data values on a ratio scale.
+#' @param hypothesis 'EQU' for equivalence (default), or 'MET' for minimal effects test.
+#' @param paired a logical indicating whether you want a paired t-test.
+#' @param var.equal a logical variable indicating whether to treat the two variances as being equal.
+#' @param eqb Equivalence bound expressed as a ratio. Can provide 1 value (e.g., 1.25 for bounds of 0.8 and 1.25)
+#'   or 2 specific values that represent the lower and upper equivalence bounds (e.g., c(0.8, 1.25)).
+#' @param alpha alpha level (default = 0.05).
+#' @param null the ratio value under the null hypothesis (default = 1).
+#' @param boot_ci method for bootstrap confidence interval calculation: "stud" (studentized, default),
+#'   "basic" (basic bootstrap), or "perc" (percentile bootstrap).
+#' @param R number of bootstrap replications (default = 1999).
+#' @param ... further arguments to be passed to or from methods.
+#'
+#' @details
+#' The function implements a bootstrap method for log-transformed TOST as recommended by
+#' He et al. (2022) and corresponds to the proposal in Chapter 16 of Efron and Tibshirani (1994).
+#' This is approximately equivalent to the percentile bootstrap method mentioned by He et al. (2014).
+#'
+#' For two-sample tests, the test is of \eqn{\bar log(x) - \bar log(y)} which corresponds to testing
+#' the ratio of geometric means. For paired samples, the test is of difference scores on the log scale,
+#' \eqn{z = log(x) - log(y) = log(x/y)}, which also corresponds to a ratio test.
+#'
+#'
+#' The bootstrap procedure follows these steps:
+#'   - Log-transform the data
+#'   - Perform resampling with replacement to generate bootstrap samples
+#'   - For each bootstrap sample, calculate test statistics and effect sizes
+#'   - Use the distribution of bootstrap results to compute p-values and confidence intervals
+#'   - Back-transform for the ratio of means
+#'
+#'
+#' Note that all input data must be positive (ratio scale with a true zero) since log transformation
+#' is applied. The function will stop with an error if any negative values are detected.
+#'
+#' For details on the calculations in this function see `vignette("robustTOST")`.
+#'
+#' @return An S3 object of class `"TOSTt"` is returned containing the following slots:
 #'
 #'   - "TOST": A table of class `"data.frame"` containing two-tailed t-test and both one-tailed results.
 #'   - "eqb": A table of class `"data.frame"` containing equivalence bound settings.
-#'   - "effsize":  table of class `"data.frame"` containing effect size estimates.
+#'   - "effsize": Table of class `"data.frame"` containing effect size estimates.
 #'   - "hypothesis": String stating the hypothesis being tested.
 #'   - "smd": List containing the results of the means ratio calculation.
-#'      - Items include: d (means ratio estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation)
+#'      - Items include: d (means ratio estimate), dlow (lower CI bound), dhigh (upper CI bound), d_df (degrees of freedom for SMD), d_sigma (SE), d_lambda (non-centrality), J (bias correction), smd_label (type of SMD), d_denom (denominator calculation).
 #'   - "alpha": Alpha level set for the analysis.
 #'   - "method": Type of t-test.
 #'   - "decision": List included text regarding the decisions for statistical inference.
 #'   - "boot": List containing the bootstrap samples.
 #'
-#' @details The implemented test(s) corresponds to the proposal of Chapter 16 of Efron and Tibshirani (1994),
-#' and recommended by He et al (2022).
-#' Returns TOSTt class object with bootstrapped based results.
-#' This is approximately equivalent to the percentile bootstrap method mentioned by He et al (2014).
+#' @examples
+#' # Example 1: Two-Sample Test for Bioequivalence
+#' # Generate ratio scale data (e.g., drug concentrations)
+#' test_group <- rlnorm(30, meanlog = 3.5, sdlog = 0.4)
+#' ref_group <- rlnorm(30, meanlog = 3.6, sdlog = 0.4)
 #'
-#' For two-sample tests, the test is of \eqn{\bar log(x) - \bar log(y)} (mean of x minus mean of y).
-#' For paired samples, the test is of the difference scores (z),
-#' wherein \eqn{z =  log(x) - log(y) = log(x)/log(y)}, and the test is of \eqn{\bar z} (mean of the difference/ratio scores).
+#' # FDA standard bioequivalence bounds (80% to 125%)
+#' result <- boot_log_TOST(x = test_group,
+#'                         y = ref_group,
+#'                         eqb = 1.25,  # Creates bounds of 0.8 and 1.25
+#'                         R = 999)     # Reduce for demonstration
 #'
+#' # Example 2: Paired Sample Test
+#' # Generate paired ratio scale data
+#' n <- 20
+#' baseline <- rlnorm(n, meanlog = 4, sdlog = 0.3)
+#' followup <- baseline * rlnorm(n, meanlog = 0.05, sdlog = 0.2)
 #'
+#' # Test with asymmetric bounds
+#' result <- boot_log_TOST(x = followup,
+#'                         y = baseline,
+#'                         paired = TRUE,
+#'                         eqb = c(0.85, 1.20),
+#'                         boot_ci = "perc")
 #'
-#' For details on the calculations in this function see `vignette("robustTOST")`.
 #' @references
-#' Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press
+#' Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press.
 #'
 #' He, Y., Deng, Y., You, C., & Zhou, X. H. (2022). Equivalence tests for ratio of means in bioequivalence studies under crossover design. Statistical Methods in Medical Research, 09622802221093721.
 #'
 #' Food and Drug Administration (2014). Bioavailability and Bioequivalence Studies Submitted in NDAs or INDs — General Considerations.
 #' Center for Drug Evaluation and Research. Docket: FDA-2014-D-0204.
 #' https://www.fda.gov/regulatory-information/search-fda-guidance-documents/bioavailability-and-bioequivalence-studies-submitted-ndas-or-inds-general-considerations
-#' @importFrom stats var quantile
+#'
 #' @name boot_log_TOST
 #' @family Robust tests
 #' @family TOST
@@ -51,6 +109,7 @@ boot_log_TOST <- function(x, ...){
 }
 
 #' @rdname boot_log_TOST
+#' @importFrom stats var
 #' @method boot_log_TOST default
 #' @export
 

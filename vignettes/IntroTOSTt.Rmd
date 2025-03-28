@@ -23,12 +23,31 @@ knitr::opts_chunk$set(
 library(TOSTER)
 library(ggplot2)
 library(ggdist)
-
 ```
 
-In an effort to make `TOSTER` more informative and easier to use, I created the functions `t_TOST` and `simple_htest`. These function operates very similarly to base R's `t.test` function with a few exceptions. First, `t_TOST` performs 3 t-tests (one two-tailed and two one-tailed tests). Second, `simple_htest` allows you to run equivalence testing or minimal effects testing using a t-test or Wilcoxon-Mann-Whitney tests using the `alternative` argument and the output is the same as `t.test` or `wilcox.test` (in that the object is of the class `htest`). In addition, these functions have a generic method where two vectors can be supplied or a formula can be given (e.g.,`y ~ group`). These functions make it easier to switch between types of t-tests. All three types (two sample, one sample, and paired samples) can be performed/calculated from the same function. Moreover, the summary information and visualizations have been upgraded. This should make the decisions derived from the function more informative and user-friendly. 
+# Introduction to TOST
 
-These functions are not limited to equivalence tests. Minimal effects testing (MET) is possible. MET is useful for situations where the hypothesis is about a minimal effect and the null hypothesis *is* equivalence.
+TOST (Two One-Sided Tests) is a statistical approach used primarily for equivalence testing. Unlike traditional null hypothesis significance testing which aims to detect differences, equivalence testing aims to statistically support a claim of "no meaningful difference" between groups or conditions. This is particularly useful in bioequivalence studies, non-inferiority trials, or any research where establishing similarity (rather than difference) is the primary goal.
+
+In an effort to make `TOSTER` more informative and easier to use, I created the functions `t_TOST` and `simple_htest`. These functions operate very similarly to base R's `t.test` function with a few key enhancements:
+
+1. `t_TOST` performs 3 t-tests simultaneously:
+   - One traditional two-tailed test
+   - Two one-sided tests to assess equivalence
+
+2. `simple_htest` allows you to run equivalence testing or minimal effects testing using either t-tests or Wilcoxon-Mann-Whitney tests, with output in the familiar `htest` class format (like base R's statistical test functions).
+
+Both functions have versatile methods where you can supply:
+
+- Two vectors of data
+- A formula interface (e.g., `y ~ group`)
+- Various test configurations (two-sample, one-sample, or paired samples)
+
+The functions also provide enhanced summary information and visualizations that make interpreting results more intuitive and user-friendly.
+
+## Beyond Equivalence: Minimal Effects Testing
+
+These functions are not limited to equivalence tests. Minimal effects testing (MET) is also supported, which is useful for situations where the hypothesis concerns a minimal effect and the null hypothesis *is* equivalence. This reverses the typical TOST paradigm and can be valuable in contexts where you want to demonstrate that an effect exceeds some minimal threshold.
 
 ```{r tostplots,echo=FALSE, message = FALSE, warning = FALSE, fig.show='hold'}
 
@@ -154,99 +173,128 @@ theme_tidybayes() +
   )
 ```
 
-In the general introduction to this package, we detailed how to look at *old* results and how to apply TOST to interpreting those results. However, in many cases, users may have new data that needs to be analyzed. Therefore, `t_TOST` and `simple_htest` can be applied to new data. This vignette will use the `iris` and the `sleep` data.
+The plots above illustrate the conceptual difference between Minimal Effect Tests (left) and Equivalence Tests (right). Notice how the null (H0) and alternative (H1) hypotheses are reversed between these approaches.
+
+# Getting Started with Sample Data
+
+In this vignette, we'll use the built-in `iris` and `sleep` datasets to demonstrate various applications of TOST.
 
 ```{r}
 data('sleep')
 data('iris')
 ```
 
-# Independent Groups
-
-For this example, we will use the sleep data. In this data there is a `group` variable and an outcome `extra`.
+Let's take a quick look at the sleep data:
 
 ```{r}
 head(sleep)
 ```
 
-We will assume the data are independent, and that we have equivalence bounds of +/- 0.5 raw units. All we need to do is provide the `formula`, `data`, and  `eqb` arguments for the function to run appropriately. In addition, we can set the `var.equal` argument (to assume equal variance), and the `paired` argument (sets if the data is paired or not). Both are logical indicators that can be set to TRUE or FALSE. The `alpha` is automatically set to 0.05 but this can also be adjusted by the user. The Hedges correction is also automatically calculated, but this can be overridden with the `bias_correction` argument. The `hypothesis` is automatically set to "EQU" for equivalence but if a minimal effect is of interest then "MET" can be supplied. Note: for this example, we will set `smd_ci` to "t" indicating that the t-distribution and the standard error of the SMD will be used to create SMD confidence intervals. This is done to reduce the time to produce plots.
+The `sleep` dataset contains observations on the effect of two soporific drugs (`group` 1 and 2) on 10 patients, with the increase in hours of sleep (`extra`) as the response variable.
+
+# Independent Groups Analysis
+
+## Basic Equivalence Testing
+
+For our first example, we'll test whether the effect of the two drugs in the `sleep` data is equivalent within bounds of ±0.5 hours. We'll use both the comprehensive `t_TOST` function and the simpler `simple_htest` approach.
+
+### Using t_TOST
 
 ```{r}
 res1 = t_TOST(formula = extra ~ group,
               data = sleep,
-              eqb = .5,
-              smd_ci = "t")
+              eqb = .5,  # equivalence bounds of ±0.5 hours
+              smd_ci = "t")  # t-distribution for SMD confidence intervals
 
-res1a = t_TOST(x = subset(sleep,group==1)$extra,
-               y = subset(sleep,group==2)$extra,
+# Alternative syntax with separate vectors
+res1a = t_TOST(x = subset(sleep, group==1)$extra,
+               y = subset(sleep, group==2)$extra,
                eqb = .5)
 ```
 
-We can also use the "simpler" approach with `simple_htest`.
+The `eqb` parameter specifies our equivalence bounds (±0.5 hours of sleep). The `smd_ci = "t"` argument indicates that we want to use the t-distribution and the standard error of the standardized mean difference (SMD) to create SMD confidence intervals, which is computationally faster for demonstration purposes.
+
+### Using simple_htest
+
+We can achieve similar results with the more concise `simple_htest` function:
 
 ```{r}
-# Simple htest
-
+# Simple htest approach
 res1b = simple_htest(formula = extra ~ group,
                      data = sleep,
-                     mu = .5, # set equivalence bound
-                     alternative = "e")
-
-
+                     mu = .5,  # equivalence bound
+                     alternative = "e")  # "e" for equivalence
 ```
 
-Once the function has run, we can print the results with the `print` command. This provides a verbose summary of the results. Note that the results from `simple_htest` are much more concise than that of `t_TOST`.
+The `alternative = "e"` specifies an equivalence test, and `mu = .5` sets our equivalence bound.
+
+## Viewing Results
+
+Let's examine the output from both approaches:
 
 ```{r}
-
-# t_TOST
+# Comprehensive t_TOST output
 print(res1)
 
-# htest
-
+# Concise htest output
 print(res1b)
 ```
 
+Notice how `t_TOST` provides detailed information including both raw and standardized effect sizes, whereas `simple_htest` gives a more concise summary in the familiar format of base R's statistical tests.
 
-## Plots
+## Visualizing Results
 
-Another nice feature is the generic `plot` method that can provide a visual summary of the results (only available for `t_TOST`). All of the plots in this package were inspired by the [concurve](https://cran.r-project.org/package=concurve) R package. There are four types of plots that can be produced. 
+One of the advantages of `t_TOST` is its built-in visualization capabilities. There are four types of plots available:
 
+### 1. Simple Dot-and-Whisker Plot
 
-The default is a dot-and-whisker plot (`type = "simple"`).
+This is the default plot type, showing the point estimate and confidence intervals relative to the equivalence bounds:
 
 ```{r fig.width=6, fig.height=6}
 plot(res1, type = "simple")
 ```
 
-The next is a "consonance density" plot (`type = "cd"`). The shading pattern can be modified with the `ci_shades`.
+This plot clearly shows where our observed difference (with confidence intervals) falls in relation to our equivalence bounds (dashed vertical lines).
+
+### 2. Consonance Density Plot
+
+This plot shows the distribution of possible effect sizes, with shading for different confidence levels:
 
 ```{r fig.width=6, fig.height=6, eval=TRUE}
-# Set to shade only the 90% and 95% CI areas
+# Shade the 90% and 95% CI areas
 plot(res1, type = "cd",
-     ci_shades = c(.9,.95))
+     ci_shades = c(.9, .95))
 ```
 
-Consonance plots, where all confidence intervals can be simultaneous plotted, can also be produced. The advantage here is multiple confidence interval lines can plotted at once.
+The darker shaded region represents the 90% confidence interval, while the lighter region represents the 95% confidence interval. This visualization helps illustrate the precision of our estimate.
+
+### 3. Consonance Plot
+
+This plot shows multiple confidence intervals simultaneously:
 
 ```{r fig.width=6, fig.height=6}
 plot(res1, type = "c",
-     ci_lines =  c(.9,.95))
+     ci_lines = c(.9, .95))
 ```
 
-The null distribution can also be visualized with `type = "tnull"`, but notice how it can only plot the mean difference (no SMD).
+Here, we can see both the 90% and 95% confidence intervals represented as different lines.
+
+### 4. Null Distribution Plot
+
+This plot visualizes the null distribution:
 
 ```{r fig.width=6, fig.height=6}
 plot(res1, type = "tnull")
 ```
 
-## Descriptions
+This visualization is particularly useful for understanding the theoretical distribution under the null hypothesis.
 
-A description of the results can also be produced with the `describe` or `describe_htest` method and function respectively.
+## Describing Results in Plain Language
+
+Both `t_TOST` and `simple_htest` objects can be used with the `describe` or `describe_htest` functions to generate plain language interpretations of the results:
 
 ```{r, eval = FALSE}
 describe(res1)
-
 describe_htest(res1b)
 ```
 
@@ -254,14 +302,20 @@ describe_htest(res1b)
 
 > `r describe_htest(res1b)`
 
-# Paired Samples
+These descriptions provide accessible interpretations of the statistical results, making it easier to understand and communicate findings.
 
-To perform a paired samples TOST, the process does not change much. We could process the test the same way by providing a formula. All we would need to then is change `paired` to TRUE.
+# Paired Samples Analysis
+
+Many study designs involve paired measurements (e.g., before-after designs or matched samples). Let's examine how to perform TOST with paired data.
+
+## Using the Sleep Data with Paired Analysis
+
+We can use the same sleep data, but now treat the measurements as paired:
 
 ```{r}
 res2 = t_TOST(formula = extra ~ group,
               data = sleep,
-              paired = TRUE,
+              paired = TRUE,  # specify paired analysis
               eqb = .5)
 res2
 
@@ -274,7 +328,11 @@ res2b = simple_htest(
 res2b
 ```
 
-However, we may have two vectors of data that are paired. So we may want to just provide those separately rather than using a data set and setting the formula. This can be demonstrated with the "iris" data.
+Setting `paired = TRUE` changes the analysis to account for within-subject correlations.
+
+## Using Separate Vectors for Paired Data
+
+Alternatively, we can provide two separate vectors for paired data, as demonstrated with the iris dataset:
 
 ```{r}
 res3 = t_TOST(x = iris$Sepal.Length,
@@ -293,15 +351,19 @@ res3a = simple_htest(
 res3a
 ```
 
-We may want to perform a Minimal Effect Test with the `hypothesis` argument set to "MET".
+Here we're testing whether the difference between Sepal.Length and Sepal.Width is equivalent within ±1 unit.
+
+## Minimal Effect Testing (MET)
+
+As mentioned earlier, sometimes we want to test for a minimal effect rather than equivalence. We can do this by changing the `hypothesis` argument to "MET":
 
 ```{r}
 res_met = t_TOST(x = iris$Sepal.Length,
               y = iris$Sepal.Width,
-               paired = TRUE,
-               hypothesis = "MET",
-               eqb = 1,
-              smd_ci = "goulet")
+              paired = TRUE,
+              hypothesis = "MET",  # Change to minimal effect test
+              eqb = 1,
+              smd_ci = "t")
 res_met
 
 res_metb = simple_htest(x = iris$Sepal.Length,
@@ -312,13 +374,12 @@ res_metb = simple_htest(x = iris$Sepal.Length,
 res_metb
 ```
 
-## Descriptions
+For `simple_htest`, we use `alternative = "minimal.effect"` to specify MET. The `smd_ci = "t"` in `t_TOST` specifies using the t-distribution method for calculating standardized mean difference confidence intervals (this is faster than the default "nct" method).
 
-A description of the results can also be produced with the `describe` or `describe_htest` method and function respectively.
+### Interpreting MET Results
 
 ```{r, eval = FALSE}
 describe(res_met)
-
 describe_htest(res_metb)
 ```
 
@@ -328,39 +389,41 @@ describe_htest(res_metb)
 
 # One Sample t-test
 
-In other cases we may just have a one sample test. If that is the case all we have to do is supply the `x` argument for the data. For this test we may hypothesis that the mean of Sepal.Length is not more than 5.5 points greater or less than 8.5.
+In some cases, we may want to compare a single sample against known bounds. For this, we can use a one-sample test:
 
 ```{r}
 res4 = t_TOST(x = iris$Sepal.Length,
               hypothesis = "EQU",
-              eqb = c(5.5,8.5),
-              smd_ci = "goulet")
+              eqb = c(5.5, 8.5),  # lower and upper bounds
+              smd_ci = "t")
 res4
 ```
 
+Here, we're testing whether the mean of Sepal.Length is equivalent within bounds of 5.5 and 8.5 units. Notice how we specify the bounds as a vector with two distinct values rather than a single value that gets applied symmetrically.
 
-# Only have the summary statistics? No problem!
+# Working with Summary Statistics Only
 
-In some cases you may only have access to the summary statistics. Therefore, we created a function, `tsum_TOST`, to perform the same tests just based on the summary statistics. This involves providing the function with a number of different arguments.
-
-* `n1 & n2` the sample sizes (only n1 needs to be provided for one sample case)
-* `m1 & m2` the sample means
-* `sd1 & sd2` the sample standard deviation
-* `r12` the correlation between the paired samples; only needed if `paired` is set to TRUE
-
-The results from above can be replicated with the `tsum_TOST`
+Researchers often only have access to summary statistics rather than raw data, especially when working with published literature. The `tsum_TOST` function allows you to perform TOST analyses using just summary statistics:
 
 ```{r}
 res_tsum = tsum_TOST(
-  m1 = mean(iris$Sepal.Length, na.rm=TRUE),
-  sd1 = sd(iris$Sepal.Length, na.rm=TRUE),
-  n1 = length(na.omit(iris$Sepal.Length)),
+  m1 = mean(iris$Sepal.Length, na.rm=TRUE),  # sample mean
+  sd1 = sd(iris$Sepal.Length, na.rm=TRUE),   # sample standard deviation
+  n1 = length(na.omit(iris$Sepal.Length)),  # sample size
   hypothesis = "EQU",
-  eqb = c(5.5,8.5)
+  eqb = c(5.5, 8.5)
 )
 
 res_tsum
 ```
+
+Required arguments vary depending on the test type:
+* `n1 & n2`: the sample sizes (only n1 needed for one-sample tests)
+* `m1 & m2`: the sample means
+* `sd1 & sd2`: the sample standard deviations
+* `r12`: the correlation between paired samples (only needed if `paired = TRUE`)
+
+The same visualization and description methods work with `tsum_TOST`:
 
 ```{r fig.width=6, fig.height=6}
 plot(res_tsum)
@@ -370,25 +433,38 @@ plot(res_tsum)
 describe(res_tsum)
 ```
 
+# Power Analysis for TOST
 
-# Power Analysis for t-test based TOST
+Planning studies requires determining appropriate sample sizes. The `power_t_TOST` function allows for power calculations specifically designed for TOST analyses.
 
-We also created `power_t_TOST`  to allow for power calculations for TOST analyses that utilize t-tests. This function uses a more accurate method than the older functions in TOSTER and match the results of the commercially available PASS software. The exact calculations of power are based on Owen’s Q-function or by direct integration of the bivariate non-central t-distribution^[Inspired by @PowerTOST in the `PowerTOST` R package. Please see this package for more options]. Approximate power is implemented via the non-central t-distribution or the ‘shifted’ central t-distribution [@phillips1990, @diletti1991]. The function is limited to power analyses involves one sample, two sample, and paired sample cases. More options are available in the `PowerTOST` R package.
+This function uses more accurate methods than previous TOSTER functions and matches results from commercial software like PASS. The calculations are based on Owen's Q-function or direct integration of the bivariate non-central t-distribution^[Inspired by @PowerTOST in the `PowerTOST` R package. Please see this package for more options]. Approximate power is implemented via the non-central t-distribution or the 'shifted' central t-distribution [@phillips1990, @diletti1991].
 
-The interface for this function is quite simple and was intended to mimic the base R function `power.t.test`. The user must specify the 2 equivalence bounds, and leave only one of the other options blank (`alpha`, `power`, or `n`). The "true difference" can be set with `delta` and the standard deviation (default is 1) can be set with the `sd` argument. Once everything is set and the function is run, a object of the `power.htest` class will be returned.
-
-As an example, let's say we are looking at an equivalence study where we assume the *true* difference is *at least* 1 unit, the standard deviation is 2.5, and we set the equivalence bounds to 2.5 units as well. If we want to find the sample size adequate to have 95% power at an alpha of 0.025 we enter the following:
+The interface mimics base R's `power.t.test` function. You specify equivalence bounds and leave one parameter blank (`alpha`, `power`, or `n`) to solve for it:
 
 ```{r}
 power_t_TOST(n = NULL,
-  delta = 1,
-  sd = 2.5,
-  eqb = 2.5,
-  alpha = .025,
-  power = .95,
-  type = "two.sample")
+  delta = 1,          # assumed true difference
+  sd = 2.5,           # assumed standard deviation
+  eqb = 2.5,          # equivalence bounds
+  alpha = .025,       # significance level
+  power = .95,        # desired power
+  type = "two.sample") # test type
 ```
 
-From the analysis above we would conclude that adequate power is achieved with 74 participants per group and 148 participants in total.
+In this example, we're planning a two-sample equivalence study where:
+- We assume the true difference is at least 1 unit
+- The standard deviation is estimated to be 2.5
+- We set equivalence bounds to ±2.5 units
+- We want 95% power with alpha of 0.025
+
+The analysis indicates we need 74 participants per group (148 total) to achieve our desired power.
+
+For more advanced power analysis options, the `PowerTOST` R package provides additional functionality.
+
+# Conclusion
+
+The `t_TOST` and `simple_htest` functions in the TOSTER package provide flexible and user-friendly tools for performing equivalence testing and minimal effect testing. With support for various study designs, robust visualization capabilities, and plain language interpretations, these functions make it easier to apply and communicate these important statistical approaches.
+
+Whether you're analyzing raw data or working with summary statistics, TOSTER provides the tools needed to conduct and interpret these tests appropriately.
 
 # References

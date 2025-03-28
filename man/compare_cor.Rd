@@ -2,7 +2,7 @@
 % Please edit documentation in R/compare_cor.R
 \name{compare_cor}
 \alias{compare_cor}
-\title{Comparing two independent correlation coefficients}
+\title{Comparing Two Independent Correlation Coefficients}
 \usage{
 compare_cor(
   r1,
@@ -15,44 +15,122 @@ compare_cor(
 )
 }
 \arguments{
-\item{r1}{Correlation study 1.}
+\item{r1}{Correlation from study 1.}
 
 \item{df1}{Degrees of freedom from study 1 (if a simple correlation the df is N-2).}
 
-\item{r2}{Correlation study 2.}
+\item{r2}{Correlation from study 2.}
 
 \item{df2}{Degrees of freedom from study 2 (if a simple correlation the df is N-2).}
 
-\item{method}{Method for determining differences. Default, "z", will use Fisher's transformation, while "Kraatz" will use the Kraatz method.}
+\item{method}{Method for determining differences:
+\itemize{
+\item "fisher": uses Fisher's z transformation (default)
+\item "kraatz": uses the Kraatz method
+}}
 
-\item{alternative}{a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater", "less", "equivalence" (TOST), or "minimal.effect" (TOST). You can specify just the initial letter.}
+\item{alternative}{A character string specifying the alternative hypothesis:
+\itemize{
+\item "two.sided": difference is not equal to null (default)
+\item "greater": difference is greater than null
+\item "less": difference is less than null
+\item "equivalence": difference is within the equivalence bounds (TOST)
+\item "minimal.effect": difference is outside the equivalence bounds (TOST)
+}
 
-\item{null}{a number indicating the null hypothesis. For TOST, this would be equivalence bound.}
+You can specify just the initial letter.}
+
+\item{null}{A number or vector indicating the null hypothesis value(s):
+\itemize{
+\item For standard tests: a single value representing the null difference (default = 0)
+\item For equivalence/minimal effect tests: either a single value (symmetric bounds ±value will be created)
+or a vector of two values representing the lower and upper bounds
+}}
+}
+\value{
+A list with class "htest" containing the following components:
+\itemize{
+\item \strong{statistic}: z-score with name "z"
+\item \strong{p.value}: numeric scalar containing the p-value for the test under the null hypothesis
+\item \strong{estimate}: difference in correlation coefficients between studies
+\item \strong{null.value}: the specified hypothesized value(s) for the null hypothesis
+\item \strong{alternative}: character string indicating the alternative hypothesis
+\item \strong{method}: description of the method used for comparison
+\item \strong{data.name}: "Summary Statistics" to denote summary statistics were utilized
+\item \strong{cor}: list containing the correlation coefficients used in the comparison
+\item \strong{call}: the matched call
+}
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 
-A function to compare correlations between studies. This function is intended to be used to compare the compatibility of original studies with replication studies (lower p-values indicating lower compatibility).
+A function to compare correlations between independent studies. This function is intended
+to be used to compare the compatibility of original studies with replication studies
+(lower p-values indicating lower compatibility).
 }
 \details{
-This function tests for differences between correlations.
-@return A list with class "htest" containing the following components:
+This function tests for differences between correlation coefficients from independent studies.
+It is particularly useful for:
 \itemize{
-\item "statistic":  z-score
-\item "p.value":  numeric scalar containing the p-value for the test under the null hypothesis.
-\item "estimate":  difference in SMD between studies.
-\item "null.value":  the specified hypothesized value for the null hypothesis.
-\item "alternative":  character string indicating the alternative hypothesis (the value of the input argument alternative). Possible values are "greater", "less", or "two-sided".
-\item "method":  Type of SMD.
-\item "data.name":  "Summary Statistics" to denote summary statistics were utilized to obtain results.
-\item "cor":  Correlation input for the function.
-\item "call":  the matched call.
+\item Comparing an original study with its replication
+\item Meta-analytic comparisons between studies
+\item Testing if correlations from different samples are equivalent
 }
+
+The function offers two methods for comparing correlations:
+\enumerate{
+\item \strong{Fisher's z transformation} (default): Transforms correlations to stabilize variance
+\item \strong{Kraatz method}: Uses a direct approach that may be more appropriate for larger correlations
+}
+
+The function supports both standard hypothesis testing and equivalence/minimal effect testing:
+\itemize{
+\item For standard tests (two.sided, less, greater), the function tests whether the difference
+between correlations differs from the null value (typically 0).
+\item For equivalence testing ("equivalence"), it determines whether the difference falls within
+the specified bounds, which can be set asymmetrically.
+\item For minimal effect testing ("minimal.effect"), it determines whether the difference falls
+outside the specified bounds.
+}
+
+When performing equivalence or minimal effect testing:
+\itemize{
+\item If a single value is provided for \code{null}, symmetric bounds ±value will be used
+\item If two values are provided for \code{null}, they will be used as the lower and upper bounds
+}
+}
+\examples{
+# Example 1: Comparing two correlations (standard test)
+compare_cor(r1 = 0.45, df1 = 48, r2 = 0.25, df2 = 58,
+            method = "fisher", alternative = "two.sided")
+
+# Example 2: Testing for equivalence between correlations
+# Testing if the difference between correlations is within ±0.15
+compare_cor(r1 = 0.42, df1 = 38, r2 = 0.38, df2 = 42,
+            method = "fisher", alternative = "equivalence", null = 0.15)
+
+# Example 3: Testing for minimal effects using Kraatz method
+# Testing if the difference between correlations is outside ±0.2
+compare_cor(r1 = 0.53, df1 = 28, r2 = 0.22, df2 = 32,
+            method = "kraatz", alternative = "minimal.effect", null = 0.2)
+
+# Example 4: One-sided test (are correlations different in a specific direction?)
+compare_cor(r1 = 0.65, df1 = 48, r2 = 0.45, df2 = 52,
+            method = "fisher", alternative = "greater")
+
+# Example 5: Using asymmetric bounds for equivalence testing
+compare_cor(r1 = 0.35, df1 = 48, r2 = 0.25, df2 = 52,
+            method = "fisher", alternative = "equivalence", null = c(-0.05, 0.2))
+
 }
 \references{
-Counsell, A., & Cribbie, R. A. (2015). Equivalence tests for comparing correlation and regression coefficients. The British journal of mathematical and statistical psychology, 68(2), 292–309. https://doi.org/10.1111/bmsp.12045
+Counsell, A., & Cribbie, R. A. (2015). Equivalence tests for comparing correlation and
+regression coefficients. The British journal of mathematical and statistical psychology,
+68(2), 292-309. https://doi.org/10.1111/bmsp.12045
 
-Anderson, S., & Hauck, W. W. (1983). A new procedure for testing equivalence in comparative bioavailability and other clinical trials. Communications in Statistics-Theory and Methods, 12(23), 2663-2692.
+Anderson, S., & Hauck, W. W. (1983). A new procedure for testing equivalence in comparative
+bioavailability and other clinical trials. Communications in Statistics-Theory and Methods,
+12(23), 2663-2692.
 }
 \seealso{
 Other compare studies: 

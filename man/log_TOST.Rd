@@ -36,7 +36,7 @@ log_TOST(
 
 \item{...}{further arguments to be passed to or from methods.}
 
-\item{hypothesis}{'EQU' for equivalence (default), or 'MET' for minimal effects test, the alternative hypothesis.}
+\item{hypothesis}{'EQU' for equivalence (default), or 'MET' for minimal effects test.}
 
 \item{paired}{a logical indicating whether you want a paired t-test.}
 
@@ -62,9 +62,9 @@ log_TOST(
 An S3 object of class
 \verb{"TOSTt}" is returned containing the following slots:
 \itemize{
-\item "TOST": A table of class \code{"data.frame"} containing two-tailed t-test and both one-tailed results.
-\item "eqb": A table of class \code{"data.frame"} containing equivalence bound settings.
-\item "effsize":  table of class \code{"data.frame"} containing effect size estimates.
+\item "TOST": A table of class \code{data.frame} containing two-tailed t-test and both one-tailed results.
+\item "eqb": A table of class \code{data.frame} containing equivalence bound settings.
+\item "effsize":  table of class `data.frame`` containing effect size estimates.
 \item "hypothesis": String stating the hypothesis being tested
 \item "smd": List containing the results of the means ratio calculation.
 \itemize{
@@ -83,9 +83,16 @@ A function for TOST on the log-transformed data using parametric t-tests.
 \details{
 For details on the calculations in this function see \code{vignette("robustTOST")}.
 
-For two-sample tests, the test is of \eqn{\bar log(x) - \bar log(y)} (mean of x minus mean of y).
+For two-sample tests, the test is of \eqn{\bar{log(x)} - \bar{log(y)}} (mean of log(x) minus mean of log(y)).
 For paired samples, the test is of the difference scores (z),
-wherein \eqn{z =  log(x) - log(y) = log(x)/log(y)}, and the test is of \eqn{\bar z} (mean of the difference/ratio scores).
+wherein \eqn{z = log(x) - log(y) = log(x/y)}, and the test is of \eqn{\bar{z}} (mean of the difference/ratio scores).
+
+This approach is particularly useful for:
+\itemize{
+\item Bioequivalence studies where FDA guidelines recommend ratio-based bounds
+\item Data with a multiplicative nature, where ratio comparisons are more meaningful
+\item Skewed data where log transformation helps normalize the residuals
+}
 }
 \examples{
 data(mtcars)

@@ -1,31 +1,85 @@
-#' @title  Association/Correlation Test from Summary Statistics
+#' @title Association/Correlation Test from Summary Statistics
 #' @description
 #' `r lifecycle::badge('stable')`
 #'
-#' Test for association between paired samples, using one of Pearson's product moment correlation coefficient, Kendall's \eqn{\tau} (tau) or Spearman's \eqn{\rho} (rho).
-#' This is the updated version of the [TOSTr] function.
+#' Test for association between paired samples using only the correlation coefficient and sample size.
+#' Supports Pearson's product moment correlation, Kendall's \eqn{\tau} (tau), or Spearman's \eqn{\rho} (rho).
+#' This is the updated version of the `TOSTr` function.
+#'
+#' @param r correlation coefficient (the estimated value)
+#' @param n sample size (number of pairs)
 #' @inheritParams TOSTr
 #' @inheritParams z_cor_test
+#'
 #' @details
 #' This function uses Fisher's z transformation for the correlations,
-#' but uses Fieller's correction of the standard error for Spearman's \eqn{\rho} and Kendall's \eqn{\tau}.
+#' but uses Fieller's correction of the standard error for Kendall's \eqn{\tau} or Spearman's \eqn{\rho}.
+#'
+#' Unlike `z_cor_test`, which requires raw data, this function only needs the correlation value
+#' and sample size. This is particularly useful when:
+#'
+#' * You only have access to summary statistics (correlation coefficient and sample size)
+#' * You want to reanalyze published results within an equivalence testing framework
+#'
+#' The function supports both standard hypothesis testing and equivalence/minimal effect testing:
+#'
+#' * For standard tests (two.sided, less, greater), the function tests whether the correlation
+#'   differs from the null value (typically 0).
+#'
+#' * For equivalence testing ("equivalence"), it determines whether the correlation falls within
+#'   the specified bounds, which can be set asymmetrically.
+#'
+#' * For minimal effect testing ("minimal.effect"), it determines whether the correlation falls
+#'   outside the specified bounds.
+#'
+#' When performing equivalence or minimal effect testing:
+#' * If a single value is provided for `null`, symmetric bounds ±value will be used
+#' * If two values are provided for `null`, they will be used as the lower and upper bounds
 #'
 #' @return A list with class "htest" containing the following components:
 #'
-#'   - "statistic": z-score.
-#'   - "p.value": the p-value of the test.
-#'   - "estimate": the estimated measure of association, with name "cor", "tau", or "rho" corresponding to the method employed.
-#'   - "null.value": the value of the association measure under the null hypothesis.
-#'   - "alternative": character string indicating the alternative hypothesis (the value of the input argument alternative).
-#'   - "method": a character string indicating how the association was measured.
-#'   - "data.name": a character string giving the names of the data.
-#'   - "call": the matched call.
+#' * **statistic**: z-score with name "z".
+#' * **p.value**: the p-value of the test.
+#' * **parameter**: the sample size with name "N".
+#' * **conf.int**: a confidence interval for the correlation appropriate to the specified alternative hypothesis.
+#' * **estimate**: the estimated correlation coefficient, with name "cor", "tau", or "rho" corresponding to the method employed.
+#' * **stderr**: the standard error of the test statistic.
+#' * **null.value**: the value(s) of the correlation coefficient under the null hypothesis.
+#' * **alternative**: character string indicating the alternative hypothesis.
+#' * **method**: a character string indicating how the correlation was measured.
+#' * **data.name**: a character string giving the names of the data.
+#' * **call**: the matched call.
+#'
+#' @examples
+#' # Example 1: Standard significance test for Pearson correlation
+#' corsum_test(r = 0.45, n = 30, method = "pearson", alternative = "two.sided")
+#'
+#' # Example 2: Equivalence test for Spearman correlation
+#' # Testing if correlation is equivalent to zero within ±0.3
+#' corsum_test(r = 0.15, n = 40, method = "spearman",
+#'             alternative = "equivalence", null = 0.3)
+#'
+#' # Example 3: Minimal effect test for Kendall's tau
+#' # Testing if correlation is meaningfully different from ±0.25
+#' corsum_test(r = 0.42, n = 50, method = "kendall",
+#'             alternative = "minimal.effect", null = 0.25)
+#'
+#' # Example 4: One-sided test with non-zero null
+#' # Testing if correlation is greater than 0.3
+#' corsum_test(r = 0.45, n = 35, method = "pearson",
+#'             alternative = "greater", null = 0.3)
+#'
+#' # Example 5: Using asymmetric bounds for equivalence testing
+#' corsum_test(r = 0.1, n = 60, method = "pearson",
+#'             alternative = "equivalence", null = c(-0.2, 0.3))
 #'
 #' @references
-#' Goertzen, J. R., & Cribbie, R. A. (2010). Detecting a lack of association: An equivalence testing approach. British Journal of Mathematical and Statistical Psychology, 63(3), 527-537. https://doi.org/10.1348/000711009X475853, formula page 531.
+#' Goertzen, J. R., & Cribbie, R. A. (2010). Detecting a lack of association: An equivalence
+#' testing approach. British Journal of Mathematical and Statistical Psychology, 63(3), 527-537.
+#' https://doi.org/10.1348/000711009X475853, formula page 531.
+#'
 #' @family Correlations
 #' @export
-#'
 
 
 corsum_test = function(r,

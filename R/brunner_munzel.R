@@ -3,33 +3,27 @@
 #' `r lifecycle::badge("maturing")`
 #'
 #' This is a generic function that performs a generalized asymptotic Brunner-Munzel test in a fashion similar to [t.test].
-#' @param x a (non-empty) numeric vector of data values.
-#' @param y an optional (non-empty) numeric vector of data values.
-#' @param formula a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.
-#' @param data an optional matrix or data frame (or similar: see model.frame) containing the variables in the formula formula. By default the variables are taken from environment(formula).
 #' @param paired a logical indicating whether you want a paired test.
 #' @param mu 	a number specifying an optional parameter used to form the null hypothesis (Default = 0.5). This can be thought of as the null in terms of the relative effect, p = P (X < Y ) + 0.5 * P (X = Y); See ‘Details’.
 #' @param perm a logical indicating whether or not to perform a permutation test over approximate t-distribution based test (default is FALSE). Highly recommend to set perm = TRUE when sample size per condition is less than 15.
 #' @param max_n_perm the maximum number of permutations (default is 10000).
 #' @param alternative a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater" or "less". You can specify just the initial letter.
-#' @param subset an optional vector specifying a subset of observations to be used.
-#' @param na.action a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").
 #' @inheritParams t_TOST
 #' @param ...  further arguments to be passed to or from methods.
 #' @details
 #'
 #' This function is made to provide a test of stochastic equality between two samples (paired or independent), and is referred to as the Brunner-Munzel test.
 #'
-#' This tests the hypothesis that the relative effect, discussed below, is equal to the null value (default is mu = 0.5).
+#' This tests the hypothesis that the relative effect, discussed below, is equal to the null value (default is `mu = 0.5`).
 #'
 #' The estimate of the relative effect, which can be considered as value similar to the probability of superiority, refers to the following:
 #'
-#'  \deqn{\hat p = p(X<Y) + \frac{1}{2} \cdot P(X=Y)}
+#'  \deqn{\hat p = p(X>Y) + \frac{1}{2} \cdot P(X=Y)}
 #'
 #'  Note, for paired samples, this does *not* refer to the probability of an increase/decrease in paired sample but rather the probability that a randomly sampled value of X.
 #'  This is also referred to as the "relative" effect in the literature. Therefore, the results will differ from the concordance probability provided by the ses_calc function.
 #'
-#'  The brunner_munzel function is based on the npar.t.test and npar.t.test.paired functions within the nparcomp package (Konietschke et al. 2015).
+#'  The brunner_munzel function is based on the `npar.t.test` and `npar.t.test.paired` functions within the `nparcomp` package (Konietschke et al. 2015).
 #'
 #' @return A list with class `"htest"` containing the following components:
 #'
@@ -56,6 +50,7 @@
 #'
 #' Konietschke, F., Placzek, M., Schaarschmidt, F., & Hothorn, L. A. (2015). nparcomp: an R software package for nonparametric multiple comparisons and simultaneous confidence intervals. Journal of Statistical Software 64 (2015), Nr. 9, 64(9), 1-17. http://www.jstatsoft.org/v64/i09/
 #' @name brunner_munzel
+#' @importFrom stats var quantile
 #' @family Robust tests
 #' @export brunner_munzel
 
@@ -167,6 +162,7 @@ brunner_munzel.default = function(x,
 
     if(perm == TRUE){
       METHOD = "Paired Brunner-Munzel permutation test"
+      message("NOTE: Confidence intervals derived from permutation tests may differ from conclusions drawn from p-values. When discrepancies occur, consider additional diagnostics or alternative inference methods.")
       # Directly from nparcomp
       if(n<=13){
         max_n_perm=2^n
@@ -284,7 +280,7 @@ brunner_munzel.default = function(x,
 
       ## permutation -----
       METHOD = "two-sample Brunner-Munzel permutation test"
-
+      message("NOTE: Confidence intervals derived from permutation tests may differ from conclusions drawn from p-values. When discrepancies occur, consider additional diagnostics or alternative inference methods.")
       Tprob<-qnorm(pd)*exp(-0.5*qnorm(pd)^2)*sqrt(N/(V*2*pi))
       P<-apply(matrix(rep(1:N,max_n_perm),ncol=max_n_perm),2,sample)
       Px<-matrix(c(x,y)[P],ncol=max_n_perm)

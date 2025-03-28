@@ -4,7 +4,7 @@
 \alias{boot_smd_calc}
 \alias{boot_smd_calc.default}
 \alias{boot_smd_calc.formula}
-\title{Bootstrapped SMD Calculation}
+\title{Bootstrapped Standardized Mean Difference (SMD) Calculation}
 \usage{
 boot_smd_calc(
   x,
@@ -51,15 +51,15 @@ boot_smd_calc(
 
 \item{rm_correction}{Repeated measures correction to make standardized mean difference Cohen's d(rm). This only applies to repeated/paired samples. Default is FALSE.}
 
-\item{glass}{A option to calculate Glass's delta as an alternative to Cohen's d type SMD. Default is NULL to not calculate Glass's delta, "glass1" will use the first group's SD as the denominator whereas "glass2" will use the 2nd group's SD.}
+\item{glass}{Option to calculate Glass's delta instead of Cohen's d style SMD ('glass1' uses first group's SD, 'glass2' uses second group's SD).}
 
-\item{boot_ci}{type of bootstrap confidence interval. Options include studentized (stud), empirical/basic (basic) and percentile (perc) confidence intervals.}
+\item{boot_ci}{method for bootstrap confidence interval calculation: "stud" (studentized, default), "basic" (basic bootstrap), or "perc" (percentile bootstrap).}
 
-\item{R}{number of bootstrap replicates}
+\item{R}{number of bootstrap replications (default = 1999).}
 
 \item{y}{an optional (non-empty) numeric vector of data values.}
 
-\item{mu}{Null value. Deviating from zero will give the x-y-mu.}
+\item{mu}{null value to adjust the calculation. If non-zero, the function calculates x-y-mu (default = 0).}
 
 \item{formula}{a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.}
 
@@ -67,23 +67,119 @@ boot_smd_calc(
 
 \item{subset}{an optional vector specifying a subset of observations to be used.}
 
-\item{na.action}{a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").}
+\item{na.action}{a function indicating what should happen when the data contain NAs.}
 }
 \value{
-A data frame containing the SMD estimates.
+A data frame containing the following information:
+\itemize{
+\item estimate: The SMD calculated from the original data
+\item bias: Estimated bias (difference between original estimate and median of bootstrap estimates)
+\item SE: Standard error estimated from the bootstrap distribution
+\item lower.ci: Lower bound of the bootstrap confidence interval
+\item upper.ci: Upper bound of the bootstrap confidence interval
+\item conf.level: Confidence level (1-alpha)
+\item boot_ci: The bootstrap confidence interval method used
+}
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#maturing}{\figure{lifecycle-maturing.svg}{options: alt='[Maturing]'}}}{\strong{[Maturing]}}
 
-A function to only calculate standardized mean differences with bootstrap confidence intervals.
+Calculates standardized mean differences (SMDs) with bootstrap confidence intervals.
+This function provides more robust confidence intervals for Cohen's d, Hedges' g,
+and other SMD measures through resampling methods.
 }
 \details{
-For details on the calculations in this function see vignette("SMD_calcs").
+This function calculates bootstrapped confidence intervals for standardized mean differences.
+It is an extension of the \code{smd_calc()} function that uses resampling to provide more robust
+confidence intervals, especially for small sample sizes or when data violate assumptions
+of parametric methods.
+
+The function implements the following bootstrap approach:
+\itemize{
+\item Calculate the raw SMD and its standard error using the original data
+\item Create R bootstrap samples by resampling with replacement from the original data
+\item Calculate the SMD and its standard error for each bootstrap sample
+\item Calculate confidence intervals using the specified method
 }
+
+Three bootstrap confidence interval methods are available:
+\itemize{
+\item \strong{Studentized bootstrap ("stud")}: Accounts for the variability in standard error estimates. Usually provides the most accurate coverage probability and is set as the default.
+\item \strong{Basic bootstrap ("basic")}: Uses the empirical distribution of bootstrap estimates. Simple approach that works well for symmetric distributions.
+\item \strong{Percentile bootstrap ("perc")}: Uses percentiles of the bootstrap distribution directly. More robust to skewness in the bootstrap distribution.
+}
+
+The function supports various SMD variants:
+\itemize{
+\item Classic standardized mean difference (bias_correction = FALSE)
+\item Bias-corrected version (bias_correction = TRUE)
+\item Glass's delta: Uses only one group's standard deviation as the denominator (glass = "glass1" or "glass2")
+\item Repeated measures d: Accounts for correlation in paired designs (rm_correction = TRUE)
+}
+
+The function supports three study designs:
+\itemize{
+\item One-sample design: Standardizes the difference between the sample mean and zero (or other specified value)
+\item Two-sample independent design: Standardizes the difference between two group means
+\item Paired samples design: Standardizes the mean difference between paired observations
+}
+
+For detailed information on calculation methods, see \code{vignette("SMD_calcs")}.
+}
+\section{Purpose}{
+
+Use this function when:
+\itemize{
+\item You need more robust confidence intervals for standardized mean differences
+\item You want to account for non-normality or heterogeneity in your effect size estimates
+\item Sample sizes are small or standard error approximations may be unreliable
+\item You prefer resampling-based confidence intervals over parametric approximations
+\item You need to quantify uncertainty in SMD estimates more accurately
+}
+}
+
 \examples{
-\dontrun{
-boot_smd_calc(formula = extra ~ group,data = sleep, paired = TRUE, smd_ci = "nct")
-}
+# Example 1: Independent groups comparison with studentized bootstrap CI
+set.seed(123)
+group1 <- rnorm(30, mean = 100, sd = 15)
+group2 <- rnorm(30, mean = 110, sd = 18)
+
+# Use fewer bootstrap replicates for a quick example
+result <- boot_smd_calc(x = group1, y = group2,
+                      boot_ci = "stud",
+                      R = 999)
+
+# Example 2: Using formula notation with basic bootstrap and Hedges' g
+df <- data.frame(
+  value = c(group1, group2),
+  group = factor(rep(c("A", "B"), each = 30))
+)
+result <- boot_smd_calc(formula = value ~ group,
+                      data = df,
+                      boot_ci = "basic",
+                      bias_correction = TRUE,
+                      R = 999)
+
+# Example 3: Paired samples with percentile bootstrap
+set.seed(456)
+before <- rnorm(30)
+after <- rnorm(30)
+result <- boot_smd_calc(x = before,
+                      y = after,
+                      paired = TRUE,
+                      boot_ci = "perc",
+                      R = 999)
+
+# Example 4: Glass's delta with homogeneous variances
+set.seed(456)
+control <- rnorm(25, mean = 50, sd = 10)
+treatment <- rnorm(25, mean = 60, sd = 10)
+result <- boot_smd_calc(x = control,
+                      y = treatment,
+                      glass = "glass1",
+                      boot_ci = "stud",
+                      R = 999)
+
 }
 \seealso{
 Other effect sizes: 

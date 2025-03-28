@@ -1,4 +1,4 @@
-#' @title Power calculations for TOST for t-tests
+#' @title Power calculations for TOST with t-tests
 #' @description
 #' `r lifecycle::badge('stable')`
 #'

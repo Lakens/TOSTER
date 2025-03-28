@@ -11,9 +11,9 @@ extract_r_paired(m1, sd1, m2, sd2 = NULL, n, tstat = NULL, pvalue = NULL)
 
 \item{sd1}{standard deviation of group 1.}
 
-\item{m2}{mean of group 2.}
+\item{m2}{mean of group 2 (not required for one-sample tests).}
 
-\item{sd2}{standard deviation of group 2.}
+\item{sd2}{standard deviation of group 2 (not required for one-sample tests).}
 
 \item{n}{Sample size (number of pairs)}
 

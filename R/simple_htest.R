@@ -1,47 +1,117 @@
-#' @title One, two, and paired samples hypothesis tests
+#' @title One, Two, and Paired Samples Hypothesis Tests with Extended Options
 #'
 #' @description
 #' `r lifecycle::badge("maturing")`
 #'
-#' Performs one or two sample t-tests or Wilcoxon-Mann-Whitney rank-based tests with expanded options compared to [t.test], [brunner_munzel], or [wilcox.test].
-#' @param test a character string specifying what type of hypothesis test to use. Options are limited to "wilcox.test", "t.test", or "brunner_munzel". You can specify just the initial letter.
+#' Performs statistical hypothesis tests with extended functionality beyond standard implementations.
+#' Supports t-tests, Wilcoxon-Mann-Whitney tests, and Brunner-Munzel tests with additional
+#' alternatives such as equivalence and minimal effect testing.
+#'
+#' @section Purpose:
+#' Use this function when:
+#'   - You need a unified interface for different types of hypothesis tests
+#'   - You want to perform equivalence testing or minimal effect testing with non-parametric methods
+#'   - You need more flexibility in hypothesis testing than provided by standard functions
+#'   - You want to easily switch between parametric and non-parametric methods
+#'
 #' @inheritParams t_TOST
 #' @inheritParams z_cor_test
 #' @inheritParams brunner_munzel
-#' @param 	mu a number specifying an optional parameter used to form the null hypothesis. See ‘Details’.
-#' @param ...  further arguments to be passed to or from methods.
+#' @param test a character string specifying the type of hypothesis test to use:
+#'     - "t.test": Student's t-test (parametric, default)
+#'     - "wilcox.test": Wilcoxon-Mann-Whitney test (non-parametric)
+#'     - "brunner_munzel": Brunner-Munzel test (non-parametric)
+#'
+#'   You can specify just the initial letter (e.g., "t" for "t.test").
+#' @param alternative the alternative hypothesis:
+#'     - "two.sided": different from mu (default)
+#'     - "less": less than mu
+#'     - "greater": greater than mu
+#'     - "equivalence": between specified bounds
+#'     - "minimal.effect": outside specified bounds
+#' @param mu a number or vector specifying the null hypothesis value(s):
+#'     - For standard alternatives (two.sided, less, greater): a single value (default: 0 for t-test/wilcox.test, 0.5 for brunner_munzel)
+#'     - For equivalence/minimal.effect: either a single value (symmetric bounds will be created) or a vector of two values representing the lower and upper bounds
+#' @param ... further arguments to be passed to or from the underlying test functions.
+#'
 #' @details
-#' The type of test, t-test/Wilcoxon-Mann-Whitney/Brunner-Munzel, can be selected with the `"test"` argument.
+#' This function provides a unified interface to several common hypothesis tests with expanded
+#' alternative hypotheses, particularly for equivalence testing and minimal effect testing.
+#'
+#' When `alternative = "equivalence"`, the test evaluates whether the effect is contained
+#' within the bounds specified by `mu`. This corresponds to the alternative hypothesis that
+#' the true effect is between the specified bounds. The function performs two one-sided tests and
+#' returns the most conservative result (highest p-value).
+#'
+#' When `alternative = "minimal.effect"`, the test evaluates whether the effect is outside
+#' the bounds specified by `mu`. This corresponds to the alternative hypothesis that the true
+#' effect is either less than the lower bound or greater than the upper bound. The function performs
+#' two one-sided tests and returns the most significant result (lowest p-value).
+#'
+#' For standard alternatives ("two.sided", "less", "greater"), the function behaves similarly to
+#' the underlying test functions with some additional standardization in the output format.
+#'
+#' The interpretation of `mu` depends on the test used:
+#'   - For t-test and wilcox.test: mu represents the difference in means/medians (default: 0)
+#'   - For brunner_munzel: mu represents the probability that a randomly selected value from the first sample exceeds a randomly selected value from the second sample (default: 0.5)
 #'
 #'
-#' \code{alternative = "greater"} is the alternative that x is larger than y (on average).
-#' If \code{alternative = "equivalence"} then the alternative is that the difference between x and y is between the two null values `mu`..
-#' If \code{alternative = "minimal.effect"} then the alternative is that the difference between x and y is less than the lowest null value or greater than the highest.
+#' If `mu` is a single value for equivalence or minimal effect alternatives, symmetric bounds
+#' will be created automatically:
+#'   - For t-test and wilcox.test: bounds become c(mu, -mu)
+#'   - For brunner_munzel: bounds become c(mu, abs(mu-1))
 #'
-#' For more details on each possible test ([brunner_munzel], [stats::t.test], or [stats::wilcox.test]), please read their individual documentation.
 #'
 #' @return A list with class `"htest"` containing the following components:
 #'
-#'   - statistic: the value of the t-statistic.
-#'   - parameter: the degrees of freedom for the t-statistic.
+#'   - statistic: the value of the test statistic.
+#'   - parameter: the parameter(s) for the test statistic (e.g., degrees of freedom for t-tests).
 #'   - p.value: the p-value for the test.
-#'   - conf.int: a confidence interval for the mean appropriate to the specified alternative hypothesis.
-#'   - estimate: the estimated mean or difference in means depending on whether it was a one-sample test or a two-sample test.
-#'   - null.value: the specified hypothesized value of the mean or mean difference. May be 2 values.
-#'   - stderr: the standard error of the mean (difference), used as denominator in the t-statistic formula.
+#'   - conf.int: a confidence interval appropriate to the specified alternative hypothesis.
+#'   - estimate: the estimated effect (e.g., mean difference for t-tests, probability estimate for Brunner-Munzel).
+#'   - null.value: the specified hypothesized value(s). For equivalence and minimal effect tests, this will be two values.
+#'   - stderr: the standard error of the estimate (for t-tests).
 #'   - alternative: a character string describing the alternative hypothesis.
-#'   - method: a character string indicating what type of t-test was performed.
+#'   - method: a character string indicating what type of test was performed.
 #'   - data.name: a character string giving the name(s) of the data.
 #'
 #' @examples
+#' # Example 1: Basic t-test with equivalence alternative
+#' # Testing if the difference in mpg between automatic and manual transmission cars
+#' # is equivalent within ±3 units
 #' data(mtcars)
-#' simple_htest(mpg ~ am,
-#' data = mtcars,
-#' alternative = "e",
-#' mu = 3)
+#' simple_htest(mpg ~ am, data = mtcars, alternative = "equivalence", mu = 3)
+#'
+#' # Example 2: Using a non-parametric test with minimal effect alternative
+#' # Testing if the effect of transmission type on mpg is meaningfully large
+#' # (either less than -2 or greater than 2)
+#' simple_htest(mpg ~ am, data = mtcars,
+#'              test = "wilcox",
+#'              alternative = "minimal.effect",
+#'              mu = c(-2, 2))
+#'
+#' # Example 3: Paired samples test
+#' # Using the sleep dataset to test if drug has an effect on sleep
+#' data(sleep)
+#' with(sleep, simple_htest(x = extra[group == 1],
+#'                         y = extra[group == 2],
+#'                         paired = TRUE,
+#'                         alternative = "greater"))
+#'
+#' # Example 4: Brunner-Munzel test
+#' # Testing if values in one group tend to exceed values in another
+#' set.seed(123)
+#' group1 <- rnorm(20, mean = 5, sd = 1)
+#' group2 <- rnorm(20, mean = 6, sd = 2)
+#' simple_htest(x = group1, y = group2,
+#'              test = "brunner_munzel",
+#'              alternative = "less")
+#'
 #' @family TOST
+#' @family htest
 #' @name simple_htest
 #' @export simple_htest
+
 
 #simple_htest <- setClass("simple_htest")
 simple_htest <- function(x, ...,

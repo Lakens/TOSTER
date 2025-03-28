@@ -2,7 +2,7 @@
 % Please edit documentation in R/power_t_TOST.R
 \name{power_t_TOST}
 \alias{power_t_TOST}
-\title{Power calculations for TOST for t-tests}
+\title{Power calculations for TOST with t-tests}
 \usage{
 power_t_TOST(
   n = NULL,

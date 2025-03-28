@@ -14,43 +14,111 @@ corsum_test(
 )
 }
 \arguments{
-\item{r}{observed correlation}
+\item{r}{correlation coefficient (the estimated value)}
 
-\item{n}{number of pairs of observations}
+\item{n}{sample size (number of pairs)}
 
-\item{alternative}{a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater", "less", "equivalence" (TOST), or "minimal.effect" (TOST). You can specify just the initial letter.}
+\item{alternative}{a character string specifying the alternative hypothesis:
+\itemize{
+\item "two.sided": correlation is not equal to null (default)
+\item "greater": correlation is greater than null
+\item "less": correlation is less than null
+\item "equivalence": correlation is within the equivalence bounds (TOST)
+\item "minimal.effect": correlation is outside the equivalence bounds (TOST)
+}
 
-\item{method}{a character string indicating which correlation coefficient is to be used for the test. One of "pearson", "kendall", or "spearman", can be abbreviated.}
+You can specify just the initial letter.}
+
+\item{method}{a character string indicating which correlation coefficient is to be used for the test.
+One of "pearson", "kendall", or "spearman", can be abbreviated.}
 
 \item{alpha}{alpha level (default = 0.05)}
 
-\item{null}{a number indicating the null hypothesis. Default is a correlation of zero.}
+\item{null}{a number or vector indicating the null hypothesis value(s):
+\itemize{
+\item For standard tests: a single value (default = 0)
+\item For equivalence/minimal effect tests: either a single value (symmetric bounds ±value will be created)
+or a vector of two values representing the lower and upper bounds
+}}
 }
 \value{
 A list with class "htest" containing the following components:
 \itemize{
-\item "statistic": z-score.
-\item "p.value": the p-value of the test.
-\item "estimate": the estimated measure of association, with name "cor", "tau", or "rho" corresponding to the method employed.
-\item "null.value": the value of the association measure under the null hypothesis.
-\item "alternative": character string indicating the alternative hypothesis (the value of the input argument alternative).
-\item "method": a character string indicating how the association was measured.
-\item "data.name": a character string giving the names of the data.
-\item "call": the matched call.
+\item \strong{statistic}: z-score with name "z".
+\item \strong{p.value}: the p-value of the test.
+\item \strong{parameter}: the sample size with name "N".
+\item \strong{conf.int}: a confidence interval for the correlation appropriate to the specified alternative hypothesis.
+\item \strong{estimate}: the estimated correlation coefficient, with name "cor", "tau", or "rho" corresponding to the method employed.
+\item \strong{stderr}: the standard error of the test statistic.
+\item \strong{null.value}: the value(s) of the correlation coefficient under the null hypothesis.
+\item \strong{alternative}: character string indicating the alternative hypothesis.
+\item \strong{method}: a character string indicating how the correlation was measured.
+\item \strong{data.name}: a character string giving the names of the data.
+\item \strong{call}: the matched call.
 }
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 
-Test for association between paired samples, using one of Pearson's product moment correlation coefficient, Kendall's \eqn{\tau} (tau) or Spearman's \eqn{\rho} (rho).
-This is the updated version of the \link{TOSTr} function.
+Test for association between paired samples using only the correlation coefficient and sample size.
+Supports Pearson's product moment correlation, Kendall's \eqn{\tau} (tau), or Spearman's \eqn{\rho} (rho).
+This is the updated version of the \code{TOSTr} function.
 }
 \details{
 This function uses Fisher's z transformation for the correlations,
-but uses Fieller's correction of the standard error for Spearman's \eqn{\rho} and Kendall's \eqn{\tau}.
+but uses Fieller's correction of the standard error for Kendall's \eqn{\tau} or Spearman's \eqn{\rho}.
+
+Unlike \code{z_cor_test}, which requires raw data, this function only needs the correlation value
+and sample size. This is particularly useful when:
+\itemize{
+\item You only have access to summary statistics (correlation coefficient and sample size)
+\item You want to reanalyze published results within an equivalence testing framework
+}
+
+The function supports both standard hypothesis testing and equivalence/minimal effect testing:
+\itemize{
+\item For standard tests (two.sided, less, greater), the function tests whether the correlation
+differs from the null value (typically 0).
+\item For equivalence testing ("equivalence"), it determines whether the correlation falls within
+the specified bounds, which can be set asymmetrically.
+\item For minimal effect testing ("minimal.effect"), it determines whether the correlation falls
+outside the specified bounds.
+}
+
+When performing equivalence or minimal effect testing:
+\itemize{
+\item If a single value is provided for \code{null}, symmetric bounds ±value will be used
+\item If two values are provided for \code{null}, they will be used as the lower and upper bounds
+}
+}
+\examples{
+# Example 1: Standard significance test for Pearson correlation
+corsum_test(r = 0.45, n = 30, method = "pearson", alternative = "two.sided")
+
+# Example 2: Equivalence test for Spearman correlation
+# Testing if correlation is equivalent to zero within ±0.3
+corsum_test(r = 0.15, n = 40, method = "spearman",
+            alternative = "equivalence", null = 0.3)
+
+# Example 3: Minimal effect test for Kendall's tau
+# Testing if correlation is meaningfully different from ±0.25
+corsum_test(r = 0.42, n = 50, method = "kendall",
+            alternative = "minimal.effect", null = 0.25)
+
+# Example 4: One-sided test with non-zero null
+# Testing if correlation is greater than 0.3
+corsum_test(r = 0.45, n = 35, method = "pearson",
+            alternative = "greater", null = 0.3)
+
+# Example 5: Using asymmetric bounds for equivalence testing
+corsum_test(r = 0.1, n = 60, method = "pearson",
+            alternative = "equivalence", null = c(-0.2, 0.3))
+
 }
 \references{
-Goertzen, J. R., & Cribbie, R. A. (2010). Detecting a lack of association: An equivalence testing approach. British Journal of Mathematical and Statistical Psychology, 63(3), 527-537. https://doi.org/10.1348/000711009X475853, formula page 531.
+Goertzen, J. R., & Cribbie, R. A. (2010). Detecting a lack of association: An equivalence
+testing approach. British Journal of Mathematical and Statistical Psychology, 63(3), 527-537.
+https://doi.org/10.1348/000711009X475853, formula page 531.
 }
 \seealso{
 Other Correlations: 
