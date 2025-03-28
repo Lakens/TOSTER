@@ -16,7 +16,7 @@ vignette: >
 
 The TOSTER package provides several functions for calculating and analyzing correlations. These functions extend beyond traditional correlation tests by offering equivalence testing capabilities and robust correlation methods. The included functions are based on research by @goertzen2010 (`z_cor_test` & `compare_cor`), and @wilcox2011introduction (`boot_cor_test`)^[The bootstrapped functions were adapted from code posted by Rand Wilcox on his website, with modifications inspired by Guillaume Rousselet's `bootcorci` R package, available on GitHub: https://github.com/GRousselet].
 
-## Simple Correlation Test
+# Simple Correlation Test
 
 Basic tests of association can be performed with the `z_cor_test` function. This function is styled after R's built-in `cor.test` function but uses Fisher's z transformation as the basis for all significance tests (p-values). Despite this difference in methodology, the confidence intervals are typically very similar to those produced by `cor.test`.
 
@@ -43,7 +43,7 @@ z_cor_test(mtcars$mpg,
            method = "kendall")
 ```
 
-### Advantages of z_cor_test
+# Advantages of z_cor_test
 
 The main advantage of `z_cor_test` over the standard `cor.test` is its ability to perform equivalence testing (TOST) or any hypothesis test where the null hypothesis isn't zero. This makes it particularly useful for research questions focused on demonstrating practical equivalence or testing against specific correlation thresholds.
 
@@ -57,7 +57,7 @@ z_cor_test(mtcars$mpg,
 
 In this example, we're testing whether the correlation is equivalent to zero within the boundaries of ±0.4.
 
-## Using Summary Statistics
+# Using Summary Statistics
 
 A key advantage of TOSTER is the ability to perform correlation tests using only summary statistics, which is particularly useful when reviewing published literature or working with limited data access. The `corsum_test` function enables this functionality:
 
@@ -71,7 +71,7 @@ corsum_test(r = .121,
 
 This example tests whether a correlation of 0.121 from a sample of 105 paired observations is equivalent to zero within the boundaries of ±0.4.
 
-## Bootstrapped Correlation Test
+# Bootstrapped Correlation Test
 
 For more robust analyses when raw data is available, TOSTER provides the `boot_cor_test` function. This bootstrapping approach generally produces more reliable results than Fisher's z-based tests, especially when outliers are present or distribution assumptions are violated.
 
@@ -97,7 +97,7 @@ boot_cor_test(mtcars$mpg,
            null = .4)
 ```
 
-### Robust Correlation Methods
+## Robust Correlation Methods
 
 The `boot_cor_test` function also provides access to robust correlation methods that are less sensitive to outliers and violations of normality:
 
@@ -121,11 +121,11 @@ boot_cor_test(mtcars$mpg,
 
 The Winsorized correlation reduces the impact of outliers by replacing extreme values with less extreme values. The percentage bend correlation is another robust method that downweights the influence of outliers in the calculation.
 
-## Comparing Correlations
+# Comparing Correlations
 
 TOSTER provides tools for comparing correlations between independent groups or studies. This is useful for testing differences in relationships across populations or for evaluating replication studies.
 
-### Summary Statistics Approach
+## Summary Statistics Approach
 
 When only summary statistics are available, the `compare_cor` function can be used:
 
@@ -157,7 +157,7 @@ Available methods include:
 
 While both methods are appropriate for general significance testing, they may have limited statistical power in some scenarios [@counsell2015equ].
 
-### Bootstrapped Comparison
+## Bootstrapped Comparison
 
 When raw data is available for both correlations, the `boot_compare_cor` function offers a more robust approach through bootstrapping:
 
@@ -190,7 +190,7 @@ This approach has several advantages:
 - It can provide more accurate confidence intervals, especially when typical assumptions are violated
 
 
-## Practical Recommendations
+# Practical Recommendations
 
 When choosing which correlation method to use in TOSTER:
 
@@ -206,9 +206,9 @@ When choosing which correlation method to use in TOSTER:
    - Carefully select meaningful boundaries (null values) based on your research context
    - Consider what effect size would be practically insignificant in your field
 
-## Advanced Usage
+# Advanced Usage
 
-### Custom Bootstrap Methods
+## Custom Bootstrap Methods
 
 The bootstrapped functions in TOSTER allow customization of the bootstrap procedure:
 
@@ -224,7 +224,7 @@ boot_cor_test(
 )
 ```
 
-### Working with Missing Data
+## Working with Missing Data
 
 By default, the correlation functions in TOSTER use pairwise complete observations:
 
