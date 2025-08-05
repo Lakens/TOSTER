@@ -3,14 +3,17 @@ from scipy import stats
 import pandas as pd
 import warnings
 from .cohend_calcs import d_est_one, d_est_pair, d_est_ind
+from .boot_ci import basic_ci, perc_ci, stud_ci
 
 def _t_tost_helper(x, y=None, hypothesis="EQU", paired=False, var_equal=False, eqb=None, mu=0, bias_correction=True, rm_correction=False, glass=None):
     smd_type = 'g' if bias_correction else 'd'
 
-    if len(eqb) == 1:
+    if eqb is not None and len(eqb) == 1:
         low_eqbound, high_eqbound = -abs(eqb), abs(eqb)
-    else:
+    elif eqb is not None:
         low_eqbound, high_eqbound = min(eqb), max(eqb)
+    else:
+        low_eqbound, high_eqbound = np.nan, np.nan
 
     if y is None: # one-sample
         res = stats.ttest_1samp(x, popmean=mu)
@@ -93,14 +96,14 @@ def boot_t_tost(x, y=None, hypothesis="EQU", paired=False, var_equal=False, eqb=
         pTOST = min(p_l, p_u)
 
     if boot_ci == "stud":
-        boot_cint = _stud_ci(m_vec, m_se_vec, nullTOST['effsize']['SE'][0], nullTOST['effsize']['estimate'][0], alpha*2)
-        d_cint = _stud_ci(d_vec, d_se_vec, nullTOST['effsize']['SE'][1], nullTOST['effsize']['estimate'][1], alpha*2)
+        boot_cint = stud_ci(m_vec, m_se_vec, nullTOST['effsize']['SE'][0], nullTOST['effsize']['estimate'][0], alpha*2)
+        d_cint = stud_ci(d_vec, d_se_vec, nullTOST['effsize']['SE'][1], nullTOST['effsize']['estimate'][1], alpha*2)
     elif boot_ci == "basic":
-        boot_cint = _basic_ci(m_vec, nullTOST['effsize']['estimate'][0], alpha*2)
-        d_cint = _basic_ci(d_vec, nullTOST['effsize']['estimate'][1], alpha*2)
+        boot_cint = basic_ci(m_vec, nullTOST['effsize']['estimate'][0], alpha*2)
+        d_cint = basic_ci(d_vec, nullTOST['effsize']['estimate'][1], alpha*2)
     else: # perc
-        boot_cint = _perc_ci(m_vec, alpha*2)
-        d_cint = _perc_ci(d_vec, alpha*2)
+        boot_cint = perc_ci(m_vec, alpha*2)
+        d_cint = perc_ci(d_vec, alpha*2)
 
     return {
         'p.value': boot_pval,
@@ -110,18 +113,3 @@ def boot_t_tost(x, y=None, hypothesis="EQU", paired=False, var_equal=False, eqb=
         'estimate': nullTOST['effsize']['estimate'][0],
         'smd_estimate': nullTOST['effsize']['estimate'][1]
     }
-
-def _perc_ci(boots_est, alpha):
-    return np.quantile(boots_est, [alpha/2, 1-alpha/2])
-
-def _basic_ci(boots_est, t0, alpha):
-    conf = 1 - alpha
-    qq = np.quantile(boots_est, [(1 - conf) / 2, (1 + conf) / 2])
-    return 2 * t0 - qq[::-1]
-
-def _stud_ci(boots_est, boots_se, se0, t0, alpha):
-    conf = 1 - alpha
-    z = (boots_est - t0) / boots_se
-    z = z[np.isfinite(z)]
-    qq = np.quantile(z, [(1 - conf) / 2, (1 + conf) / 2])
-    return t0 - se0 * qq[::-1]

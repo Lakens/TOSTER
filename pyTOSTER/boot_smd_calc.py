@@ -3,6 +3,7 @@ from scipy import stats
 import pandas as pd
 import warnings
 from .cohend_calcs import d_est_one, d_est_pair, d_est_ind
+from .boot_ci import basic_ci, perc_ci, stud_ci
 
 def _smd_calc(x, y=None, paired=False, var_equal=False, bias_correction=True, rm_correction=False, glass=None, mu=0):
     smd_type = 'g' if bias_correction else 'd'
@@ -58,11 +59,11 @@ def boot_smd_calc(x, y=None, paired=False, var_equal=False, alpha=0.05, bias_cor
             boots_se[i] = res_boot['SE'].iloc[0]
 
     if boot_ci == "stud":
-        ci = _stud_ci(boots, boots_se, raw_smd['SE'].iloc[0], raw_smd['estimate'].iloc[0], alpha)
+        ci = stud_ci(boots, boots_se, raw_smd['SE'].iloc[0], raw_smd['estimate'].iloc[0], alpha)
     elif boot_ci == "basic":
-        ci = _basic_ci(boots, raw_smd['estimate'].iloc[0], alpha)
+        ci = basic_ci(boots, raw_smd['estimate'].iloc[0], alpha)
     else: # perc
-        ci = _perc_ci(boots, alpha)
+        ci = perc_ci(boots, alpha)
 
     effsize = pd.DataFrame({
         'estimate': raw_smd['estimate'].iloc[0],
@@ -75,18 +76,3 @@ def boot_smd_calc(x, y=None, paired=False, var_equal=False, alpha=0.05, bias_cor
     }, index=[raw_smd.index[0]])
 
     return effsize
-
-def _perc_ci(boots_est, alpha):
-    return np.quantile(boots_est, [alpha/2, 1-alpha/2])
-
-def _basic_ci(boots_est, t0, alpha):
-    conf = 1 - alpha
-    qq = np.quantile(boots_est, [(1 - conf) / 2, (1 + conf) / 2])
-    return 2 * t0 - qq[::-1]
-
-def _stud_ci(boots_est, boots_se, se0, t0, alpha):
-    conf = 1 - alpha
-    z = (boots_est - t0) / boots_se
-    z = z[np.isfinite(z)]
-    qq = np.quantile(z, [(1 - conf) / 2, (1 + conf) / 2])
-    return t0 - se0 * qq[::-1]
