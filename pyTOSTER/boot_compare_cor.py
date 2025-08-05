@@ -1,23 +1,17 @@
 import numpy as np
 from scipy import stats
-import warnings
-
-try:
-    import pingouin as pg
-except ImportError:
-    warnings.warn("pingouin is not installed. Please install it to use robust correlation methods.")
-    pg = None
+from .robust_cor import wincor, pbcor
 
 def boot_compare_cor(x1, y1, x2, y2,
                      alternative='two.sided',
                      method='pearson',
                      alpha=0.05,
                      null=0,
-                     R=1999):
+                     R=1999,
+                     tr=0.2,
+                     beta=0.2):
     """
     Comparing Correlations Between Independent Studies with Bootstrapping.
-
-    Note: Robust methods 'winsorized' and 'bendpercent' require the 'pingouin' package.
     """
     if not isinstance(x1, (list, np.ndarray)) or not isinstance(y1, (list, np.ndarray)) or \
        not isinstance(x2, (list, np.ndarray)) or not isinstance(y2, (list, np.ndarray)):
@@ -56,13 +50,11 @@ def boot_compare_cor(x1, y1, x2, y2,
             bvec1[i] = stats.kendalltau(x1[idx1], y1[idx1])[0]
             bvec2[i] = stats.kendalltau(x2[idx2], y2[idx2])[0]
         elif method == 'winsorized':
-            if pg is None: raise ImportError("pingouin package is required for winsorized correlation.")
-            bvec1[i] = pg.corr(stats.mstats.winsorize(x1[idx1]), stats.mstats.winsorize(y1[idx1]))['r'].values[0]
-            bvec2[i] = pg.corr(stats.mstats.winsorize(x2[idx2]), stats.mstats.winsorize(y2[idx2]))['r'].values[0]
+            bvec1[i] = wincor(x1[idx1], y1[idx1], tr=tr)
+            bvec2[i] = wincor(x2[idx2], y2[idx2], tr=tr)
         elif method == 'bendpercent':
-            if pg is None: raise ImportError("pingouin package is required for percentage bend correlation.")
-            bvec1[i] = pg.corr(x1[idx1], y1[idx1], method='percbend')['r'].values[0]
-            bvec2[i] = pg.corr(x2[idx2], y2[idx2], method='percbend')['r'].values[0]
+            bvec1[i] = pbcor(x1[idx1], y1[idx1], beta=beta)
+            bvec2[i] = pbcor(x2[idx2], y2[idx2], beta=beta)
         else:
             raise ValueError(f"Method '{method}' not supported.")
 
@@ -105,22 +97,20 @@ def boot_compare_cor(x1, y1, x2, y2,
 
     # Initial correlations
     if method == 'pearson':
-        r1 = stats.pearsonr(x1, y1)[0]
-        r2 = stats.pearsonr(x2, y2)[0]
+        r1, _ = stats.pearsonr(x1, y1)
+        r2, _ = stats.pearsonr(x2, y2)
     elif method == 'spearman':
-        r1 = stats.spearmanr(x1, y1)[0]
-        r2 = stats.spearmanr(x2, y2)[0]
+        r1, _ = stats.spearmanr(x1, y1)
+        r2, _ = stats.spearmanr(x2, y2)
     elif method == 'kendall':
-        r1 = stats.kendalltau(x1, y1)[0]
-        r2 = stats.kendalltau(x2, y2)[0]
+        r1, _ = stats.kendalltau(x1, y1)
+        r2, _ = stats.kendalltau(x2, y2)
     elif method == 'winsorized':
-        if pg is None: raise ImportError("pingouin package is required for winsorized correlation.")
-        r1 = pg.corr(stats.mstats.winsorize(x1), stats.mstats.winsorize(y1))['r'].values[0]
-        r2 = pg.corr(stats.mstats.winsorize(x2), stats.mstats.winsorize(y2))['r'].values[0]
+        r1 = wincor(x1, y1, tr=tr)
+        r2 = wincor(x2, y2, tr=tr)
     elif method == 'bendpercent':
-        if pg is None: raise ImportError("pingouin package is required for percentage bend correlation.")
-        r1 = pg.corr(x1, y1, method='percbend')['r'].values[0]
-        r2 = pg.corr(x2, y2, method='percbend')['r'].values[0]
+        r1 = pbcor(x1, y1, beta=beta)
+        r2 = pbcor(x2, y2, beta=beta)
 
     estimate = r1 - r2
     stderr = np.std(bvec_diff)
