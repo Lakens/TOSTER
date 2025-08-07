@@ -3,6 +3,9 @@ NEWS
 
 **TOSTER R package and jamovi module**
 
+# TOSTER v0.8.6
+- Add warning message about error control with MET 
+
 # TOSTER v0.8.5
 - Big update to package documentation to make things more detailed.
 - Added extra message when permutation tests are used for the Brunner-Munzel test.

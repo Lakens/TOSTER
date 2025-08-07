@@ -136,3 +136,19 @@ norm.inter = function (t, alpha) {
   cbind(round(rk, 2), out)
 }
 
+
+# Function to test if an interval (defined by two numbers) does not contain zero
+test_interval_no_zero <- function(vec) {
+  # Check if vector has exactly 2 elements
+  if (length(vec) != 2) {
+    stop("Input must be a vector of exactly 2 numbers")
+  }
+
+  # Get the interval bounds
+  lower <- min(vec)
+  upper <- max(vec)
+
+  # Check if zero is NOT in the interval [lower, upper]
+  return(!(0 >= lower && 0 <= upper))
+}
+
