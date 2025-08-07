@@ -149,11 +149,13 @@ boot_t_TOST.default <- function(x,
       low_eqbound = min(eqb)
     }
 
-    interval_no_zero = test_interval_no_zero(c(low_eqbound, high_eqbound))
 
-    if(interval_no_zero){
-      message("Equivalence interval does not include zero.")
-    }
+  }
+
+  interval_no_zero = test_interval_no_zero(c(low_eqbound, high_eqbound))
+
+  if(interval_no_zero){
+    message("Equivalence interval does not include zero.")
   }
 
   if (!is.null(y)) {

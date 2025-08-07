@@ -253,11 +253,13 @@ tsum_TOST <- function(m1,
       low_eqbound = min(eqb)
     }
 
-    interval_no_zero = test_interval_no_zero(c(low_eqbound, high_eqbound))
 
-    if(interval_no_zero){
-      message("Equivalence interval does not include zero.")
-    }
+  }
+
+  interval_no_zero = test_interval_no_zero(c(low_eqbound, high_eqbound))
+
+  if(interval_no_zero){
+    message("Equivalence interval does not include zero.")
   }
 
   if (eqbound_type == 'SMD') {
@@ -285,11 +287,7 @@ tsum_TOST <- function(m1,
                      " > (Mean1 - Mean2) or (Mean1 - Mean2)  > ",
                      round(high_eqbound,2))
 
-    if(!interval_no_zero){
-      if(pTOST <= tresult$p.value){
-        warning("MET test may have higher error rates than a nil two-tailed test. Consider wider equivalence bounds.")
-      }
-    }
+
   }
 
   low_ttest <- tsum_test(
@@ -326,6 +324,12 @@ tsum_TOST <- function(m1,
     tTOST = ifelse(abs(low_ttest$statistic) > abs(high_ttest$statistic),
                    low_ttest$statistic,
                    high_ttest$statistic) #Get lowest t-value for summary TOST result
+
+    if(!interval_no_zero){
+      if(pTOST <= tresult$p.value){
+        warning("MET test may have higher error rates than a nil two-tailed test. Consider wider equivalence bounds.")
+      }
+    }
   }
 
 
