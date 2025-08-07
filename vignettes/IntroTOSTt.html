@@ -12,7 +12,7 @@
 
 <meta name="author" content="Aaron R. Caldwell" />
 
-<meta name="date" content="2025-03-25" />
+<meta name="date" content="2025-08-07" />
 
 <title>An Introduction to t_TOST</title>
 
@@ -364,7 +364,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <h1 class="title toc-ignore">An Introduction to t_TOST</h1>
 <h3 class="subtitle">A new function for TOST with t-tests</h3>
 <h4 class="author">Aaron R. Caldwell</h4>
-<h4 class="date">2025-03-25</h4>
+<h4 class="date">2025-08-07</h4>
 
 
 <div id="TOC">
@@ -851,26 +851,27 @@ bounds. For this, we can use a one-sample test:</p>
 <span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>              <span class="at">hypothesis =</span> <span class="st">&quot;EQU&quot;</span>,</span>
 <span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>              <span class="at">eqb =</span> <span class="fu">c</span>(<span class="fl">5.5</span>, <span class="fl">8.5</span>),  <span class="co"># lower and upper bounds</span></span>
 <span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>              <span class="at">smd_ci =</span> <span class="st">&quot;t&quot;</span>)</span>
-<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>res4</span>
-<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a><span class="co">#&gt; One Sample t-test</span></span>
-<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a><span class="co">#&gt; The equivalence test was significant, t(149) = 5.08, p &lt; 0.01</span></span>
-<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a><span class="co">#&gt; The null hypothesis test was significant, t(149) = 86.425, p &lt; 0.01</span></span>
-<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a><span class="co">#&gt; NHST: reject null significance hypothesis that the effect is equal to zero </span></span>
-<span id="cb15-12"><a href="#cb15-12" tabindex="-1"></a><span class="co">#&gt; TOST: reject null equivalence hypothesis</span></span>
-<span id="cb15-13"><a href="#cb15-13" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb15-14"><a href="#cb15-14" tabindex="-1"></a><span class="co">#&gt; TOST Results </span></span>
-<span id="cb15-15"><a href="#cb15-15" tabindex="-1"></a><span class="co">#&gt;                  t  df p.value</span></span>
-<span id="cb15-16"><a href="#cb15-16" tabindex="-1"></a><span class="co">#&gt; t-test      86.425 149 &lt; 0.001</span></span>
-<span id="cb15-17"><a href="#cb15-17" tabindex="-1"></a><span class="co">#&gt; TOST Lower   5.078 149 &lt; 0.001</span></span>
-<span id="cb15-18"><a href="#cb15-18" tabindex="-1"></a><span class="co">#&gt; TOST Upper -39.293 149 &lt; 0.001</span></span>
-<span id="cb15-19"><a href="#cb15-19" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb15-20"><a href="#cb15-20" tabindex="-1"></a><span class="co">#&gt; Effect Sizes </span></span>
-<span id="cb15-21"><a href="#cb15-21" tabindex="-1"></a><span class="co">#&gt;            Estimate      SE             C.I. Conf. Level</span></span>
-<span id="cb15-22"><a href="#cb15-22" tabindex="-1"></a><span class="co">#&gt; Raw           5.843 0.06761 [5.7314, 5.9552]         0.9</span></span>
-<span id="cb15-23"><a href="#cb15-23" tabindex="-1"></a><span class="co">#&gt; Hedges&#39;s g    7.021 0.41350 [6.2039, 7.8381]         0.9</span></span>
-<span id="cb15-24"><a href="#cb15-24" tabindex="-1"></a><span class="co">#&gt; Note: SMD confidence intervals are an approximation. See vignette(&quot;SMD_calcs&quot;).</span></span></code></pre></div>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a><span class="co">#&gt; Equivalence interval does not include zero.</span></span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>res4</span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a><span class="co">#&gt; One Sample t-test</span></span>
+<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a><span class="co">#&gt; The equivalence test was significant, t(149) = 5.08, p &lt; 0.01</span></span>
+<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a><span class="co">#&gt; The null hypothesis test was significant, t(149) = 86.425, p &lt; 0.01</span></span>
+<span id="cb15-12"><a href="#cb15-12" tabindex="-1"></a><span class="co">#&gt; NHST: reject null significance hypothesis that the effect is equal to zero </span></span>
+<span id="cb15-13"><a href="#cb15-13" tabindex="-1"></a><span class="co">#&gt; TOST: reject null equivalence hypothesis</span></span>
+<span id="cb15-14"><a href="#cb15-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb15-15"><a href="#cb15-15" tabindex="-1"></a><span class="co">#&gt; TOST Results </span></span>
+<span id="cb15-16"><a href="#cb15-16" tabindex="-1"></a><span class="co">#&gt;                  t  df p.value</span></span>
+<span id="cb15-17"><a href="#cb15-17" tabindex="-1"></a><span class="co">#&gt; t-test      86.425 149 &lt; 0.001</span></span>
+<span id="cb15-18"><a href="#cb15-18" tabindex="-1"></a><span class="co">#&gt; TOST Lower   5.078 149 &lt; 0.001</span></span>
+<span id="cb15-19"><a href="#cb15-19" tabindex="-1"></a><span class="co">#&gt; TOST Upper -39.293 149 &lt; 0.001</span></span>
+<span id="cb15-20"><a href="#cb15-20" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb15-21"><a href="#cb15-21" tabindex="-1"></a><span class="co">#&gt; Effect Sizes </span></span>
+<span id="cb15-22"><a href="#cb15-22" tabindex="-1"></a><span class="co">#&gt;            Estimate      SE             C.I. Conf. Level</span></span>
+<span id="cb15-23"><a href="#cb15-23" tabindex="-1"></a><span class="co">#&gt; Raw           5.843 0.06761 [5.7314, 5.9552]         0.9</span></span>
+<span id="cb15-24"><a href="#cb15-24" tabindex="-1"></a><span class="co">#&gt; Hedges&#39;s g    7.021 0.41350 [6.2039, 7.8381]         0.9</span></span>
+<span id="cb15-25"><a href="#cb15-25" tabindex="-1"></a><span class="co">#&gt; Note: SMD confidence intervals are an approximation. See vignette(&quot;SMD_calcs&quot;).</span></span></code></pre></div>
 <p>Here, we’re testing whether the mean of Sepal.Length is equivalent
 within bounds of 5.5 and 8.5 units. Notice how we specify the bounds as
 a vector with two distinct values rather than a single value that gets
@@ -889,27 +890,28 @@ using just summary statistics:</p>
 <span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>  <span class="at">hypothesis =</span> <span class="st">&quot;EQU&quot;</span>,</span>
 <span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a>  <span class="at">eqb =</span> <span class="fu">c</span>(<span class="fl">5.5</span>, <span class="fl">8.5</span>)</span>
 <span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a>)</span>
-<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a></span>
-<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a>res_tsum</span>
-<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a><span class="co">#&gt; One-sample t-test</span></span>
-<span id="cb16-12"><a href="#cb16-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb16-13"><a href="#cb16-13" tabindex="-1"></a><span class="co">#&gt; The equivalence test was significant, t(149) = 5.078, p = 5.62e-07</span></span>
-<span id="cb16-14"><a href="#cb16-14" tabindex="-1"></a><span class="co">#&gt; The null hypothesis test was significant, t(149) = 86.425, p = 3.33e-129</span></span>
-<span id="cb16-15"><a href="#cb16-15" tabindex="-1"></a><span class="co">#&gt; NHST: reject null significance hypothesis that the effect is equal to zero </span></span>
-<span id="cb16-16"><a href="#cb16-16" tabindex="-1"></a><span class="co">#&gt; TOST: reject null equivalence hypothesis</span></span>
-<span id="cb16-17"><a href="#cb16-17" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb16-18"><a href="#cb16-18" tabindex="-1"></a><span class="co">#&gt; TOST Results </span></span>
-<span id="cb16-19"><a href="#cb16-19" tabindex="-1"></a><span class="co">#&gt;                  t  df p.value</span></span>
-<span id="cb16-20"><a href="#cb16-20" tabindex="-1"></a><span class="co">#&gt; t-test      86.425 149 &lt; 0.001</span></span>
-<span id="cb16-21"><a href="#cb16-21" tabindex="-1"></a><span class="co">#&gt; TOST Lower   5.078 149 &lt; 0.001</span></span>
-<span id="cb16-22"><a href="#cb16-22" tabindex="-1"></a><span class="co">#&gt; TOST Upper -39.293 149 &lt; 0.001</span></span>
-<span id="cb16-23"><a href="#cb16-23" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb16-24"><a href="#cb16-24" tabindex="-1"></a><span class="co">#&gt; Effect Sizes </span></span>
-<span id="cb16-25"><a href="#cb16-25" tabindex="-1"></a><span class="co">#&gt;            Estimate      SE             C.I. Conf. Level</span></span>
-<span id="cb16-26"><a href="#cb16-26" tabindex="-1"></a><span class="co">#&gt; Raw           5.843 0.06761 [5.7314, 5.9552]         0.9</span></span>
-<span id="cb16-27"><a href="#cb16-27" tabindex="-1"></a><span class="co">#&gt; Hedges&#39;s g    7.021 0.41350  [6.327, 7.6914]         0.9</span></span>
-<span id="cb16-28"><a href="#cb16-28" tabindex="-1"></a><span class="co">#&gt; Note: SMD confidence intervals are an approximation. See vignette(&quot;SMD_calcs&quot;).</span></span></code></pre></div>
+<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a><span class="co">#&gt; Equivalence interval does not include zero.</span></span>
+<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a></span>
+<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a>res_tsum</span>
+<span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-12"><a href="#cb16-12" tabindex="-1"></a><span class="co">#&gt; One-sample t-test</span></span>
+<span id="cb16-13"><a href="#cb16-13" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-14"><a href="#cb16-14" tabindex="-1"></a><span class="co">#&gt; The equivalence test was significant, t(149) = 5.078, p = 5.62e-07</span></span>
+<span id="cb16-15"><a href="#cb16-15" tabindex="-1"></a><span class="co">#&gt; The null hypothesis test was significant, t(149) = 86.425, p = 3.33e-129</span></span>
+<span id="cb16-16"><a href="#cb16-16" tabindex="-1"></a><span class="co">#&gt; NHST: reject null significance hypothesis that the effect is equal to zero </span></span>
+<span id="cb16-17"><a href="#cb16-17" tabindex="-1"></a><span class="co">#&gt; TOST: reject null equivalence hypothesis</span></span>
+<span id="cb16-18"><a href="#cb16-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-19"><a href="#cb16-19" tabindex="-1"></a><span class="co">#&gt; TOST Results </span></span>
+<span id="cb16-20"><a href="#cb16-20" tabindex="-1"></a><span class="co">#&gt;                  t  df p.value</span></span>
+<span id="cb16-21"><a href="#cb16-21" tabindex="-1"></a><span class="co">#&gt; t-test      86.425 149 &lt; 0.001</span></span>
+<span id="cb16-22"><a href="#cb16-22" tabindex="-1"></a><span class="co">#&gt; TOST Lower   5.078 149 &lt; 0.001</span></span>
+<span id="cb16-23"><a href="#cb16-23" tabindex="-1"></a><span class="co">#&gt; TOST Upper -39.293 149 &lt; 0.001</span></span>
+<span id="cb16-24"><a href="#cb16-24" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-25"><a href="#cb16-25" tabindex="-1"></a><span class="co">#&gt; Effect Sizes </span></span>
+<span id="cb16-26"><a href="#cb16-26" tabindex="-1"></a><span class="co">#&gt;            Estimate      SE             C.I. Conf. Level</span></span>
+<span id="cb16-27"><a href="#cb16-27" tabindex="-1"></a><span class="co">#&gt; Raw           5.843 0.06761 [5.7314, 5.9552]         0.9</span></span>
+<span id="cb16-28"><a href="#cb16-28" tabindex="-1"></a><span class="co">#&gt; Hedges&#39;s g    7.021 0.41350  [6.327, 7.6914]         0.9</span></span>
+<span id="cb16-29"><a href="#cb16-29" tabindex="-1"></a><span class="co">#&gt; Note: SMD confidence intervals are an approximation. See vignette(&quot;SMD_calcs&quot;).</span></span></code></pre></div>
 <p>Required arguments vary depending on the test type: *
 <code>n1 &amp; n2</code>: the sample sizes (only n1 needed for
 one-sample tests) * <code>m1 &amp; m2</code>: the sample means *

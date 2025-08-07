@@ -323,11 +323,13 @@ t_TOST.default = function(x,
       low_eqbound = min(eqb)
     }
 
-    interval_no_zero = test_interval_no_zero(c(low_eqbound, high_eqbound))
 
-    if(interval_no_zero){
-      message("Equivalence interval does not include zero.")
-    }
+  }
+
+  interval_no_zero = test_interval_no_zero(c(low_eqbound, high_eqbound))
+
+  if(interval_no_zero){
+    message("Equivalence interval does not include zero.")
   }
 
   if (eqbound_type == 'SMD') {
@@ -391,7 +393,7 @@ t_TOST.default = function(x,
 
     if(!interval_no_zero){
       if(pTOST <= tresult$p.value){
-        warning("MET test may higher error rate than two-tailed t-test. Proceed with caution")
+        warning("MET test may have higher error rates than a nil two-tailed test. Consider wider equivalence bounds.")
       }
     }
 

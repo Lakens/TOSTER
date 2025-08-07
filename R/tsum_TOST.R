@@ -252,6 +252,12 @@ tsum_TOST <- function(m1,
       high_eqbound = max(eqb)
       low_eqbound = min(eqb)
     }
+
+    interval_no_zero = test_interval_no_zero(c(low_eqbound, high_eqbound))
+
+    if(interval_no_zero){
+      message("Equivalence interval does not include zero.")
+    }
   }
 
   if (eqbound_type == 'SMD') {
@@ -278,6 +284,12 @@ tsum_TOST <- function(m1,
     alt_hyp = paste0(round(low_eqbound,2),
                      " > (Mean1 - Mean2) or (Mean1 - Mean2)  > ",
                      round(high_eqbound,2))
+
+    if(!interval_no_zero){
+      if(pTOST <= tresult$p.value){
+        warning("MET test may have higher error rates than a nil two-tailed test. Consider wider equivalence bounds.")
+      }
+    }
   }
 
   low_ttest <- tsum_test(

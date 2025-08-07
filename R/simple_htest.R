@@ -277,6 +277,27 @@ simple_htest.default = function(x,
    }
 
    if(alternative == "minimal.effect"){
+     two_test = switch(
+       test,
+       t.test = t.test(
+         x = x,
+         y = y,
+         paired = paired,
+         alternative = "two.sided",
+         ...
+       ),
+       wilcox.test = wilcox.test(
+         x = x,
+         y = y,
+         paired = paired,
+         alternative = "two.sided",
+         ...),
+       brunner_munzel = brunner_munzel(
+         x = x,
+         y = y,
+         paired = paired,
+         alternative = "two.sided",
+         ...))
 
      lo_test = switch(
        test,
@@ -333,6 +354,11 @@ simple_htest.default = function(x,
      } else {
        rval = lo_test
      }
+
+       if(two_test$p.value <= rval$p.value){
+         warning("MET test may have higher error rates than a nil two-tailed test. Consider wider equivalence bounds.")
+       }
+
      name_val = names(ci_test$null.value)
      rval$conf.int = ci_test$conf.int
      rval$alternative = alternative
