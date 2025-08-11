@@ -282,6 +282,7 @@ simple_htest.default = function(x,
        t.test = t.test(
          x = x,
          y = y,
+         mu = 0,
          paired = paired,
          alternative = "two.sided",
          ...
@@ -290,11 +291,13 @@ simple_htest.default = function(x,
          x = x,
          y = y,
          paired = paired,
+         mu = 0,
          alternative = "two.sided",
          ...),
        brunner_munzel = brunner_munzel(
          x = x,
          y = y,
+         mu = 0,
          paired = paired,
          alternative = "two.sided",
          ...))
@@ -355,7 +358,7 @@ simple_htest.default = function(x,
        rval = lo_test
      }
 
-       if(two_test$p.value <= rval$p.value){
+       if(two_test$p.value >= rval$p.value){
          warning("MET test may have higher error rates than a nil two-tailed test. Consider wider equivalence bounds.")
        }
 
