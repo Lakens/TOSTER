@@ -359,7 +359,7 @@ simple_htest.default = function(x,
      }
 
        if(two_test$p.value >= rval$p.value){
-         warning("MET test may have higher error rates than a nil two-tailed test. Consider wider equivalence bounds.")
+         message("MET test may have higher error rates than a nil two-tailed test. Consider wider equivalence bounds.")
        }
 
      name_val = names(ci_test$null.value)

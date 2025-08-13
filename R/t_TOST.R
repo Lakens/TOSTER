@@ -391,15 +391,10 @@ t_TOST.default = function(x,
                    low_ttest$statistic,
                    high_ttest$statistic) #Get lowest t-value for summary TOST result
 
-    if(!interval_no_zero){
-      if(pTOST <= tresult$p.value){
-        warning("MET test may have higher error rates than a nil two-tailed test. Consider wider equivalence bounds.")
-      }
-    }
+
 
 
   }
-
 
   TOST = data.frame(
     t = c(tresult$statistic,
@@ -478,6 +473,14 @@ t_TOST.default = function(x,
 
   #message(cat("Based on the equivalence test and the null-hypothesis test combined, we can conclude that the observed effect is ",combined_outcome,".",sep=""))
 
+  if(hypothesis == "MET"){
+     if(!interval_no_zero){
+    if(pTOST <= tresult$p.value){
+      message("MET test may have higher error rates than a nil two-tailed test. Consider wider equivalence bounds.")
+
+      }
+    }
+  }
 
   rval = list(
     TOST = TOST,

@@ -549,7 +549,7 @@ boot_t_TOST.default <- function(x,
 
     if(!interval_no_zero){
       if(pTOST <= boot.pval){
-        warning("MET test may have higher error rates than a nil two-tailed test. Consider wider equivalence bounds.")
+        message("MET test may have higher error rates than a nil two-tailed test. Consider wider equivalence bounds.")
       }
     }
   }
