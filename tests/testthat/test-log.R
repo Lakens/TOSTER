@@ -23,6 +23,23 @@ test_that("Run examples for two sample", {
                         eqb = 1.25,
                         R = 199)
 
+  expect_message({
+    boot_log_TOST(data = dat1,
+                  mpg ~ am,
+                  var.equal = TRUE,
+                  hypothesis = "MET",
+                  eqb = 1.01,
+                  R = 99)
+  })
+
+  expect_message({
+   log_TOST(data = dat1,
+                  mpg ~ am,
+                  var.equal = TRUE,
+                  hypothesis = "MET",
+                  eqb = 1.01)
+  })
+
   test1_t = log_TOST(data = dat1,
                         mpg ~ am,
                         var.equal = TRUE,

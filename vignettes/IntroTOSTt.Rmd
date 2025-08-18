@@ -389,7 +389,7 @@ describe_htest(res_metb)
 
 ### Warning: careful using narrow equivalence bounds
 
-Now, using MET isn't without some potential danger. If a user utilizes a very small equivalence bound (e.g., an SMD of 0.2) then there is the possibility that the p-value for the MET test will be smaller than the a typical nil-hypothesis two-tailed test. This raises the concern that someone could "hack" these functions in order to produce a "significant" result that alluded them when using a two-tailed test. A warning message has now been added to the TOST functions in this package to at least warn users about the hazards of using very narrow equivalence bounds.
+Now, using MET isn't without some potential danger. If a user utilizes a very small equivalence bound (e.g., an SMD of 0.05) then there is the possibility that the p-value for the MET test will be smaller than the a typical nil-hypothesis two-tailed test. This raises the concern that someone could "hack" these functions in order to produce a "significant" result that alluded them when using a two-tailed test. A warning message has now been added to the TOST functions in this package to at least warn users about the hazards of using very narrow equivalence bounds.
 
 ```{r, error=TRUE}
 set.seed(221)

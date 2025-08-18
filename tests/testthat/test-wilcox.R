@@ -15,6 +15,12 @@ test_that("Run examples for one sample", {
 
   expect_error(wilcox_TOST())
 
+  expect_message({
+   wilcox_TOST(x = samp1,
+               hypothesis = "MET",
+               eqb = .05)
+  })
+
   test1 = wilcox_TOST(x = samp1,
                  low_eqbound = -.5,
                  high_eqbound = .5)
