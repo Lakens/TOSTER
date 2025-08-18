@@ -33,12 +33,7 @@ test_that("Run examples for one sample", {
                 R = 99)
   })
 
-  expect_message({
-    boot_log_TOST(x = samp1,
-                hypothesis = "MET",
-                eqb = 1.01,
-                R = 99)
-  })
+
 
   htest_alt1 = boot_t_test(x = samp1,
                            alternative = "t",

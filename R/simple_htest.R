@@ -297,7 +297,7 @@ simple_htest.default = function(x,
        brunner_munzel = brunner_munzel(
          x = x,
          y = y,
-         mu = 0,
+         mu = 0.5,
          paired = paired,
          alternative = "two.sided",
          ...))
