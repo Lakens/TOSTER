@@ -178,8 +178,8 @@ plot(res1, type = "c",
 plot(res1, type = "tnull")
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  describe(res1)
-#  describe_htest(res1b)
+# describe(res1)
+# describe_htest(res1b)
 
 ## -----------------------------------------------------------------------------
 res2 = t_TOST(formula = extra ~ group,
@@ -229,8 +229,25 @@ res_metb = simple_htest(x = iris$Sepal.Length,
 res_metb
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  describe(res_met)
-#  describe_htest(res_metb)
+# describe(res_met)
+# describe_htest(res_metb)
+
+## ----error=TRUE---------------------------------------------------------------
+try({
+set.seed(221)
+dat1 = rnorm(30)
+dat2 = rnorm(30)
+
+test = t_TOST(
+  x = dat1,
+  y = dat2,
+  eqbound_type = "SMD",
+  eqb = .2,
+  hypothesis = "MET"
+)
+
+test
+})
 
 ## -----------------------------------------------------------------------------
 res4 = t_TOST(x = iris$Sepal.Length,

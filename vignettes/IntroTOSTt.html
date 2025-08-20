@@ -12,7 +12,7 @@
 
 <meta name="author" content="Aaron R. Caldwell" />
 
-<meta name="date" content="2025-08-07" />
+<meta name="date" content="2025-08-20" />
 
 <title>An Introduction to t_TOST</title>
 
@@ -364,7 +364,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <h1 class="title toc-ignore">An Introduction to t_TOST</h1>
 <h3 class="subtitle">A new function for TOST with t-tests</h3>
 <h4 class="author">Aaron R. Caldwell</h4>
-<h4 class="date">2025-08-07</h4>
+<h4 class="date">2025-08-20</h4>
 
 
 <div id="TOC">
@@ -408,6 +408,8 @@ for Paired Data</a></li>
 <li><a href="#minimal-effect-testing-met" id="toc-minimal-effect-testing-met">Minimal Effect Testing (MET)</a>
 <ul>
 <li><a href="#interpreting-met-results" id="toc-interpreting-met-results">Interpreting MET Results</a></li>
+<li><a href="#warning-careful-using-narrow-equivalence-bounds" id="toc-warning-careful-using-narrow-equivalence-bounds">Warning:
+careful using narrow equivalence bounds</a></li>
 </ul></li>
 </ul></li>
 <li><a href="#one-sample-t-test" id="toc-one-sample-t-test">One Sample
@@ -841,37 +843,83 @@ rate, it can be stated that the true mean difference is less than -1 or
 greater than 1.</p>
 </blockquote>
 </div>
+<div id="warning-careful-using-narrow-equivalence-bounds" class="section level3">
+<h3>Warning: careful using narrow equivalence bounds</h3>
+<p>Now, using MET isn’t without some potential danger. If a user
+utilizes a very small equivalence bound (e.g., an SMD of 0.05) then
+there is the possibility that the p-value for the MET test will be
+smaller than the a typical nil-hypothesis two-tailed test. This raises
+the concern that someone could “hack” these functions in order to
+produce a “significant” result that alluded them when using a two-tailed
+test. A warning message has now been added to the TOST functions in this
+package to at least warn users about the hazards of using very narrow
+equivalence bounds.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">221</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>dat1 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">30</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>dat2 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">30</span>)</span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>test <span class="ot">=</span> <span class="fu">t_TOST</span>(</span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>  <span class="at">x =</span> dat1,</span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a>  <span class="at">y =</span> dat2,</span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a>  <span class="at">eqbound_type =</span> <span class="st">&quot;SMD&quot;</span>,</span>
+<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a>  <span class="at">eqb =</span> .<span class="dv">2</span>,</span>
+<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a>  <span class="at">hypothesis =</span> <span class="st">&quot;MET&quot;</span></span>
+<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a>)</span>
+<span id="cb15-12"><a href="#cb15-12" tabindex="-1"></a><span class="co">#&gt; Warning: setting bound type to SMD produces biased results!</span></span>
+<span id="cb15-13"><a href="#cb15-13" tabindex="-1"></a><span class="co">#&gt; MET test may have higher error rates than a nil two-tailed test. Consider wider equivalence bounds.</span></span>
+<span id="cb15-14"><a href="#cb15-14" tabindex="-1"></a></span>
+<span id="cb15-15"><a href="#cb15-15" tabindex="-1"></a>test</span>
+<span id="cb15-16"><a href="#cb15-16" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb15-17"><a href="#cb15-17" tabindex="-1"></a><span class="co">#&gt; Welch Two Sample t-test</span></span>
+<span id="cb15-18"><a href="#cb15-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb15-19"><a href="#cb15-19" tabindex="-1"></a><span class="co">#&gt; The minimal effect test was non-significant, t(54.91) = 0.91, p = 0.74</span></span>
+<span id="cb15-20"><a href="#cb15-20" tabindex="-1"></a><span class="co">#&gt; The null hypothesis test was non-significant, t(54.91) = 0.133, p = 0.89</span></span>
+<span id="cb15-21"><a href="#cb15-21" tabindex="-1"></a><span class="co">#&gt; NHST: don&#39;t reject null significance hypothesis that the effect is equal to zero </span></span>
+<span id="cb15-22"><a href="#cb15-22" tabindex="-1"></a><span class="co">#&gt; TOST: don&#39;t reject null MET hypothesis</span></span>
+<span id="cb15-23"><a href="#cb15-23" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb15-24"><a href="#cb15-24" tabindex="-1"></a><span class="co">#&gt; TOST Results </span></span>
+<span id="cb15-25"><a href="#cb15-25" tabindex="-1"></a><span class="co">#&gt;                  t    df p.value</span></span>
+<span id="cb15-26"><a href="#cb15-26" tabindex="-1"></a><span class="co">#&gt; t-test      0.1329 54.91   0.895</span></span>
+<span id="cb15-27"><a href="#cb15-27" tabindex="-1"></a><span class="co">#&gt; TOST Lower  0.9075 54.91   0.816</span></span>
+<span id="cb15-28"><a href="#cb15-28" tabindex="-1"></a><span class="co">#&gt; TOST Upper -0.6417 54.91   0.738</span></span>
+<span id="cb15-29"><a href="#cb15-29" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb15-30"><a href="#cb15-30" tabindex="-1"></a><span class="co">#&gt; Effect Sizes </span></span>
+<span id="cb15-31"><a href="#cb15-31" tabindex="-1"></a><span class="co">#&gt;                Estimate     SE              C.I. Conf. Level</span></span>
+<span id="cb15-32"><a href="#cb15-32" tabindex="-1"></a><span class="co">#&gt; Raw             0.03003 0.2259   [-0.348, 0.408]         0.9</span></span>
+<span id="cb15-33"><a href="#cb15-33" tabindex="-1"></a><span class="co">#&gt; Hedges&#39;s g(av)  0.03385 0.2626 [-0.3852, 0.4526]         0.9</span></span>
+<span id="cb15-34"><a href="#cb15-34" tabindex="-1"></a><span class="co">#&gt; Note: SMD confidence intervals are an approximation. See vignette(&quot;SMD_calcs&quot;).</span></span></code></pre></div>
+</div>
 </div>
 </div>
 <div id="one-sample-t-test" class="section level1">
 <h1>One Sample t-test</h1>
 <p>In some cases, we may want to compare a single sample against known
 bounds. For this, we can use a one-sample test:</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>res4 <span class="ot">=</span> <span class="fu">t_TOST</span>(<span class="at">x =</span> iris<span class="sc">$</span>Sepal.Length,</span>
-<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>              <span class="at">hypothesis =</span> <span class="st">&quot;EQU&quot;</span>,</span>
-<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>              <span class="at">eqb =</span> <span class="fu">c</span>(<span class="fl">5.5</span>, <span class="fl">8.5</span>),  <span class="co"># lower and upper bounds</span></span>
-<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>              <span class="at">smd_ci =</span> <span class="st">&quot;t&quot;</span>)</span>
-<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a><span class="co">#&gt; Equivalence interval does not include zero.</span></span>
-<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>res4</span>
-<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a><span class="co">#&gt; One Sample t-test</span></span>
-<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a><span class="co">#&gt; The equivalence test was significant, t(149) = 5.08, p &lt; 0.01</span></span>
-<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a><span class="co">#&gt; The null hypothesis test was significant, t(149) = 86.425, p &lt; 0.01</span></span>
-<span id="cb15-12"><a href="#cb15-12" tabindex="-1"></a><span class="co">#&gt; NHST: reject null significance hypothesis that the effect is equal to zero </span></span>
-<span id="cb15-13"><a href="#cb15-13" tabindex="-1"></a><span class="co">#&gt; TOST: reject null equivalence hypothesis</span></span>
-<span id="cb15-14"><a href="#cb15-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb15-15"><a href="#cb15-15" tabindex="-1"></a><span class="co">#&gt; TOST Results </span></span>
-<span id="cb15-16"><a href="#cb15-16" tabindex="-1"></a><span class="co">#&gt;                  t  df p.value</span></span>
-<span id="cb15-17"><a href="#cb15-17" tabindex="-1"></a><span class="co">#&gt; t-test      86.425 149 &lt; 0.001</span></span>
-<span id="cb15-18"><a href="#cb15-18" tabindex="-1"></a><span class="co">#&gt; TOST Lower   5.078 149 &lt; 0.001</span></span>
-<span id="cb15-19"><a href="#cb15-19" tabindex="-1"></a><span class="co">#&gt; TOST Upper -39.293 149 &lt; 0.001</span></span>
-<span id="cb15-20"><a href="#cb15-20" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb15-21"><a href="#cb15-21" tabindex="-1"></a><span class="co">#&gt; Effect Sizes </span></span>
-<span id="cb15-22"><a href="#cb15-22" tabindex="-1"></a><span class="co">#&gt;            Estimate      SE             C.I. Conf. Level</span></span>
-<span id="cb15-23"><a href="#cb15-23" tabindex="-1"></a><span class="co">#&gt; Raw           5.843 0.06761 [5.7314, 5.9552]         0.9</span></span>
-<span id="cb15-24"><a href="#cb15-24" tabindex="-1"></a><span class="co">#&gt; Hedges&#39;s g    7.021 0.41350 [6.2039, 7.8381]         0.9</span></span>
-<span id="cb15-25"><a href="#cb15-25" tabindex="-1"></a><span class="co">#&gt; Note: SMD confidence intervals are an approximation. See vignette(&quot;SMD_calcs&quot;).</span></span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>res4 <span class="ot">=</span> <span class="fu">t_TOST</span>(<span class="at">x =</span> iris<span class="sc">$</span>Sepal.Length,</span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>              <span class="at">hypothesis =</span> <span class="st">&quot;EQU&quot;</span>,</span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>              <span class="at">eqb =</span> <span class="fu">c</span>(<span class="fl">5.5</span>, <span class="fl">8.5</span>),  <span class="co"># lower and upper bounds</span></span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>              <span class="at">smd_ci =</span> <span class="st">&quot;t&quot;</span>)</span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a><span class="co">#&gt; Equivalence interval does not include zero.</span></span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a>res4</span>
+<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a><span class="co">#&gt; One Sample t-test</span></span>
+<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a><span class="co">#&gt; The equivalence test was significant, t(149) = 5.08, p &lt; 0.01</span></span>
+<span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a><span class="co">#&gt; The null hypothesis test was significant, t(149) = 86.425, p &lt; 0.01</span></span>
+<span id="cb16-12"><a href="#cb16-12" tabindex="-1"></a><span class="co">#&gt; NHST: reject null significance hypothesis that the effect is equal to zero </span></span>
+<span id="cb16-13"><a href="#cb16-13" tabindex="-1"></a><span class="co">#&gt; TOST: reject null equivalence hypothesis</span></span>
+<span id="cb16-14"><a href="#cb16-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-15"><a href="#cb16-15" tabindex="-1"></a><span class="co">#&gt; TOST Results </span></span>
+<span id="cb16-16"><a href="#cb16-16" tabindex="-1"></a><span class="co">#&gt;                  t  df p.value</span></span>
+<span id="cb16-17"><a href="#cb16-17" tabindex="-1"></a><span class="co">#&gt; t-test      86.425 149 &lt; 0.001</span></span>
+<span id="cb16-18"><a href="#cb16-18" tabindex="-1"></a><span class="co">#&gt; TOST Lower   5.078 149 &lt; 0.001</span></span>
+<span id="cb16-19"><a href="#cb16-19" tabindex="-1"></a><span class="co">#&gt; TOST Upper -39.293 149 &lt; 0.001</span></span>
+<span id="cb16-20"><a href="#cb16-20" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb16-21"><a href="#cb16-21" tabindex="-1"></a><span class="co">#&gt; Effect Sizes </span></span>
+<span id="cb16-22"><a href="#cb16-22" tabindex="-1"></a><span class="co">#&gt;            Estimate      SE             C.I. Conf. Level</span></span>
+<span id="cb16-23"><a href="#cb16-23" tabindex="-1"></a><span class="co">#&gt; Raw           5.843 0.06761 [5.7314, 5.9552]         0.9</span></span>
+<span id="cb16-24"><a href="#cb16-24" tabindex="-1"></a><span class="co">#&gt; Hedges&#39;s g    7.021 0.41350 [6.2039, 7.8381]         0.9</span></span>
+<span id="cb16-25"><a href="#cb16-25" tabindex="-1"></a><span class="co">#&gt; Note: SMD confidence intervals are an approximation. See vignette(&quot;SMD_calcs&quot;).</span></span></code></pre></div>
 <p>Here, we’re testing whether the mean of Sepal.Length is equivalent
 within bounds of 5.5 and 8.5 units. Notice how we specify the bounds as
 a vector with two distinct values rather than a single value that gets
@@ -883,35 +931,35 @@ applied symmetrically.</p>
 raw data, especially when working with published literature. The
 <code>tsum_TOST</code> function allows you to perform TOST analyses
 using just summary statistics:</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>res_tsum <span class="ot">=</span> <span class="fu">tsum_TOST</span>(</span>
-<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>  <span class="at">m1 =</span> <span class="fu">mean</span>(iris<span class="sc">$</span>Sepal.Length, <span class="at">na.rm=</span><span class="cn">TRUE</span>),  <span class="co"># sample mean</span></span>
-<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>  <span class="at">sd1 =</span> <span class="fu">sd</span>(iris<span class="sc">$</span>Sepal.Length, <span class="at">na.rm=</span><span class="cn">TRUE</span>),   <span class="co"># sample standard deviation</span></span>
-<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>  <span class="at">n1 =</span> <span class="fu">length</span>(<span class="fu">na.omit</span>(iris<span class="sc">$</span>Sepal.Length)),  <span class="co"># sample size</span></span>
-<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>  <span class="at">hypothesis =</span> <span class="st">&quot;EQU&quot;</span>,</span>
-<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a>  <span class="at">eqb =</span> <span class="fu">c</span>(<span class="fl">5.5</span>, <span class="fl">8.5</span>)</span>
-<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a>)</span>
-<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a><span class="co">#&gt; Equivalence interval does not include zero.</span></span>
-<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a></span>
-<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a>res_tsum</span>
-<span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb16-12"><a href="#cb16-12" tabindex="-1"></a><span class="co">#&gt; One-sample t-test</span></span>
-<span id="cb16-13"><a href="#cb16-13" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb16-14"><a href="#cb16-14" tabindex="-1"></a><span class="co">#&gt; The equivalence test was significant, t(149) = 5.078, p = 5.62e-07</span></span>
-<span id="cb16-15"><a href="#cb16-15" tabindex="-1"></a><span class="co">#&gt; The null hypothesis test was significant, t(149) = 86.425, p = 3.33e-129</span></span>
-<span id="cb16-16"><a href="#cb16-16" tabindex="-1"></a><span class="co">#&gt; NHST: reject null significance hypothesis that the effect is equal to zero </span></span>
-<span id="cb16-17"><a href="#cb16-17" tabindex="-1"></a><span class="co">#&gt; TOST: reject null equivalence hypothesis</span></span>
-<span id="cb16-18"><a href="#cb16-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb16-19"><a href="#cb16-19" tabindex="-1"></a><span class="co">#&gt; TOST Results </span></span>
-<span id="cb16-20"><a href="#cb16-20" tabindex="-1"></a><span class="co">#&gt;                  t  df p.value</span></span>
-<span id="cb16-21"><a href="#cb16-21" tabindex="-1"></a><span class="co">#&gt; t-test      86.425 149 &lt; 0.001</span></span>
-<span id="cb16-22"><a href="#cb16-22" tabindex="-1"></a><span class="co">#&gt; TOST Lower   5.078 149 &lt; 0.001</span></span>
-<span id="cb16-23"><a href="#cb16-23" tabindex="-1"></a><span class="co">#&gt; TOST Upper -39.293 149 &lt; 0.001</span></span>
-<span id="cb16-24"><a href="#cb16-24" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb16-25"><a href="#cb16-25" tabindex="-1"></a><span class="co">#&gt; Effect Sizes </span></span>
-<span id="cb16-26"><a href="#cb16-26" tabindex="-1"></a><span class="co">#&gt;            Estimate      SE             C.I. Conf. Level</span></span>
-<span id="cb16-27"><a href="#cb16-27" tabindex="-1"></a><span class="co">#&gt; Raw           5.843 0.06761 [5.7314, 5.9552]         0.9</span></span>
-<span id="cb16-28"><a href="#cb16-28" tabindex="-1"></a><span class="co">#&gt; Hedges&#39;s g    7.021 0.41350  [6.327, 7.6914]         0.9</span></span>
-<span id="cb16-29"><a href="#cb16-29" tabindex="-1"></a><span class="co">#&gt; Note: SMD confidence intervals are an approximation. See vignette(&quot;SMD_calcs&quot;).</span></span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a>res_tsum <span class="ot">=</span> <span class="fu">tsum_TOST</span>(</span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>  <span class="at">m1 =</span> <span class="fu">mean</span>(iris<span class="sc">$</span>Sepal.Length, <span class="at">na.rm=</span><span class="cn">TRUE</span>),  <span class="co"># sample mean</span></span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a>  <span class="at">sd1 =</span> <span class="fu">sd</span>(iris<span class="sc">$</span>Sepal.Length, <span class="at">na.rm=</span><span class="cn">TRUE</span>),   <span class="co"># sample standard deviation</span></span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a>  <span class="at">n1 =</span> <span class="fu">length</span>(<span class="fu">na.omit</span>(iris<span class="sc">$</span>Sepal.Length)),  <span class="co"># sample size</span></span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a>  <span class="at">hypothesis =</span> <span class="st">&quot;EQU&quot;</span>,</span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a>  <span class="at">eqb =</span> <span class="fu">c</span>(<span class="fl">5.5</span>, <span class="fl">8.5</span>)</span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a>)</span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a><span class="co">#&gt; Equivalence interval does not include zero.</span></span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a></span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a>res_tsum</span>
+<span id="cb17-11"><a href="#cb17-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb17-12"><a href="#cb17-12" tabindex="-1"></a><span class="co">#&gt; One-sample t-test</span></span>
+<span id="cb17-13"><a href="#cb17-13" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb17-14"><a href="#cb17-14" tabindex="-1"></a><span class="co">#&gt; The equivalence test was significant, t(149) = 5.078, p = 5.62e-07</span></span>
+<span id="cb17-15"><a href="#cb17-15" tabindex="-1"></a><span class="co">#&gt; The null hypothesis test was significant, t(149) = 86.425, p = 3.33e-129</span></span>
+<span id="cb17-16"><a href="#cb17-16" tabindex="-1"></a><span class="co">#&gt; NHST: reject null significance hypothesis that the effect is equal to zero </span></span>
+<span id="cb17-17"><a href="#cb17-17" tabindex="-1"></a><span class="co">#&gt; TOST: reject null equivalence hypothesis</span></span>
+<span id="cb17-18"><a href="#cb17-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb17-19"><a href="#cb17-19" tabindex="-1"></a><span class="co">#&gt; TOST Results </span></span>
+<span id="cb17-20"><a href="#cb17-20" tabindex="-1"></a><span class="co">#&gt;                  t  df p.value</span></span>
+<span id="cb17-21"><a href="#cb17-21" tabindex="-1"></a><span class="co">#&gt; t-test      86.425 149 &lt; 0.001</span></span>
+<span id="cb17-22"><a href="#cb17-22" tabindex="-1"></a><span class="co">#&gt; TOST Lower   5.078 149 &lt; 0.001</span></span>
+<span id="cb17-23"><a href="#cb17-23" tabindex="-1"></a><span class="co">#&gt; TOST Upper -39.293 149 &lt; 0.001</span></span>
+<span id="cb17-24"><a href="#cb17-24" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb17-25"><a href="#cb17-25" tabindex="-1"></a><span class="co">#&gt; Effect Sizes </span></span>
+<span id="cb17-26"><a href="#cb17-26" tabindex="-1"></a><span class="co">#&gt;            Estimate      SE             C.I. Conf. Level</span></span>
+<span id="cb17-27"><a href="#cb17-27" tabindex="-1"></a><span class="co">#&gt; Raw           5.843 0.06761 [5.7314, 5.9552]         0.9</span></span>
+<span id="cb17-28"><a href="#cb17-28" tabindex="-1"></a><span class="co">#&gt; Hedges&#39;s g    7.021 0.41350  [6.327, 7.6914]         0.9</span></span>
+<span id="cb17-29"><a href="#cb17-29" tabindex="-1"></a><span class="co">#&gt; Note: SMD confidence intervals are an approximation. See vignette(&quot;SMD_calcs&quot;).</span></span></code></pre></div>
 <p>Required arguments vary depending on the test type: *
 <code>n1 &amp; n2</code>: the sample sizes (only n1 needed for
 one-sample tests) * <code>m1 &amp; m2</code>: the sample means *
@@ -920,10 +968,10 @@ one-sample tests) * <code>m1 &amp; m2</code>: the sample means *
 <code>paired = TRUE</code>)</p>
 <p>The same visualization and description methods work with
 <code>tsum_TOST</code>:</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="fu">plot</span>(res_tsum)</span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="fu">plot</span>(res_tsum)</span></code></pre></div>
 <p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="fu">describe</span>(res_tsum)</span>
-<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Using the One-sample t-test, a null hypothesis significance test (NHST), and a equivalence test, via two one-sided tests (TOST), were performed with an alpha-level of 0.05. These tested the null hypotheses that true mean is equal to 0 (NHST), and true mean is more extreme than 5.5 and 8.5 (TOST). The equivalence test was significant, t(149) = 5.078, p &lt; 0.001 (mean = 5.843 90% C.I.[5.731, 5.955]; Hedges&#39;s g = 7.021 90% C.I.[6.327, 7.691]). At the desired error rate, it can be stated that the true mean is between 5.5 and 8.5.&quot;</span></span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="fu">describe</span>(res_tsum)</span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Using the One-sample t-test, a null hypothesis significance test (NHST), and a equivalence test, via two one-sided tests (TOST), were performed with an alpha-level of 0.05. These tested the null hypotheses that true mean is equal to 0 (NHST), and true mean is more extreme than 5.5 and 8.5 (TOST). The equivalence test was significant, t(149) = 5.078, p &lt; 0.001 (mean = 5.843 90% C.I.[5.731, 5.955]; Hedges&#39;s g = 7.021 90% C.I.[6.327, 7.691]). At the desired error rate, it can be stated that the true mean is between 5.5 and 8.5.&quot;</span></span></code></pre></div>
 </div>
 <div id="power-analysis-for-tost" class="section level1">
 <h1>Power Analysis for TOST</h1>
@@ -939,25 +987,25 @@ non-central t-distribution or the ‘shifted’ central t-distribution <span cla
 specify equivalence bounds and leave one parameter blank
 (<code>alpha</code>, <code>power</code>, or <code>n</code>) to solve for
 it:</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="fu">power_t_TOST</span>(<span class="at">n =</span> <span class="cn">NULL</span>,</span>
-<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a>  <span class="at">delta =</span> <span class="dv">1</span>,          <span class="co"># assumed true difference</span></span>
-<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a>  <span class="at">sd =</span> <span class="fl">2.5</span>,           <span class="co"># assumed standard deviation</span></span>
-<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a>  <span class="at">eqb =</span> <span class="fl">2.5</span>,          <span class="co"># equivalence bounds</span></span>
-<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a>  <span class="at">alpha =</span> .<span class="dv">025</span>,       <span class="co"># significance level</span></span>
-<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a>  <span class="at">power =</span> .<span class="dv">95</span>,        <span class="co"># desired power</span></span>
-<span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">&quot;two.sample&quot;</span>) <span class="co"># test type</span></span>
-<span id="cb19-8"><a href="#cb19-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb19-9"><a href="#cb19-9" tabindex="-1"></a><span class="co">#&gt;      Two-sample TOST power calculation </span></span>
-<span id="cb19-10"><a href="#cb19-10" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb19-11"><a href="#cb19-11" tabindex="-1"></a><span class="co">#&gt;           power = 0.95</span></span>
-<span id="cb19-12"><a href="#cb19-12" tabindex="-1"></a><span class="co">#&gt;            beta = 0.05</span></span>
-<span id="cb19-13"><a href="#cb19-13" tabindex="-1"></a><span class="co">#&gt;           alpha = 0.025</span></span>
-<span id="cb19-14"><a href="#cb19-14" tabindex="-1"></a><span class="co">#&gt;               n = 73.16747</span></span>
-<span id="cb19-15"><a href="#cb19-15" tabindex="-1"></a><span class="co">#&gt;           delta = 1</span></span>
-<span id="cb19-16"><a href="#cb19-16" tabindex="-1"></a><span class="co">#&gt;              sd = 2.5</span></span>
-<span id="cb19-17"><a href="#cb19-17" tabindex="-1"></a><span class="co">#&gt;          bounds = -2.5, 2.5</span></span>
-<span id="cb19-18"><a href="#cb19-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb19-19"><a href="#cb19-19" tabindex="-1"></a><span class="co">#&gt; </span><span class="al">NOTE</span><span class="co">: n is number in *each* group</span></span></code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a><span class="fu">power_t_TOST</span>(<span class="at">n =</span> <span class="cn">NULL</span>,</span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a>  <span class="at">delta =</span> <span class="dv">1</span>,          <span class="co"># assumed true difference</span></span>
+<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a>  <span class="at">sd =</span> <span class="fl">2.5</span>,           <span class="co"># assumed standard deviation</span></span>
+<span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a>  <span class="at">eqb =</span> <span class="fl">2.5</span>,          <span class="co"># equivalence bounds</span></span>
+<span id="cb20-5"><a href="#cb20-5" tabindex="-1"></a>  <span class="at">alpha =</span> .<span class="dv">025</span>,       <span class="co"># significance level</span></span>
+<span id="cb20-6"><a href="#cb20-6" tabindex="-1"></a>  <span class="at">power =</span> .<span class="dv">95</span>,        <span class="co"># desired power</span></span>
+<span id="cb20-7"><a href="#cb20-7" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">&quot;two.sample&quot;</span>) <span class="co"># test type</span></span>
+<span id="cb20-8"><a href="#cb20-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb20-9"><a href="#cb20-9" tabindex="-1"></a><span class="co">#&gt;      Two-sample TOST power calculation </span></span>
+<span id="cb20-10"><a href="#cb20-10" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb20-11"><a href="#cb20-11" tabindex="-1"></a><span class="co">#&gt;           power = 0.95</span></span>
+<span id="cb20-12"><a href="#cb20-12" tabindex="-1"></a><span class="co">#&gt;            beta = 0.05</span></span>
+<span id="cb20-13"><a href="#cb20-13" tabindex="-1"></a><span class="co">#&gt;           alpha = 0.025</span></span>
+<span id="cb20-14"><a href="#cb20-14" tabindex="-1"></a><span class="co">#&gt;               n = 73.16747</span></span>
+<span id="cb20-15"><a href="#cb20-15" tabindex="-1"></a><span class="co">#&gt;           delta = 1</span></span>
+<span id="cb20-16"><a href="#cb20-16" tabindex="-1"></a><span class="co">#&gt;              sd = 2.5</span></span>
+<span id="cb20-17"><a href="#cb20-17" tabindex="-1"></a><span class="co">#&gt;          bounds = -2.5, 2.5</span></span>
+<span id="cb20-18"><a href="#cb20-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb20-19"><a href="#cb20-19" tabindex="-1"></a><span class="co">#&gt; </span><span class="al">NOTE</span><span class="co">: n is number in *each* group</span></span></code></pre></div>
 <p>In this example, we’re planning a two-sample equivalence study where:
 - We assume the true difference is at least 1 unit - The standard
 deviation is estimated to be 2.5 - We set equivalence bounds to ±2.5

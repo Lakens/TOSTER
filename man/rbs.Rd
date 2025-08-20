@@ -13,7 +13,7 @@ np_ses(
   mu = 0,
   conf.level = 0.95,
   paired = FALSE,
-  ses = c("rb", "odds", "cstat")
+  ses = c("rb", "odds", "logodds", "cstat")
 )
 }
 \arguments{

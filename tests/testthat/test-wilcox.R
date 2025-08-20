@@ -93,11 +93,38 @@ test_that("Run examples for two sample", {
                       high_eqbound = .5)
   test1_smd = ses_calc(formula = y ~ group,
                       data = df_samp)
+  test1_smd_cstat = ses_calc(formula = y ~ group,
+                                       data = df_samp,
+                                       ses = "cstat")
+  test1_smd_odds = ses_calc(formula = y ~ group,
+                                      data = df_samp,
+                                      ses = "odds")
+  test1_smd_logodds = ses_calc(formula = y ~ group,
+                                         data = df_samp,
+                                         ses = "logodds")
   test1_smd_boot = boot_ses_calc(formula = y ~ group,
                        data = df_samp,
                        R = 99)
+  test1_smd_boot_cstat = boot_ses_calc(formula = y ~ group,
+                                 data = df_samp,
+                                 ses = "cstat",
+                                 R = 99)
+  test1_smd_boot_odds = boot_ses_calc(formula = y ~ group,
+                                 data = df_samp,
+                                 ses = "odds",
+                                 R = 99)
+  test1_smd_boot_logodds = boot_ses_calc(formula = y ~ group,
+                                      data = df_samp,
+                                      ses = "logodds",
+                                      R = 99)
   expect_equal(test1_smd_boot$estimate,
                test1_smd$estimate)
+  expect_equal(test1_smd_boot_cstat$estimate,
+               test1_smd_cstat$estimate)
+  expect_equal(test1_smd_boot_odds$estimate,
+               test1_smd_odds$estimate)
+  expect_equal(test1_smd_boot_logodds$estimate,
+               test1_smd_logodds$estimate)
   expect_error(ses_calc(formula = y ~ group,
                         data = df_samp,
                         alpha = 1.1))

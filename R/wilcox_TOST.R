@@ -76,7 +76,7 @@ wilcox_TOST.default = function(x,
                           eqb,
                           low_eqbound,
                           high_eqbound,
-                          ses = c("rb","odds","cstat"),
+                          ses = c("rb","odds", "logodds", "cstat"),
                           alpha = 0.05,
                           mu = 0,
                           ...) {

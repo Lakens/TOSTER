@@ -108,8 +108,13 @@ The function supports three study designs:
 }
 
 Note that extreme values (perfect separation between groups) can produce infinite values during
-the bootstrapping process. The function will issue a warning if this occurs, as it may affect
+the bootstrapping process.
+This is happen often if the sample size is very small.
+The function will issue a warning if this occurs, as it may affect
 the accuracy of the confidence intervals.
+Additionally, this affects the ability to calculate bias and SE estimates from the bootstrap samples.
+If the number of infinite values is small (less than 10\% of the bootstrap samples) then the infinite values
+are replaced with the nearest next value (only for the SE and bias estimates, not confidence intervals).
 
 For detailed information on calculation methods, see \code{vignette("robustTOST")}.
 }

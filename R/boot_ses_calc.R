@@ -48,8 +48,13 @@
 #'   - Paired samples design: Compares paired observations
 #'
 #' Note that extreme values (perfect separation between groups) can produce infinite values during
-#' the bootstrapping process. The function will issue a warning if this occurs, as it may affect
+#' the bootstrapping process.
+#' This is happen often if the sample size is very small.
+#' The function will issue a warning if this occurs, as it may affect
 #' the accuracy of the confidence intervals.
+#' Additionally, this affects the ability to calculate bias and SE estimates from the bootstrap samples.
+#' If the number of infinite values is small (less than 10% of the bootstrap samples) then the infinite values
+#' are replaced with the nearest next value (only for the SE and bias estimates, not confidence intervals).
 #'
 #' For detailed information on calculation methods, see `vignette("robustTOST")`.
 #'
@@ -238,15 +243,17 @@ boot_ses_calc.default = function(x,
 
   }
   if(any(is.infinite(boots))){
-    message("Bootstrapped results contain extreme results (i.e., no overlap), caution advised interpreting the with confidence intervals.")
+    message("Bootstrapped results contain extreme results (i.e., no overlap), caution advised interpreting confidence intervals.")
   }
 
+  # get CI on Fisher Z
   zci = switch(boot_ci,
                "stud" = stud(boots_est = boots, boots_se = boots_se,
                              se0=raw_SE, t0 = atanh(raw_ses$estimate[1L]),
                              alpha), # extreme problems with extreme
                "perc" = perc(boots, alpha),
                "basic" = basic(boots, t0 = atanh(raw_ses$estimate), alpha))
+  # transform back to rcb
   rci = tanh(zci)
 
   rboots = tanh(boots)
@@ -257,15 +264,38 @@ boot_ses_calc.default = function(x,
                   "odds" = rb_to_odds(rboots),
                   "logodds" = log(rb_to_odds(rboots)))
 
+  # adjust for infinite observations
+  if(any(is.infinite(boots2))){
+    sum_inf = sum(is.infinite(boots2))
+    # need to look into this more
+    # might need more stringent cutoff
+    if(sum_inf/R > .1){
+      message("More than 10% of bootstrap estimates contain infinite values, bias and SE calculations will not be provided. Seek other robust bootstrap methods.")
+    } else{
+      message(paste0("A total of ",sum_inf, " bootstrapped estimates of ", R, " samples is an infinite value. Bias and SE estimates are affected; proceed with caution."))
+      upper_inf = max(boots2[is.finite(boots2) ])
+      lower_inf = min(boots2[is.finite(boots2) ])
+      boots2[boots2 == Inf ] <- upper_inf
+      boots2[boots2 == -Inf] <- lower_inf
+    }
+
+  }
+  # transform tp desired estimate
   ci = switch(ses,
               "rb" = rci,
               "cstat" = rb_to_cstat(rci),
               "odds" = rb_to_odds(rci),
               "logodds" = log(rb_to_odds(rci)))
 
+  est2 = switch(ses,
+                "rb" = raw_ses$estimate,
+                "cstat" = rb_to_cstat(raw_ses$estimate),
+                "odds" = rb_to_odds(raw_ses$estimate),
+                "logodds" = log(rb_to_odds(raw_ses$estimate)))
+
   effsize = data.frame(
-    estimate = raw_ses$estimate,
-    bias = raw_ses$estimate - median(boots2),
+    estimate = est2,
+    bias = est2 - median(boots2),
     SE = sd(boots2),
     lower.ci = ci[1],
     upper.ci = ci[2],
