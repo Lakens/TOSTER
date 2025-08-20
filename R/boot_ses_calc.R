@@ -49,7 +49,7 @@
 #'
 #' Note that extreme values (perfect separation between groups) can produce infinite values during
 #' the bootstrapping process.
-#' This is happen often if the sample size is very small.
+#' This happens often if the sample size is very small.
 #' The function will issue a warning if this occurs, as it may affect
 #' the accuracy of the confidence intervals.
 #' Additionally, this affects the ability to calculate bias and SE estimates from the bootstrap samples.
@@ -272,7 +272,7 @@ boot_ses_calc.default = function(x,
     if(sum_inf/R > .1){
       message("More than 10% of bootstrap estimates contain infinite values, bias and SE calculations will not be provided. Seek other robust bootstrap methods.")
     } else{
-      message(paste0("A total of ",sum_inf, " bootstrapped estimates of ", R, " samples is an infinite value. Bias and SE estimates are affected; proceed with caution."))
+      message(paste0("A total of ",sum_inf, " bootstrapped estimates of ", R, " samples are infinite values. Bias and SE estimates are affected; proceed with caution."))
       upper_inf = max(boots2[is.finite(boots2) ])
       lower_inf = min(boots2[is.finite(boots2) ])
       boots2[boots2 == Inf ] <- upper_inf
