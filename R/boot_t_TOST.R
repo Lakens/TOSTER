@@ -148,6 +148,14 @@ boot_t_TOST.default <- function(x,
       high_eqbound = max(eqb)
       low_eqbound = min(eqb)
     }
+
+
+  }
+
+  interval_no_zero = test_interval_no_zero(c(low_eqbound, high_eqbound))
+
+  if(interval_no_zero){
+    message("Equivalence interval does not include zero.")
   }
 
   if (!is.null(y)) {
@@ -538,6 +546,12 @@ boot_t_TOST.default <- function(x,
     tTOST = ifelse(abs(tstat_l) > abs(tstat_u),
                    tstat_l,
                    tstat_u) #Get lowest t-value for summary TOST result
+
+    if(!interval_no_zero){
+      if(pTOST <= boot.pval){
+        message("MET test may have higher error rates than a nil two-tailed test. Consider wider equivalence bounds.")
+      }
+    }
   }
 
   # Change text based on two tailed t test if mu is not zero

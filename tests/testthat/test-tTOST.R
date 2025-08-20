@@ -31,6 +31,10 @@ test_that("Run examples for one sample", {
                      high_eqbound = .5,
                      alpha = 1.22))
   expect_error(t_TOST(Sepal.Width ~ Species, data = iris))
+
+  expect_message({t_TOST(x = samp1,
+                 eqb = .05,
+                 hypothesis = "MET")})
   # Normal one sample ----
 
   test1 = t_TOST(x = samp1,

@@ -26,6 +26,15 @@ test_that("Run examples for one sample", {
                            R = 99))
   expect_error(boot_t_TOST(Sepal.Width ~ Species, data = iris))
 
+  expect_message({
+    boot_t_TOST(x = samp1,
+                hypothesis = "MET",
+                eqb = .005,
+                R = 99)
+  })
+
+
+
   htest_alt1 = boot_t_test(x = samp1,
                            alternative = "t",
                            R = 99)
@@ -56,6 +65,8 @@ test_that("Run examples for one sample", {
   expect_error( boot_log_TOST(x = samp1,
                       eqb = .5,
                       R = 99))
+
+
 
   set.seed(432020)
   test3 = boot_t_TOST(x = samp1,

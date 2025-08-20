@@ -159,7 +159,7 @@ np_ses <- function(x,
                    mu = 0,
                    conf.level = 0.95,
                    paired = FALSE,
-                   ses = c("rb","odds","cstat")) {
+                   ses = c("rb","odds","logodds","cstat")) {
   ses = match.arg(ses)
   rb <- rbs(x=x,
             y = y,

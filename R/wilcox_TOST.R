@@ -76,7 +76,7 @@ wilcox_TOST.default = function(x,
                           eqb,
                           low_eqbound,
                           high_eqbound,
-                          ses = c("rb","odds","cstat"),
+                          ses = c("rb","odds", "logodds", "cstat"),
                           alpha = 0.05,
                           mu = 0,
                           ...) {
@@ -135,6 +135,14 @@ wilcox_TOST.default = function(x,
       high_eqbound = max(eqb)
       low_eqbound = min(eqb)
     }
+
+
+  }
+
+  interval_no_zero = test_interval_no_zero(c(low_eqbound, high_eqbound))
+
+  if(interval_no_zero){
+    message("Equivalence interval does not include zero.")
   }
 
   if(!is.numeric(alpha) || alpha <=0 || alpha >=1){
@@ -208,6 +216,12 @@ wilcox_TOST.default = function(x,
     tTOST = ifelse(abs(low_ttest$statistic) > abs(high_ttest$statistic),
                    low_ttest$statistic,
                    high_ttest$statistic) #Get lowest t-value for summary TOST result
+
+    if(!interval_no_zero){
+      if(pTOST <= tresult$p.value){
+        message("MET test may have higher error rates than a nil two-tailed test. Consider wider equivalence bounds.")
+      }
+    }
   }
 
   TOST = data.frame(

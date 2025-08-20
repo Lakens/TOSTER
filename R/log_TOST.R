@@ -231,6 +231,12 @@ log_TOST.default = function(x,
       low_eqbound = min(eqb)
     }
 
+  interval_no_zero = test_interval_no_zero(c(log(low_eqbound), log(high_eqbound)))
+
+  if(interval_no_zero){
+    message("Equivalence interval does not include 1.")
+  }
+
 
   if(hypothesis == "EQU"){
     null_hyp = paste0(round(low_eqbound,2),
@@ -280,6 +286,11 @@ log_TOST.default = function(x,
     tTOST = ifelse(abs(low_ttest$statistic) > abs(high_ttest$statistic),
                    low_ttest$statistic,
                    high_ttest$statistic) #Get lowest t-value for summary TOST result
+    if(!interval_no_zero){
+    if(pTOST <= tresult$p.value){
+      message("MET test may have higher error rates than a nil two-tailed test. Consider wider equivalence bounds.")
+    }
+  }
   }
 
 

@@ -12,7 +12,7 @@
 
 <meta name="author" content="Aaron R. Caldwell" />
 
-<meta name="date" content="2025-03-25" />
+<meta name="date" content="2025-08-07" />
 
 <title>Correlations</title>
 
@@ -363,15 +363,13 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Correlations</h1>
 <h4 class="author">Aaron R. Caldwell</h4>
-<h4 class="date">2025-03-25</h4>
+<h4 class="date">2025-08-07</h4>
 
 
 <div id="TOC">
 <ul>
-<li><a href="#simple-correlation-test" id="toc-simple-correlation-test">Simple Correlation Test</a>
-<ul>
+<li><a href="#simple-correlation-test" id="toc-simple-correlation-test">Simple Correlation Test</a></li>
 <li><a href="#advantages-of-z_cor_test" id="toc-advantages-of-z_cor_test">Advantages of z_cor_test</a></li>
-</ul></li>
 <li><a href="#using-summary-statistics" id="toc-using-summary-statistics">Using Summary Statistics</a></li>
 <li><a href="#bootstrapped-correlation-test" id="toc-bootstrapped-correlation-test">Bootstrapped Correlation Test</a>
 <ul>
@@ -399,8 +397,8 @@ correlation tests by offering equivalence testing capabilities and
 robust correlation methods. The included functions are based on research
 by <span class="citation">Goertzen and Cribbie (2010)</span>
 (<code>z_cor_test</code> &amp; <code>compare_cor</code>), and <span class="citation">Wilcox (2011)</span> (<code>boot_cor_test</code>)<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>.</p>
-<div id="simple-correlation-test" class="section level2">
-<h2>Simple Correlation Test</h2>
+<div id="simple-correlation-test" class="section level1">
+<h1>Simple Correlation Test</h1>
 <p>Basic tests of association can be performed with the
 <code>z_cor_test</code> function. This function is styled after R’s
 built-in <code>cor.test</code> function but uses Fisher’s z
@@ -466,8 +464,9 @@ supports Spearman and Kendall correlation coefficients:</p>
 ## sample estimates:
 ##       tau 
 ## 0.3153652</code></pre>
-<div id="advantages-of-z_cor_test" class="section level3">
-<h3>Advantages of z_cor_test</h3>
+</div>
+<div id="advantages-of-z_cor_test" class="section level1">
+<h1>Advantages of z_cor_test</h1>
 <p>The main advantage of <code>z_cor_test</code> over the standard
 <code>cor.test</code> is its ability to perform equivalence testing
 (TOST) or any hypothesis test where the null hypothesis isn’t zero. This
@@ -496,9 +495,8 @@ correlation thresholds.</p>
 <p>In this example, we’re testing whether the correlation is equivalent
 to zero within the boundaries of ±0.4.</p>
 </div>
-</div>
-<div id="using-summary-statistics" class="section level2">
-<h2>Using Summary Statistics</h2>
+<div id="using-summary-statistics" class="section level1">
+<h1>Using Summary Statistics</h1>
 <p>A key advantage of TOSTER is the ability to perform correlation tests
 using only summary statistics, which is particularly useful when
 reviewing published literature or working with limited data access. The
@@ -526,8 +524,8 @@ reviewing published literature or working with limited data access. The
 105 paired observations is equivalent to zero within the boundaries of
 ±0.4.</p>
 </div>
-<div id="bootstrapped-correlation-test" class="section level2">
-<h2>Bootstrapped Correlation Test</h2>
+<div id="bootstrapped-correlation-test" class="section level1">
+<h1>Bootstrapped Correlation Test</h1>
 <p>For more robust analyses when raw data is available, TOSTER provides
 the <code>boot_cor_test</code> function. This bootstrapping approach
 generally produces more reliable results than Fisher’s z-based tests,
@@ -592,8 +590,8 @@ violated.</p>
 ## sample estimates:
 ##       tau 
 ## 0.3153652</code></pre>
-<div id="robust-correlation-methods" class="section level3">
-<h3>Robust Correlation Methods</h3>
+<div id="robust-correlation-methods" class="section level2">
+<h2>Robust Correlation Methods</h2>
 <p>The <code>boot_cor_test</code> function also provides access to
 robust correlation methods that are less sensitive to outliers and
 violations of normality:</p>
@@ -645,14 +643,14 @@ correlation is another robust method that downweights the influence of
 outliers in the calculation.</p>
 </div>
 </div>
-<div id="comparing-correlations" class="section level2">
-<h2>Comparing Correlations</h2>
+<div id="comparing-correlations" class="section level1">
+<h1>Comparing Correlations</h1>
 <p>TOSTER provides tools for comparing correlations between independent
 groups or studies. This is useful for testing differences in
 relationships across populations or for evaluating replication
 studies.</p>
-<div id="summary-statistics-approach" class="section level3">
-<h3>Summary Statistics Approach</h3>
+<div id="summary-statistics-approach" class="section level2">
+<h2>Summary Statistics Approach</h2>
 <p>When only summary statistics are available, the
 <code>compare_cor</code> function can be used:</p>
 <div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="co"># Comparing correlation r1=0.8 from n=40 with r2=0.2 from n=100</span></span>
@@ -704,8 +702,8 @@ coefficients.</li>
 <p>While both methods are appropriate for general significance testing,
 they may have limited statistical power in some scenarios <span class="citation">(Counsell and Cribbie 2015)</span>.</p>
 </div>
-<div id="bootstrapped-comparison" class="section level3">
-<h3>Bootstrapped Comparison</h3>
+<div id="bootstrapped-comparison" class="section level2">
+<h2>Bootstrapped Comparison</h2>
 <p>When raw data is available for both correlations, the
 <code>boot_compare_cor</code> function offers a more robust approach
 through bootstrapping:</p>
@@ -747,8 +745,8 @@ typical assumptions are violated</li>
 </ul>
 </div>
 </div>
-<div id="practical-recommendations" class="section level2">
-<h2>Practical Recommendations</h2>
+<div id="practical-recommendations" class="section level1">
+<h1>Practical Recommendations</h1>
 <p>When choosing which correlation method to use in TOSTER:</p>
 <ol style="list-style-type: decimal">
 <li><strong>If raw data is available:</strong>
@@ -773,10 +771,10 @@ field</li>
 </ul></li>
 </ol>
 </div>
-<div id="advanced-usage" class="section level2">
-<h2>Advanced Usage</h2>
-<div id="custom-bootstrap-methods" class="section level3">
-<h3>Custom Bootstrap Methods</h3>
+<div id="advanced-usage" class="section level1">
+<h1>Advanced Usage</h1>
+<div id="custom-bootstrap-methods" class="section level2">
+<h2>Custom Bootstrap Methods</h2>
 <p>The bootstrapped functions in TOSTER allow customization of the
 bootstrap procedure:</p>
 <div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" tabindex="-1"></a><span class="co"># Customizing the bootstrap procedure</span></span>
@@ -789,8 +787,8 @@ bootstrap procedure:</p>
 <span id="cb29-8"><a href="#cb29-8" tabindex="-1"></a>  <span class="at">alternative =</span> <span class="st">&quot;t&quot;</span>  <span class="co"># Two-sided test</span></span>
 <span id="cb29-9"><a href="#cb29-9" tabindex="-1"></a>)</span></code></pre></div>
 </div>
-<div id="working-with-missing-data" class="section level3">
-<h3>Working with Missing Data</h3>
+<div id="working-with-missing-data" class="section level2">
+<h2>Working with Missing Data</h2>
 <p>By default, the correlation functions in TOSTER use pairwise complete
 observations:</p>
 <div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a><span class="co"># Example with missing data</span></span>

@@ -322,6 +322,14 @@ t_TOST.default = function(x,
       high_eqbound = max(eqb)
       low_eqbound = min(eqb)
     }
+
+
+  }
+
+  interval_no_zero = test_interval_no_zero(c(low_eqbound, high_eqbound))
+
+  if(interval_no_zero){
+    message("Equivalence interval does not include zero.")
   }
 
   if (eqbound_type == 'SMD') {
@@ -382,8 +390,11 @@ t_TOST.default = function(x,
     tTOST = ifelse(abs(low_ttest$statistic) > abs(high_ttest$statistic),
                    low_ttest$statistic,
                    high_ttest$statistic) #Get lowest t-value for summary TOST result
-  }
 
+
+
+
+  }
 
   TOST = data.frame(
     t = c(tresult$statistic,
@@ -462,6 +473,14 @@ t_TOST.default = function(x,
 
   #message(cat("Based on the equivalence test and the null-hypothesis test combined, we can conclude that the observed effect is ",combined_outcome,".",sep=""))
 
+  if(hypothesis == "MET"){
+     if(!interval_no_zero){
+    if(pTOST <= tresult$p.value){
+      message("MET test may have higher error rates than a nil two-tailed test. Consider wider equivalence bounds.")
+
+      }
+    }
+  }
 
   rval = list(
     TOST = TOST,
