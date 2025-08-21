@@ -13,7 +13,7 @@ jobs:
   test-coverage:
     runs-on: ubuntu-latest
     env:
-      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_PAT: ${{ 17f1a5ed-600b-4c28-af2f-5f7e95a1d3bb }}
 
     steps:
       - uses: actions/checkout@v4
