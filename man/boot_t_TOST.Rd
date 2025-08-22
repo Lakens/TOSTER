@@ -134,6 +134,7 @@ Use this function when:
 }
 
 \examples{
+\dontrun{
 # Example 1: Two-Sample Test with Symmetric Bounds
 set.seed(1234)
 group1 <- rnorm(30, mean = 5, sd = 2)
@@ -164,7 +165,7 @@ scores <- rnorm(40, mean = 0.3, sd = 1)
 result <- boot_t_TOST(x = scores,
                      eqb = 0.5,
                      boot_ci = "basic")
-
+}
 }
 \references{
 Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press.

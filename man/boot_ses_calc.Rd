@@ -109,7 +109,7 @@ The function supports three study designs:
 
 Note that extreme values (perfect separation between groups) can produce infinite values during
 the bootstrapping process.
-This is happen often if the sample size is very small.
+This happens often if the sample size is very small.
 The function will issue a warning if this occurs, as it may affect
 the accuracy of the confidence intervals.
 Additionally, this affects the ability to calculate bias and SE estimates from the bootstrap samples.

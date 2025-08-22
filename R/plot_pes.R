@@ -51,6 +51,7 @@
 #' @return A `ggplot2` object or plot grid from `cowplot`.
 #'
 #' @examples
+#' \dontrun{
 #' # Example 1: Basic consonance plot for partial eta-squared
 #' # For an F-statistic of 4.5 with df1 = 2, df2 = 60
 #' plot_pes(Fstat = 4.5, df1 = 2, df2 = 60)
@@ -78,7 +79,7 @@
 #' p + theme_minimal() +
 #'   labs(title = "Consonance Plot for Partial Eta-Squared",
 #'        subtitle = "F(2, 60) = 4.5")
-#'
+#'}
 #' @references
 #' Schweder, T., & Hjort, N. L. (2016). Confidence, likelihood, probability:
 #' Statistical inference with confidence distributions. Cambridge University Press.

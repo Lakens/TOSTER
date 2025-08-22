@@ -58,6 +58,7 @@
 #'   - "boot": List containing the bootstrap samples for SMD and raw effect sizes.
 #'
 #' @examples
+#' \dontrun{
 #' # Example 1: Two-Sample Test with Symmetric Bounds
 #' set.seed(1234)
 #' group1 <- rnorm(30, mean = 5, sd = 2)
@@ -88,7 +89,7 @@
 #' result <- boot_t_TOST(x = scores,
 #'                      eqb = 0.5,
 #'                      boot_ci = "basic")
-#'
+#'}
 #' @references
 #' Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press.
 #'

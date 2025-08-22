@@ -134,6 +134,7 @@ Use this function when:
 }
 
 \examples{
+
 # Example 1: Basic two-sample test with formula notation
 data(sleep)
 result <- boot_t_test(extra ~ group, data = sleep)
