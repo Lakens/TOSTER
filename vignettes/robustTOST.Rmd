@@ -53,6 +53,16 @@ The `wilcox_TOST` function is particularly useful when:
 - You're concerned about outliers influencing your results
 - You need a test that makes minimal assumptions about the underlying distributions
 
+### Understanding the Equivalence Bounds (`eqb`)
+
+The equivalence bounds (`eqb`) are specified on the **raw scale** of your data, just like the `mu` argument in `stats::wilcox.test()`. This means `eqb` represents actual differences in location (e.g., location shifts) in the original units of measurement, not standardized effect sizes. Unlike `t_TOST`, where `eqb` *can* be set in terms of standardized mean differences (e.g., Cohen's d), in `wilcox_TOST`, you *must* define `eqb` based on the scale of your data for `wilcox_TOST`.
+
+**The `eqb` and `ses` parameters are completely independent:**
+
+- `eqb` sets the equivalence bounds on the raw data scale for the statistical test
+- `ses` only determines which *type* of standardized effect size is calculated and reported (e.g., rank-biserial correlation, concordance probability, or odds)
+- Changing `ses` does **not** change the meaning or interpretation of `eqb`
+
 As an example, we can use the sleep data to make a non-parametric comparison of equivalence.
 
 ```{r}
@@ -209,7 +219,7 @@ Where $logit(c) = \ln\frac{c}{1-c}$
 
 The WMW odds can be interpreted similarly to a traditional odds ratio, representing the odds that an observation from one group is greater than an observation from another group.
 
-Either effect size is available by simply modifying the `ses` argument for the `wilcox_TOST` function.
+Either effect size is available by simply modifying the `ses` argument for the `wilcox_TOST` function. **Note:** In all examples below, `eqb = .5` remains on the raw data scale (the scale of the `extra` variable in hours of sleep). The `ses` argument only changes which standardized effect size is calculated and reported; it does not change the equivalence bounds or the hypothesis test itself.
 
 ```{r}
 # Rank biserial
@@ -342,7 +352,7 @@ The permutation approach (`perm = TRUE`) is recommended when:
 - Data distributions are highly skewed or contain outliers
 - Precision is more important than computational speed
 
-Note that the permutation approach can be computationally intensive for large datasets, potentially increasing processing time significantly. Additionlly, with a permutation test you may observe situations where the confidence interval and the p-values would yield *different* conclusions.
+Note that the permutation approach can be computationally intensive for large datasets, potentially increasing processing time significantly. Additionally, with a permutation test you may observe situations where the confidence interval and the p-values would yield *different* conclusions.
 
 # Bootstrap TOST
 

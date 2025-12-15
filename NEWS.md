@@ -3,6 +3,9 @@ NEWS
 
 **TOSTER R package and jamovi module**
 
+# TOSTER v0.8.7
+- Update documentation to make it clear what the "eqb" argument does within the `wilcox_TOST` function.
+
 # TOSTER v0.8.6
 - Add warning message about error control with MET 
 - Fix unit tests for boot_ses_calc to catch errors when estimates contain infinite values or when ses is not "rb"
