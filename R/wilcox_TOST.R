@@ -9,15 +9,15 @@
 #' @param mu  number indicating the value around which (a-)symmetry (for
 #'   one-sample or paired samples) or shift (for independent samples) is to be
 #'   estimated. See [stats::wilcox.test].
-#' @param eqb Equivalence bound. Can provide 1 value (symmetric bound) or 2 specific values that represent the lower and upper equivalence bounds.
-#'   Like the `mu` argument, `eqb` is specified on the **raw scale** of the original data (e.g., the scale of the median or location shift).
+#' @param eqb Equivalence bound. Can provide one value (symmetric bound) or two specific values that represent the lower and upper equivalence bounds.
+#'   Like the `mu` argument, `eqb` is specified on the **raw scale** of the original data (e.g., the scale of the location shift).
 #'   This parameter is independent of the `ses` argument, which only affects the type of standardized effect size that is reported.
 #' @param ses Standardized effect size. Default is "rb" for rank-biserial
 #' correlation. Options also include "cstat" for concordance probability, or
 #' "odds" for Wilcoxon-Mann-Whitney odds (otherwise known as Agresti's
 #' generalized odds ratio). Note that `ses` only determines which effect size is calculated and does not affect the equivalence bounds (`eqb`).
 #' @details
-#' For details on the calculations in this function see `vignette("robustTOST")`.
+#' For details on the calculations in this function see `vignette("robustTOST")`. For details on the Wilcoxon-Mann-Whitney tests see [stats::wilcox.test].
 #'
 #' If only x is given, or if both x and y are given and paired is TRUE,
 #' a Wilcoxon signed rank test of the null that the distribution of x (in the one sample case)
