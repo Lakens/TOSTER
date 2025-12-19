@@ -62,6 +62,9 @@ boot_t_test(x, ...)
 \value{
 A list with class \code{"htest"} containing the following components:
 \itemize{
+\item "statistic": the observed t-statistic (note: the p-value is derived from the bootstrap
+distribution, not from this statistic and the degrees of freedom).
+\item "parameter": the degrees of freedom for the t-statistic.
 \item "p.value": the bootstrapped p-value for the test.
 \item "stderr": the bootstrapped standard error.
 \item "conf.int": a bootstrapped confidence interval for the mean appropriate to the specified alternative hypothesis.
