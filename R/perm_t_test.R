@@ -5,15 +5,13 @@
 #' Performs t-tests with permutation-based p-values and confidence intervals. This function supports
 #' standard hypothesis testing alternatives as well as equivalence and minimal effect testing,
 #' with optional trimmed means (Yuen's approach) for robust inference.
-#'
 #' @section Purpose:
 #' Use this function when:
 #'   * You need more robust inference than provided by standard t-tests
-
 #'   * You want to perform equivalence or minimal effect testing with permutation methods
-#'   * Sample sizes are small or standard parametric approaches may be kess reliable
+#'   * Sample sizes are very small where standard or bootstrap approaches may be less reliable
 #'   * You prefer the standard `htest` output format for compatibility with other R functions
-#'   * You want an alternative that tests means, mean difference, or difference in means that can also use trimming
+#'   * You want an alternative that tests means, mean difference, or difference in means that can also utilize trimming
 #'
 #' @inheritParams simple_htest
 #' @param mu a number or vector specifying the null hypothesis value(s):
@@ -79,6 +77,8 @@
 #'
 #' @return A list with class `"htest"` containing the following components:
 #'
+#'   - "statistic": the value of the t-statistic.
+#'   - "parameter": the degrees of freedom for the t-statistic.
 #'   - "p.value": the permutation p-value for the test.
 #'   - "stderr": the standard error of the mean (difference).
 #'   - "conf.int": a permutation percentile confidence interval appropriate to the
@@ -149,6 +149,10 @@
 #' @family Robust tests
 #' @name perm_t_test
 #' @export perm_t_test
+
+perm_t_test <- function(x, ...) {
+  UseMethod("perm_t_test")
+}
 
 #' @keywords internal
 #' @noRd
@@ -274,9 +278,7 @@ perm_groups <- function(nx, ny, R) {
   }
 }
 
-perm_t_test <- function(x, ...) {
-  UseMethod("perm_t_test")
-}
+
 
 #' @rdname perm_t_test
 #' @method perm_t_test default
@@ -413,11 +415,7 @@ perm_t_test.default <- function(x,
       tstat <- (mx - mu) / stderr
     }
 
-    method <- if (paired) {
-      if (trim > 0) paste0(method_prefix," Paired Yuen t-test") else paste0(method_prefix," Paired t-test")
-    } else {
-      if (trim > 0) paste0(method_prefix," One Sample Yuen t-test") else paste0(method_prefix," One Sample t-test")
-    }
+
 
     estimate <- setNames(mx, if (paired) {
       if (trim > 0) "trimmed mean of the differences" else "mean of the differences"
@@ -433,11 +431,7 @@ perm_t_test.default <- function(x,
     signs_matrix <- perm_result$signs
     R_used <- perm_result$R.used
     exact_perm <- perm_result$exact
-    if (exact_perm) {
-      method_prefix <- paste("Exact Permutation", ...)
-    } else {
-      method_prefix <- paste("Monte Carlo Permutation", ...)
-    }
+
     # Compute permutation statistics
     TSTAT <- numeric(R_used)
     EFF <- numeric(R_used)
@@ -531,11 +525,7 @@ perm_t_test.default <- function(x,
       tstat <- (diff_means - mu) / stderr
     }
 
-    method <- paste(method_prefix,
-                    if (!var.equal) "Welch",
-                    if (trim > 0) "Yuen",
-                    "Two Sample t-test")
-    method <- gsub("\\s+", " ", method)  # Clean up extra spaces
+
 
     if (trim > 0) {
       estimate <- c(mx, my)
@@ -667,8 +657,62 @@ perm_t_test.default <- function(x,
 
   attr(perm.cint, "conf.level") <- conf.level
 
+  if (exact_perm) {
+    method_prefix <- "Exact Permutation"
+  } else {
+    method_prefix <- "Monte Carlo Permutation"
+  }
+
+  if (is.null(y)) {
+    if (paired) {
+      method <- ifelse(trim > 0, paste0(method_prefix," Paired Yuen t-test"),
+                       paste0(method_prefix," Paired t-test"))
+    } else {
+      method <- ifelse(trim > 0,paste0(method_prefix," One Sample Yuen t-test"),
+                       paste0(method_prefix," One Sample t-test"))
+    }
+  } else {
+    method <- paste(method_prefix,
+                    if (!var.equal) "Welch",
+                    if (trim > 0) "Yuen",
+                    "Two Sample t-test")
+    method <- gsub("\\s+", " ", method)  # Clean up extra spaces
+  }
+
+  # Name the statistic and parameter
+
+  # For equivalence/minimal.effect, report the t-statistic corresponding to the p-value
+  if (alternative == "equivalence") {
+    # p-value is max of the two one-sided p-values
+    # Report the t-statistic for the "binding" bound (the one with higher p-value)
+    p_low <- mean(TSTAT >= tstat[1])
+    p_high <- mean(TSTAT <= tstat[2])
+    if (p_low >= p_high) {
+      tstat_report <- tstat[1]
+    } else {
+      tstat_report <- tstat[2]
+    }
+  } else if (alternative == "minimal.effect") {
+    # p-value is min of the two one-sided p-values
+    # Report the t-statistic for the "binding" bound (the one with lower p-value)
+    p_low <- mean(TSTAT <= tstat[1])
+    p_high <- mean(TSTAT >= tstat[2])
+    if (p_low <= p_high) {
+      tstat_report <- tstat[1]
+    } else {
+      tstat_report <- tstat[2]
+    }
+  } else {
+    tstat_report <- tstat
+  }
+
+  names(tstat_report) <- "t-observed"
+  names(df) <- "df"
+
   # Build output
   rval <- list(
+    statistic = tstat_report,
+    parameter = df,
     p.value = perm.pval,
     stderr = stderr,
     conf.int = perm.cint,

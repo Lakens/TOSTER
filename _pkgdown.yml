@@ -43,6 +43,8 @@ reference:
   - log_TOST
   - boot_log_TOST
   - brunner_munzel
+  - perm_t_test
+  - boot_t_test
 
 - subtitle: "ANOVA"
   desc: >
@@ -69,7 +71,7 @@ reference:
   contents:
   - htest-helpers
   - simple_htest
-  - boot_t_test
+
 
 - title: "Standardized Effect Sizes"
 
