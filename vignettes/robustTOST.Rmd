@@ -34,15 +34,25 @@ The following table provides a quick overview of the robust methods covered in t
 
 | Method | Function | Key Characteristics | Best Used When |
 |--------|----------|---------------------|---------------|
-| Wilcoxon TOST | `wilcox_TOST()` | Rank-based, nonparametric | Data is ordinal or non-normal |
-| Brunner-Munzel | `brunner_munzel()` with `simple_htest()` | Probability-based, robust to heteroscedasticity | Distribution shapes differ between groups |
-| Permutation t-test | `perm_t_test()` | Resampling without replacement, exact p-values possible | Very small samples, exact inference needed |
-| Bootstrap TOST | `boot_t_TOST()` | Resampling with replacement, flexible | Moderate samples, visualization desired |
+| Wilcoxon TOST | `wilcox_TOST()` | Rank-based, nonparametric | Ordinal data; see caveats below |
+| Brunner-Munzel | `brunner_munzel()` with `simple_htest()` | Probability-based, robust to heteroscedasticity | Stochastic superiority is the effect of interest |
+| Permutation t-test | `perm_t_test()` | Resampling without replacement, exact p-values possible | Small samples, mean differences, exact inference |
+| Bootstrap TOST | `boot_t_TOST()` | Resampling with replacement, flexible | Moderate samples, mean differences, visualization |
 | Log-Transformed TOST | `log_TOST()` | Ratio-based, for multiplicative comparisons | Comparing relative differences (e.g., bioequivalence) |
 
 # Wilcoxon-Mann-Whitney TOST
 
 The Wilcoxon group of tests (includes Mann-Whitney U-test) provide a non-parametric test of differences between groups, or within samples, based on ranks. This provides a test of location shift, which is a fancy way of saying differences in the center of the distribution (i.e., in parametric tests the location is mean). With TOST, there are two separate tests of directional location shift to determine if the location shift is within (equivalence) or outside (minimal effect). The exact calculations can be explored via the documentation of the `wilcox.test` function.
+
+## A Note on the Wilcoxon-Mann-Whitney Tests
+
+While the Wilcoxon-Mann-Whitney (WMW) tests are widely used as the "non-parametric alternative" to the t-test, there are reasons to be cautious about their interpretation. As @karch2021 discusses, the WMW tests do not straightforwardly test hypotheses about means or medians. The null hypothesis being tested is that the two distributions are identical, and when this null is rejected, interpreting *what* differs between groups (location? scale? shape?) can be ambiguous.
+
+This interpretive difficulty becomes even more pronounced in the equivalence testing context. When we perform TOST with Wilcoxon tests, we are testing whether a location shift parameter falls within equivalence bounds, but the relationship between this parameter and familiar quantities like means or medians depends on assumptions about distributional shape that may not hold.
+
+**Recommendation:** If your goal is to make inferences about differences in means (or trimmed means), you are better served by the resampling methods described later in this vignette: `perm_t_test` or `boot_t_TOST`. These methods test hypotheses directly about means while relaxing distributional assumptions. If your interest is in stochastic superiority (the probability that a randomly selected observation from one group exceeds one from another), the Brunner-Munzel test provides a clearer framework with an interpretable effect size.
+
+The `wilcox_TOST` function remains available for situations where rank-based tests are specifically desired, such as with ordinal data or when you want consistency with prior analyses that used WMW tests.
 
 ## Key Features and Usage
 
@@ -387,6 +397,78 @@ For **one-sample and paired tests**, permutation is performed by randomly flippi
 
 For **two-sample tests**, permutation is performed by randomly reassigning observations to the two groups. Under the null hypothesis of no group difference, group membership is arbitrary, making the labels exchangeable.
 
+## Two-Sample Permutation Algorithm
+
+The studentized permutation test for two independent samples proceeds as follows:
+
+1. Compute the observed test statistic from the original data. For the standard case (no trimming, unequal variances allowed):
+
+$$
+t_{obs} = \frac{\bar{x} - \bar{y} - \mu_0}{\sqrt{s_x^2/n_x + s_y^2/n_y}}
+$$
+
+Where $\bar{x}$ and $\bar{y}$ are the sample means, $s_x^2$ and $s_y^2$ are the sample variances, $n_x$ and $n_y$ are the sample sizes, and $\mu_0$ is the null hypothesis value (typically 0).
+
+2. Pool the observations: $z = (x_1, \ldots, x_{n_x}, y_1, \ldots, y_{n_y})$
+
+3. For each permutation $b = 1, \ldots, B$:
+   - Randomly assign $n_x$ observations to group X and the remaining $n_y$ to group Y
+   - Compute the permutation means $\bar{x}^{*b}$ and $\bar{y}^{*b}$
+   - Compute the permutation variances $s_x^{*2b}$ and $s_y^{*2b}$
+   - Compute the permutation test statistic:
+
+$$
+t^{*b} = \frac{\bar{x}^{*b} - \bar{y}^{*b}}{\sqrt{s_x^{*2b}/n_x + s_y^{*2b}/n_y}}
+$$
+
+4. Compute the p-value as the proportion of permutation statistics as extreme as or more extreme than the observed statistic.
+
+### Welch Variant (var.equal = FALSE)
+
+When `var.equal = FALSE` (the default), the standard error is computed separately for each group as shown above. This is the studentized permutation approach of @janssen1997 and @chung2013, which remains valid even when the two populations have different variances.
+
+### Pooled Variance Variant (var.equal = TRUE)
+
+When `var.equal = TRUE`, a pooled variance estimate is used:
+
+$$
+s_p^2 = \frac{(n_x - 1)s_x^2 + (n_y - 1)s_y^2}{n_x + n_y - 2}
+$$
+
+$$
+t_{obs} = \frac{\bar{x} - \bar{y} - \mu_0}{s_p\sqrt{1/n_x + 1/n_y}}
+$$
+
+The same pooled approach is applied to each permutation sample.
+
+### Yuen Variant (trim > 0)
+
+When `trim > 0`, the function uses trimmed means and winsorized variances. Let $g = \lfloor \gamma \cdot n \rfloor$ be the number of observations trimmed from each tail (where $\gamma$ is the trimming proportion), and let $h = n - 2g$ be the effective sample size.
+
+The trimmed mean is:
+
+$$
+\bar{x}_t = \frac{1}{h} \sum_{i=g+1}^{n-g} x_{(i)}
+$$
+
+where $x_{(i)}$ denotes the $i$-th order statistic.
+
+The winsorized variance $s_w^2$ is computed by replacing the $g$ smallest values with the $(g+1)$-th smallest and the $g$ largest with the $(n-g)$-th largest, then computing the usual variance.
+
+The standard error for Yuen's test is:
+
+$$
+SE = \sqrt{\frac{(n_x - 1) s_{w,x}^2}{h_x(h_x - 1)} + \frac{(n_y - 1) s_{w,y}^2}{h_y(h_y - 1)}}
+$$
+
+The test statistic becomes:
+
+$$
+t_{obs} = \frac{\bar{x}_t - \bar{y}_t - \mu_0}{SE}
+$$ 
+
+This same procedure is applied to each permutation sample, using trimmed means and winsorized variances computed from the permuted data.
+
 ## Combining Permutation with Trimmed Means
 
 A key feature of `perm_t_test` is its support for trimmed means via the `trim` argument. When `trim > 0`, the function uses Yuen's approach: trimmed means for location estimation and winsorized variances for standard error calculation. This combination is particularly powerful because it provides robustness against outliers (through trimming) together with exact or near-exact inference (through permutation).
@@ -714,11 +796,11 @@ The `boot_ses_calc` function offers several bootstrap confidence interval method
 
 | Method | Key Advantages | Limitations | Best Use Cases |
 |--------|---------------|-------------|---------------|
-| **Wilcoxon TOST** | Simple, widely accepted, minimal assumptions | Less power than parametric tests with normal data | Ordinal data, non-normal distributions, presence of outliers |
-| **Brunner-Munzel** | Robust to unequal distributions, interpretable effect | Computationally intensive with permutation | Different distribution shapes between groups, heteroscedasticity |
-| **Permutation t-test** | Exact p-values (small samples), supports trimmed means | Computationally intensive for large samples | Very small samples (N < 17 paired, N < 20 two-sample), outliers with trimming |
-| **Bootstrap TOST** | Flexible, visualization of effect distributions | Results vary slightly between runs, no trimming option | Moderate samples, when effect size plots are desired |
-| **Log-Transformed** | Focuses on relative differences, often stabilizes variance | Requires positive data, can be biased with small samples | Bioequivalence studies, comparing ratios rather than absolute differences |
+| **Wilcoxon TOST** | Simple, widely accepted | Ambiguous hypothesis; not clearly about means | Ordinal data; legacy analyses |
+| **Brunner-Munzel** | Clear interpretation, robust to heteroscedasticity | Computationally intensive with permutation | Stochastic superiority/dominance |
+| **Permutation t-test** | Exact p-values (small samples), supports trimmed means | Computationally intensive for large samples | Mean differences with small samples |
+| **Bootstrap TOST** | Flexible, visualization of effect distributions | Results vary between runs | Mean differences with moderate samples |
+| **Log-Transformed** | Focuses on relative differences, stabilizes variance | Requires positive data | Bioequivalence, ratio comparisons |
 
 # Conclusion
 
