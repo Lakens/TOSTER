@@ -1,11 +1,14 @@
 
-# 	TOSTER: Two one-sided tests (TOST) equivalence testing
+# TOSTER <a href="https://aaroncaldwell.us/TOSTERpkg"><img src="man/figures/logo.png" align="right" height="139" alt="TOSTER website" /></a>
+
  <!-- badges: start -->
   [![R-CMD-check](https://github.com/Lakens/TOSTER/workflows/R-CMD-check/badge.svg)](https://github.com/Lakens/TOSTER/actions)
   [![Coverage status](https://codecov.io/gh/Lakens/TOSTER/branch/master/graph/badge.svg)](https://app.codecov.io/github/Lakens/TOSTER?branch=master)
   [![CRAN_Status_Badge_version_last_release](https://www.r-pkg.org/badges/version-last-release/TOSTER)](https://cran.r-project.org/package=TOSTER)
   [![documentation](https://img.shields.io/badge/website-active-blue)](https://aaroncaldwell.us/TOSTERpkg/)
   <!-- badges: end -->
+  
+
 
 *An R package and jamovi module for equivalence testing*
 

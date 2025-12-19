@@ -36,10 +36,11 @@ The following table provides a quick overview of the robust methods covered in t
 |--------|----------|---------------------|---------------|
 | Wilcoxon TOST | `wilcox_TOST()` | Rank-based, nonparametric | Data is ordinal or non-normal |
 | Brunner-Munzel | `brunner_munzel()` with `simple_htest()` | Probability-based, robust to heteroscedasticity | Distribution shapes differ between groups |
-| Bootstrap TOST | `boot_t_TOST()` | Resampling-based, requires fewer assumptions | Sample size is small or distribution is unknown |
+| Permutation t-test | `perm_t_test()` | Resampling without replacement, exact p-values possible | Very small samples, exact inference needed |
+| Bootstrap TOST | `boot_t_TOST()` | Resampling with replacement, flexible | Moderate samples, visualization desired |
 | Log-Transformed TOST | `log_TOST()` | Ratio-based, for multiplicative comparisons | Comparing relative differences (e.g., bioequivalence) |
 
-# Wilcoxon TOST
+# Wilcoxon-Mann-Whitney TOST
 
 The Wilcoxon group of tests (includes Mann-Whitney U-test) provide a non-parametric test of differences between groups, or within samples, based on ranks. This provides a test of location shift, which is a fancy way of saying differences in the center of the distribution (i.e., in parametric tests the location is mean). With TOST, there are two separate tests of directional location shift to determine if the location shift is within (equivalence) or outside (minimal effect). The exact calculations can be explored via the documentation of the `wilcox.test` function.
 
@@ -354,9 +355,110 @@ The permutation approach (`perm = TRUE`) is recommended when:
 
 Note that the permutation approach can be computationally intensive for large datasets, potentially increasing processing time significantly. Additionally, with a permutation test you may observe situations where the confidence interval and the p-values would yield *different* conclusions.
 
-# Bootstrap TOST
+# Resampling Methods: Bootstrapping and Permutation
 
-The bootstrap is a simulation based technique, derived from re-sampling with replacement, designed for statistical estimation and inference. Bootstrapping techniques are very useful because they are considered somewhat robust to the violations of assumptions for a simple t-test. Therefore we added a bootstrap option, `boot_t_TOST` to the package to provide another robust alternative to the `t_TOST` function. 
+Resampling methods provide robust alternatives to parametric t-tests by using the data itself to approximate the sampling distribution of the test statistic. TOSTER offers two complementary resampling approaches: bootstrapping and permutation testing. While both methods relax distributional assumptions, they differ in their mechanics and are suited to different situations.
+
+## Conceptual Overview
+
+**Bootstrapping** resamples *with replacement* from the observed data to estimate the variability of a statistic. The bootstrap distribution approximates what we would see if we could repeatedly sample from the true population. This approach is particularly useful when you want confidence intervals and effect size estimates alongside your p-values.
+
+**Permutation testing** resamples *without replacement* by randomly reassigning observations to groups (or flipping signs for one-sample/paired tests). Under the null hypothesis of no difference, group labels are exchangeable, and the permutation distribution represents the exact null distribution. Permutation tests provide valid inference even with very small samples where asymptotic approximations may fail.
+
+## When to Use Each Method
+
+| Scenario | Recommended Method | Rationale |
+|----------|-------------------|-----------|
+| Very small samples (paired/one-sample N < 17, two-sample N < 20) | Permutation | Exact permutations are computationally feasible and provide exact p-values |
+| Moderate to large samples | Bootstrap | More computationally efficient; provides stable CI estimates |
+| Outliers present | Permutation with trimming | Combines exact inference with robust location estimation |
+| Complex data structures | Bootstrap | More flexible for non-standard designs |
+| Publication requiring exact p-values | Permutation (if feasible) | No Monte Carlo error when exact permutations computed |
+
+The sample size thresholds above reflect computational practicality. For one-sample or paired tests, the number of possible sign permutations is $2^n$, which equals 65,536 when n = 16 and jumps to 131,072 at n = 17. For two-sample tests, the number of possible group assignments is $\binom{n_x + n_y}{n_x}$, which grows even faster. When exact enumeration is feasible, permutation tests yield exact p-values with no Monte Carlo error.
+
+# Permutation t-test
+
+The `perm_t_test` function implements studentized permutation tests following the approaches of @janssen1997 and @chung2013. The studentized approach computes a t-statistic for each permutation, making the test valid even under heteroscedasticity (unequal variances).
+
+## Permutation Procedure
+
+For **one-sample and paired tests**, permutation is performed by randomly flipping the signs of the centered observations (or difference scores). Under the null hypothesis that the mean equals the hypothesized value, positive and negative deviations are equally likely, making sign assignments exchangeable.
+
+For **two-sample tests**, permutation is performed by randomly reassigning observations to the two groups. Under the null hypothesis of no group difference, group membership is arbitrary, making the labels exchangeable.
+
+## Combining Permutation with Trimmed Means
+
+A key feature of `perm_t_test` is its support for trimmed means via the `trim` argument. When `trim > 0`, the function uses Yuen's approach: trimmed means for location estimation and winsorized variances for standard error calculation. This combination is particularly powerful because it provides robustness against outliers (through trimming) together with exact or near-exact inference (through permutation).
+
+Trimming is helpful when:
+
+- Data contain outliers or extreme values that would unduly influence the mean
+- Distributions have heavy tails
+- You want robust location estimates without sacrificing the exactness of permutation inference
+
+A common choice is `trim = 0.1` (10% trimming) or `trim = 0.2` (20% trimming), though the optimal amount depends on the suspected degree of contamination.
+
+## Example: Basic Permutation Test
+
+```{r}
+data('sleep')
+
+# Two-sample permutation t-test
+perm_result <- perm_t_test(extra ~ group, 
+                           data = sleep,
+                           R = 1999)
+perm_result
+```
+
+## Example: Permutation Test with Trimming
+
+When outliers are a concern, combining permutation with trimming provides doubly robust inference:
+
+```{r}
+# Simulate data with outliers
+set.seed(42)
+x <- c(rnorm(18, mean = 0), 8, 12)  # Two outliers
+y <- rnorm(20, mean = 0)
+
+# Standard permutation test (sensitive to outliers)
+perm_t_test(x, y, R = 999)
+
+# Trimmed permutation test (robust to outliers)
+perm_t_test(x, y, trim = 0.1, R = 999)
+```
+
+## Example: Equivalence Testing with Permutation
+
+The `perm_t_test` function supports TOSTER's equivalence and minimal effect alternatives:
+
+```{r}
+# Equivalence test: is the effect within ±3 units?
+perm_t_test(extra ~ group, 
+            data = sleep,
+            alternative = "equivalence",
+            mu = c(-3, 3),
+            R = 999)
+```
+
+## Exact vs. Monte Carlo Permutations
+
+When the total number of possible permutations is less than or equal to `R`, the function automatically computes all exact permutations and prints a message. For example, with a paired sample of n = 10, there are $2^{10} = 1024$ possible sign permutations, so requesting `R = 1999` would trigger exact computation.
+
+```{r}
+# Small paired sample - exact permutations will be computed
+before <- c(5.1, 4.8, 6.2, 5.7, 6.0, 5.5, 4.9, 5.8)
+after <- c(5.6, 5.2, 6.7, 6.1, 6.5, 5.8, 5.3, 6.2)
+
+perm_t_test(x = before, y = after,
+            paired = TRUE,
+            alternative = "less",
+            R = 999)
+```
+
+# Bootstrap t-test
+
+The `boot_t_TOST` function provides bootstrap-based inference using the percentile bootstrap approach outlined by @efron93 (see chapter 16). The bootstrapped p-values are derived from the studentized version of a test of mean differences. Overall, the results should be similar to `t_TOST` but with greater robustness to distributional violations.
 
 ## Advantages of Bootstrapping
 
@@ -368,9 +470,7 @@ Bootstrap methods offer several advantages for equivalence testing:
 4. They can handle complex data structures and dependencies
 5. They often provide more accurate results when parametric assumptions are violated
 
-In this function, we provide the percentile bootstrap solution outlined by @efron93 (see chapter 16, page 220). The bootstrapped p-values are derived from the "studentized" version of a test of mean differences outlined by @efron93. Overall, the results should be similar to the results of `t_TOST`. 
-
-## Two Sample Algorithm
+## Bootstrap Algorithm (Two-Sample Case)
 
 1. Form B bootstrap data sets from x* and y* wherein x* is sampled with replacement from $\tilde x_1,\tilde x_2, ... \tilde x_n$ and y* is sampled with replacement from $\tilde y_1,\tilde y_2, ... \tilde y_n$
 
@@ -442,6 +542,51 @@ When interpreting the results of `boot_t_TOST`:
 3. The distribution plots provide visual insight into the variability of the effect size estimate
 
 For equivalence testing, examine whether both bootstrap p-values are significant (< alpha) and whether the confidence interval for the effect size falls entirely within the equivalence bounds.
+
+# Comparing Bootstrap and Permutation Approaches
+
+To illustrate the similarities and differences between these methods, let's apply both to the same dataset:
+
+```{r}
+# Same equivalence test using both methods
+data('sleep')
+
+# Bootstrap approach
+boot_result <- boot_t_test(extra ~ group, 
+                           data = sleep,
+                           alternative = "equivalence",
+                           mu = c(-2, 2),
+                           R = 999)
+
+# Permutation approach  
+perm_result <- perm_t_test(extra ~ group,
+                           data = sleep,
+                           alternative = "equivalence", 
+                           mu = c(-2, 2),
+                           R = 999)
+
+# Compare results
+boot_result
+perm_result
+```
+
+Both methods test the same hypothesis and should yield similar conclusions. Key differences to note:
+
+- **P-values**: May differ slightly due to Monte Carlo variability and the different resampling mechanisms
+- **Confidence intervals**: Bootstrap uses the resampled effect distribution; permutation uses the percentile method on permuted effects
+- **Exact inference**: When sample sizes are small enough, permutation provides exact p-values with no Monte Carlo error
+
+## Summary: Choosing Between Methods
+
+| Feature | Permutation (`perm_t_test`) | Bootstrap (`boot_t_TOST`) |
+|---------|----------------------------|---------------------------|
+| Resampling type | Without replacement | With replacement |
+| Exact p-values possible | Yes (small samples) | No |
+| Trimmed means support | Yes (`trim` argument) | No |
+| Effect size plots | No | Yes |
+| Best for | Small samples, exact inference | Moderate samples, visualization |
+
+For very small samples where exact permutations are feasible, permutation testing is generally preferred because it provides exact p-values (i.e., no need to set a seed). For larger samples or when you want the visualization capabilities of `boot_t_TOST`, bootstrapping is a good choice. When outliers are a concern, using `perm_t_test` with trimming combines the benefits of exact inference with robust location estimation.
 
 # Ratio of Difference (Log Transformed)
 
@@ -571,7 +716,8 @@ The `boot_ses_calc` function offers several bootstrap confidence interval method
 |--------|---------------|-------------|---------------|
 | **Wilcoxon TOST** | Simple, widely accepted, minimal assumptions | Less power than parametric tests with normal data | Ordinal data, non-normal distributions, presence of outliers |
 | **Brunner-Munzel** | Robust to unequal distributions, interpretable effect | Computationally intensive with permutation | Different distribution shapes between groups, heteroscedasticity |
-| **Bootstrap TOST** | Flexible, minimal assumptions, works with small samples | Computationally intensive, results vary slightly between runs | Small samples, complex data structures, when precise CIs are important |
+| **Permutation t-test** | Exact p-values (small samples), supports trimmed means | Computationally intensive for large samples | Very small samples (N < 17 paired, N < 20 two-sample), outliers with trimming |
+| **Bootstrap TOST** | Flexible, visualization of effect distributions | Results vary slightly between runs, no trimming option | Moderate samples, when effect size plots are desired |
 | **Log-Transformed** | Focuses on relative differences, often stabilizes variance | Requires positive data, can be biased with small samples | Bioequivalence studies, comparing ratios rather than absolute differences |
 
 # Conclusion

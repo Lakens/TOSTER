@@ -2,17 +2,17 @@ home:
   title: TOSTER R package
   description: An R pacakge for equivalence testing through two one-sided tests (TOST).
 
+url: https://aaroncaldwell.us/TOSTERpkg
 
 template:
   bootstrap: 5
   math-rendering: mathjax
+  light-switch: true
+  bootswatch: materia
   opengraph:
     image:
-      src: docs/articles/IntroTOSTt_files/figure-html/tostplots-2.png
-      alt: "Equivalence Test"
-    twitter:
-      creator: "@exphysstudent"
-      card: summary_large_image
+      src: junk/TOSTER_hex_v2_toast_shadow.png
+      alt: "TOSTER logo"
 
 reference:
 
