@@ -1511,14 +1511,20 @@ test_that("More tsum_test",{
 
 })
 
-test_that("Formula methods reject paired = TRUE", {
-  # Test that all formula methods properly reject paired = TRUE
-  # to match base R behavior
+test_that("Formula methods reject paired parameter", {
+  # Test that all formula methods properly reject any paired parameter
+  # (both TRUE and FALSE) to match base R behavior
   data(sleep)
   
   # t_TOST.formula should reject paired = TRUE
   expect_error(
     t_TOST(extra ~ group, data = sleep, paired = TRUE, eqb = 1),
+    "cannot use 'paired' in formula method"
+  )
+  
+  # t_TOST.formula should also reject paired = FALSE for consistency
+  expect_error(
+    t_TOST(extra ~ group, data = sleep, paired = FALSE, eqb = 1),
     "cannot use 'paired' in formula method"
   )
   
