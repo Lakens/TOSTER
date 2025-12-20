@@ -67,7 +67,7 @@ We have created an argument for all TOST functions
 which allow the user to specify "goulet" (for the @Cousineau2021 method), 
 "nct" (this will approximately match the results of @MOTE and @effectsize), 
 "t" (central t method), or "z" (normal method).
-We would strongly recommend using "nct" or "goulet" for any analysis.
+We would  recommend using "nct" as the default for any analysis but as @viechtbauer2007approximate points out the approximate methods usually suffice.
 It is important to remember that all of these methods are only *approximations*
 of confidence intervals (of varying degrees of quality)
 and therefore should be interpreted with caution.
@@ -76,7 +76,7 @@ It is my belief that SMDs provide another interesting description of the sample,
 and have very limited inferential utility (though exceptions apply). 
 You may disagree, and if you are basing your inferences on the SMD, and the
 associated confidence intervals, we recommend you go with a
-bootstrapping approach (see `boot_t_TOST`) [@Kirby2013].
+bootstrapping approach (see `boot_t_TOST`) [@Kirby2013] as it is a more robust option.
 
 In this section we will detail on the calculations that are involved in
 calculating the SMD, their associated degrees of freedom, non-centrality
