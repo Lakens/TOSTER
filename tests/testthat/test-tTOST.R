@@ -1557,4 +1557,25 @@ test_that("Formula methods reject paired = TRUE", {
     t_TOST(extra ~ group, data = sleep, eqb = 1)
   )
   
+  # Test calc functions also reject paired = TRUE with formula
+  expect_error(
+    smd_calc(extra ~ group, data = sleep, paired = TRUE),
+    "cannot use 'paired' in formula method"
+  )
+  
+  expect_error(
+    ses_calc(extra ~ group, data = sleep, paired = TRUE),
+    "cannot use 'paired' in formula method"
+  )
+  
+  expect_error(
+    boot_smd_calc(extra ~ group, data = sleep, paired = TRUE, R = 10),
+    "cannot use 'paired' in formula method"
+  )
+  
+  expect_error(
+    boot_ses_calc(extra ~ group, data = sleep, paired = TRUE, R = 10),
+    "cannot use 'paired' in formula method"
+  )
+  
 })
