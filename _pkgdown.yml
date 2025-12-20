@@ -8,7 +8,8 @@ template:
   bootstrap: 5
   math-rendering: mathjax
   light-switch: true
-  bootswatch: materia
+  bslib:
+    bootswatch: united
   opengraph:
     image:
       src: junk/TOSTER_hex_v2_toast_shadow.png
