@@ -23,10 +23,12 @@
 #'     If `TRUE` then the pooled variance is used to estimate the variance otherwise the Welch
 #'     (or Satterthwaite) approximation to the degrees of freedom is used. Default is `FALSE`.
 #' @param alpha significance level (default = 0.05).
-#' @param trim the fraction (0 to 0.5) of observations to be trimmed from each end before
+#' @param tr the fraction (0 to 0.5) of observations to be trimmed from each end before
 #'     computing the mean and winsorized variance. Default is 0 (no trimming).
-#'     When trim > 0, the function performs Yuen's trimmed t-test.
-#' @param R the number of permutations. Default is 1999.
+#'     When tr > 0, the function performs Yuen's trimmed t-test.
+#' @param R the number of permutations. Default is NULL, which computes all exact permutations.
+#'     If R is specified and is less than the maximum number of possible permutations,
+#'     Monte Carlo sampling is used instead.
 #' @param symmetric a logical variable indicating whether to assume symmetry in the two-sided test.
 #'     If `TRUE` (default) then the symmetric permutation p-value is computed, otherwise the
 #'     equal-tail permutation p-value is computed. Only relevant for `alternative = "two.sided"`.
@@ -54,8 +56,8 @@
 #' two groups. The studentized permutation approach of Janssen (1997) and Chung & Romano (2013)
 #' is used, which is valid even under heteroscedasticity.
 #'
-#' When `trim > 0`, the function uses Yuen's trimmed t-test approach:
-#'   * Trimmed means are computed by removing the fraction `trim` of observations from each tail
+#' When `tr > 0`, the function uses Yuen's trimmed t-test approach:
+#'   * Trimmed means are computed by removing the fraction `tr` of observations from each tail
 #'   * Winsorized variances are used in place of standard variances
 #'   * This provides robustness against outliers and heavy-tailed distributions
 #'
@@ -83,7 +85,7 @@
 #'   - "stderr": the standard error of the mean (difference).
 #'   - "conf.int": a permutation percentile confidence interval appropriate to the
 #'       specified alternative hypothesis.
-#'   - "estimate": the estimated mean or difference in means (or trimmed means if trim > 0).
+#'   - "estimate": the estimated mean or difference in means (or trimmed means if tr > 0).
 #'   - "null.value": the specified hypothesized value(s) of the mean or mean difference.
 #'   - "alternative": a character string describing the alternative hypothesis.
 #'   - "method": a character string indicating what type of permutation t-test was performed.
@@ -126,7 +128,7 @@
 #' set.seed(42)
 #' x <- c(rnorm(18), 10, 15)  # Two outliers
 #' y <- rnorm(20)
-#' perm_t_test(x, y, trim = 0.1, R = 999)
+#' perm_t_test(x, y, tr = 0.1, R = 999)
 #'
 #' # Example 6: Minimal effect testing
 #' perm_t_test(mpg ~ am, data = mtcars,
@@ -157,21 +159,21 @@ perm_t_test <- function(x, ...) {
 #' @keywords internal
 #' @noRd
 # Helper function to compute trimmed mean
-trimmed_mean <- function(x, trim = 0) {
-  mean(x, trim = trim, na.rm = TRUE)
+trimmed_mean <- function(x, tr = 0) {
+  mean(x, trim = tr, na.rm = TRUE)
 }
 
 #' @keywords internal
 #' @noRd
 # Helper function to compute winsorized variance
-winsorized_var <- function(x, trim = 0) {
+winsorized_var <- function(x, tr = 0) {
 
   n <- length(x)
-  if (trim == 0) {
+  if (tr == 0) {
     return(var(x))
   }
 
-  g <- floor(trim * n)
+  g <- floor(tr * n)
   if (g == 0) {
     return(var(x))
   }
@@ -189,16 +191,16 @@ winsorized_var <- function(x, trim = 0) {
 #' @keywords internal
 #' @noRd
 # Helper function to compute effective sample size after trimming
-effective_n <- function(n, trim) {
-  n - 2 * floor(trim * n)
+effective_n <- function(n, tr) {
+  n - 2 * floor(tr * n)
 }
 
 #' @keywords internal
 #' @noRd
 # Helper function to compute degrees of freedom for trimmed t-test (Yuen-Welch)
-yuen_welch_df <- function(nx, ny, vx_wins, vy_wins, trim) {
-  hx <- effective_n(nx, trim)
-  hy <- effective_n(ny, trim)
+yuen_welch_df <- function(nx, ny, vx_wins, vy_wins, tr) {
+  hx <- effective_n(nx, tr)
+  hy <- effective_n(ny, tr)
 
   # Winsorized standard errors
   dx <- (nx - 1) * vx_wins / (hx * (hx - 1))
@@ -213,9 +215,9 @@ yuen_welch_df <- function(nx, ny, vx_wins, vy_wins, trim) {
 #' @keywords internal
 #' @noRd
 # Helper function to compute pooled winsorized df
-pooled_wins_df <- function(nx, ny, trim) {
-  hx <- effective_n(nx, trim)
-  hy <- effective_n(ny, trim)
+pooled_wins_df <- function(nx, ny, tr) {
+  hx <- effective_n(nx, tr)
+  hy <- effective_n(ny, tr)
   hx + hy - 2
 }
 
@@ -226,15 +228,20 @@ perm_signs <- function(n, R) {
   # Total possible permutations for sign flipping
   max_perms <- 2^n
 
-  if (max_perms <= R) {
-    # Generate all possible sign combinations
+  if (is.null(R) || max_perms <= R) {
+    # Generate all possible sign combinations (exact permutation)
     message("Computing all ", max_perms, " exact permutations.")
     signs <- as.matrix(expand.grid(rep(list(c(-1, 1)), n)))
-    return(list(signs = signs, exact = TRUE, R.used = max_perms))
+    return(list(signs = signs, exact = TRUE, R.used = max_perms, max_perms = max_perms))
   } else {
     # Monte Carlo sampling
+    # Check if R < 1000 and max_perms > 1000, print informative message
+    if (R < 1000 && max_perms > 1000) {
+      message("Note: Number of permutations (R = ", R, ") is less than 1000. ",
+              "Consider increasing R for more stable p-value estimates.")
+    }
     signs <- matrix(sample(c(-1, 1), size = n * R, replace = TRUE), nrow = R, ncol = n)
-    return(list(signs = signs, exact = FALSE, R.used = R))
+    return(list(signs = signs, exact = FALSE, R.used = R, max_perms = max_perms))
   }
 }
 
@@ -245,14 +252,20 @@ perm_groups <- function(nx, ny, R) {
   n_total <- nx + ny
   max_perms <- choose(n_total, nx)
 
-  if (max_perms <= R) {
-    # Generate all possible combinations
+  if (is.null(R) || max_perms <= R) {
+    # Generate all possible combinations (exact permutation)
     message("Computing all ", max_perms, " exact permutations.")
     idx <- utils::combn(n_total, nx)
     # Convert to matrix where each row is a permutation
     perms <- t(idx)
-    return(list(idx_x = perms, exact = TRUE, R.used = max_perms))
+    return(list(idx_x = perms, exact = TRUE, R.used = max_perms, max_perms = max_perms))
   } else {
+    # Monte Carlo sampling
+    # Check if R < 1000 and max_perms > 1000, print informative message
+    if (R < 1000 && max_perms > 1000) {
+      message("Note: Number of permutations (R = ", R, ") is less than 1000. ",
+              "Consider increasing R for more stable p-value estimates.")
+    }
     # Monte Carlo sampling - ensure unique permutations
     perms <- matrix(NA, nrow = R, ncol = nx)
     for (i in 1:R) {
@@ -274,7 +287,7 @@ perm_groups <- function(nx, ny, R) {
     if (nrow(perms) > R) {
       perms <- perms[1:R, , drop = FALSE]
     }
-    return(list(idx_x = perms, exact = FALSE, R.used = nrow(perms)))
+    return(list(idx_x = perms, exact = FALSE, R.used = nrow(perms), max_perms = max_perms))
   }
 }
 
@@ -295,8 +308,8 @@ perm_t_test.default <- function(x,
                                 paired = FALSE,
                                 var.equal = FALSE,
                                 alpha = 0.05,
-                                trim = 0,
-                                R = 1999,
+                                tr = 0,
+                                R = NULL,
                                 symmetric = TRUE,
                                 keep_perm = TRUE,
                                 ...) {
@@ -309,15 +322,18 @@ perm_t_test.default <- function(x,
     stop("'alpha' must be a single number between 0 and 1")
   }
 
-  if (!missing(trim) && (length(trim) != 1 || !is.finite(trim) ||
-                         trim < 0 || trim >= 0.5)) {
-    stop("'trim' must be a single number between 0 and 0.5 (exclusive)")
+  if (!missing(tr) && (length(tr) != 1 || !is.finite(tr) ||
+                       tr < 0 || tr >= 0.5)) {
+    stop("'tr' must be a single number between 0 and 0.5 (exclusive)")
   }
 
-  if (!missing(R) && (length(R) != 1 || !is.finite(R) || R < 1)) {
-    stop("'R' must be a positive integer")
+  # R validation: NULL means exact permutation, otherwise must be positive integer
+  if (!is.null(R)) {
+    if (length(R) != 1 || !is.finite(R) || R < 1) {
+      stop("'R' must be NULL (for exact permutation) or a positive integer")
+    }
+    R <- as.integer(R)
   }
-  R <- as.integer(R)
 
   # Handle mu for equivalence/minimal.effect
   if (alternative %in% c("equivalence", "minimal.effect")) {
@@ -373,13 +389,13 @@ perm_t_test.default <- function(x,
 
   # Check minimum sample size based on trimming
   # Need at least 2 observations remaining after trimming for variance calculation
-  if (trim > 0) {
-    g <- floor(trim * nx)
+  if (tr > 0) {
+    g <- floor(tr * nx)
     effective <- nx - 2 * g
     if (effective < 2) {
-      min_n <- ceiling(2 / (1 - 2 * trim)) + 1
+      min_n <- ceiling(2 / (1 - 2 * tr)) + 1
       stop("Sample size too small for specified trimming proportion. ",
-           "With trim = ", trim, ", need at least ", min_n, " observations, but only have ", nx, ".")
+           "With tr = ", tr, ", need at least ", min_n, " observations, but only have ", nx, ".")
     }
   } else {
     if (nx < 2) {
@@ -390,11 +406,11 @@ perm_t_test.default <- function(x,
   # Compute statistics for one-sample/paired case
   if (is.null(y)) {
     # One sample or paired
-    mx <- trimmed_mean(x, trim)
-    vx <- winsorized_var(x, trim)
-    hx <- effective_n(nx, trim)
+    mx <- trimmed_mean(x, tr)
+    vx <- winsorized_var(x, tr)
+    hx <- effective_n(nx, tr)
 
-    if (trim > 0) {
+    if (tr > 0) {
       # Yuen's approach: use winsorized SE
       stderr <- sqrt((nx - 1) * vx / (hx * (hx - 1)))
     } else {
@@ -418,9 +434,9 @@ perm_t_test.default <- function(x,
 
 
     estimate <- setNames(mx, if (paired) {
-      if (trim > 0) "trimmed mean of the differences" else "mean of the differences"
+      if (tr > 0) "trimmed mean of the differences" else "mean of the differences"
     } else {
-      if (trim > 0) "trimmed mean of x" else "mean of x"
+      if (tr > 0) "trimmed mean of x" else "mean of x"
     })
 
     # Generate permutation distribution
@@ -431,6 +447,16 @@ perm_t_test.default <- function(x,
     signs_matrix <- perm_result$signs
     R_used <- perm_result$R.used
     exact_perm <- perm_result$exact
+    max_perms <- perm_result$max_perms
+
+    # Check if R is sufficient for the chosen alpha level
+    # Rule: need at least 1/alpha - 1 permutations for reliable p-value estimation at level alpha
+    min_R_for_alpha <- ceiling(1/alpha - 1)
+    if (!exact_perm && R_used < min_R_for_alpha && max_perms > min_R_for_alpha) {
+      message("Note: Number of permutations (R = ", R_used, ") may be insufficient ",
+              "for alpha = ", alpha, ". Consider R >= ", min_R_for_alpha,
+              " for more reliable p-value estimation.")
+    }
 
     # Compute permutation statistics
     TSTAT <- numeric(R_used)
@@ -438,10 +464,10 @@ perm_t_test.default <- function(x,
 
     for (i in 1:R_used) {
       x_perm <- abs(x_centered) * signs_matrix[i, ]
-      mx_perm <- trimmed_mean(x_perm, trim)
-      vx_perm <- winsorized_var(x_perm, trim)
+      mx_perm <- trimmed_mean(x_perm, tr)
+      vx_perm <- winsorized_var(x_perm, tr)
 
-      if (trim > 0) {
+      if (tr > 0) {
         stderr_perm <- sqrt((nx - 1) * vx_perm / (hx * (hx - 1)))
       } else {
         stderr_perm <- sqrt(vx_perm / nx)
@@ -460,13 +486,13 @@ perm_t_test.default <- function(x,
     ny <- length(y)
 
     # Check minimum sample size for y
-    if (trim > 0) {
-      g <- floor(trim * ny)
+    if (tr > 0) {
+      g <- floor(tr * ny)
       effective <- ny - 2 * g
       if (effective < 2) {
-        min_n <- ceiling(2 / (1 - 2 * trim)) + 1
+        min_n <- ceiling(2 / (1 - 2 * tr)) + 1
         stop("Sample size too small for specified trimming proportion. ",
-             "With trim = ", trim, ", need at least ", min_n, " observations in each group, but y has only ", ny, ".")
+             "With tr = ", tr, ", need at least ", min_n, " observations in each group, but y has only ", ny, ".")
       }
     } else {
       if (!var.equal && ny < 2) {
@@ -477,18 +503,18 @@ perm_t_test.default <- function(x,
       }
     }
 
-    mx <- trimmed_mean(x, trim)
-    my <- trimmed_mean(y, trim)
-    vx <- winsorized_var(x, trim)
-    vy <- winsorized_var(y, trim)
-    hx <- effective_n(nx, trim)
-    hy <- effective_n(ny, trim)
+    mx <- trimmed_mean(x, tr)
+    my <- trimmed_mean(y, tr)
+    vx <- winsorized_var(x, tr)
+    vy <- winsorized_var(y, tr)
+    hx <- effective_n(nx, tr)
+    hy <- effective_n(ny, tr)
 
     if (var.equal) {
       # Pooled variance approach
-      if (trim > 0) {
+      if (tr > 0) {
         # Pooled winsorized variance
-        df <- pooled_wins_df(nx, ny, trim)
+        df <- pooled_wins_df(nx, ny, tr)
         v_pooled <- ((hx - 1) * vx + (hy - 1) * vy) / df
         stderr <- sqrt(v_pooled * ((nx - 1) / (hx * (hx - 1)) + (ny - 1) / (hy * (hy - 1))))
       } else {
@@ -498,11 +524,11 @@ perm_t_test.default <- function(x,
       }
     } else {
       # Welch/Yuen-Welch approach
-      if (trim > 0) {
+      if (tr > 0) {
         dx <- (nx - 1) * vx / (hx * (hx - 1))
         dy <- (ny - 1) * vy / (hy * (hy - 1))
         stderr <- sqrt(dx + dy)
-        df <- yuen_welch_df(nx, ny, vx, vy, trim)
+        df <- yuen_welch_df(nx, ny, vx, vy, tr)
       } else {
         stderrx <- sqrt(vx / nx)
         stderry <- sqrt(vy / ny)
@@ -527,7 +553,7 @@ perm_t_test.default <- function(x,
 
 
 
-    if (trim > 0) {
+    if (tr > 0) {
       estimate <- c(mx, my)
       names(estimate) <- c("trimmed mean of x", "trimmed mean of y")
     } else {
@@ -542,6 +568,16 @@ perm_t_test.default <- function(x,
     idx_x_matrix <- perm_result$idx_x
     R_used <- perm_result$R.used
     exact_perm <- perm_result$exact
+    max_perms <- perm_result$max_perms
+
+    # Check if R is sufficient for the chosen alpha level
+    # Rule: need at least 1/alpha - 1 permutations for reliable p-value estimation at level alpha
+    min_R_for_alpha <- ceiling(1/alpha - 1)
+    if (!exact_perm && R_used < min_R_for_alpha && max_perms > min_R_for_alpha) {
+      message("Note: Number of permutations (R = ", R_used, ") may be insufficient ",
+              "for alpha = ", alpha, ". Consider R >= ", min_R_for_alpha,
+              " for more reliable p-value estimation.")
+    }
 
     # Compute permutation statistics
     # Following the studentized permutation approach:
@@ -556,14 +592,14 @@ perm_t_test.default <- function(x,
       x_perm <- z[idx_x]
       y_perm <- z[idx_y]
 
-      mx_perm <- trimmed_mean(x_perm, trim)
-      my_perm <- trimmed_mean(y_perm, trim)
-      vx_perm <- winsorized_var(x_perm, trim)
-      vy_perm <- winsorized_var(y_perm, trim)
+      mx_perm <- trimmed_mean(x_perm, tr)
+      my_perm <- trimmed_mean(y_perm, tr)
+      vx_perm <- winsorized_var(x_perm, tr)
+      vy_perm <- winsorized_var(y_perm, tr)
 
       if (var.equal) {
-        if (trim > 0) {
-          df_perm <- pooled_wins_df(nx, ny, trim)
+        if (tr > 0) {
+          df_perm <- pooled_wins_df(nx, ny, tr)
           v_pooled_perm <- ((hx - 1) * vx_perm + (hy - 1) * vy_perm) / df_perm
           stderr_perm <- sqrt(v_pooled_perm * ((nx - 1) / (hx * (hx - 1)) + (ny - 1) / (hy * (hy - 1))))
         } else {
@@ -572,7 +608,7 @@ perm_t_test.default <- function(x,
           stderr_perm <- sqrt(v_pooled_perm * (1/nx + 1/ny))
         }
       } else {
-        if (trim > 0) {
+        if (tr > 0) {
           dx_perm <- (nx - 1) * vx_perm / (hx * (hx - 1))
           dy_perm <- (ny - 1) * vy_perm / (hy * (hy - 1))
           stderr_perm <- sqrt(dx_perm + dy_perm)
@@ -665,16 +701,16 @@ perm_t_test.default <- function(x,
 
   if (is.null(y)) {
     if (paired) {
-      method <- ifelse(trim > 0, paste0(method_prefix," Paired Yuen t-test"),
+      method <- ifelse(tr > 0, paste0(method_prefix," Paired Yuen t-test"),
                        paste0(method_prefix," Paired t-test"))
     } else {
-      method <- ifelse(trim > 0,paste0(method_prefix," One Sample Yuen t-test"),
+      method <- ifelse(tr > 0,paste0(method_prefix," One Sample Yuen t-test"),
                        paste0(method_prefix," One Sample t-test"))
     }
   } else {
     method <- paste(method_prefix,
                     if (!var.equal) "Welch",
-                    if (trim > 0) "Yuen",
+                    if (tr > 0) "Yuen",
                     "Two Sample t-test")
     method <- gsub("\\s+", " ", method)  # Clean up extra spaces
   }
