@@ -1510,3 +1510,51 @@ test_that("More tsum_test",{
   ))
 
 })
+
+test_that("Formula methods reject paired = TRUE", {
+  # Test that all formula methods properly reject paired = TRUE
+  # to match base R behavior
+  data(sleep)
+  
+  # t_TOST.formula should reject paired = TRUE
+  expect_error(
+    t_TOST(extra ~ group, data = sleep, paired = TRUE, eqb = 1),
+    "cannot use 'paired' in formula method"
+  )
+  
+  # boot_t_TOST.formula should reject paired = TRUE
+  expect_error(
+    boot_t_TOST(extra ~ group, data = sleep, paired = TRUE, eqb = 1, R = 10),
+    "cannot use 'paired' in formula method"
+  )
+  
+  # boot_t_test.formula should reject paired = TRUE
+  expect_error(
+    boot_t_test(extra ~ group, data = sleep, paired = TRUE, R = 10),
+    "cannot use 'paired' in formula method"
+  )
+  
+  # wilcox_TOST.formula should reject paired = TRUE
+  expect_error(
+    wilcox_TOST(extra ~ group, data = sleep, paired = TRUE, eqb = 1),
+    "cannot use 'paired' in formula method"
+  )
+  
+  # simple_htest.formula should reject paired = TRUE
+  expect_error(
+    simple_htest(extra ~ group, data = sleep, paired = TRUE),
+    "cannot use 'paired' in formula method"
+  )
+  
+  # brunner_munzel.formula should reject paired = TRUE
+  expect_error(
+    brunner_munzel(extra ~ group, data = sleep, paired = TRUE),
+    "cannot use 'paired' in formula method"
+  )
+  
+  # Verify formula methods still work without paired parameter
+  expect_no_error(
+    t_TOST(extra ~ group, data = sleep, eqb = 1)
+  )
+  
+})
