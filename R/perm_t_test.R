@@ -5,6 +5,8 @@
 #' Performs t-tests with permutation-based p-values and confidence intervals. This function supports
 #' standard hypothesis testing alternatives as well as equivalence and minimal effect testing,
 #' with optional trimmed means (Yuen's approach) for robust inference.
+#' It can handle one-sample, two-sample (independent), and paired designs.
+#'
 #' @section Purpose:
 #' Use this function when:
 #'   * You need more robust inference than provided by standard t-tests
@@ -26,12 +28,26 @@
 #' @param tr the fraction (0 to 0.5) of observations to be trimmed from each end before
 #'     computing the mean and winsorized variance. Default is 0 (no trimming).
 #'     When tr > 0, the function performs Yuen's trimmed t-test.
-#' @param R the number of permutations. Default is NULL, which computes all exact permutations.
+#' @param R the number of permutations. Default is NULL, which computes all permutations.
 #'     If R is specified and is less than the maximum number of possible permutations,
 #'     Monte Carlo sampling is used instead.
 #' @param symmetric a logical variable indicating whether to assume symmetry in the two-sided test.
 #'     If `TRUE` (default) then the symmetric permutation p-value is computed, otherwise the
 #'     equal-tail permutation p-value is computed. Only relevant for `alternative = "two.sided"`.
+#' @param perm_se a logical variable indicating whether to recompute the standard error for each
+#'     permutation (studentized permutation test). If `TRUE` (default), the standard error is
+#'     recomputed for each permuted sample, following the studentized permutation approach of
+#'     Janssen (1997) and Chung & Romano (2013), which is valid even under heteroscedasticity.
+#'     If `FALSE`, the standard error from the original sample is used for all permutations,
+#'     which is computationally faster but assumes homoscedasticity.
+#' @param p_method the method for computing permutation p-values. Options are:
+#'     * `"plusone"` (default): Uses the formula (b+1)/(R+1) where b is the number of permutation
+#'         statistics at least as extreme as the observed. Because permutations are sampled
+#'         without replacement in this implementation, this formula provides exact p-values
+#'         that are never zero and guarantee correct Type I error control (Phipson & Smyth, 2010).
+#'     * `"original"`: Uses b/R with a minimum of 1/R. This can produce p-values of exactly
+#'         1/R when no permutation statistic exceeds the observed, which may be problematic
+#'         for multiple testing corrections and does not guarantee exact Type I error control.
 #' @param keep_perm logical. If `TRUE` (default), the permutation distribution of the test
 #'     statistic and effect sizes are stored in the output. Set to `FALSE` for large datasets
 #'     to save memory.
@@ -53,8 +69,11 @@
 #' the (centered) observations or difference scores.
 #'
 #' For two-sample tests, permutation is performed by randomly reassigning observations to the
-#' two groups. The studentized permutation approach of Janssen (1997) and Chung & Romano (2013)
-#' is used, which is valid even under heteroscedasticity.
+#' two groups. When `perm_se = TRUE` (default), the studentized permutation approach of
+#' Janssen (1997) and Chung & Romano (2013) is used, which recomputes the standard error for
+#' each permutation and is valid even under heteroscedasticity. When `perm_se = FALSE`, the
+#' standard error from the original sample is used for all permutations, which is faster but
+#' assumes equal variances.
 #'
 #' When `tr > 0`, the function uses Yuen's trimmed t-test approach:
 #'   * Trimmed means are computed by removing the fraction `tr` of observations from each tail
@@ -136,6 +155,12 @@
 #'             mu = c(-3, 3),
 #'             R = 199)
 #'
+#' # Example 7: Non-studentized permutation (fixed SE, faster)
+#' perm_t_test(mpg ~ am, data = mtcars, perm_se = FALSE, R = 999)
+#'
+#' # Example 8: Using different p-value computation methods
+#' perm_t_test(mpg ~ am, data = mtcars, p_method = "original", R = 999)
+#'
 #' @references
 #' Efron, B., & Tibshirani, R. J. (1993). An Introduction to the Bootstrap. Chapman and Hall/CRC.
 #'
@@ -147,6 +172,10 @@
 #'
 #' Yuen, K. K. (1974). The two-sample trimmed t for unequal population variances.
 #' Biometrika, 61(1), 165-170.
+#'
+#' Phipson, B., & Smyth, G. K. (2010). Permutation P-values should never be zero:
+#' calculating exact P-values when permutations are randomly drawn.
+#' Statistical Applications in Genetics and Molecular Biology, 9(1), Article 39.
 #'
 #' @family Robust tests
 #' @name perm_t_test
@@ -234,14 +263,37 @@ perm_signs <- function(n, R) {
     signs <- as.matrix(expand.grid(rep(list(c(-1, 1)), n)))
     return(list(signs = signs, exact = TRUE, R.used = max_perms, max_perms = max_perms))
   } else {
-    # Monte Carlo sampling
+    # Monte Carlo sampling - ensure unique sign patterns (sampling without replacement)
     # Check if R < 1000 and max_perms > 1000, print informative message
     if (R < 1000 && max_perms > 1000) {
       message("Note: Number of permutations (R = ", R, ") is less than 1000. ",
               "Consider increasing R for more stable p-value estimates.")
     }
+
+    # Generate unique sign patterns
+    # Each row is a unique combination of signs
     signs <- matrix(sample(c(-1, 1), size = n * R, replace = TRUE), nrow = R, ncol = n)
-    return(list(signs = signs, exact = FALSE, R.used = R, max_perms = max_perms))
+
+    # Remove duplicate rows
+    signs <- unique(signs)
+
+    # If we lost too many to duplicates, generate more
+    iter <- 0
+    max_iter <- 10
+    while (nrow(signs) < R && iter < max_iter) {
+      needed <- R - nrow(signs)
+      new_signs <- matrix(sample(c(-1, 1), size = n * needed * 2, replace = TRUE),
+                          nrow = needed * 2, ncol = n)
+      signs <- unique(rbind(signs, new_signs))
+      iter <- iter + 1
+    }
+
+    # Trim to exactly R if we have more
+    if (nrow(signs) > R) {
+      signs <- signs[1:R, , drop = FALSE]
+    }
+
+    return(list(signs = signs, exact = FALSE, R.used = nrow(signs), max_perms = max_perms))
   }
 }
 
@@ -291,6 +343,38 @@ perm_groups <- function(nx, ny, R) {
   }
 }
 
+#' @keywords internal
+#' @noRd
+# Helper function to compute permutation p-value using different methods
+#
+# This function implements two methods for computing permutation p-values:
+# - "plusone": (b+1)/(R+1) formula from Phipson & Smyth (2010)
+# - "original": b/R with minimum 1/R
+#
+# Because this implementation samples permutations without replacement,
+# the "plusone" formula provides exact p-values (see Phipson & Smyth 2010, Section 5).
+#
+# Arguments:
+#   b: number of permutation statistics at least as extreme as observed
+#   R: total number of permutations used
+#   p_method: one of "plusone" or "original"
+#
+# Returns: the computed p-value
+compute_perm_pval <- function(b, R, p_method) {
+  if (p_method == "plusone") {
+    # Phipson & Smyth (2010) formula for sampling without replacement
+    # This is exact when permutations are unique (no replacement)
+    return((b + 1) / (R + 1))
+
+  } else if (p_method == "original") {
+    # Original formula: b/R with minimum 1/R
+    pval <- b / R
+    return(max(pval, 1 / R))
+
+  } else {
+    stop("Unknown p_method: ", p_method)
+  }
+}
 
 
 #' @rdname perm_t_test
@@ -311,10 +395,13 @@ perm_t_test.default <- function(x,
                                 tr = 0,
                                 R = NULL,
                                 symmetric = TRUE,
+                                perm_se = TRUE,
+                                p_method = c("plusone", "original"),
                                 keep_perm = TRUE,
                                 ...) {
 
   alternative <- match.arg(alternative)
+  p_method <- match.arg(p_method)
 
   # Input validation
   if (!missing(alpha) && (length(alpha) != 1 || !is.finite(alpha) ||
@@ -333,6 +420,11 @@ perm_t_test.default <- function(x,
       stop("'R' must be NULL (for exact permutation) or a positive integer")
     }
     R <- as.integer(R)
+  }
+
+  # perm_se validation
+  if (!is.logical(perm_se) || length(perm_se) != 1) {
+    stop("'perm_se' must be TRUE or FALSE")
   }
 
   # Handle mu for equivalence/minimal.effect
@@ -431,8 +523,6 @@ perm_t_test.default <- function(x,
       tstat <- (mx - mu) / stderr
     }
 
-
-
     estimate <- setNames(mx, if (paired) {
       if (tr > 0) "trimmed mean of the differences" else "mean of the differences"
     } else {
@@ -450,7 +540,6 @@ perm_t_test.default <- function(x,
     max_perms <- perm_result$max_perms
 
     # Check if R is sufficient for the chosen alpha level
-    # Rule: need at least 1/alpha - 1 permutations for reliable p-value estimation at level alpha
     min_R_for_alpha <- ceiling(1/alpha - 1)
     if (!exact_perm && R_used < min_R_for_alpha && max_perms > min_R_for_alpha) {
       message("Note: Number of permutations (R = ", R_used, ") may be insufficient ",
@@ -465,12 +554,18 @@ perm_t_test.default <- function(x,
     for (i in 1:R_used) {
       x_perm <- abs(x_centered) * signs_matrix[i, ]
       mx_perm <- trimmed_mean(x_perm, tr)
-      vx_perm <- winsorized_var(x_perm, tr)
 
-      if (tr > 0) {
-        stderr_perm <- sqrt((nx - 1) * vx_perm / (hx * (hx - 1)))
+      if (perm_se) {
+        # Studentized: recompute SE for each permutation
+        vx_perm <- winsorized_var(x_perm, tr)
+        if (tr > 0) {
+          stderr_perm <- sqrt((nx - 1) * vx_perm / (hx * (hx - 1)))
+        } else {
+          stderr_perm <- sqrt(vx_perm / nx)
+        }
       } else {
-        stderr_perm <- sqrt(vx_perm / nx)
+        # Non-studentized: use original SE
+        stderr_perm <- stderr
       }
 
       if (stderr_perm > 10 * .Machine$double.eps) {
@@ -513,7 +608,6 @@ perm_t_test.default <- function(x,
     if (var.equal) {
       # Pooled variance approach
       if (tr > 0) {
-        # Pooled winsorized variance
         df <- pooled_wins_df(nx, ny, tr)
         v_pooled <- ((hx - 1) * vx + (hy - 1) * vy) / df
         stderr <- sqrt(v_pooled * ((nx - 1) / (hx * (hx - 1)) + (ny - 1) / (hy * (hy - 1))))
@@ -551,8 +645,6 @@ perm_t_test.default <- function(x,
       tstat <- (diff_means - mu) / stderr
     }
 
-
-
     if (tr > 0) {
       estimate <- c(mx, my)
       names(estimate) <- c("trimmed mean of x", "trimmed mean of y")
@@ -571,7 +663,6 @@ perm_t_test.default <- function(x,
     max_perms <- perm_result$max_perms
 
     # Check if R is sufficient for the chosen alpha level
-    # Rule: need at least 1/alpha - 1 permutations for reliable p-value estimation at level alpha
     min_R_for_alpha <- ceiling(1/alpha - 1)
     if (!exact_perm && R_used < min_R_for_alpha && max_perms > min_R_for_alpha) {
       message("Note: Number of permutations (R = ", R_used, ") may be insufficient ",
@@ -580,8 +671,6 @@ perm_t_test.default <- function(x,
     }
 
     # Compute permutation statistics
-    # Following the studentized permutation approach:
-    # Permute labels, compute test statistic, compare to observed
     TSTAT <- numeric(R_used)
     EFF <- numeric(R_used)
 
@@ -594,42 +683,44 @@ perm_t_test.default <- function(x,
 
       mx_perm <- trimmed_mean(x_perm, tr)
       my_perm <- trimmed_mean(y_perm, tr)
-      vx_perm <- winsorized_var(x_perm, tr)
-      vy_perm <- winsorized_var(y_perm, tr)
 
-      if (var.equal) {
-        if (tr > 0) {
-          df_perm <- pooled_wins_df(nx, ny, tr)
-          v_pooled_perm <- ((hx - 1) * vx_perm + (hy - 1) * vy_perm) / df_perm
-          stderr_perm <- sqrt(v_pooled_perm * ((nx - 1) / (hx * (hx - 1)) + (ny - 1) / (hy * (hy - 1))))
+      if (perm_se) {
+        # Studentized: recompute SE for each permutation
+        vx_perm <- winsorized_var(x_perm, tr)
+        vy_perm <- winsorized_var(y_perm, tr)
+
+        if (var.equal) {
+          if (tr > 0) {
+            df_perm <- pooled_wins_df(nx, ny, tr)
+            v_pooled_perm <- ((hx - 1) * vx_perm + (hy - 1) * vy_perm) / df_perm
+            stderr_perm <- sqrt(v_pooled_perm * ((nx - 1) / (hx * (hx - 1)) + (ny - 1) / (hy * (hy - 1))))
+          } else {
+            df_perm <- nx + ny - 2
+            v_pooled_perm <- ((nx - 1) * vx_perm + (ny - 1) * vy_perm) / df_perm
+            stderr_perm <- sqrt(v_pooled_perm * (1/nx + 1/ny))
+          }
         } else {
-          df_perm <- nx + ny - 2
-          v_pooled_perm <- ((nx - 1) * vx_perm + (ny - 1) * vy_perm) / df_perm
-          stderr_perm <- sqrt(v_pooled_perm * (1/nx + 1/ny))
+          if (tr > 0) {
+            dx_perm <- (nx - 1) * vx_perm / (hx * (hx - 1))
+            dy_perm <- (ny - 1) * vy_perm / (hy * (hy - 1))
+            stderr_perm <- sqrt(dx_perm + dy_perm)
+          } else {
+            stderrx_perm <- sqrt(vx_perm / nx)
+            stderry_perm <- sqrt(vy_perm / ny)
+            stderr_perm <- sqrt(stderrx_perm^2 + stderry_perm^2)
+          }
         }
       } else {
-        if (tr > 0) {
-          dx_perm <- (nx - 1) * vx_perm / (hx * (hx - 1))
-          dy_perm <- (ny - 1) * vy_perm / (hy * (hy - 1))
-          stderr_perm <- sqrt(dx_perm + dy_perm)
-        } else {
-          stderrx_perm <- sqrt(vx_perm / nx)
-          stderry_perm <- sqrt(vy_perm / ny)
-          stderr_perm <- sqrt(stderrx_perm^2 + stderry_perm^2)
-        }
+        # Non-studentized: use original SE
+        stderr_perm <- stderr
       }
 
-      # Compute test statistic under permutation
-      # Under the null hypothesis, the group labels are exchangeable
-      # so we compute the raw difference standardized by permutation SE
       if (stderr_perm > 10 * .Machine$double.eps) {
         TSTAT[i] <- (mx_perm - my_perm) / stderr_perm
       } else {
         TSTAT[i] <- 0
       }
 
-      # Effect for CI: permutation difference centered around observed
-      # This gives us the distribution of the effect under repeated sampling
       EFF[i] <- (mx_perm - my_perm) + diff_means
     }
   }
@@ -643,42 +734,43 @@ perm_t_test.default <- function(x,
 
   # Compute p-values and confidence intervals
   if (alternative == "less") {
-    if (is.null(y)) {
-      perm.pval <- mean(TSTAT <= tstat)
-    } else {
-      perm.pval <- mean(TSTAT <= tstat)
-    }
-    perm.pval <- max(perm.pval, 1 / R_used)
+    b <- sum(TSTAT <= tstat)
+    perm.pval <- compute_perm_pval(b, R_used, p_method)
     perm.cint <- c(-Inf, quantile(EFF, conf.level, names = FALSE))
 
   } else if (alternative == "greater") {
-    perm.pval <- mean(TSTAT >= tstat)
-    perm.pval <- max(perm.pval, 1 / R_used)
+    b <- sum(TSTAT >= tstat)
+    perm.pval <- compute_perm_pval(b, R_used, p_method)
     perm.cint <- c(quantile(EFF, 1 - conf.level, names = FALSE), Inf)
 
   } else if (alternative == "two.sided") {
     if (symmetric) {
-      perm.pval <- mean(abs(TSTAT) >= abs(tstat))
+      b <- sum(abs(TSTAT) >= abs(tstat))
+      perm.pval <- compute_perm_pval(b, R_used, p_method)
     } else {
-      perm.pval <- 2 * min(mean(TSTAT <= tstat), mean(TSTAT > tstat))
+      b_low <- sum(TSTAT <= tstat)
+      b_high <- sum(TSTAT >= tstat)
+      p_low <- compute_perm_pval(b_low, R_used, p_method)
+      p_high <- compute_perm_pval(b_high, R_used, p_method)
+      perm.pval <- 2 * min(p_low, p_high)
+      perm.pval <- min(perm.pval, 1)
     }
-    perm.pval <- max(perm.pval, 1 / R_used)
     perm.cint <- quantile(EFF, c(alpha / 2, 1 - alpha / 2), names = FALSE)
 
   } else if (alternative == "equivalence") {
-    # Two one-sided tests
-    p_low <- mean(TSTAT >= tstat[1])   # Test against lower bound
-    p_high <- mean(TSTAT <= tstat[2])  # Test against upper bound
+    b_low <- sum(TSTAT >= tstat[1])
+    b_high <- sum(TSTAT <= tstat[2])
+    p_low <- compute_perm_pval(b_low, R_used, p_method)
+    p_high <- compute_perm_pval(b_high, R_used, p_method)
     perm.pval <- max(p_low, p_high)
-    perm.pval <- max(perm.pval, 1 / R_used)
     perm.cint <- quantile(EFF, c(alpha, 1 - alpha), names = FALSE)
 
   } else if (alternative == "minimal.effect") {
-    # Two one-sided tests (opposite direction)
-    p_low <- mean(TSTAT <= tstat[1])   # Test against lower bound
-    p_high <- mean(TSTAT >= tstat[2])  # Test against upper bound
+    b_low <- sum(TSTAT <= tstat[1])
+    b_high <- sum(TSTAT >= tstat[2])
+    p_low <- compute_perm_pval(b_low, R_used, p_method)
+    p_high <- compute_perm_pval(b_high, R_used, p_method)
     perm.pval <- min(p_low, p_high)
-    perm.pval <- max(perm.pval, 1 / R_used)
     perm.cint <- quantile(EFF, c(alpha, 1 - alpha), names = FALSE)
   }
 
@@ -712,27 +804,25 @@ perm_t_test.default <- function(x,
                     if (!var.equal) "Welch",
                     if (tr > 0) "Yuen",
                     "Two Sample t-test")
-    method <- gsub("\\s+", " ", method)  # Clean up extra spaces
+    method <- gsub("\\s+", " ", method)
   }
-
-  # Name the statistic and parameter
 
   # For equivalence/minimal.effect, report the t-statistic corresponding to the p-value
   if (alternative == "equivalence") {
-    # p-value is max of the two one-sided p-values
-    # Report the t-statistic for the "binding" bound (the one with higher p-value)
-    p_low <- mean(TSTAT >= tstat[1])
-    p_high <- mean(TSTAT <= tstat[2])
+    b_low <- sum(TSTAT >= tstat[1])
+    b_high <- sum(TSTAT <= tstat[2])
+    p_low <- compute_perm_pval(b_low, R_used, p_method)
+    p_high <- compute_perm_pval(b_high, R_used, p_method)
     if (p_low >= p_high) {
       tstat_report <- tstat[1]
     } else {
       tstat_report <- tstat[2]
     }
   } else if (alternative == "minimal.effect") {
-    # p-value is min of the two one-sided p-values
-    # Report the t-statistic for the "binding" bound (the one with lower p-value)
-    p_low <- mean(TSTAT <= tstat[1])
-    p_high <- mean(TSTAT >= tstat[2])
+    b_low <- sum(TSTAT <= tstat[1])
+    b_high <- sum(TSTAT >= tstat[2])
+    p_low <- compute_perm_pval(b_low, R_used, p_method)
+    p_high <- compute_perm_pval(b_high, R_used, p_method)
     if (p_low <= p_high) {
       tstat_report <- tstat[1]
     } else {

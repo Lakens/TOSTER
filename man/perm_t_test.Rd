@@ -16,8 +16,8 @@ perm_t_test(x, ...)
   paired = FALSE,
   var.equal = FALSE,
   alpha = 0.05,
-  trim = 0,
-  R = 1999,
+  tr = 0,
+  R = NULL,
   symmetric = TRUE,
   keep_perm = TRUE,
   ...
@@ -51,11 +51,13 @@ If \code{TRUE} then the pooled variance is used to estimate the variance otherwi
 
 \item{alpha}{significance level (default = 0.05).}
 
-\item{trim}{the fraction (0 to 0.5) of observations to be trimmed from each end before
+\item{tr}{the fraction (0 to 0.5) of observations to be trimmed from each end before
 computing the mean and winsorized variance. Default is 0 (no trimming).
-When trim > 0, the function performs Yuen's trimmed t-test.}
+When tr > 0, the function performs Yuen's trimmed t-test.}
 
-\item{R}{the number of permutations. Default is 1999.}
+\item{R}{the number of permutations. Default is NULL, which computes all exact permutations.
+If R is specified and is less than the maximum number of possible permutations,
+Monte Carlo sampling is used instead.}
 
 \item{symmetric}{a logical variable indicating whether to assume symmetry in the two-sided test.
 If \code{TRUE} (default) then the symmetric permutation p-value is computed, otherwise the
@@ -82,7 +84,7 @@ A list with class \code{"htest"} containing the following components:
 \item "stderr": the standard error of the mean (difference).
 \item "conf.int": a permutation percentile confidence interval appropriate to the
 specified alternative hypothesis.
-\item "estimate": the estimated mean or difference in means (or trimmed means if trim > 0).
+\item "estimate": the estimated mean or difference in means (or trimmed means if tr > 0).
 \item "null.value": the specified hypothesized value(s) of the mean or mean difference.
 \item "alternative": a character string describing the alternative hypothesis.
 \item "method": a character string indicating what type of permutation t-test was performed.
@@ -100,6 +102,7 @@ specified alternative hypothesis.
 Performs t-tests with permutation-based p-values and confidence intervals. This function supports
 standard hypothesis testing alternatives as well as equivalence and minimal effect testing,
 with optional trimmed means (Yuen's approach) for robust inference.
+It can handle one-sample, two-sample (independent), and paired designs.
 }
 \details{
 This function performs permutation-based t-tests, providing more robust inference than standard
@@ -122,9 +125,9 @@ For two-sample tests, permutation is performed by randomly reassigning observati
 two groups. The studentized permutation approach of Janssen (1997) and Chung & Romano (2013)
 is used, which is valid even under heteroscedasticity.
 
-When \code{trim > 0}, the function uses Yuen's trimmed t-test approach:
+When \code{tr > 0}, the function uses Yuen's trimmed t-test approach:
 \itemize{
-\item Trimmed means are computed by removing the fraction \code{trim} of observations from each tail
+\item Trimmed means are computed by removing the fraction \code{tr} of observations from each tail
 \item Winsorized variances are used in place of standard variances
 \item This provides robustness against outliers and heavy-tailed distributions
 }
@@ -191,7 +194,7 @@ perm_t_test(mpg ~ am, data = mtcars,
 set.seed(42)
 x <- c(rnorm(18), 10, 15)  # Two outliers
 y <- rnorm(20)
-perm_t_test(x, y, trim = 0.1, R = 999)
+perm_t_test(x, y, tr = 0.1, R = 999)
 
 # Example 6: Minimal effect testing
 perm_t_test(mpg ~ am, data = mtcars,
