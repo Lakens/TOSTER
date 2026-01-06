@@ -232,16 +232,17 @@ test_that("brunner_munzel",{
   data(sleep)
 
   set.seed(1944)
-  testy1 = simple_htest(data = sleep,
-                        extra ~ group,
+  # Use vector form for paired tests, not formula
+  testy1 = simple_htest(x = sleep$extra[sleep$group == 1],
+                        y = sleep$extra[sleep$group == 2],
                         test = "b",
                         mu = .25,
                         alternative = "g",
                         perm = TRUE,
                         paired = TRUE)
   set.seed(1944)
-  testy2 = brunner_munzel(data = sleep,
-                          extra ~ group,
+  testy2 = brunner_munzel(x = sleep$extra[sleep$group == 1],
+                          y = sleep$extra[sleep$group == 2],
                           mu = .25,
                           alternative = "g",
                           perm = TRUE,

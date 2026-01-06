@@ -962,32 +962,32 @@ test_that("Run examples for paired samples", {
                tsum4$TOST$p.value,
                ignore_attr = TRUE)
 
-  # Run with formula
-  test1 = t_TOST(formula = y ~ group,
-                 data = df_samp,
+  # Use vector form for paired tests, not formula
+  test1 = t_TOST(x = df_samp$y[df_samp$group == "g1"],
+                 y = df_samp$y[df_samp$group == "g2"],
                  paired = TRUE,
                  low_eqbound = -.5,
                  high_eqbound = .5,
                  bias_correction = FALSE)
 
-  test2 = suppressMessages( t_TOST(formula = y ~ group,
-                                 data = df_samp,
+  test2 = suppressMessages( t_TOST(x = df_samp$y[df_samp$group == "g1"],
+                                 y = df_samp$y[df_samp$group == "g2"],
                                  paired = TRUE,
                                  low_eqbound = -.5,
                                  high_eqbound = .5,
                                  eqbound_type = "SMD",
                                  bias_correction = FALSE) )
 
-  test3 = t_TOST(formula = y ~ group,
-                 data = df_samp,
+  test3 = t_TOST(x = df_samp$y[df_samp$group == "g1"],
+                 y = df_samp$y[df_samp$group == "g2"],
                  paired = TRUE,
                  low_eqbound = -.5,
                  high_eqbound = .5,
                  hypothesis = "MET",
                  bias_correction = FALSE)
 
-  test4 = suppressMessages(  t_TOST(formula = y ~ group,
-                                  data = df_samp,
+  test4 = suppressMessages(  t_TOST(x = df_samp$y[df_samp$group == "g1"],
+                                  y = df_samp$y[df_samp$group == "g2"],
                                   paired = TRUE,
                                   low_eqbound = -.5,
                                   high_eqbound = .5,
@@ -1169,7 +1169,9 @@ test_that("Ensure paired output correct", {
                    rm_correction = T)
   expect_equal(sign(test2$effsize$estimate[1]),sign(test2$effsize$estimate[2]))
 
-  test3 = t_TOST(extra ~ group, data = sleep,
+  # Use vector form for paired tests, not formula
+  test3 = t_TOST(x = sleep$extra[sleep$group == 1],
+         y = sleep$extra[sleep$group == 2],
          low_eqbound = -.5,
          high_eqbound = .5,
          paired = T,
@@ -1213,7 +1215,9 @@ test_that("Ensure paired output correct", {
   # x2: .04 (1.02)
   # r12 = .06
 
-  test4 = t_TOST(extra ~ group, data = sleep,
+  # Use vector form for paired tests
+  test4 = t_TOST(x = sleep$extra[sleep$group == 1],
+                 y = sleep$extra[sleep$group == 2],
                  low_eqbound = -.5,
                  high_eqbound = .5,
                  paired = T,
