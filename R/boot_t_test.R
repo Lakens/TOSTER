@@ -446,8 +446,11 @@ boot_t_test.formula <- function (formula, data, subset, na.action, ...){
   
   # Check for paired argument in ... and reject it
   dots <- list(...)
-  if("paired" %in% names(dots))
-    stop("cannot use 'paired' in formula method")
+  if("paired" %in% names(dots)){
+    if(isTRUE(dots$paired)){
+      stop("cannot use 'paired' in formula method")
+    }
+  }
   
   m <- match.call(expand.dots = FALSE)
   if(is.matrix(eval(m$data, parent.frame())))
