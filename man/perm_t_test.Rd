@@ -19,6 +19,8 @@ perm_t_test(x, ...)
   tr = 0,
   R = NULL,
   symmetric = TRUE,
+  perm_se = TRUE,
+  p_method = c("plusone", "original"),
   keep_perm = TRUE,
   ...
 )
@@ -55,13 +57,29 @@ If \code{TRUE} then the pooled variance is used to estimate the variance otherwi
 computing the mean and winsorized variance. Default is 0 (no trimming).
 When tr > 0, the function performs Yuen's trimmed t-test.}
 
-\item{R}{the number of permutations. Default is NULL, which computes all exact permutations.
+\item{R}{the number of permutations. Default is NULL, which computes all permutations.
 If R is specified and is less than the maximum number of possible permutations,
 Monte Carlo sampling is used instead.}
 
 \item{symmetric}{a logical variable indicating whether to assume symmetry in the two-sided test.
 If \code{TRUE} (default) then the symmetric permutation p-value is computed, otherwise the
 equal-tail permutation p-value is computed. Only relevant for \code{alternative = "two.sided"}.}
+
+\item{perm_se}{a logical variable indicating whether to recompute the standard error for each
+permutation (studentized permutation test). If \code{TRUE} (default), the standard error is
+recomputed for each permuted sample, following the studentized permutation approach of
+Janssen (1997) and Chung & Romano (2013), which is valid even under heteroscedasticity.
+If \code{FALSE}, the standard error from the original sample is used for all permutations,
+which is computationally faster but assumes homoscedasticity.}
+
+\item{p_method}{the method for computing permutation p-values. Options are:
+* \code{"plusone"} (default): Uses the formula (b+1)/(R+1) where b is the number of permutation
+statistics at least as extreme as the observed. Because permutations are sampled
+without replacement in this implementation, this formula provides exact p-values
+that are never zero and guarantee correct Type I error control (Phipson & Smyth, 2010).
+* \code{"original"}: Uses b/R with a minimum of 1/R. This can produce p-values of exactly
+1/R when no permutation statistic exceeds the observed, which may be problematic
+for multiple testing corrections and does not guarantee exact Type I error control.}
 
 \item{keep_perm}{logical. If \code{TRUE} (default), the permutation distribution of the test
 statistic and effect sizes are stored in the output. Set to \code{FALSE} for large datasets
@@ -122,8 +140,11 @@ For one-sample and paired tests, permutation is performed by randomly flipping t
 the (centered) observations or difference scores.
 
 For two-sample tests, permutation is performed by randomly reassigning observations to the
-two groups. The studentized permutation approach of Janssen (1997) and Chung & Romano (2013)
-is used, which is valid even under heteroscedasticity.
+two groups. When \code{perm_se = TRUE} (default), the studentized permutation approach of
+Janssen (1997) and Chung & Romano (2013) is used, which recomputes the standard error for
+each permutation and is valid even under heteroscedasticity. When \code{perm_se = FALSE}, the
+standard error from the original sample is used for all permutations, which is faster but
+assumes equal variances.
 
 When \code{tr > 0}, the function uses Yuen's trimmed t-test approach:
 \itemize{
@@ -160,6 +181,31 @@ Use this function when:
 \item You prefer the standard \code{htest} output format for compatibility with other R functions
 \item You want an alternative that tests means, mean difference, or difference in means that can also utilize trimming
 }
+}
+
+\section{Comparison with Other Packages}{
+
+Results from \code{perm_t_test} may differ slightly from other permutation test implementations
+such as \code{MKinfer::perm.t.test} or \code{coin::oneway_test}. These differences arise from
+methodological choices:
+
+\itemize{
+\item \strong{P-value formula}: This function uses the \code{(b+1)/(R+1)} formula by default
+(where \code{b} is the count of permutation statistics at least as extreme as observed),
+which provides exact p-values that are never zero and guarantees correct Type I error
+control (Phipson & Smyth, 2010). Some packages use \code{b/R} with strict inequality (\code{>}),
+which excludes tied values and can produce p-values of exactly zero.
+\item \strong{Studentized permutation}: By default (\code{perm_se = TRUE}), this function
+recalculates the standard error for each permutation, following the studentized
+approach of Janssen (1997). This provides valid inference even under heteroscedasticity
+but may produce different results than non-studentized implementations.
+\item \strong{Exact permutation detection}: This function automatically detects when exact
+enumeration is feasible and computes all possible permutations, while some packages
+may default to Monte Carlo sampling regardless of sample size.
+}
+
+All approaches produce valid permutation tests; the differences reflect trade-offs between
+conservatism, exactness, and robustness to assumption violations.
 }
 
 \examples{
@@ -202,6 +248,12 @@ perm_t_test(mpg ~ am, data = mtcars,
             mu = c(-3, 3),
             R = 199)
 
+# Example 7: Non-studentized permutation (fixed SE, faster)
+perm_t_test(mpg ~ am, data = mtcars, perm_se = FALSE, R = 999)
+
+# Example 8: Using different p-value computation methods
+perm_t_test(mpg ~ am, data = mtcars, p_method = "original", R = 999)
+
 }
 \references{
 Efron, B., & Tibshirani, R. J. (1993). An Introduction to the Bootstrap. Chapman and Hall/CRC.
@@ -214,6 +266,10 @@ The Annals of Statistics, 41(2), 484-507.
 
 Yuen, K. K. (1974). The two-sample trimmed t for unequal population variances.
 Biometrika, 61(1), 165-170.
+
+Phipson, B., & Smyth, G. K. (2010). Permutation P-values should never be zero:
+calculating exact P-values when permutations are randomly drawn.
+Statistical Applications in Genetics and Molecular Biology, 9(1), Article 39.
 }
 \seealso{
 Other Robust tests: 

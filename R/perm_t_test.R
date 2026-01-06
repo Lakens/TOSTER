@@ -96,6 +96,29 @@
 #' If the number of possible permutations is less than R, all exact permutations are computed
 #' and a message is printed to the console.
 #'
+#' @section Comparison with Other Packages:
+#' Results from `perm_t_test` may differ slightly from other permutation test implementations
+#' such as `MKinfer::perm.t.test` or `coin::oneway_test`. These differences arise from
+#' methodological choices:
+#'
+#' \itemize{
+#'   \item **P-value formula**: This function uses the `(b+1)/(R+1)` formula by default
+#'     (where `b` is the count of permutation statistics at least as extreme as observed),
+#'     which provides exact p-values that are never zero and guarantees correct Type I error
+#'     control (Phipson & Smyth, 2010). Some packages use `b/R` with strict inequality (`>`),
+#'     which excludes tied values and can produce p-values of exactly zero.
+#'   \item **Studentized permutation**: By default (`perm_se = TRUE`), this function
+#'     recalculates the standard error for each permutation, following the studentized
+#'     approach of Janssen (1997). This provides valid inference even under heteroscedasticity
+#'     but may produce different results than non-studentized implementations.
+#'   \item **Exact permutation detection**: This function automatically detects when exact
+#'     enumeration is feasible and computes all possible permutations, while some packages
+#'     may default to Monte Carlo sampling regardless of sample size.
+#' }
+#'
+#' All approaches produce valid permutation tests; the differences reflect trade-offs between
+#' conservatism, exactness, and robustness to assumption violations.
+#'
 #' @return A list with class `"htest"` containing the following components:
 #'
 #'   - "statistic": the value of the t-statistic.

@@ -25,8 +25,13 @@ cat("Mean:", round(mean(x), 4), "\n")
 cat("SD:", round(sd(x), 4), "\n\n")
 
 # TOSTER (studentized)
-result_toster <- perm_t_test(x, mu = 0, alternative = "two.sided", R = 9999)
-
+result_toster1 <- perm_t_test(x, mu = 0, alternative = "two.sided", R = 9999)
+result_toster2 <- perm_t_test(x, mu = 0, alternative = "two.sided", R = 9999,
+                              perm_se = TRUE,
+                              p_method = "o")
+result_toster3 <- perm_t_test(x, mu = 0, alternative = "two.sided", R = 9999,
+                              perm_se = FALSE,
+                              p_method = "o")
 # MKinfer (non-studentized)
 result_mkinfer <- perm.t.test(x, mu = 0, alternative = "two.sided", R = 9999)
 
@@ -37,7 +42,9 @@ result_mkinfer <- perm.t.test(x, mu = 0, alternative = "two.sided", R = 9999)
 
 cat("One-sample permutation t-test (H0: mu = 0):\n")
 cat("-----------------------------------------\n")
-cat("TOSTER p-value:  ", round(result_toster$p.value, 4), " (studentized)\n")
+cat("TOSTER p-value:  ", round(result_toster1$p.value, 4), " (studentized)\n")
+cat("TOSTER p-value:  ", round(result_toster2$p.value, 4), " (studentized, original perm)\n")
+cat("TOSTER p-value:  ", round(result_toster3$p.value, 4), " (non-studentized, original perm)\n")
 cat("MKinfer p-value: ", round(result_mkinfer$perm.p.value, 4), " (non-studentized)\n")
 #cat("coin p-value:    ", round(pvalue(result_coin), 4), " (Wilcoxon signed-rank, exact)\n")
 cat("Parametric t p:  ", round(t.test(x, mu = 0)$p.value, 4), "\n\n")
@@ -55,7 +62,13 @@ cat("Group 1: n =", length(x), ", mean =", round(mean(x), 4), ", sd =", round(sd
 cat("Group 2: n =", length(y), ", mean =", round(mean(y), 4), ", sd =", round(sd(y), 4), "\n\n")
 
 # TOSTER (studentized)
-result_toster <- perm_t_test(x, y, alternative = "two.sided", var.equal = FALSE, R = 9999)
+result_toster1 <- perm_t_test(x, y, alternative = "two.sided", var.equal = FALSE, R = 9999)
+result_toster2 <- perm_t_test(x, y, alternative = "two.sided", var.equal = FALSE, R = 9999,
+                              perm_se = TRUE,
+                              p_method = "o")
+result_toster3 <- perm_t_test(x, y, alternative = "two.sided", var.equal = FALSE, R = 9999,
+                              perm_se = FALSE,
+                              p_method = "o")
 
 # MKinfer (their version)
 result_mkinfer <- perm.t.test(x, y, alternative = "two.sided", var.equal = FALSE, R = 9999)
@@ -70,7 +83,9 @@ result_coin <- oneway_test(value ~ group, data = df,
 
 cat("Two-sample permutation t-test (H0: mu_x = mu_y):\n")
 cat("------------------------------------------------\n")
-cat("TOSTER p-value:  ", round(result_toster$p.value, 4), " (studentized Welch)\n")
+cat("TOSTER p-value:  ", round(result_toster1$p.value, 4), " (studentized)\n")
+cat("TOSTER p-value:  ", round(result_toster2$p.value, 4), " (studentized, original perm)\n")
+cat("TOSTER p-value:  ", round(result_toster3$p.value, 4), " (non-studentized, original perm)\n")
 cat("MKinfer p-value: ", round(result_mkinfer$perm.p.value, 4), "\n")
 cat("coin p-value:    ", round(pvalue(result_coin), 4), " (asymptotic studentized)\n")
 cat("Parametric t p:  ", round(t.test(x, y, var.equal = FALSE)$p.value, 4), "\n\n")
@@ -81,8 +96,13 @@ cat("Parametric t p:  ", round(t.test(x, y, var.equal = FALSE)$p.value, 4), "\n\
 cat("=== TWO-SAMPLE WITH EQUAL VARIANCES ===\n\n")
 
 # TOSTER (studentized, pooled variance)
-result_toster_eq <- perm_t_test(x, y, alternative = "two.sided", var.equal = TRUE, R = 9999)
-
+result_toster_eq1 <- perm_t_test(x, y, alternative = "two.sided", var.equal = TRUE, R = 9999)
+result_toster_eq2 <- perm_t_test(x, y, alternative = "two.sided", var.equal = TRUE, R = 9999,
+                                perm_se = TRUE,
+                                p_method = "o")
+result_toster_eq3 <- perm_t_test(x, y, alternative = "two.sided", var.equal = TRUE, R = 9999,
+                                perm_se = FALSE,
+                                p_method = "o")
 # MKinfer (pooled variance)
 result_mkinfer_eq <- perm.t.test(x, y, alternative = "two.sided", var.equal = TRUE, R = 9999)
 
@@ -92,7 +112,9 @@ result_coin_eq <- oneway_test(value ~ group, data = df,
 
 cat("Two-sample permutation t-test (pooled variance):\n")
 cat("------------------------------------------------\n")
-cat("TOSTER p-value:  ", round(result_toster_eq$p.value, 4), " (studentized)\n")
+cat("TOSTER p-value:  ", round(result_toster_eq1$p.value, 4), " (studentized)\n")
+cat("TOSTER p-value:  ", round(result_toster_eq2$p.value, 4), " (studentized, original perm)\n")
+cat("TOSTER p-value:  ", round(result_toster_eq3$p.value, 4), " (non-studentized, original perm)\n")
 cat("MKinfer p-value: ", round(result_mkinfer_eq$perm.p.value, 4), "\n")
 cat("coin p-value:    ", round(pvalue(result_coin_eq), 4), "\n")
 cat("Parametric t p:  ", round(t.test(x, y, var.equal = TRUE)$p.value, 4), "\n\n")
