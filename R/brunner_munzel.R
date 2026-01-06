@@ -3,11 +3,24 @@
 #' `r lifecycle::badge("maturing")`
 #'
 #' This is a generic function that performs a generalized asymptotic Brunner-Munzel test in a fashion similar to [t.test].
-#' @param paired a logical indicating whether you want a paired test. Cannot be used with the formula method; use x and y vectors instead for paired tests.
-#' @param mu 	a number specifying an optional parameter used to form the null hypothesis (Default = 0.5). This can be thought of as the null in terms of the relative effect, p = P (X < Y ) + 0.5 * P (X = Y); See ‘Details’.
+#' @param paired a logical indicating whether you want a paired test.
+#' @param mu a number or vector specifying the null hypothesis value(s):
+#'
+#'   * For standard alternatives ("two.sided", "less", "greater"): a single value
+#'     representing the hypothesized relative effect (default = 0.5, i.e., stochastic equality).
+#'   * For "equivalence" or "minimal.effect": two values representing the lower and upper bounds
+#'     for the relative effect. Values must be between 0 and 1.
+#'
 #' @param perm a logical indicating whether or not to perform a permutation test over approximate t-distribution based test (default is FALSE). Highly recommend to set perm = TRUE when sample size per condition is less than 15.
 #' @param max_n_perm the maximum number of permutations (default is 10000).
-#' @param alternative a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater" or "less". You can specify just the initial letter.
+#' @param alternative a character string specifying the alternative hypothesis, must be one of:
+#'
+#'   * "two.sided" (default): true relative effect is not equal to `mu`
+#'   * "less": true relative effect is less than `mu`
+#'   * "greater": true relative effect is greater than `mu`
+#'   * "equivalence": true relative effect is between the lower and upper bounds specified in `mu`
+#'   * "minimal.effect": true relative effect is less than the lower bound or greater than the upper bound specified in `mu`
+#'
 #' @inheritParams t_TOST
 #' @param ...  further arguments to be passed to or from methods.
 #' @details
@@ -18,12 +31,40 @@
 #'
 #' The estimate of the relative effect, which can be considered as value similar to the probability of superiority, refers to the following:
 #'
-#'  \deqn{\hat p = p(X>Y) + \frac{1}{2} \cdot P(X=Y)}
+#'  \deqn{\hat p = P(X>Y) + \frac{1}{2} \cdot P(X=Y)}
 #'
-#'  Note, for paired samples, this does *not* refer to the probability of an increase/decrease in paired sample but rather the probability that a randomly sampled value of X.
+#'  Note, for paired samples, this does *not* refer to the probability of an increase/decrease in paired sample but rather the probability that a randomly sampled value of X is greater than a randomly sampled value of Y.
 #'  This is also referred to as the "relative" effect in the literature. Therefore, the results will differ from the concordance probability provided by the ses_calc function.
 #'
 #'  The brunner_munzel function is based on the `npar.t.test` and `npar.t.test.paired` functions within the `nparcomp` package (Konietschke et al. 2015).
+#'
+#' ## Hypothesis Testing
+#'
+#' For the standard alternatives, the null hypothesis is that the relative effect equals `mu`:
+#'
+#' * "two.sided": H0: p = mu vs H1: p ≠ mu
+#' * "less": H0: p ≥ mu vs H1: p < mu
+#' * "greater": H0: p ≤ mu vs H1: p > mu
+#'
+#' For equivalence and minimal effect testing using the two one-sided tests (TOST) procedure:
+#'
+#' * "equivalence": H0: p ≤ mu[1] OR p ≥ mu[2] vs H1: mu[1] < p < mu[2]
+#'
+#'   Tests whether the relative effect falls within the specified bounds.
+#'   The p-value is the maximum of the two one-sided p-values.
+#'
+#' * "minimal.effect": H0: mu[1] < p < mu[2] vs H1: p ≤ mu[1] OR p ≥ mu[2]
+#'
+#'   Tests whether the relative effect falls outside the specified bounds.
+#'   The p-value is the minimum of the two one-sided p-values.
+#'
+#' ## Permutation Tests with Non-0.5 Null Values
+#'
+#' When `perm = TRUE` and `mu != 0.5`, the permutation distribution is constructed by centering
+#' the permuted test statistics at 0.5 (the value implied by exchangeability), while the observed
+#' test statistic is centered at the hypothesized null value. This approach is valid because
+#' the studentized permutation distribution converges to the same limit regardless of the
+#' centering, following the asymptotic theory of Janssen (1997) and Neubert & Brunner (2007).
 #'
 #' @return A list with class `"htest"` containing the following components:
 #'
@@ -40,7 +81,28 @@
 #'
 #' @examples
 #' data(mtcars)
+#' # Standard test of stochastic equality
 #' brunner_munzel(mpg ~ am, data = mtcars)
+#'
+#' # Test against a specific null value
+#' brunner_munzel(mpg ~ am, data = mtcars, mu = 0.3)
+#'
+#' # Equivalence test: is the relative effect between 0.35 and 0.65?
+#' brunner_munzel(mpg ~ am, data = mtcars,
+#'                alternative = "equivalence",
+#'                mu = c(0.35, 0.65))
+#'
+#' # Minimal effect test: is the relative effect outside 0.4 to 0.6?
+#' brunner_munzel(mpg ~ am, data = mtcars,
+#'                alternative = "minimal.effect",
+#'                mu = c(0.4, 0.6))
+#'
+#' # Permutation-based equivalence test
+#' brunner_munzel(mpg ~ am, data = mtcars,
+#'                alternative = "equivalence",
+#'                mu = c(0.35, 0.65),
+#'                perm = TRUE)
+#'
 #' @references
 #' Brunner, E., Munzel, U. (2000). The Nonparametric Behrens-Fisher Problem: Asymptotic Theory and a Small Sample Approximation. Biometrical Journal 42, 17 -25.
 #'
@@ -48,7 +110,11 @@
 #'
 #' Munzel, U., Brunner, E. (2002). An Exact Paired Rank Test. Biometrical Journal 44, 584-593.
 #'
+#' Munzel, U., Hauschke, D. (2003). A nonparametric test for proving noninferiority in clinical trials with ordered categorical data. Pharmaceutical Statistics, 2, 31-37.
+#'
 #' Konietschke, F., Placzek, M., Schaarschmidt, F., & Hothorn, L. A. (2015). nparcomp: an R software package for nonparametric multiple comparisons and simultaneous confidence intervals. Journal of Statistical Software 64 (2015), Nr. 9, 64(9), 1-17. http://www.jstatsoft.org/v64/i09/
+#'
+#' Janssen, A. (1997). Studentized permutation tests for non-i.i.d. hypotheses and the generalized Behrens-Fisher problem. Statistics & Probability Letters, 36(1), 9-21.
 #' @name brunner_munzel
 #' @importFrom stats var quantile
 #' @family Robust tests
@@ -60,7 +126,9 @@ brunner_munzel <- function(x,
                            paired = FALSE,
                            alternative = c("two.sided",
                                            "less",
-                                           "greater"),
+                                           "greater",
+                                           "equivalence",
+                                           "minimal.effect"),
                            mu = 0.5,
                            alpha = 0.05,
                            perm = FALSE,
@@ -80,23 +148,41 @@ brunner_munzel.default = function(x,
                                   paired = FALSE,
                                   alternative = c("two.sided",
                                                   "less",
-                                                  "greater"),
+                                                  "greater",
+                                                  "equivalence",
+                                                  "minimal.effect"),
                                   mu = 0.5,
                                   alpha = 0.05,
                                   perm = FALSE,
                                   max_n_perm = 10000,
                                   ...) {
   alternative = match.arg(alternative)
-  if(!missing(mu) &&
-     ((length(mu) > 1L) || !is.finite(mu)) ||
-    ( mu < 0 || mu > 1))
-    stop("'mu' must be a single number between 0 and 1.")
 
-  if(alternative == "two.sided"){
-    if(mu == 0 | mu == 1){
-      stop("'mu' cannot be 0 or 1 when alternative is 'two.sided'")
+  # Validate mu based on alternative
+
+  if(alternative %in% c("equivalence", "minimal.effect")) {
+    if(length(mu) != 2) {
+      stop("'mu' must be a vector of length 2 for equivalence or minimal.effect alternatives")
+    }
+    if(any(!is.finite(mu)) || any(mu < 0) || any(mu > 1)) {
+      stop("'mu' values must be finite numbers between 0 and 1")
+    }
+    if(mu[1] >= mu[2]) {
+      stop("'mu[1]' (lower bound) must be less than 'mu[2]' (upper bound)")
+    }
+    low_eqbound <- min(mu)
+    high_eqbound <- max(mu)
+  } else {
+    if(length(mu) != 1 || !is.finite(mu) || mu < 0 || mu > 1) {
+      stop("'mu' must be a single number between 0 and 1")
+    }
+    if(alternative == "two.sided") {
+      if(mu == 0 || mu == 1) {
+        stop("'mu' cannot be 0 or 1 when alternative is 'two.sided'")
+      }
     }
   }
+
   if(!is.numeric(x)) stop("'x' must be numeric")
   if(!missing(y)) {
     if(!is.numeric(y)) stop("'y' must be numeric")
@@ -120,7 +206,7 @@ brunner_munzel.default = function(x,
     if(min(length(x),length(y)) > 250 &&
        sum(length(x),length(y)) > 500 &&
        (perm)){
-      message("Sample size is fairly large. Use of a permutation test is probably unnessary.")
+      message("Sample size is fairly large. Use of a permutation test is probably unnecessary.")
     }
   } else {
 
@@ -128,6 +214,12 @@ brunner_munzel.default = function(x,
 
   }
 
+  # Set confidence level based on alternative
+  if(alternative %in% c("equivalence", "minimal.effect")) {
+    conf.level <- 1 - alpha * 2
+  } else {
+    conf.level <- 1 - alpha
+  }
 
   # Paired -----
   if(paired){
@@ -157,28 +249,31 @@ brunner_munzel.default = function(x,
     v <- (sum(BM3 ^ 2) - n * m ^ 2) / (n - 1)
     v0 <- (v == 0)
     v[v0] <- 1 / n
-    test_stat <- sqrt(n) * (pd - mu) / sqrt(v)
-    std_err = sqrt(v)
+    std_err = sqrt(v/n)
 
     if(perm == TRUE){
       METHOD = "Paired Brunner-Munzel permutation test"
-      message("NOTE: Confidence intervals derived from permutation tests may differ from conclusions drawn from p-values. When discrepancies occur, consider additional diagnostics or alternative inference methods.")
+      if(alternative %in% c("equivalence", "minimal.effect")) {
+        message("NOTE: Permutation-based TOST for equivalence/minimal.effect testing.")
+      }
+
       # Directly from nparcomp
       if(n<=13){
-        max_n_perm=2^n
+        n_perm_actual <- 2^n
         p<-0
         for (i in 1:n){
-          a<-rep(c(rep(c(i,i+n),max_n_perm/(2^i)),rep(c(i+n,i),max_n_perm/(2^i))),2^(i-1))
+          a<-rep(c(rep(c(i,i+n),n_perm_actual/(2^i)),rep(c(i+n,i),n_perm_actual/(2^i))),2^(i-1))
           p<-rbind(p,a)
         }
         p<-p[2:(n+1),]
-        P<-matrix(p,ncol=max_n_perm)
+        P<-matrix(p,ncol=n_perm_actual)
 
-        xperm<-matrix(all_data[P],nrow=N,ncol=max_n_perm)
-        rxperm<-matrix(rx[P],nrow=N,ncol=max_n_perm)
+        xperm<-matrix(all_data[P],nrow=N,ncol=n_perm_actual)
+        rxperm<-matrix(rx[P],nrow=N,ncol=n_perm_actual)
       }
       else{
-        P<-matrix(nrow=n,ncol=10000)
+        n_perm_actual <- max_n_perm
+        P<-matrix(nrow=n,ncol=n_perm_actual)
         permu<-function(all_data){
           n<-length(all_data)
           result<-sample(c(0,1),size=n,replace=TRUE)
@@ -202,53 +297,147 @@ brunner_munzel.default = function(x,
       vperm3<-(colSums(BMperm3^2)-n*mperm3^2)/(n-1)
       vperm30<-(vperm3==0)
       vperm3[vperm30]<-1/n
-      #print(vperm3)
-      Tperm<-sqrt(n)*(pdperm-mu)/sqrt(vperm3)
-      p1perm<-mean(Tperm<=test_stat)
-      pq1<-sort(Tperm)[(floor((1-alpha/2)*max_n_perm)+1)]
-      pq2<-sort(Tperm)[(floor((1-alpha)*max_n_perm)+1)]
 
-      p.value = switch(alternative,
-                       "two.sided" = min(2*p1perm,2*(1-p1perm)),
-                       "less" = p1perm,
-                       "greater" =  1-p1perm)
+      # FIXED: Permuted statistics always centered at 0.5 (exchangeability assumption)
+      Tperm <- sqrt(n) * (pdperm - 0.5) / sqrt(vperm3)
 
-      pd.lower = switch(alternative,
-                        "two.sided" = pd-pq1*sqrt(v/n),
-                        "less" = 0,
-                        "greater" =  pd-pq2*sqrt(v/n))
+      # Calculate p-values based on alternative
+      if(alternative %in% c("equivalence", "minimal.effect")) {
+        # Observed test statistics for each bound
+        test_stat_low <- sqrt(n) * (pd - low_eqbound) / sqrt(v)
+        test_stat_high <- sqrt(n) * (pd - high_eqbound) / sqrt(v)
 
-      pd.upper = switch(alternative,
-                        "two.sided" = pd+pq1*sqrt(v/n),
-                        "less" = pd+pq2*sqrt(v/n),
-                        "greater" =  1)
+        # One-sided p-values
+        # For lower bound test: H0: p <= low vs H1: p > low
+        # Large test_stat_low supports H1, so p-value = P(T >= t_obs)
+        p_greater_low <- mean(Tperm >= test_stat_low)
+
+        # For upper bound test: H0: p >= high vs H1: p < high
+        # Small (negative) test_stat_high supports H1, so p-value = P(T <= t_obs)
+        p_less_high <- mean(Tperm <= test_stat_high)
+
+        if(alternative == "equivalence") {
+          # Both conditions must be met: p > low AND p < high
+          # p-value is the maximum of the two one-sided tests
+          p.value <- max(p_greater_low, p_less_high)
+
+          # Determine which bound is "binding" for reporting
+          if(p_greater_low >= p_less_high) {
+            test_stat <- test_stat_low
+          } else {
+            test_stat <- test_stat_high
+          }
+        } else { # minimal.effect
+          # At least one condition must be met: p <= low OR p >= high
+          # p-value is the minimum of the two one-sided tests
+          p.value <- min(1 - p_greater_low, 1 - p_less_high)
+
+          # Determine which bound is "binding" for reporting
+          if((1 - p_greater_low) <= (1 - p_less_high)) {
+            test_stat <- test_stat_low
+          } else {
+            test_stat <- test_stat_high
+          }
+        }
+
+        # Confidence interval quantiles from permutation distribution
+        # Use actual number of permutations for indexing
+        pq1 <- sort(Tperm)[(floor((1-alpha)*n_perm_actual)+1)]
+
+        pd.lower <- pd - pq1*sqrt(v/n)
+        pd.upper <- pd + pq1*sqrt(v/n)
+
+      } else {
+        # Standard alternatives (two.sided, less, greater)
+        # Observed test statistic centered at mu
+        test_stat <- sqrt(n) * (pd - mu) / sqrt(v)
+
+        p1perm <- mean(Tperm <= test_stat)
+        pq1 <- sort(Tperm)[(floor((1-alpha/2)*n_perm_actual)+1)]
+        pq2 <- sort(Tperm)[(floor((1-alpha)*n_perm_actual)+1)]
+
+        p.value = switch(alternative,
+                         "two.sided" = min(2*p1perm, 2*(1-p1perm)),
+                         "less" = p1perm,
+                         "greater" = 1-p1perm)
+
+        pd.lower = switch(alternative,
+                          "two.sided" = pd - pq1*sqrt(v/n),
+                          "less" = 0,
+                          "greater" = pd - pq2*sqrt(v/n))
+
+        pd.upper = switch(alternative,
+                          "two.sided" = pd + pq1*sqrt(v/n),
+                          "less" = pd + pq2*sqrt(v/n),
+                          "greater" = 1)
+      }
+
+      # Clamp bounds to [0, 1]
+      pd.lower <- ifelse(pd.lower < 0, 0, pd.lower)
+      pd.upper <- ifelse(pd.upper > 1, 1, pd.upper)
+
     } else {
+      # Asymptotic (t-distribution) approach
+      METHOD = "Exact paired Brunner-Munzel test"
 
-      METHOD = "exact paired Brunner-Munzel test"
-      p.value = switch(alternative,
-                       "two.sided" = (2*min(pt(test_stat,n-1),
-                                            1-pt(test_stat,n-1))),
-                       "less" = pt(test_stat,
-                                   df=df.sw),
-                       "greater" =  1-pt(test_stat,
-                                         df=df.sw))
+      if(alternative %in% c("equivalence", "minimal.effect")) {
+        # Test statistics for each bound
+        test_stat_low <- sqrt(n) * (pd - low_eqbound) / sqrt(v)
+        test_stat_high <- sqrt(n) * (pd - high_eqbound) / sqrt(v)
 
-      pd.lower = switch(alternative,
-                        "two.sided" = pd-qt(1-alpha/2,df.sw)*sqrt(v/n),
-                        "less" = 0,
-                        "greater" =  pd-qt(1-alpha,df.sw)*sqrt(v/n))
+        # One-sided p-values
+        p_low_greater <- 1 - pt(test_stat_low, df.sw)  # p > low_eqbound
+        p_high_less <- pt(test_stat_high, df.sw)       # p < high_eqbound
 
-      pd.upper = switch(alternative,
-                        "two.sided" = pd+qt(1-alpha/2,df.sw)*sqrt(v/n),
-                        "less" = pd+qt(1-alpha,df.sw)*sqrt(v/n),
-                        "greater" =  1)
+        if(alternative == "equivalence") {
+          p.value <- max(p_low_greater, p_high_less)
+
+          # Report the binding statistic
+          if(p_low_greater >= p_high_less) {
+            test_stat <- test_stat_low
+          } else {
+            test_stat <- test_stat_high
+          }
+        } else { # minimal.effect
+          p.value <- min(1 - p_low_greater, 1 - p_high_less)
+
+          # Report the binding statistic
+          if((1 - p_low_greater) <= (1 - p_high_less)) {
+            test_stat <- test_stat_low
+          } else {
+            test_stat <- test_stat_high
+          }
+        }
+
+        # 1-2*alpha CI for TOST
+        pd.lower <- pd - qt(1-alpha, df.sw)*sqrt(v/n)
+        pd.upper <- pd + qt(1-alpha, df.sw)*sqrt(v/n)
+
+      } else {
+        # Standard alternatives
+        test_stat <- sqrt(n) * (pd - mu) / sqrt(v)
+
+        p.value = switch(alternative,
+                         "two.sided" = 2*min(pt(test_stat, df.sw),
+                                             1-pt(test_stat, df.sw)),
+                         "less" = pt(test_stat, df=df.sw),
+                         "greater" = 1-pt(test_stat, df=df.sw))
+
+        pd.lower = switch(alternative,
+                          "two.sided" = pd - qt(1-alpha/2, df.sw)*sqrt(v/n),
+                          "less" = 0,
+                          "greater" = pd - qt(1-alpha, df.sw)*sqrt(v/n))
+
+        pd.upper = switch(alternative,
+                          "two.sided" = pd + qt(1-alpha/2, df.sw)*sqrt(v/n),
+                          "less" = pd + qt(1-alpha, df.sw)*sqrt(v/n),
+                          "greater" = 1)
+      }
     }
 
+  } else {
 
-
-  } else{
-
-  # Two-sample ------
+    # Two-sample ------
     rxy <- rank(c(x, y))
     rx <- rank(x)
     ry <- rank(y)
@@ -269,84 +458,170 @@ brunner_munzel.default = function(x,
     V <- N*(s1+s2)
     singular.bf <- (V == 0)
     V[singular.bf] <- N/(2 * n.x * n.y)
-    std_err = sqrt(V)
+    std_err = sqrt(V/N)
 
-
-    test_stat <- sqrt(N)*(pd - mu)/sqrt(V)
     df.sw <- (s1 + s2)^2/(s1^2/(n.x - 1) + s2^2/(n.y - 1))
     df.sw[is.nan(df.sw)] <- 1000
 
     if(perm){
 
       ## permutation -----
-      METHOD = "two-sample Brunner-Munzel permutation test"
-      message("NOTE: Confidence intervals derived from permutation tests may differ from conclusions drawn from p-values. When discrepancies occur, consider additional diagnostics or alternative inference methods.")
+      METHOD = "Two-sample Brunner-Munzel permutation test"
+      if(alternative %in% c("equivalence", "minimal.effect")) {
+        message("NOTE: Permutation-based TOST for equivalence/minimal.effect testing.")
+      }
+
       Tprob<-qnorm(pd)*exp(-0.5*qnorm(pd)^2)*sqrt(N/(V*2*pi))
       P<-apply(matrix(rep(1:N,max_n_perm),ncol=max_n_perm),2,sample)
       Px<-matrix(c(x,y)[P],ncol=max_n_perm)
+
+      # perm_loop already centers at 0.5 (see res1[1,]<-(pdP-1/2)/sqrt(vP))
       Tperm<-t(apply(perm_loop(x=Px[1:n.x,],y=Px[(n.x+1):N,],
                                n.x=n.x,n.y=n.y,max_n_perm),1,sort))
-      p.PERM1<-mean((test_stat <= Tperm[1,]))
-      if(alternative == "two.sided"){
-        c1<-0.5*(Tperm[1,floor((1-alpha/2)*max_n_perm)]+Tperm[1,ceiling((1-alpha/2)*max_n_perm)])
-        c2<-0.5*(Tperm[1,floor(alpha/2*max_n_perm)]+Tperm[1,ceiling(alpha/2*max_n_perm)])
+
+      if(alternative %in% c("equivalence", "minimal.effect")) {
+        # Observed test statistics for each bound
+        test_stat_low <- sqrt(N) * (pd - low_eqbound) / sqrt(V)
+        test_stat_high <- sqrt(N) * (pd - high_eqbound) / sqrt(V)
+
+        # One-sided p-values from permutation distribution
+        p_low_greater <- mean(test_stat_low >= Tperm[1,])  # evidence p > low
+        p_high_less <- mean(test_stat_high <= Tperm[1,])   # evidence p < high
+
+        if(alternative == "equivalence") {
+          # Both must reject: p > low AND p < high
+          p.value <- max(1 - p_low_greater, 1 - p_high_less)
+
+          if((1 - p_low_greater) >= (1 - p_high_less)) {
+            test_stat <- test_stat_low
+          } else {
+            test_stat <- test_stat_high
+          }
+        } else { # minimal.effect
+          # At least one must reject: p <= low OR p >= high
+          p.value <- min(p_low_greater, p_high_less)
+
+          if(p_low_greater <= p_high_less) {
+            test_stat <- test_stat_low
+          } else {
+            test_stat <- test_stat_high
+          }
+        }
+
+        # CI quantiles for 1-2*alpha level
+        c1 <- 0.5*(Tperm[1, floor((1-alpha)*max_n_perm)] +
+                     Tperm[1, ceiling((1-alpha)*max_n_perm)])
+
+        pd.lower <- pd - sqrt(V/N)*c1
+        pd.upper <- pd + sqrt(V/N)*c1
+
       } else {
-        c1<-0.5*(Tperm[1,
-                       floor((1-alpha)*max_n_perm)]+Tperm[1,
-                                                          ceiling((1-alpha)*max_n_perm)])
-        c2<-0.5*(Tperm[1,
-                       floor(alpha*max_n_perm)]+Tperm[1,
-                                                      ceiling(alpha*max_n_perm)])
+        # Standard alternatives
+        # Observed test statistic centered at mu
+        test_stat <- sqrt(N) * (pd - mu) / sqrt(V)
+
+        p.PERM1 <- mean((test_stat <= Tperm[1,]))
+
+        if(alternative == "two.sided"){
+          c1<-0.5*(Tperm[1,floor((1-alpha/2)*max_n_perm)]+Tperm[1,ceiling((1-alpha/2)*max_n_perm)])
+          c2<-0.5*(Tperm[1,floor(alpha/2*max_n_perm)]+Tperm[1,ceiling(alpha/2*max_n_perm)])
+        } else {
+          c1<-0.5*(Tperm[1, floor((1-alpha)*max_n_perm)]+Tperm[1, ceiling((1-alpha)*max_n_perm)])
+          c2<-0.5*(Tperm[1, floor(alpha*max_n_perm)]+Tperm[1, ceiling(alpha*max_n_perm)])
+        }
+
+        lower_ci = pd - sqrt(V/N)*c1
+        upper_ci = pd - sqrt(V/N)*c2
+
+        p.value = switch(alternative,
+                         "two.sided" = min(2-2*p.PERM1, 2*p.PERM1),
+                         "less" =  p.PERM1,
+                         "greater" =  1-p.PERM1)
+
+        pd.lower = switch(alternative,
+                          "two.sided" = lower_ci,
+                          "less" = 0,
+                          "greater" = lower_ci)
+
+        pd.upper = switch(alternative,
+                          "two.sided" = upper_ci,
+                          "less" = upper_ci,
+                          "greater" = 1)
       }
 
-      lower_ci = pd-sqrt(V/N)*c1
-      upper_ci = pd-sqrt(V/N)*c2
-
-      p.value = switch(alternative,
-                       "two.sided" = min(2-2*p.PERM1,
-                                         2*p.PERM1),
-                       "less" =  p.PERM1,
-                       "greater" =  1-p.PERM1)
-
-      pd.lower = switch(alternative,
-                        "two.sided" = lower_ci,
-                        "less" = 0,
-                        "greater" =  lower_ci)
       pd.lower = ifelse(pd.lower < 0, 0, pd.lower)
-
-      pd.upper = switch(alternative,
-                        "two.sided" = upper_ci,
-                        "less" = upper_ci,
-                        "greater" =  1)
       pd.upper = ifelse(pd.upper > 1, 1, pd.upper)
 
-      } else{
+    } else{
 
-        ## t-approx ----
-    METHOD = "two-sample Brunner-Munzel test"
-    p.value = switch(alternative,
-                     "two.sided" = min(c(2 - 2 * pt(test_stat,
-                                                  df=df.sw),
-                                       2 * pt(test_stat,
-                                              df=df.sw))),
-                     "less" = pt(test_stat, df=df.sw),
-                     "greater" =  1-pt(test_stat, df=df.sw))
+      ## t-approx ----
+      METHOD = "Two-sample Brunner-Munzel test"
 
-    pd.lower = switch(alternative,
-                      "two.sided" = pd - qt(1-alpha/2, df=df.sw)/sqrt(N)*sqrt(V),
-                      "less" = 0,
-                      "greater" =  pd - qt(1-alpha, df=df.sw)/sqrt(N)*sqrt(V))
-    pd.lower = ifelse(pd.lower < 0, 0, pd.lower)
+      if(alternative %in% c("equivalence", "minimal.effect")) {
+        # Test statistics for each bound
+        test_stat_low <- sqrt(N) * (pd - low_eqbound) / sqrt(V)
+        test_stat_high <- sqrt(N) * (pd - high_eqbound) / sqrt(V)
 
-    pd.upper = switch(alternative,
-                      "two.sided" = pd + qt(1-alpha/2, df=df.sw)/sqrt(N)*sqrt(V),
-                      "less" = pd + qt(1-alpha, df=df.sw)/sqrt(N)*sqrt(V),
-                      "greater" =  1)
-    pd.upper = ifelse(pd.upper > 1, 1, pd.upper)
+        # One-sided p-values
+        p_low_greater <- 1 - pt(test_stat_low, df=df.sw)  # p > low_eqbound
+        p_high_less <- pt(test_stat_high, df=df.sw)       # p < high_eqbound
+
+        if(alternative == "equivalence") {
+          p.value <- max(p_low_greater, p_high_less)
+
+          if(p_low_greater >= p_high_less) {
+            test_stat <- test_stat_low
+          } else {
+            test_stat <- test_stat_high
+          }
+        } else { # minimal.effect
+          p.value <- min(1 - p_low_greater, 1 - p_high_less)
+
+          if((1 - p_low_greater) <= (1 - p_high_less)) {
+            test_stat <- test_stat_low
+          } else {
+            test_stat <- test_stat_high
+          }
+        }
+
+        # 1-2*alpha CI for TOST
+        pd.lower <- pd - qt(1-alpha, df=df.sw)/sqrt(N)*sqrt(V)
+        pd.upper <- pd + qt(1-alpha, df=df.sw)/sqrt(N)*sqrt(V)
+        pd.lower = ifelse(pd.lower < 0, 0, pd.lower)
+        pd.upper = ifelse(pd.upper > 1, 1, pd.upper)
+
+      } else {
+        # Standard alternatives
+        test_stat <- sqrt(N) * (pd - mu) / sqrt(V)
+
+        p.value = switch(alternative,
+                         "two.sided" = min(c(2 - 2 * pt(test_stat, df=df.sw),
+                                             2 * pt(test_stat, df=df.sw))),
+                         "less" = pt(test_stat, df=df.sw),
+                         "greater" = 1-pt(test_stat, df=df.sw))
+
+        pd.lower = switch(alternative,
+                          "two.sided" = pd - qt(1-alpha/2, df=df.sw)/sqrt(N)*sqrt(V),
+                          "less" = 0,
+                          "greater" = pd - qt(1-alpha, df=df.sw)/sqrt(N)*sqrt(V))
+        pd.lower = ifelse(pd.lower < 0, 0, pd.lower)
+
+        pd.upper = switch(alternative,
+                          "two.sided" = pd + qt(1-alpha/2, df=df.sw)/sqrt(N)*sqrt(V),
+                          "less" = pd + qt(1-alpha, df=df.sw)/sqrt(N)*sqrt(V),
+                          "greater" = 1)
+        pd.upper = ifelse(pd.upper > 1, 1, pd.upper)
+      }
     }
   }
 
-  names(mu) <- "relative effect"
+  # Prepare output
+  if(alternative %in% c("equivalence", "minimal.effect")) {
+    names(mu) <- c("lower bound", "upper bound")
+  } else {
+    names(mu) <- "relative effect"
+  }
+
   if(perm){
     names(test_stat) = "t-observed"
   } else {
@@ -354,12 +629,10 @@ brunner_munzel.default = function(x,
   }
 
   names(df.sw) = "df"
-  cint = c(pd.lower,pd.upper)
-  attr(cint,"conf.level") = ifelse(alternative == "two.sided",
-                                   1-alpha,
-                                   1-2*alpha)
+  cint = c(pd.lower, pd.upper)
+  attr(cint, "conf.level") = conf.level
   estimate = pd
-  names(estimate) = "p(X>Y) + .5*P(X=Y)"
+  names(estimate) = "P(X>Y) + .5*P(X=Y)"
 
   rval <- list(statistic = test_stat,
                parameter = df.sw,
@@ -389,7 +662,7 @@ brunner_munzel.formula = function(formula,
      || (length(formula) != 3L)
      || (length(attr(terms(formula[-2L]), "term.labels")) != 1L))
     stop("'formula' missing or incorrect")
-  
+
   # Check for paired argument in ... and reject it
   dots <- list(...)
   if("paired" %in% names(dots)){
@@ -397,7 +670,7 @@ brunner_munzel.formula = function(formula,
       stop("cannot use 'paired' in formula method")
     }
   }
-  
+
   m <- match.call(expand.dots = FALSE)
   if(is.matrix(eval(m$data, parent.frame())))
     m$data <- as.data.frame(data)
@@ -449,6 +722,7 @@ perm_loop <-function(x,y,n.x,n.y,max_n_perm){
 
   res1<-matrix(rep(0,max_n_perm*3),nrow=3)
 
+  # Note: This centers at 0.5, which is correct for the permutation distribution
   res1[1,]<-(pdP-1/2)/sqrt(vP)
 
   pdP0<-(pdP==0)
@@ -461,4 +735,3 @@ perm_loop <-function(x,y,n.x,n.y,max_n_perm){
 
   res1
 }
-
