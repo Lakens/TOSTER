@@ -3,6 +3,9 @@ NEWS
 
 **TOSTER R package and jamovi module**
 
+# TOSTER v0.9.0
+- Added `perm_t_test` function to allow for permutation tests for equivalence using TOST
+
 # TOSTER v0.8.7
 - Update documentation to make it clear what the "eqb" argument does within the `wilcox_TOST` function.
 

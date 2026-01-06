@@ -6,6 +6,8 @@
 \alias{TOSTER-package}
 \title{TOSTER: Two One-Sided Tests (TOST) Equivalence Testing}
 \description{
+\if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
+
 Two one-sided tests (TOST) procedure to test equivalence for t-tests, correlations, differences between proportions, and meta-analyses, including power analysis for t-tests and correlations. Allows you to specify equivalence bounds in raw scale units or in terms of effect sizes. See: Lakens (2017) \doi{10.1177/1948550617697177}.
 }
 \seealso{

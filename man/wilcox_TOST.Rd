@@ -43,8 +43,8 @@ wilcox_TOST(
 
 \item{paired}{a logical indicating whether you want a paired t-test.}
 
-\item{eqb}{Equivalence bound. Can provide 1 value (symmetric bound) or 2 specific values that represent the lower and upper equivalence bounds.
-Like the \code{mu} argument, \code{eqb} is specified on the \strong{raw scale} of the original data (e.g., the scale of the median or location shift).
+\item{eqb}{Equivalence bound. Can provide one value (symmetric bound) or two specific values that represent the lower and upper equivalence bounds.
+Like the \code{mu} argument, \code{eqb} is specified on the \strong{raw scale} of the original data (e.g., the scale of the location shift).
 This parameter is independent of the \code{ses} argument, which only affects the type of standardized effect size that is reported.}
 
 \item{low_eqbound}{lower equivalence bounds (deprecated, use \code{eqb} instead).}
@@ -93,7 +93,7 @@ A function for TOST using the non-parametric methods of the Wilcoxon-Mann-Whitne
 This function uses the normal approximation and applies a continuity correction automatically.
 }
 \details{
-For details on the calculations in this function see \code{vignette("robustTOST")}.
+For details on the calculations in this function see \code{vignette("robustTOST")}. For details on the Wilcoxon-Mann-Whitney tests see \link[stats:wilcox.test]{stats::wilcox.test}.
 
 If only x is given, or if both x and y are given and paired is TRUE,
 a Wilcoxon signed rank test of the null that the distribution of x (in the one sample case)
@@ -122,7 +122,8 @@ Other Robust tests:
 \code{\link{boot_t_TOST}()},
 \code{\link{boot_t_test}()},
 \code{\link{brunner_munzel}()},
-\code{\link{log_TOST}()}
+\code{\link{log_TOST}()},
+\code{\link{perm_t_test}()}
 
 Other TOST: 
 \code{\link{boot_log_TOST}()},

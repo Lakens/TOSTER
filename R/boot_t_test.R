@@ -64,6 +64,9 @@
 #'
 #' @return A list with class `"htest"` containing the following components:
 #'
+#'   - "statistic": the observed t-statistic (note: the p-value is derived from the bootstrap
+#'       distribution, not from this statistic and the degrees of freedom).
+#'   - "parameter": the degrees of freedom for the t-statistic.
 #'   - "p.value": the bootstrapped p-value for the test.
 #'   - "stderr": the bootstrapped standard error.
 #'   - "conf.int": a bootstrapped confidence interval for the mean appropriate to the specified alternative hypothesis.
@@ -144,7 +147,7 @@ boot_t_test.default <- function(x,
   boot_ci = match.arg(boot_ci)
 
   if(!missing(alpha) && (length(alpha) != 1 || !is.finite(alpha) ||
-                              alpha < 0 || alpha > 1)) {
+                         alpha < 0 || alpha > 1)) {
     stop("'alpha' must be a single number between 0 and 1")
   }
 
@@ -416,7 +419,34 @@ boot_t_test.default <- function(x,
   boot.se = sd(m_vec, na.rm = TRUE)
   attr(boot.cint, "conf.level") <- conf.level
 
+  # Name the statistic and parameter
+  # For equivalence/minimal.effect, report the t-statistic corresponding to the p-value
+  if (alternative == "equivalence") {
+    # p-value is max of the two one-sided p-values
+    # Report the t-statistic for the "binding" bound (the one with higher p-value)
+    if (p_l >= p_u) {
+      tstat_report <- tstat_l
+    } else {
+      tstat_report <- tstat_u
+    }
+  } else if (alternative == "minimal.effect") {
+    # p-value is min of the two one-sided p-values
+    # Report the t-statistic for the "binding" bound (the one with lower p-value)
+    if (p_l <= p_u) {
+      tstat_report <- tstat_l
+    } else {
+      tstat_report <- tstat_u
+    }
+  } else {
+    tstat_report <- tstat
+  }
+
+  names(tstat_report) <- "t-observed"
+  names(df) <- "df"
+
   rval = list(
+    statistic = tstat_report,
+    parameter = df,
     p.value = boot.pval,
     stderr = boot.se,
     conf.int = boot.cint,

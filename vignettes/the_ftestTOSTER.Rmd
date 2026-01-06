@@ -37,7 +37,9 @@ The null and alternative hypotheses for equivalence testing with F-tests are:
 
 $$
 H_0: \space \eta^2_p \geq \Delta \quad \text{(Effect is meaningfully large)}
-\\
+$$
+
+$$
 H_1: \space \eta^2_p < \Delta \quad \text{(Effect is practically equivalent to zero)}
 $$
 
