@@ -257,16 +257,17 @@ test_that("brunner_munzel",{
                           paired = TRUE)
 
   set.seed(1945)
-  testy1 = simple_htest(data = sleep,
-                        extra ~ group,
+  # Use vector form for paired tests, not formula
+  testy1 = simple_htest(x = sleep$extra[sleep$group == 1],
+                        y = sleep$extra[sleep$group == 2],
                         test = "b",
                         mu = .25,
                         alternative = "l",
                         perm = TRUE,
                         paired = TRUE)
   set.seed(1945)
-  testy2 = brunner_munzel(data = sleep,
-                          extra ~ group,
+  testy2 = brunner_munzel(x = sleep$extra[sleep$group == 1],
+                          y = sleep$extra[sleep$group == 2],
                           mu = .25,
                           alternative = "l",
                           perm = TRUE,
@@ -274,16 +275,17 @@ test_that("brunner_munzel",{
   expect_equal(testy1$p.value,testy2$p.value)
 
   set.seed(1946)
-  testy1 = simple_htest(data = sleep,
-                        extra ~ group,
+  # Use vector form for paired tests, not formula
+  testy1 = simple_htest(x = sleep$extra[sleep$group == 1],
+                        y = sleep$extra[sleep$group == 2],
                         test = "b",
                         mu = .5,
                         alternative = "t",
                         perm = TRUE,
                         paired = TRUE)
   set.seed(1946)
-  testy2 = brunner_munzel(data = sleep,
-                          extra ~ group,
+  testy2 = brunner_munzel(x = sleep$extra[sleep$group == 1],
+                          y = sleep$extra[sleep$group == 2],
                           mu = .5,
                           alternative = "t",
                           perm = TRUE,
