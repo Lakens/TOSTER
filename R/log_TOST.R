@@ -392,6 +392,15 @@ log_TOST.formula = function(formula,
      || (length(formula) != 3L)
      || (length(attr(terms(formula[-2L]), "term.labels")) != 1L))
     stop("'formula' missing or incorrect")
+  
+  # Check for paired argument in ... and reject it
+  dots <- list(...)
+  if("paired" %in% names(dots)){
+    if(isTRUE(dots$paired)){
+      stop("cannot use 'paired' in formula method")
+    }
+  }
+  
   m <- match.call(expand.dots = FALSE)
   if(is.matrix(eval(m$data, parent.frame())))
     m$data <- as.data.frame(data)

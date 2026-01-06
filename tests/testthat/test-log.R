@@ -116,66 +116,68 @@ test_that("Run examples for paired samples", {
   set.seed(922287)
   sleep2 = sleep
   sleep2$sleep = sleep2$extra + 4
+  
+  # Test error for negative values in extra column (using vectors for paired test)
   expect_error(boot_log_TOST(
-    data = sleep2,
-    extra ~ group,
+    x = sleep2$extra[sleep2$group == 1],
+    y = sleep2$extra[sleep2$group == 2],
     paired = TRUE,
     eqb = 1.25,
     R = 199
   ))
   expect_error(log_TOST(
-    data = sleep2,
-    extra ~ group,
+    x = sleep2$extra[sleep2$group == 1],
+    y = sleep2$extra[sleep2$group == 2],
     paired = TRUE,
-    eqb = 1.25,
-    R = 199
+    eqb = 1.25
   ))
 
+  # Test error for null = -1
   expect_error(boot_log_TOST(
-    data = sleep2,
-    sleep ~ group,
+    x = sleep2$sleep[sleep2$group == 1],
+    y = sleep2$sleep[sleep2$group == 2],
     paired = TRUE,
     eqb = 1.25,
     null = -1,
     R = 199
   ))
   expect_error(log_TOST(
-    data = sleep2,
-    sleep ~ group,
+    x = sleep2$sleep[sleep2$group == 1],
+    y = sleep2$sleep[sleep2$group == 2],
     paired = TRUE,
     eqb = 1.25,
-    null = -1,
-    R = 199
+    null = -1
   ))
 
+  # Test error for alpha = -1
   expect_error(boot_log_TOST(
-    data = sleep2,
-    sleep ~ group,
+    x = sleep2$sleep[sleep2$group == 1],
+    y = sleep2$sleep[sleep2$group == 2],
     paired = TRUE,
     eqb = 1.25,
     alpha = -1,
     R = 199
   ))
   expect_error(log_TOST(
-    data = sleep2,
-    sleep ~ group,
+    x = sleep2$sleep[sleep2$group == 1],
+    y = sleep2$sleep[sleep2$group == 2],
     paired = TRUE,
     eqb = 1.25,
-    alpha = -1,
-    R = 199
+    alpha = -1
   ))
 
+  # Valid tests using vectors for paired samples
   test1 = boot_log_TOST(
-    data = sleep2,
-    sleep ~ group,
+    x = sleep2$sleep[sleep2$group == 1],
+    y = sleep2$sleep[sleep2$group == 2],
     paired = TRUE,
     eqb = 1.25,
     R = 199
   )
 
   test1_t = log_TOST(
-    data = sleep2,
-    sleep ~ group,
+    x = sleep2$sleep[sleep2$group == 1],
+    y = sleep2$sleep[sleep2$group == 2],
     paired = TRUE,
     eqb = 1.25
   )
@@ -184,8 +186,8 @@ test_that("Run examples for paired samples", {
                test1_t$effsize$estimate)
 
   test1 = boot_log_TOST(
-    data = sleep2,
-    sleep ~ group,
+    x = sleep2$sleep[sleep2$group == 1],
+    y = sleep2$sleep[sleep2$group == 2],
     paired = TRUE,
     hypothesis = "MET",
     eqb = 1.25,
@@ -193,8 +195,8 @@ test_that("Run examples for paired samples", {
   )
 
   test1_t = log_TOST(
-    data = sleep2,
-    sleep ~ group,
+    x = sleep2$sleep[sleep2$group == 1],
+    y = sleep2$sleep[sleep2$group == 2],
     paired = TRUE,
     hypothesis = "MET",
     eqb = 1.25
@@ -204,8 +206,8 @@ test_that("Run examples for paired samples", {
                test1_t$effsize$estimate)
 
   test1 = boot_log_TOST(
-    data = sleep2,
-    sleep ~ group,
+    x = sleep2$sleep[sleep2$group == 1],
+    y = sleep2$sleep[sleep2$group == 2],
     paired = TRUE,
     hypothesis = "MET",
     eqb = 1.05,
@@ -213,8 +215,8 @@ test_that("Run examples for paired samples", {
   )
 
   test1_t = log_TOST(
-    data = sleep2,
-    sleep ~ group,
+    x = sleep2$sleep[sleep2$group == 1],
+    y = sleep2$sleep[sleep2$group == 2],
     paired = TRUE,
     hypothesis = "MET",
     eqb = 1.05
@@ -225,21 +227,32 @@ test_that("Run examples for paired samples", {
 
 
   test1 = boot_log_TOST(
-    data = sleep2,
-    sleep ~ group,
+    x = sleep2$sleep[sleep2$group == 1],
+    y = sleep2$sleep[sleep2$group == 2],
     paired = TRUE,
     eqb = 1.9,
     R = 199
   )
 
   test1_t = log_TOST(
-    data = sleep2,
-    sleep ~ group,
+    x = sleep2$sleep[sleep2$group == 1],
+    y = sleep2$sleep[sleep2$group == 2],
     paired = TRUE,
     eqb = 1.9
   )
 
   expect_equal(test1$effsize$estimate,
                test1_t$effsize$estimate)
+  
+  # Test that paired = TRUE is rejected with formula method
+  expect_error(
+    log_TOST(sleep ~ group, data = sleep2, paired = TRUE, eqb = 1.25),
+    "cannot use 'paired' in formula method"
+  )
+  
+  expect_error(
+    boot_log_TOST(sleep ~ group, data = sleep2, paired = TRUE, eqb = 1.25, R = 199),
+    "cannot use 'paired' in formula method"
+  )
 
 })

@@ -962,32 +962,32 @@ test_that("Run examples for paired samples", {
                tsum4$TOST$p.value,
                ignore_attr = TRUE)
 
-  # Run with formula
-  test1 = t_TOST(formula = y ~ group,
-                 data = df_samp,
+  # Use vector form for paired tests, not formula
+  test1 = t_TOST(x = df_samp$y[df_samp$group == "g1"],
+                 y = df_samp$y[df_samp$group == "g2"],
                  paired = TRUE,
                  low_eqbound = -.5,
                  high_eqbound = .5,
                  bias_correction = FALSE)
 
-  test2 = suppressMessages( t_TOST(formula = y ~ group,
-                                 data = df_samp,
+  test2 = suppressMessages( t_TOST(x = df_samp$y[df_samp$group == "g1"],
+                                 y = df_samp$y[df_samp$group == "g2"],
                                  paired = TRUE,
                                  low_eqbound = -.5,
                                  high_eqbound = .5,
                                  eqbound_type = "SMD",
                                  bias_correction = FALSE) )
 
-  test3 = t_TOST(formula = y ~ group,
-                 data = df_samp,
+  test3 = t_TOST(x = df_samp$y[df_samp$group == "g1"],
+                 y = df_samp$y[df_samp$group == "g2"],
                  paired = TRUE,
                  low_eqbound = -.5,
                  high_eqbound = .5,
                  hypothesis = "MET",
                  bias_correction = FALSE)
 
-  test4 = suppressMessages(  t_TOST(formula = y ~ group,
-                                  data = df_samp,
+  test4 = suppressMessages(  t_TOST(x = df_samp$y[df_samp$group == "g1"],
+                                  y = df_samp$y[df_samp$group == "g2"],
                                   paired = TRUE,
                                   low_eqbound = -.5,
                                   high_eqbound = .5,
@@ -1169,7 +1169,9 @@ test_that("Ensure paired output correct", {
                    rm_correction = T)
   expect_equal(sign(test2$effsize$estimate[1]),sign(test2$effsize$estimate[2]))
 
-  test3 = t_TOST(extra ~ group, data = sleep,
+  # Use vector form for paired tests, not formula
+  test3 = t_TOST(x = sleep$extra[sleep$group == 1],
+         y = sleep$extra[sleep$group == 2],
          low_eqbound = -.5,
          high_eqbound = .5,
          paired = T,
@@ -1213,7 +1215,9 @@ test_that("Ensure paired output correct", {
   # x2: .04 (1.02)
   # r12 = .06
 
-  test4 = t_TOST(extra ~ group, data = sleep,
+  # Use vector form for paired tests
+  test4 = t_TOST(x = sleep$extra[sleep$group == 1],
+                 y = sleep$extra[sleep$group == 2],
                  low_eqbound = -.5,
                  high_eqbound = .5,
                  paired = T,
@@ -1509,4 +1513,78 @@ test_that("More tsum_test",{
     conf.level = 55
   ))
 
+})
+
+test_that("Formula methods reject paired = TRUE", {
+  # Test that all formula methods properly reject paired = TRUE
+  # to match base R behavior. paired = FALSE is allowed (redundant but harmless)
+  data(sleep)
+  
+  # t_TOST.formula should reject paired = TRUE
+  expect_error(
+    t_TOST(extra ~ group, data = sleep, paired = TRUE, eqb = 1),
+    "cannot use 'paired' in formula method"
+  )
+  
+  # t_TOST.formula should allow paired = FALSE (redundant but harmless)
+  expect_no_error(
+    t_TOST(extra ~ group, data = sleep, paired = FALSE, eqb = 1)
+  )
+  
+  # boot_t_TOST.formula should reject paired = TRUE
+  expect_error(
+    boot_t_TOST(extra ~ group, data = sleep, paired = TRUE, eqb = 1, R = 10),
+    "cannot use 'paired' in formula method"
+  )
+  
+  # boot_t_test.formula should reject paired = TRUE
+  expect_error(
+    boot_t_test(extra ~ group, data = sleep, paired = TRUE, R = 10),
+    "cannot use 'paired' in formula method"
+  )
+  
+  # wilcox_TOST.formula should reject paired = TRUE
+  expect_error(
+    wilcox_TOST(extra ~ group, data = sleep, paired = TRUE, eqb = 1),
+    "cannot use 'paired' in formula method"
+  )
+  
+  # simple_htest.formula should reject paired = TRUE
+  expect_error(
+    simple_htest(extra ~ group, data = sleep, paired = TRUE),
+    "cannot use 'paired' in formula method"
+  )
+  
+  # brunner_munzel.formula should reject paired = TRUE
+  expect_error(
+    brunner_munzel(extra ~ group, data = sleep, paired = TRUE),
+    "cannot use 'paired' in formula method"
+  )
+  
+  # Verify formula methods still work without paired parameter
+  expect_no_error(
+    t_TOST(extra ~ group, data = sleep, eqb = 1)
+  )
+  
+  # Test calc functions also reject paired = TRUE with formula
+  expect_error(
+    smd_calc(extra ~ group, data = sleep, paired = TRUE),
+    "cannot use 'paired' in formula method"
+  )
+  
+  expect_error(
+    ses_calc(extra ~ group, data = sleep, paired = TRUE),
+    "cannot use 'paired' in formula method"
+  )
+  
+  expect_error(
+    boot_smd_calc(extra ~ group, data = sleep, paired = TRUE, R = 10),
+    "cannot use 'paired' in formula method"
+  )
+  
+  expect_error(
+    boot_ses_calc(extra ~ group, data = sleep, paired = TRUE, R = 10),
+    "cannot use 'paired' in formula method"
+  )
+  
 })

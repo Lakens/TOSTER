@@ -3,7 +3,7 @@
 #' `r lifecycle::badge("maturing")`
 #'
 #' This is a generic function that performs a generalized asymptotic Brunner-Munzel test in a fashion similar to [t.test].
-#' @param paired a logical indicating whether you want a paired test.
+#' @param paired a logical indicating whether you want a paired test. Cannot be used with the formula method; use x and y vectors instead for paired tests.
 #' @param mu 	a number specifying an optional parameter used to form the null hypothesis (Default = 0.5). This can be thought of as the null in terms of the relative effect, p = P (X < Y ) + 0.5 * P (X = Y); See ‘Details’.
 #' @param perm a logical indicating whether or not to perform a permutation test over approximate t-distribution based test (default is FALSE). Highly recommend to set perm = TRUE when sample size per condition is less than 15.
 #' @param max_n_perm the maximum number of permutations (default is 10000).
@@ -389,6 +389,15 @@ brunner_munzel.formula = function(formula,
      || (length(formula) != 3L)
      || (length(attr(terms(formula[-2L]), "term.labels")) != 1L))
     stop("'formula' missing or incorrect")
+  
+  # Check for paired argument in ... and reject it
+  dots <- list(...)
+  if("paired" %in% names(dots)){
+    if(isTRUE(dots$paired)){
+      stop("cannot use 'paired' in formula method")
+    }
+  }
+  
   m <- match.call(expand.dots = FALSE)
   if(is.matrix(eval(m$data, parent.frame())))
     m$data <- as.data.frame(data)

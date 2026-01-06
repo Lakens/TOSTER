@@ -82,7 +82,6 @@ library(TOSTER)
 
 test1 = wilcox_TOST(formula = extra ~ group,
                       data = sleep,
-                      paired = FALSE,
                       eqb = .5)
 
 
@@ -236,7 +235,6 @@ Either effect size is available by simply modifying the `ses` argument for the `
 # Rank biserial
 wilcox_TOST(formula = extra ~ group,
                       data = sleep,
-                      paired = FALSE,
                       ses = "r",
                       eqb = .5)
 
@@ -244,7 +242,6 @@ wilcox_TOST(formula = extra ~ group,
 
 wilcox_TOST(formula = extra ~ group,
                       data = sleep,
-                      paired = FALSE,
                       ses = "o",
                       eqb = .5)
 
@@ -252,7 +249,6 @@ wilcox_TOST(formula = extra ~ group,
 
 wilcox_TOST(formula = extra ~ group,
                       data = sleep,
-                      paired = FALSE,
                       ses = "c",
                       eqb = .5)
 
@@ -324,12 +320,10 @@ The interface for the function is very similar to the `t.test` function. The `br
 ```{r}
 # studentized test
 brunner_munzel(formula = extra ~ group,
-                      data = sleep,
-                      paired = FALSE)
+                      data = sleep)
 # permutation
 brunner_munzel(formula = extra ~ group,
                       data = sleep,
-                      paired = FALSE,
                perm = TRUE)
 ```
 
@@ -340,7 +334,6 @@ The `simple_htest` function allows TOST tests using a Brunner-Munzel test by set
 simple_htest(formula = extra ~ group,
              test = "brunner",
              data = sleep,
-             paired = FALSE,
              alternative = "equ",
              mu = .7,
              perm = TRUE)
@@ -627,8 +620,9 @@ We can use the sleep data to see the bootstrapped results. Notice that the plots
 ```{r}
 data('sleep')
 
-test1 = boot_t_TOST(formula = extra ~ group,
-                      data = sleep,
+# For paired tests with bootstrap methods, use separate vectors
+test1 = boot_t_TOST(x = sleep$extra[sleep$group == 1],
+                    y = sleep$extra[sleep$group == 2],
                       paired = TRUE,
                       eqb = .5,
                     R = 499)
@@ -792,15 +786,16 @@ Therefore, I created the `ses_calc` and `boot_ses_calc` functions as robust effe
 The interface is almost the same as `wilcox_TOST` but you don't set an equivalence bound.
 
 ```{r}
-ses_calc(formula = extra ~ group,
-         data = sleep,
+# For paired tests, use separate vectors
+ses_calc(x = sleep$extra[sleep$group == 1],
+         y = sleep$extra[sleep$group == 2],
          paired = TRUE,
          ses = "r")
 
 # Setting bootstrap replications low to
 ## reduce compiling time of vignette
-boot_ses_calc(formula = extra ~ group,
-         data = sleep,
+boot_ses_calc(x = sleep$extra[sleep$group == 1],
+              y = sleep$extra[sleep$group == 2],
          paired = TRUE,
          R = 199,
          boot_ci = "perc", # recommend percentile bootstrap for paired SES

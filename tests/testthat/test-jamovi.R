@@ -164,8 +164,9 @@ test_that("dataTOSTpaired: internal consistency",{
   sleep2 = data.frame(pair1 = pair1,
                       pair2 = pair2)
 
-  t1 = t_TOST(formula = extra ~ group,
-              data = sleep,
+  # Use vector form for paired tests, not formula
+  t1 = t_TOST(x = sleep$extra[sleep$group == 1],
+              y = sleep$extra[sleep$group == 2],
               paired = TRUE,
               low_eqbound = -2,
               high_eqbound = 2,
@@ -189,9 +190,9 @@ test_that("dataTOSTpaired: internal consistency",{
 
 
 
-  # bound type to SMD
-  t1 = suppressMessages(t_TOST(formula = extra ~ group,
-              data = sleep,
+  # bound type to SMD - use vector form for paired tests
+  t1 = suppressMessages(t_TOST(x = sleep$extra[sleep$group == 1],
+              y = sleep$extra[sleep$group == 2],
               paired = TRUE,
               #hypothesis = "MET",
               eqbound_type = "SMD",
@@ -219,9 +220,9 @@ test_that("dataTOSTpaired: internal consistency",{
 
   # Test MET
 
-  # bound type to SMD
-  t1 = t_TOST(formula = extra ~ group,
-              data = sleep,
+  # bound type to SMD - use vector form for paired tests
+  t1 = t_TOST(x = sleep$extra[sleep$group == 1],
+              y = sleep$extra[sleep$group == 2],
               paired = TRUE,
               hypothesis = "MET",
               #eqbound_type = "SMD",
@@ -247,9 +248,9 @@ test_that("dataTOSTpaired: internal consistency",{
                ignore_attr = TRUE
   )
 
-  # bound type to SMD
-  t1 = suppressMessages(t_TOST(formula = extra ~ group,
-              data = sleep,
+  # bound type to SMD - use vector form for paired tests
+  t1 = suppressMessages(t_TOST(x = sleep$extra[sleep$group == 1],
+              y = sleep$extra[sleep$group == 2],
               paired = TRUE,
               #hypothesis = "MET",
               eqbound_type = "SMD",

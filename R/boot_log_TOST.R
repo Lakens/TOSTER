@@ -18,7 +18,7 @@
 #' @param x a (non-empty) numeric vector of positive data values on a ratio scale.
 #' @param y an optional (non-empty) numeric vector of positive data values on a ratio scale.
 #' @param hypothesis 'EQU' for equivalence (default), or 'MET' for minimal effects test.
-#' @param paired a logical indicating whether you want a paired t-test.
+#' @param paired a logical indicating whether you want a paired t-test. Cannot be used with the formula method; use x and y vectors instead for paired tests.
 #' @param var.equal a logical variable indicating whether to treat the two variances as being equal.
 #' @param eqb Equivalence bound expressed as a ratio. Can provide 1 value (e.g., 1.25 for bounds of 0.8 and 1.25)
 #'   or 2 specific values that represent the lower and upper equivalence bounds (e.g., c(0.8, 1.25)).
@@ -520,6 +520,15 @@ boot_log_TOST.formula <- function (formula, data, subset, na.action, ...){
      || (length(formula) != 3L)
      || (length(attr(terms(formula[-2L]), "term.labels")) != 1L))
     stop("'formula' missing or incorrect")
+  
+  # Check for paired argument in ... and reject it
+  dots <- list(...)
+  if("paired" %in% names(dots)){
+    if(isTRUE(dots$paired)){
+      stop("cannot use 'paired' in formula method")
+    }
+  }
+  
   m <- match.call(expand.dots = FALSE)
   if(is.matrix(eval(m$data, parent.frame())))
     m$data <- as.data.frame(data)
