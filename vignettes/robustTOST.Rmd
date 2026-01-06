@@ -71,7 +71,6 @@ library(TOSTER)
 
 test1 = wilcox_TOST(formula = extra ~ group,
                       data = sleep,
-                      paired = FALSE,
                       eqb = .5)
 
 
@@ -225,7 +224,6 @@ Either effect size is available by simply modifying the `ses` argument for the `
 # Rank biserial
 wilcox_TOST(formula = extra ~ group,
                       data = sleep,
-                      paired = FALSE,
                       ses = "r",
                       eqb = .5)
 
@@ -233,7 +231,6 @@ wilcox_TOST(formula = extra ~ group,
 
 wilcox_TOST(formula = extra ~ group,
                       data = sleep,
-                      paired = FALSE,
                       ses = "o",
                       eqb = .5)
 
@@ -241,7 +238,6 @@ wilcox_TOST(formula = extra ~ group,
 
 wilcox_TOST(formula = extra ~ group,
                       data = sleep,
-                      paired = FALSE,
                       ses = "c",
                       eqb = .5)
 
@@ -313,12 +309,10 @@ The interface for the function is very similar to the `t.test` function. The `br
 ```{r}
 # studentized test
 brunner_munzel(formula = extra ~ group,
-                      data = sleep,
-                      paired = FALSE)
+                      data = sleep)
 # permutation
 brunner_munzel(formula = extra ~ group,
                       data = sleep,
-                      paired = FALSE,
                perm = TRUE)
 ```
 
@@ -329,7 +323,6 @@ The `simple_htest` function allows TOST tests using a Brunner-Munzel test by set
 simple_htest(formula = extra ~ group,
              test = "brunner",
              data = sleep,
-             paired = FALSE,
              alternative = "equ",
              mu = .7,
              perm = TRUE)
