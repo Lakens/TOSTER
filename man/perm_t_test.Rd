@@ -228,31 +228,6 @@ perm_t_test(x = before, y = after,
             alternative = "less",
             R = 199)
 
-# Example 4: Equivalence testing with permutation t-test
-data(mtcars)
-perm_t_test(mpg ~ am, data = mtcars,
-            alternative = "equivalence",
-            mu = c(-3, 3),
-            R = 199)
-
-# Example 5: Trimmed permutation t-test (Yuen's approach)
-# Useful when data may contain outliers
-set.seed(42)
-x <- c(rnorm(18), 10, 15)  # Two outliers
-y <- rnorm(20)
-perm_t_test(x, y, tr = 0.1, R = 999)
-
-# Example 6: Minimal effect testing
-perm_t_test(mpg ~ am, data = mtcars,
-            alternative = "minimal.effect",
-            mu = c(-3, 3),
-            R = 199)
-
-# Example 7: Non-studentized permutation (fixed SE, faster)
-perm_t_test(mpg ~ am, data = mtcars, perm_se = FALSE, R = 999)
-
-# Example 8: Using different p-value computation methods
-perm_t_test(mpg ~ am, data = mtcars, p_method = "original", R = 999)
 
 }
 \references{

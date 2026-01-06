@@ -441,9 +441,9 @@ $$
 
 The same pooled approach is applied to each permutation sample.
 
-### Yuen Variant (trim > 0)
+### Yuen Variant (tr > 0)
 
-When `trim > 0`, the function uses trimmed means and winsorized variances. Let $g = \lfloor \gamma \cdot n \rfloor$ be the number of observations trimmed from each tail (where $\gamma$ is the trimming proportion), and let $h = n - 2g$ be the effective sample size.
+When `tr > 0`, the function uses trimmed means and winsorized variances. Let $g = \lfloor \gamma \cdot n \rfloor$ be the number of observations trimmed from each tail (where $\gamma$ is the trimming proportion), and let $h = n - 2g$ be the effective sample size.
 
 The trimmed mean is:
 
@@ -469,9 +469,33 @@ $$
 
 This same procedure is applied to each permutation sample, using trimmed means and winsorized variances computed from the permuted data.
 
+## Studentized Permutation: The `perm_se` Argument
+
+By default, `perm_t_test` uses the **studentized** permutation approach (`perm_se = TRUE`), which recalculates the standard error for each permutation sample. This follows the recommendations of @janssen1997 and @chung2013, who showed that studentized permutation tests maintain valid Type I error control even under heteroscedasticity (unequal variances).
+
+**How `perm_se` and `var.equal` interact:**
+
+These two arguments control different aspects of the test:
+
+- `var.equal` controls **how** the standard error is calculated (pooled vs. Welch formula)
+- `perm_se` controls **whether** the standard error is recalculated for each permutation
+
+| `perm_se` | `var.equal` | Behavior |
+|-----------|-------------|----------|
+| TRUE | TRUE | Recalculates pooled variance for each permutation |
+| TRUE | FALSE | Recalculates separate (Welch) variances for each permutation |
+| FALSE | TRUE | Uses original pooled SE for all permutations |
+| FALSE | FALSE | Uses original Welch SE for all permutations |
+
+**Recommendations:**
+
+- **Use `perm_se = TRUE` (default)** in most situations. The studentized approach provides better Type I error control, especially when variances differ between groups.
+- **Use `perm_se = FALSE`** only when you are confident that variances are truly equal and want faster computation. This is the traditional (non-studentized) permutation approach, which assumes homoscedasticity.
+- The choice of `var.equal` should be based on your substantive knowledge about whether the groups have equal variances. When in doubt, use the default `var.equal = FALSE`.
+
 ## Combining Permutation with Trimmed Means
 
-A key feature of `perm_t_test` is its support for trimmed means via the `trim` argument. When `trim > 0`, the function uses Yuen's approach: trimmed means for location estimation and winsorized variances for standard error calculation. This combination is particularly powerful because it provides robustness against outliers (through trimming) together with exact or near-exact inference (through permutation).
+A key feature of `perm_t_test` is its support for trimmed means via the `tr` argument. When `tr > 0`, the function uses Yuen's approach: trimmed means for location estimation and winsorized variances for standard error calculation. This combination is particularly powerful because it provides robustness against outliers (through trimming) together with exact or near-exact inference (through permutation).
 
 Trimming is helpful when:
 
@@ -479,7 +503,7 @@ Trimming is helpful when:
 - Distributions have heavy tails
 - You want robust location estimates without sacrificing the exactness of permutation inference
 
-A common choice is `trim = 0.1` (10% trimming) or `trim = 0.2` (20% trimming), though the optimal amount depends on the suspected degree of contamination.
+A common choice is `tr = 0.1` (10% trimming) or `tr = 0.2` (20% trimming), though the optimal amount depends on the suspected degree of contamination.
 
 ## Example: Basic Permutation Test
 
@@ -507,7 +531,7 @@ y <- rnorm(20, mean = 0)
 perm_t_test(x, y, R = 999)
 
 # Trimmed permutation test (robust to outliers)
-perm_t_test(x, y, trim = 0.1, R = 999)
+perm_t_test(x, y, tr = 0.1, R = 999)
 ```
 
 ## Example: Equivalence Testing with Permutation
@@ -664,7 +688,7 @@ Both methods test the same hypothesis and should yield similar conclusions. Key 
 |---------|----------------------------|---------------------------|
 | Resampling type | Without replacement | With replacement |
 | Exact p-values possible | Yes (small samples) | No |
-| Trimmed means support | Yes (`trim` argument) | No |
+| Trimmed means support | Yes (`tr` argument) | No |
 | Effect size plots | No | Yes |
 | Best for | Small samples, exact inference | Moderate samples, visualization |
 
@@ -789,14 +813,14 @@ The `boot_ses_calc` function offers several bootstrap confidence interval method
 
 - **"perc"** (Percentile): Simple and intuitive, works well for symmetric distributions
 - **"basic"**: Similar to percentile but adjusts for bias, more conservative
-- **"norm"** (Normal approximation): Assumes normality of the bootstrap distribution
+- **"stud"** (studentized): uses the standard error of each bootstrap sample, more accurate for skewed distributions
 
 
 # Summary Comparison of Robust TOST Methods
 
 | Method | Key Advantages | Limitations | Best Use Cases |
 |--------|---------------|-------------|---------------|
-| **Wilcoxon TOST** | Simple, widely accepted | Ambiguous hypothesis; not clearly about means | Ordinal data; legacy analyses |
+| **Wilcoxon TOST** | Simple, widely accepted | Ambiguous hypothesis; not about means or medians | legacy analyses |
 | **Brunner-Munzel** | Clear interpretation, robust to heteroscedasticity | Computationally intensive with permutation | Stochastic superiority/dominance |
 | **Permutation t-test** | Exact p-values (small samples), supports trimmed means | Computationally intensive for large samples | Mean differences with small samples |
 | **Bootstrap TOST** | Flexible, visualization of effect distributions | Results vary between runs | Mean differences with moderate samples |
