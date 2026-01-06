@@ -313,22 +313,23 @@ Many study designs involve paired measurements (e.g., before-after designs or ma
 We can use the same sleep data, but now treat the measurements as paired:
 
 ```{r}
-res2 = t_TOST(formula = extra ~ group,
-              data = sleep,
+# For paired tests, use separate vectors rather than formula notation
+res2 = t_TOST(x = sleep$extra[sleep$group == 1],
+              y = sleep$extra[sleep$group == 2],
               paired = TRUE,  # specify paired analysis
               eqb = .5)
 res2
 
 res2b = simple_htest(
-  formula = extra ~ group,
-  data = sleep,
+  x = sleep$extra[sleep$group == 1],
+  y = sleep$extra[sleep$group == 2],
   paired = TRUE,
   mu = .5,
   alternative = "e")
 res2b
 ```
 
-Setting `paired = TRUE` changes the analysis to account for within-subject correlations.
+Setting `paired = TRUE` changes the analysis to account for within-subject correlations. Note that for paired tests, we use separate vectors (x and y) rather than the formula notation, as formula notation represents independent groups.
 
 ## Using Separate Vectors for Paired Data
 

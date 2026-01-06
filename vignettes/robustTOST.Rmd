@@ -421,8 +421,9 @@ We can use the sleep data to see the bootstrapped results. Notice that the plots
 ```{r}
 data('sleep')
 
-test1 = boot_t_TOST(formula = extra ~ group,
-                      data = sleep,
+# For paired tests with bootstrap methods, use separate vectors
+test1 = boot_t_TOST(x = sleep$extra[sleep$group == 1],
+                    y = sleep$extra[sleep$group == 2],
                       paired = TRUE,
                       eqb = .5,
                     R = 499)
@@ -541,15 +542,16 @@ Therefore, I created the `ses_calc` and `boot_ses_calc` functions as robust effe
 The interface is almost the same as `wilcox_TOST` but you don't set an equivalence bound.
 
 ```{r}
-ses_calc(formula = extra ~ group,
-         data = sleep,
+# For paired tests, use separate vectors
+ses_calc(x = sleep$extra[sleep$group == 1],
+         y = sleep$extra[sleep$group == 2],
          paired = TRUE,
          ses = "r")
 
 # Setting bootstrap replications low to
 ## reduce compiling time of vignette
-boot_ses_calc(formula = extra ~ group,
-         data = sleep,
+boot_ses_calc(x = sleep$extra[sleep$group == 1],
+              y = sleep$extra[sleep$group == 2],
          paired = TRUE,
          R = 199,
          boot_ci = "perc", # recommend percentile bootstrap for paired SES
