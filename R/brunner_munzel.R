@@ -18,6 +18,11 @@
 #'   * "perm": studentized permutation test (recommended when sample size per condition is less than 15)
 #'
 #' @param R the number of permutations for the permutation test (default is 10000). Only used when `test_method = "perm"`.
+#' @param p_method a character string specifying the method for computing permutation p-values. Only used when `test_method = "perm"`:
+#'
+#'   * "plusone" (default): Uses the (b+1)/(R+1) formula from Phipson & Smyth (2010), which provides
+#'     exact p-values when permutations are sampled without replacement.
+#'   * "original": Uses the traditional b/R formula with a minimum of 1/R.
 #' @param perm `r lifecycle::badge("deprecated")` Use `test_method = "perm"` instead.
 #' @param max_n_perm `r lifecycle::badge("deprecated")` Use `R` instead.
 #' @param alternative a character string specifying the alternative hypothesis, must be one of:
@@ -140,10 +145,57 @@
 #' Konietschke, F., Placzek, M., Schaarschmidt, F., & Hothorn, L. A. (2015). nparcomp: an R software package for nonparametric multiple comparisons and simultaneous confidence intervals. Journal of Statistical Software 64 (2015), Nr. 9, 64(9), 1-17. http://www.jstatsoft.org/v64/i09/
 #'
 #' Janssen, A. (1997). Studentized permutation tests for non-i.i.d. hypotheses and the generalized Behrens-Fisher problem. Statistics & Probability Letters, 36(1), 9-21.
+#'
+#' Phipson, B., & Smyth, G. K. (2010). Permutation P-values should never be zero: calculating exact P-values when permutations are randomly drawn. Statistical Applications in Genetics and Molecular Biology, 9(1), Article 39.
 #' @name brunner_munzel
 #' @importFrom stats var quantile
 #' @family Robust tests
 #' @export brunner_munzel
+
+# Helper function to generate permutation indices without replacement
+# Returns a matrix where each column contains indices for group x
+#' @keywords internal
+#' @noRd
+bm_perm_indices <- function(N, n.x, R) {
+  # Sample permutations without replacement to avoid duplicates
+  perms <- matrix(NA, nrow = R, ncol = N)
+  for (i in 1:R) {
+    perms[i, ] <- sample(1:N, N)
+  }
+  # Remove duplicate permutations
+  perms <- unique(perms)
+  iter <- 0
+  max_iter <- 10
+  while (nrow(perms) < R && iter < max_iter) {
+    needed <- R - nrow(perms)
+    new_perms <- matrix(NA, nrow = needed * 2, ncol = N)
+    for (i in 1:(needed * 2)) {
+      new_perms[i, ] <- sample(1:N, N)
+    }
+    perms <- unique(rbind(perms, new_perms))
+    iter <- iter + 1
+  }
+  if (nrow(perms) > R) {
+    perms <- perms[1:R, , drop = FALSE]
+  }
+  return(t(perms))  # Return as N x R matrix for compatibility with original code
+}
+
+# Helper function to compute permutation p-value
+# Based on Phipson & Smyth (2010) for sampling without replacement
+#' @keywords internal
+#' @noRd
+bm_compute_perm_pval <- function(b, R, p_method) {
+  if (p_method == "plusone") {
+    # Phipson & Smyth (2010) formula: (b+1)/(R+1)
+    # Provides exact p-values when permutations are sampled without replacement
+    return((b + 1) / (R + 1))
+  } else {
+    # Original formula: b/R with minimum 1/R
+    pval <- b / R
+    return(max(pval, 1 / R))
+  }
+}
 
 #brunner_munzel <- setClass("brunner_munzel")
 brunner_munzel <- function(x,
@@ -158,6 +210,7 @@ brunner_munzel <- function(x,
                            alpha = 0.05,
                            test_method = c("t", "logit", "perm"),
                            R = 10000,
+                           p_method = c("plusone", "original"),
                            perm = "deprecated",
                            max_n_perm = "deprecated") {
 
@@ -182,6 +235,7 @@ brunner_munzel.default = function(x,
                                   alpha = 0.05,
                                   test_method = c("t", "logit", "perm"),
                                   R = 10000,
+                                  p_method = c("plusone", "original"),
                                   perm = "deprecated",
                                   max_n_perm = "deprecated",
                                   ...) {
@@ -211,6 +265,7 @@ brunner_munzel.default = function(x,
 
   alternative = match.arg(alternative)
   test_method = match.arg(test_method)
+  p_method = match.arg(p_method)
 
   # Validate mu based on alternative
 
@@ -600,21 +655,27 @@ brunner_munzel.default = function(x,
       }
 
       Tprob<-qnorm(pd)*exp(-0.5*qnorm(pd)^2)*sqrt(N/(V*2*pi))
-      P<-apply(matrix(rep(1:N,R),ncol=R),2,sample)
-      Px<-matrix(c(x,y)[P],ncol=R)
+      # Use sampling without replacement to avoid duplicate permutations
+      P <- bm_perm_indices(N, n.x, R)
+      R_actual <- ncol(P)  # Actual number of unique permutations obtained
+      Px<-matrix(c(x,y)[P],ncol=R_actual)
 
       # perm_loop already centers at 0.5 (see res1[1,]<-(pdP-1/2)/sqrt(vP))
       Tperm<-t(apply(perm_loop(x=Px[1:n.x,],y=Px[(n.x+1):N,],
-                               n.x=n.x,n.y=n.y,R=R),1,sort))
+                               n.x=n.x,n.y=n.y,R=R_actual),1,sort))
 
       if(alternative %in% c("equivalence", "minimal.effect")) {
         # Observed test statistics for each bound
         test_stat_low <- sqrt(N) * (pd - low_eqbound) / sqrt(V)
         test_stat_high <- sqrt(N) * (pd - high_eqbound) / sqrt(V)
 
-        # One-sided p-values from permutation distribution
-        p_low_greater <- mean(test_stat_low >= Tperm[1,])  # evidence p > low
-        p_high_less <- mean(test_stat_high <= Tperm[1,])   # evidence p < high
+        # Count extreme values for p-value calculation with plusone method
+        b_low_greater <- sum(test_stat_low >= Tperm[1,])  # evidence p > low
+        b_high_less <- sum(test_stat_high <= Tperm[1,])   # evidence p < high
+
+        # One-sided p-values using selected method
+        p_low_greater <- bm_compute_perm_pval(b_low_greater, R_actual, p_method)
+        p_high_less <- bm_compute_perm_pval(b_high_less, R_actual, p_method)
 
         if(alternative == "equivalence") {
           # Both must reject: p > low AND p < high
@@ -637,8 +698,8 @@ brunner_munzel.default = function(x,
         }
 
         # CI quantiles for 1-2*alpha level
-        c1 <- 0.5*(Tperm[1, floor((1-alpha)*R)] +
-                     Tperm[1, ceiling((1-alpha)*R)])
+        c1 <- 0.5*(Tperm[1, floor((1-alpha)*R_actual)] +
+                     Tperm[1, ceiling((1-alpha)*R_actual)])
 
         pd.lower <- pd - sqrt(V/N)*c1
         pd.upper <- pd + sqrt(V/N)*c1
@@ -648,23 +709,29 @@ brunner_munzel.default = function(x,
         # Observed test statistic centered at mu
         test_stat <- sqrt(N) * (pd - mu) / sqrt(V)
 
-        p.PERM1 <- mean((test_stat <= Tperm[1,]))
+        # Count extreme values for p-value calculation
+        b_less <- sum(test_stat <= Tperm[1,])
+        b_greater <- sum(test_stat >= Tperm[1,])
 
         if(alternative == "two.sided"){
-          c1<-0.5*(Tperm[1,floor((1-alpha/2)*R)]+Tperm[1,ceiling((1-alpha/2)*R)])
-          c2<-0.5*(Tperm[1,floor(alpha/2*R)]+Tperm[1,ceiling(alpha/2*R)])
+          c1<-0.5*(Tperm[1,floor((1-alpha/2)*R_actual)]+Tperm[1,ceiling((1-alpha/2)*R_actual)])
+          c2<-0.5*(Tperm[1,floor(alpha/2*R_actual)]+Tperm[1,ceiling(alpha/2*R_actual)])
         } else {
-          c1<-0.5*(Tperm[1, floor((1-alpha)*R)]+Tperm[1, ceiling((1-alpha)*R)])
-          c2<-0.5*(Tperm[1, floor(alpha*R)]+Tperm[1, ceiling(alpha*R)])
+          c1<-0.5*(Tperm[1, floor((1-alpha)*R_actual)]+Tperm[1, ceiling((1-alpha)*R_actual)])
+          c2<-0.5*(Tperm[1, floor(alpha*R_actual)]+Tperm[1, ceiling(alpha*R_actual)])
         }
 
         lower_ci = pd - sqrt(V/N)*c1
         upper_ci = pd - sqrt(V/N)*c2
 
+        # Compute p-values using selected method
+        p_less <- bm_compute_perm_pval(b_less, R_actual, p_method)
+        p_greater <- bm_compute_perm_pval(b_greater, R_actual, p_method)
+
         p.value = switch(alternative,
-                         "two.sided" = min(2-2*p.PERM1, 2*p.PERM1),
-                         "less" =  p.PERM1,
-                         "greater" =  1-p.PERM1)
+                         "two.sided" = min(2 * p_less, 2 * p_greater),
+                         "less" = p_less,
+                         "greater" = p_greater)
 
         pd.lower = switch(alternative,
                           "two.sided" = lower_ci,
