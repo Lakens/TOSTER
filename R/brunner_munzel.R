@@ -11,8 +11,15 @@
 #'   * For "equivalence" or "minimal.effect": two values representing the lower and upper bounds
 #'     for the relative effect. Values must be between 0 and 1.
 #'
-#' @param perm a logical indicating whether or not to perform a permutation test over approximate t-distribution based test (default is FALSE). Highly recommend to set perm = TRUE when sample size per condition is less than 15.
-#' @param max_n_perm the maximum number of permutations (default is 10000).
+#' @param test_method a character string specifying the test method to use:
+#'
+#'   * "t" (default): approximate t-distribution with Satterthwaite-Welch degrees of freedom
+#'   * "logit": logit transformation for range-preserving confidence intervals
+#'   * "perm": studentized permutation test (recommended when sample size per condition is less than 15)
+#'
+#' @param R the number of permutations for the permutation test (default is 10000). Only used when `test_method = "perm"`.
+#' @param perm `r lifecycle::badge("deprecated")` Use `test_method = "perm"` instead.
+#' @param max_n_perm `r lifecycle::badge("deprecated")` Use `R` instead.
 #' @param alternative a character string specifying the alternative hypothesis, must be one of:
 #'
 #'   * "two.sided" (default): true relative effect is not equal to `mu`
@@ -38,6 +45,21 @@
 #'
 #'  The brunner_munzel function is based on the `npar.t.test` and `npar.t.test.paired` functions within the `nparcomp` package (Konietschke et al. 2015).
 #'
+#' ## Test Methods
+#'
+#' Three test methods are available:
+#'
+#' * "t": The default method uses a t-distribution approximation with Satterthwaite-Welch
+#'   degrees of freedom. This is appropriate for moderate to large sample sizes.
+#'
+#' * "logit": Uses a logit transformation to produce range-preserving confidence intervals
+#'   that are guaranteed to stay within [0, 1]. This method is recommended when the estimated
+#'   relative effect is close to 0 or 1.
+#'
+#' * "perm": A studentized permutation test following Neubert & Brunner (2007). This method
+#'   is highly recommended when sample sizes are small (< 15 per group) as it provides better
+#'   control of Type I error rates in these situations.
+#'
 #' ## Hypothesis Testing
 #'
 #' For the standard alternatives, the null hypothesis is that the relative effect equals `mu`:
@@ -60,7 +82,7 @@
 #'
 #' ## Permutation Tests with Non-0.5 Null Values
 #'
-#' When `perm = TRUE` and `mu != 0.5`, the permutation distribution is constructed by centering
+#' When `test_method = "perm"` and `mu != 0.5`, the permutation distribution is constructed by centering
 #' the permuted test statistics at 0.5 (the value implied by exchangeability), while the observed
 #' test statistic is centered at the hypothesized null value. This approach is valid because
 #' the studentized permutation distribution converges to the same limit regardless of the
@@ -84,6 +106,9 @@
 #' # Standard test of stochastic equality
 #' brunner_munzel(mpg ~ am, data = mtcars)
 #'
+#' # Test using logit transformation for range-preserving CIs
+#' brunner_munzel(mpg ~ am, data = mtcars, test_method = "logit")
+#'
 #' # Test against a specific null value
 #' brunner_munzel(mpg ~ am, data = mtcars, mu = 0.3)
 #'
@@ -101,7 +126,7 @@
 #' brunner_munzel(mpg ~ am, data = mtcars,
 #'                alternative = "equivalence",
 #'                mu = c(0.35, 0.65),
-#'                perm = TRUE)
+#'                test_method = "perm")
 #'
 #' @references
 #' Brunner, E., Munzel, U. (2000). The Nonparametric Behrens-Fisher Problem: Asymptotic Theory and a Small Sample Approximation. Biometrical Journal 42, 17 -25.
@@ -131,8 +156,10 @@ brunner_munzel <- function(x,
                                            "minimal.effect"),
                            mu = 0.5,
                            alpha = 0.05,
-                           perm = FALSE,
-                           max_n_perm = 10000) {
+                           test_method = c("t", "logit", "perm"),
+                           R = 10000,
+                           perm = "deprecated",
+                           max_n_perm = "deprecated") {
 
   UseMethod("brunner_munzel")
 }
@@ -153,10 +180,37 @@ brunner_munzel.default = function(x,
                                                   "minimal.effect"),
                                   mu = 0.5,
                                   alpha = 0.05,
-                                  perm = FALSE,
-                                  max_n_perm = 10000,
+                                  test_method = c("t", "logit", "perm"),
+                                  R = 10000,
+                                  perm = "deprecated",
+                                  max_n_perm = "deprecated",
                                   ...) {
+
+  # Handle deprecated arguments
+  if (!identical(perm, "deprecated")) {
+    lifecycle::deprecate_warn(
+      when = "0.9.0",
+      what = "brunner_munzel(perm)",
+      with = "brunner_munzel(test_method)",
+      details = "Use `test_method = 'perm'` instead of `perm = TRUE`."
+    )
+    if (isTRUE(perm)) {
+      test_method <- "perm"
+    }
+  }
+
+  if (!identical(max_n_perm, "deprecated")) {
+    lifecycle::deprecate_warn(
+      when = "0.9.0",
+      what = "brunner_munzel(max_n_perm)",
+      with = "brunner_munzel(R)",
+      details = "Use `R` to specify the number of permutations."
+    )
+    R <- max_n_perm
+  }
+
   alternative = match.arg(alternative)
+  test_method = match.arg(test_method)
 
   # Validate mu based on alternative
 
@@ -200,12 +254,12 @@ brunner_munzel.default = function(x,
       y <- y[is.finite(y)]
     }
 
-    if(min(length(x),length(y)) < 15 && !(perm)){
-      message("Sample size in at least one group is small. Permutation test (perm = TRUE) is highly recommended.")
+    if(min(length(x),length(y)) < 15 && test_method != "perm"){
+      message("Sample size in at least one group is small. Permutation test (test_method = 'perm') is highly recommended.")
     }
     if(min(length(x),length(y)) > 250 &&
        sum(length(x),length(y)) > 500 &&
-       (perm)){
+       test_method == "perm"){
       message("Sample size is fairly large. Use of a permutation test is probably unnecessary.")
     }
   } else {
@@ -251,7 +305,7 @@ brunner_munzel.default = function(x,
     v[v0] <- 1 / n
     std_err = sqrt(v/n)
 
-    if(perm == TRUE){
+    if(test_method == "perm"){
       METHOD = "Paired Brunner-Munzel permutation test"
       if(alternative %in% c("equivalence", "minimal.effect")) {
         message("NOTE: Permutation-based TOST for equivalence/minimal.effect testing.")
@@ -272,7 +326,7 @@ brunner_munzel.default = function(x,
         rxperm<-matrix(rx[P],nrow=N,ncol=n_perm_actual)
       }
       else{
-        n_perm_actual <- max_n_perm
+        n_perm_actual <- R
         P<-matrix(nrow=n,ncol=n_perm_actual)
         permu<-function(all_data){
           n<-length(all_data)
@@ -376,6 +430,80 @@ brunner_munzel.default = function(x,
       pd.lower <- ifelse(pd.lower < 0, 0, pd.lower)
       pd.upper <- ifelse(pd.upper > 1, 1, pd.upper)
 
+    } else if(test_method == "logit") {
+      # Logit transformation method for paired samples
+      METHOD = "Exact paired Brunner-Munzel test (logit)"
+
+      # Logit transformation for range-preserving CIs
+      pd_logit <- log(pd / (1 - pd))
+      se_logit <- sqrt(v/n) / (pd * (1 - pd))
+
+      if(alternative %in% c("equivalence", "minimal.effect")) {
+        # Test statistics for each bound on logit scale
+        low_logit <- log(low_eqbound / (1 - low_eqbound))
+        high_logit <- log(high_eqbound / (1 - high_eqbound))
+
+        test_stat_low <- (pd_logit - low_logit) / se_logit
+        test_stat_high <- (pd_logit - high_logit) / se_logit
+
+        # One-sided p-values
+        p_low_greater <- 1 - pt(test_stat_low, df.sw)
+        p_high_less <- pt(test_stat_high, df.sw)
+
+        if(alternative == "equivalence") {
+          p.value <- max(p_low_greater, p_high_less)
+
+          if(p_low_greater >= p_high_less) {
+            test_stat <- test_stat_low
+          } else {
+            test_stat <- test_stat_high
+          }
+        } else { # minimal.effect
+          p.value <- min(1 - p_low_greater, 1 - p_high_less)
+
+          if((1 - p_low_greater) <= (1 - p_high_less)) {
+            test_stat <- test_stat_low
+          } else {
+            test_stat <- test_stat_high
+          }
+        }
+
+        # CI on logit scale, then back-transform
+        ci_logit_lower <- pd_logit - qt(1-alpha, df.sw) * se_logit
+        ci_logit_upper <- pd_logit + qt(1-alpha, df.sw) * se_logit
+
+        pd.lower <- exp(ci_logit_lower) / (1 + exp(ci_logit_lower))
+        pd.upper <- exp(ci_logit_upper) / (1 + exp(ci_logit_upper))
+
+      } else {
+        # Standard alternatives
+        mu_logit <- log(mu / (1 - mu))
+        test_stat <- (pd_logit - mu_logit) / se_logit
+
+        p.value = switch(alternative,
+                         "two.sided" = 2*min(pt(test_stat, df.sw),
+                                             1-pt(test_stat, df.sw)),
+                         "less" = pt(test_stat, df=df.sw),
+                         "greater" = 1-pt(test_stat, df=df.sw))
+
+        ci_logit_lower = switch(alternative,
+                                "two.sided" = pd_logit - qt(1-alpha/2, df.sw) * se_logit,
+                                "less" = -Inf,
+                                "greater" = pd_logit - qt(1-alpha, df.sw) * se_logit)
+
+        ci_logit_upper = switch(alternative,
+                                "two.sided" = pd_logit + qt(1-alpha/2, df.sw) * se_logit,
+                                "less" = pd_logit + qt(1-alpha, df.sw) * se_logit,
+                                "greater" = Inf)
+
+        pd.lower <- exp(ci_logit_lower) / (1 + exp(ci_logit_lower))
+        pd.upper <- exp(ci_logit_upper) / (1 + exp(ci_logit_upper))
+      }
+
+      # Handle edge cases
+      pd.lower <- ifelse(is.nan(pd.lower) | pd.lower < 0, 0, pd.lower)
+      pd.upper <- ifelse(is.nan(pd.upper) | pd.upper > 1, 1, pd.upper)
+
     } else {
       # Asymptotic (t-distribution) approach
       METHOD = "Exact paired Brunner-Munzel test"
@@ -463,7 +591,7 @@ brunner_munzel.default = function(x,
     df.sw <- (s1 + s2)^2/(s1^2/(n.x - 1) + s2^2/(n.y - 1))
     df.sw[is.nan(df.sw)] <- 1000
 
-    if(perm){
+    if(test_method == "perm"){
 
       ## permutation -----
       METHOD = "Two-sample Brunner-Munzel permutation test"
@@ -472,12 +600,12 @@ brunner_munzel.default = function(x,
       }
 
       Tprob<-qnorm(pd)*exp(-0.5*qnorm(pd)^2)*sqrt(N/(V*2*pi))
-      P<-apply(matrix(rep(1:N,max_n_perm),ncol=max_n_perm),2,sample)
-      Px<-matrix(c(x,y)[P],ncol=max_n_perm)
+      P<-apply(matrix(rep(1:N,R),ncol=R),2,sample)
+      Px<-matrix(c(x,y)[P],ncol=R)
 
       # perm_loop already centers at 0.5 (see res1[1,]<-(pdP-1/2)/sqrt(vP))
       Tperm<-t(apply(perm_loop(x=Px[1:n.x,],y=Px[(n.x+1):N,],
-                               n.x=n.x,n.y=n.y,max_n_perm),1,sort))
+                               n.x=n.x,n.y=n.y,R=R),1,sort))
 
       if(alternative %in% c("equivalence", "minimal.effect")) {
         # Observed test statistics for each bound
@@ -509,8 +637,8 @@ brunner_munzel.default = function(x,
         }
 
         # CI quantiles for 1-2*alpha level
-        c1 <- 0.5*(Tperm[1, floor((1-alpha)*max_n_perm)] +
-                     Tperm[1, ceiling((1-alpha)*max_n_perm)])
+        c1 <- 0.5*(Tperm[1, floor((1-alpha)*R)] +
+                     Tperm[1, ceiling((1-alpha)*R)])
 
         pd.lower <- pd - sqrt(V/N)*c1
         pd.upper <- pd + sqrt(V/N)*c1
@@ -523,11 +651,11 @@ brunner_munzel.default = function(x,
         p.PERM1 <- mean((test_stat <= Tperm[1,]))
 
         if(alternative == "two.sided"){
-          c1<-0.5*(Tperm[1,floor((1-alpha/2)*max_n_perm)]+Tperm[1,ceiling((1-alpha/2)*max_n_perm)])
-          c2<-0.5*(Tperm[1,floor(alpha/2*max_n_perm)]+Tperm[1,ceiling(alpha/2*max_n_perm)])
+          c1<-0.5*(Tperm[1,floor((1-alpha/2)*R)]+Tperm[1,ceiling((1-alpha/2)*R)])
+          c2<-0.5*(Tperm[1,floor(alpha/2*R)]+Tperm[1,ceiling(alpha/2*R)])
         } else {
-          c1<-0.5*(Tperm[1, floor((1-alpha)*max_n_perm)]+Tperm[1, ceiling((1-alpha)*max_n_perm)])
-          c2<-0.5*(Tperm[1, floor(alpha*max_n_perm)]+Tperm[1, ceiling(alpha*max_n_perm)])
+          c1<-0.5*(Tperm[1, floor((1-alpha)*R)]+Tperm[1, ceiling((1-alpha)*R)])
+          c2<-0.5*(Tperm[1, floor(alpha*R)]+Tperm[1, ceiling(alpha*R)])
         }
 
         lower_ci = pd - sqrt(V/N)*c1
@@ -551,6 +679,81 @@ brunner_munzel.default = function(x,
 
       pd.lower = ifelse(pd.lower < 0, 0, pd.lower)
       pd.upper = ifelse(pd.upper > 1, 1, pd.upper)
+
+    } else if(test_method == "logit") {
+
+      ## logit transformation ----
+      METHOD = "Two-sample Brunner-Munzel test (logit)"
+
+      # Logit transformation for range-preserving CIs
+      pd_logit <- log(pd / (1 - pd))
+      se_logit <- sqrt(V/N) / (pd * (1 - pd))
+
+      if(alternative %in% c("equivalence", "minimal.effect")) {
+        # Test statistics for each bound on logit scale
+        low_logit <- log(low_eqbound / (1 - low_eqbound))
+        high_logit <- log(high_eqbound / (1 - high_eqbound))
+
+        test_stat_low <- (pd_logit - low_logit) / se_logit
+        test_stat_high <- (pd_logit - high_logit) / se_logit
+
+        # One-sided p-values
+        p_low_greater <- 1 - pt(test_stat_low, df=df.sw)
+        p_high_less <- pt(test_stat_high, df=df.sw)
+
+        if(alternative == "equivalence") {
+          p.value <- max(p_low_greater, p_high_less)
+
+          if(p_low_greater >= p_high_less) {
+            test_stat <- test_stat_low
+          } else {
+            test_stat <- test_stat_high
+          }
+        } else { # minimal.effect
+          p.value <- min(1 - p_low_greater, 1 - p_high_less)
+
+          if((1 - p_low_greater) <= (1 - p_high_less)) {
+            test_stat <- test_stat_low
+          } else {
+            test_stat <- test_stat_high
+          }
+        }
+
+        # CI on logit scale, then back-transform
+        ci_logit_lower <- pd_logit - qt(1-alpha, df=df.sw) * se_logit
+        ci_logit_upper <- pd_logit + qt(1-alpha, df=df.sw) * se_logit
+
+        pd.lower <- exp(ci_logit_lower) / (1 + exp(ci_logit_lower))
+        pd.upper <- exp(ci_logit_upper) / (1 + exp(ci_logit_upper))
+
+      } else {
+        # Standard alternatives
+        mu_logit <- log(mu / (1 - mu))
+        test_stat <- (pd_logit - mu_logit) / se_logit
+
+        p.value = switch(alternative,
+                         "two.sided" = min(c(2 - 2 * pt(test_stat, df=df.sw),
+                                             2 * pt(test_stat, df=df.sw))),
+                         "less" = pt(test_stat, df=df.sw),
+                         "greater" = 1-pt(test_stat, df=df.sw))
+
+        ci_logit_lower = switch(alternative,
+                                "two.sided" = pd_logit - qt(1-alpha/2, df=df.sw) * se_logit,
+                                "less" = -Inf,
+                                "greater" = pd_logit - qt(1-alpha, df=df.sw) * se_logit)
+
+        ci_logit_upper = switch(alternative,
+                                "two.sided" = pd_logit + qt(1-alpha/2, df=df.sw) * se_logit,
+                                "less" = pd_logit + qt(1-alpha, df=df.sw) * se_logit,
+                                "greater" = Inf)
+
+        pd.lower <- exp(ci_logit_lower) / (1 + exp(ci_logit_lower))
+        pd.upper <- exp(ci_logit_upper) / (1 + exp(ci_logit_upper))
+      }
+
+      # Handle edge cases
+      pd.lower <- ifelse(is.nan(pd.lower) | pd.lower < 0, 0, pd.lower)
+      pd.upper <- ifelse(is.nan(pd.upper) | pd.upper > 1, 1, pd.upper)
 
     } else{
 
@@ -622,7 +825,7 @@ brunner_munzel.default = function(x,
     names(mu) <- "relative effect"
   }
 
-  if(perm){
+  if(test_method == "perm"){
     names(test_stat) = "t-observed"
   } else {
     names(test_stat) = "t"
@@ -692,20 +895,20 @@ brunner_munzel.formula = function(formula,
 }
 
 
-perm_loop <-function(x,y,n.x,n.y,max_n_perm){
+perm_loop <-function(x,y,n.x,n.y,R){
 
-  pl1P<-matrix(0,nrow=n.x,ncol=max_n_perm)
-  pl2P<-matrix(0,nrow=n.y,ncol=max_n_perm)
+  pl1P<-matrix(0,nrow=n.x,ncol=R)
+  pl2P<-matrix(0,nrow=n.y,ncol=R)
 
   for(h1 in 1:n.x){
     help1<-matrix(t(x[h1,]),
-                  ncol=max_n_perm,
+                  ncol=R,
                   nrow=n.y,byrow=TRUE)
     pl1P[h1,]<-1/n.y*(colSums((y<help1)+1/2*(y==help1)))
   }
   for(h2 in 1:n.y){
     help2<-matrix(t(y[h2,]),
-                  ncol=max_n_perm,
+                  ncol=R,
                   nrow=n.x,byrow=TRUE)
     pl2P[h2,]<-1/n.x*(colSums((x<help2)+1/2*(x==help2)))
   }
@@ -720,7 +923,7 @@ perm_loop <-function(x,y,n.x,n.y,max_n_perm){
   v0P<-(vP==0)
   vP[v0P]<-0.5/(n.x*n.y)^2
 
-  res1<-matrix(rep(0,max_n_perm*3),nrow=3)
+  res1<-matrix(rep(0,R*3),nrow=3)
 
   # Note: This centers at 0.5, which is correct for the permutation distribution
   res1[1,]<-(pdP-1/2)/sqrt(vP)
