@@ -244,15 +244,15 @@ test_that("Run examples for paired samples", {
   expect_equal(test1$effsize$estimate,
                test1_t$effsize$estimate)
   
-  # Test that paired = TRUE is rejected with formula method
-  expect_error(
+  # Test that paired = TRUE shows a message with formula method
+  expect_message(
     log_TOST(sleep ~ group, data = sleep2, paired = TRUE, eqb = 1.25),
-    "cannot use 'paired' in formula method"
+    "Using 'paired = TRUE' with the formula interface is not recommended"
   )
   
-  expect_error(
+  expect_message(
     boot_log_TOST(sleep ~ group, data = sleep2, paired = TRUE, eqb = 1.25, R = 199),
-    "cannot use 'paired' in formula method"
+    "Using 'paired = TRUE' with the formula interface is not recommended"
   )
 
 })

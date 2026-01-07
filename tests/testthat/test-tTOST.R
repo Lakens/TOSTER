@@ -1516,14 +1516,14 @@ test_that("More tsum_test",{
 })
 
 test_that("Formula methods reject paired = TRUE", {
-  # Test that all formula methods properly reject paired = TRUE
-  # to match base R behavior. paired = FALSE is allowed (redundant but harmless)
+  # Test that all formula methods properly show a message for paired = TRUE
+  # to warn users about data sorting. paired = FALSE is allowed (redundant but harmless)
   data(sleep)
   
-  # t_TOST.formula should reject paired = TRUE
-  expect_error(
+  # t_TOST.formula should show message for paired = TRUE
+  expect_message(
     t_TOST(extra ~ group, data = sleep, paired = TRUE, eqb = 1),
-    "cannot use 'paired' in formula method"
+    "Using 'paired = TRUE' with the formula interface is not recommended"
   )
   
   # t_TOST.formula should allow paired = FALSE (redundant but harmless)
@@ -1531,34 +1531,34 @@ test_that("Formula methods reject paired = TRUE", {
     t_TOST(extra ~ group, data = sleep, paired = FALSE, eqb = 1)
   )
   
-  # boot_t_TOST.formula should reject paired = TRUE
-  expect_error(
+  # boot_t_TOST.formula should show message for paired = TRUE
+  expect_message(
     boot_t_TOST(extra ~ group, data = sleep, paired = TRUE, eqb = 1, R = 10),
-    "cannot use 'paired' in formula method"
+    "Using 'paired = TRUE' with the formula interface is not recommended"
   )
   
-  # boot_t_test.formula should reject paired = TRUE
-  expect_error(
+  # boot_t_test.formula should show message for paired = TRUE
+  expect_message(
     boot_t_test(extra ~ group, data = sleep, paired = TRUE, R = 10),
-    "cannot use 'paired' in formula method"
+    "Using 'paired = TRUE' with the formula interface is not recommended"
   )
   
-  # wilcox_TOST.formula should reject paired = TRUE
-  expect_error(
+  # wilcox_TOST.formula should show message for paired = TRUE
+  expect_message(
     wilcox_TOST(extra ~ group, data = sleep, paired = TRUE, eqb = 1),
-    "cannot use 'paired' in formula method"
+    "Using 'paired = TRUE' with the formula interface is not recommended"
   )
   
-  # simple_htest.formula should reject paired = TRUE
-  expect_error(
+  # simple_htest.formula should show message for paired = TRUE
+  expect_message(
     simple_htest(extra ~ group, data = sleep, paired = TRUE),
-    "cannot use 'paired' in formula method"
+    "Using 'paired = TRUE' with the formula interface is not recommended"
   )
   
-  # brunner_munzel.formula should reject paired = TRUE
-  expect_error(
+  # brunner_munzel.formula should show message for paired = TRUE
+  expect_message(
     brunner_munzel(extra ~ group, data = sleep, paired = TRUE),
-    "cannot use 'paired' in formula method"
+    "Using 'paired = TRUE' with the formula interface is not recommended"
   )
   
   # Verify formula methods still work without paired parameter
@@ -1566,25 +1566,25 @@ test_that("Formula methods reject paired = TRUE", {
     t_TOST(extra ~ group, data = sleep, eqb = 1)
   )
   
-  # Test calc functions also reject paired = TRUE with formula
-  expect_error(
+  # Test calc functions also show message for paired = TRUE with formula
+  expect_message(
     smd_calc(extra ~ group, data = sleep, paired = TRUE),
-    "cannot use 'paired' in formula method"
+    "Using 'paired = TRUE' with the formula interface is not recommended"
   )
   
-  expect_error(
+  expect_message(
     ses_calc(extra ~ group, data = sleep, paired = TRUE),
-    "cannot use 'paired' in formula method"
+    "Using 'paired = TRUE' with the formula interface is not recommended"
   )
   
-  expect_error(
+  expect_message(
     boot_smd_calc(extra ~ group, data = sleep, paired = TRUE, R = 10),
-    "cannot use 'paired' in formula method"
+    "Using 'paired = TRUE' with the formula interface is not recommended"
   )
   
-  expect_error(
+  expect_message(
     boot_ses_calc(extra ~ group, data = sleep, paired = TRUE, R = 10),
-    "cannot use 'paired' in formula method"
+    "Using 'paired = TRUE' with the formula interface is not recommended"
   )
   
 })
