@@ -41,7 +41,7 @@ wilcox_TOST(
 
 \item{hypothesis}{'EQU' for equivalence (default), or 'MET' for minimal effects test.}
 
-\item{paired}{a logical indicating whether you want a paired t-test.}
+\item{paired}{a logical indicating whether you want a paired t-test. Cannot be used with the formula method; use x and y vectors instead for paired tests.}
 
 \item{eqb}{Equivalence bound. Can provide one value (symmetric bound) or two specific values that represent the lower and upper equivalence bounds.
 Like the \code{mu} argument, \code{eqb} is specified on the \strong{raw scale} of the original data (e.g., the scale of the location shift).
@@ -64,7 +64,7 @@ generalized odds ratio). Note that \code{ses} only determines which effect size 
 one-sample or paired samples) or shift (for independent samples) is to be
 estimated. See \link[stats:wilcox.test]{stats::wilcox.test}.}
 
-\item{formula}{a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.}
+\item{formula}{a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample test or a factor with two levels giving the corresponding groups. For paired tests, use the default method with x and y vectors instead of the formula method.}
 
 \item{data}{an optional matrix or data frame (or similar: see model.frame) containing the variables in the formula formula. By default the variables are taken from environment(formula).}
 

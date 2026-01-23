@@ -38,7 +38,7 @@ log_TOST(
 
 \item{hypothesis}{'EQU' for equivalence (default), or 'MET' for minimal effects test.}
 
-\item{paired}{a logical indicating whether you want a paired t-test.}
+\item{paired}{a logical indicating whether you want a paired t-test. Cannot be used with the formula method; use x and y vectors instead for paired tests.}
 
 \item{var.equal}{a logical variable indicating whether to treat the two variances as being equal. If TRUE then the pooled variance is used to estimate the variance otherwise the Welch (or Satterthwaite) approximation to the degrees of freedom is used.}
 
@@ -50,7 +50,7 @@ log_TOST(
 
 \item{y}{an optional (non-empty) numeric vector of data values.}
 
-\item{formula}{a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.}
+\item{formula}{a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample test or a factor with two levels giving the corresponding groups. For paired tests, use the default method with x and y vectors instead of the formula method.}
 
 \item{data}{an optional matrix or data frame (or similar: see model.frame) containing the variables in the formula formula. By default the variables are taken from environment(formula).}
 

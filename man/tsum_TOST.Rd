@@ -44,7 +44,7 @@ tsum_TOST(
 
 \item{hypothesis}{'EQU' for equivalence (default), or 'MET' for minimal effects test.}
 
-\item{paired}{a logical indicating whether you want a paired t-test.}
+\item{paired}{a logical indicating whether you want a paired t-test. Cannot be used with the formula method; use x and y vectors instead for paired tests.}
 
 \item{var.equal}{a logical variable indicating whether to treat the two variances as being equal. If TRUE then the pooled variance is used to estimate the variance otherwise the Welch (or Satterthwaite) approximation to the degrees of freedom is used.}
 

@@ -85,6 +85,38 @@
 #'   Tests whether the relative effect falls outside the specified bounds.
 #'   The p-value is the minimum of the two one-sided p-values.
 #'
+#' ## Test Statistic and P-value Calculation
+#'
+#' The test statistic is calculated as:
+#'
+#' \deqn{t = \sqrt{N} \cdot \frac{\hat{p} - p_0}{s}}
+#'
+#' where \eqn{N} is the total sample size (or \eqn{n} for paired samples), \eqn{\hat{p}} is the
+#' estimated relative effect, \eqn{p_0} is the null hypothesis value, and \eqn{s} is the
+#' rank-based standard error.
+#'
+#' For equivalence testing, two test statistics are computed:
+#'
+#' \deqn{t_{low} = \sqrt{N} \cdot \frac{\hat{p} - p_{low}}{s}}
+#' \deqn{t_{high} = \sqrt{N} \cdot \frac{\hat{p} - p_{high}}{s}}
+#'
+#' where \eqn{p_{low}} and \eqn{p_{high}} are the lower and upper equivalence bounds.
+#' The one-sided p-values are:
+#'
+#' * \eqn{p_1}: p-value for H1: p > \eqn{p_{low}} (from the lower bound test)
+#' * \eqn{p_2}: p-value for H1: p < \eqn{p_{high}} (from the upper bound test)
+#'
+#' For equivalence: \eqn{p_{TOST} = \max(p_1, p_2)}
+#'
+#' For minimal effect: \eqn{p_{MET} = \min(1 - p_1, 1 - p_2)}
+#'
+#' ## Confidence Intervals for Equivalence Testing
+#'
+#' When `alternative = "equivalence"` or `alternative = "minimal.effect"`, the confidence
+#' interval is computed at the \eqn{1 - 2\alpha} level (default: 90% CI when \eqn{\alpha = 0.05}).
+#' This follows the standard TOST procedure where the \eqn{(1 - 2\alpha) \times 100\%} CI
+#' corresponds to two one-sided tests at level \eqn{\alpha}.
+#'
 #' ## Permutation Tests with Non-0.5 Null Values
 #'
 #' When `test_method = "perm"` and `mu != 0.5`, the permutation distribution is constructed by centering
@@ -151,12 +183,12 @@
 #' @importFrom stats var quantile
 #' @family Robust tests
 #' @export brunner_munzel
+NULL
 
-# Helper function to generate permutation indices without replacement
-# Returns a matrix where each column contains indices for group x
-#' @keywords internal
 #' @noRd
 bm_perm_indices <- function(N, n.x, R) {
+  # Internal helper function to generate permutation indices without replacement
+  # Returns a matrix where each column contains indices for group x
   # Sample permutations without replacement to avoid duplicates
   perms <- matrix(NA, nrow = R, ncol = N)
   for (i in 1:R) {
@@ -181,11 +213,10 @@ bm_perm_indices <- function(N, n.x, R) {
   return(t(perms))  # Return as N x R matrix for compatibility with original code
 }
 
-# Helper function to compute permutation p-value
-# Based on Phipson & Smyth (2010) for sampling without replacement
-#' @keywords internal
 #' @noRd
 bm_compute_perm_pval <- function(b, R, p_method) {
+  # Internal helper function to compute permutation p-value
+  # Based on Phipson & Smyth (2010) for sampling without replacement
   if (p_method == "plusone") {
     # Phipson & Smyth (2010) formula: (b+1)/(R+1)
     # Provides exact p-values when permutations are sampled without replacement
@@ -669,28 +700,35 @@ brunner_munzel.default = function(x,
         test_stat_low <- sqrt(N) * (pd - low_eqbound) / sqrt(V)
         test_stat_high <- sqrt(N) * (pd - high_eqbound) / sqrt(V)
 
-        # Count extreme values for p-value calculation with plusone method
-        b_low_greater <- sum(test_stat_low >= Tperm[1,])  # evidence p > low
-        b_high_less <- sum(test_stat_high <= Tperm[1,])   # evidence p < high
+        # Count extreme values for p-value calculation
+        # For lower bound test (H1: p > low): count permutations with T >= t_obs_low
+        # For upper bound test (H1: p < high): count permutations with T <= t_obs_high
+        b_greater_low <- sum(Tperm[1,] >= test_stat_low)
+        b_less_high <- sum(Tperm[1,] <= test_stat_high)
 
         # One-sided p-values using selected method
-        p_low_greater <- bm_compute_perm_pval(b_low_greater, R_actual, p_method)
-        p_high_less <- bm_compute_perm_pval(b_high_less, R_actual, p_method)
+        # p_greater_low = P(T >= t_obs | H0) for testing H1: p > low
+        # p_less_high = P(T <= t_obs | H0) for testing H1: p < high
+        p_greater_low <- bm_compute_perm_pval(b_greater_low, R_actual, p_method)
+        p_less_high <- bm_compute_perm_pval(b_less_high, R_actual, p_method)
 
         if(alternative == "equivalence") {
-          # Both must reject: p > low AND p < high
-          p.value <- max(1 - p_low_greater, 1 - p_high_less)
+          # Both conditions must be met: p > low AND p < high
+          # p-value is the maximum of the two one-sided tests
+          p.value <- max(p_greater_low, p_less_high)
 
-          if((1 - p_low_greater) >= (1 - p_high_less)) {
+          # Determine which bound is "binding" for reporting
+          if(p_greater_low >= p_less_high) {
             test_stat <- test_stat_low
           } else {
             test_stat <- test_stat_high
           }
         } else { # minimal.effect
-          # At least one must reject: p <= low OR p >= high
-          p.value <- min(p_low_greater, p_high_less)
+          # At least one condition must be met: p <= low OR p >= high
+          # p-value is the minimum of the two one-sided tests
+          p.value <- min(1 - p_greater_low, 1 - p_less_high)
 
-          if(p_low_greater <= p_high_less) {
+          if((1 - p_greater_low) <= (1 - p_less_high)) {
             test_stat <- test_stat_low
           } else {
             test_stat <- test_stat_high

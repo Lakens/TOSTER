@@ -6,26 +6,18 @@
 \alias{brunner_munzel.formula}
 \title{Brunner-Munzel Test}
 \usage{
-brunner_munzel(
-  x,
-  ...,
-  paired = FALSE,
-  alternative = c("two.sided", "less", "greater"),
-  mu = 0.5,
-  alpha = 0.05,
-  perm = FALSE,
-  max_n_perm = 10000
-)
-
 \method{brunner_munzel}{default}(
   x,
   y,
   paired = FALSE,
-  alternative = c("two.sided", "less", "greater"),
+  alternative = c("two.sided", "less", "greater", "equivalence", "minimal.effect"),
   mu = 0.5,
   alpha = 0.05,
-  perm = FALSE,
-  max_n_perm = 10000,
+  test_method = c("t", "logit", "perm"),
+  R = 10000,
+  p_method = c("plusone", "original"),
+  perm = "deprecated",
+  max_n_perm = "deprecated",
   ...
 )
 
@@ -34,23 +26,52 @@ brunner_munzel(
 \arguments{
 \item{x}{a (non-empty) numeric vector of data values.}
 
-\item{...}{further arguments to be passed to or from methods.}
+\item{y}{an optional (non-empty) numeric vector of data values.}
 
 \item{paired}{a logical indicating whether you want a paired test.}
 
-\item{alternative}{a character string specifying the alternative hypothesis, must be one of "two.sided" (default), "greater" or "less". You can specify just the initial letter.}
+\item{alternative}{a character string specifying the alternative hypothesis, must be one of:
+\itemize{
+\item "two.sided" (default): true relative effect is not equal to \code{mu}
+\item "less": true relative effect is less than \code{mu}
+\item "greater": true relative effect is greater than \code{mu}
+\item "equivalence": true relative effect is between the lower and upper bounds specified in \code{mu}
+\item "minimal.effect": true relative effect is less than the lower bound or greater than the upper bound specified in \code{mu}
+}}
 
-\item{mu}{a number specifying an optional parameter used to form the null hypothesis (Default = 0.5). This can be thought of as the null in terms of the relative effect, p = P (X < Y ) + 0.5 * P (X = Y); See ‘Details’.}
+\item{mu}{a number or vector specifying the null hypothesis value(s):
+\itemize{
+\item For standard alternatives ("two.sided", "less", "greater"): a single value
+representing the hypothesized relative effect (default = 0.5, i.e., stochastic equality).
+\item For "equivalence" or "minimal.effect": two values representing the lower and upper bounds
+for the relative effect. Values must be between 0 and 1.
+}}
 
 \item{alpha}{alpha level (default = 0.05)}
 
-\item{perm}{a logical indicating whether or not to perform a permutation test over approximate t-distribution based test (default is FALSE). Highly recommend to set perm = TRUE when sample size per condition is less than 15.}
+\item{test_method}{a character string specifying the test method to use:
+\itemize{
+\item "t" (default): approximate t-distribution with Satterthwaite-Welch degrees of freedom
+\item "logit": logit transformation for range-preserving confidence intervals
+\item "perm": studentized permutation test (recommended when sample size per condition is less than 15)
+}}
 
-\item{max_n_perm}{the maximum number of permutations (default is 10000).}
+\item{R}{the number of permutations for the permutation test (default is 10000). Only used when \code{test_method = "perm"}.}
 
-\item{y}{an optional (non-empty) numeric vector of data values.}
+\item{p_method}{a character string specifying the method for computing permutation p-values. Only used when \code{test_method = "perm"}:
+\itemize{
+\item "plusone" (default): Uses the (b+1)/(R+1) formula from Phipson & Smyth (2010), which provides
+exact p-values when permutations are sampled without replacement.
+\item "original": Uses the traditional b/R formula with a minimum of 1/R.
+}}
 
-\item{formula}{a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.}
+\item{perm}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Use \code{test_method = "perm"} instead.}
+
+\item{max_n_perm}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Use \code{R} instead.}
+
+\item{...}{further arguments to be passed to or from methods.}
+
+\item{formula}{a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample test or a factor with two levels giving the corresponding groups. For paired tests, use the default method with x and y vectors instead of the formula method.}
 
 \item{data}{an optional matrix or data frame (or similar: see model.frame) containing the variables in the formula formula. By default the variables are taken from environment(formula).}
 
@@ -85,16 +106,120 @@ This tests the hypothesis that the relative effect, discussed below, is equal to
 
 The estimate of the relative effect, which can be considered as value similar to the probability of superiority, refers to the following:
 
-\deqn{\hat p = p(X>Y) + \frac{1}{2} \cdot P(X=Y)}
+\deqn{\hat p = P(X>Y) + \frac{1}{2} \cdot P(X=Y)}
 
-Note, for paired samples, this does \emph{not} refer to the probability of an increase/decrease in paired sample but rather the probability that a randomly sampled value of X.
+Note, for paired samples, this does \emph{not} refer to the probability of an increase/decrease in paired sample but rather the probability that a randomly sampled value of X is greater than a randomly sampled value of Y.
 This is also referred to as the "relative" effect in the literature. Therefore, the results will differ from the concordance probability provided by the ses_calc function.
 
 The brunner_munzel function is based on the \code{npar.t.test} and \code{npar.t.test.paired} functions within the \code{nparcomp} package (Konietschke et al. 2015).
+\subsection{Test Methods}{
+
+Three test methods are available:
+\itemize{
+\item "t": The default method uses a t-distribution approximation with Satterthwaite-Welch
+degrees of freedom. This is appropriate for moderate to large sample sizes.
+\item "logit": Uses a logit transformation to produce range-preserving confidence intervals
+that are guaranteed to stay within \link{0, 1}. This method is recommended when the estimated
+relative effect is close to 0 or 1.
+\item "perm": A studentized permutation test following Neubert & Brunner (2007). This method
+is highly recommended when sample sizes are small (< 15 per group) as it provides better
+control of Type I error rates in these situations.
+}
+}
+
+\subsection{Hypothesis Testing}{
+
+For the standard alternatives, the null hypothesis is that the relative effect equals \code{mu}:
+\itemize{
+\item "two.sided": H0: p = mu vs H1: p ≠ mu
+\item "less": H0: p ≥ mu vs H1: p < mu
+\item "greater": H0: p ≤ mu vs H1: p > mu
+}
+
+For equivalence and minimal effect testing using the two one-sided tests (TOST) procedure:
+\itemize{
+\item "equivalence": H0: p ≤ mu\link{1} OR p ≥ mu\link{2} vs H1: mu\link{1} < p < mu\link{2}
+
+Tests whether the relative effect falls within the specified bounds.
+The p-value is the maximum of the two one-sided p-values.
+\item "minimal.effect": H0: mu\link{1} < p < mu\link{2} vs H1: p ≤ mu\link{1} OR p ≥ mu\link{2}
+
+Tests whether the relative effect falls outside the specified bounds.
+The p-value is the minimum of the two one-sided p-values.
+}
+}
+
+\subsection{Test Statistic and P-value Calculation}{
+
+The test statistic is calculated as:
+
+\deqn{t = \sqrt{N} \cdot \frac{\hat{p} - p_0}{s}}
+
+where \eqn{N} is the total sample size (or \eqn{n} for paired samples), \eqn{\hat{p}} is the
+estimated relative effect, \eqn{p_0} is the null hypothesis value, and \eqn{s} is the
+rank-based standard error.
+
+For equivalence testing, two test statistics are computed:
+
+\deqn{t_{low} = \sqrt{N} \cdot \frac{\hat{p} - p_{low}}{s}}
+\deqn{t_{high} = \sqrt{N} \cdot \frac{\hat{p} - p_{high}}{s}}
+
+where \eqn{p_{low}} and \eqn{p_{high}} are the lower and upper equivalence bounds.
+The one-sided p-values are:
+\itemize{
+\item \eqn{p_1}: p-value for H1: p > \eqn{p_{low}} (from the lower bound test)
+\item \eqn{p_2}: p-value for H1: p < \eqn{p_{high}} (from the upper bound test)
+}
+
+For equivalence: \eqn{p_{TOST} = \max(p_1, p_2)}
+
+For minimal effect: \eqn{p_{MET} = \min(1 - p_1, 1 - p_2)}
+}
+
+\subsection{Confidence Intervals for Equivalence Testing}{
+
+When \code{alternative = "equivalence"} or \code{alternative = "minimal.effect"}, the confidence
+interval is computed at the \eqn{1 - 2\alpha} level (default: 90\% CI when \eqn{\alpha = 0.05}).
+This follows the standard TOST procedure where the \eqn{(1 - 2\alpha) \times 100\%} CI
+corresponds to two one-sided tests at level \eqn{\alpha}.
+}
+
+\subsection{Permutation Tests with Non-0.5 Null Values}{
+
+When \code{test_method = "perm"} and \code{mu != 0.5}, the permutation distribution is constructed by centering
+the permuted test statistics at 0.5 (the value implied by exchangeability), while the observed
+test statistic is centered at the hypothesized null value. This approach is valid because
+the studentized permutation distribution converges to the same limit regardless of the
+centering, following the asymptotic theory of Janssen (1997) and Neubert & Brunner (2007).
+}
 }
 \examples{
 data(mtcars)
+# Standard test of stochastic equality
 brunner_munzel(mpg ~ am, data = mtcars)
+
+# Test using logit transformation for range-preserving CIs
+brunner_munzel(mpg ~ am, data = mtcars, test_method = "logit")
+
+# Test against a specific null value
+brunner_munzel(mpg ~ am, data = mtcars, mu = 0.3)
+
+# Equivalence test: is the relative effect between 0.35 and 0.65?
+brunner_munzel(mpg ~ am, data = mtcars,
+               alternative = "equivalence",
+               mu = c(0.35, 0.65))
+
+# Minimal effect test: is the relative effect outside 0.4 to 0.6?
+brunner_munzel(mpg ~ am, data = mtcars,
+               alternative = "minimal.effect",
+               mu = c(0.4, 0.6))
+
+# Permutation-based equivalence test
+brunner_munzel(mpg ~ am, data = mtcars,
+               alternative = "equivalence",
+               mu = c(0.35, 0.65),
+               test_method = "perm")
+
 }
 \references{
 Brunner, E., Munzel, U. (2000). The Nonparametric Behrens-Fisher Problem: Asymptotic Theory and a Small Sample Approximation. Biometrical Journal 42, 17 -25.
@@ -103,7 +228,13 @@ Neubert, K., Brunner, E., (2006). A Studentized Permutation Test for the Nonpara
 
 Munzel, U., Brunner, E. (2002). An Exact Paired Rank Test. Biometrical Journal 44, 584-593.
 
+Munzel, U., Hauschke, D. (2003). A nonparametric test for proving noninferiority in clinical trials with ordered categorical data. Pharmaceutical Statistics, 2, 31-37.
+
 Konietschke, F., Placzek, M., Schaarschmidt, F., & Hothorn, L. A. (2015). nparcomp: an R software package for nonparametric multiple comparisons and simultaneous confidence intervals. Journal of Statistical Software 64 (2015), Nr. 9, 64(9), 1-17. http://www.jstatsoft.org/v64/i09/
+
+Janssen, A. (1997). Studentized permutation tests for non-i.i.d. hypotheses and the generalized Behrens-Fisher problem. Statistics & Probability Letters, 36(1), 9-21.
+
+Phipson, B., & Smyth, G. K. (2010). Permutation P-values should never be zero: calculating exact P-values when permutations are randomly drawn. Statistical Applications in Genetics and Molecular Biology, 9(1), Article 39.
 }
 \seealso{
 Other Robust tests: 

@@ -324,6 +324,151 @@ test_that("brunner_munzel",{
   expect_equal(testy1$p.value,testy2$p.value)
   expect_equal(testy1$p.value, testydf$p.value)
 
+  # Direct equivalence/minimal.effect tests with mu as length-2 vector ----
+
+  # Two-sample: equivalence with t-method
+  eq_test <- brunner_munzel(data = mtcars,
+                            mpg ~ am,
+                            alternative = "equivalence",
+                            mu = c(0.3, 0.7))
+  expect_true(eq_test$alternative == "equivalence")
+  expect_equal(length(eq_test$null.value), 2)
+  expect_true(eq_test$p.value >= 0 && eq_test$p.value <= 1)
+  # CI should be at 1-2*alpha level
+
+  expect_equal(attr(eq_test$conf.int, "conf.level"), 0.9)
+
+  # Two-sample: minimal.effect with t-method
+  met_test <- brunner_munzel(data = mtcars,
+                             mpg ~ am,
+                             alternative = "minimal.effect",
+                             mu = c(0.4, 0.6))
+  expect_true(met_test$alternative == "minimal.effect")
+  expect_equal(length(met_test$null.value), 2)
+  expect_true(met_test$p.value >= 0 && met_test$p.value <= 1)
+
+  # Two-sample: equivalence with logit method
+  eq_logit <- brunner_munzel(data = mtcars,
+                             mpg ~ am,
+                             alternative = "equivalence",
+                             mu = c(0.3, 0.7),
+                             test_method = "logit")
+  expect_true(eq_logit$alternative == "equivalence")
+  # CI should stay within [0, 1]
+  expect_true(eq_logit$conf.int[1] >= 0 && eq_logit$conf.int[2] <= 1)
+
+  # Two-sample: equivalence with permutation method
+  set.seed(12345)
+  eq_perm <- brunner_munzel(data = mtcars,
+                            mpg ~ am,
+                            alternative = "equivalence",
+                            mu = c(0.3, 0.7),
+                            test_method = "perm",
+                            R = 999)
+  expect_true(eq_perm$alternative == "equivalence")
+  expect_true(eq_perm$p.value >= 0 && eq_perm$p.value <= 1)
+
+  # Two-sample: minimal.effect with permutation method
+  set.seed(12346)
+  met_perm <- brunner_munzel(data = mtcars,
+                             mpg ~ am,
+                             alternative = "minimal.effect",
+                             mu = c(0.4, 0.6),
+                             test_method = "perm",
+                             R = 999)
+  expect_true(met_perm$alternative == "minimal.effect")
+  expect_true(met_perm$p.value >= 0 && met_perm$p.value <= 1)
+
+  # Paired: equivalence with t-method
+  eq_paired <- brunner_munzel(x = sleep$extra[sleep$group == 1],
+                              y = sleep$extra[sleep$group == 2],
+                              paired = TRUE,
+                              alternative = "equivalence",
+                              mu = c(0.3, 0.7))
+  expect_true(eq_paired$alternative == "equivalence")
+  expect_equal(length(eq_paired$null.value), 2)
+
+  # Paired: minimal.effect with t-method
+  met_paired <- brunner_munzel(x = sleep$extra[sleep$group == 1],
+                               y = sleep$extra[sleep$group == 2],
+                               paired = TRUE,
+                               alternative = "minimal.effect",
+                               mu = c(0.4, 0.6))
+  expect_true(met_paired$alternative == "minimal.effect")
+
+  # Paired: equivalence with logit method
+  eq_paired_logit <- brunner_munzel(x = sleep$extra[sleep$group == 1],
+                                    y = sleep$extra[sleep$group == 2],
+                                    paired = TRUE,
+                                    alternative = "equivalence",
+                                    mu = c(0.3, 0.7),
+                                    test_method = "logit")
+  expect_true(eq_paired_logit$alternative == "equivalence")
+
+  # Paired: equivalence with permutation method
+  set.seed(12347)
+  eq_paired_perm <- brunner_munzel(x = sleep$extra[sleep$group == 1],
+                                   y = sleep$extra[sleep$group == 2],
+                                   paired = TRUE,
+                                   alternative = "equivalence",
+                                   mu = c(0.3, 0.7),
+                                   test_method = "perm",
+                                   R = 999)
+  expect_true(eq_paired_perm$alternative == "equivalence")
+
+  # Consistency check: equivalence p-value should equal max of one-sided tests
+  lo_test <- brunner_munzel(data = mtcars,
+                            mpg ~ am,
+                            mu = 0.3,
+                            alternative = "greater")
+  hi_test <- brunner_munzel(data = mtcars,
+                            mpg ~ am,
+                            mu = 0.7,
+                            alternative = "less")
+  eq_direct <- brunner_munzel(data = mtcars,
+                              mpg ~ am,
+                              alternative = "equivalence",
+                              mu = c(0.3, 0.7))
+  expect_equal(eq_direct$p.value, max(lo_test$p.value, hi_test$p.value),
+               tolerance = 1e-10)
+
+  # Consistency check: minimal.effect p-value should equal min of one-sided tests
+  lo_test_met <- brunner_munzel(data = mtcars,
+                                mpg ~ am,
+                                mu = 0.4,
+                                alternative = "less")
+  hi_test_met <- brunner_munzel(data = mtcars,
+                                mpg ~ am,
+                                mu = 0.6,
+                                alternative = "greater")
+  met_direct <- brunner_munzel(data = mtcars,
+                               mpg ~ am,
+                               alternative = "minimal.effect",
+                               mu = c(0.4, 0.6))
+  expect_equal(met_direct$p.value, min(lo_test_met$p.value, hi_test_met$p.value),
+               tolerance = 1e-10)
+
+  # Error handling for equivalence/minimal.effect ----
+
+  # mu must be length 2 for equivalence
+  expect_error(brunner_munzel(data = mtcars, mpg ~ am,
+                              alternative = "equivalence",
+                              mu = 0.5))
+
+  # mu[1] must be less than mu[2]
+  expect_error(brunner_munzel(data = mtcars, mpg ~ am,
+                              alternative = "equivalence",
+                              mu = c(0.7, 0.3)))
+
+  # mu values must be between 0 and 1
+  expect_error(brunner_munzel(data = mtcars, mpg ~ am,
+                              alternative = "equivalence",
+                              mu = c(-0.1, 0.7)))
+
+  expect_error(brunner_munzel(data = mtcars, mpg ~ am,
+                              alternative = "equivalence",
+                              mu = c(0.3, 1.1)))
+
   # Errors ----
 
   expect_error(brunner_munzel(x = rnorm(100),

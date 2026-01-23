@@ -33,7 +33,7 @@ simple_htest(
 
 \item{...}{further arguments to be passed to or from the underlying test functions.}
 
-\item{paired}{a logical indicating whether you want a paired t-test.}
+\item{paired}{a logical indicating whether you want a paired t-test. Cannot be used with the formula method; use x and y vectors instead for paired tests.}
 
 \item{alternative}{the alternative hypothesis:
 - "two.sided": different from mu (default)
@@ -57,7 +57,7 @@ simple_htest(
 
 You can specify just the initial letter (e.g., "t" for "t.test").}
 
-\item{formula}{a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.}
+\item{formula}{a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample test or a factor with two levels giving the corresponding groups. For paired tests, use the default method with x and y vectors instead of the formula method.}
 
 \item{data}{an optional matrix or data frame (or similar: see model.frame) containing the variables in the formula formula. By default the variables are taken from environment(formula).}
 
