@@ -512,14 +512,6 @@ plot_htest_est <- function(htest, alpha = NULL) {
     }
   }
 
-  # Create data frame for plotting
-  df_plot <- data.frame(
-    estimate = unname(estimate),
-    lower.ci = ci_lower,
-    upper.ci = ci_upper,
-    stringsAsFactors = FALSE
-  )
-
   # Determine label for facet
   if (is.null(estimate_name) || length(estimate_name) == 0) {
     facet_label <- "Estimate"
@@ -528,6 +520,15 @@ plot_htest_est <- function(htest, alpha = NULL) {
     facet_label <- paste0(toupper(substr(estimate_name, 1, 1)),
                           substr(estimate_name, 2, nchar(estimate_name)))
   }
+
+  # Create data frame for plotting (include facet_label in the data)
+  df_plot <- data.frame(
+    estimate = unname(estimate),
+    lower.ci = ci_lower,
+    upper.ci = ci_upper,
+    facet_label = facet_label,
+    stringsAsFactors = FALSE
+  )
 
   # Build the plot
   p <- ggplot(df_plot,
@@ -548,17 +549,21 @@ plot_htest_est <- function(htest, alpha = NULL) {
           axis.ticks.y = element_blank())
 
   # Add null value reference line(s)
+  # Use inherit.aes = FALSE to avoid facet issues with geom_vline
   if (!is.null(htest$null.value)) {
     null_vals <- unname(htest$null.value)
 
     if (length(null_vals) == 1) {
       # Single null value (standard hypothesis test)
-      p <- p + geom_vline(xintercept = null_vals, linetype = "dashed")
+      p <- p + geom_vline(xintercept = null_vals, linetype = "dashed",
+                          inherit.aes = FALSE)
     } else if (length(null_vals) == 2) {
       # Two null values (equivalence bounds)
       p <- p +
-        geom_vline(xintercept = null_vals[1], linetype = "dashed") +
-        geom_vline(xintercept = null_vals[2], linetype = "dashed") +
+        geom_vline(xintercept = null_vals[1], linetype = "dashed",
+                   inherit.aes = FALSE) +
+        geom_vline(xintercept = null_vals[2], linetype = "dashed",
+                   inherit.aes = FALSE) +
         scale_x_continuous(sec.axis = dup_axis(
           breaks = round(null_vals, 3),
           name = ""
