@@ -163,7 +163,7 @@ print(res1)
 print(res1b)
 
 ## ----fig.width=6, fig.height=6------------------------------------------------
-plot(res1, type = "simple")
+plot(res1, type = "simple", layout = "combined")
 
 ## ----fig.width=6, fig.height=6, eval=TRUE-------------------------------------
 # Shade the 90% and 95% CI areas

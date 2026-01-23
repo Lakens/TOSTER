@@ -251,7 +251,7 @@ One of the advantages of `t_TOST` is its built-in visualization capabilities. Th
 This is the default plot type, showing the point estimate and confidence intervals relative to the equivalence bounds:
 
 ```{r fig.width=6, fig.height=6}
-plot(res1, type = "simple")
+plot(res1, type = "simple", layout = "combined")
 ```
 
 This plot clearly shows where our observed difference (with confidence intervals) falls in relation to our equivalence bounds (dashed vertical lines).
