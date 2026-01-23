@@ -656,3 +656,49 @@ test_that("All other htests",{
   expect_equal(htest$p.value,df1$p.value)
 
 })
+
+test_that("plot_htest_est works correctly", {
+
+  # Standard two-sample t-test (should auto-convert to difference)
+  t_two <- t.test(extra ~ group, data = sleep)
+  p1 <- plot_htest_est(t_two)
+  expect_s3_class(p1, "ggplot")
+
+  # One-sample t-test
+  t_one <- t.test(sleep$extra, mu = 0)
+  p2 <- plot_htest_est(t_one)
+  expect_s3_class(p2, "ggplot")
+
+  # Correlation test
+  cor_res <- cor.test(mtcars$mpg, mtcars$wt)
+  p3 <- plot_htest_est(cor_res)
+  expect_s3_class(p3, "ggplot")
+
+  # TOST converted to htest (equivalence bounds)
+  tost_res <- t_TOST(extra ~ group, data = sleep, eqb = 1)
+  htest_tost <- as_htest(tost_res)
+  p4 <- plot_htest_est(htest_tost)
+  expect_s3_class(p4, "ggplot")
+
+  # Error cases
+  expect_error(plot_htest_est("not_htest"),
+               "Input must be an object of class")
+
+  # htest without estimate
+  htest_no_est <- t_two
+  htest_no_est$estimate <- NULL
+  expect_error(plot_htest_est(htest_no_est),
+               "htest object has no estimate")
+
+  # htest without conf.int
+  htest_no_ci <- t_two
+  htest_no_ci$conf.int <- NULL
+  expect_error(plot_htest_est(htest_no_ci),
+               "htest object has no confidence interval")
+
+  # Wilcoxon test with CI
+  wilcox_res <- wilcox.test(extra ~ group, data = sleep, conf.int = TRUE)
+  p5 <- plot_htest_est(wilcox_res)
+  expect_s3_class(p5, "ggplot")
+
+})

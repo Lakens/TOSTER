@@ -16,6 +16,7 @@
   estimates = c("raw", "SMD"),
   ci_lines,
   ci_shades,
+  layout = c("stacked", "combined"),
   ...
 )
 
@@ -30,13 +31,15 @@ describe(x, ...)
 
 \item{...}{further arguments passed through, see description of return value for details..}
 
-\item{type}{Type of plot to produce. Default is a consonance density plot "cd". Consonance plots (type = "cd") and null distribution plots (type = "tnull") can also be produced. Note: null distribution plots only available for estimates = "raw".}
+\item{type}{Type of plot to produce. Default is "simple" which shows point estimates with confidence intervals. Other options include consonance plots ("c"), consonance density plots ("cd"), and null distribution plots ("tnull"). Note: null distribution plots only available for estimates = "raw".}
 
 \item{estimates}{indicator of what estimates to plot; options include "raw" or "SMD". Default is is both: c("raw","SMD").}
 
 \item{ci_lines}{Confidence interval lines for plots. Default is 1-alpha*2 (e.g., alpha = 0.05 is 90\%)}
 
 \item{ci_shades}{Confidence interval shades when plot type is "cd".}
+
+\item{layout}{Layout for displaying multiple estimates. Options are "stacked" (default, separate plots stacked vertically) or "combined" (single faceted plot with shared legend). Only applies when both "raw" and "SMD" are in estimates.}
 }
 \value{
 \itemize{

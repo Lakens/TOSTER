@@ -4,10 +4,11 @@
 #'
 #' @param x object of class `TOSTt`.
 #' @param digits Number of digits to print for p-values
-#' @param type Type of plot to produce. Default is a consonance density plot "cd". Consonance plots (type = "cd") and null distribution plots (type = "tnull") can also be produced. Note: null distribution plots only available for estimates = "raw".
+#' @param type Type of plot to produce. Default is "simple" which shows point estimates with confidence intervals. Other options include consonance plots ("c"), consonance density plots ("cd"), and null distribution plots ("tnull"). Note: null distribution plots only available for estimates = "raw".
 #' @param ci_lines Confidence interval lines for plots. Default is 1-alpha*2 (e.g., alpha = 0.05 is 90%)
 #' @param ci_shades Confidence interval shades when plot type is "cd".
 #' @param estimates indicator of what estimates to plot; options include "raw" or "SMD". Default is is both: c("raw","SMD").
+#' @param layout Layout for displaying multiple estimates. Options are "stacked" (default, separate plots stacked vertically) or "combined" (single faceted plot with shared legend). Only applies when both "raw" and "SMD" are in estimates.
 #' @param ... further arguments passed through, see description of return value for details..
 #'
 #' @return
@@ -119,8 +120,10 @@ plot.TOSTt <- function(x,
                        estimates = c("raw","SMD"),
                        ci_lines,
                        ci_shades,
+                       layout = c("stacked", "combined"),
                        ...){
   type = match.arg(type)
+  layout = match.arg(layout)
 
   low_eqd = x$eqb$low_eq[2]
   high_eqd = x$eqb$high_eq[2]
@@ -177,12 +180,75 @@ plot.TOSTt <- function(x,
 
     ci_print = x$effsize$conf.level[1]
 
+    # Build subtitle with decision text and equivalence bounds
+    eqb_text = paste0("Equivalence bounds: [",
+                      round(low_eqt, 3), ", ",
+                      round(high_eqt, 3), "] (raw)")
+    subtitle_text = paste0(x$decision$TOST, "\n",
+                           x$decision$ttest, "\n",
+                           eqb_text)
+
     # Get estimates for mean ----
     df_t = x$effsize[1,]
 
     # Get estimates for SMD ----
     df_d = x$effsize[2,]
 
+    # Check if we should use combined layout
+    both_estimates = "SMD" %in% estimates && "raw" %in% estimates
+
+    if(both_estimates && layout == "combined"){
+      # Combined faceted plot ----
+      # Create combined data frame with scale indicator
+      df_combined = rbind(
+        data.frame(
+          estimate = df_t$estimate,
+          lower.ci = df_t$lower.ci,
+          upper.ci = df_t$upper.ci,
+          type = paste0(x_label, " (raw)"),
+          low_eq = low_eqt,
+          high_eq = high_eqt,
+          stringsAsFactors = FALSE
+        ),
+        data.frame(
+          estimate = df_d$estimate,
+          lower.ci = df_d$lower.ci,
+          upper.ci = df_d$upper.ci,
+          type = paste0(x$smd$smd_label, " (standardized)"),
+          low_eq = low_eqd,
+          high_eq = high_eqd,
+          stringsAsFactors = FALSE
+        )
+      )
+      # Preserve order: raw first, then SMD
+      df_combined$type = factor(df_combined$type,
+                                levels = c(paste0(x_label, " (raw)"),
+                                           paste0(x$smd$smd_label, " (standardized)")))
+
+      plts <- ggplot(df_combined,
+                     aes(x = estimate,
+                         y = 1,
+                         xmin = lower.ci,
+                         xmax = upper.ci)) +
+        geom_pointrange() +
+        geom_vline(aes(xintercept = low_eq), linetype = "dashed") +
+        geom_vline(aes(xintercept = high_eq), linetype = "dashed") +
+        facet_wrap(~type, scales = "free_x") +
+        theme_tidybayes() +
+        labs(title = subtitle_text,
+             caption = paste0(ci_print*100, "% Confidence Interval")) +
+        theme(strip.text = element_text(face = "bold", size = 10),
+              plot.title = element_text(size = 10),
+              axis.title.x = element_blank(),
+              axis.title.y = element_blank(),
+              axis.text.y = element_blank(),
+              axis.ticks.y = element_blank())
+
+      return(plts)
+    }
+
+    # Stacked layout (default) ----
+    # Raw plot (now shown on top with subtitle)
     t_plot <-
       ggplot(df_t,
              aes(x=estimate,
@@ -198,15 +264,16 @@ plot.TOSTt <- function(x,
       facet_grid(~as.character(x_label)) +
       theme_tidybayes() +
       labs(caption = paste0(ci_print*100,"% Confidence Interval"),
-           subtitle = paste0(x$decision$TOST, " \n", x$decision$ttest)) +
+           title = subtitle_text) +
       theme(strip.text = element_text(face = "bold",
                                       size = 10),
-            plot.subtitle = element_text(size = 10),
+            plot.title = element_text(size = 10),
             axis.title.x = element_blank(),
             axis.title.y=element_blank(),
             axis.text.y=element_blank(),
             axis.ticks.y=element_blank())
 
+    # SMD plot (now shown on bottom)
     d_plot <-
       ggplot(df_d,
              aes(x=estimate,
@@ -229,14 +296,10 @@ plot.TOSTt <- function(x,
             axis.text.y=element_blank(),
             axis.ticks.y=element_blank())
 
-
-
-    # add the legend to the row we made earlier. Give it one-third of
-    # the width of one plot (via rel_widths).
-
-    if("SMD" %in% estimates && "raw" %in% estimates){
-      plts = plot_grid(d_plot,
-                       t_plot,
+    # Stack plots: raw on top, SMD on bottom
+    if(both_estimates){
+      plts = plot_grid(t_plot,
+                       d_plot,
                        ncol = 1)
     }
 

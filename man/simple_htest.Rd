@@ -171,11 +171,13 @@ Other TOST:
 
 Other htest: 
 \code{\link{as_htest}()},
-\code{\link{htest-helpers}}
+\code{\link{htest-helpers}},
+\code{\link{plot_htest_est}()}
 
 Other htest: 
 \code{\link{as_htest}()},
-\code{\link{htest-helpers}}
+\code{\link{htest-helpers}},
+\code{\link{plot_htest_est}()}
 }
 \concept{TOST}
 \concept{htest}

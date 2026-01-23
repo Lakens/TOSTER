@@ -404,6 +404,7 @@ rounder_stat = function(number,
 
 printable_pval = function(pval,
                           digits = 3){
+
   cutoff = 1*10^(-1*digits)
   if(pval < cutoff){
     pval = paste0("p < ",cutoff)
@@ -412,4 +413,158 @@ printable_pval = function(pval,
   }
 
   return(pval)
+}
+
+#' @title Plot Estimate from 'htest' Object
+#'
+#' @description
+#' `r lifecycle::badge('stable')`
+#'
+#' Creates a simple point estimate plot with confidence interval from any 'htest' object
+#' that contains an estimate and confidence interval. This provides a visual representation
+#' of the effect size and its uncertainty, similar to a forest plot.
+#'
+#' @param htest An S3 object of class 'htest' containing at minimum an `estimate` and
+#'   `conf.int` component. Examples include output from `t.test()`, `cor.test()`,
+#'   or TOSTER functions converted with `as_htest()`.
+#' @param alpha Significance level for determining the confidence level label.
+#'
+#' @details
+#' The function creates a horizontal point-range plot showing:
+#' \itemize{
+#'   \item Point estimate (black dot)
+#'   \item Confidence interval (horizontal line)
+#'   \item Null value(s) as dashed vertical reference line(s)
+#' }
+#'
+#' For two-sample t-tests, R's `t.test()` returns both group means as the estimate
+
+#' rather
+#' than their difference. This function automatically computes the difference to display
+#' a single meaningful estimate with its confidence interval.
+#'
+#' If the 'htest' object contains equivalence bounds (two values in `null.value`),
+#' both bounds are displayed as dashed vertical lines.
+#'
+#' @return A `ggplot` object that can be further customized using ggplot2 functions.
+#'
+#' @examples
+#' # Standard t-test
+#' t_result <- t.test(extra ~ group, data = sleep)
+#' plot_htest_est(t_result)
+#'
+#' # One-sample t-test
+#' t_one <- t.test(sleep$extra, mu = 0)
+#' plot_htest_est(t_one)
+#'
+#' # Correlation test
+#' cor_result <- cor.test(mtcars$mpg, mtcars$wt)
+#' plot_htest_est(cor_result)
+#'
+#' # TOST result converted to htest
+#' tost_res <- t_TOST(extra ~ group, data = sleep, eqb = 1)
+#' plot_htest_est(as_htest(tost_res))
+#'
+#' @import ggplot2
+#' @import ggdist
+#' @family htest
+#' @export
+plot_htest_est <- function(htest, alpha = NULL) {
+
+
+  if (!inherits(htest, "htest")) {
+    stop("Input must be an object of class
+'htest'")
+  }
+
+  if (is.null(htest$estimate)) {
+    stop("Cannot create estimate plot: htest object has no estimate")
+  }
+
+  if (is.null(htest$conf.int)) {
+    stop("Cannot create estimate plot: htest object has no confidence interval")
+  }
+
+  # Handle two-sample t-test case where estimate contains both group means
+  estimate <- htest$estimate
+  estimate_name <- names(estimate)
+
+  if (grepl("two sample t-test", htest$method, ignore.case = TRUE) &&
+      length(estimate) > 1) {
+    estimate <- estimate[1] - estimate[2]
+    estimate_name <- "mean difference"
+  } else if (length(estimate) > 1) {
+    # For other cases with multiple estimates, warn and use first
+    warning("htest object has multiple estimates; using first estimate only")
+    estimate <- estimate[1]
+    estimate_name <- names(htest$estimate)[1]
+  }
+
+  # Get confidence interval
+  ci_lower <- min(htest$conf.int)
+  ci_upper <- max(htest$conf.int)
+  conf_level <- attr(htest$conf.int, "conf.level")
+
+  if (is.null(conf_level)) {
+    conf_level <- 0.95
+    if (is.null(alpha)) {
+      message("No confidence level found in htest object. Defaulting to 95%.")
+    }
+  }
+
+  # Create data frame for plotting
+  df_plot <- data.frame(
+    estimate = unname(estimate),
+    lower.ci = ci_lower,
+    upper.ci = ci_upper,
+    stringsAsFactors = FALSE
+  )
+
+  # Determine label for facet
+  if (is.null(estimate_name) || length(estimate_name) == 0) {
+    facet_label <- "Estimate"
+  } else {
+    # Capitalize first letter
+    facet_label <- paste0(toupper(substr(estimate_name, 1, 1)),
+                          substr(estimate_name, 2, nchar(estimate_name)))
+  }
+
+  # Build the plot
+  p <- ggplot(df_plot,
+              aes(x = estimate,
+                  y = 1,
+                  xmin = lower.ci,
+                  xmax = upper.ci)) +
+    geom_pointrange() +
+    facet_grid(~facet_label) +
+    theme_tidybayes() +
+    labs(caption = paste0(conf_level * 100, "% Confidence Interval"),
+         subtitle = htest$method) +
+    theme(strip.text = element_text(face = "bold", size = 10),
+          plot.subtitle = element_text(size = 10),
+          axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank())
+
+  # Add null value reference line(s)
+  if (!is.null(htest$null.value)) {
+    null_vals <- unname(htest$null.value)
+
+    if (length(null_vals) == 1) {
+      # Single null value (standard hypothesis test)
+      p <- p + geom_vline(xintercept = null_vals, linetype = "dashed")
+    } else if (length(null_vals) == 2) {
+      # Two null values (equivalence bounds)
+      p <- p +
+        geom_vline(xintercept = null_vals[1], linetype = "dashed") +
+        geom_vline(xintercept = null_vals[2], linetype = "dashed") +
+        scale_x_continuous(sec.axis = dup_axis(
+          breaks = round(null_vals, 3),
+          name = ""
+        ))
+    }
+  }
+
+  return(p)
 }

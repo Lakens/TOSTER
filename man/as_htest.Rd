@@ -57,6 +57,7 @@ as_htest(res2)
 \seealso{
 Other htest: 
 \code{\link{htest-helpers}},
+\code{\link{plot_htest_est}()},
 \code{\link{simple_htest}()}
 }
 \concept{htest}
