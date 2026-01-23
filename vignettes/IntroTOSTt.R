@@ -182,15 +182,16 @@ plot(res1, type = "tnull")
 # describe_htest(res1b)
 
 ## -----------------------------------------------------------------------------
-res2 = t_TOST(formula = extra ~ group,
-              data = sleep,
+# For paired tests, use separate vectors rather than formula notation
+res2 = t_TOST(x = sleep$extra[sleep$group == 1],
+              y = sleep$extra[sleep$group == 2],
               paired = TRUE,  # specify paired analysis
               eqb = .5)
 res2
 
 res2b = simple_htest(
-  formula = extra ~ group,
-  data = sleep,
+  x = sleep$extra[sleep$group == 1],
+  y = sleep$extra[sleep$group == 2],
   paired = TRUE,
   mu = .5,
   alternative = "e")

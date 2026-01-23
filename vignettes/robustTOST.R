@@ -4,7 +4,6 @@ library(TOSTER)
 
 test1 = wilcox_TOST(formula = extra ~ group,
                       data = sleep,
-                      paired = FALSE,
                       eqb = .5)
 
 
@@ -14,7 +13,6 @@ print(test1)
 # Rank biserial
 wilcox_TOST(formula = extra ~ group,
                       data = sleep,
-                      paired = FALSE,
                       ses = "r",
                       eqb = .5)
 
@@ -22,7 +20,6 @@ wilcox_TOST(formula = extra ~ group,
 
 wilcox_TOST(formula = extra ~ group,
                       data = sleep,
-                      paired = FALSE,
                       ses = "o",
                       eqb = .5)
 
@@ -30,32 +27,75 @@ wilcox_TOST(formula = extra ~ group,
 
 wilcox_TOST(formula = extra ~ group,
                       data = sleep,
-                      paired = FALSE,
                       ses = "c",
                       eqb = .5)
 
 
 ## -----------------------------------------------------------------------------
-# studentized test
+# Default studentized test (t-approximation)
 brunner_munzel(formula = extra ~ group,
-                      data = sleep,
-                      paired = FALSE)
-# permutation
-brunner_munzel(formula = extra ~ group,
-                      data = sleep,
-                      paired = FALSE,
-               perm = TRUE)
+               data = sleep)
 
 ## -----------------------------------------------------------------------------
-# permutation based Brunner-Munzel test of equivalence
-simple_htest(formula = extra ~ group,
-             test = "brunner",
-             data = sleep,
-             paired = FALSE,
-             alternative = "equ",
-             mu = .7,
-             perm = TRUE)
+# Permutation test (recommended for small samples)
+brunner_munzel(formula = extra ~ group,
+               data = sleep,
+               test_method = "perm")
 
+## -----------------------------------------------------------------------------
+# Logit transformation for range-preserving CIs
+brunner_munzel(formula = extra ~ group,
+               data = sleep,
+               test_method = "logit")
+
+## -----------------------------------------------------------------------------
+# Equivalence test: is the relative effect between 0.3 and 0.7?
+brunner_munzel(formula = extra ~ group,
+               data = sleep,
+               alternative = "equivalence",
+               mu = c(0.3, 0.7))
+
+## -----------------------------------------------------------------------------
+# Permutation-based equivalence test
+brunner_munzel(formula = extra ~ group,
+               data = sleep,
+               alternative = "equivalence",
+               mu = c(0.3, 0.7),
+               test_method = "perm")
+
+## -----------------------------------------------------------------------------
+# Minimal effect test: is the relative effect outside 0.4 to 0.6?
+brunner_munzel(formula = extra ~ group,
+               data = sleep,
+               alternative = "minimal.effect",
+               mu = c(0.4, 0.6))
+
+## -----------------------------------------------------------------------------
+# Paired samples test
+brunner_munzel(x = sleep$extra[sleep$group == 1],
+               y = sleep$extra[sleep$group == 2],
+               paired = TRUE)
+
+## -----------------------------------------------------------------------------
+# Paired samples with permutation test
+brunner_munzel(x = sleep$extra[sleep$group == 1],
+               y = sleep$extra[sleep$group == 2],
+               paired = TRUE,
+               test_method = "perm")
+
+## -----------------------------------------------------------------------------
+# Test if the relative effect differs from 0.3
+brunner_munzel(formula = extra ~ group,
+               data = sleep,
+               mu = 0.3)
+
+## -----------------------------------------------------------------------------
+# Example: test non-inferiority with lower bound of 0.35
+# (i.e., the new treatment should not be substantially worse)
+brunner_munzel(formula = extra ~ group,
+               data = sleep,
+               alternative = "greater",
+               mu = 0.35)
 
 ## -----------------------------------------------------------------------------
 data('sleep')
@@ -76,7 +116,7 @@ y <- rnorm(20, mean = 0)
 perm_t_test(x, y, R = 999)
 
 # Trimmed permutation test (robust to outliers)
-perm_t_test(x, y, trim = 0.1, R = 999)
+perm_t_test(x, y, tr = 0.1, R = 999)
 
 ## -----------------------------------------------------------------------------
 # Equivalence test: is the effect within ±3 units?
@@ -99,8 +139,9 @@ perm_t_test(x = before, y = after,
 ## -----------------------------------------------------------------------------
 data('sleep')
 
-test1 = boot_t_TOST(formula = extra ~ group,
-                      data = sleep,
+# For paired tests with bootstrap methods, use separate vectors
+test1 = boot_t_TOST(x = sleep$extra[sleep$group == 1],
+                    y = sleep$extra[sleep$group == 2],
                       paired = TRUE,
                       eqb = .5,
                     R = 499)
@@ -146,15 +187,16 @@ boot_log_TOST(
 )
 
 ## -----------------------------------------------------------------------------
-ses_calc(formula = extra ~ group,
-         data = sleep,
+# For paired tests, use separate vectors
+ses_calc(x = sleep$extra[sleep$group == 1],
+         y = sleep$extra[sleep$group == 2],
          paired = TRUE,
          ses = "r")
 
 # Setting bootstrap replications low to
 ## reduce compiling time of vignette
-boot_ses_calc(formula = extra ~ group,
-         data = sleep,
+boot_ses_calc(x = sleep$extra[sleep$group == 1],
+              y = sleep$extra[sleep$group == 2],
          paired = TRUE,
          R = 199,
          boot_ci = "perc", # recommend percentile bootstrap for paired SES
