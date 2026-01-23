@@ -871,11 +871,11 @@ perm_t_test.formula <- function(formula, data, subset, na.action, ...) {
     stop("'formula' missing or incorrect")
   }
 
-  # Check for paired argument in ... and reject it
+  # Check for paired argument in ... and warn user
   dots <- list(...)
   if("paired" %in% names(dots)){
     if(isTRUE(dots$paired)){
-      stop("cannot use 'paired' in formula method")
+      message("Using 'paired = TRUE' with the formula interface is not recommended. Please ensure your data is sorted appropriately to make the correct paired comparison.")
     }
   }
 

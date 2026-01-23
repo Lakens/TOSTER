@@ -338,11 +338,11 @@ wilcox_TOST.formula = function(formula,
      || (length(attr(terms(formula[-2L]), "term.labels")) != 1L))
     stop("'formula' missing or incorrect")
   
-  # Check for paired argument in ... and reject it
+  # Check for paired argument in ... and warn user
   dots <- list(...)
   if("paired" %in% names(dots)){
     if(isTRUE(dots$paired)){
-      stop("cannot use 'paired' in formula method")
+      message("Using 'paired = TRUE' with the formula interface is not recommended. Please ensure your data is sorted appropriately to make the correct paired comparison.")
     }
   }
   
