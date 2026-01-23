@@ -248,6 +248,10 @@ plot.TOSTt <- function(x,
     }
 
     # Stacked layout (default) ----
+    # Build facet labels with scale indicator
+    raw_facet_label = paste0(x_label, " (raw)")
+    smd_facet_label = paste0(x$smd$smd_label, " (standardized)")
+
     # Raw plot (now shown on top with subtitle)
     t_plot <-
       ggplot(df_t,
@@ -261,7 +265,7 @@ plot.TOSTt <- function(x,
       scale_x_continuous(sec.axis = dup_axis(breaks=c(round(low_eqt,round_t),
                                                       round(high_eqt,round_t)),
                                              name = "")) +
-      facet_grid(~as.character(x_label)) +
+      facet_grid(~as.character(raw_facet_label)) +
       theme_tidybayes() +
       labs(caption = paste0(ci_print*100,"% Confidence Interval"),
            title = subtitle_text) +
@@ -286,7 +290,7 @@ plot.TOSTt <- function(x,
       scale_x_continuous(sec.axis = dup_axis(breaks=c(round(low_eqd,round_t),
                                                       round(high_eqd,round_t)),
                                              name = "")) +
-      facet_grid(~as.character(x$smd$smd_label)) +
+      facet_grid(~as.character(smd_facet_label)) +
       labs(caption = paste0(ci_print*100,"% Confidence Interval")) +
       theme_tidybayes() +
       theme(strip.text = element_text(face = "bold",
