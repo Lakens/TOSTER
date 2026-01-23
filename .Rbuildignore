@@ -26,3 +26,5 @@ NUL
 ^papers
 ^junk
 ^codecov\.yml$
+^CLAUDE\.md$
+^references$
