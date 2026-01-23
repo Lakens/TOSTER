@@ -119,7 +119,7 @@ Three test methods are available:
 \item "t": The default method uses a t-distribution approximation with Satterthwaite-Welch
 degrees of freedom. This is appropriate for moderate to large sample sizes.
 \item "logit": Uses a logit transformation to produce range-preserving confidence intervals
-that are guaranteed to stay within \link{0, 1}. This method is recommended when the estimated
+that are guaranteed to stay within \verb{[0, 1]}. This method is recommended when the estimated
 relative effect is close to 0 or 1.
 \item "perm": A studentized permutation test following Neubert & Brunner (2007). This method
 is highly recommended when sample sizes are small (< 15 per group) as it provides better
@@ -138,11 +138,11 @@ For the standard alternatives, the null hypothesis is that the relative effect e
 
 For equivalence and minimal effect testing using the two one-sided tests (TOST) procedure:
 \itemize{
-\item "equivalence": H0: p ≤ mu\link{1} OR p ≥ mu\link{2} vs H1: mu\link{1} < p < mu\link{2}
+\item "equivalence": H0: p ≤ mu[1] OR p ≥ mu[2] vs H1: mu[1] < p < mu[2]
 
 Tests whether the relative effect falls within the specified bounds.
 The p-value is the maximum of the two one-sided p-values.
-\item "minimal.effect": H0: mu\link{1} < p < mu\link{2} vs H1: p ≤ mu\link{1} OR p ≥ mu\link{2}
+\item "minimal.effect": H0: mu[1] < p < mu[2] vs H1: p ≤ mu[1] OR p ≥ mu[2]
 
 Tests whether the relative effect falls outside the specified bounds.
 The p-value is the minimum of the two one-sided p-values.

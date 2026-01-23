@@ -58,7 +58,7 @@
 #'   degrees of freedom. This is appropriate for moderate to large sample sizes.
 #'
 #' * "logit": Uses a logit transformation to produce range-preserving confidence intervals
-#'   that are guaranteed to stay within [0, 1]. This method is recommended when the estimated
+#'   that are guaranteed to stay within `[0, 1]`. This method is recommended when the estimated
 #'   relative effect is close to 0 or 1.
 #'
 #' * "perm": A studentized permutation test following Neubert & Brunner (2007). This method
@@ -75,12 +75,12 @@
 #'
 #' For equivalence and minimal effect testing using the two one-sided tests (TOST) procedure:
 #'
-#' * "equivalence": H0: p ≤ mu[1] OR p ≥ mu[2] vs H1: mu[1] < p < mu[2]
+#' * "equivalence": H0: p ≤ mu\[1\] OR p ≥ mu\[2\] vs H1: mu\[1\] < p < mu\[2\]
 #'
 #'   Tests whether the relative effect falls within the specified bounds.
 #'   The p-value is the maximum of the two one-sided p-values.
 #'
-#' * "minimal.effect": H0: mu[1] < p < mu[2] vs H1: p ≤ mu[1] OR p ≥ mu[2]
+#' * "minimal.effect": H0: mu\[1\] < p < mu\[2\] vs H1: p ≤ mu\[1\] OR p ≥ mu\[2\]
 #'
 #'   Tests whether the relative effect falls outside the specified bounds.
 #'   The p-value is the minimum of the two one-sided p-values.
