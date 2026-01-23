@@ -9,16 +9,17 @@ library(ggdist)
 
 
 ## -----------------------------------------------------------------------------
-smd_calc(formula = extra ~ group,
-         data = sleep,
+# For paired tests, use separate vectors
+smd_calc(x = sleep$extra[sleep$group == 1],
+         y = sleep$extra[sleep$group == 2],
          paired = TRUE,
          smd_ci = "nct",
          bias_correction = F)
 
 # Setting bootstrap replications low to
 ## reduce compiling time of vignette
-boot_smd_calc(formula = extra ~ group,
-         data = sleep,
+boot_smd_calc(x = sleep$extra[sleep$group == 1],
+              y = sleep$extra[sleep$group == 2],
          R = 199,
          paired = TRUE,
          boot_ci = "stud",

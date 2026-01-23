@@ -85,7 +85,7 @@ for multiple testing corrections and does not guarantee exact Type I error contr
 statistic and effect sizes are stored in the output. Set to \code{FALSE} for large datasets
 to save memory.}
 
-\item{formula}{a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.}
+\item{formula}{a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample test or a factor with two levels giving the corresponding groups. For paired tests, use the default method with x and y vectors instead of the formula method.}
 
 \item{data}{an optional matrix or data frame (or similar: see model.frame) containing the variables in the formula formula. By default the variables are taken from environment(formula).}
 

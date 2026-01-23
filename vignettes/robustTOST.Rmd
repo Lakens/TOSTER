@@ -35,7 +35,7 @@ The following table provides a quick overview of the robust methods covered in t
 | Method | Function | Key Characteristics | Best Used When |
 |--------|----------|---------------------|---------------|
 | Wilcoxon TOST | `wilcox_TOST()` | Rank-based, nonparametric | Ordinal data; see caveats below |
-| Brunner-Munzel | `brunner_munzel()` with `simple_htest()` | Probability-based, robust to heteroscedasticity | Stochastic superiority is the effect of interest |
+| Brunner-Munzel | `brunner_munzel()` | Probability-based, robust to heteroscedasticity | Stochastic superiority is the effect of interest |
 | Permutation t-test | `perm_t_test()` | Resampling without replacement, exact p-values possible | Small samples, mean differences, exact inference |
 | Bootstrap TOST | `boot_t_TOST()` | Resampling with replacement, flexible | Moderate samples, mean differences, visualization |
 | Log-Transformed TOST | `log_TOST()` | Ratio-based, for multiplicative comparisons | Comparing relative differences (e.g., bioequivalence) |
@@ -260,21 +260,21 @@ wilcox_TOST(formula = extra ~ group,
 - **Concordance probability (`"c"`)** is beneficial when you want to express the effect in terms of probability, making it accessible to non-statisticians.
 - **WMW odds (`"o"`)** is helpful when you want to express the effect in terms familiar to those who work with odds ratios in logistic regression or epidemiology.
 
-# Brunner-Munzel
+# Brunner-Munzel Test
 
-As @karch2021 explained, there are some reasons to dislike the WMW family of tests as the non-parametric alternative to the t-test. Regardless of the underlying statistical arguments^[I would like to note that I think the statistical properties of the WMW tests are sound, and Frank Harrell has written [many](https://www.fharrell.com/post/po/) [blogposts](https://www.fharrell.com/post/wpo/) outlined their sound application in biomedicine. ], it can be argued that the interpretation of the WMW tests, especially when involving equivalence testing, is a tad difficult.
+As Karch (2021) explained, there are some reasons to dislike the Wilcoxon-Mann-Whitney (WMW) family of tests as the non-parametric alternative to the t-test. Regardless of the underlying statistical arguments^[I would like to note that I think the statistical properties of the WMW tests are sound, and Frank Harrell has written [many](https://www.fharrell.com/post/po/) [blogposts](https://www.fharrell.com/post/wpo/) outlining their sound application in biomedicine.], it can be argued that the interpretation of the WMW tests, especially when involving equivalence testing, is difficult.
 Some may want a non-parametric alternative to the WMW test, and the Brunner-Munzel test(s) may be a useful option.
 
 ## Overview and Advantages
 
-The Brunner-Munzel test [@brunner2000; @neubert2007] offers several advantages over the Wilcoxon-Mann-Whitney tests:
+The Brunner-Munzel test (Brunner & Munzel, 2000; Neubert & Brunner, 2007) offers several advantages over the Wilcoxon-Mann-Whitney tests:
 
 1. It does not assume equal distributions (shapes) between groups
 2. It is robust to heteroscedasticity (unequal variances)
-3. It provides a more interpretable effect size measure ("relative effect")
+3. It provides a more interpretable effect size measure (the "relative effect")
 4. It maintains good statistical properties even with unequal sample sizes
 
-The Brunner-Munzel test is based on calculating the "stochastic superiority" [@karch2021, i.e., probability of superiority], which is usually referred to as the relative effect, based on the ranks of the two groups being compared (X and Y). A Brunner-Munzel type test is then a directional test of an effect, and answers a question akin to "what is the probability that a randomly sampled value of X will be greater than Y?"
+The Brunner-Munzel test is based on calculating the "stochastic superiority" (Karch, 2021), which is usually referred to as the relative effect, based on the ranks of the two groups being compared (X and Y). A Brunner-Munzel type test is then a directional test of an effect, and answers a question akin to "what is the probability that a randomly sampled value of X will be greater than Y?"
 
 $$
 \hat p = P(X>Y) + 0.5 \cdot P(X=Y)
@@ -288,18 +288,16 @@ Where:
 
 The relative effect $\hat p$ has an intuitive interpretation:
 
-- $\hat p = 0.5$ indicates no difference between groups
+- $\hat p = 0.5$ indicates no difference between groups (stochastic equality)
 - $\hat p > 0.5$ indicates values in X tend to be greater than values in Y
 - $\hat p < 0.5$ indicates values in X tend to be smaller than values in Y
 
 ## Basics of the Calculative Approach
 
-In this section, I will quickly detail the calculative approach that underlies the Brunner-Munzel test in `TOSTER`.
-
 A studentized test statistic can be calculated as:
 
 $$
-t = \sqrt{N} \cdot \frac{\hat p -p_{null}}{s}
+t = \sqrt{N} \cdot \frac{\hat p - p_{null}}{s}
 $$
 
 Where:
@@ -309,54 +307,156 @@ Where:
 - $p_{null}$ is the null hypothesis value (typically 0.5)
 - $s$ is the rank-based Brunner-Munzel standard error
 
-The default null hypothesis $p_{null}$ is typically 0.5 (50% probability of superiority is the default null), and $s$ refers the rank-based Brunner-Munzel standard error. The null can be modified therefore allowing for equivalence testing *directly based on the relative effect*. Additionally, for paired samples the probability of superiority is based on a *hypothesis of exchangability* and is not based on the differences scores^[This means the relative effect will *not* match the concordance probability provided by `ses_calc`].
+The default null hypothesis $p_{null}$ is typically 0.5 (50% probability of superiority is the default null), and $s$ refers to the rank-based Brunner-Munzel standard error. The null can be modified, thereby allowing for equivalence testing *directly based on the relative effect*. Additionally, for paired samples the probability of superiority is based on a *hypothesis of exchangeability* and is not based on the difference scores^[This means the relative effect will *not* match the concordance probability provided by `ses_calc`.].
 
-For more details on the calculative approach, I suggest reading @karch2021. At small sample sizes, it is recommended that the permutation version of the test (`perm = TRUE`) be used rather than the basic test statistic approach.
+For more details on the calculative approach, I suggest reading Karch (2021). At small sample sizes, it is recommended that the permutation version of the test (`test_method = "perm"`) be used rather than the basic test statistic approach.
 
-## Example
+## Test Methods
 
-The interface for the function is very similar to the `t.test` function. The `brunner_munzel` function itself does not allow for equivalence tests, but you can set an alternative hypothesis for "two.sided", "less", or "greater".
+The `brunner_munzel` function provides three test methods via the `test_method` argument:
+
+- **"t"** (default): Uses a t-distribution approximation with Satterthwaite-Welch degrees of freedom. This is appropriate for moderate to large sample sizes (generally n ≥ 15 per group).
+
+- **"logit"**: Uses a logit transformation to produce range-preserving confidence intervals that are guaranteed to stay within [0, 1]. This method is recommended when the estimated relative effect is close to 0 or 1.
+
+- **"perm"**: A studentized permutation test following Neubert & Brunner (2007). This method is highly recommended when sample sizes are small (< 15 per group) as it provides better control of Type I error rates in these situations.
+
+## Examples
+
+### Basic Two-Sample Test
+
+The interface for the function is similar to `t.test`. The `brunner_munzel` function allows for standard hypothesis tests ("two.sided", "less", "greater") as well as equivalence and minimal effect tests.
 
 ```{r}
-# studentized test
+# Default studentized test (t-approximation)
 brunner_munzel(formula = extra ~ group,
-                      data = sleep)
-# permutation
-brunner_munzel(formula = extra ~ group,
-                      data = sleep,
-               perm = TRUE)
+               data = sleep)
 ```
-
-The `simple_htest` function allows TOST tests using a Brunner-Munzel test by setting the alternative to "equivalence" or "minimal.effect". The equivalence bounds, based on the relative effect, can be set with the `mu` argument.
 
 ```{r}
-# permutation based Brunner-Munzel test of equivalence
-simple_htest(formula = extra ~ group,
-             test = "brunner",
-             data = sleep,
-             alternative = "equ",
-             mu = .7,
-             perm = TRUE)
-
+# Permutation test (recommended for small samples)
+brunner_munzel(formula = extra ~ group,
+               data = sleep,
+               test_method = "perm")
 ```
 
-### Interpreting Brunner-Munzel Results
+### Logit Transformation for Range-Preserving CIs
+
+When the relative effect estimate is close to 0 or 1, the standard confidence intervals may extend beyond the valid [0, 1] range. The logit transformation method addresses this:
+
+```{r}
+# Logit transformation for range-preserving CIs
+brunner_munzel(formula = extra ~ group,
+               data = sleep,
+               test_method = "logit")
+```
+
+### Equivalence Testing
+
+The `brunner_munzel` function directly supports equivalence testing via the `alternative` argument. For equivalence tests, you specify bounds for the relative effect using the `mu` argument:
+
+```{r}
+# Equivalence test: is the relative effect between 0.3 and 0.7?
+brunner_munzel(formula = extra ~ group,
+               data = sleep,
+               alternative = "equivalence",
+               mu = c(0.3, 0.7))
+```
+
+```{r}
+# Permutation-based equivalence test
+brunner_munzel(formula = extra ~ group,
+               data = sleep,
+               alternative = "equivalence",
+               mu = c(0.3, 0.7),
+               test_method = "perm")
+```
+
+### Minimal Effect Testing
+
+You can also test whether the relative effect falls *outside* specified bounds (minimal effect test):
+
+```{r}
+# Minimal effect test: is the relative effect outside 0.4 to 0.6?
+brunner_munzel(formula = extra ~ group,
+               data = sleep,
+               alternative = "minimal.effect",
+               mu = c(0.4, 0.6))
+```
+
+### Paired Samples
+
+The Brunner-Munzel test can also be applied to paired samples using the `paired` argument. Note that for paired samples, the test is based on a hypothesis of exchangeability:
+
+```{r}
+# Paired samples test
+brunner_munzel(x = sleep$extra[sleep$group == 1],
+               y = sleep$extra[sleep$group == 2],
+               paired = TRUE)
+```
+
+```{r}
+# Paired samples with permutation test
+brunner_munzel(x = sleep$extra[sleep$group == 1],
+               y = sleep$extra[sleep$group == 2],
+               paired = TRUE,
+               test_method = "perm")
+```
+
+### Testing Against a Non-Standard Null
+
+You can test against null values other than 0.5:
+
+```{r}
+# Test if the relative effect differs from 0.3
+brunner_munzel(formula = extra ~ group,
+               data = sleep,
+               mu = 0.3)
+```
+
+## Interpreting Brunner-Munzel Results
 
 When interpreting the Brunner-Munzel test results:
 
 1. The relative effect (p-hat) is the primary measure of interest
-2. For equivalence testing, you're testing whether this relative effect falls within your specified bounds
-3. A significant equivalence test suggests that the probability of superiority is statistically confined to your specified range
+2. Values near 0.5 suggest no tendency for one group to produce larger values than the other
+3. For equivalence testing, you are testing whether this relative effect falls within your specified bounds
+4. A significant equivalence test suggests that the probability of superiority is statistically confined to your specified range
 
-### When to Use Permutation
+## Choosing the Right Test Method
 
-The permutation approach (`perm = TRUE`) is recommended when:
+**Use `test_method = "t"` when:**
 
-- Sample sizes are small (generally n < 30 per group)
-- Data distributions are highly skewed or contain outliers
+- Sample sizes are moderate to large (n ≥ 15 per group)
+- You want the fastest computation
+- The relative effect estimate is not near the boundaries (0 or 1)
+
+**Use `test_method = "logit"` when:**
+
+- The relative effect estimate is close to 0 or 1
+- You need confidence intervals guaranteed to stay within [0, 1]
+- Sample sizes are moderate to large
+
+**Use `test_method = "perm"` when:**
+
+- Sample sizes are small (n < 15 per group)
+- You want better Type I error control in small samples
 - Precision is more important than computational speed
 
-Note that the permutation approach can be computationally intensive for large datasets, potentially increasing processing time significantly. Additionally, with a permutation test you may observe situations where the confidence interval and the p-values would yield *different* conclusions.
+Note that the permutation approach can be computationally intensive for large datasets. Additionally, with a permutation test you may observe situations where the confidence interval and the p-value would yield *different* conclusions.
+
+## Non-Inferiority Testing
+
+The Brunner-Munzel test can be used for non-inferiority testing in clinical trials with ordered categorical data (Munzel & Hauschke, 2003). By setting appropriate bounds, you can test whether a new treatment is not relevantly inferior to a standard:
+    
+```{r}
+# Example: test non-inferiority with lower bound of 0.35
+# (i.e., the new treatment should not be substantially worse)
+brunner_munzel(formula = extra ~ group,
+               data = sleep,
+               alternative = "greater",
+               mu = 0.35)
+```
 
 # Resampling Methods: Bootstrapping and Permutation
 

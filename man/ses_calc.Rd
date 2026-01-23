@@ -25,7 +25,7 @@ ses_calc(x, ..., paired = FALSE, ses = "rb", alpha = 0.05)
 
 \item{...}{further arguments to be passed to or from methods.}
 
-\item{paired}{a logical indicating whether you want a paired t-test.}
+\item{paired}{a logical indicating whether you want a paired t-test. Cannot be used with the formula method; use x and y vectors instead for paired tests.}
 
 \item{ses}{a character string specifying the effect size measure to calculate:
 - "rb": rank-biserial correlation (default)
@@ -40,7 +40,7 @@ ses_calc(x, ..., paired = FALSE, ses = "rb", alpha = 0.05)
 \item{mu}{number indicating the value around which asymmetry (for one-sample or paired samples)
 or shift (for independent samples) is to be estimated (default = 0).}
 
-\item{formula}{a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample or paired test or a factor with two levels giving the corresponding groups. If lhs is of class "Pair" and rhs is 1, a paired test is done.}
+\item{formula}{a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample test or a factor with two levels giving the corresponding groups. For paired tests, use the default method with x and y vectors instead of the formula method.}
 
 \item{data}{an optional matrix or data frame (or similar: see model.frame) containing the variables in the formula formula. By default the variables are taken from environment(formula).}
 
