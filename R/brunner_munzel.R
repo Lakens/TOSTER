@@ -193,7 +193,7 @@ bm_perm_indices <- function(N, n.x, R) {
   # We ensure unique ALLOCATIONS (which n.x elements go to group x), not just unique permutations
   #
   # For small sample sizes where R >= choose(N, n.x), enumerate all combinations
- max_combs <- choose(N, n.x)
+  max_combs <- choose(N, n.x)
   if (R >= max_combs) {
     # Enumerate all unique combinations
     combs <- combn(N, n.x)
