@@ -500,7 +500,193 @@ test_that("brunner_munzel",{
                               #paired = TRUE
                               ))
 
+  # Test for completely separated small samples (issue #109 regression test) ----
+  # This tests the fix for multiple bugs in permutation p-value calculation:
+  # 1. Comparison operator bug: b_less and b_greater were computed with inverted comparisons
+  # 2. Relative effect convention mismatch: perm_loop computed P(X<Y) but main function uses P(X>Y)
+  # 3. Two-sided p-value formula: changed from min(2*p_less, 2*p_greater) to mean(|T_perm| >= |T_obs|)
+  # 4. Zero-variance handling: made consistent between observed and permuted statistics
+  # 5. Unique allocation sampling: fixed bm_perm_indices to ensure unique allocations
+  #
+  # With these fixes, TOSTER now matches the brunnermunzel package's permutation test results.
 
+  # Test case: completely separated data x = 1:3, y = 4:6
+  # All x < all y, so P(X>Y) = 0 (estimate should be very small)
+  # With 20 unique allocations (choose(6,3)), exactly 2 have |T| >= |T_obs|
+  # So the two-sided p-value should be:
+  #   - With p_method="original": 2/20 = 0.10
+  #   - With p_method="plusone": 3/21 ≈ 0.143
+
+  set.seed(42)
+  result <- brunner_munzel(1:3, 4:6,
+                          test_method = "perm",
+                          R = 1000,
+                          p_method = "plusone")
+
+  # Two-sided p-value with plusone should be (b+1)/(R+1) = 3/21 ≈ 0.143
+  expect_true(result$p.value > 0.12 && result$p.value < 0.18,
+              info = paste("Two-sided p-value was", result$p.value,
+                          "but should be approximately 0.143 with plusone method"))
+
+  # P(X>Y) estimate should be very small (close to 0)
+  expect_true(result$estimate < 0.01,
+              info = paste("P(X>Y) estimate was", result$estimate,
+                          "but should be close to 0"))
+
+  # Test the opposite direction: y < x
+  set.seed(789)
+  result_rev <- brunner_munzel(4:6, 1:3,
+                              test_method = "perm",
+                              R = 1000,
+                              p_method = "plusone")
+
+  # Two-sided p-value with plusone should also be approximately 0.143
+  expect_true(result_rev$p.value > 0.12 && result_rev$p.value < 0.18,
+              info = paste("reversed p-value was", result_rev$p.value,
+                          "but should be approximately 0.143 with plusone method"))
+
+  # P(X>Y) should be close to 1 in this case
+  expect_true(result_rev$estimate > 0.99,
+              info = paste("P(X>Y) estimate was", result_rev$estimate,
+                          "but should be close to 1"))
+
+  # Test with p_method="original" to verify exact match with brunnermunzel package
+  set.seed(42)
+  result_orig <- brunner_munzel(1:3, 4:6,
+                               test_method = "perm",
+                               R = 1000,
+                               p_method = "original")
+
+  # With p_method="original", p-value should be exactly 2/20 = 0.10
+  # (matching brunnermunzel package's formula: count / total)
+  expect_equal(result_orig$p.value, 0.10, tolerance = 1e-10,
+               info = "p-value with original method should be exactly 0.10")
+
+  # Test one-sided alternatives work correctly
+  # This is the critical test that catches the comparison operator bug!
+  # The bug was that b_less and b_greater were computed incorrectly,
+  # causing p_less and p_greater to be swapped for one-sided tests.
+
+  set.seed(456)
+  result_greater <- brunner_munzel(1:3, 4:6,
+                                  test_method = "perm",
+                                  alternative = "greater",
+                                  R = 1000,
+                                  p_method = "plusone")
+
+  # For "greater" alternative (H1: P(X>Y) > 0.5), with observed P(X>Y) ≈ 0,
+  # the p-value should be very large (close to 1)
+  expect_true(result_greater$p.value > 0.85,
+              info = paste("one-sided greater p-value was", result_greater$p.value,
+                          "but should be close to 1"))
+
+  set.seed(456)
+  result_less <- brunner_munzel(1:3, 4:6,
+                               test_method = "perm",
+                               alternative = "less",
+                               R = 1000,
+                               p_method = "plusone")
+
+  # For "less" alternative (H1: P(X>Y) < 0.5), with observed P(X>Y) ≈ 0,
+  # the p-value should be very small
+  expect_true(result_less$p.value < 0.15,
+              info = paste("one-sided less p-value was", result_less$p.value,
+                          "but should be small"))
+
+  # CRITICAL: Verify p-values are NOT swapped (regression test for the bug)
+  # With the bug, "less" would give ~0.9 and "greater" would give ~0.1
+  # The correct behavior is the opposite
+  expect_true(result_less$p.value < result_greater$p.value,
+              info = paste("p_less should be < p_greater, but got:",
+                          "p_less =", result_less$p.value,
+                          ", p_greater =", result_greater$p.value))
+
+  # Also test the reverse direction: x > y
+  set.seed(789)
+  result_greater_rev <- brunner_munzel(4:6, 1:3,
+                                       test_method = "perm",
+                                       alternative = "greater",
+                                       R = 1000,
+                                       p_method = "plusone")
+
+  # For "greater" alternative with x > y, P(X>Y) ≈ 1,
+  # so we should reject in favor of P(X>Y) > 0.5
+  expect_true(result_greater_rev$p.value < 0.15,
+              info = paste("reversed greater p-value was", result_greater_rev$p.value,
+                          "but should be small"))
+
+  set.seed(789)
+  result_less_rev <- brunner_munzel(4:6, 1:3,
+                                    test_method = "perm",
+                                    alternative = "less",
+                                    R = 1000,
+                                    p_method = "plusone")
+
+  # For "less" alternative with x > y, P(X>Y) ≈ 1,
+  # so we should NOT reject in favor of P(X>Y) < 0.5
+  expect_true(result_less_rev$p.value > 0.85,
+              info = paste("reversed less p-value was", result_less_rev$p.value,
+                          "but should be close to 1"))
+
+  # CRITICAL: Verify p-values are NOT swapped for reverse direction
+  expect_true(result_less_rev$p.value > result_greater_rev$p.value,
+              info = paste("reversed: p_less should be > p_greater, but got:",
+                          "p_less =", result_less_rev$p.value,
+                          ", p_greater =", result_greater_rev$p.value))
+
+  # Validation against brunnermunzel R package reference values ----
+  # These tests verify that TOSTER's permutation test gives results consistent
+
+  # with the brunnermunzel package's brunnermunzel.permutation.test function.
+  #
+  # Key differences between packages:
+  # - TOSTER estimate: P(X>Y) + 0.5*P(X=Y)
+  # - brunnermunzel estimate: P(X<Y) + 0.5*P(X=Y) = 1 - TOSTER estimate
+  # - TOSTER uses Monte Carlo permutation by default; brunnermunzel uses exact
+
+  # Example from brunnermunzel documentation (Hollander & Wolfe 1973, p.29):
+  # Hamilton depression scale measurements
+  x_hw <- c(1.83, 0.50, 1.62, 2.48, 1.68, 1.88, 1.55, 3.06, 1.30)
+  y_hw <- c(0.878, 0.647, 0.598, 2.05, 1.06, 1.29, 1.06, 3.14, 1.29)
+
+  # brunnermunzel.permutation.test reports:
+  #   p-value = 0.158
+  #   P(X<Y)+.5*P(X=Y) = 0.2839506
+  # So P(X>Y)+.5*P(X=Y) = 1 - 0.2839506 = 0.7160494
+
+  set.seed(123)
+  result_hw <- brunner_munzel(x_hw, y_hw, test_method = "perm", R = 10000)
+
+  # Estimate should match exactly (no Monte Carlo involved in estimate)
+  expect_equal(as.numeric(result_hw$estimate), 0.7160494, tolerance = 1e-6,
+               info = "Estimate should match brunnermunzel package")
+
+  # P-value should be close to brunnermunzel's 0.158 (some MC variance expected)
+  expect_true(result_hw$p.value > 0.10 && result_hw$p.value < 0.25,
+              info = paste("p-value was", result_hw$p.value,
+                          "but should be close to brunnermunzel's 0.158"))
+
+  # Example from Brunner & Munzel (2000) / Neubert & Brunner (2007):
+  # Pain scores after surgery
+  Y_pain <- c(1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 4, 1, 1)
+  N_pain <- c(3, 3, 4, 3, 1, 2, 3, 1, 1, 5, 4)
+
+  # brunnermunzel.permutation.test reports:
+  #   p-value = 0.008038
+  #   P(X<Y)+.5*P(X=Y) = 0.788961
+  # So P(X>Y)+.5*P(X=Y) = 1 - 0.788961 = 0.211039
+
+  set.seed(456)
+  result_pain <- brunner_munzel(Y_pain, N_pain, test_method = "perm", R = 10000)
+
+  # Estimate should match exactly
+  expect_equal(as.numeric(result_pain$estimate), 1 - 0.788961, tolerance = 1e-4,
+               info = "Estimate should match brunnermunzel package")
+
+  # P-value should be close to brunnermunzel's 0.008 (highly significant)
+  expect_true(result_pain$p.value < 0.02,
+              info = paste("p-value was", result_pain$p.value,
+                          "but should be close to brunnermunzel's 0.008"))
 
 })
 

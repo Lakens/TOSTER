@@ -43,7 +43,7 @@ simple_htest(
 - "minimal.effect": outside specified bounds}
 
 \item{mu}{a number or vector specifying the null hypothesis value(s):
-- For standard alternatives (two.sided, less, greater): a single value (default: 0 for t-test/wilcox.test, 0.5 for brunner_munzel)
+- For standard alternatives (two.sided, less, greater): a single value (default: 0)
 - For equivalence/minimal.effect: either a single value (symmetric bounds will be created) or a vector of two values representing the lower and upper bounds}
 
 \item{alpha}{alpha level (default = 0.05)}
@@ -53,7 +53,6 @@ simple_htest(
 \item{test}{a character string specifying the type of hypothesis test to use:
 - "t.test": Student's t-test (parametric, default)
 - "wilcox.test": Wilcoxon-Mann-Whitney test (non-parametric)
-- "brunner_munzel": Brunner-Munzel test (non-parametric)
 
 You can specify just the initial letter (e.g., "t" for "t.test").}
 
@@ -72,7 +71,7 @@ A list with class \code{"htest"} containing the following components:
 \item parameter: the parameter(s) for the test statistic (e.g., degrees of freedom for t-tests).
 \item p.value: the p-value for the test.
 \item conf.int: a confidence interval appropriate to the specified alternative hypothesis.
-\item estimate: the estimated effect (e.g., mean difference for t-tests, probability estimate for Brunner-Munzel).
+\item estimate: the estimated effect (e.g., mean difference for t-tests).
 \item null.value: the specified hypothesized value(s). For equivalence and minimal effect tests, this will be two values.
 \item stderr: the standard error of the estimate (for t-tests).
 \item alternative: a character string describing the alternative hypothesis.
@@ -84,7 +83,7 @@ A list with class \code{"htest"} containing the following components:
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#maturing}{\figure{lifecycle-maturing.svg}{options: alt='[Maturing]'}}}{\strong{[Maturing]}}
 
 Performs statistical hypothesis tests with extended functionality beyond standard implementations.
-Supports t-tests, Wilcoxon-Mann-Whitney tests, and Brunner-Munzel tests with additional
+Supports t-tests and Wilcoxon-Mann-Whitney tests with additional
 alternatives such as equivalence and minimal effect testing.
 }
 \details{
@@ -106,16 +105,12 @@ the underlying test functions with some additional standardization in the output
 
 The interpretation of \code{mu} depends on the test used:
 \itemize{
-\item For t-test and wilcox.test: mu represents the difference in means/medians (default: 0)
-\item For brunner_munzel: mu represents the probability that a randomly selected value from the first sample exceeds a randomly selected value from the second sample (default: 0.5)
+\item For t-test: mu represents the difference in means (default: 0)
+\item For wilcox.test: mu represents the location shift (default: 0)
 }
 
 If \code{mu} is a single value for equivalence or minimal effect alternatives, symmetric bounds
-will be created automatically:
-\itemize{
-\item For t-test and wilcox.test: bounds become c(mu, -mu)
-\item For brunner_munzel: bounds become c(mu, abs(mu-1))
-}
+will be created automatically as c(mu, -mu).
 }
 \section{Purpose}{
 
@@ -150,15 +145,6 @@ with(sleep, simple_htest(x = extra[group == 1],
                         y = extra[group == 2],
                         paired = TRUE,
                         alternative = "greater"))
-
-# Example 4: Brunner-Munzel test
-# Testing if values in one group tend to exceed values in another
-set.seed(123)
-group1 <- rnorm(20, mean = 5, sd = 1)
-group2 <- rnorm(20, mean = 6, sd = 2)
-simple_htest(x = group1, y = group2,
-             test = "brunner_munzel",
-             alternative = "less")
 
 }
 \seealso{
