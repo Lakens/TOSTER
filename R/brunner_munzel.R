@@ -181,6 +181,7 @@
 #' Phipson, B., & Smyth, G. K. (2010). Permutation P-values should never be zero: calculating exact P-values when permutations are randomly drawn. Statistical Applications in Genetics and Molecular Biology, 9(1), Article 39.
 #' @name brunner_munzel
 #' @importFrom stats var quantile
+#' @importFrom utils combn
 #' @family Robust tests
 #' @export brunner_munzel
 NULL
@@ -1007,7 +1008,7 @@ brunner_munzel.formula = function(formula,
      || (length(formula) != 3L)
      || (length(attr(terms(formula[-2L]), "term.labels")) != 1L))
     stop("'formula' missing or incorrect")
-  
+
   # Check for paired argument in ... and warn user
   dots <- list(...)
   if("paired" %in% names(dots)){
