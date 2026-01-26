@@ -188,28 +188,43 @@ NULL
 #' @noRd
 bm_perm_indices <- function(N, n.x, R) {
   # Internal helper function to generate permutation indices without replacement
-  # Returns a matrix where each column contains indices for group x
-  # Sample permutations without replacement to avoid duplicates
-  perms <- matrix(NA, nrow = R, ncol = N)
-  for (i in 1:R) {
-    perms[i, ] <- sample(1:N, N)
-  }
-  # Remove duplicate permutations
-  perms <- unique(perms)
-  iter <- 0
-  max_iter <- 10
-  while (nrow(perms) < R && iter < max_iter) {
-    needed <- R - nrow(perms)
-    new_perms <- matrix(NA, nrow = needed * 2, ncol = N)
-    for (i in 1:(needed * 2)) {
-      new_perms[i, ] <- sample(1:N, N)
+  # Returns a matrix where each column contains a full permutation of 1:N
+  # We ensure unique ALLOCATIONS (which n.x elements go to group x), not just unique permutations
+  #
+  # For small sample sizes where R >= choose(N, n.x), enumerate all combinations
+ max_combs <- choose(N, n.x)
+  if (R >= max_combs) {
+    # Enumerate all unique combinations
+    combs <- combn(N, n.x)
+    # Convert each combination to a full permutation [combo, remaining]
+    perms <- matrix(NA, nrow = max_combs, ncol = N)
+    for (i in 1:max_combs) {
+      x_idx <- combs[, i]
+      y_idx <- setdiff(1:N, x_idx)
+      perms[i, ] <- c(x_idx, y_idx)
     }
-    perms <- unique(rbind(perms, new_perms))
+    return(t(perms))  # Return as N x R matrix
+  }
+
+  # For larger sample sizes, sample unique allocations
+  seen_allocs <- character(0)
+  perms_list <- list()
+  iter <- 0
+  max_iter <- R * 10  # Allow more iterations to find unique allocations
+
+  while (length(perms_list) < R && iter < max_iter) {
+    perm <- sample(1:N, N)
+    # Create a canonical representation of the allocation (sorted first n.x elements)
+    alloc_key <- paste(sort(perm[1:n.x]), collapse = ",")
+
+    if (!(alloc_key %in% seen_allocs)) {
+      seen_allocs <- c(seen_allocs, alloc_key)
+      perms_list[[length(perms_list) + 1]] <- perm
+    }
     iter <- iter + 1
   }
-  if (nrow(perms) > R) {
-    perms <- perms[1:R, , drop = FALSE]
-  }
+
+  perms <- do.call(rbind, perms_list)
   return(t(perms))  # Return as N x R matrix for compatibility with original code
 }
 
@@ -328,6 +343,12 @@ brunner_munzel.default = function(x,
     if(!is.numeric(y)) stop("'y' must be numeric")
     DNAME <- paste(deparse(substitute(x)), "and",
                    deparse(substitute(y)))
+    # Capture group names for estimate label (X and Y in P(X>Y))
+    # Use simple "X" and "Y" for default method since variable names
+    # may be expressions (e.g., 1:10, c(7:20, 200)) which look messy
+    # Formula method will overwrite these with actual factor level names
+    XNAME <- "X"
+    YNAME <- "Y"
     if(paired) {
       if(length(x) != length(y))
         stop("'x' and 'y' must have the same length")
@@ -360,6 +381,9 @@ brunner_munzel.default = function(x,
   } else {
     conf.level <- 1 - alpha
   }
+
+  # Initialize n_perm_actual (will be set if test_method == "perm")
+  n_perm_actual <- NULL
 
   # Paired -----
   if(paired){
@@ -671,7 +695,8 @@ brunner_munzel.default = function(x,
 
     V <- N*(s1+s2)
     singular.bf <- (V == 0)
-    V[singular.bf] <- N/(2 * n.x * n.y)
+    # Use same zero-variance handling as perm_loop: vP = 0.5/(n.x*n.y)^2, so V = N*vP
+    V[singular.bf] <- N * 0.5/(n.x * n.y)^2
     std_err = sqrt(V/N)
 
     df.sw <- (s1 + s2)^2/(s1^2/(n.x - 1) + s2^2/(n.y - 1))
@@ -689,6 +714,7 @@ brunner_munzel.default = function(x,
       # Use sampling without replacement to avoid duplicate permutations
       P <- bm_perm_indices(N, n.x, R)
       R_actual <- ncol(P)  # Actual number of unique permutations obtained
+      n_perm_actual <- R_actual  # Store for output parameter
       Px<-matrix(c(x,y)[P],ncol=R_actual)
 
       # perm_loop already centers at 0.5 (see res1[1,]<-(pdP-1/2)/sqrt(vP))
@@ -751,6 +777,10 @@ brunner_munzel.default = function(x,
         b_less <- sum(Tperm[1,] <= test_stat)
         b_greater <- sum(Tperm[1,] >= test_stat)
 
+        # For two-sided tests, use absolute value method: mean(|T_perm| >= |T_obs|)
+        # This matches the brunnermunzel package's approach
+        b_two_sided <- sum(abs(Tperm[1,]) >= abs(test_stat))
+
         if(alternative == "two.sided"){
           c1<-0.5*(Tperm[1,floor((1-alpha/2)*R_actual)]+Tperm[1,ceiling((1-alpha/2)*R_actual)])
           c2<-0.5*(Tperm[1,floor(alpha/2*R_actual)]+Tperm[1,ceiling(alpha/2*R_actual)])
@@ -765,9 +795,10 @@ brunner_munzel.default = function(x,
         # Compute p-values using selected method
         p_less <- bm_compute_perm_pval(b_less, R_actual, p_method)
         p_greater <- bm_compute_perm_pval(b_greater, R_actual, p_method)
+        p_two_sided <- bm_compute_perm_pval(b_two_sided, R_actual, p_method)
 
         p.value = switch(alternative,
-                         "two.sided" = min(2 * p_less, 2 * p_greater),
+                         "two.sided" = p_two_sided,
                          "less" = p_less,
                          "greater" = p_greater)
 
@@ -932,18 +963,24 @@ brunner_munzel.default = function(x,
 
   if(test_method == "perm"){
     names(test_stat) = "t-observed"
+    # For permutation tests, report number of permutations instead of df
+    param <- n_perm_actual
+    names(param) <- "N-permutations"
   } else {
     names(test_stat) = "t"
+    param <- df.sw
+    names(param) <- "df"
   }
 
-  names(df.sw) = "df"
   cint = c(pd.lower, pd.upper)
   attr(cint, "conf.level") = conf.level
   estimate = pd
-  names(estimate) = "P(X>Y) + .5*P(X=Y)"
+  # Use actual group names in estimate label
+  # XNAME and YNAME are set from input variable names or overwritten by formula method
+  names(estimate) = paste0("P(", XNAME, ">", YNAME, ") + .5*P(", XNAME, "=", YNAME, ")")
 
   rval <- list(statistic = test_stat,
-               parameter = df.sw,
+               parameter = param,
                p.value = as.numeric(p.value),
                estimate = estimate,
                stderr = std_err,
@@ -995,6 +1032,11 @@ brunner_munzel.formula = function(formula,
   DATA <- setNames(split(mf[[response]], g), c("x", "y"))
   y <- do.call("brunner_munzel", c(DATA, list(...)))
   y$data.name <- DNAME
+  # Update estimate label with actual factor level names
+  # First level becomes "x" (XNAME), second level becomes "y" (YNAME)
+  XNAME <- levels(g)[1]
+  YNAME <- levels(g)[2]
+  names(y$estimate) <- paste0("P(", XNAME, ">", YNAME, ") + .5*P(", XNAME, "=", YNAME, ")")
   y
 
 }
@@ -1005,17 +1047,21 @@ perm_loop <-function(x,y,n.x,n.y,R){
   pl1P<-matrix(0,nrow=n.x,ncol=R)
   pl2P<-matrix(0,nrow=n.y,ncol=R)
 
+  # Compute P(Y < X_h1) for each h1 (used for variance calculation)
   for(h1 in 1:n.x){
     help1<-matrix(t(x[h1,]),
                   ncol=R,
                   nrow=n.y,byrow=TRUE)
     pl1P[h1,]<-1/n.y*(colSums((y<help1)+1/2*(y==help1)))
   }
+  # Compute P(X > Y_h2) for each h2 (used for pd calculation)
+  # Note: Changed from (x<help2) to (x>help2) to match main function convention
+  # Main function uses pd = P(X > Y), so perm_loop must use same convention
   for(h2 in 1:n.y){
     help2<-matrix(t(y[h2,]),
                   ncol=R,
                   nrow=n.x,byrow=TRUE)
-    pl2P[h2,]<-1/n.x*(colSums((x<help2)+1/2*(x==help2)))
+    pl2P[h2,]<-1/n.x*(colSums((x>help2)+1/2*(x==help2)))
   }
 
   pdP<-colMeans(pl2P)
