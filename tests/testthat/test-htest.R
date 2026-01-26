@@ -701,4 +701,22 @@ test_that("plot_htest_est works correctly", {
   p5 <- plot_htest_est(wilcox_res)
   expect_s3_class(p5, "ggplot")
 
+  # Test describe argument
+  p_desc <- plot_htest_est(t_two, describe = TRUE)
+  expect_s3_class(p_desc, "ggplot")
+  expect_true(!is.null(p_desc$labels$subtitle))
+  expect_true(grepl("t\\(", p_desc$labels$subtitle))  # Should contain t statistic
+
+  p_no_desc <- plot_htest_est(t_two, describe = FALSE)
+  expect_s3_class(p_no_desc, "ggplot")
+  expect_true(is.null(p_no_desc$labels$subtitle))
+
+  # Test with equivalence test (two null values)
+  res_eq <- simple_htest(x = sleep$extra[sleep$group == 1],
+                         y = sleep$extra[sleep$group == 2],
+                         paired = TRUE, mu = 1, alternative = "e")
+  p_eq <- plot_htest_est(res_eq)
+  expect_s3_class(p_eq, "ggplot")
+  expect_true(!is.null(p_eq$labels$subtitle))
+
 })

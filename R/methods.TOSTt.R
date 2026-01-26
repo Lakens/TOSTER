@@ -662,23 +662,14 @@ plot.TOSTt <- function(x,
       warning("Multiple CI lines provided; only first element will be used.")
     }
 
-    if("Equilvalence" %in% x$hypothesis){
-      METhyp = TRUE
-    } else {
-      METhyp = FALSE
-    }
-    points = data.frame(
-      type = x_label,
-      mu = c(x$effsize$estimate[1]),
-      param = c(round(unname(x$TOST$df[1]), 0)),
-      sigma = c(x$TOST$SE[1]),
-      lambda = c(0),
-      est = c(x$effsize$estimate[1]),
-      low = c(x$eqb$low_eq[1]),
-      high = c(x$eqb$high_eq[1]),
-      alpha = c(x$alpha),
-      stringsAsFactors = FALSE
-    )
+    # Determine if this is equivalence or MET hypothesis
+    is_equivalence = grepl("Equivalence", x$hypothesis, ignore.case = TRUE)
+
+    # Common parameters
+    se = x$TOST$SE[1]
+    df_t = round(unname(x$TOST$df[1]), 0)
+
+    # Data for point estimate and CI
     points = data.frame(
       x_label = x_label,
       point = x$effsize$estimate[1],
@@ -686,53 +677,88 @@ plot.TOSTt <- function(x,
       ci_low = x$effsize$upper.ci[1],
       stringsAsFactors = FALSE
     )
+
     points_l = data.frame(
-      mu = c(x$eqb$low_eq[1]),
-      param = c(round(unname(x$TOST$df[1]), 0)),
-      sigma = c(x$TOST$SE[1]),
+      mu = c(low_eqt),
+      param = c(df_t),
+      sigma = c(se),
       lambda = c(0),
       stringsAsFactors = FALSE
     )
     points_u = data.frame(
-      mu = c(x$eqb$high_eq[1]),
-      param = c(round(unname(x$TOST$df[1]), 0)),
-      sigma = c(x$TOST$SE[1]),
+      mu = c(high_eqt),
+      param = c(df_t),
+      sigma = c(se),
       lambda = c(0),
       stringsAsFactors = FALSE
     )
 
-    x_l = c(low_eqt - qnorm(1-x$alpha)*points_l$sigma,
-            low_eqt + qnorm(1-x$alpha)*points_l$sigma)
-    x_u = c(high_eqt - qnorm(1-x$alpha)*points_l$sigma,
-                 high_eqt + qnorm(1-x$alpha)*points_l$sigma)
+    # Calculate one-sided critical values
+    # For equivalence: lower bound uses right tail (greater), upper bound uses left tail (less)
+    # For MET: lower bound uses left tail (less), upper bound uses right tail (greater)
+    if (is_equivalence) {
+      crit_l_right = low_eqt + qnorm(1 - x$alpha) * se
+      crit_u_left = high_eqt - qnorm(1 - x$alpha) * se
+    } else {
+      crit_l_left = low_eqt - qnorm(1 - x$alpha) * se
+      crit_u_right = high_eqt + qnorm(1 - x$alpha) * se
+    }
 
+    # Build plot with one-sided rejection regions
     t_plot = ggplot(data = points,
-                    aes_string(y = 0)) +
-      stat_dist_slab(data = points_l,
-                     aes(fill = stat(x < x_l[1] | x > x_l[2]),
-                         dist = dist_student_t(
-                           mu = mu,
-                           df = param,
-                           sigma = sigma,
-                           ncp = lambda
-                         )),
-                     alpha = .5,
-                     #  fill = NA,
-                     slab_color = "black",
-                     slab_size = .5) +
-      stat_dist_slab(data = points_u,
-                     aes(fill = stat(x < x_u[1] | x > x_u[2]),
-                         dist = dist_student_t(
-                           mu = mu,
-                           df = param,
-                           sigma = sigma,
-                           ncp = lambda
-                         )),
+                    aes_string(y = 0))
 
-                     alpha = .5,
-                     #  fill = NA,
-                     slab_color = "black",
-                     slab_size = .5) +
+    if (is_equivalence) {
+      t_plot = t_plot +
+        stat_dist_slab(data = points_l,
+                       aes(fill = after_stat(x > crit_l_right),
+                           dist = dist_student_t(
+                             mu = mu,
+                             df = param,
+                             sigma = sigma,
+                             ncp = lambda
+                           )),
+                       alpha = .5,
+                       slab_color = "black",
+                       slab_size = .5) +
+        stat_dist_slab(data = points_u,
+                       aes(fill = after_stat(x < crit_u_left),
+                           dist = dist_student_t(
+                             mu = mu,
+                             df = param,
+                             sigma = sigma,
+                             ncp = lambda
+                           )),
+                       alpha = .5,
+                       slab_color = "black",
+                       slab_size = .5)
+    } else {
+      t_plot = t_plot +
+        stat_dist_slab(data = points_l,
+                       aes(fill = after_stat(x < crit_l_left),
+                           dist = dist_student_t(
+                             mu = mu,
+                             df = param,
+                             sigma = sigma,
+                             ncp = lambda
+                           )),
+                       alpha = .5,
+                       slab_color = "black",
+                       slab_size = .5) +
+        stat_dist_slab(data = points_u,
+                       aes(fill = after_stat(x > crit_u_right),
+                           dist = dist_student_t(
+                             mu = mu,
+                             df = param,
+                             sigma = sigma,
+                             ncp = lambda
+                           )),
+                       alpha = .5,
+                       slab_color = "black",
+                       slab_size = .5)
+    }
+
+    t_plot = t_plot +
       geom_point(data = data.frame(y = -.1,
                                    x = points$point),
                  aes(x = x, y = y),
@@ -742,15 +768,16 @@ plot.TOSTt <- function(x,
                xend = points$ci_high,
                y = -.1, yend = -.1,
                size = 1.5,
-               colour = "black")+
-      # set palettes  need true false
+               colour = "black") +
       scale_fill_manual(values = c("gray85", "green")) +
       geom_vline(aes(xintercept = low_eqt),
                  linetype = "dashed") +
       geom_vline(aes(xintercept = high_eqt),
                  linetype = "dashed") +
-      facet_wrap( ~ x_label) +
-      labs(caption = "Note: green indicates rejection region for null equivalence and MET hypotheses")+
+      facet_wrap(~ x_label) +
+      labs(caption = paste0("Note: green indicates one-sided rejection region (",
+                            ifelse(is_equivalence, "equivalence", "minimal effect"),
+                            " test)")) +
       theme_tidybayes() +
       theme(
         legend.position = "none",
@@ -764,14 +791,15 @@ plot.TOSTt <- function(x,
         axis.text.x = element_text(face = "bold", size = 11),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        panel.background = element_rect(fill = "transparent",colour = NA),
-        plot.background = element_rect(fill = "transparent",colour = NA),
-        legend.background = element_rect(fill = "transparent",colour = NA)
+        panel.background = element_rect(fill = "transparent", colour = NA),
+        plot.background = element_rect(fill = "transparent", colour = NA),
+        legend.background = element_rect(fill = "transparent", colour = NA)
       ) +
       scale_x_continuous(sec.axis = dup_axis(breaks = c(
         round(low_eqt, round_t),
         round(high_eqt, round_t)
       )))
+
     return(t_plot)
   }
 
