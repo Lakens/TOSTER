@@ -500,7 +500,73 @@ test_that("brunner_munzel",{
                               #paired = TRUE
                               ))
 
-
+  # Test for completely separated small samples (issue fix) ----
+  # Tests that permutation test gives correct p-values for separated data
+  
+  # Test case: completely separated data x = 1:3, y = 4:6
+  # All x < all y, so P(X>Y) should be very small (close to 0)
+  # For exact permutation test, there are choose(6,3) = 20 possible allocations
+  # Only 2 allocations give complete separation (original and reversed)
+  # Expected two-sided p-value ≈ 2/20 = 0.1
+  
+  set.seed(42)
+  result <- brunner_munzel(1:3, 4:6, 
+                          test_method = "perm", 
+                          R = 1000,
+                          p_method = "plusone")
+  
+  # The p-value should be close to 0.1, not inflated to 0.2
+  expect_true(result$p.value < 0.15, 
+              info = paste("p-value was", result$p.value, 
+                          "but should be close to 0.1"))
+  
+  # P(X>Y) estimate should be very small (close to 0)
+  expect_true(result$estimate < 0.1,
+              info = paste("P(X>Y) estimate was", result$estimate,
+                          "but should be close to 0"))
+  
+  # Test the opposite direction: y < x (should also give p ≈ 0.1)
+  set.seed(789)
+  result_rev <- brunner_munzel(4:6, 1:3,
+                              test_method = "perm",
+                              R = 1000,
+                              p_method = "plusone")
+  
+  expect_true(result_rev$p.value < 0.15,
+              info = paste("reversed p-value was", result_rev$p.value,
+                          "but should be close to 0.1"))
+  
+  # P(X>Y) should be close to 1 in this case
+  expect_true(result_rev$estimate > 0.9,
+              info = paste("P(X>Y) estimate was", result_rev$estimate,
+                          "but should be close to 1"))
+  
+  # Test one-sided alternatives work correctly
+  set.seed(456)
+  result_greater <- brunner_munzel(1:3, 4:6,
+                                  test_method = "perm",
+                                  alternative = "greater",
+                                  R = 1000,
+                                  p_method = "plusone")
+  
+  # For "greater" alternative (H1: P(X>Y) > 0.5), with observed P(X>Y) ≈ 0,
+  # the p-value should be very large (close to 1)
+  expect_true(result_greater$p.value > 0.9,
+              info = paste("one-sided greater p-value was", result_greater$p.value,
+                          "but should be close to 1"))
+  
+  set.seed(456)
+  result_less <- brunner_munzel(1:3, 4:6,
+                               test_method = "perm",
+                               alternative = "less",
+                               R = 1000,
+                               p_method = "plusone")
+  
+  # For "less" alternative (H1: P(X>Y) < 0.5), with observed P(X>Y) ≈ 0,
+  # the p-value should be very small
+  expect_true(result_less$p.value < 0.1,
+              info = paste("one-sided less p-value was", result_less$p.value,
+                          "but should be small"))
 
 })
 

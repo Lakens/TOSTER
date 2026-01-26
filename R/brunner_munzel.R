@@ -748,8 +748,8 @@ brunner_munzel.default = function(x,
         test_stat <- sqrt(N) * (pd - mu) / sqrt(V)
 
         # Count extreme values for p-value calculation
-        b_less <- sum(test_stat <= Tperm[1,])
-        b_greater <- sum(test_stat >= Tperm[1,])
+        b_less <- sum(Tperm[1,] <= test_stat)
+        b_greater <- sum(Tperm[1,] >= test_stat)
 
         if(alternative == "two.sided"){
           c1<-0.5*(Tperm[1,floor((1-alpha/2)*R_actual)]+Tperm[1,ceiling((1-alpha/2)*R_actual)])
