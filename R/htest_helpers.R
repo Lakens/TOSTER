@@ -429,7 +429,8 @@ printable_pval = function(pval,
 #'   or TOSTER functions converted with `as_htest()`.
 #' @param alpha Significance level for determining the confidence level label.
 #' @param describe Logical. If TRUE (default), includes a concise statistical description
-#'   in the plot subtitle showing the test statistic, p-value, estimate, and confidence interval.
+#'   in the plot subtitle showing the test statistic, p-value, estimate, confidence interval,
+#'   and the null hypothesis.
 #'
 #' @details
 #' The function creates a horizontal point-range plot showing:
@@ -446,8 +447,13 @@ printable_pval = function(pval,
 #' If the 'htest' object contains equivalence bounds (two values in `null.value`),
 #' both bounds are displayed as dashed vertical lines.
 #'
-#' When `describe = TRUE`, the plot includes a subtitle with the test statistic, p-value,
-#' and estimate with confidence interval. The method name appears as the plot title.
+#' When `describe = TRUE`, the plot includes a three-line subtitle:
+#' \enumerate{
+#'   \item Test statistic and p-value
+#'   \item Point estimate and confidence interval
+#'   \item Null hypothesis statement
+#' }
+#' The method name appears as the plot title.
 #'
 #' @return A `ggplot` object that can be further customized using ggplot2 functions.
 #'
@@ -571,8 +577,57 @@ plot_htest_est <- function(htest, alpha = NULL, describe = TRUE) {
                      rounder_stat(ci_upper, digits = 3), "]")
     line2 <- paste(est_str, ci_str, sep = ", ")
 
-    # Combine with line break
-    subtitle_text <- paste(line1, line2, sep = "\n")
+    # Build third line: null hypothesis
+    line3 <- NULL
+    if (!is.null(htest$null.value) && !is.null(htest$alternative)) {
+      null_name <- names(htest$null.value)
+      if (is.null(null_name) || length(null_name) == 0) {
+        null_name <- estimate_name
+      }
+
+      if (length(htest$null.value) == 1) {
+        # Standard hypothesis test - show null based on alternative
+        null_rel <- switch(htest$alternative,
+                           two.sided = "is equal to",
+                           less = "is greater than or equal to",
+                           greater = "is less than or equal to",
+                           "is equal to")
+        line3 <- paste0("null: ", null_name, " ", null_rel, " ",
+                        rounder_stat(unname(htest$null.value), digits = 3))
+      } else if (length(htest$null.value) == 2) {
+        # Equivalence or minimal effect test
+        null_vals <- sort(unname(htest$null.value))
+        if (htest$alternative == "equivalence") {
+          line3 <- paste0("null: ", null_name, " < ", rounder_stat(null_vals[1], digits = 3),
+                          " or > ", rounder_stat(null_vals[2], digits = 3))
+        } else if (htest$alternative == "minimal.effect") {
+          line3 <- paste0("null: ", rounder_stat(null_vals[1], digits = 3),
+                          " < ", null_name, " < ", rounder_stat(null_vals[2], digits = 3))
+        } else {
+          # Fallback for other cases with two bounds
+          line3 <- paste0("null: ", null_name, " in [",
+                          rounder_stat(null_vals[1], digits = 3), ", ",
+                          rounder_stat(null_vals[2], digits = 3), "]")
+        }
+      }
+    } else if (!is.null(htest$null.value)) {
+      # No alternative specified, just show null value
+      null_name <- names(htest$null.value)
+      if (is.null(null_name) || length(null_name) == 0) {
+        null_name <- estimate_name
+      }
+      if (length(htest$null.value) == 1) {
+        line3 <- paste0("null: ", null_name, " = ",
+                        rounder_stat(unname(htest$null.value), digits = 3))
+      }
+    }
+
+    # Combine lines
+    if (!is.null(line3)) {
+      subtitle_text <- paste(line1, line2, line3, sep = "\n")
+    } else {
+      subtitle_text <- paste(line1, line2, sep = "\n")
+    }
     title_text <- htest$method
   } else {
     subtitle_text <- NULL
