@@ -4,7 +4,7 @@
 \alias{plot_htest_est}
 \title{Plot Estimate from 'htest' Object}
 \usage{
-plot_htest_est(htest, alpha = NULL)
+plot_htest_est(htest, alpha = NULL, describe = TRUE)
 }
 \arguments{
 \item{htest}{An S3 object of class 'htest' containing at minimum an \code{estimate} and
@@ -12,6 +12,9 @@ plot_htest_est(htest, alpha = NULL)
 or TOSTER functions converted with \code{as_htest()}.}
 
 \item{alpha}{Significance level for determining the confidence level label.}
+
+\item{describe}{Logical. If TRUE (default), includes a concise statistical description
+in the plot subtitle showing the test statistic, p-value, estimate, and confidence interval.}
 }
 \value{
 A \code{ggplot} object that can be further customized using ggplot2 functions.
@@ -32,12 +35,14 @@ The function creates a horizontal point-range plot showing:
 }
 
 For two-sample t-tests, R's \code{t.test()} returns both group means as the estimate
-rather
-than their difference. This function automatically computes the difference to display
+rather than their difference. This function automatically computes the difference to display
 a single meaningful estimate with its confidence interval.
 
 If the 'htest' object contains equivalence bounds (two values in \code{null.value}),
 both bounds are displayed as dashed vertical lines.
+
+When \code{describe = TRUE}, the plot includes a subtitle with the test statistic, p-value,
+and estimate with confidence interval. The method name appears as the plot title.
 }
 \examples{
 # Standard t-test
@@ -55,6 +60,9 @@ plot_htest_est(cor_result)
 # TOST result converted to htest
 tost_res <- t_TOST(extra ~ group, data = sleep, eqb = 1)
 plot_htest_est(as_htest(tost_res))
+
+# Without description
+plot_htest_est(t_result, describe = FALSE)
 
 }
 \seealso{

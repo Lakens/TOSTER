@@ -428,6 +428,8 @@ printable_pval = function(pval,
 #'   `conf.int` component. Examples include output from `t.test()`, `cor.test()`,
 #'   or TOSTER functions converted with `as_htest()`.
 #' @param alpha Significance level for determining the confidence level label.
+#' @param describe Logical. If TRUE (default), includes a concise statistical description
+#'   in the plot subtitle showing the test statistic, p-value, estimate, and confidence interval.
 #'
 #' @details
 #' The function creates a horizontal point-range plot showing:
@@ -438,13 +440,14 @@ printable_pval = function(pval,
 #' }
 #'
 #' For two-sample t-tests, R's `t.test()` returns both group means as the estimate
-
-#' rather
-#' than their difference. This function automatically computes the difference to display
+#' rather than their difference. This function automatically computes the difference to display
 #' a single meaningful estimate with its confidence interval.
 #'
 #' If the 'htest' object contains equivalence bounds (two values in `null.value`),
 #' both bounds are displayed as dashed vertical lines.
+#'
+#' When `describe = TRUE`, the plot includes a subtitle with the test statistic, p-value,
+#' and estimate with confidence interval. The method name appears as the plot title.
 #'
 #' @return A `ggplot` object that can be further customized using ggplot2 functions.
 #'
@@ -465,11 +468,14 @@ printable_pval = function(pval,
 #' tost_res <- t_TOST(extra ~ group, data = sleep, eqb = 1)
 #' plot_htest_est(as_htest(tost_res))
 #'
+#' # Without description
+#' plot_htest_est(t_result, describe = FALSE)
+#'
 #' @import ggplot2
 #' @import ggdist
 #' @family htest
 #' @export
-plot_htest_est <- function(htest, alpha = NULL) {
+plot_htest_est <- function(htest, alpha = NULL, describe = TRUE) {
 
 
   if (!inherits(htest, "htest")) {
@@ -530,6 +536,49 @@ plot_htest_est <- function(htest, alpha = NULL) {
     stringsAsFactors = FALSE
   )
 
+  # Build description for subtitle if requested
+  if (describe) {
+    # Build concise description similar to describe_htest but shorter
+    desc_parts <- c()
+
+    # Add test statistic if available
+    if (!is.null(htest$statistic)) {
+      stat_name <- names(htest$statistic)
+      stat_val <- rounder_stat(unname(htest$statistic), digits = 3)
+
+      if (!is.null(htest$parameter)) {
+        par_val <- rounder_stat(unname(htest$parameter), digits = 2)
+        stat_str <- paste0(stat_name, "(", par_val, ") = ", stat_val)
+      } else {
+        stat_str <- paste0(stat_name, " = ", stat_val)
+      }
+      desc_parts <- c(desc_parts, stat_str)
+    }
+
+    # Add p-value if available
+    if (!is.null(htest$p.value)) {
+      desc_parts <- c(desc_parts, printable_pval(htest$p.value, digits = 3))
+    }
+
+    # Build first line: test statistic and p-value
+    line1 <- paste(desc_parts, collapse = ", ")
+
+    # Build second line: estimate and CI
+    est_str <- paste0(estimate_name, " = ",
+                      rounder_stat(unname(estimate), digits = 3))
+    ci_str <- paste0(round(conf_level * 100), "% CI [",
+                     rounder_stat(ci_lower, digits = 3), ", ",
+                     rounder_stat(ci_upper, digits = 3), "]")
+    line2 <- paste(est_str, ci_str, sep = ", ")
+
+    # Combine with line break
+    subtitle_text <- paste(line1, line2, sep = "\n")
+    title_text <- htest$method
+  } else {
+    subtitle_text <- NULL
+    title_text <- htest$method
+  }
+
   # Build the plot
   p <- ggplot(df_plot,
               aes(x = estimate,
@@ -540,30 +589,28 @@ plot_htest_est <- function(htest, alpha = NULL) {
     facet_grid(~facet_label) +
     theme_tidybayes() +
     labs(caption = paste0(conf_level * 100, "% Confidence Interval"),
-         subtitle = htest$method) +
+         title = title_text,
+         subtitle = subtitle_text) +
     theme(strip.text = element_text(face = "bold", size = 10),
-          plot.subtitle = element_text(size = 10),
+          plot.title = element_text(size = 11),
+          plot.subtitle = element_text(size = 9),
           axis.title.x = element_blank(),
           axis.title.y = element_blank(),
           axis.text.y = element_blank(),
           axis.ticks.y = element_blank())
 
   # Add null value reference line(s)
-  # Use inherit.aes = FALSE to avoid facet issues with geom_vline
   if (!is.null(htest$null.value)) {
     null_vals <- unname(htest$null.value)
 
     if (length(null_vals) == 1) {
       # Single null value (standard hypothesis test)
-      p <- p + geom_vline(xintercept = null_vals, linetype = "dashed",
-                          inherit.aes = FALSE)
+      p <- p + geom_vline(xintercept = null_vals, linetype = "dashed")
     } else if (length(null_vals) == 2) {
       # Two null values (equivalence bounds)
       p <- p +
-        geom_vline(xintercept = null_vals[1], linetype = "dashed",
-                   inherit.aes = FALSE) +
-        geom_vline(xintercept = null_vals[2], linetype = "dashed",
-                   inherit.aes = FALSE) +
+        geom_vline(xintercept = null_vals[1], linetype = "dashed") +
+        geom_vline(xintercept = null_vals[2], linetype = "dashed") +
         scale_x_continuous(sec.axis = dup_axis(
           breaks = round(null_vals, 3),
           name = ""
