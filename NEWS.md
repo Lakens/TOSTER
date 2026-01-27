@@ -4,7 +4,28 @@ NEWS
 **TOSTER R package and jamovi module**
 
 # TOSTER v0.9.0
+
+## New Features
+
+- Added `hodges_lehmann` function for robust location testing
+  - Implements Hodges-Lehmann estimators (HL1 for one-sample/paired, HL2 for two-sample)
+  - Supports exact permutation, randomization, and asymptotic (KDE-based) inference
+  - Full support for equivalence and minimal effect testing
+  - Consistent sign convention with `wilcox.test` (x - y for two-sample tests)
+  - Formula and default methods available
 - Added `perm_t_test` function to allow for permutation tests for equivalence using TOST
+- Added `plot_htest_est()` function to create simple estimate plots from any `htest` object
+  - Displays point estimate with confidence interval
+  - Handles null values (single or equivalence bounds) as reference lines
+  - Automatically handles two-sample t-test estimates by computing mean difference
+
+## Improvements
+
+- **Permutation test terminology**: Clarified distinction between "Exact Permutation" (all permutations enumerated) and "Randomization" (permutations sampled with replacement) tests across `perm_t_test`, `hodges_lehmann`, and `brunner_munzel`
+- **p_method auto-selection**: Added intelligent default for `p_method` argument in permutation-based functions:
+  - `NULL` (default): Automatically selects "exact" for exact permutation tests and "plusone" for randomization tests
+  - "exact": Uses b/R, appropriate when all permutations are enumerated
+  - "plusone": Uses (b+1)/(R+1) following Phipson & Smyth (2010), provides exact Type I error control for randomization tests
 - Update `brunner_munzel` function to allow TOST directly
 - Update functions to disallow `paired = TRUE` when formula method utilized.
 - Improved `plot.TOSTt` for `type = "simple"`:
@@ -15,10 +36,6 @@ NEWS
   - Now shows only one-sided rejection regions appropriate to the test type
   - Equivalence tests: lower bound shows right tail, upper bound shows left tail
   - Minimal effect tests: lower bound shows left tail, upper bound shows right tail
-- Added `plot_htest_est()` function to create simple estimate plots from any `htest` object
-  - Displays point estimate with confidence interval
-  - Handles null values (single or equivalence bounds) as reference lines
-  - Automatically handles two-sample t-test estimates by computing mean difference
 
 # TOSTER v0.8.7
 - Update documentation to make it clear what the "eqb" argument does within the `wilcox_TOST` function.

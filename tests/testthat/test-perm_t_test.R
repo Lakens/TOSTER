@@ -244,9 +244,9 @@ test_that("p_method = 'plusone' produces valid p-values", {
   expect_lte(result$p.value, 1)
 })
 
-test_that("p_method = 'original' produces valid p-values", {
+test_that("p_method = 'exact' produces valid p-values", {
   set.seed(123)
-  result <- perm_t_test(x_sample, y_sample, R = 199, p_method = "original")
+  result <- perm_t_test(x_sample, y_sample, R = 199, p_method = "exact")
 
   expect_gte(result$p.value, 0)
   expect_lte(result$p.value, 1)
@@ -256,11 +256,11 @@ test_that("different p_methods can produce different results", {
   set.seed(123)
   result_plus <- perm_t_test(x_sample, y_sample, R = 99, p_method = "plusone")
   set.seed(123)
-  result_orig <- perm_t_test(x_sample, y_sample, R = 99, p_method = "original")
+  result_exact <- perm_t_test(x_sample, y_sample, R = 99, p_method = "exact")
 
   # They may or may not differ depending on the data, but both should be valid
   expect_gte(result_plus$p.value, 0)
-  expect_gte(result_orig$p.value, 0)
+  expect_gte(result_exact$p.value, 0)
 })
 
 
@@ -356,12 +356,12 @@ test_that("exact permutation for one-sample small samples", {
   expect_equal(result$R.used, 2^5)
 })
 
-test_that("Monte Carlo is used when R is specified and smaller than max perms", {
+test_that("Randomization is used when R is specified and smaller than max perms", {
   set.seed(123)
-  # Large enough sample that R = 199 triggers Monte Carlo
+  # Large enough sample that R = 199 triggers Randomization
   result <- perm_t_test(x_sample, y_sample, R = 199)
 
-  expect_true(grepl("Monte Carlo", result$method))
+  expect_true(grepl("Randomization", result$method))
   expect_equal(result$R, 199)
 })
 

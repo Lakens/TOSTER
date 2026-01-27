@@ -514,7 +514,7 @@ test_that("brunner_munzel",{
   # All x < all y, so P(X>Y) = 0 (estimate should be very small)
   # With 20 unique allocations (choose(6,3)), exactly 2 have |T| >= |T_obs|
   # So the two-sided p-value should be:
-  #   - With p_method="original": 2/20 = 0.10
+  #   - With p_method="exact": 2/20 = 0.10
   #   - With p_method="plusone": 3/21 ≈ 0.143
 
   set.seed(42)
@@ -550,17 +550,17 @@ test_that("brunner_munzel",{
               info = paste("P(X>Y) estimate was", result_rev$estimate,
                           "but should be close to 1"))
 
-  # Test with p_method="original" to verify exact match with brunnermunzel package
+  # Test with p_method="exact" to verify exact match with brunnermunzel package
   set.seed(42)
-  result_orig <- brunner_munzel(1:3, 4:6,
+  result_exact <- brunner_munzel(1:3, 4:6,
                                test_method = "perm",
                                R = 1000,
-                               p_method = "original")
+                               p_method = "exact")
 
-  # With p_method="original", p-value should be exactly 2/20 = 0.10
+  # With p_method="exact", p-value should be exactly 2/20 = 0.10
   # (matching brunnermunzel package's formula: count / total)
-  expect_equal(result_orig$p.value, 0.10, tolerance = 1e-10,
-               info = "p-value with original method should be exactly 0.10")
+  expect_equal(result_exact$p.value, 0.10, tolerance = 1e-10,
+               info = "p-value with exact method should be exactly 0.10")
 
   # Test one-sided alternatives work correctly
   # This is the critical test that catches the comparison operator bug!
@@ -642,7 +642,7 @@ test_that("brunner_munzel",{
   # Key differences between packages:
   # - TOSTER estimate: P(X>Y) + 0.5*P(X=Y)
   # - brunnermunzel estimate: P(X<Y) + 0.5*P(X=Y) = 1 - TOSTER estimate
-  # - TOSTER uses Monte Carlo permutation by default; brunnermunzel uses exact
+  # - TOSTER uses Randomization by default; brunnermunzel uses exact
 
   # Example from brunnermunzel documentation (Hollander & Wolfe 1973, p.29):
   # Hamilton depression scale measurements
@@ -657,7 +657,7 @@ test_that("brunner_munzel",{
   set.seed(123)
   result_hw <- brunner_munzel(x_hw, y_hw, test_method = "perm", R = 10000)
 
-  # Estimate should match exactly (no Monte Carlo involved in estimate)
+  # Estimate should match exactly (no randomization involved in estimate)
   expect_equal(as.numeric(result_hw$estimate), 0.7160494, tolerance = 1e-6,
                info = "Estimate should match brunnermunzel package")
 

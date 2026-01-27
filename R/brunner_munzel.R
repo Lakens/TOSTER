@@ -20,9 +20,14 @@
 #' @param R the number of permutations for the permutation test (default is 10000). Only used when `test_method = "perm"`.
 #' @param p_method a character string specifying the method for computing permutation p-values. Only used when `test_method = "perm"`:
 #'
-#'   * "plusone" (default): Uses the (b+1)/(R+1) formula from Phipson & Smyth (2010), which provides
-#'     exact p-values when permutations are sampled without replacement.
-#'   * "original": Uses the traditional b/R formula with a minimum of 1/R.
+#'   * `NULL` (default): Automatically selects "exact" for exact permutation tests (when all
+#'     permutations are enumerated) and "plusone" for randomization tests (when permutations
+#'     are sampled with replacement).
+#'   * "exact": Uses b/R where b is the count of permutation statistics at least as extreme as
+#'     observed. Appropriate when all permutations are enumerated.
+#'   * "plusone": Uses (b+1)/(R+1), which guarantees p > 0 and provides exact Type I error
+#'     control for randomization tests where permutations are sampled with replacement
+#'     (Phipson & Smyth, 2010).
 #' @param perm `r lifecycle::badge("deprecated")` Use `test_method = "perm"` instead.
 #' @param max_n_perm `r lifecycle::badge("deprecated")` Use `R` instead.
 #' @param alternative a character string specifying the alternative hypothesis, must be one of:
@@ -188,14 +193,14 @@ NULL
 
 #' @noRd
 bm_perm_indices <- function(N, n.x, R) {
-  # Internal helper function to generate permutation indices without replacement
+  # Internal helper function to generate permutation indices
   # Returns a matrix where each column contains a full permutation of 1:N
-  # We ensure unique ALLOCATIONS (which n.x elements go to group x), not just unique permutations
   #
-  # For small sample sizes where R >= choose(N, n.x), enumerate all combinations
+  # For small sample sizes where R >= choose(N, n.x), enumerate all combinations (exact)
+  # For larger sample sizes, use randomization (sampling with replacement)
   max_combs <- choose(N, n.x)
   if (R >= max_combs) {
-    # Enumerate all unique combinations
+    # Exact: Enumerate all unique combinations
     combs <- combn(N, n.x)
     # Convert each combination to a full permutation [combo, remaining]
     perms <- matrix(NA, nrow = max_combs, ncol = N)
@@ -207,40 +212,26 @@ bm_perm_indices <- function(N, n.x, R) {
     return(t(perms))  # Return as N x R matrix
   }
 
-  # For larger sample sizes, sample unique allocations
-  seen_allocs <- character(0)
-  perms_list <- list()
-  iter <- 0
-  max_iter <- R * 10  # Allow more iterations to find unique allocations
-
-  while (length(perms_list) < R && iter < max_iter) {
+  # Randomization: sample with replacement (may include duplicate allocations)
+  # This matches the approach in perm_t_test and hodges_lehmann
+  perms <- matrix(NA, nrow = R, ncol = N)
+  for (i in 1:R) {
     perm <- sample(1:N, N)
-    # Create a canonical representation of the allocation (sorted first n.x elements)
-    alloc_key <- paste(sort(perm[1:n.x]), collapse = ",")
-
-    if (!(alloc_key %in% seen_allocs)) {
-      seen_allocs <- c(seen_allocs, alloc_key)
-      perms_list[[length(perms_list) + 1]] <- perm
-    }
-    iter <- iter + 1
+    perms[i, ] <- perm
   }
-
-  perms <- do.call(rbind, perms_list)
   return(t(perms))  # Return as N x R matrix for compatibility with original code
 }
 
 #' @noRd
 bm_compute_perm_pval <- function(b, R, p_method) {
   # Internal helper function to compute permutation p-value
-  # Based on Phipson & Smyth (2010) for sampling without replacement
-  if (p_method == "plusone") {
-    # Phipson & Smyth (2010) formula: (b+1)/(R+1)
-    # Provides exact p-values when permutations are sampled without replacement
-    return((b + 1) / (R + 1))
+  if (p_method == "exact") {
+    # Exact formula: b/R, appropriate when all permutations are enumerated
+    return(b / R)
   } else {
-    # Original formula: b/R with minimum 1/R
-    pval <- b / R
-    return(max(pval, 1 / R))
+    # Phipson & Smyth (2010) formula: (b+1)/(R+1)
+    # Provides exact Type I error control for randomization tests
+    return((b + 1) / (R + 1))
   }
 }
 
@@ -257,7 +248,7 @@ brunner_munzel <- function(x,
                            alpha = 0.05,
                            test_method = c("t", "logit", "perm"),
                            R = 10000,
-                           p_method = c("plusone", "original"),
+                           p_method = NULL,
                            perm = "deprecated",
                            max_n_perm = "deprecated") {
 
@@ -282,7 +273,7 @@ brunner_munzel.default = function(x,
                                   alpha = 0.05,
                                   test_method = c("t", "logit", "perm"),
                                   R = 10000,
-                                  p_method = c("plusone", "original"),
+                                  p_method = NULL,
                                   perm = "deprecated",
                                   max_n_perm = "deprecated",
                                   ...) {
@@ -312,7 +303,7 @@ brunner_munzel.default = function(x,
 
   alternative = match.arg(alternative)
   test_method = match.arg(test_method)
-  p_method = match.arg(p_method)
+  # p_method validation deferred until we know if exact or randomization
 
   # Validate mu based on alternative
 
@@ -417,12 +408,28 @@ brunner_munzel.default = function(x,
     std_err = sqrt(v/n)
 
     if(test_method == "perm"){
-      METHOD = "Paired Brunner-Munzel permutation test"
       if(alternative %in% c("equivalence", "minimal.effect")) {
         message("NOTE: Permutation-based TOST for equivalence/minimal.effect testing.")
       }
 
       # Directly from nparcomp
+      # Determine if exact permutation or randomization
+      exact_perm <- (n <= 13)
+
+      # Set p_method default based on exact vs randomization
+      if (is.null(p_method)) {
+        p_method <- if (exact_perm) "exact" else "plusone"
+      } else {
+        p_method <- match.arg(p_method, c("exact", "plusone"))
+      }
+
+      # Update method string based on permutation type
+      if (exact_perm) {
+        METHOD <- "Paired Brunner-Munzel Exact Permutation test"
+      } else {
+        METHOD <- "Paired Brunner-Munzel Randomization test"
+      }
+
       if(n<=13){
         n_perm_actual <- 2^n
         p<-0
@@ -706,7 +713,6 @@ brunner_munzel.default = function(x,
     if(test_method == "perm"){
 
       ## permutation -----
-      METHOD = "Two-sample Brunner-Munzel permutation test"
       if(alternative %in% c("equivalence", "minimal.effect")) {
         message("NOTE: Permutation-based TOST for equivalence/minimal.effect testing.")
       }
@@ -716,6 +722,25 @@ brunner_munzel.default = function(x,
       P <- bm_perm_indices(N, n.x, R)
       R_actual <- ncol(P)  # Actual number of unique permutations obtained
       n_perm_actual <- R_actual  # Store for output parameter
+
+      # Determine if exact permutation or randomization
+      max_perms <- choose(N, n.x)
+      exact_perm <- (R_actual >= max_perms)
+
+      # Set p_method default based on exact vs randomization
+      if (is.null(p_method)) {
+        p_method <- if (exact_perm) "exact" else "plusone"
+      } else {
+        p_method <- match.arg(p_method, c("exact", "plusone"))
+      }
+
+      # Update method string based on permutation type
+      if (exact_perm) {
+        METHOD <- "Two-sample Brunner-Munzel Exact Permutation test"
+      } else {
+        METHOD <- "Two-sample Brunner-Munzel Randomization test"
+      }
+
       Px<-matrix(c(x,y)[P],ncol=R_actual)
 
       # perm_loop already centers at 0.5 (see res1[1,]<-(pdP-1/2)/sqrt(vP))

@@ -28,9 +28,9 @@
 #' @param tr the fraction (0 to 0.5) of observations to be trimmed from each end before
 #'     computing the mean and winsorized variance. Default is 0 (no trimming).
 #'     When tr > 0, the function performs Yuen's trimmed t-test.
-#' @param R the number of permutations. Default is NULL, which computes all permutations.
+#' @param R the number of permutations. Default is NULL, which computes all exact permutations.
 #'     If R is specified and is less than the maximum number of possible permutations,
-#'     Monte Carlo sampling is used instead.
+#'     randomization (permutation with replacement) is used instead.
 #' @param symmetric a logical variable indicating whether to assume symmetry in the two-sided test.
 #'     If `TRUE` (default) then the symmetric permutation p-value is computed, otherwise the
 #'     equal-tail permutation p-value is computed. Only relevant for `alternative = "two.sided"`.
@@ -41,13 +41,14 @@
 #'     If `FALSE`, the standard error from the original sample is used for all permutations,
 #'     which is computationally faster but assumes homoscedasticity.
 #' @param p_method the method for computing permutation p-values. Options are:
-#'     * `"plusone"` (default): Uses the formula (b+1)/(R+1) where b is the number of permutation
-#'         statistics at least as extreme as the observed. Because permutations are sampled
-#'         without replacement in this implementation, this formula provides exact p-values
-#'         that are never zero and guarantee correct Type I error control (Phipson & Smyth, 2010).
-#'     * `"original"`: Uses b/R with a minimum of 1/R. This can produce p-values of exactly
-#'         1/R when no permutation statistic exceeds the observed, which may be problematic
-#'         for multiple testing corrections and does not guarantee exact Type I error control.
+#'     * `NULL` (default): Automatically selects "exact" for exact permutation tests (when all
+#'         permutations are enumerated) and "plusone" for randomization tests (when permutations
+#'         are sampled with replacement).
+#'     * `"exact"`: Uses b/R where b is the number of permutation statistics at least as extreme
+#'         as observed. Appropriate when all permutations are enumerated.
+#'     * `"plusone"`: Uses (b+1)/(R+1), which guarantees p > 0 and provides exact Type I
+#'         error control for randomization tests where permutations are sampled with replacement
+#'         (Phipson & Smyth, 2010).
 #' @param keep_perm logical. If `TRUE` (default), the permutation distribution of the test
 #'     statistic and effect sizes are stored in the output. Set to `FALSE` for large datasets
 #'     to save memory.
@@ -113,7 +114,7 @@
 #'     but may produce different results than non-studentized implementations.
 #'   \item **Exact permutation detection**: This function automatically detects when exact
 #'     enumeration is feasible and computes all possible permutations, while some packages
-#'     may default to Monte Carlo sampling regardless of sample size.
+#'     may default to Randomization sampling regardless of sample size.
 #' }
 #'
 #' All approaches produce valid permutation tests; the differences reflect trade-offs between
@@ -261,7 +262,7 @@ perm_signs <- function(n, R) {
     signs <- as.matrix(expand.grid(rep(list(c(-1, 1)), n)))
     return(list(signs = signs, exact = TRUE, R.used = max_perms, max_perms = max_perms))
   } else {
-    # Monte Carlo sampling - ensure unique sign patterns (sampling without replacement)
+    # Randomization sampling - ensure unique sign patterns (sampling without replacement)
     # Check if R < 1000 and max_perms > 1000, print informative message
     if (R < 1000 && max_perms > 1000) {
       message("Note: Number of permutations (R = ", R, ") is less than 1000. ",
@@ -310,13 +311,13 @@ perm_groups <- function(nx, ny, R) {
     perms <- t(idx)
     return(list(idx_x = perms, exact = TRUE, R.used = max_perms, max_perms = max_perms))
   } else {
-    # Monte Carlo sampling
+    # Randomization sampling
     # Check if R < 1000 and max_perms > 1000, print informative message
     if (R < 1000 && max_perms > 1000) {
       message("Note: Number of permutations (R = ", R, ") is less than 1000. ",
               "Consider increasing R for more stable p-value estimates.")
     }
-    # Monte Carlo sampling - ensure unique permutations
+    # Randomization sampling - ensure unique permutations
     perms <- matrix(NA, nrow = R, ncol = nx)
     for (i in 1:R) {
       perms[i, ] <- sort(sample(n_total, nx))
@@ -355,19 +356,18 @@ perm_groups <- function(nx, ny, R) {
 # Arguments:
 #   b: number of permutation statistics at least as extreme as observed
 #   R: total number of permutations used
-#   p_method: one of "plusone" or "original"
+#   p_method: one of "exact" or "plusone"
 #
 # Returns: the computed p-value
 compute_perm_pval <- function(b, R, p_method) {
-  if (p_method == "plusone") {
-    # Phipson & Smyth (2010) formula for sampling without replacement
-    # This is exact when permutations are unique (no replacement)
-    return((b + 1) / (R + 1))
+  if (p_method == "exact") {
+    # Exact formula: b/R, appropriate when all permutations are enumerated
+    return(b / R)
 
-  } else if (p_method == "original") {
-    # Original formula: b/R with minimum 1/R
-    pval <- b / R
-    return(max(pval, 1 / R))
+  } else if (p_method == "plusone") {
+    # Phipson & Smyth (2010) formula: (b+1)/(R+1)
+    # Provides exact Type I error control for randomization tests
+    return((b + 1) / (R + 1))
 
   } else {
     stop("Unknown p_method: ", p_method)
@@ -394,12 +394,11 @@ perm_t_test.default <- function(x,
                                 R = NULL,
                                 symmetric = TRUE,
                                 perm_se = TRUE,
-                                p_method = c("plusone", "original"),
+                                p_method = NULL,
                                 keep_perm = TRUE,
                                 ...) {
 
   alternative <- match.arg(alternative)
-  p_method <- match.arg(p_method)
 
   # Input validation
   if (!missing(alpha) && (length(alpha) != 1 || !is.finite(alpha) ||
@@ -537,6 +536,13 @@ perm_t_test.default <- function(x,
     exact_perm <- perm_result$exact
     max_perms <- perm_result$max_perms
 
+    # Set p_method default based on exact vs randomization
+    if (is.null(p_method)) {
+      p_method <- if (exact_perm) "exact" else "plusone"
+    } else {
+      p_method <- match.arg(p_method, c("exact", "plusone"))
+    }
+
     # Check if R is sufficient for the chosen alpha level
     min_R_for_alpha <- ceiling(1/alpha - 1)
     if (!exact_perm && R_used < min_R_for_alpha && max_perms > min_R_for_alpha) {
@@ -659,6 +665,13 @@ perm_t_test.default <- function(x,
     R_used <- perm_result$R.used
     exact_perm <- perm_result$exact
     max_perms <- perm_result$max_perms
+
+    # Set p_method default based on exact vs randomization
+    if (is.null(p_method)) {
+      p_method <- if (exact_perm) "exact" else "plusone"
+    } else {
+      p_method <- match.arg(p_method, c("exact", "plusone"))
+    }
 
     # Check if R is sufficient for the chosen alpha level
     min_R_for_alpha <- ceiling(1/alpha - 1)
@@ -786,7 +799,7 @@ perm_t_test.default <- function(x,
   if (exact_perm) {
     method_prefix <- "Exact Permutation"
   } else {
-    method_prefix <- "Monte Carlo Permutation"
+    method_prefix <- "Randomization Permutation"
   }
 
   if (is.null(y)) {
