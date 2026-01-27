@@ -485,8 +485,7 @@ plot_htest_est <- function(htest, alpha = NULL, describe = TRUE) {
 
 
   if (!inherits(htest, "htest")) {
-    stop("Input must be an object of class
-'htest'")
+    stop("Input must be an object of class 'htest'")
   }
 
   if (is.null(htest$estimate)) {
