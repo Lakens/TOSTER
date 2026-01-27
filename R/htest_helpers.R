@@ -404,7 +404,6 @@ rounder_stat = function(number,
 
 printable_pval = function(pval,
                           digits = 3){
-
   cutoff = 1*10^(-1*digits)
   if(pval < cutoff){
     pval = paste0("p < ",cutoff)
