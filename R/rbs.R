@@ -72,6 +72,13 @@ rbs <- function(x,
                 conf.level = 0.95,
                 paired = FALSE) {
 
+ lifecycle::deprecate_warn(
+    when = "0.9.0",
+    what = "rbs()",
+    with = "ses_calc()",
+    details = "rbs() is deprecated. Please use ses_calc() which provides improved SE estimation methods and additional output options."
+  )
+
   # adpated from
   # Ben-Shachar M, Lüdecke D, Makowski D (2020). effectsize: Estimation of Effect Size
   #   Indices and Standardized Parameters. Journal of Open Source Software, 5(56), 2815. doi:
@@ -160,6 +167,14 @@ np_ses <- function(x,
                    conf.level = 0.95,
                    paired = FALSE,
                    ses = c("rb","odds","logodds","cstat")) {
+
+  lifecycle::deprecate_warn(
+    when = "0.9.0",
+    what = "np_ses()",
+    with = "ses_calc()",
+    details = "np_ses() is deprecated. Please use ses_calc() which provides improved SE estimation methods and additional output options."
+  )
+
   ses = match.arg(ses)
   rb <- rbs(x=x,
             y = y,

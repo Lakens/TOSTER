@@ -162,13 +162,15 @@ wilcox_TOST.default = function(x,
                    conf.level = 1 - alpha*2,
                    alternative = "two.sided")
 
-  rbs_val = np_ses(
+  rbs_val = ses_calc(
     x = x,
     y = y,
     paired = paired,
     mu = mu,
-    conf.level = 1 - alpha * 2,
-    ses = ses
+    alpha = alpha * 2,
+    ses = ses,
+    se_method = "fisher",
+    output = "data.frame"
   )
 
   if(hypothesis == "EQU"){
@@ -251,9 +253,9 @@ wilcox_TOST.default = function(x,
 
   effsize = data.frame(
     estimate = c(tresult$estimate,
-                 rbs_val$est),
-    lower.ci = c(tresult$conf.int[1], rbs_val$conf.int[1]),
-    upper.ci = c(tresult$conf.int[2], rbs_val$conf.int[2]),
+                 rbs_val$estimate),
+    lower.ci = c(tresult$conf.int[1], rbs_val$lower.ci),
+    upper.ci = c(tresult$conf.int[2], rbs_val$upper.ci),
     conf.level = c((1-alpha*2),(1-alpha*2)),
     row.names = c(raw_name,ses_name)
   )

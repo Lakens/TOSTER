@@ -24,14 +24,22 @@ test_that("Run examples for one sample", {
   test1 = wilcox_TOST(x = samp1,
                  low_eqbound = -.5,
                  high_eqbound = .5)
-  test1_ses  = ses_calc(x = samp1,
-                        alpha = .1)
+  # Test data.frame output for backward compatibility
+  test1_ses_df  = ses_calc(x = samp1,
+                           alpha = .1,
+                           se_method = "fisher",
+                           output = "data.frame")
   expect_equal(test1$effsize$estimate[2],
-               test1_ses$estimate)
+               test1_ses_df$estimate)
   expect_equal(test1$effsize$lower.ci[2],
-               test1_ses$lower.ci)
+               test1_ses_df$lower.ci)
   expect_equal(test1$effsize$upper.ci[2],
-               test1_ses$upper.ci)
+               test1_ses_df$upper.ci)
+
+  # Test htest output (new default)
+  test1_ses_htest = ses_calc(x = samp1, alpha = .1)
+  expect_s3_class(test1_ses_htest, "htest")
+  expect_equal(unname(test1_ses_htest$estimate), test1$effsize$estimate[2])
 
   test1_ses  = boot_ses_calc(x = samp1,
                         alpha = .1,
@@ -91,17 +99,22 @@ test_that("Run examples for two sample", {
                       data = df_samp,
                       low_eqbound = -.5,
                       high_eqbound = .5)
+  # Test with data.frame output for comparison with boot_ses_calc
   test1_smd = ses_calc(formula = y ~ group,
-                      data = df_samp)
+                       data = df_samp,
+                       output = "data.frame")
   test1_smd_cstat = ses_calc(formula = y ~ group,
-                                       data = df_samp,
-                                       ses = "cstat")
+                             data = df_samp,
+                             ses = "cstat",
+                             output = "data.frame")
   test1_smd_odds = ses_calc(formula = y ~ group,
-                                      data = df_samp,
-                                      ses = "odds")
+                            data = df_samp,
+                            ses = "odds",
+                            output = "data.frame")
   test1_smd_logodds = ses_calc(formula = y ~ group,
-                                         data = df_samp,
-                                         ses = "logodds")
+                               data = df_samp,
+                               ses = "logodds",
+                               output = "data.frame")
   test1_smd_boot = boot_ses_calc(formula = y ~ group,
                        data = df_samp,
                        R = 99)
@@ -117,14 +130,21 @@ test_that("Run examples for two sample", {
                                       data = df_samp,
                                       ses = "logodds",
                                       R = 99)
-  expect_equal(test1_smd_boot$estimate,
+  # Point estimates should match between ses_calc and boot_ses_calc
+  # boot_ses_calc returns htest with named estimate, ses_calc data.frame has unnamed
+  expect_equal(unname(test1_smd_boot$estimate),
                test1_smd$estimate)
-  expect_equal(test1_smd_boot_cstat$estimate,
+  expect_equal(unname(test1_smd_boot_cstat$estimate),
                test1_smd_cstat$estimate)
-  expect_equal(test1_smd_boot_odds$estimate,
+  expect_equal(unname(test1_smd_boot_odds$estimate),
                test1_smd_odds$estimate)
-  expect_equal(test1_smd_boot_logodds$estimate,
+  expect_equal(unname(test1_smd_boot_logodds$estimate),
                test1_smd_logodds$estimate)
+
+  # Test htest output (new default)
+  test1_smd_htest = ses_calc(formula = y ~ group, data = df_samp)
+  expect_s3_class(test1_smd_htest, "htest")
+
   expect_error(ses_calc(formula = y ~ group,
                         data = df_samp,
                         alpha = 1.1))
