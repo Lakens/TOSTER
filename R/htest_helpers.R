@@ -483,7 +483,6 @@ printable_pval = function(pval,
 #' @export
 plot_htest_est <- function(htest, alpha = NULL, describe = TRUE) {
 
-
   if (!inherits(htest, "htest")) {
     stop("Input must be an object of class 'htest'")
   }
