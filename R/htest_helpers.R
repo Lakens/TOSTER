@@ -517,8 +517,10 @@ plot_htest_est <- function(htest, alpha = NULL, describe = TRUE) {
   conf_level <- attr(htest$conf.int, "conf.level")
 
   if (is.null(conf_level)) {
-    conf_level <- 0.95
-    if (is.null(alpha)) {
+    if (!is.null(alpha)) {
+      conf_level <- 1 - alpha
+    } else {
+      conf_level <- 0.95
       message("No confidence level found in htest object. Defaulting to 95%.")
     }
   }
