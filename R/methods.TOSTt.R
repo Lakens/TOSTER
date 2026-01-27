@@ -706,7 +706,7 @@ plot.TOSTt <- function(x,
 
     # Build plot with one-sided rejection regions
     t_plot = ggplot(data = points,
-                    aes_string(y = 0))
+                    aes(y = 0))
 
     if (is_equivalence) {
       t_plot = t_plot +
