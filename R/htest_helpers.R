@@ -413,3 +413,264 @@ printable_pval = function(pval,
 
   return(pval)
 }
+
+#' @title Plot Estimate from 'htest' Object
+#'
+#' @description
+#' `r lifecycle::badge('stable')`
+#'
+#' Creates a simple point estimate plot with confidence interval from any 'htest' object
+#' that contains an estimate and confidence interval. This provides a visual representation
+#' of the effect size and its uncertainty, similar to a forest plot.
+#'
+#' @param htest An S3 object of class 'htest' containing at minimum an `estimate` and
+#'   `conf.int` component. Examples include output from `t.test()`, `cor.test()`,
+#'   or TOSTER functions converted with `as_htest()`.
+#' @param alpha Significance level for determining the confidence level label.
+#' @param describe Logical. If TRUE (default), includes a concise statistical description
+#'   in the plot subtitle showing the test statistic, p-value, estimate, confidence interval,
+#'   and the null hypothesis.
+#'
+#' @details
+#' The function creates a horizontal point-range plot showing:
+#' \itemize{
+#'   \item Point estimate (black dot)
+#'   \item Confidence interval (horizontal line)
+#'   \item Null value(s) as dashed vertical reference line(s)
+#' }
+#'
+#' For two-sample t-tests, R's `t.test()` returns both group means as the estimate
+#' rather than their difference. This function automatically computes the difference to display
+#' a single meaningful estimate with its confidence interval.
+#'
+#' If the 'htest' object contains equivalence bounds (two values in `null.value`),
+#' both bounds are displayed as dashed vertical lines.
+#'
+#' When `describe = TRUE`, the plot includes a three-line subtitle:
+#' \enumerate{
+#'   \item Test statistic and p-value
+#'   \item Point estimate and confidence interval
+#'   \item Null hypothesis statement
+#' }
+#' The method name appears as the plot title.
+#'
+#' @return A `ggplot` object that can be further customized using ggplot2 functions.
+#'
+#' @examples
+#' # Standard t-test
+#' t_result <- t.test(extra ~ group, data = sleep)
+#' plot_htest_est(t_result)
+#'
+#' # One-sample t-test
+#' t_one <- t.test(sleep$extra, mu = 0)
+#' plot_htest_est(t_one)
+#'
+#' # Correlation test
+#' cor_result <- cor.test(mtcars$mpg, mtcars$wt)
+#' plot_htest_est(cor_result)
+#'
+#' # TOST result converted to htest
+#' tost_res <- t_TOST(extra ~ group, data = sleep, eqb = 1)
+#' plot_htest_est(as_htest(tost_res))
+#'
+#' # Without description
+#' plot_htest_est(t_result, describe = FALSE)
+#'
+#' @import ggplot2
+#' @import ggdist
+#' @family htest
+#' @export
+plot_htest_est <- function(htest, alpha = NULL, describe = TRUE) {
+
+  if (!inherits(htest, "htest")) {
+    stop("Input must be an object of class 'htest'")
+  }
+
+  if (is.null(htest$estimate)) {
+    stop("Cannot create estimate plot: htest object has no estimate")
+  }
+
+  if (is.null(htest$conf.int)) {
+    stop("Cannot create estimate plot: htest object has no confidence interval")
+  }
+
+  # Handle two-sample t-test case where estimate contains both group means
+  estimate <- htest$estimate
+  estimate_name <- names(estimate)
+
+  if (grepl("two sample t-test", htest$method, ignore.case = TRUE) &&
+      length(estimate) > 1) {
+    estimate <- estimate[1] - estimate[2]
+    estimate_name <- "mean difference"
+  } else if (length(estimate) > 1) {
+    # For other cases with multiple estimates, warn and use first
+    warning("htest object has multiple estimates; using first estimate only")
+    estimate <- estimate[1]
+    estimate_name <- names(htest$estimate)[1]
+  }
+
+  # Get confidence interval
+  ci_lower <- min(htest$conf.int)
+  ci_upper <- max(htest$conf.int)
+  conf_level <- attr(htest$conf.int, "conf.level")
+
+  if (is.null(conf_level)) {
+    if (!is.null(alpha)) {
+      conf_level <- 1 - alpha
+    } else {
+      conf_level <- 0.95
+      message("No confidence level found in htest object. Defaulting to 95%.")
+    }
+  }
+
+  # Determine label for facet
+  if (is.null(estimate_name) || length(estimate_name) == 0) {
+    facet_label <- "Estimate"
+  } else {
+    # Capitalize first letter
+    facet_label <- paste0(toupper(substr(estimate_name, 1, 1)),
+                          substr(estimate_name, 2, nchar(estimate_name)))
+  }
+
+  # Create data frame for plotting (include facet_label in the data)
+  df_plot <- data.frame(
+    estimate = unname(estimate),
+    lower.ci = ci_lower,
+    upper.ci = ci_upper,
+    facet_label = facet_label,
+    stringsAsFactors = FALSE
+  )
+
+  # Build description for subtitle if requested
+  if (describe) {
+    # Build concise description similar to describe_htest but shorter
+    desc_parts <- c()
+
+    # Add test statistic if available
+    if (!is.null(htest$statistic)) {
+      stat_name <- names(htest$statistic)
+      stat_val <- rounder_stat(unname(htest$statistic), digits = 3)
+
+      if (!is.null(htest$parameter)) {
+        par_val <- rounder_stat(unname(htest$parameter), digits = 2)
+        stat_str <- paste0(stat_name, "(", par_val, ") = ", stat_val)
+      } else {
+        stat_str <- paste0(stat_name, " = ", stat_val)
+      }
+      desc_parts <- c(desc_parts, stat_str)
+    }
+
+    # Add p-value if available
+    if (!is.null(htest$p.value)) {
+      desc_parts <- c(desc_parts, printable_pval(htest$p.value, digits = 3))
+    }
+
+    # Build first line: test statistic and p-value
+    line1 <- paste(desc_parts, collapse = ", ")
+
+    # Build second line: estimate and CI
+    est_str <- paste0(estimate_name, " = ",
+                      rounder_stat(unname(estimate), digits = 3))
+    ci_str <- paste0(round(conf_level * 100), "% CI [",
+                     rounder_stat(ci_lower, digits = 3), ", ",
+                     rounder_stat(ci_upper, digits = 3), "]")
+    line2 <- paste(est_str, ci_str, sep = ", ")
+
+    # Build third line: null hypothesis
+    line3 <- NULL
+    if (!is.null(htest$null.value) && !is.null(htest$alternative)) {
+      null_name <- names(htest$null.value)
+      if (is.null(null_name) || length(null_name) == 0) {
+        null_name <- estimate_name
+      }
+
+      if (length(htest$null.value) == 1) {
+        # Standard hypothesis test - show null based on alternative
+        null_rel <- switch(htest$alternative,
+                           two.sided = "is equal to",
+                           less = "is greater than or equal to",
+                           greater = "is less than or equal to",
+                           "is equal to")
+        line3 <- paste0("null: ", null_name, " ", null_rel, " ",
+                        rounder_stat(unname(htest$null.value), digits = 3))
+      } else if (length(htest$null.value) == 2) {
+        # Equivalence or minimal effect test
+        null_vals <- sort(unname(htest$null.value))
+        if (htest$alternative == "equivalence") {
+          line3 <- paste0("null: ", null_name, " < ", rounder_stat(null_vals[1], digits = 3),
+                          " or > ", rounder_stat(null_vals[2], digits = 3))
+        } else if (htest$alternative == "minimal.effect") {
+          line3 <- paste0("null: ", rounder_stat(null_vals[1], digits = 3),
+                          " < ", null_name, " < ", rounder_stat(null_vals[2], digits = 3))
+        } else {
+          # Fallback for other cases with two bounds
+          line3 <- paste0("null: ", null_name, " in [",
+                          rounder_stat(null_vals[1], digits = 3), ", ",
+                          rounder_stat(null_vals[2], digits = 3), "]")
+        }
+      }
+    } else if (!is.null(htest$null.value)) {
+      # No alternative specified, just show null value
+      null_name <- names(htest$null.value)
+      if (is.null(null_name) || length(null_name) == 0) {
+        null_name <- estimate_name
+      }
+      if (length(htest$null.value) == 1) {
+        line3 <- paste0("null: ", null_name, " = ",
+                        rounder_stat(unname(htest$null.value), digits = 3))
+      }
+    }
+
+    # Combine lines
+    if (!is.null(line3)) {
+      subtitle_text <- paste(line1, line2, line3, sep = "\n")
+    } else {
+      subtitle_text <- paste(line1, line2, sep = "\n")
+    }
+    title_text <- htest$method
+  } else {
+    subtitle_text <- NULL
+    title_text <- htest$method
+  }
+
+  # Build the plot
+  p <- ggplot(df_plot,
+              aes(x = estimate,
+                  y = 1,
+                  xmin = lower.ci,
+                  xmax = upper.ci)) +
+    geom_pointrange() +
+    facet_grid(~facet_label) +
+    theme_tidybayes() +
+    labs(caption = paste0(conf_level * 100, "% Confidence Interval"),
+         title = title_text,
+         subtitle = subtitle_text) +
+    theme(strip.text = element_text(face = "bold", size = 10),
+          plot.title = element_text(size = 11),
+          plot.subtitle = element_text(size = 9),
+          axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          axis.text.y = element_blank(),
+          axis.ticks.y = element_blank())
+
+  # Add null value reference line(s)
+  if (!is.null(htest$null.value)) {
+    null_vals <- unname(htest$null.value)
+
+    if (length(null_vals) == 1) {
+      # Single null value (standard hypothesis test)
+      p <- p + geom_vline(xintercept = null_vals, linetype = "dashed")
+    } else if (length(null_vals) == 2) {
+      # Two null values (equivalence bounds)
+      p <- p +
+        geom_vline(xintercept = null_vals[1], linetype = "dashed") +
+        geom_vline(xintercept = null_vals[2], linetype = "dashed") +
+        scale_x_continuous(sec.axis = dup_axis(
+          breaks = round(null_vals, 3),
+          name = ""
+        ))
+    }
+  }
+
+  return(p)
+}

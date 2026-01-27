@@ -4,10 +4,11 @@
 #'
 #' @param x object of class `TOSTt`.
 #' @param digits Number of digits to print for p-values
-#' @param type Type of plot to produce. Default is a consonance density plot "cd". Consonance plots (type = "cd") and null distribution plots (type = "tnull") can also be produced. Note: null distribution plots only available for estimates = "raw".
+#' @param type Type of plot to produce. Default is "simple" which shows point estimates with confidence intervals. Other options include consonance plots ("c"), consonance density plots ("cd"), and null distribution plots ("tnull"). Note: null distribution plots only available for estimates = "raw".
 #' @param ci_lines Confidence interval lines for plots. Default is 1-alpha*2 (e.g., alpha = 0.05 is 90%)
 #' @param ci_shades Confidence interval shades when plot type is "cd".
 #' @param estimates indicator of what estimates to plot; options include "raw" or "SMD". Default is is both: c("raw","SMD").
+#' @param layout Layout for displaying multiple estimates. Options are "stacked" (default, separate plots stacked vertically) or "combined" (single faceted plot with shared legend). Only applies when both "raw" and "SMD" are in estimates.
 #' @param ... further arguments passed through, see description of return value for details..
 #'
 #' @return
@@ -119,8 +120,10 @@ plot.TOSTt <- function(x,
                        estimates = c("raw","SMD"),
                        ci_lines,
                        ci_shades,
+                       layout = c("stacked", "combined"),
                        ...){
   type = match.arg(type)
+  layout = match.arg(layout)
 
   low_eqd = x$eqb$low_eq[2]
   high_eqd = x$eqb$high_eq[2]
@@ -177,12 +180,79 @@ plot.TOSTt <- function(x,
 
     ci_print = x$effsize$conf.level[1]
 
+    # Build subtitle with decision text and equivalence bounds
+    eqb_text = paste0("Equivalence bounds: [",
+                      round(low_eqt, 3), ", ",
+                      round(high_eqt, 3), "] (raw)")
+    subtitle_text = paste0(x$decision$TOST, "\n",
+                           x$decision$ttest, "\n",
+                           eqb_text)
+
     # Get estimates for mean ----
     df_t = x$effsize[1,]
 
     # Get estimates for SMD ----
     df_d = x$effsize[2,]
 
+    # Check if we should use combined layout
+    both_estimates = "SMD" %in% estimates && "raw" %in% estimates
+
+    if(both_estimates && layout == "combined"){
+      # Combined faceted plot ----
+      # Create combined data frame with scale indicator
+      df_combined = rbind(
+        data.frame(
+          estimate = df_t$estimate,
+          lower.ci = df_t$lower.ci,
+          upper.ci = df_t$upper.ci,
+          type = paste0(x_label, " (raw)"),
+          low_eq = low_eqt,
+          high_eq = high_eqt,
+          stringsAsFactors = FALSE
+        ),
+        data.frame(
+          estimate = df_d$estimate,
+          lower.ci = df_d$lower.ci,
+          upper.ci = df_d$upper.ci,
+          type = paste0(x$smd$smd_label, " (standardized)"),
+          low_eq = low_eqd,
+          high_eq = high_eqd,
+          stringsAsFactors = FALSE
+        )
+      )
+      # Preserve order: raw first, then SMD
+      df_combined$type = factor(df_combined$type,
+                                levels = c(paste0(x_label, " (raw)"),
+                                           paste0(x$smd$smd_label, " (standardized)")))
+
+      plts <- ggplot(df_combined,
+                     aes(x = estimate,
+                         y = 1,
+                         xmin = lower.ci,
+                         xmax = upper.ci)) +
+        geom_pointrange() +
+        geom_vline(aes(xintercept = low_eq), linetype = "dashed") +
+        geom_vline(aes(xintercept = high_eq), linetype = "dashed") +
+        facet_wrap(~type, scales = "free_x") +
+        theme_tidybayes() +
+        labs(title = subtitle_text,
+             caption = paste0(ci_print*100, "% Confidence Interval")) +
+        theme(strip.text = element_text(face = "bold", size = 10),
+              plot.title = element_text(size = 10),
+              axis.title.x = element_blank(),
+              axis.title.y = element_blank(),
+              axis.text.y = element_blank(),
+              axis.ticks.y = element_blank())
+
+      return(plts)
+    }
+
+    # Stacked layout (default) ----
+    # Build facet labels with scale indicator
+    raw_facet_label = paste0(x_label, " (raw)")
+    smd_facet_label = paste0(x$smd$smd_label, " (standardized)")
+
+    # Raw plot (now shown on top with subtitle)
     t_plot <-
       ggplot(df_t,
              aes(x=estimate,
@@ -195,18 +265,19 @@ plot.TOSTt <- function(x,
       scale_x_continuous(sec.axis = dup_axis(breaks=c(round(low_eqt,round_t),
                                                       round(high_eqt,round_t)),
                                              name = "")) +
-      facet_grid(~as.character(x_label)) +
+      facet_grid(~as.character(raw_facet_label)) +
       theme_tidybayes() +
       labs(caption = paste0(ci_print*100,"% Confidence Interval"),
-           subtitle = paste0(x$decision$TOST, " \n", x$decision$ttest)) +
+           title = subtitle_text) +
       theme(strip.text = element_text(face = "bold",
                                       size = 10),
-            plot.subtitle = element_text(size = 10),
+            plot.title = element_text(size = 10),
             axis.title.x = element_blank(),
             axis.title.y=element_blank(),
             axis.text.y=element_blank(),
             axis.ticks.y=element_blank())
 
+    # SMD plot (now shown on bottom)
     d_plot <-
       ggplot(df_d,
              aes(x=estimate,
@@ -219,7 +290,7 @@ plot.TOSTt <- function(x,
       scale_x_continuous(sec.axis = dup_axis(breaks=c(round(low_eqd,round_t),
                                                       round(high_eqd,round_t)),
                                              name = "")) +
-      facet_grid(~as.character(x$smd$smd_label)) +
+      facet_grid(~as.character(smd_facet_label)) +
       labs(caption = paste0(ci_print*100,"% Confidence Interval")) +
       theme_tidybayes() +
       theme(strip.text = element_text(face = "bold",
@@ -229,14 +300,10 @@ plot.TOSTt <- function(x,
             axis.text.y=element_blank(),
             axis.ticks.y=element_blank())
 
-
-
-    # add the legend to the row we made earlier. Give it one-third of
-    # the width of one plot (via rel_widths).
-
-    if("SMD" %in% estimates && "raw" %in% estimates){
-      plts = plot_grid(d_plot,
-                       t_plot,
+    # Stack plots: raw on top, SMD on bottom
+    if(both_estimates){
+      plts = plot_grid(t_plot,
+                       d_plot,
                        ncol = 1)
     }
 
@@ -595,23 +662,14 @@ plot.TOSTt <- function(x,
       warning("Multiple CI lines provided; only first element will be used.")
     }
 
-    if("Equilvalence" %in% x$hypothesis){
-      METhyp = TRUE
-    } else {
-      METhyp = FALSE
-    }
-    points = data.frame(
-      type = x_label,
-      mu = c(x$effsize$estimate[1]),
-      param = c(round(unname(x$TOST$df[1]), 0)),
-      sigma = c(x$TOST$SE[1]),
-      lambda = c(0),
-      est = c(x$effsize$estimate[1]),
-      low = c(x$eqb$low_eq[1]),
-      high = c(x$eqb$high_eq[1]),
-      alpha = c(x$alpha),
-      stringsAsFactors = FALSE
-    )
+    # Determine if this is equivalence or MET hypothesis
+    is_equivalence = grepl("Equivalence", x$hypothesis, ignore.case = TRUE)
+
+    # Common parameters
+    se = x$TOST$SE[1]
+    df_t = round(unname(x$TOST$df[1]), 0)
+
+    # Data for point estimate and CI
     points = data.frame(
       x_label = x_label,
       point = x$effsize$estimate[1],
@@ -619,53 +677,88 @@ plot.TOSTt <- function(x,
       ci_low = x$effsize$upper.ci[1],
       stringsAsFactors = FALSE
     )
+
     points_l = data.frame(
-      mu = c(x$eqb$low_eq[1]),
-      param = c(round(unname(x$TOST$df[1]), 0)),
-      sigma = c(x$TOST$SE[1]),
+      mu = c(low_eqt),
+      param = c(df_t),
+      sigma = c(se),
       lambda = c(0),
       stringsAsFactors = FALSE
     )
     points_u = data.frame(
-      mu = c(x$eqb$high_eq[1]),
-      param = c(round(unname(x$TOST$df[1]), 0)),
-      sigma = c(x$TOST$SE[1]),
+      mu = c(high_eqt),
+      param = c(df_t),
+      sigma = c(se),
       lambda = c(0),
       stringsAsFactors = FALSE
     )
 
-    x_l = c(low_eqt - qnorm(1-x$alpha)*points_l$sigma,
-            low_eqt + qnorm(1-x$alpha)*points_l$sigma)
-    x_u = c(high_eqt - qnorm(1-x$alpha)*points_l$sigma,
-                 high_eqt + qnorm(1-x$alpha)*points_l$sigma)
+    # Calculate one-sided critical values
+    # For equivalence: lower bound uses right tail (greater), upper bound uses left tail (less)
+    # For MET: lower bound uses left tail (less), upper bound uses right tail (greater)
+    if (is_equivalence) {
+      crit_l_right = low_eqt + qnorm(1 - x$alpha) * se
+      crit_u_left = high_eqt - qnorm(1 - x$alpha) * se
+    } else {
+      crit_l_left = low_eqt - qnorm(1 - x$alpha) * se
+      crit_u_right = high_eqt + qnorm(1 - x$alpha) * se
+    }
 
+    # Build plot with one-sided rejection regions
     t_plot = ggplot(data = points,
-                    aes_string(y = 0)) +
-      stat_dist_slab(data = points_l,
-                     aes(fill = stat(x < x_l[1] | x > x_l[2]),
-                         dist = dist_student_t(
-                           mu = mu,
-                           df = param,
-                           sigma = sigma,
-                           ncp = lambda
-                         )),
-                     alpha = .5,
-                     #  fill = NA,
-                     slab_color = "black",
-                     slab_size = .5) +
-      stat_dist_slab(data = points_u,
-                     aes(fill = stat(x < x_u[1] | x > x_u[2]),
-                         dist = dist_student_t(
-                           mu = mu,
-                           df = param,
-                           sigma = sigma,
-                           ncp = lambda
-                         )),
+                    aes(y = 0))
 
-                     alpha = .5,
-                     #  fill = NA,
-                     slab_color = "black",
-                     slab_size = .5) +
+    if (is_equivalence) {
+      t_plot = t_plot +
+        stat_dist_slab(data = points_l,
+                       aes(fill = after_stat(x > crit_l_right),
+                           dist = dist_student_t(
+                             mu = mu,
+                             df = param,
+                             sigma = sigma,
+                             ncp = lambda
+                           )),
+                       alpha = .5,
+                       slab_color = "black",
+                       slab_size = .5) +
+        stat_dist_slab(data = points_u,
+                       aes(fill = after_stat(x < crit_u_left),
+                           dist = dist_student_t(
+                             mu = mu,
+                             df = param,
+                             sigma = sigma,
+                             ncp = lambda
+                           )),
+                       alpha = .5,
+                       slab_color = "black",
+                       slab_size = .5)
+    } else {
+      t_plot = t_plot +
+        stat_dist_slab(data = points_l,
+                       aes(fill = after_stat(x < crit_l_left),
+                           dist = dist_student_t(
+                             mu = mu,
+                             df = param,
+                             sigma = sigma,
+                             ncp = lambda
+                           )),
+                       alpha = .5,
+                       slab_color = "black",
+                       slab_size = .5) +
+        stat_dist_slab(data = points_u,
+                       aes(fill = after_stat(x > crit_u_right),
+                           dist = dist_student_t(
+                             mu = mu,
+                             df = param,
+                             sigma = sigma,
+                             ncp = lambda
+                           )),
+                       alpha = .5,
+                       slab_color = "black",
+                       slab_size = .5)
+    }
+
+    t_plot = t_plot +
       geom_point(data = data.frame(y = -.1,
                                    x = points$point),
                  aes(x = x, y = y),
@@ -675,15 +768,16 @@ plot.TOSTt <- function(x,
                xend = points$ci_high,
                y = -.1, yend = -.1,
                size = 1.5,
-               colour = "black")+
-      # set palettes  need true false
+               colour = "black") +
       scale_fill_manual(values = c("gray85", "green")) +
       geom_vline(aes(xintercept = low_eqt),
                  linetype = "dashed") +
       geom_vline(aes(xintercept = high_eqt),
                  linetype = "dashed") +
-      facet_wrap( ~ x_label) +
-      labs(caption = "Note: green indicates rejection region for null equivalence and MET hypotheses")+
+      facet_wrap(~ x_label) +
+      labs(caption = paste0("Note: green indicates one-sided rejection region (",
+                            ifelse(is_equivalence, "equivalence", "minimal effect"),
+                            " test)")) +
       theme_tidybayes() +
       theme(
         legend.position = "none",
@@ -697,14 +791,15 @@ plot.TOSTt <- function(x,
         axis.text.x = element_text(face = "bold", size = 11),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        panel.background = element_rect(fill = "transparent",colour = NA),
-        plot.background = element_rect(fill = "transparent",colour = NA),
-        legend.background = element_rect(fill = "transparent",colour = NA)
+        panel.background = element_rect(fill = "transparent", colour = NA),
+        plot.background = element_rect(fill = "transparent", colour = NA),
+        legend.background = element_rect(fill = "transparent", colour = NA)
       ) +
       scale_x_continuous(sec.axis = dup_axis(breaks = c(
         round(low_eqt, round_t),
         round(high_eqt, round_t)
       )))
+
     return(t_plot)
   }
 

@@ -1137,6 +1137,45 @@ test_that("plot generic function",{
 
 })
 
+test_that("plot.TOSTt simple type layout options", {
+  # Test the new layout parameter and updated simple plot behavior
+
+  test1 = t_TOST(extra ~ group, data = sleep, eqb = 2)
+
+  # Test default stacked layout
+  p_stacked = plot(test1, type = "simple")
+  expect_true(inherits(p_stacked, c("gg", "ggplot")) || inherits(p_stacked, "gtable"))
+
+  # Test combined layout
+  p_combined = plot(test1, type = "simple", layout = "combined")
+  expect_s3_class(p_combined, "ggplot")
+
+  # Test stacked layout explicitly
+  p_stacked2 = plot(test1, type = "simple", layout = "stacked")
+  expect_true(inherits(p_stacked2, c("gg", "ggplot")) || inherits(p_stacked2, "gtable"))
+
+  # Test with only raw estimates
+  p_raw = plot(test1, type = "simple", estimates = "raw")
+  expect_s3_class(p_raw, "ggplot")
+
+  # Test with only SMD estimates
+  p_smd = plot(test1, type = "simple", estimates = "SMD")
+  expect_s3_class(p_smd, "ggplot")
+
+  # Test combined layout with only one estimate type (should just return single plot)
+  p_raw_combined = plot(test1, type = "simple", estimates = "raw", layout = "combined")
+  expect_s3_class(p_raw_combined, "ggplot")
+
+  # Test one-sample case
+  test_one = t_TOST(x = sleep$extra, eqb = 1)
+  p_one = plot(test_one, type = "simple")
+  expect_true(inherits(p_one, c("gg", "ggplot")) || inherits(p_one, "gtable"))
+
+  p_one_combined = plot(test_one, type = "simple", layout = "combined")
+  expect_s3_class(p_one_combined, "ggplot")
+
+})
+
 test_that("Ensure paired output correct", {
 
   test1 = tsum_TOST(n1 = 23,

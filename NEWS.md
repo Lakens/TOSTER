@@ -7,6 +7,18 @@ NEWS
 - Added `perm_t_test` function to allow for permutation tests for equivalence using TOST
 - Update `brunner_munzel` function to allow TOST directly
 - Update functions to disallow `paired = TRUE` when formula method utilized.
+- Improved `plot.TOSTt` for `type = "simple"`:
+  - Raw estimate plot now appears on top (was on bottom)
+  - Decision text and equivalence bounds now displayed at top of plot
+  - Added `layout` parameter: "stacked" (default) or "combined" for a single faceted plot
+- Improved `plot.TOSTt` for `type = "tnull"`:
+  - Now shows only one-sided rejection regions appropriate to the test type
+  - Equivalence tests: lower bound shows right tail, upper bound shows left tail
+  - Minimal effect tests: lower bound shows left tail, upper bound shows right tail
+- Added `plot_htest_est()` function to create simple estimate plots from any `htest` object
+  - Displays point estimate with confidence interval
+  - Handles null values (single or equivalence bounds) as reference lines
+  - Automatically handles two-sample t-test estimates by computing mean difference
 
 # TOSTER v0.8.7
 - Update documentation to make it clear what the "eqb" argument does within the `wilcox_TOST` function.

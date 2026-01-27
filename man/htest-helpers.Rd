@@ -84,6 +84,7 @@ describe_htest(cor_result)
 \seealso{
 Other htest: 
 \code{\link{as_htest}()},
+\code{\link{plot_htest_est}()},
 \code{\link{simple_htest}()}
 }
 \concept{htest}
