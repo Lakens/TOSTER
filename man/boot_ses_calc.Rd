@@ -12,8 +12,13 @@ boot_ses_calc(
   paired = FALSE,
   ses = "rb",
   alpha = 0.05,
+  mu = 0,
   boot_ci = c("basic", "stud", "perc"),
-  R = 1999
+  R = 1999,
+  se_method = c("agresti", "fisher"),
+  output = c("htest", "data.frame"),
+  alternative = c("two.sided", "less", "greater", "equivalence", "minimal.effect"),
+  null.value = NULL
 )
 
 \method{boot_ses_calc}{default}(
@@ -22,8 +27,13 @@ boot_ses_calc(
   paired = FALSE,
   ses = c("rb", "odds", "logodds", "cstat"),
   alpha = 0.05,
+  mu = 0,
   boot_ci = c("basic", "stud", "perc"),
   R = 1999,
+  se_method = c("agresti", "fisher"),
+  output = c("htest", "data.frame"),
+  alternative = c("two.sided", "less", "greater", "equivalence", "minimal.effect"),
+  null.value = NULL,
   ...
 )
 
@@ -44,9 +54,34 @@ boot_ses_calc(
 
 \item{alpha}{alpha level (default = 0.05)}
 
+\item{mu}{number indicating the value around which asymmetry (for one-sample or paired samples)
+or shift (for independent samples) is to be estimated (default = 0).}
+
 \item{boot_ci}{method for bootstrap confidence interval calculation: "stud" (studentized, default), "basic" (basic bootstrap), or "perc" (percentile bootstrap).}
 
 \item{R}{number of bootstrap replications (default = 1999).}
+
+\item{se_method}{a character string specifying the method for computing standard errors
+within each bootstrap sample:
+- "agresti": (default) Uses the Agresti/Lehmann placement-based variance estimation.
+This method has better asymptotic properties.
+- "fisher": Uses the legacy Fisher z-transformation method. Retained for backward
+compatibility.}
+
+\item{output}{a character string specifying the output format:
+- "htest": (default) Returns an object of class "htest" compatible with standard R output.
+- "data.frame": Returns a data frame with effect size estimates and confidence intervals.}
+
+\item{alternative}{a character string specifying the alternative hypothesis:
+- "two.sided": effect differs from null.value (default)
+- "less": effect is less than null.value
+- "greater": effect is greater than null.value
+- "equivalence": effect is between specified bounds
+- "minimal.effect": effect is outside specified bounds}
+
+\item{null.value}{a number or vector specifying the null hypothesis value(s):
+- For standard alternatives: a single value (default = 0 for rb/logodds, 0.5 for cstat, 1 for odds)
+- For equivalence/minimal.effect: two values representing the lower and upper bounds}
 
 \item{y}{an optional (non-empty) numeric vector of data values.}
 
@@ -59,27 +94,41 @@ boot_ses_calc(
 \item{na.action}{a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").}
 }
 \value{
-A data frame containing the following information:
+If \code{output = "htest"} (default), returns a list with class \code{"htest"} containing:
 \itemize{
 \item estimate: The effect size estimate calculated from the original data
-\item bias: Estimated bias (difference between original estimate and median of bootstrap estimates)
-\item SE: Standard error estimated from the bootstrap distribution
+\item stderr: Standard error estimated from the bootstrap distribution
+\item conf.int: Bootstrap confidence interval with conf.level attribute
+\item statistic: The observed z-statistic (for hypothesis testing)
+\item p.value: The bootstrapped p-value for the test
+\item null.value: The specified hypothesized value(s)
+\item alternative: A character string describing the alternative hypothesis
+\item method: A character string indicating what type of test was performed
+\item boot: The bootstrap samples of the effect size (on the requested scale)
+\item data.name: A character string giving the name(s) of the data
+\item call: The matched call
+}
+
+If \code{output = "data.frame"}, returns a data frame containing:
+\itemize{
+\item estimate: The effect size estimate
+\item SE: Standard error from the bootstrap distribution
 \item lower.ci: Lower bound of the bootstrap confidence interval
 \item upper.ci: Upper bound of the bootstrap confidence interval
-\item conf.level: Confidence level (1-alpha)
-\item boot_ci: The bootstrap confidence interval method used
+\item conf.level: Confidence level (1-alpha or 1-2*alpha for equivalence)
+\item boot_ci: The bootstrap CI method used
 }
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#maturing}{\figure{lifecycle-maturing.svg}{options: alt='[Maturing]'}}}{\strong{[Maturing]}}
 
-Calculates non-SMD standardized effect sizes with bootstrap confidence intervals.
-This function provides more robust confidence intervals for rank-based and
-probability-based effect size measures through resampling methods.
+Calculates non-SMD standardized effect sizes with bootstrap confidence intervals and
+optional hypothesis testing. This function provides robust confidence intervals for
+rank-based and probability-based effect size measures through resampling methods.
 }
 \details{
 This function calculates bootstrapped confidence intervals for rank-based and probability-based
-effect size measures. It is an extension of the \code{ses_calc()} function that uses resampling
+effect size measures. It extends the \code{ses_calc()} function by using resampling
 to provide more robust confidence intervals, especially for small sample sizes.
 
 The function implements the following bootstrap approach:
@@ -92,12 +141,41 @@ The function implements the following bootstrap approach:
 \item Back-transform the confidence intervals to the original scale
 \item Convert to the requested effect size measure (if not rank-biserial)
 }
+\subsection{Standard Error Methods}{
+
+Two methods are available for computing standard errors within each bootstrap sample:
+\itemize{
+\item \strong{Agresti method} (\code{se_method = "agresti"}): Uses the Agresti/Lehmann placement-based
+variance estimation. This method computes the variance of the concordance probability
+and propagates it to other effect size scales using the delta method.
+\item \strong{Fisher method} (\code{se_method = "fisher"}): Uses the legacy formula based on the
+Wilcoxon statistic variance. This is retained for backward compatibility.
+}
+}
+
+\subsection{Bootstrap Confidence Interval Methods}{
 
 Three bootstrap confidence interval methods are available:
 \itemize{
 \item \strong{Basic bootstrap ("basic")}: Uses the empirical distribution of bootstrap estimates
 \item \strong{Studentized bootstrap ("stud")}: Accounts for the variability in standard error estimates
 \item \strong{Percentile bootstrap ("perc")}: Uses percentiles of the bootstrap distribution directly
+}
+}
+
+\subsection{Hypothesis Testing}{
+
+When an alternative other than "two.sided" is specified, or when null.value is not the
+default, the function performs bootstrap hypothesis testing. For equivalence and minimal
+effect testing, specify null.value as a vector of two values (lower and upper bounds).
+
+For different alternatives, the p-values are calculated as follows:
+\itemize{
+\item "two.sided": Proportion of bootstrap statistics at least as extreme as the observed statistic
+\item "less": Proportion of bootstrap statistics less than or equal to the observed statistic
+\item "greater": Proportion of bootstrap statistics greater than or equal to the observed statistic
+\item "equivalence": Maximum of two one-sided p-values (for lower and upper bounds)
+\item "minimal.effect": Minimum of two one-sided p-values (for lower and upper bounds)
 }
 
 The function supports three study designs:
@@ -108,15 +186,10 @@ The function supports three study designs:
 }
 
 Note that extreme values (perfect separation between groups) can produce infinite values during
-the bootstrapping process.
-This happens often if the sample size is very small.
-The function will issue a warning if this occurs, as it may affect
-the accuracy of the confidence intervals.
-Additionally, this affects the ability to calculate bias and SE estimates from the bootstrap samples.
-If the number of infinite values is small (less than 10\% of the bootstrap samples) then the infinite values
-are replaced with the nearest next value (only for the SE and bias estimates, not confidence intervals).
+the bootstrapping process. The function will issue a warning if this occurs.
 
 For detailed information on calculation methods, see \code{vignette("robustTOST")}.
+}
 }
 \section{Purpose}{
 
@@ -125,6 +198,7 @@ Use this function when:
 \item You need more robust confidence intervals for non-parametric effect sizes
 \item You prefer resampling-based confidence intervals over asymptotic approximations
 \item You need to quantify uncertainty in rank-based effect sizes more accurately
+\item You want to perform hypothesis testing with bootstrap methods
 }
 }
 
@@ -140,7 +214,30 @@ result <- boot_ses_calc(x = group1, y = group2,
                         boot_ci = "basic",
                         R = 99)
 
-# Example 2: Using formula notation to calculate concordance statistic
+# Example 2: Hypothesis testing (two-sided)
+result <- boot_ses_calc(x = group1, y = group2,
+                        ses = "rb",
+                        alternative = "two.sided",
+                        null.value = 0,
+                        R = 99)
+
+# Example 3: Equivalence testing
+result <- boot_ses_calc(x = group1, y = group2,
+                        ses = "rb",
+                        alternative = "equivalence",
+                        null.value = c(-0.3, 0.3),
+                        R = 99)
+
+# Example 4: Paired samples
+data(sleep)
+with(sleep, boot_ses_calc(x = extra[group == 1],
+                          y = extra[group == 2],
+                          paired = TRUE,
+                          ses = "rb",
+                          alternative = "greater",
+                          R = 99))
+
+# Example 5: Using formula notation
 data(mtcars)
 result <- boot_ses_calc(formula = mpg ~ am,
                         data = mtcars,
@@ -148,30 +245,16 @@ result <- boot_ses_calc(formula = mpg ~ am,
                         boot_ci = "perc",
                         R = 99)
 
-# Example 3: Paired samples with studentized bootstrap CI
-data(sleep)
-with(sleep, boot_ses_calc(x = extra[group == 1],
-                          y = extra[group == 2],
-                          paired = TRUE,
-                          ses = "rb",
-                          boot_ci = "stud",
-                          R = 99))
-
-# Example 4: Comparing different bootstrap CI methods
-\dontrun{
-# Basic bootstrap
-basic_ci <- boot_ses_calc(x = group1, y = group2, boot_ci = "basic")
-
-# Percentile bootstrap
-perc_ci <- boot_ses_calc(x = group1, y = group2, boot_ci = "perc")
-
-# Studentized bootstrap
-stud_ci <- boot_ses_calc(x = group1, y = group2, boot_ci = "stud")
-
-# Compare the results
-rbind(basic_ci, perc_ci, stud_ci)
 }
+\references{
+Agresti, A. (1980). Generalized odds ratios for ordinal data. \emph{Biometrics}, 36, 59-67.
 
+Bamber, D. (1975). The area above the ordinal dominance graph and the area below the receiver
+operating characteristic graph. \emph{Journal of Mathematical Psychology}, 12, 387-415.
+
+Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press.
+
+Lehmann, E.L. (1975). \emph{Nonparametrics: Statistical Methods Based on Ranks}. Holden-Day.
 }
 \seealso{
 Other effect sizes: 

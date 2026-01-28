@@ -122,6 +122,7 @@ Other Robust tests:
 \code{\link{boot_t_TOST}()},
 \code{\link{boot_t_test}()},
 \code{\link{brunner_munzel}()},
+\code{\link{hodges_lehmann}()},
 \code{\link{log_TOST}()},
 \code{\link{perm_t_test}()}
 

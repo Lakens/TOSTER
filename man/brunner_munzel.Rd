@@ -15,7 +15,7 @@
   alpha = 0.05,
   test_method = c("t", "logit", "perm"),
   R = 10000,
-  p_method = c("plusone", "original"),
+  p_method = NULL,
   perm = "deprecated",
   max_n_perm = "deprecated",
   ...
@@ -60,9 +60,14 @@ for the relative effect. Values must be between 0 and 1.
 
 \item{p_method}{a character string specifying the method for computing permutation p-values. Only used when \code{test_method = "perm"}:
 \itemize{
-\item "plusone" (default): Uses the (b+1)/(R+1) formula from Phipson & Smyth (2010), which provides
-exact p-values when permutations are sampled without replacement.
-\item "original": Uses the traditional b/R formula with a minimum of 1/R.
+\item \code{NULL} (default): Automatically selects "exact" for exact permutation tests (when all
+permutations are enumerated) and "plusone" for randomization tests (when permutations
+are sampled with replacement).
+\item "exact": Uses b/R where b is the count of permutation statistics at least as extreme as
+observed. Appropriate when all permutations are enumerated.
+\item "plusone": Uses (b+1)/(R+1), which guarantees p > 0 and provides exact Type I error
+control for randomization tests where permutations are sampled with replacement
+(Phipson & Smyth, 2010).
 }}
 
 \item{perm}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Use \code{test_method = "perm"} instead.}
@@ -241,6 +246,7 @@ Other Robust tests:
 \code{\link{boot_log_TOST}()},
 \code{\link{boot_t_TOST}()},
 \code{\link{boot_t_test}()},
+\code{\link{hodges_lehmann}()},
 \code{\link{log_TOST}()},
 \code{\link{perm_t_test}()},
 \code{\link{wilcox_TOST}()}

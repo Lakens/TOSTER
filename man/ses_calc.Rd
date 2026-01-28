@@ -6,7 +6,18 @@
 \alias{ses_calc.formula}
 \title{Standardized Effect Size (SES) Calculation}
 \usage{
-ses_calc(x, ..., paired = FALSE, ses = "rb", alpha = 0.05)
+ses_calc(
+  x,
+  ...,
+  paired = FALSE,
+  ses = "rb",
+  alpha = 0.05,
+  se_method = c("agresti", "fisher"),
+  output = c("htest", "data.frame"),
+  null.value = NULL,
+  alternative = c("none", "two.sided", "less", "greater", "equivalence",
+    "minimal.effect")
+)
 
 \method{ses_calc}{default}(
   x,
@@ -15,6 +26,11 @@ ses_calc(x, ..., paired = FALSE, ses = "rb", alpha = 0.05)
   ses = c("rb", "odds", "logodds", "cstat"),
   alpha = 0.05,
   mu = 0,
+  se_method = c("agresti", "fisher"),
+  output = c("htest", "data.frame"),
+  null.value = NULL,
+  alternative = c("none", "two.sided", "less", "greater", "equivalence",
+    "minimal.effect"),
   ...
 )
 
@@ -35,6 +51,32 @@ ses_calc(x, ..., paired = FALSE, ses = "rb", alpha = 0.05)
 
 \item{alpha}{alpha level for confidence interval calculation (default = 0.05).}
 
+\item{se_method}{a character string specifying the method for computing standard errors and
+confidence intervals:
+- "agresti": (default) Uses the Agresti/Lehmann placement-based variance estimation with
+confidence intervals computed on the log-odds scale and back-transformed. This method
+has better asymptotic properties and faster convergence to normality.
+- "fisher": Uses the legacy Fisher z-transformation method for confidence intervals.
+This method is retained for backward compatibility.}
+
+\item{output}{a character string specifying the output format:
+- "htest": (default) Returns an object of class "htest" compatible with standard R output.
+- "data.frame": Returns a data frame with effect size estimates and confidence intervals.}
+
+\item{null.value}{a number or vector specifying the null hypothesis value(s) on the scale of the
+effect size estimate. Only used when \code{alternative != "none"}.
+- For standard alternatives: a single value (default = 0 for rb/logodds, 0.5 for cstat, 1 for odds)
+- For equivalence/minimal.effect: two values representing the lower and upper bounds}
+
+\item{alternative}{a character string specifying the alternative hypothesis for optional
+hypothesis testing:
+- "none": (default) No hypothesis test is performed; only effect size and CI are returned.
+- "two.sided": Test whether effect differs from null.value
+- "less": Test whether effect is less than null.value
+- "greater": Test whether effect is greater than null.value
+- "equivalence": Test whether effect is between specified bounds
+- "minimal.effect": Test whether effect is outside specified bounds}
+
 \item{y}{an optional (non-empty) numeric vector of data values.}
 
 \item{mu}{number indicating the value around which asymmetry (for one-sample or paired samples)
@@ -49,12 +91,28 @@ or shift (for independent samples) is to be estimated (default = 0).}
 \item{na.action}{a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").}
 }
 \value{
-A data frame containing the following information:
+If \code{output = "htest"} (default), returns a list with class \code{"htest"} containing:
 \itemize{
 \item estimate: The effect size estimate
+\item stderr: Standard error of the estimate
+\item conf.int: Confidence interval with conf.level attribute
+\item null.value: The null hypothesis value (if alternative != "none")
+\item alternative: The alternative hypothesis
+\item method: Description of the method used
+\item data.name: Names of the input data
+\item statistic: Test statistic (only if alternative != "none")
+\item parameter: Degrees of freedom or other parameters (only if alternative != "none")
+\item p.value: P-value for the test (only if alternative != "none")
+}
+
+If \code{output = "data.frame"}, returns a data frame containing:
+\itemize{
+\item estimate: The effect size estimate
+\item SE: Standard error of the estimate
 \item lower.ci: Lower bound of the confidence interval
 \item upper.ci: Upper bound of the confidence interval
 \item conf.level: Confidence level (1-alpha)
+\item se_method: The SE method used
 }
 }
 \description{
@@ -66,8 +124,7 @@ non-parametric analyses and when data do not meet normality assumptions.
 }
 \details{
 This function calculates standardized effect sizes that are not standardized mean differences (SMDs).
-These effect sizes are particularly useful for non-parametric analyses or when data violate
-assumptions of normality.
+These effect sizes are particularly useful to compliment non-parametric analyses or when analyzing ordinal data.
 
 The available effect size measures are:
 \itemize{
@@ -87,6 +144,95 @@ observation from group 1 exceeds a randomly selected observation from group 2. A
 as the common language effect size or the area under the ROC curve. Values range from 0 to
 1, with 0.5 indicating no effect.
 }
+\subsection{Standard Error Methods}{
+
+Two methods are available for computing standard errors and confidence intervals:
+\itemize{
+\item \strong{Agresti method} (\code{se_method = "agresti"}): This method computes the variance of the
+concordance probability \eqn{\hat{p} = \Pr(X > Y)} using the Lehmann/Agresti placement-based
+formula. For two independent samples with sizes \eqn{n_1} and \eqn{n_2}, the placement values
+\eqn{V_i = \Pr(X > Y | X = x_i)} and \eqn{W_j = \Pr(X > Y | Y = y_j)} are computed, and the
+variance is estimated as:
+
+\deqn{\widehat{\mathrm{Var}}(\hat{p}) = \frac{\bar{V^2} - \hat{p}^2}{n_1}
+    + \frac{\bar{W^2} - \hat{p}^2}{n_2}}
+
+where \eqn{\bar{V^2} = \frac{1}{n_1}\sum V_i^2} and \eqn{\bar{W^2} = \frac{1}{n_2}\sum W_j^2}.
+For paired samples, the variance is derived from the Wilcoxon signed-rank statistic using
+its null-distribution variance with a tie correction.
+
+Standard errors for other effect size scales are obtained via the delta method. Let
+\eqn{\mathrm{SE}_p} denote the standard error of \eqn{\hat{p}}. Then:
+\itemize{
+\item \eqn{\mathrm{SE}_{\mathrm{rb}} = 2 \cdot \mathrm{SE}_p} (since \eqn{r_b = 2p - 1})
+\item \eqn{\mathrm{SE}_{\eta} = \mathrm{SE}_p / [\hat{p}(1 - \hat{p})]} for the log-odds
+\eqn{\eta = \log[\hat{p}/(1 - \hat{p})]}
+\item \eqn{\mathrm{SE}_{\alpha} = \mathrm{SE}_p / (1 - \hat{p})^2} for the odds
+\eqn{\alpha = \hat{p}/(1 - \hat{p})}
+}
+
+Confidence intervals are constructed on the log-odds scale and back-transformed to the
+requested effect size scale. This ensures that intervals respect the natural bounds of each
+measure (e.g., \eqn{[0, 1]} for cstat, \eqn{[-1, 1]} for rb).
+\item \strong{Fisher method} (\code{se_method = "fisher"}): This legacy method uses Fisher's z-transformation
+(arctanh) for the rank-biserial correlation. Confidence intervals for other effect sizes
+are obtained by simple transformation of the rank-biserial CI bounds.
+}
+}
+
+\subsection{Continuity Correction for Boundary Cases}{
+
+When there is complete separation between groups (i.e., all observations in one group exceed all
+observations in the other), the concordance probability \eqn{\hat{p}} equals exactly 0 or 1.
+This leads to undefined odds (0 or \eqn{\infty}) and log-odds (\eqn{-\infty} or \eqn{\infty}).
+
+In this case, a continuity correction is applied (for \code{se_method = "agresti"} only):
+\itemize{
+\item \strong{Two-sample}: \eqn{\hat{p}} is corrected to \eqn{0.5 / (n_1 \cdot n_2)} or
+\eqn{1 - 0.5 / (n_1 \cdot n_2)}, where \eqn{n_1 \cdot n_2} is the total number of pairwise
+comparisons.
+\item \strong{Paired/one-sample}: \eqn{\hat{p}} is corrected to \eqn{0.5 / S} or \eqn{1 - 0.5 / S},
+where \eqn{S = N(N+1)/2} is the maximum possible Wilcoxon signed-rank statistic and \eqn{N}
+is the number of non-zero differences.
+}
+
+A message is printed when this correction is applied. Point estimates and hypothesis tests
+should be interpreted as approximate in these cases. For bootstrap inference with complete
+separation, see \code{\link[=boot_ses_calc]{boot_ses_calc()}}, which will detect this condition and stop with an
+informative error.
+}
+
+\subsection{Hypothesis Testing}{
+
+When \code{alternative != "none"}, a hypothesis test is performed. The approach depends on the
+SE method:
+\itemize{
+\item \strong{Agresti method}: All hypothesis tests are conducted on the \strong{log-odds scale}, regardless
+of which effect size is requested. The log-odds scale \eqn{\eta = \log[p / (1-p)]} has
+superior asymptotic properties: it is unbounded (\eqn{-\infty} to \eqn{+\infty}), converges
+more quickly to normality, and the null hypothesis (\eqn{\eta_0 = 0}) is interior to the
+parameter space.
+
+The user specifies \code{null.value} on the scale of their chosen effect size. These values are
+internally transformed to the log-odds scale for testing:
+\itemize{
+\item rb: \eqn{\eta_0 = \log[(r_0 + 1) / (1 - r_0)]}
+\item cstat: \eqn{\eta_0 = \log[p_0 / (1 - p_0)]}
+\item odds: \eqn{\eta_0 = \log(\alpha_0)}
+\item logodds: \eqn{\eta_0 = \eta_0} (no transformation needed)
+}
+
+The z-statistic is computed as \eqn{z = (\hat{\eta} - \eta_0) / \mathrm{SE}_\eta}, and the
+p-value is obtained from the standard normal distribution. When the user specifies custom
+null values (not the default), a message reports the transformation to the log-odds scale.
+\item \strong{Fisher method}: Hypothesis tests are conducted on the scale of the requested effect size,
+using the Wald z-statistic \eqn{z = (\hat{\theta} - \theta_0) / \mathrm{SE}_\theta}.
+}
+
+For equivalence testing (\code{alternative = "equivalence"}), the TOST procedure is used: two
+one-sided tests are performed against the lower and upper bounds, and the p-value is the
+maximum of the two one-sided p-values. For minimal effect testing
+(\code{alternative = "minimal.effect"}), the p-value is the minimum.
 
 The function supports three study designs:
 \itemize{
@@ -97,6 +243,7 @@ The function supports three study designs:
 
 For detailed information on calculation methods, see \code{vignette("robustTOST")}.
 }
+}
 \section{Purpose}{
 
 Use this function when:
@@ -104,7 +251,7 @@ Use this function when:
 \item You want to report non-parametric effect size measures
 \item You need to quantify the magnitude of differences using ranks or probabilities
 \item Your outcome variable is ordinal
-\item You want to complement results from Wilcoxon-Mann-Whitney type test
+\item You want to complement results from Wilcoxon-Mann-Whitney type tests
 }
 }
 
@@ -126,6 +273,30 @@ with(sleep, ses_calc(x = extra[group == 1],
                      paired = TRUE,
                      ses = "cstat"))
 
+# Example 4: With hypothesis testing
+ses_calc(x = group1, y = group2, ses = "rb",
+         alternative = "two.sided", null.value = 0)
+
+# Example 5: Return as data frame (legacy format)
+ses_calc(x = group1, y = group2, ses = "rb", output = "data.frame")
+
+# Example 6: Using Fisher method for backward compatibility
+ses_calc(x = group1, y = group2, ses = "rb", se_method = "fisher")
+
+}
+\references{
+Agresti, A. (1980). Generalized odds ratios for ordinal data. \emph{Biometrics}, 36, 59-67.
+
+Bamber, D. (1975). The area above the ordinal dominance graph and the area below the receiver
+operating characteristic graph. \emph{Journal of Mathematical Psychology}, 12, 387-415.
+
+Kerby, D. S. (2014). The simple difference formula: An approach to teaching nonparametric
+correlation. \emph{Comprehensive Psychology}, 3, 11-IT.
+
+Lehmann, E.L. (1975). \emph{Nonparametrics: Statistical Methods Based on Ranks}. Holden-Day.
+
+O'Brien, R.G. & Castelloe, J. (2006). Exploiting the link between the Wilcoxon-Mann-Whitney
+test and a simple odds statistic. \emph{SUGI 31 Proceedings}, Paper 209-31.
 }
 \seealso{
 Other effect sizes: 

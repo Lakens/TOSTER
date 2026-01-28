@@ -49,8 +49,7 @@
 #'
 #' @details
 #' This function calculates standardized effect sizes that are not standardized mean differences (SMDs).
-#' These effect sizes are particularly useful for non-parametric analyses or when data violate
-#' assumptions of normality.
+#' These effect sizes are particularly useful to compliment non-parametric analyses or when analyzing ordinal data.
 #'
 #' The available effect size measures are:
 #'
@@ -78,15 +77,82 @@
 #' Two methods are available for computing standard errors and confidence intervals:
 #'
 #'   - **Agresti method** (`se_method = "agresti"`): This method computes the variance of the
-#'     concordance probability using the Lehmann/Agresti formula based on placement values.
-#'     Confidence intervals are constructed on the log-odds scale (which has the best asymptotic
-
-#'     properties) and then back-transformed to the desired effect size scale. This ensures that
-#'     confidence intervals respect the natural bounds of each effect size measure.
+#'     concordance probability \eqn{\hat{p} = \Pr(X > Y)} using the Lehmann/Agresti placement-based
+#'     formula. For two independent samples with sizes \eqn{n_1} and \eqn{n_2}, the placement values
+#'     \eqn{V_i = \Pr(X > Y | X = x_i)} and \eqn{W_j = \Pr(X > Y | Y = y_j)} are computed, and the
+#'     variance is estimated as:
+#'
+#'     \deqn{\widehat{\mathrm{Var}}(\hat{p}) = \frac{\bar{V^2} - \hat{p}^2}{n_1}
+#'     + \frac{\bar{W^2} - \hat{p}^2}{n_2}}
+#'
+#'     where \eqn{\bar{V^2} = \frac{1}{n_1}\sum V_i^2} and \eqn{\bar{W^2} = \frac{1}{n_2}\sum W_j^2}.
+#'     For paired samples, the variance is derived from the Wilcoxon signed-rank statistic using
+#'     its null-distribution variance with a tie correction.
+#'
+#'     Standard errors for other effect size scales are obtained via the delta method. Let
+#'     \eqn{\mathrm{SE}_p} denote the standard error of \eqn{\hat{p}}. Then:
+#'       - \eqn{\mathrm{SE}_{\mathrm{rb}} = 2 \cdot \mathrm{SE}_p} (since \eqn{r_b = 2p - 1})
+#'       - \eqn{\mathrm{SE}_{\eta} = \mathrm{SE}_p / [\hat{p}(1 - \hat{p})]} for the log-odds
+#'         \eqn{\eta = \log[\hat{p}/(1 - \hat{p})]}
+#'       - \eqn{\mathrm{SE}_{\alpha} = \mathrm{SE}_p / (1 - \hat{p})^2} for the odds
+#'         \eqn{\alpha = \hat{p}/(1 - \hat{p})}
+#'
+#'     Confidence intervals are constructed on the log-odds scale and back-transformed to the
+#'     requested effect size scale. This ensures that intervals respect the natural bounds of each
+#'     measure (e.g., \eqn{[0, 1]} for cstat, \eqn{[-1, 1]} for rb).
 #'
 #'   - **Fisher method** (`se_method = "fisher"`): This legacy method uses Fisher's z-transformation
 #'     (arctanh) for the rank-biserial correlation. Confidence intervals for other effect sizes
 #'     are obtained by simple transformation of the rank-biserial CI bounds.
+#'
+#' ## Continuity Correction for Boundary Cases
+#'
+#' When there is complete separation between groups (i.e., all observations in one group exceed all
+#' observations in the other), the concordance probability \eqn{\hat{p}} equals exactly 0 or 1.
+#' This leads to undefined odds (0 or \eqn{\infty}) and log-odds (\eqn{-\infty} or \eqn{\infty}).
+#'
+#' In this case, a continuity correction is applied (for `se_method = "agresti"` only):
+#'   - **Two-sample**: \eqn{\hat{p}} is corrected to \eqn{0.5 / (n_1 \cdot n_2)} or
+#'     \eqn{1 - 0.5 / (n_1 \cdot n_2)}, where \eqn{n_1 \cdot n_2} is the total number of pairwise
+#'     comparisons.
+#'   - **Paired/one-sample**: \eqn{\hat{p}} is corrected to \eqn{0.5 / S} or \eqn{1 - 0.5 / S},
+#'     where \eqn{S = N(N+1)/2} is the maximum possible Wilcoxon signed-rank statistic and \eqn{N}
+#'     is the number of non-zero differences.
+#'
+#' A message is printed when this correction is applied. Point estimates and hypothesis tests
+#' should be interpreted as approximate in these cases. For bootstrap inference with complete
+#' separation, see [boot_ses_calc()], which will detect this condition and stop with an
+#' informative error.
+#'
+#' ## Hypothesis Testing
+#'
+#' When `alternative != "none"`, a hypothesis test is performed. The approach depends on the
+#' SE method:
+#'
+#'   - **Agresti method**: All hypothesis tests are conducted on the **log-odds scale**, regardless
+#'     of which effect size is requested. The log-odds scale \eqn{\eta = \log[p / (1-p)]} has
+#'     superior asymptotic properties: it is unbounded (\eqn{-\infty} to \eqn{+\infty}), converges
+#'     more quickly to normality, and the null hypothesis (\eqn{\eta_0 = 0}) is interior to the
+#'     parameter space.
+#'
+#'     The user specifies `null.value` on the scale of their chosen effect size. These values are
+#'     internally transformed to the log-odds scale for testing:
+#'       - rb: \eqn{\eta_0 = \log[(r_0 + 1) / (1 - r_0)]}
+#'       - cstat: \eqn{\eta_0 = \log[p_0 / (1 - p_0)]}
+#'       - odds: \eqn{\eta_0 = \log(\alpha_0)}
+#'       - logodds: \eqn{\eta_0 = \eta_0} (no transformation needed)
+#'
+#'     The z-statistic is computed as \eqn{z = (\hat{\eta} - \eta_0) / \mathrm{SE}_\eta}, and the
+#'     p-value is obtained from the standard normal distribution. When the user specifies custom
+#'     null values (not the default), a message reports the transformation to the log-odds scale.
+#'
+#'   - **Fisher method**: Hypothesis tests are conducted on the scale of the requested effect size,
+#'     using the Wald z-statistic \eqn{z = (\hat{\theta} - \theta_0) / \mathrm{SE}_\theta}.
+#'
+#' For equivalence testing (`alternative = "equivalence"`), the TOST procedure is used: two
+#' one-sided tests are performed against the lower and upper bounds, and the p-value is the
+#' maximum of the two one-sided p-values. For minimal effect testing
+#' (`alternative = "minimal.effect"`), the p-value is the minimum.
 #'
 #' The function supports three study designs:
 #'   - One-sample design: Compares a single sample to a specified value
@@ -155,6 +221,9 @@
 #'
 #' Lehmann, E.L. (1975). *Nonparametrics: Statistical Methods Based on Ranks*. Holden-Day.
 #'
+#' O'Brien, R.G. & Castelloe, J. (2006). Exploiting the link between the Wilcoxon-Mann-Whitney
+#' test and a simple odds statistic. *SUGI 31 Proceedings*, Paper 209-31.
+#'
 #' @family effect sizes
 #' @name ses_calc
 #' @export ses_calc
@@ -197,6 +266,9 @@ ses_calc.default = function(x,
   output = match.arg(output)
   alternative = match.arg(alternative)
 
+  # Track whether user provided null.value (for messaging about log-odds transformation)
+  null.value_original <- null.value
+
   # Set default null.value based on effect size type (consistent with boot_ses_calc)
   if (is.null(null.value)) {
     null.value <- switch(ses,
@@ -205,6 +277,9 @@ ses_calc.default = function(x,
                          "odds" = 1,
                          "logodds" = 0)
   }
+
+  # Determine if user specified custom bounds (for messaging)
+  user_specified_bounds <- !is.null(null.value_original)
 
   # Handle equivalence/minimal.effect bounds
   if (alternative %in% c("equivalence", "minimal.effect")) {
@@ -291,6 +366,15 @@ ses_calc.default = function(x,
       stop("Unable to compute effect size - check that data has sufficient non-zero differences")
     }
 
+    # Message if continuity correction was applied
+    if (est_results$boundary_corrected) {
+      message(
+        "Complete separation detected (p = 0 or 1). ",
+        "A continuity correction of 0.5/(number of pairs) was applied. ",
+        "Point estimates and hypothesis tests are approximate."
+      )
+    }
+
     ci_results <- ses_ci_logodds(est_results, conf.level = conf.level)
 
     # Extract results for requested effect size
@@ -352,11 +436,19 @@ ses_calc.default = function(x,
 
   } else {
     # htest output
-    method_desc <- paste0(ses_name, " (", sample_type, ")")
+
+    # Method string: "<Sample Type> <Estimate Name> <test|estimate with CI>"
+    method_suffix <- if (alternative != "none") "test" else "estimate with CI"
+    method_desc <- paste0(sample_type, " ", ses_name, " ", method_suffix)
+
+    # Note: SE/CI methodology details
     if (se_method == "agresti") {
-      method_desc <- paste0(method_desc, "\nSE: Agresti/Lehmann; CI: log-odds transform")
+      note_text <- "SE: Agresti/Lehmann placement; CI: log-odds back-transform"
+      if (alternative != "none") {
+        note_text <- paste0(note_text, "; hypothesis test conducted on log-odds scale")
+      }
     } else {
-      method_desc <- paste0(method_desc, "\nSE: Fisher z-transform")
+      note_text <- "SE: Fisher z-transform"
     }
 
     # Set up estimate with name
@@ -374,12 +466,87 @@ ses_calc.default = function(x,
       conf.int = conf.int,
       alternative = alternative,
       method = method_desc,
+      note = note_text,
       data.name = dname
     )
 
     # Add hypothesis test components if requested
-    if (alternative != "none") {
-      # Compute z-statistic and p-value
+    if (alternative != "none" && se_method == "agresti") {
+      # Conduct hypothesis tests on log-odds scale for better asymptotic properties
+      # Get log-odds estimate and SE from est_results
+      eta_hat <- est_results$logodds
+      se_eta <- est_results$se_logodds
+
+      if (alternative %in% c("equivalence", "minimal.effect")) {
+        # Transform both bounds to log-odds
+        eta_low <- to_logodds(low_bound, ses)
+        eta_high <- to_logodds(high_bound, ses)
+
+        # Message if user specified custom bounds
+        if (user_specified_bounds) {
+          message(
+            "Hypothesis test conducted on log-odds scale. ",
+            "Bounds [", round(low_bound, 4), ", ", round(high_bound, 4), "] on ", ses, " scale ",
+            "correspond to [", round(eta_low, 4), ", ", round(eta_high, 4), "] on log-odds scale."
+          )
+        }
+
+        # Compute z-statistics on log-odds scale
+        z_low <- (eta_hat - eta_low) / se_eta
+        z_high <- (eta_hat - eta_high) / se_eta
+
+        p_low <- pnorm(z_low, lower.tail = FALSE)  # H0: effect <= low_bound
+        p_high <- pnorm(z_high)  # H0: effect >= high_bound
+
+        if (alternative == "equivalence") {
+          # TOST: max of p-values, report z closest to null
+          p_val <- max(p_low, p_high)
+          z_stat <- if (abs(z_low) < abs(z_high)) z_low else z_high
+        } else {
+          # minimal.effect: min of p-values
+          p_val <- min(p_low, p_high)
+          z_stat <- if (abs(z_low) < abs(z_high)) z_low else z_high
+        }
+
+        # Report null values on user's requested scale
+        null_val <- c(low_bound, high_bound)
+        names(null_val) <- c("lower bound", "upper bound")
+
+      } else {
+        # Standard alternatives (two.sided, less, greater)
+        eta_null <- to_logodds(null.value, ses)
+
+        # Message if user specified custom null (non-default)
+        if (user_specified_bounds) {
+          message(
+            "Hypothesis test conducted on log-odds scale. ",
+            "Null value ", round(null.value, 4), " on ", ses, " scale ",
+            "corresponds to ", round(eta_null, 4), " on log-odds scale."
+          )
+        }
+
+        # Compute z-statistic on log-odds scale
+        z_stat <- (eta_hat - eta_null) / se_eta
+
+        p_val <- switch(alternative,
+                        "two.sided" = 2 * pnorm(-abs(z_stat)),
+                        "less" = pnorm(z_stat),
+                        "greater" = pnorm(z_stat, lower.tail = FALSE))
+
+        # Report null value on user's requested scale
+        null_val <- null.value
+        names(null_val) <- ses_name
+      }
+
+      names(z_stat) <- "z"
+      rval$statistic <- z_stat
+      rval$p.value <- p_val
+      rval$null.value <- null_val
+    }
+
+    # For Fisher method, keep existing behavior (test on requested scale)
+    if (alternative != "none" && se_method == "fisher") {
+      # Compute z-statistic and p-value on the requested scale
       if (alternative %in% c("equivalence", "minimal.effect")) {
         z_low <- (est_val - low_bound) / se_val
         z_high <- (est_val - high_bound) / se_val

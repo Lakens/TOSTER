@@ -276,6 +276,18 @@ boot_ses_calc.default = function(x,
     }
   }
 
+  # Helper function to check for complete separation
+  check_complete_separation <- function(p_init) {
+    if (p_init <= 0 || p_init >= 1) {
+      stop(
+        "Complete separation detected (concordance probability = ", p_init, "). ",
+        "Bootstrap confidence intervals are not appropriate because resampling ",
+        "will produce a degenerate distribution with near-zero variance. ",
+        "Use ses_calc() with se_method = 'agresti' for asymptotic inference instead."
+      )
+    }
+  }
+
   # paired ----
   if(paired == TRUE && !is.null(y)){
     i1 <- x
@@ -293,6 +305,10 @@ boot_ses_calc.default = function(x,
       maxw <- (nd^2 + nd) / 2
       raw_SE = sqrt((2 * nd^3 + 3 * nd^2 + nd) / 6) / maxw
     }
+
+    # Check for complete separation (paired case)
+    p_init <- rb_to_cstat(rbs_calc(x = data$y, y = data$x, mu = mu, paired = TRUE))
+    check_complete_separation(p_init)
 
     raw_ses = ses_calc(x = data$x,
                        y = data$y,
@@ -331,6 +347,10 @@ boot_ses_calc.default = function(x,
                                  rep("y",length(i2))))
     n1 = length(i1)
     n2 = length(i2)
+
+    # Check for complete separation (two-sample case)
+    p_init <- mean(sapply(i1, function(xi) mean(i2 < xi) + 0.5 * mean(i2 == xi)))
+    check_complete_separation(p_init)
 
     if (se_method == "agresti") {
       est_results <- ses_compute_agresti(x = i1, y = i2, paired = FALSE, mu = mu)
@@ -374,6 +394,16 @@ boot_ses_calc.default = function(x,
     # one-sample -----
     x1 = na.omit(x)
     n1 = nd =  length(x1)
+
+    # Check for complete separation (one-sample case)
+    # One-sample: compare x to mu using signed rank approach
+    d <- x1 - mu
+    d_nonzero <- d[d != 0]
+    if (length(d_nonzero) > 0) {
+      # Compute concordance probability from signed ranks
+      p_init <- rb_to_cstat(rbs_calc(x = rep(mu, length(x1)), y = x1, mu = 0, paired = TRUE))
+      check_complete_separation(p_init)
+    }
 
     if (se_method == "agresti") {
       est_results <- ses_compute_agresti(x = x1, y = NULL, paired = FALSE, mu = mu)
@@ -543,7 +573,11 @@ boot_ses_calc.default = function(x,
     sample_type = "Two Sample"
   }
 
-  method_desc <- paste0("Bootstrapped ", ses_name, " (", sample_type, ")")
+  method_desc <- paste0("Bootstrapped ", sample_type, " ", ses_name, " test")
+
+  # Note: bootstrap methodology details
+  note_text <- paste0("Bootstrap CI: ", boot_ci,
+                      "; SE method: ", if (se_method == "agresti") "Agresti/Lehmann placement" else "Fisher z-transform")
 
   # Build output
   if (output == "data.frame") {
@@ -585,6 +619,7 @@ boot_ses_calc.default = function(x,
       null.value = null_val,
       alternative = alternative,
       method = method_desc,
+      note = note_text,
       boot = boots_transformed,
       data.name = dname,
       call = match.call()

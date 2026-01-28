@@ -115,6 +115,31 @@ rho_to_z <- function(x){
   atanh(x)
 }
 
+# === Transformation helper functions ===
+
+#' Transform effect size values to log-odds scale
+#' @param value numeric value on the specified scale
+#' @param scale character string specifying the scale ("rb", "cstat", "odds", "logodds")
+#' @return value on the log-odds scale
+#' @noRd
+to_logodds <- function(value, scale) {
+  switch(scale,
+    "rb" = {
+      p <- (value + 1) / 2
+      log(p / (1 - p))
+    },
+    "cstat" = {
+      log(value / (1 - value))
+    },
+    "odds" = {
+      log(value)
+    },
+    "logodds" = {
+      value
+    }
+  )
+}
+
 # === New variance estimation functions (Agresti/Lehmann method) ===
 
 #' Compute placement values for two-sample comparison
@@ -204,7 +229,7 @@ var_concordance_paired <- function(d) {
 #' @param y numeric vector (group 2 or post-treatment), NULL for one-sample
 #' @param paired logical, TRUE for paired samples
 #' @param mu hypothesized difference (default 0)
-#' @return list with point estimates and SEs for all effect sizes
+#' @return list with point estimates and SEs for all effect sizes, including boundary_corrected flag
 #' @noRd
 ses_compute_agresti <- function(x, y = NULL, paired = FALSE, mu = 0) {
 
@@ -214,6 +239,10 @@ ses_compute_agresti <- function(x, y = NULL, paired = FALSE, mu = 0) {
     paired <- TRUE
     mu <- 0  # Already accounted for
   }
+
+  # Track if continuity correction was applied
+
+  boundary_corrected <- FALSE
 
   if (paired) {
     # === PAIRED SAMPLES ===
@@ -232,6 +261,22 @@ ses_compute_agresti <- function(x, y = NULL, paired = FALSE, mu = 0) {
       return(NULL)
     }
 
+    # Continuity correction for boundary cases (paired/one-sample)
+    # S = total rank sum, analogous to n1 * n2 in the two-sample case
+    S_total <- n_nonzero * (n_nonzero + 1) / 2
+    if (p_hat <= 0) {
+      p_hat <- 0.5 / S_total
+      boundary_corrected <- TRUE
+    } else if (p_hat >= 1) {
+      p_hat <- 1 - 0.5 / S_total
+      boundary_corrected <- TRUE
+    }
+
+    # Recompute r_hat from corrected p_hat if needed
+    if (boundary_corrected) {
+      r_hat <- 2 * p_hat - 1
+    }
+
     # Variance using Agresti method (based on non-zero differences)
     var_p <- var_concordance_paired(d)
     se_p <- sqrt(var_p)
@@ -244,6 +289,17 @@ ses_compute_agresti <- function(x, y = NULL, paired = FALSE, mu = 0) {
     # Compute placements and variance
     placements <- compute_placements(x - mu, y)
     p_hat <- placements$p_hat
+    n_pairs <- placements$n1 * placements$n2
+
+    # Continuity correction for boundary cases (two-sample)
+    if (p_hat <= 0) {
+      p_hat <- 0.5 / n_pairs
+      boundary_corrected <- TRUE
+    } else if (p_hat >= 1) {
+      p_hat <- 1 - 0.5 / n_pairs
+      boundary_corrected <- TRUE
+    }
+
     r_hat <- 2 * p_hat - 1
 
     var_p <- var_concordance_twosample(placements)
@@ -275,7 +331,9 @@ ses_compute_agresti <- function(x, y = NULL, paired = FALSE, mu = 0) {
     se_odds = se_odds,
     se_logodds = se_logodds,
     # Design info
-    paired = paired
+    paired = paired,
+    # Boundary correction flag
+    boundary_corrected = boundary_corrected
   )
 }
 

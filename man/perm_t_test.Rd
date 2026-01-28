@@ -20,7 +20,7 @@ perm_t_test(x, ...)
   R = NULL,
   symmetric = TRUE,
   perm_se = TRUE,
-  p_method = c("plusone", "original"),
+  p_method = NULL,
   keep_perm = TRUE,
   ...
 )
@@ -57,9 +57,9 @@ If \code{TRUE} then the pooled variance is used to estimate the variance otherwi
 computing the mean and winsorized variance. Default is 0 (no trimming).
 When tr > 0, the function performs Yuen's trimmed t-test.}
 
-\item{R}{the number of permutations. Default is NULL, which computes all permutations.
+\item{R}{the number of permutations. Default is NULL, which computes all exact permutations.
 If R is specified and is less than the maximum number of possible permutations,
-Monte Carlo sampling is used instead.}
+randomization (permutation with replacement) is used instead.}
 
 \item{symmetric}{a logical variable indicating whether to assume symmetry in the two-sided test.
 If \code{TRUE} (default) then the symmetric permutation p-value is computed, otherwise the
@@ -73,13 +73,14 @@ If \code{FALSE}, the standard error from the original sample is used for all per
 which is computationally faster but assumes homoscedasticity.}
 
 \item{p_method}{the method for computing permutation p-values. Options are:
-* \code{"plusone"} (default): Uses the formula (b+1)/(R+1) where b is the number of permutation
-statistics at least as extreme as the observed. Because permutations are sampled
-without replacement in this implementation, this formula provides exact p-values
-that are never zero and guarantee correct Type I error control (Phipson & Smyth, 2010).
-* \code{"original"}: Uses b/R with a minimum of 1/R. This can produce p-values of exactly
-1/R when no permutation statistic exceeds the observed, which may be problematic
-for multiple testing corrections and does not guarantee exact Type I error control.}
+* \code{NULL} (default): Automatically selects "exact" for exact permutation tests (when all
+permutations are enumerated) and "plusone" for randomization tests (when permutations
+are sampled with replacement).
+* \code{"exact"}: Uses b/R where b is the number of permutation statistics at least as extreme
+as observed. Appropriate when all permutations are enumerated.
+* \code{"plusone"}: Uses (b+1)/(R+1), which guarantees p > 0 and provides exact Type I
+error control for randomization tests where permutations are sampled with replacement
+(Phipson & Smyth, 2010).}
 
 \item{keep_perm}{logical. If \code{TRUE} (default), the permutation distribution of the test
 statistic and effect sizes are stored in the output. Set to \code{FALSE} for large datasets
@@ -201,7 +202,7 @@ approach of Janssen (1997). This provides valid inference even under heterosceda
 but may produce different results than non-studentized implementations.
 \item \strong{Exact permutation detection}: This function automatically detects when exact
 enumeration is feasible and computes all possible permutations, while some packages
-may default to Monte Carlo sampling regardless of sample size.
+may default to Randomization sampling regardless of sample size.
 }
 
 All approaches produce valid permutation tests; the differences reflect trade-offs between
@@ -252,6 +253,7 @@ Other Robust tests:
 \code{\link{boot_t_TOST}()},
 \code{\link{boot_t_test}()},
 \code{\link{brunner_munzel}()},
+\code{\link{hodges_lehmann}()},
 \code{\link{log_TOST}()},
 \code{\link{wilcox_TOST}()}
 }
