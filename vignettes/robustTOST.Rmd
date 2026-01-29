@@ -891,7 +891,6 @@ The interface is almost the same as `wilcox_TOST` but you don't set an equivalen
 ses_calc(x = sleep$extra[sleep$group == 1],
          y = sleep$extra[sleep$group == 2],
          paired = TRUE,
-         alternative = "two.sided",
          ses = "r")
 
 # Setting bootstrap replications low to
