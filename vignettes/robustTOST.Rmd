@@ -258,7 +258,8 @@ wilcox_TOST(formula = extra ~ group,
 
 - **Rank-biserial correlation (`"r"`)** is useful when you want a correlation-like measure that's easily interpretable and comparable to other correlation coefficients.
 - **Concordance probability (`"c"`)** is beneficial when you want to express the effect in terms of probability, making it accessible to non-statisticians.
-- **WMW odds (`"o"`)** is helpful when you want to express the effect in terms familiar to those who work with odds ratios in logistic regression or epidemiology.
+- **WMW odds (`"o"`)** is helpful when you want to express the effect in terms familiar to those who work with odds ratios in logistic regression or epidemiology, or interpreting probabilities as odds (e.g., betting and prediction markets).
+- **WMW log-odds (`"l"`)** the log-odds can be helpful because you *could* interpret them as a percent difference/change in the odds of stochastic superiority. E.g., if the WMW log-odds were 0.10 then you could say "X increases the odds of superiority by approximately 10% over Y".
 
 # Brunner-Munzel Test
 
@@ -890,6 +891,7 @@ The interface is almost the same as `wilcox_TOST` but you don't set an equivalen
 ses_calc(x = sleep$extra[sleep$group == 1],
          y = sleep$extra[sleep$group == 2],
          paired = TRUE,
+         alternative = "two.sided",
          ses = "r")
 
 # Setting bootstrap replications low to
