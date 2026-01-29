@@ -32,12 +32,14 @@
 #' @param output a character string specifying the output format:
 #'     - "htest": (default) Returns an object of class "htest" compatible with standard R output.
 #'     - "data.frame": Returns a data frame with effect size estimates and confidence intervals.
-#' @param alternative a character string specifying the alternative hypothesis:
-#'     - "two.sided": effect differs from null.value (default)
-#'     - "less": effect is less than null.value
-#'     - "greater": effect is greater than null.value
-#'     - "equivalence": effect is between specified bounds
-#'     - "minimal.effect": effect is outside specified bounds
+#' @param alternative a character string specifying the alternative hypothesis for optional
+#'   hypothesis testing:
+#'     - "none": (default) No hypothesis test is performed; only effect size and CI are returned.
+#'     - "two.sided": Test whether effect differs from null.value
+#'     - "less": Test whether effect is less than null.value
+#'     - "greater": Test whether effect is greater than null.value
+#'     - "equivalence": Test whether effect is between specified bounds
+#'     - "minimal.effect": Test whether effect is outside specified bounds
 #' @param null.value a number or vector specifying the null hypothesis value(s):
 #'     - For standard alternatives: a single value (default = 0 for rb/logodds, 0.5 for cstat, 1 for odds)
 #'     - For equivalence/minimal.effect: two values representing the lower and upper bounds
@@ -103,14 +105,14 @@
 #'   - estimate: The effect size estimate calculated from the original data
 #'   - stderr: Standard error estimated from the bootstrap distribution
 #'   - conf.int: Bootstrap confidence interval with conf.level attribute
-#'   - statistic: The observed z-statistic (for hypothesis testing)
-#'   - p.value: The bootstrapped p-value for the test
-#'   - null.value: The specified hypothesized value(s)
 #'   - alternative: A character string describing the alternative hypothesis
 #'   - method: A character string indicating what type of test was performed
 #'   - boot: The bootstrap samples of the effect size (on the requested scale)
 #'   - data.name: A character string giving the name(s) of the data
 #'   - call: The matched call
+#'   - statistic: Test statistic (only if alternative != "none")
+#'   - p.value: The bootstrapped p-value for the test (only if alternative != "none")
+#'   - null.value: The specified hypothesized value(s) (only if alternative != "none")
 #'
 #' If `output = "data.frame"`, returns a data frame containing:
 #'   - estimate: The effect size estimate
@@ -186,7 +188,7 @@ boot_ses_calc <- function(x, ...,
                           R = 1999,
                           se_method = c("agresti", "fisher"),
                           output = c("htest", "data.frame"),
-                          alternative = c("two.sided", "less", "greater",
+                          alternative = c("none", "two.sided", "less", "greater",
                                           "equivalence", "minimal.effect"),
                           null.value = NULL){
   UseMethod("boot_ses_calc")
@@ -206,7 +208,7 @@ boot_ses_calc.default = function(x,
                                  R = 1999,
                                  se_method = c("agresti", "fisher"),
                                  output = c("htest", "data.frame"),
-                                 alternative = c("two.sided", "less", "greater",
+                                 alternative = c("none", "two.sided", "less", "greater",
                                                  "equivalence", "minimal.effect"),
                                  null.value = NULL,
                                  ...) {
@@ -504,64 +506,66 @@ boot_ses_calc.default = function(x,
   # Bootstrap SE on the transformed scale
   boot_se = sd(boots_transformed, na.rm = TRUE)
 
-  # Compute p-value using bootstrap distribution
-  # Center the bootstrap distribution at the null value
-  # For rb/logodds: null is 0; for cstat: null is 0.5; for odds: null is 1
+  # Compute p-value using bootstrap distribution (only when hypothesis test requested)
+  if (alternative != "none") {
+    # Center the bootstrap distribution at the null value
+    # For rb/logodds: null is 0; for cstat: null is 0.5; for odds: null is 1
 
-  if (alternative == "two.sided") {
-    # Two-sided test: proportion of bootstrap values at least as extreme as observed
-    # Centered at null
-    boot_centered <- boots_transformed - null.value
-    obs_centered <- est_val - null.value
-    boot.pval <- 2 * min(mean(boot_centered <= obs_centered),
-                         mean(boot_centered > obs_centered))
-  } else if (alternative == "less") {
-    # One-sided: proportion of bootstrap values less than or equal to observed
-    boot_centered <- boots_transformed - null.value
-    obs_centered <- est_val - null.value
-    boot.pval <- mean(boot_centered <= obs_centered)
-  } else if (alternative == "greater") {
-    # One-sided: proportion of bootstrap values greater than or equal to observed
-    boot_centered <- boots_transformed - null.value
-    obs_centered <- est_val - null.value
-    boot.pval <- mean(boot_centered >= obs_centered)
-  } else if (alternative == "equivalence") {
-    # Equivalence: max of two one-sided p-values
-    # Test 1: H0: effect <= low_bound vs H1: effect > low_bound
-    # Test 2: H0: effect >= high_bound vs H1: effect < high_bound
-    boot_centered_low <- boots_transformed - low_bound
-    boot_centered_high <- boots_transformed - high_bound
-    obs_centered_low <- est_val - low_bound
-    obs_centered_high <- est_val - high_bound
+    if (alternative == "two.sided") {
+      # Two-sided test: proportion of bootstrap values at least as extreme as observed
+      # Centered at null
+      boot_centered <- boots_transformed - null.value
+      obs_centered <- est_val - null.value
+      boot.pval <- 2 * min(mean(boot_centered <= obs_centered),
+                           mean(boot_centered > obs_centered))
+    } else if (alternative == "less") {
+      # One-sided: proportion of bootstrap values less than or equal to observed
+      boot_centered <- boots_transformed - null.value
+      obs_centered <- est_val - null.value
+      boot.pval <- mean(boot_centered <= obs_centered)
+    } else if (alternative == "greater") {
+      # One-sided: proportion of bootstrap values greater than or equal to observed
+      boot_centered <- boots_transformed - null.value
+      obs_centered <- est_val - null.value
+      boot.pval <- mean(boot_centered >= obs_centered)
+    } else if (alternative == "equivalence") {
+      # Equivalence: max of two one-sided p-values
+      # Test 1: H0: effect <= low_bound vs H1: effect > low_bound
+      # Test 2: H0: effect >= high_bound vs H1: effect < high_bound
+      boot_centered_low <- boots_transformed - low_bound
+      boot_centered_high <- boots_transformed - high_bound
+      obs_centered_low <- est_val - low_bound
+      obs_centered_high <- est_val - high_bound
 
-    p_low <- mean(boot_centered_low >= obs_centered_low)  # greater than low bound
-    p_high <- mean(boot_centered_high <= obs_centered_high)  # less than high bound
-    boot.pval <- max(p_low, p_high)
-  } else if (alternative == "minimal.effect") {
-    # Minimal effect: min of two one-sided p-values
-    # Test 1: H0: effect >= low_bound vs H1: effect < low_bound
-    # Test 2: H0: effect <= high_bound vs H1: effect > high_bound
-    boot_centered_low <- boots_transformed - low_bound
-    boot_centered_high <- boots_transformed - high_bound
-    obs_centered_low <- est_val - low_bound
-    obs_centered_high <- est_val - high_bound
+      p_low <- mean(boot_centered_low >= obs_centered_low)  # greater than low bound
+      p_high <- mean(boot_centered_high <= obs_centered_high)  # less than high bound
+      boot.pval <- max(p_low, p_high)
+    } else if (alternative == "minimal.effect") {
+      # Minimal effect: min of two one-sided p-values
+      # Test 1: H0: effect >= low_bound vs H1: effect < low_bound
+      # Test 2: H0: effect <= high_bound vs H1: effect > high_bound
+      boot_centered_low <- boots_transformed - low_bound
+      boot_centered_high <- boots_transformed - high_bound
+      obs_centered_low <- est_val - low_bound
+      obs_centered_high <- est_val - high_bound
 
-    p_low <- mean(boot_centered_low <= obs_centered_low)  # less than low bound
-    p_high <- mean(boot_centered_high >= obs_centered_high)  # greater than high bound
-    boot.pval <- min(p_low, p_high)
-  }
-
-  # Compute z-statistic (for reference)
-  if (alternative %in% c("equivalence", "minimal.effect")) {
-    z_low <- (est_val - low_bound) / boot_se
-    z_high <- (est_val - high_bound) / boot_se
-    if (alternative == "equivalence") {
-      z_stat <- if (abs(z_low) < abs(z_high)) z_low else z_high
-    } else {
-      z_stat <- if (abs(z_low) < abs(z_high)) z_low else z_high
+      p_low <- mean(boot_centered_low <= obs_centered_low)  # less than low bound
+      p_high <- mean(boot_centered_high >= obs_centered_high)  # greater than high bound
+      boot.pval <- min(p_low, p_high)
     }
-  } else {
-    z_stat <- (est_val - null.value) / boot_se
+
+    # Compute z-statistic (for reference)
+    if (alternative %in% c("equivalence", "minimal.effect")) {
+      z_low <- (est_val - low_bound) / boot_se
+      z_high <- (est_val - high_bound) / boot_se
+      if (alternative == "equivalence") {
+        z_stat <- if (abs(z_low) < abs(z_high)) z_low else z_high
+      } else {
+        z_stat <- if (abs(z_low) < abs(z_high)) z_low else z_high
+      }
+    } else {
+      z_stat <- (est_val - null.value) / boot_se
+    }
   }
 
   # Determine sample type for method string
@@ -573,7 +577,8 @@ boot_ses_calc.default = function(x,
     sample_type = "Two Sample"
   }
 
-  method_desc <- paste0("Bootstrapped ", sample_type, " ", ses_name, " test")
+  method_suffix <- if (alternative != "none") "test" else "estimate with CI"
+  method_desc <- paste0("Bootstrapped ", sample_type, " ", ses_name, " ", method_suffix)
 
   # Note: bootstrap methodology details
   note_text <- paste0("Bootstrap CI: ", boot_ci,
@@ -600,23 +605,10 @@ boot_ses_calc.default = function(x,
 
     attr(ci, "conf.level") <- conf.level
 
-    names(z_stat) <- "z"
-
-    if (alternative %in% c("equivalence", "minimal.effect")) {
-      null_val <- c(low_bound, high_bound)
-      names(null_val) <- c("lower bound", "upper bound")
-    } else {
-      null_val <- null.value
-      names(null_val) <- ses_name
-    }
-
     rval = list(
-      statistic = z_stat,
-      p.value = boot.pval,
+      estimate = estimate,
       stderr = boot_se,
       conf.int = ci,
-      estimate = estimate,
-      null.value = null_val,
       alternative = alternative,
       method = method_desc,
       note = note_text,
@@ -624,6 +616,23 @@ boot_ses_calc.default = function(x,
       data.name = dname,
       call = match.call()
     )
+
+    # Add hypothesis test components only if requested
+    if (alternative != "none") {
+      names(z_stat) <- "z"
+
+      if (alternative %in% c("equivalence", "minimal.effect")) {
+        null_val <- c(low_bound, high_bound)
+        names(null_val) <- c("lower bound", "upper bound")
+      } else {
+        null_val <- null.value
+        names(null_val) <- ses_name
+      }
+
+      rval$statistic <- z_stat
+      rval$p.value <- boot.pval
+      rval$null.value <- null_val
+    }
 
     class(rval) = "htest"
 
