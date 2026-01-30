@@ -255,6 +255,7 @@ Other Robust tests:
 \code{\link{brunner_munzel}()},
 \code{\link{hodges_lehmann}()},
 \code{\link{log_TOST}()},
+\code{\link{perm_ses_test}()},
 \code{\link{wilcox_TOST}()}
 }
 \concept{Robust tests}

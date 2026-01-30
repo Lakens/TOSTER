@@ -35,10 +35,12 @@ test_that("rbs_calc: one-sample with mu shift", {
   set.seed(8494)
   x <- rnorm(30, mean = 2)
 
-  # Large positive mean should give positive rb when compared to 0
-
+  # rbs_calc paired convention: z = (x - y) - mu
+  # When x=zeros, y=positive_data: z is negative, giving negative rho
+  # ses_calc swaps args (passes y,x) so end-user sees positive rb for positive mean
+  # Here we test the raw internal convention
   r <- TOSTER:::rbs_calc(x = rep(0, length(x)), y = x, mu = 0, paired = TRUE)
-  expect_true(r > 0)
+  expect_true(r < 0)
 })
 
 test_that("Transformation round-trips", {
@@ -153,9 +155,9 @@ test_that("ses_compute_agresti: boundary correction applied", {
   y <- c(1, 2, 3)
   res <- TOSTER:::ses_compute_agresti(x, y, paired = FALSE)
   expect_true(res$boundary_corrected)
-  # cstat should be near 1 but corrected
+  # cstat should be near 1 but corrected: 1 - 0.5/(n1*n2) = 1 - 0.5/9 ≈ 0.944
   expect_true(res$cstat < 1)
-  expect_true(res$cstat > 0.99)
+  expect_true(res$cstat > 0.9)
 })
 
 test_that("ses_ci_logodds returns valid CIs", {
@@ -515,7 +517,7 @@ test_that("boot_ses_calc: data.frame output", {
 test_that("boot_ses_calc: paired samples", {
   set.seed(205)
   x <- rnorm(15)
-  y <- x + rnorm(15, mean = 0.5, sd = 0.3)
+  y <- x + rnorm(15, mean = 0.3, sd = 1)
 
   res <- hush(boot_ses_calc(x = x, y = y, paired = TRUE, R = 99))
   expect_s3_class(res, "htest")

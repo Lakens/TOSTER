@@ -266,6 +266,10 @@ ses_calc.default = function(x,
   output = match.arg(output)
   alternative = match.arg(alternative)
 
+  if(!is.numeric(alpha) || alpha <=0 || alpha >=1){
+    stop("alpha must be a numeric value between 0 and 1")
+  }
+
   # Track whether user provided null.value (for messaging about log-odds transformation)
   null.value_original <- null.value
 
@@ -312,10 +316,6 @@ ses_calc.default = function(x,
                    deparse(substitute(y)))
   } else {
     dname <- deparse(substitute(x))
-  }
-
-  if(!is.numeric(alpha) || alpha <=0 || alpha >=1){
-    stop("The alpha must be a numeric value between 0 and 1")
   }
 
   # Handle NA removal

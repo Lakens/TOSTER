@@ -916,15 +916,15 @@ The `boot_ses_calc` function offers several bootstrap confidence interval method
 
 | Method | Key Advantages | Limitations | Best Use Cases |
 |--------|---------------|-------------|---------------|
-| **Wilcoxon TOST** | Simple, widely accepted | Ambiguous hypothesis; not about means or medians | legacy analyses |
-| **Brunner-Munzel** | Clear interpretation, robust to heteroscedasticity | Computationally intensive with permutation | Stochastic superiority/dominance |
+| **Wilcoxon-Mann-Whitney tests** | Simple, widely accepted | Ambiguous hypothesis; not about means or medians | legacy analyses |
+| **Brunner-Munzel test** | Clear interpretation, robust to heteroscedasticity | Computationally intensive with permutation | Stochastic superiority/dominance |
 | **Permutation t-test** | Exact p-values (small samples), supports trimmed means | Computationally intensive for large samples | Mean differences with small samples |
-| **Bootstrap TOST** | Flexible, visualization of effect distributions | Results vary between runs | Mean differences with moderate samples |
+| **Bootstrap t-test** | Flexible, visualization of effect distributions | Results vary between runs | Mean differences with moderate samples |
 | **Log-Transformed** | Focuses on relative differences, stabilizes variance | Requires positive data | Bioequivalence, ratio comparisons |
 
 # Conclusion
 
-The robust TOST procedures provided in the TOSTER package offer reliable alternatives to standard parametric equivalence testing when data violate typical assumptions. By selecting the appropriate robust method for your specific data characteristics and research question, you can ensure more valid statistical inferences about equivalence or minimal effects.
+The robust TOST procedures provided in the TOSTER package offer reliable alternatives to standard t-test based equivalence testing when data violate typical assumptions. By selecting the appropriate robust method for your specific data characteristics and research question, you can ensure more valid statistical inferences about equivalence or minimal effects.
 
 Remember that no single method is universally superior - the choice depends on your data structure, sample size, and specific research question. When in doubt, running multiple approaches and comparing results can provide valuable insights into the robustness of your conclusions.
 

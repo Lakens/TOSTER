@@ -248,6 +248,7 @@ Other Robust tests:
 \code{\link{boot_t_test}()},
 \code{\link{hodges_lehmann}()},
 \code{\link{log_TOST}()},
+\code{\link{perm_ses_test}()},
 \code{\link{perm_t_test}()},
 \code{\link{wilcox_TOST}()}
 }

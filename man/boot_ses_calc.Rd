@@ -17,7 +17,8 @@ boot_ses_calc(
   R = 1999,
   se_method = c("agresti", "fisher"),
   output = c("htest", "data.frame"),
-  alternative = c("two.sided", "less", "greater", "equivalence", "minimal.effect"),
+  alternative = c("none", "two.sided", "less", "greater", "equivalence",
+    "minimal.effect"),
   null.value = NULL
 )
 
@@ -32,7 +33,8 @@ boot_ses_calc(
   R = 1999,
   se_method = c("agresti", "fisher"),
   output = c("htest", "data.frame"),
-  alternative = c("two.sided", "less", "greater", "equivalence", "minimal.effect"),
+  alternative = c("none", "two.sided", "less", "greater", "equivalence",
+    "minimal.effect"),
   null.value = NULL,
   ...
 )
@@ -72,12 +74,14 @@ compatibility.}
 - "htest": (default) Returns an object of class "htest" compatible with standard R output.
 - "data.frame": Returns a data frame with effect size estimates and confidence intervals.}
 
-\item{alternative}{a character string specifying the alternative hypothesis:
-- "two.sided": effect differs from null.value (default)
-- "less": effect is less than null.value
-- "greater": effect is greater than null.value
-- "equivalence": effect is between specified bounds
-- "minimal.effect": effect is outside specified bounds}
+\item{alternative}{a character string specifying the alternative hypothesis for optional
+hypothesis testing:
+- "none": (default) No hypothesis test is performed; only effect size and CI are returned.
+- "two.sided": Test whether effect differs from null.value
+- "less": Test whether effect is less than null.value
+- "greater": Test whether effect is greater than null.value
+- "equivalence": Test whether effect is between specified bounds
+- "minimal.effect": Test whether effect is outside specified bounds}
 
 \item{null.value}{a number or vector specifying the null hypothesis value(s):
 - For standard alternatives: a single value (default = 0 for rb/logodds, 0.5 for cstat, 1 for odds)
@@ -99,14 +103,14 @@ If \code{output = "htest"} (default), returns a list with class \code{"htest"} c
 \item estimate: The effect size estimate calculated from the original data
 \item stderr: Standard error estimated from the bootstrap distribution
 \item conf.int: Bootstrap confidence interval with conf.level attribute
-\item statistic: The observed z-statistic (for hypothesis testing)
-\item p.value: The bootstrapped p-value for the test
-\item null.value: The specified hypothesized value(s)
 \item alternative: A character string describing the alternative hypothesis
 \item method: A character string indicating what type of test was performed
 \item boot: The bootstrap samples of the effect size (on the requested scale)
 \item data.name: A character string giving the name(s) of the data
 \item call: The matched call
+\item statistic: Test statistic (only if alternative != "none")
+\item p.value: The bootstrapped p-value for the test (only if alternative != "none")
+\item null.value: The specified hypothesized value(s) (only if alternative != "none")
 }
 
 If \code{output = "data.frame"}, returns a data frame containing:
