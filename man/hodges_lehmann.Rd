@@ -161,6 +161,26 @@ estimator (Fried & Dehling, 2011):
 where Z is the median-corrected combined sample.
 }
 
+\subsection{Permutation-Based Equivalence Testing}{
+
+For equivalence and minimal effect testing with permutation methods, this function
+uses an unstudentized approach. The permutation distribution of the raw
+Hodges-Lehmann estimator is generated under the null hypothesis of exchangeability
+(no location difference), and p-values are computed by comparing the observed
+estimate's distance from each equivalence bound to this centered permutation
+distribution.
+
+This approach ensures that the confidence interval and p-value are concordant:
+when the (1-2\eqn{\alpha})\% confidence interval falls entirely within the equivalence
+bounds, the TOST p-value will be less than \eqn{\alpha}, and vice versa.
+
+Unlike the studentized permutation approach used for standard alternatives
+(two.sided, less, greater), the equivalence and minimal effect tests do not
+divide by a scale estimate. This is because the scale estimates (S1, S2) from
+Fried & Dehling (2011) provide numerical stability for standard tests but do
+not constitute true studentization for the Hodges-Lehmann estimator.
+}
+
 \subsection{Alternatives}{
 
 The function supports five alternative hypotheses:
