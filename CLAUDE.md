@@ -8,6 +8,10 @@ Implements the two one-sided tests (TOST) procedure to test equivalence for t-te
 
 Primary citation: Lakens (2017) <doi:10.1177/1948550617697177>
 
+## Workflow
+
+**Always work directly in the local repository** — edit files in place, run tests, and commit from the main checkout. Do NOT create git worktrees or separate working directories. This keeps the workflow simple and changes immediately visible in the user's IDE/editor.
+
 ## Development Commands
 
 ```r

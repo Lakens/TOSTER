@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Rscript:*)",
+      "Bash(where Rscript)",
+      "Bash(where:*)",
+      "Bash(cmd /c \"where Rscript 2>nul || dir /s /b C:\\\\\"Program Files\"\\\\R\\\\*Rscript.exe)",
+      "Bash(echo not found \")",
+      "Bash(cmd /c \"dir /s /b \"\"C:\\\\Program Files\\\\R\\\\*Rscript.exe\"\" 2>nul\")",
+      "Bash(cmd /c \"dir /s /b C:\\\\R*Rscript.exe 2>nul & dir /s /b C:\\\\Users\\\\caldwellaaron\\\\AppData\\\\Local\\\\R*Rscript.exe 2>nul & dir /s /b C:\\\\Users\\\\caldwellaaron\\\\scoop\\\\*Rscript.exe 2>nul\")",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nFix boot_ses_calc to default to no hypothesis test; add ses_calc unit tests\n\nboot_ses_calc now defaults to alternative=\"none\", matching ses_calc behavior.\nWhen no test is requested, statistic/p.value/null.value are omitted from htest\noutput and method string reads \"estimate with CI\" instead of \"test\".\n\nAdded dedicated test file \\(test-ses_calc.R\\) covering ses_calc, boot_ses_calc,\nand internal helpers \\(rbs_calc, ses_compute_agresti, ses_ci_logodds,\nses_ci_fisher, compute_placements, var_concordance_*, to_logodds,\ntransformation round-trips\\).\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git checkout:*)",
+      "Bash(git merge:*)",
+      "Bash(\"C:/Program Files/R/R-4.5.1/bin/Rscript.exe\" -e \"devtools::load_all\\(\\); testthat::test_file\\(''tests/testthat/test-ses_calc.R''\\)\")",
+      "Bash(\"C:/Program Files/R/R-4.5.1/bin/Rscript.exe\" -e \"devtools::test\\(\\)\")",
+      "Bash(\"C:/Program Files/R/R-4.5.1/bin/Rscript.exe\" -e \"devtools::document\\(\\)\")",
+      "Bash(\"C:/Program Files/R/R-4.5.1/bin/Rscript.exe\":*)"
+    ]
+  }
+}
