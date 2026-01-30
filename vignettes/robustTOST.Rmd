@@ -137,133 +137,9 @@ A statistically significant equivalence test (p < alpha) indicates that the obse
 - Values around ±0.5 indicate a moderate effect
 - Values around ±0.7 or greater indicate a large effect
 
-## Rank-Biserial Correlation
+## Standardized Effect Sizes
 
-The standardized effect size reported for the `wilcox_TOST` procedure is the rank-biserial correlation. This is a fairly intuitive measure of effect size which has the same interpretation of the common language effect size [@Kerby_2014]. However, instead of assuming normality and equal variances, the rank-biserial correlation calculates the number of favorable (positive) and unfavorable (negative) pairs based on their respective ranks. 
-
-For the two sample case, the correlation is calculated as the proportion of favorable pairs minus the unfavorable pairs.
-
-$$
-r_{biserial} = f_{pairs} - u_{pairs}
-$$
-
-Where:
-- $f_{pairs}$ is the proportion of favorable pairs
-- $u_{pairs}$ is the proportion of unfavorable pairs
-
-For the one sample or paired samples cases, the correlation is calculated with ties (values equal to zero) not being dropped. This provides a *conservative* estimate of the rank biserial correlation.
-
-It is calculated in the following steps wherein $z$ represents the values or difference between paired observations:
-
-1. Calculate signed ranks:
-
-$$
-r_j = -1 \cdot sign(z_j) \cdot rank(|z_j|)
-$$
-
-Where:
-- $r_j$ is the signed rank for observation $j$
-- $sign(z_j)$ is the sign of observation $z_j$ (+1 or -1)
-- $rank(|z_j|)$ is the rank of the absolute value of observation $z_j$
-
-2. Calculate the positive and negative sums:
-
-$$
-    R_{+} = \sum_{1\le i \le n, \space z_i > 0}r_j 
-$$
-
-$$
-    R_{-} = \sum_{1\le i \le n, \space z_i < 0}r_j 
-$$
-
-Where:
-- $R_{+}$ is the sum of ranks for positive observations
-- $R_{-}$ is the sum of ranks for negative observations
-
-3. Determine the smaller of the two rank sums:
-
-$$
-T = min(R_{+}, \space R_{-})
-$$
-
-$$
-S = \begin{cases} -4 & R_{+} \ge R_{-} \\ 4 & R_{+} < R_{-} \end{cases}
-$$
-
-Where:
-- $T$ is the smaller of the two rank sums
-- $S$ is a sign factor based on which rank sum is smaller
-
-4. Calculate rank-biserial correlation:
-
-$$
-r_{biserial} = S \cdot | \frac{\frac{T - \frac{(R_{+} + R_{-})}{2}}{n}}{n + 1} |
-$$
-
-Where:
-- $n$ is the number of observations (or pairs)
-- The final value ranges from -1 to 1
-
-## Confidence Intervals
-
-The Fisher approximation is used to calculate the confidence intervals.
-
-For paired samples, or one sample, the standard error is calculated as the following:
-
-$$
-SE_r = \sqrt{ \frac {(2 \cdot nd^3 + 3 \cdot nd^2 + nd) / 6} {(nd^2 + nd) / 2} }
-$$
-
-wherein, nd represents the total number of observations (or pairs).
-
-For independent samples, the standard error is calculated as the following:
-
-$$
-SE_r = \sqrt{\frac {(n1 + n2 + 1)} { (3 \cdot n1 \cdot n2)}}
-$$
-
-Where:
-
-- $n1$ and $n2$ are the sample sizes of the two groups
-
-The confidence intervals can then be calculated by transforming the estimate.
-
-$$
-r_z = atanh(r_{biserial})
-$$
-
-Then the confidence interval can be calculated and back transformed.
-
-$$
-r_{CI} = tanh(r_z  \pm  Z_{(1 - \alpha / 2)} \cdot SE_r)
-$$
-
-Where:
-
-- $Z_{(1 - \alpha / 2)}$ is the critical value from the standard normal distribution
-- $\alpha$ is the significance level (typically 0.05)
-
-## Conversion to other effect sizes
-
-Two other effect sizes can be calculated for non-parametric tests. First, there is the concordance probability, which is also known as the c-statistic, c-index, or probability of superiority^[Directly inspired by this blog post from Professor Frank Harrell https://hbiostat.org/blog/post/wpo/]. The c-statistic is converted from the correlation using the following formula:
-
-$$
-c = \frac{(r_{biserial} + 1)}{2}
-$$
-
-The c-statistic can be interpreted as the probability that a randomly selected observation from one group will be greater than a randomly selected observation from another group. A value of 0.5 indicates no difference between groups, while values approaching 1 indicate perfect separation between groups.
-
-The Wilcoxon-Mann-Whitney odds [@wmwodds], also known as the "Generalized Odds Ratio" [@agresti], is calculated by converting the c-statistic using the following formula:
-
-$$
-WMW_{odds} = e^{logit(c)}
-$$
-
-Where $logit(c) = \ln\frac{c}{1-c}$
-
-The WMW odds can be interpreted similarly to a traditional odds ratio, representing the odds that an observation from one group is greater than an observation from another group.
-
-Either effect size is available by simply modifying the `ses` argument for the `wilcox_TOST` function. **Note:** In all examples below, `eqb = .5` remains on the raw data scale (the scale of the `extra` variable in hours of sleep). The `ses` argument only changes which standardized effect size is calculated and reported; it does not change the equivalence bounds or the hypothesis test itself.
+The `wilcox_TOST` function reports a standardized effect size (SES) alongside the equivalence test. By default, this is the rank-biserial correlation, but you can select other effect sizes --- concordance probability, WMW odds, or WMW log-odds --- via the `ses` argument. Changing `ses` only affects which effect size is reported; it does **not** change the equivalence test itself.
 
 ```{r}
 # Rank biserial
@@ -273,27 +149,19 @@ wilcox_TOST(formula = extra ~ group,
                       eqb = .5)
 
 # Odds
-
 wilcox_TOST(formula = extra ~ group,
                       data = sleep,
                       ses = "o",
                       eqb = .5)
 
 # Concordance
-
 wilcox_TOST(formula = extra ~ group,
                       data = sleep,
                       ses = "c",
                       eqb = .5)
-
 ```
 
-### Guidelines for Selecting Effect Size Measures
-
-- **Rank-biserial correlation (`"r"`)** is useful when you want a correlation-like measure that's easily interpretable and comparable to other correlation coefficients.
-- **Concordance probability (`"c"`)** is beneficial when you want to express the effect in terms of probability, making it accessible to non-statisticians.
-- **WMW odds (`"o"`)** is helpful when you want to express the effect in terms familiar to those who work with odds ratios in logistic regression or epidemiology, or interpreting probabilities as odds (e.g., betting and prediction markets).
-- **WMW log-odds (`"l"`)** the log-odds can be helpful because you *could* interpret them as a percent difference/change in the odds of stochastic superiority. E.g., if the WMW log-odds were 0.10 then you could say "X increases the odds of superiority by approximately 10% over Y".
+For details on how each effect size is calculated, the available confidence interval methods, and how to perform hypothesis testing directly on the effect size scale, see the [Standardized Effect Sizes: Estimation and Testing] section later in this vignette.
 
 # Brunner-Munzel Test
 
@@ -493,15 +361,15 @@ brunner_munzel(formula = extra ~ group,
                mu = 0.35)
 ```
 
-# Hodges-Lehmann Test
+# Hodges-Lehmann Estimator and Test
 
-The `hodges_lehmann` function provides a robust location test based on the Hodges-Lehmann estimator [@hodges1963]. This is a natural companion to the WMW discussion above: while `wilcox_TOST` implicitly relies on the location-shift assumption without making it explicit, `hodges_lehmann` directly estimates and tests the location shift parameter with transparent assumptions.
+The `hodges_lehmann` function provides a robust location test based on the Hodges-Lehmann estimator [@hodges1963; @fried2011]. This is a natural companion to the WMW discussion above: while `wilcox_TOST` implicitly relies on the location-shift assumption without making it explicit, `hodges_lehmann` directly estimates and tests the location shift parameter with transparent assumptions.
 
 ## Why Use the Hodges-Lehmann Estimator?
 
 The Hodges-Lehmann estimator has several appealing properties:
 
-1. **High breakdown point (~29.3%):** The estimate remains stable even when nearly 30% of observations are outliers, making it far more robust than the mean.
+1. **Robustness to outliers** The Hodges-Lehmann estimator has bounded influence, meaning individual extreme observations cannot arbitrarily distort the estimate. This provides substantially greater robustness than the mean while retaining higher efficiency than the median under normal distributions.
 2. **Efficiency:** Under normality, the Hodges-Lehmann estimator achieves about 95.5% of the efficiency of the sample mean --- a small price for substantial robustness gains.
 3. **Transparent assumptions:** Unlike `wilcox_TOST`, which requires you to reason about pseudomedians on the raw scale, the `hodges_lehmann` function makes the estimand and test explicit.
 
@@ -566,6 +434,10 @@ hodges_lehmann(formula = extra ~ group,
                mu = 2,
                R = 1999)
 ```
+
+**Note on the permutation approach for equivalence testing:** When using permutation-based inference (i.e., `R` is not `NULL`), the equivalence and minimal effect tests use an *unstudentized* approach. The permutation distribution of the raw Hodges-Lehmann estimator is generated under the null hypothesis of exchangeability, and p-values are computed by comparing the observed estimate's distance from each equivalence bound to this distribution. This ensures that the confidence interval and p-value are always concordant: when the $(1 - 2\alpha)$% CI falls entirely within the equivalence bounds, the TOST p-value will be less than $\alpha$, and vice versa. This differs from the standard alternatives (`two.sided`, `less`, `greater`), which use a studentized statistic (dividing by a robust scale estimate). The unstudentized approach is necessary because the scale estimates S1 and S2 from @fried2011 provide numerical stability for standard tests but do not constitute true studentization for the Hodges-Lehmann estimator.
+
+By contrast, `brunner_munzel` and `perm_t_test` use studentized permutation approaches for all alternatives because they have proper standard error estimates.
 
 ### Paired Samples
 
@@ -1032,6 +904,151 @@ The bootstrapped version is particularly recommended when:
 
 The `ses_calc` and `boot_ses_calc` functions calculate non-parametric standardized effect sizes (rank-biserial correlation, WMW odds, concordance probability, or log-odds) with confidence intervals^[The results from `ses_calc` and `boot_ses_calc` can differ substantially because the bootstrap CI method is typically more conservative than the asymptotic method. This difference is more apparent with extremely small samples like that in the `sleep` dataset.]. As of v0.9.0, `ses_calc` also supports hypothesis testing directly on the effect size scale.
 
+## Available Effect Sizes
+
+### Rank-Biserial Correlation
+
+The rank-biserial correlation is a fairly intuitive measure of effect size which has the same interpretation as the common language effect size [@Kerby_2014]. However, instead of assuming normality and equal variances, it calculates the number of favorable (positive) and unfavorable (negative) pairs based on their respective ranks.
+
+For the two sample case, the correlation is calculated as the proportion of favorable pairs minus the unfavorable pairs.
+
+$$
+r_{biserial} = f_{pairs} - u_{pairs}
+$$
+
+Where:
+- $f_{pairs}$ is the proportion of favorable pairs
+- $u_{pairs}$ is the proportion of unfavorable pairs
+
+For the one sample or paired samples cases, the correlation is calculated with ties (values equal to zero) not being dropped. This provides a *conservative* estimate of the rank biserial correlation.
+
+It is calculated in the following steps wherein $z$ represents the values or difference between paired observations:
+
+1. Calculate signed ranks:
+
+$$
+r_j = -1 \cdot sign(z_j) \cdot rank(|z_j|)
+$$
+
+Where:
+- $r_j$ is the signed rank for observation $j$
+- $sign(z_j)$ is the sign of observation $z_j$ (+1 or -1)
+- $rank(|z_j|)$ is the rank of the absolute value of observation $z_j$
+
+2. Calculate the positive and negative sums:
+
+$$
+    R_{+} = \sum_{1\le i \le n, \space z_i > 0}r_j
+$$
+
+$$
+    R_{-} = \sum_{1\le i \le n, \space z_i < 0}r_j
+$$
+
+Where:
+- $R_{+}$ is the sum of ranks for positive observations
+- $R_{-}$ is the sum of ranks for negative observations
+
+3. Determine the smaller of the two rank sums:
+
+$$
+T = min(R_{+}, \space R_{-})
+$$
+
+$$
+S = \begin{cases} -4 & R_{+} \ge R_{-} \\ 4 & R_{+} < R_{-} \end{cases}
+$$
+
+Where:
+- $T$ is the smaller of the two rank sums
+- $S$ is a sign factor based on which rank sum is smaller
+
+4. Calculate rank-biserial correlation:
+
+$$
+r_{biserial} = S \cdot | \frac{\frac{T - \frac{(R_{+} + R_{-})}{2}}{n}}{n + 1} |
+$$
+
+Where:
+- $n$ is the number of observations (or pairs)
+- The final value ranges from -1 to 1
+
+### Concordance Probability
+
+The concordance probability (also known as the c-statistic, c-index, or probability of superiority^[Directly inspired by this blog post from Professor Frank Harrell https://hbiostat.org/blog/post/wpo/]) is converted from the rank-biserial correlation:
+
+$$
+c = \frac{(r_{biserial} + 1)}{2}
+$$
+
+The c-statistic can be interpreted as the probability that a randomly selected observation from one group will be greater than a randomly selected observation from another group. A value of 0.5 indicates no difference between groups, while values approaching 1 indicate perfect separation between groups.
+
+Please note that the c-statistic is equivalent to the area under the receiver operating characteristic curve (AUC) in binary classification contexts. Additionally, the c-statistic is the same estimate that is produced by `brunner_munzel` with the exception of paired samples and one sample designs. Additionally, the CI and SE methods differ.
+
+### WMW Odds
+
+The Wilcoxon-Mann-Whitney odds [@wmwodds], also known as the "Generalized Odds Ratio"^[As noted by my frequent collaborator this name is quite weird since it is not a ratio of odds... but simply an odds!] [@agresti], is calculated by converting the c-statistic:
+
+$$
+WMW_{odds} = e^{logit(c)}
+$$
+
+Where $logit(c) = \ln\frac{c}{1-c}$
+
+The WMW odds can be interpreted similarly to a traditional odds ratio, representing the odds that an observation from one group is greater than an observation from another group.
+
+### Guidelines for Selecting Effect Size Measures
+
+- **Rank-biserial correlation (`"rb"`)** is useful when you want a correlation-like measure that's easily interpretable and comparable to other correlation coefficients.
+- **Concordance probability (`"cstat"`)** is beneficial when you want to express the effect in terms of probability, making it accessible to non-statisticians.
+- **WMW odds (`"odds"`)** is helpful when you want to express the effect in terms familiar to those who work with odds ratios in logistic regression or epidemiology, or interpreting probabilities as odds (e.g., betting and prediction markets).
+- **WMW log-odds (`"logodds"`)** the log-odds can be helpful because you *could* interpret them as a percent difference/change in the odds of stochastic superiority. E.g., if the WMW log-odds were 0.10 then you could say "X increases the odds of superiority by approximately 10% over Y".
+
+## Confidence Interval Methods
+
+As of v0.9.0, the TOSTER package defaults to the **Agresti** method (`se_method = "agresti"`) for computing standard errors and confidence intervals for all SES functions. This method uses placement-based variance estimation and conducts inference on the log-odds scale, which has better asymptotic properties (the log-odds scale is unbounded and converges to normality faster). Results are back-transformed to the requested effect size scale for reporting.
+
+The **Fisher z-transformation** method (`se_method = "fisher"`) remains available as a legacy option. This was the default in earlier versions of the package and is documented below for reference.
+
+### Fisher z-Transformation (Legacy Method)
+
+The Fisher approximation calculates confidence intervals by first computing a standard error, then transforming to a Fisher z-scale for interval construction.
+
+For paired samples, or one sample, the standard error is calculated as:
+
+$$
+SE_r = \sqrt{ \frac {(2 \cdot nd^3 + 3 \cdot nd^2 + nd) / 6} {(nd^2 + nd) / 2} }
+$$
+
+wherein, nd represents the total number of observations (or pairs).
+
+For independent samples, the standard error is:
+
+$$
+SE_r = \sqrt{\frac {(n1 + n2 + 1)} { (3 \cdot n1 \cdot n2)}}
+$$
+
+Where:
+
+- $n1$ and $n2$ are the sample sizes of the two groups
+
+The confidence intervals are then calculated by transforming the estimate:
+
+$$
+r_z = atanh(r_{biserial})
+$$
+
+Then the confidence interval can be calculated and back transformed:
+
+$$
+r_{CI} = tanh(r_z  \pm  Z_{(1 - \alpha / 2)} \cdot SE_r)
+$$
+
+Where:
+
+- $Z_{(1 - \alpha / 2)}$ is the critical value from the standard normal distribution
+- $\alpha$ is the significance level (typically 0.05)
+
 ## Effect Size Estimation
 
 The interface is similar to `wilcox_TOST`, but rather than setting equivalence bounds on the raw scale, `ses_calc` works directly with the standardized effect size. By default (with `alternative = "none"`), it returns an effect size estimate and confidence interval with no hypothesis test:
@@ -1092,13 +1109,7 @@ ses_calc(x = sleep$extra[sleep$group == 1],
          null.value = c(-0.3, 0.3))
 ```
 
-### Standard Error Methods
-
-The `se_method` argument controls how the standard error is computed:
-
-- **`"agresti"`** (default): Uses the Agresti/Lehmann placement-based variance estimate. Hypothesis tests are conducted on the log-odds scale, which has better asymptotic properties (unbounded, faster convergence to normality). The reported effect size and CI are back-transformed to the requested scale.
-
-- **`"fisher"`**: Uses the Fisher z-transformation (legacy method). This is the same approach used in earlier versions of the package.
+When using `ses_calc` for hypothesis testing, the `se_method` argument (described in the [Confidence Interval Methods] section above) also controls how test statistics are computed. The default Agresti method conducts tests on the log-odds scale, while the Fisher method uses z-transformation. See above for details.
 
 ```{r}
 # Using the Agresti method (default) with WMW odds
@@ -1153,7 +1164,7 @@ For small samples where exact permutations are feasible, `perm_ses_test` is gene
 |--------|---------------|-------------|---------------|
 | **Wilcoxon-Mann-Whitney** | Simple, widely accepted | Ambiguous hypothesis; not about means or medians (see caveats above) | Ordinal data; legacy analyses |
 | **Brunner-Munzel** | Clear interpretation, robust to heteroscedasticity | Computationally intensive with permutation | Stochastic superiority/dominance |
-| **Hodges-Lehmann** | Robust location (~29% breakdown), explicit estimand | Requires location-shift assumption for full interpretation | Robust location shift testing |
+| **Hodges-Lehmann** | Robust location, explicit estimand | Requires location-shift assumption for full interpretation | Robust location shift testing |
 | **Permutation t-test** | Exact p-values (small samples), supports trimmed means | Computationally intensive for large samples | Mean differences with small samples |
 | **Bootstrap t-test** | Flexible, visualization of effect distributions | Results vary between runs | Mean differences with moderate samples |
 | **Log-Transformed** | Focuses on relative differences, stabilizes variance | Requires positive data | Bioequivalence, ratio comparisons |

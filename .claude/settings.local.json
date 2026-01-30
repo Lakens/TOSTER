@@ -23,7 +23,9 @@
       "Bash(\"C:/Program Files/R/R-4.5.1/bin/Rscript.exe\" -e:*)",
       "Bash(\"C:/Program Files/R/R-4.4.1/bin/Rscript.exe\" -e:*)",
       "Bash(cmd.exe:*)",
-      "Bash(\"/c/Program Files/R/R-4.5.1/bin/Rscript.exe\" test_vignette.R)"
+      "Bash(\"/c/Program Files/R/R-4.5.1/bin/Rscript.exe\" test_vignette.R)",
+      "Bash(\"/c/Program Files/R/R-4.5.1/bin/Rscript.exe\" test_vignette2.R)",
+      "Bash(\"/c/Program Files/R/R-4.5.1/bin/Rscript.exe\" test_hl_concordance.R)"
     ]
   }
 }

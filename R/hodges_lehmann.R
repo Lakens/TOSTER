@@ -96,6 +96,25 @@
 #'
 #' where Z is the median-corrected combined sample.
 #'
+#' ## Permutation-Based Equivalence Testing
+#'
+#' For equivalence and minimal effect testing with permutation methods, this function
+#' uses an unstudentized approach. The permutation distribution of the raw
+#' Hodges-Lehmann estimator is generated under the null hypothesis of exchangeability
+#' (no location difference), and p-values are computed by comparing the observed
+#' estimate's distance from each equivalence bound to this centered permutation
+#' distribution.
+#'
+#' This approach ensures that the confidence interval and p-value are concordant:
+#' when the (1-2\eqn{\alpha})% confidence interval falls entirely within the equivalence
+#' bounds, the TOST p-value will be less than \eqn{\alpha}, and vice versa.
+#'
+#' Unlike the studentized permutation approach used for standard alternatives
+#' (two.sided, less, greater), the equivalence and minimal effect tests do not
+#' divide by a scale estimate. This is because the scale estimates (S1, S2) from
+#' Fried & Dehling (2011) provide numerical stability for standard tests but do
+#' not constitute true studentization for the Hodges-Lehmann estimator.
+#'
 #' ## Alternatives
 #'
 #' The function supports five alternative hypotheses:
@@ -588,25 +607,38 @@ hodges_lehmann.default <- function(x,
         pval <- hl_perm_pval(b, R.used, p_method)
         cint <- c(stats::quantile(EFF, 1 - ci_level, names = FALSE), Inf)
       } else if (alternative == "equivalence") {
-        obs_stat_low <- (estimate - low_bound) / scale_est
-        obs_stat_high <- (estimate - high_bound) / scale_est
-        b_low <- sum(TSTAT >= obs_stat_low)
-        b_high <- sum(TSTAT <= obs_stat_high)
+        # Unstudentized approach: use raw EFF distribution for both CI and p-values
+        # This ensures concordance between CI and hypothesis test
+        EFF_centered <- EFF - mean(EFF)
+        dist_to_low <- estimate - low_bound
+        dist_to_high <- estimate - high_bound
+
+        b_low <- sum(EFF_centered >= dist_to_low)
+        b_high <- sum(EFF_centered <= dist_to_high)
         p_low <- hl_perm_pval(b_low, R.used, p_method)
         p_high <- hl_perm_pval(b_high, R.used, p_method)
         pval <- max(p_low, p_high)
         cint <- stats::quantile(EFF, c(alpha, 1 - alpha), names = FALSE)
-        obs_stat <- if (p_low >= p_high) obs_stat_low else obs_stat_high
+
+        # Report binding test statistic as Z-score for interpretability
+        se_perm <- stats::sd(EFF_centered)
+        obs_stat <- if (p_low >= p_high) dist_to_low / se_perm else dist_to_high / se_perm
       } else if (alternative == "minimal.effect") {
-        obs_stat_low <- (estimate - low_bound) / scale_est
-        obs_stat_high <- (estimate - high_bound) / scale_est
-        b_low <- sum(TSTAT <= obs_stat_low)
-        b_high <- sum(TSTAT >= obs_stat_high)
+        # Unstudentized approach: use raw EFF distribution for both CI and p-values
+        EFF_centered <- EFF - mean(EFF)
+        dist_to_low <- estimate - low_bound
+        dist_to_high <- estimate - high_bound
+
+        b_low <- sum(EFF_centered <= dist_to_low)
+        b_high <- sum(EFF_centered >= dist_to_high)
         p_low <- hl_perm_pval(b_low, R.used, p_method)
         p_high <- hl_perm_pval(b_high, R.used, p_method)
         pval <- min(p_low, p_high)
         cint <- stats::quantile(EFF, c(alpha, 1 - alpha), names = FALSE)
-        obs_stat <- if (p_low <= p_high) obs_stat_low else obs_stat_high
+
+        # Report binding test statistic as Z-score for interpretability
+        se_perm <- stats::sd(EFF_centered)
+        obs_stat <- if (p_low <= p_high) dist_to_low / se_perm else dist_to_high / se_perm
       }
 
       tstat_report <- obs_stat
@@ -744,7 +776,10 @@ hodges_lehmann.default <- function(x,
         if (is.na(scale_perm) || scale_perm <= 0) scale_perm <- scale_est
 
         TSTAT[i] <- hl_perm / scale_perm
-        EFF[i] <- hl_perm
+        # Store effect on the estimate-centered scale (hl_perm is null-centered,
+        # so adding estimate back gives the permutation distribution centered
+        # around the observed estimate, consistent with the one-sample case)
+        EFF[i] <- hl_perm + estimate
       }
 
       # Observed test statistic
@@ -765,25 +800,38 @@ hodges_lehmann.default <- function(x,
         pval <- hl_perm_pval(b, R.used, p_method)
         cint <- c(stats::quantile(EFF, 1 - ci_level, names = FALSE), Inf)
       } else if (alternative == "equivalence") {
-        obs_stat_low <- (estimate - low_bound) / scale_est
-        obs_stat_high <- (estimate - high_bound) / scale_est
-        b_low <- sum(TSTAT >= obs_stat_low)
-        b_high <- sum(TSTAT <= obs_stat_high)
+        # Unstudentized approach: use raw EFF distribution for both CI and p-values
+        # This ensures concordance between CI and hypothesis test
+        EFF_centered <- EFF - mean(EFF)
+        dist_to_low <- estimate - low_bound
+        dist_to_high <- estimate - high_bound
+
+        b_low <- sum(EFF_centered >= dist_to_low)
+        b_high <- sum(EFF_centered <= dist_to_high)
         p_low <- hl_perm_pval(b_low, R.used, p_method)
         p_high <- hl_perm_pval(b_high, R.used, p_method)
         pval <- max(p_low, p_high)
         cint <- stats::quantile(EFF, c(alpha, 1 - alpha), names = FALSE)
-        obs_stat <- if (p_low >= p_high) obs_stat_low else obs_stat_high
+
+        # Report binding test statistic as Z-score for interpretability
+        se_perm <- stats::sd(EFF_centered)
+        obs_stat <- if (p_low >= p_high) dist_to_low / se_perm else dist_to_high / se_perm
       } else if (alternative == "minimal.effect") {
-        obs_stat_low <- (estimate - low_bound) / scale_est
-        obs_stat_high <- (estimate - high_bound) / scale_est
-        b_low <- sum(TSTAT <= obs_stat_low)
-        b_high <- sum(TSTAT >= obs_stat_high)
+        # Unstudentized approach: use raw EFF distribution for both CI and p-values
+        EFF_centered <- EFF - mean(EFF)
+        dist_to_low <- estimate - low_bound
+        dist_to_high <- estimate - high_bound
+
+        b_low <- sum(EFF_centered <= dist_to_low)
+        b_high <- sum(EFF_centered >= dist_to_high)
         p_low <- hl_perm_pval(b_low, R.used, p_method)
         p_high <- hl_perm_pval(b_high, R.used, p_method)
         pval <- min(p_low, p_high)
         cint <- stats::quantile(EFF, c(alpha, 1 - alpha), names = FALSE)
-        obs_stat <- if (p_low <= p_high) obs_stat_low else obs_stat_high
+
+        # Report binding test statistic as Z-score for interpretability
+        se_perm <- stats::sd(EFF_centered)
+        obs_stat <- if (p_low <= p_high) dist_to_low / se_perm else dist_to_high / se_perm
       }
 
       tstat_report <- obs_stat
