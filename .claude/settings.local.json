@@ -19,7 +19,11 @@
       "Bash(\"/c/Program Files/R/R-4.5.1/bin/Rscript.exe\" -e \"devtools::document\\(\\)\")",
       "Bash(\"/c/Program Files/R/R-4.5.1/bin/Rscript.exe\" -e \"devtools::test\\(\\)\")",
       "Bash(\"/c/Program Files/R/R-4.5.1/bin/Rscript.exe\" -e \"testthat::test_file\\(''tests/testthat/test-smd_calc_htest.R''\\)\")",
-      "Bash(\"/c/Program Files/R/R-4.5.1/bin/Rscript.exe\" -e \"devtools::test\\(filter=''smd_calc_htest''\\)\")"
+      "Bash(\"/c/Program Files/R/R-4.5.1/bin/Rscript.exe\" -e \"devtools::test\\(filter=''smd_calc_htest''\\)\")",
+      "Bash(\"C:/Program Files/R/R-4.5.1/bin/Rscript.exe\" -e:*)",
+      "Bash(\"C:/Program Files/R/R-4.4.1/bin/Rscript.exe\" -e:*)",
+      "Bash(cmd.exe:*)",
+      "Bash(\"/c/Program Files/R/R-4.5.1/bin/Rscript.exe\" test_vignette.R)"
     ]
   }
 }
