@@ -15,7 +15,12 @@ smd_calc(
   bias_correction = TRUE,
   rm_correction = FALSE,
   glass = NULL,
-  smd_ci = c("nct", "goulet", "t", "z")
+  smd_ci = c("nct", "goulet", "t", "z"),
+  output = c("htest", "data.frame"),
+  null.value = 0,
+  alternative = c("none", "two.sided", "less", "greater", "equivalence",
+    "minimal.effect"),
+  test_method = c("z", "t")
 )
 
 \method{smd_calc}{default}(
@@ -29,6 +34,11 @@ smd_calc(
   rm_correction = FALSE,
   glass = NULL,
   smd_ci = c("nct", "goulet", "t", "z"),
+  output = c("htest", "data.frame"),
+  null.value = 0,
+  alternative = c("none", "two.sided", "less", "greater", "equivalence",
+    "minimal.effect"),
+  test_method = c("z", "t"),
   ...
 )
 
@@ -53,6 +63,26 @@ smd_calc(
 
 \item{smd_ci}{Method for calculating SMD confidence intervals. Methods include 'goulet', 'noncentral t' (nct), 'central t' (t), and 'normal method' (z).}
 
+\item{output}{a character string specifying the output format:
+- "htest": (default) Returns an object of class "htest" compatible with standard R output.
+- "data.frame": Returns a data frame for backward compatibility.}
+
+\item{null.value}{a number or vector specifying the null hypothesis value(s) on the SMD scale:
+- For standard alternatives: a single value (default = 0)
+- For equivalence/minimal.effect: two values representing the lower and upper bounds}
+
+\item{alternative}{a character string specifying the alternative hypothesis:
+- "none": (default) No hypothesis test is performed; only effect size and CI are returned.
+- "two.sided": Test whether SMD differs from null.value
+- "less": Test whether SMD is less than null.value
+- "greater": Test whether SMD is greater than null.value
+- "equivalence": Test whether SMD is between specified bounds
+- "minimal.effect": Test whether SMD is outside specified bounds}
+
+\item{test_method}{a character string specifying the method for hypothesis testing:
+- "z": Use z-statistic (normal distribution)
+- "t": Use t-statistic with degrees of freedom from the SMD calculation}
+
 \item{y}{an optional (non-empty) numeric vector of data values.}
 
 \item{mu}{a number indicating the true value of the mean for the two-tailed test (or difference in means if you are performing a two sample test).}
@@ -66,9 +96,23 @@ smd_calc(
 \item{na.action}{a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").}
 }
 \value{
-A data frame containing the following information:
+If \code{output = "htest"} (default), returns a list with class \code{"htest"} containing:
 \itemize{
-\item estimate: The standardized mean difference estimate (Cohen's d, Hedges' g, or Glass's delta)
+\item estimate: The SMD estimate (Cohen's d, Hedges' g, or Glass's delta)
+\item stderr: Standard error of the estimate
+\item conf.int: Confidence interval with conf.level attribute
+\item alternative: A character string describing the alternative hypothesis
+\item method: A character string indicating what type of test was performed
+\item data.name: A character string giving the name(s) of the data
+\item statistic: Test statistic (only if alternative != "none")
+\item parameter: Degrees of freedom (only if test_method = "t" and alternative != "none")
+\item p.value: P-value for the test (only if alternative != "none")
+\item null.value: The specified hypothesized value(s) (only if alternative != "none")
+}
+
+If \code{output = "data.frame"}, returns a data frame containing:
+\itemize{
+\item estimate: The SMD estimate
 \item SE: Standard error of the estimate
 \item lower.ci: Lower bound of the confidence interval
 \item upper.ci: Upper bound of the confidence interval
@@ -79,8 +123,7 @@ A data frame containing the following information:
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 
 Calculates standardized mean difference (SMD) effect sizes and their confidence intervals
-from raw data. This function focuses solely on effect size estimation without performing
-hypothesis tests.
+from raw data, with optional hypothesis testing.
 }
 \details{
 This function calculates standardized mean differences (SMD) for various study designs:
@@ -106,9 +149,6 @@ Different confidence interval calculation methods are available:
 \item "z": Uses the normal distribution
 }
 
-Note that unlike the t_TOST and related functions, smd_calc only calculates effect sizes and
-their confidence intervals without performing hypothesis tests.
-
 For detailed information on calculation methods, see \code{vignette("SMD_calcs")}.
 }
 \section{Purpose}{
@@ -119,7 +159,7 @@ Use this function when:
 \item You want confidence intervals for your effect size estimates
 \item You need effect sizes for meta-analysis or reporting
 \item You want to compare effect sizes across different studies or measures
-\item You don't need the hypothesis testing components of the TOST functions
+\item You want to test hypotheses about effect size magnitudes (e.g., equivalence testing)
 }
 }
 
@@ -144,6 +184,22 @@ smd_calc(x = before, y = after, paired = TRUE, rm_correction = TRUE)
 
 # Example 4: Glass's delta (using only first group's SD)
 smd_calc(x = group1, y = group2, glass = "glass1")
+
+# Example 5: Two-sided test against null of 0
+smd_calc(x = group1, y = group2,
+         alternative = "two.sided", null.value = 0)
+
+# Example 6: Equivalence test (TOST)
+smd_calc(x = group1, y = group2,
+         alternative = "equivalence", null.value = c(-0.5, 0.5))
+
+# Example 7: Using t-distribution for test
+smd_calc(x = group1, y = group2,
+         alternative = "two.sided", null.value = 0,
+         test_method = "t", smd_ci = "t")
+
+# Example 8: Legacy data.frame output
+smd_calc(x = group1, y = group2, output = "data.frame")
 
 }
 \seealso{

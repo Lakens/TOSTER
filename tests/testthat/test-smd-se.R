@@ -18,13 +18,15 @@ test_that("glass", {
                                      group == 1)$extra,
                           y = subset(sleep,
                                      group == 2)$extra,
-                          glass = "glass2")
+                          glass = "glass2",
+                          output = "data.frame")
   smc = TOSTER::smd_calc(x = subset(sleep,
                                      group == 1)$extra,
                           y = subset(sleep,
                                      group == 2)$extra,
                           glass = "glass1",
-                          paired = TRUE)
+                          paired = TRUE,
+                          output = "data.frame")
   # x1 = subset(sleep,
   #             group == 1)$extra
   # y1 = subset(sleep,
@@ -77,13 +79,15 @@ test_that("Hedges g(s/av) and g(z)",
                                                group == 1)$extra,
                                     y = subset(sleep,
                                                group == 2)$extra,
-                                    var.equal = TRUE)
+                                    var.equal = TRUE,
+                                    output = "data.frame")
             smc = TOSTER::smd_calc(x = subset(sleep,
                                                group == 1)$extra,
                                     y = subset(sleep,
                                                group == 2)$extra,
 
-                                    paired = TRUE)
+                                    paired = TRUE,
+                                    output = "data.frame")
             # x1 = subset(sleep,
             #             group == 1)$extra
             # y1 = subset(sleep,
@@ -137,7 +141,8 @@ test_that("Hedges g(s/av) and g(z)",
                                               group == 1)$extra,
                                    y = subset(sleep,
                                               group == 2)$extra,
-                                   var.equal = FALSE)
+                                   var.equal = FALSE,
+                                   output = "data.frame")
 
             expect_equal(0.24,round(smd$SE^2,2))
           })

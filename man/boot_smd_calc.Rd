@@ -16,7 +16,11 @@ boot_smd_calc(
   rm_correction = FALSE,
   glass = NULL,
   boot_ci = c("stud", "basic", "perc"),
-  R = 1999
+  R = 1999,
+  output = c("htest", "data.frame"),
+  null.value = 0,
+  alternative = c("none", "two.sided", "less", "greater", "equivalence",
+    "minimal.effect")
 )
 
 \method{boot_smd_calc}{default}(
@@ -31,6 +35,10 @@ boot_smd_calc(
   glass = NULL,
   boot_ci = c("stud", "basic", "perc"),
   R = 1999,
+  output = c("htest", "data.frame"),
+  null.value = 0,
+  alternative = c("none", "two.sided", "less", "greater", "equivalence",
+    "minimal.effect"),
   ...
 )
 
@@ -57,6 +65,22 @@ boot_smd_calc(
 
 \item{R}{number of bootstrap replications (default = 1999).}
 
+\item{output}{a character string specifying the output format:
+- "htest": (default) Returns an object of class "htest" compatible with standard R output.
+- "data.frame": Returns a data frame for backward compatibility.}
+
+\item{null.value}{a number or vector specifying the null hypothesis value(s) on the SMD scale:
+- For standard alternatives: a single value (default = 0)
+- For equivalence/minimal.effect: two values representing the lower and upper bounds}
+
+\item{alternative}{a character string specifying the alternative hypothesis:
+- "none": (default) No hypothesis test is performed; only effect size and CI are returned.
+- "two.sided": Test whether SMD differs from null.value
+- "less": Test whether SMD is less than null.value
+- "greater": Test whether SMD is greater than null.value
+- "equivalence": Test whether SMD is between specified bounds
+- "minimal.effect": Test whether SMD is outside specified bounds}
+
 \item{y}{an optional (non-empty) numeric vector of data values.}
 
 \item{mu}{null value to adjust the calculation. If non-zero, the function calculates x-y-mu (default = 0).}
@@ -70,7 +94,23 @@ boot_smd_calc(
 \item{na.action}{a function indicating what should happen when the data contain NAs.}
 }
 \value{
-A data frame containing the following information:
+If \code{output = "htest"} (default), returns a list with class \code{"htest"} containing:
+\itemize{
+\item estimate: The SMD estimate (Cohen's d, Hedges' g, or Glass's delta)
+\item stderr: Standard error estimated from the bootstrap distribution
+\item conf.int: Bootstrap confidence interval with conf.level attribute
+\item alternative: A character string describing the alternative hypothesis
+\item method: A character string indicating what type of test was performed
+\item note: A character string describing the bootstrap CI method used
+\item boot: The bootstrap distribution of SMD estimates
+\item data.name: A character string giving the name(s) of the data
+\item call: The matched call
+\item statistic: z-statistic (only if alternative != "none")
+\item p.value: Bootstrap p-value (only if alternative != "none")
+\item null.value: The specified hypothesized value(s) (only if alternative != "none")
+}
+
+If \code{output = "data.frame"}, returns a data frame containing:
 \itemize{
 \item estimate: The SMD calculated from the original data
 \item bias: Estimated bias (difference between original estimate and median of bootstrap estimates)
@@ -84,9 +124,8 @@ A data frame containing the following information:
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#maturing}{\figure{lifecycle-maturing.svg}{options: alt='[Maturing]'}}}{\strong{[Maturing]}}
 
-Calculates standardized mean differences (SMDs) with bootstrap confidence intervals.
-This function provides more robust confidence intervals for Cohen's d, Hedges' g,
-and other SMD measures through resampling methods.
+Calculates standardized mean differences (SMDs) with bootstrap confidence intervals,
+with optional hypothesis testing.
 }
 \details{
 This function calculates bootstrapped confidence intervals for standardized mean differences.
@@ -135,6 +174,7 @@ Use this function when:
 \item Sample sizes are small or standard error approximations may be unreliable
 \item You prefer resampling-based confidence intervals over parametric approximations
 \item You need to quantify uncertainty in SMD estimates more accurately
+\item You want to test hypotheses about effect size magnitudes using bootstrap methods
 }
 }
 
@@ -178,6 +218,23 @@ result <- boot_smd_calc(x = control,
                       y = treatment,
                       glass = "glass1",
                       boot_ci = "stud",
+                      R = 999)
+
+# Example 5: Two-sided hypothesis test
+result <- boot_smd_calc(x = group1, y = group2,
+                      alternative = "two.sided",
+                      null.value = 0,
+                      R = 999)
+
+# Example 6: Equivalence test with bootstrap
+result <- boot_smd_calc(x = group1, y = group2,
+                      alternative = "equivalence",
+                      null.value = c(-0.5, 0.5),
+                      R = 999)
+
+# Example 7: Legacy data.frame output
+result <- boot_smd_calc(x = group1, y = group2,
+                      output = "data.frame",
                       R = 999)
 
 }

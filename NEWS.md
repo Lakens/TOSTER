@@ -7,6 +7,22 @@ NEWS
 
 ## New Features
 
+- Effect size calculators now support hypothesis testing and `htest` output:
+  - `ses_calc` and `boot_ses_calc` updated with `output`, `alternative`, and `null.value` arguments
+    - Default output is now `"htest"` class; use `output = "data.frame"` for legacy format
+    - Supports `"two.sided"`, `"less"`, `"greater"`, `"equivalence"`, and `"minimal.effect"` alternatives
+    - New Agresti/Lehmann placement-based SE method (`se_method = "agresti"`) with log-odds scale hypothesis testing
+    - Continuity correction for boundary cases (complete separation)
+  - `smd_calc` and `boot_smd_calc` updated with `output`, `alternative`, `null.value`, and `test_method` arguments
+    - Default output is now `"htest"` class; use `output = "data.frame"` for legacy format
+    - Supports the same alternative hypothesis options as `ses_calc`
+    - `test_method` argument (`"z"` or `"t"`) controls the reference distribution for `smd_calc`
+    - Degrees of freedom included in output when `test_method = "t"`
+    - Bootstrap p-values for `boot_smd_calc` computed from empirical distribution
+  - Added `perm_ses_test` function for permutation-based hypothesis testing of standardized effect sizes (rank-biserial, WMW odds, log-odds, concordance)
+    - Supports exact permutation and randomization inference
+    - Full support for equivalence and minimal effect testing
+    - Formula and default methods available
 - Added `hodges_lehmann` function for robust location testing
   - Implements Hodges-Lehmann estimators (HL1 for one-sample/paired, HL2 for two-sample)
   - Supports exact permutation, randomization, and asymptotic (KDE-based) inference
