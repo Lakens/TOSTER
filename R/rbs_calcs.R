@@ -123,6 +123,7 @@ rho_to_z <- function(x){
 #' @return value on the log-odds scale
 #' @noRd
 to_logodds <- function(value, scale) {
+
   switch(scale,
     "rb" = {
       p <- (value + 1) / 2
@@ -138,6 +139,180 @@ to_logodds <- function(value, scale) {
       value
     }
   )
+}
+
+#' Convert effect size value to cstat (concordance probability) scale
+#' @param value the value to convert
+#' @param from_scale character: "rb", "cstat", "odds", or "logodds"
+#' @return value on cstat scale
+#' @noRd
+to_cstat <- function(value, from_scale) {
+  switch(from_scale,
+    "cstat" = value,
+    "rb" = (value + 1) / 2,
+    "odds" = value / (1 + value),
+    "logodds" = plogis(value)
+  )
+}
+
+# === Score-type CI functions (Fay & Malinovsky 2018) ===
+
+#' Compute tie adjustment factor for WMW variance
+#'
+#' Computes the tie correction factor used in the variance of the
+#' Wilcoxon-Mann-Whitney statistic.
+#'
+#' @param x numeric vector, group 1
+#' @param y numeric vector, group 2
+#' @return scalar tie factor in [0, 1]; equals 1 when no ties
+#' @noRd
+wmw_tie_factor <- function(x, y) {
+  r <- rank(c(x, y))
+  N <- length(r)
+  NTIES <- table(r)
+  tf <- 1 - sum(NTIES^3 - NTIES) / (N * (N + 1) * (N - 1))
+  tf
+}
+
+#' Score-type variance of the Mann-Whitney parameter (V_LAPH)
+#'
+#' Computes V_LAPH(phi) from Fay & Malinovsky (2018), which is the
+#' variance of the Mann-Whitney estimator under the proportional odds
+#' model, evaluated at a candidate parameter value phi.
+#'
+#' @param phi candidate value of the Mann-Whitney parameter (scalar in (0,1))
+#' @param tf tie adjustment factor from wmw_tie_factor()
+#' @param n1 sample size for group 1 (x)
+#' @param n2 sample size for group 2 (y)
+#' @return scalar variance
+#' @references
+#' Fay, M.P. and Malinovsky, Y. (2018). Confidence Intervals of the
+#' Mann-Whitney Parameter that are Compatible with the Wilcoxon-Mann-Whitney
+#' Test. Statistics in Medicine, 37, 3991-4006.
+#' @noRd
+v_laph <- function(phi, tf, n1, n2) {
+  tf * (phi * (1 - phi) / (n1 * n2)) *
+    (1 + ((n1 + n2 - 2) / 2) *
+       ((1 - phi) / (2 - phi) + phi / (1 + phi)))
+}
+
+#' Score-type p-value for the Mann-Whitney parameter
+#'
+#' Computes a p-value testing H0: phi = phi_null using the score statistic
+#' with optional continuity correction.
+#'
+#' @param phi_hat observed Mann-Whitney estimate (concordance probability)
+#' @param phi_null null hypothesis value on the cstat scale
+#' @param tf tie adjustment factor
+#' @param n1 sample size for group 1
+#' @param n2 sample size for group 2
+#' @param alternative character: "two.sided", "less", or "greater"
+#' @param correct logical: apply continuity correction?
+#' @return list with elements: p.value, z.statistic
+#' @noRd
+score_pvalue_wmw <- function(phi_hat, phi_null, tf, n1, n2,
+                             alternative = "two.sided", correct = FALSE) {
+
+  # Continuity corrections (separate for each direction)
+  corr_less <- 0
+  corr_greater <- 0
+  if (correct) {
+    corr_less <- -0.5 / (n1 * n2)
+    corr_greater <- 0.5 / (n1 * n2)
+  }
+
+  V_null <- v_laph(phi_null, tf, n1, n2)
+
+  # Handle degenerate case (all values equal -> tf = 0 -> V = 0)
+  if (V_null <= 0) {
+    return(list(p.value = 1, z.statistic = 0))
+  }
+
+  se_null <- sqrt(V_null)
+
+  z_less <- (phi_hat - phi_null - corr_less) / se_null
+  z_greater <- (phi_hat - phi_null - corr_greater) / se_null
+
+  p_val <- switch(alternative,
+    "two.sided" = 2 * min(pnorm(z_less), pnorm(z_greater, lower.tail = FALSE)),
+    "less" = pnorm(z_less),
+    "greater" = pnorm(z_greater, lower.tail = FALSE)
+  )
+
+  # For reporting, use the z closer to the observed direction
+  z_stat <- switch(alternative,
+    "two.sided" = if (phi_hat >= phi_null) z_greater else z_less,
+    "less" = z_less,
+    "greater" = z_greater
+  )
+
+  list(p.value = min(1, p_val), z.statistic = z_stat)
+}
+
+#' Score-type confidence interval for the Mann-Whitney parameter
+#'
+#' Constructs a CI by inverting the score test: finds the values of phi
+#' where the score statistic equals the critical value.
+#'
+#' @param phi_hat observed Mann-Whitney estimate (concordance probability)
+#' @param tf tie adjustment factor
+#' @param n1 sample size for group 1
+#' @param n2 sample size for group 2
+#' @param conf.level confidence level (e.g. 0.95)
+#' @param correct logical: apply continuity correction?
+#' @param epsilon small number for uniroot bounds (default 1e-8)
+#' @return numeric vector of length 2: c(lower, upper) on cstat scale
+#' @noRd
+score_ci_wmw <- function(phi_hat, tf, n1, n2, conf.level = 0.95,
+                         correct = FALSE, epsilon = 1e-8) {
+
+  alpha <- 1 - conf.level
+
+  # Continuity corrections
+  corr_less <- 0
+  corr_greater <- 0
+  if (correct) {
+    corr_less <- -0.5 / (n1 * n2)
+    corr_greater <- 0.5 / (n1 * n2)
+  }
+
+  # The score function: at the true phi_null, this should equal zq
+  wfunc <- function(phi_null, zq, correction = 0) {
+    V <- v_laph(phi_null, tf, n1, n2)
+    if (V <= 0) return(-Inf)
+    (phi_hat - phi_null - correction) / sqrt(V) - zq
+  }
+
+  phimin <- epsilon
+  phimax <- 1 - epsilon
+
+  root <- function(zq, corr) {
+    f.lower <- wfunc(phimin, zq, corr)
+    if (f.lower <= 0) return(phimin)
+    f.upper <- wfunc(phimax, zq, corr)
+    if (f.upper >= 0) return(phimax)
+    uniroot(wfunc, c(phimin, phimax),
+            f.lower = f.lower, f.upper = f.upper,
+            tol = epsilon, zq = zq, correction = corr)$root
+  }
+
+  # Two-sided CI
+  # Lower bound: find phi_L where score stat = z_{1-alpha/2}
+  # Upper bound: find phi_U where score stat = z_{alpha/2}
+
+  lower <- if (phi_hat == 0) {
+    0
+  } else {
+    root(zq = qnorm(alpha / 2, lower.tail = FALSE), corr = corr_greater)
+  }
+
+  upper <- if (phi_hat == 1) {
+    1
+  } else {
+    root(zq = qnorm(alpha / 2), corr = corr_less)
+  }
+
+  c(lower, upper)
 }
 
 # === New variance estimation functions (Agresti/Lehmann method) ===
@@ -229,9 +404,12 @@ var_concordance_paired <- function(d) {
 #' @param y numeric vector (group 2 or post-treatment), NULL for one-sample
 #' @param paired logical, TRUE for paired samples
 #' @param mu hypothesized difference (default 0)
+#' @param use_score_fallback logical, if TRUE and two-sample boundary is hit, use score CI
+#' @param conf.level confidence level for score CI fallback (default 0.95)
 #' @return list with point estimates and SEs for all effect sizes, including boundary_corrected flag
 #' @noRd
-ses_compute_agresti <- function(x, y = NULL, paired = FALSE, mu = 0) {
+ses_compute_agresti <- function(x, y = NULL, paired = FALSE, mu = 0,
+                                 use_score_fallback = TRUE, conf.level = 0.95) {
 
   if (is.null(y)) {
     # One-sample: compare x to mu (treat as paired with y = mu)
@@ -241,8 +419,12 @@ ses_compute_agresti <- function(x, y = NULL, paired = FALSE, mu = 0) {
   }
 
   # Track if continuity correction was applied
-
   boundary_corrected <- FALSE
+  boundary_used_score_ci <- FALSE
+  score_ci_cstat <- NULL
+
+  # Store original p_hat before any correction (needed for score fallback)
+  p_hat_original <- NULL
 
   if (paired) {
     # === PAIRED SAMPLES ===
@@ -250,6 +432,7 @@ ses_compute_agresti <- function(x, y = NULL, paired = FALSE, mu = 0) {
     # Note: rbs_calc expects x and y swapped for paired (it computes x - y)
     r_hat <- rbs_calc(x = y, y = x, mu = mu, paired = TRUE)
     p_hat <- rb_to_cstat(r_hat)
+    p_hat_original <- p_hat
 
     # Compute variance using Agresti method
     d <- y - x - mu
@@ -261,49 +444,79 @@ ses_compute_agresti <- function(x, y = NULL, paired = FALSE, mu = 0) {
       return(NULL)
     }
 
-    # Continuity correction for boundary cases (paired/one-sample)
-    # S = total rank sum, analogous to n1 * n2 in the two-sample case
-    S_total <- n_nonzero * (n_nonzero + 1) / 2
-    if (p_hat <= 0) {
-      p_hat <- 0.5 / S_total
-      boundary_corrected <- TRUE
-    } else if (p_hat >= 1) {
-      p_hat <- 1 - 0.5 / S_total
-      boundary_corrected <- TRUE
-    }
+    # Haldane-type boundary correction for paired/one-sample
+    # N_pairs = N*(N+1)/2 is the maximum possible Wilcoxon signed-rank statistic
+    N_pairs <- n_nonzero * (n_nonzero + 1) / 2
 
-    # Recompute r_hat from corrected p_hat if needed
-    if (boundary_corrected) {
+    if (p_hat <= 0 || p_hat >= 1) {
+      boundary_corrected <- TRUE
+      # Concordance count: C = p_hat * N_pairs (will be 0 or N_pairs at boundary)
+      C <- p_hat * N_pairs
+      # Haldane-type shrinkage correction
+      p_hat <- (C + 0.5) / (N_pairs + 1)
       r_hat <- 2 * p_hat - 1
     }
 
     # Variance using Agresti method (based on non-zero differences)
+    # At boundary, recompute variance with corrected p_hat
     var_p <- var_concordance_paired(d)
-    se_p <- sqrt(var_p)
+
+    # If variance is degenerate at boundary, use a fallback based on corrected p_hat
+    if (boundary_corrected && (is.na(var_p) || var_p <= 0)) {
+      # Use approximate variance based on (1 - p^2) / n structure
+      var_p <- (1 - p_hat^2) * (2 * n_nonzero + 1) / (6 * N_pairs^2)
+    }
+
+    se_p <- sqrt(max(var_p, 0))
+    n1 <- n_nonzero
+    n2 <- NULL
 
   } else {
     # === TWO INDEPENDENT SAMPLES ===
     x <- na.omit(x)
     y <- na.omit(y)
 
+    n1 <- length(x)
+    n2 <- length(y)
+
     # Compute placements and variance
     placements <- compute_placements(x - mu, y)
     p_hat <- placements$p_hat
-    n_pairs <- placements$n1 * placements$n2
+    p_hat_original <- p_hat
+    N_pairs <- n1 * n2
 
-    # Continuity correction for boundary cases (two-sample)
-    if (p_hat <= 0) {
-      p_hat <- 0.5 / n_pairs
+    if (p_hat <= 0 || p_hat >= 1) {
       boundary_corrected <- TRUE
-    } else if (p_hat >= 1) {
-      p_hat <- 1 - 0.5 / n_pairs
-      boundary_corrected <- TRUE
+      # Concordance count: C = p_hat * N_pairs (will be 0 or N_pairs at boundary)
+      C <- p_hat * N_pairs
+      # Haldane-type shrinkage correction
+      p_hat <- (C + 0.5) / (N_pairs + 1)
+
+      # For two-sample, optionally fall back to score CI for better boundary behavior
+      if (use_score_fallback) {
+        tf <- wmw_tie_factor(x - mu, y)
+        score_ci_cstat <- score_ci_wmw(phi_hat = p_hat_original, tf = tf,
+                                        n1 = n1, n2 = n2,
+                                        conf.level = conf.level, correct = FALSE)
+        boundary_used_score_ci <- TRUE
+      }
     }
 
     r_hat <- 2 * p_hat - 1
 
-    var_p <- var_concordance_twosample(placements)
-    se_p <- sqrt(var_p)
+    # Recompute variance with corrected p_hat
+    # At boundary, placement values are all identical, so need to use corrected p_hat
+    if (boundary_corrected) {
+      # At complete separation, the placement-based variance formula fails
+      # (all V_i and W_j are 0 or 1, leading to negative variance).
+      # Use the V_LAPH variance formula evaluated at the corrected p_hat.
+      tf <- wmw_tie_factor(x - mu, y)
+      var_p <- v_laph(p_hat, tf, n1, n2)
+    } else {
+      var_p <- var_concordance_twosample(placements)
+    }
+
+    se_p <- sqrt(max(var_p, 0))
   }
 
   # Safeguard for extreme values
@@ -332,8 +545,14 @@ ses_compute_agresti <- function(x, y = NULL, paired = FALSE, mu = 0) {
     se_logodds = se_logodds,
     # Design info
     paired = paired,
-    # Boundary correction flag
-    boundary_corrected = boundary_corrected
+    n1 = n1,
+    n2 = n2,
+    # Boundary correction flags
+    boundary_corrected = boundary_corrected,
+    boundary_used_score_ci = boundary_used_score_ci,
+    score_ci_cstat = score_ci_cstat,
+    # Original uncorrected p_hat (for reference)
+    p_hat_original = p_hat_original
   )
 }
 

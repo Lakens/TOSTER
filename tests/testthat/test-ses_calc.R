@@ -640,3 +640,286 @@ test_that("boot_ses_calc: boot component included in htest output", {
   expect_true(!is.null(res$boot))
   expect_equal(length(res$boot), 99)
 })
+
+
+# === Score method tests ===
+
+test_that("score method matches wilcox.test p-values", {
+  set.seed(300)
+  x <- rnorm(20)
+  y <- rnorm(25, mean = 0.5)
+
+  # With continuity correction
+  toster_p <- ses_calc(x, y, ses = "cstat", se_method = "score", correct = TRUE,
+                       alternative = "two.sided", null.value = 0.5)$p.value
+  wt_p <- wilcox.test(x, y, exact = FALSE, correct = TRUE)$p.value
+  expect_equal(toster_p, wt_p, tolerance = 1e-6)
+
+  # Without continuity correction
+  toster_p_nocorr <- ses_calc(x, y, ses = "cstat", se_method = "score", correct = FALSE,
+                              alternative = "two.sided", null.value = 0.5)$p.value
+  wt_p_nocorr <- wilcox.test(x, y, exact = FALSE, correct = FALSE)$p.value
+  expect_equal(toster_p_nocorr, wt_p_nocorr, tolerance = 1e-6)
+})
+
+test_that("score method matches wilcox.test with ties", {
+  # Ordinal data with ties
+  x_ord <- c(1, 1, 2, 2, 3, 3, 3, 4)
+  y_ord <- c(2, 3, 3, 3, 4, 4, 5, 5, 5)
+
+  toster_p <- ses_calc(x_ord, y_ord, ses = "cstat", se_method = "score", correct = TRUE,
+                       alternative = "two.sided", null.value = 0.5)$p.value
+  wt_p <- wilcox.test(x_ord, y_ord, exact = FALSE, correct = TRUE)$p.value
+  expect_equal(toster_p, wt_p, tolerance = 1e-6)
+})
+
+test_that("score method CI transforms correctly across scales", {
+  set.seed(301)
+  x <- rnorm(20)
+  y <- rnorm(20, mean = 0.5)
+
+  res_cstat <- ses_calc(x, y, ses = "cstat", se_method = "score", correct = FALSE)
+  res_rb <- ses_calc(x, y, ses = "rb", se_method = "score", correct = FALSE)
+
+  # rb CI = 2 * cstat CI - 1
+  expect_equal(as.numeric(res_rb$conf.int),
+               2 * as.numeric(res_cstat$conf.int) - 1,
+               tolerance = 1e-10)
+
+  # Estimate relationship
+  expect_equal(unname(res_rb$estimate),
+               2 * unname(res_cstat$estimate) - 1,
+               tolerance = 1e-10)
+})
+
+test_that("score method errors for paired data", {
+  set.seed(302)
+  x <- rnorm(15)
+  y <- rnorm(15)
+
+  expect_error(
+    ses_calc(x, y, paired = TRUE, se_method = "score"),
+    "only available for two-sample"
+  )
+})
+
+test_that("score method errors for one-sample data", {
+  set.seed(303)
+  x <- rnorm(15, mean = 1)
+
+  expect_error(
+    ses_calc(x, se_method = "score"),
+    "only available for two-sample"
+  )
+})
+
+test_that("score method handles boundaries naturally", {
+  # Complete separation: all x < y
+  x_sep <- 1:5
+  y_sep <- 6:10
+
+  res <- ses_calc(x_sep, y_sep, ses = "cstat", se_method = "score", correct = FALSE)
+
+  # Estimate should be 0 (all x < y means Pr(X > Y) = 0)
+  expect_equal(unname(res$estimate), 0, tolerance = 1e-10)
+  # CI lower should be 0
+  expect_equal(res$conf.int[1], 0, tolerance = 1e-10)
+  # CI upper should be > 0 (found via test inversion)
+  expect_true(res$conf.int[2] > 0)
+})
+
+test_that("score method one-sided alternatives", {
+  set.seed(304)
+  x <- rnorm(25, mean = 2)  # Clearly larger
+  y <- rnorm(25)
+
+  res_greater <- ses_calc(x, y, ses = "cstat", se_method = "score",
+                          alternative = "greater", null.value = 0.5)
+  res_less <- ses_calc(x, y, ses = "cstat", se_method = "score",
+                       alternative = "less", null.value = 0.5)
+
+  # With x >> y, cstat should be high (near 1)
+  expect_true(unname(res_greater$estimate) > 0.7)
+  # p-value for greater should be small, for less should be large
+  expect_true(res_greater$p.value < 0.05)
+  expect_true(res_less$p.value > 0.5)
+})
+
+test_that("score method equivalence testing", {
+  set.seed(305)
+  x <- rnorm(40)
+  y <- rnorm(40, mean = 0.1)
+
+  res_eq <- ses_calc(x, y, ses = "cstat", se_method = "score",
+                     alternative = "equivalence",
+                     null.value = c(0.3, 0.7))
+  expect_true(!is.null(res_eq$p.value))
+  expect_equal(length(res_eq$null.value), 2)
+
+  res_met <- ses_calc(x, y, ses = "cstat", se_method = "score",
+                      alternative = "minimal.effect",
+                      null.value = c(0.3, 0.7))
+  expect_true(!is.null(res_met$p.value))
+})
+
+test_that("score method all effect size types", {
+  set.seed(306)
+  x <- rnorm(25)
+  y <- rnorm(25, mean = 0.5)
+
+  for (ses_type in c("rb", "cstat", "odds", "logodds")) {
+    res <- ses_calc(x, y, ses = ses_type, se_method = "score")
+    expect_s3_class(res, "htest")
+    expect_true(is.numeric(res$estimate))
+    expect_true(!is.na(res$stderr))
+  }
+})
+
+test_that("correct parameter ignored for non-score methods", {
+  set.seed(307)
+  x <- rnorm(20)
+  y <- rnorm(20)
+
+  # Should produce message about ignoring correct parameter
+  expect_message(
+    ses_calc(x, y, se_method = "agresti", correct = TRUE),
+    "only used with se_method = 'score'"
+  )
+})
+
+
+# === Haldane boundary correction tests ===
+
+test_that("Haldane boundary correction applies correct shrinkage", {
+  # Two-sample complete separation
+  x_sep <- 1:5
+  y_sep <- 6:10
+  N_pairs <- 25
+  expected_p <- (N_pairs + 0.5) / (N_pairs + 1)  # = 25.5/26 ≈ 0.9808
+
+  expect_message(
+    res <- ses_calc(x_sep, y_sep, ses = "cstat", se_method = "agresti"),
+    "Complete separation detected"
+  )
+
+  # Point estimate should be corrected (not raw 1.0)
+  # Note: x < y means cstat = Pr(X > Y) = 0, so correction gives (0 + 0.5)/26
+  expected_corrected <- 0.5 / (N_pairs + 1)  # ≈ 0.0192
+  expect_equal(unname(res$estimate), expected_corrected, tolerance = 1e-4)
+
+  # CI should not be trivially narrow
+  expect_true(res$conf.int[2] - res$conf.int[1] > 0.05)
+
+  # SE should be positive
+  expect_true(res$stderr > 0)
+})
+
+test_that("Haldane boundary correction for paired data", {
+  # Paired complete separation
+  x_paired <- c(1, 2, 3, 4, 5)
+  y_paired <- c(6, 7, 8, 9, 10)
+
+  expect_message(
+    res <- ses_calc(x_paired, y_paired, paired = TRUE, ses = "cstat", se_method = "agresti"),
+    "Complete separation detected"
+  )
+
+  # Should get corrected estimate (not exactly 0 or 1)
+  expect_true(res$estimate > 0)
+  expect_true(res$estimate < 1)
+  # SE should be positive
+  expect_true(res$stderr > 0)
+})
+
+test_that("Haldane correction negligible for non-boundary cases", {
+  set.seed(308)
+  x <- rnorm(50)
+  y <- rnorm(50, mean = 0.5)
+
+  res <- ses_calc(x, y, ses = "cstat", se_method = "agresti")
+
+  # Compute raw estimate for comparison
+  r_raw <- TOSTER:::rbs_calc(x, y, mu = 0, paired = FALSE)
+  p_raw <- (r_raw + 1) / 2
+
+  # Estimate should match raw (no boundary correction applied)
+  expect_equal(as.numeric(res$estimate), p_raw, tolerance = 1e-10)
+})
+
+test_that("Haldane correction message mentions score method for two-sample", {
+  x_sep <- 1:5
+  y_sep <- 6:10
+
+  expect_message(
+    ses_calc(x_sep, y_sep, ses = "cstat", se_method = "agresti"),
+    "[Ss]core"  # Case-insensitive match for "Score" or "score"
+  )
+})
+
+test_that("to_cstat transformations work correctly", {
+  # cstat pass-through
+  expect_equal(TOSTER:::to_cstat(0.7, "cstat"), 0.7)
+
+  # rb -> cstat
+  expect_equal(TOSTER:::to_cstat(0, "rb"), 0.5)
+  expect_equal(TOSTER:::to_cstat(1, "rb"), 1)
+  expect_equal(TOSTER:::to_cstat(-1, "rb"), 0)
+  expect_equal(TOSTER:::to_cstat(0.4, "rb"), 0.7)
+
+  # odds -> cstat
+  expect_equal(TOSTER:::to_cstat(1, "odds"), 0.5)
+  expect_equal(TOSTER:::to_cstat(2, "odds"), 2/3)
+
+  # logodds -> cstat
+  expect_equal(TOSTER:::to_cstat(0, "logodds"), 0.5)
+  expect_equal(TOSTER:::to_cstat(log(2), "logodds"), 2/3)
+})
+
+test_that("wmw_tie_factor returns correct values", {
+  # No ties
+  x <- c(1, 3, 5)
+  y <- c(2, 4, 6)
+  expect_equal(TOSTER:::wmw_tie_factor(x, y), 1)
+
+  # All identical
+  x_eq <- rep(5, 5)
+  y_eq <- rep(5, 5)
+  expect_equal(TOSTER:::wmw_tie_factor(x_eq, y_eq), 0)
+})
+
+test_that("v_laph returns valid variance values", {
+  # At phi = 0.5 (null), variance should be positive
+  v_null <- TOSTER:::v_laph(0.5, tf = 1, n1 = 20, n2 = 20)
+  expect_true(v_null > 0)
+
+  # At boundaries, variance should be 0
+  v_0 <- TOSTER:::v_laph(0, tf = 1, n1 = 20, n2 = 20)
+  expect_equal(v_0, 0)
+
+  v_1 <- TOSTER:::v_laph(1, tf = 1, n1 = 20, n2 = 20)
+  expect_equal(v_1, 0)
+
+  # With ties (tf < 1), variance should be smaller
+  v_ties <- TOSTER:::v_laph(0.5, tf = 0.8, n1 = 20, n2 = 20)
+  expect_true(v_ties < v_null)
+})
+
+test_that("score_ci_wmw returns valid intervals", {
+  ci <- TOSTER:::score_ci_wmw(phi_hat = 0.6, tf = 1, n1 = 20, n2 = 20,
+                               conf.level = 0.95, correct = FALSE)
+  expect_equal(length(ci), 2)
+  expect_true(ci[1] < ci[2])
+  expect_true(ci[1] >= 0)
+  expect_true(ci[2] <= 1)
+  expect_true(ci[1] < 0.6)
+  expect_true(ci[2] > 0.6)
+})
+
+test_that("score_pvalue_wmw returns valid p-values", {
+  res <- TOSTER:::score_pvalue_wmw(phi_hat = 0.6, phi_null = 0.5,
+                                    tf = 1, n1 = 20, n2 = 20,
+                                    alternative = "two.sided", correct = FALSE)
+  expect_true(res$p.value >= 0)
+  expect_true(res$p.value <= 1)
+  expect_true(is.numeric(res$z.statistic))
+})

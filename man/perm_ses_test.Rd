@@ -162,8 +162,8 @@ of Arboretti et al. (2021)
 \subsection{Confidence Intervals}{
 
 Confidence intervals are computed using the percentile method on the permutation distribution.
-For bounded scales, intervals are clamped to the valid range (e.g., \link{-1, 1} for rb,
-\link{0, 1} for cstat).
+For bounded scales, intervals are clamped to the valid range (e.g., \eqn{[-1, 1]} for rb,
+\eqn{[0, 1]} for cstat).
 }
 
 \subsection{Ties}{

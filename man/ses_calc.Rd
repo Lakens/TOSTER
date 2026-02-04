@@ -12,7 +12,8 @@ ses_calc(
   paired = FALSE,
   ses = "rb",
   alpha = 0.05,
-  se_method = c("agresti", "fisher"),
+  se_method = c("agresti", "score", "fisher"),
+  correct = FALSE,
   output = c("htest", "data.frame"),
   null.value = NULL,
   alternative = c("none", "two.sided", "less", "greater", "equivalence",
@@ -26,7 +27,8 @@ ses_calc(
   ses = c("rb", "odds", "logodds", "cstat"),
   alpha = 0.05,
   mu = 0,
-  se_method = c("agresti", "fisher"),
+  se_method = c("agresti", "score", "fisher"),
+  correct = FALSE,
   output = c("htest", "data.frame"),
   null.value = NULL,
   alternative = c("none", "two.sided", "less", "greater", "equivalence",
@@ -55,9 +57,25 @@ ses_calc(
 confidence intervals:
 - "agresti": (default) Uses the Agresti/Lehmann placement-based variance estimation with
 confidence intervals computed on the log-odds scale and back-transformed. This method
-has better asymptotic properties and faster convergence to normality.
+has better asymptotic properties and faster convergence to normality. Available for
+all designs (one-sample, paired, and two-sample independent).
+- "score": Uses the Fay-Malinovsky score-type approach based on the
+proportional odds model. Confidence intervals are constructed by
+test inversion (finding the values of the concordance probability
+where the score statistic equals the critical value), then
+transformed to the requested effect size scale. This method has
+better small-sample coverage than the Wald-based methods and
+produces confidence intervals that are compatible with the
+Wilcoxon-Mann-Whitney test. \strong{Only available for two-sample
+independent designs.} See Fay and Malinovsky (2018) for details.
 - "fisher": Uses the legacy Fisher z-transformation method for confidence intervals.
 This method is retained for backward compatibility.}
+
+\item{correct}{logical; whether to apply a continuity correction to the
+test statistic and confidence interval. When \code{se_method = "score"},
+setting \code{correct = TRUE} produces p-values that match
+\code{wilcox.test(..., exact = FALSE, correct = TRUE)}.
+Default is \code{FALSE}. Only used with \code{se_method = "score"}.}
 
 \item{output}{a character string specifying the output format:
 - "htest": (default) Returns an object of class "htest" compatible with standard R output.
@@ -146,7 +164,7 @@ as the common language effect size or the area under the ROC curve. Values range
 }
 \subsection{Standard Error Methods}{
 
-Two methods are available for computing standard errors and confidence intervals:
+Three methods are available for computing standard errors and confidence intervals:
 \itemize{
 \item \strong{Agresti method} (\code{se_method = "agresti"}): This method computes the variance of the
 concordance probability \eqn{\hat{p} = \Pr(X > Y)} using the Lehmann/Agresti placement-based
@@ -174,32 +192,56 @@ Standard errors for other effect size scales are obtained via the delta method. 
 Confidence intervals are constructed on the log-odds scale and back-transformed to the
 requested effect size scale. This ensures that intervals respect the natural bounds of each
 measure (e.g., \eqn{[0, 1]} for cstat, \eqn{[-1, 1]} for rb).
+\item \strong{Score method} (\code{se_method = "score"}): Uses the Fay-Malinovsky approach based on the
+V_LAPH variance function from the proportional odds model. Confidence intervals are
+constructed via test inversion: finding the values of \eqn{\phi} (concordance probability)
+where the score statistic equals the critical value. This method has better small-sample
+coverage than Wald-type methods because the variance is evaluated at the candidate
+parameter value, not the estimate.
+
+The reported standard error is descriptive (computed from V_LAPH at \eqn{\hat{\phi}}),
+but the confidence interval is \strong{not} computed as estimate ± z × SE. Instead, it comes
+from test inversion, which gives better coverage properties.
+
+When \code{correct = TRUE}, a continuity correction is applied that makes p-values match
+\code{wilcox.test(..., exact = FALSE, correct = TRUE)}. This method is only available for
+two-sample independent designs.
 \item \strong{Fisher method} (\code{se_method = "fisher"}): This legacy method uses Fisher's z-transformation
 (arctanh) for the rank-biserial correlation. Confidence intervals for other effect sizes
 are obtained by simple transformation of the rank-biserial CI bounds.
 }
 }
 
-\subsection{Continuity Correction for Boundary Cases}{
+\subsection{Boundary Case Handling (Complete Separation)}{
 
-When there is complete separation between groups (i.e., all observations in one group exceed all
-observations in the other), the concordance probability \eqn{\hat{p}} equals exactly 0 or 1.
-This leads to undefined odds (0 or \eqn{\infty}) and log-odds (\eqn{-\infty} or \eqn{\infty}).
+When there is complete separation between groups (i.e., all pairwise comparisons favor
+one group), the concordance probability \eqn{\hat{p}} equals exactly 0 or 1.
+This leads to undefined odds and log-odds, and a degenerate (zero) placement-based
+variance.
 
-In this case, a continuity correction is applied (for \code{se_method = "agresti"} only):
-\itemize{
-\item \strong{Two-sample}: \eqn{\hat{p}} is corrected to \eqn{0.5 / (n_1 \cdot n_2)} or
-\eqn{1 - 0.5 / (n_1 \cdot n_2)}, where \eqn{n_1 \cdot n_2} is the total number of pairwise
-comparisons.
-\item \strong{Paired/one-sample}: \eqn{\hat{p}} is corrected to \eqn{0.5 / S} or \eqn{1 - 0.5 / S},
-where \eqn{S = N(N+1)/2} is the maximum possible Wilcoxon signed-rank statistic and \eqn{N}
-is the number of non-zero differences.
-}
+For \code{se_method = "agresti"}, a Haldane-type shrinkage correction is applied:
+\deqn{\tilde{p} = \frac{C + 0.5}{N_{\mathrm{pairs}} + 1}}
+where \eqn{C} is the concordance count and \eqn{N_{\mathrm{pairs}}} is the total
+number of pairwise comparisons (\eqn{n_1 n_2} for two-sample designs, or
+\eqn{N(N+1)/2} for paired/one-sample designs where \eqn{N} is the number of
+non-zero differences). This corresponds to the posterior mean under a Jeffreys
+Beta(0.5, 0.5) prior and shrinks the estimate toward 0.5, with stronger shrinkage
+for smaller samples.
 
-A message is printed when this correction is applied. Point estimates and hypothesis tests
-should be interpreted as approximate in these cases. For bootstrap inference with complete
-separation, see \code{\link[=boot_ses_calc]{boot_ses_calc()}}, which will detect this condition and stop with an
-informative error.
+The Agresti placement variance is then evaluated at the corrected estimate. A message
+is printed when this correction is applied. For more reliable inference at boundaries,
+consider \code{\link[=perm_ses_test]{perm_ses_test()}} for permutation-based p-values and intervals, or
+\code{se_method = "score"} (two-sample designs only) for score-type intervals that handle
+boundaries naturally without correction.
+
+For \code{se_method = "score"} (two-sample only), no correction is needed. The score-type
+CI is constructed via test inversion, where the variance function V_LAPH(phi) is
+evaluated at candidate parameter values in the interior of (0, 1). When
+\eqn{\hat{p} = 1}, the upper CI bound is trivially 1 and the lower bound is found
+by root-finding. No modification of the point estimate is required.
+
+For two-sample designs using the Agresti method, a score-type CI is automatically
+used as a fallback at boundaries for better interval coverage.
 }
 
 \subsection{Hypothesis Testing}{
@@ -283,12 +325,23 @@ ses_calc(x = group1, y = group2, ses = "rb", output = "data.frame")
 # Example 6: Using Fisher method for backward compatibility
 ses_calc(x = group1, y = group2, ses = "rb", se_method = "fisher")
 
+# Example 7: Using score method for WMW-compatible CIs (two-sample only)
+ses_calc(x = group1, y = group2, ses = "cstat", se_method = "score")
+
+# Example 8: Score method with continuity correction (matches wilcox.test)
+ses_calc(x = group1, y = group2, ses = "cstat", se_method = "score",
+         correct = TRUE, alternative = "two.sided", null.value = 0.5)
+
 }
 \references{
 Agresti, A. (1980). Generalized odds ratios for ordinal data. \emph{Biometrics}, 36, 59-67.
 
 Bamber, D. (1975). The area above the ordinal dominance graph and the area below the receiver
 operating characteristic graph. \emph{Journal of Mathematical Psychology}, 12, 387-415.
+
+Fay, M.P. and Malinovsky, Y. (2018). Confidence Intervals of the Mann-Whitney Parameter
+that are Compatible with the Wilcoxon-Mann-Whitney Test. \emph{Statistics in Medicine},
+37, 3991-4006. \doi{10.1002/sim.7890}
 
 Kerby, D. S. (2014). The simple difference formula: An approach to teaching nonparametric
 correlation. \emph{Comprehensive Psychology}, 3, 11-IT.

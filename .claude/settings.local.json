@@ -25,7 +25,16 @@
       "Bash(cmd.exe:*)",
       "Bash(\"/c/Program Files/R/R-4.5.1/bin/Rscript.exe\" test_vignette.R)",
       "Bash(\"/c/Program Files/R/R-4.5.1/bin/Rscript.exe\" test_vignette2.R)",
-      "Bash(\"/c/Program Files/R/R-4.5.1/bin/Rscript.exe\" test_hl_concordance.R)"
+      "Bash(\"/c/Program Files/R/R-4.5.1/bin/Rscript.exe\" test_hl_concordance.R)",
+      "Bash(\"C:\\\\Program Files\\\\R\\\\R-4.4.2\\\\bin\\\\Rscript.exe\" -e \"\ndevtools::load_all\\(quiet = TRUE\\)\nx_sep <- 1:5\ny_sep <- 6:10\n\n# Check the raw rbs_calc output\nr_raw <- TOSTER:::rbs_calc\\(x_sep, y_sep, mu = 0, paired = FALSE\\)\ncat\\(''rbs_calc result:'', r_raw, ''\\\\n''\\)\n\np_raw <- \\(r_raw + 1\\) / 2\ncat\\(''p_hat \\(cstat\\):'', p_raw, ''\\\\n''\\)\n\n# Check what ses_compute_agresti returns\nagresti_res <- TOSTER:::ses_compute_agresti\\(x_sep, y_sep, paired = FALSE\\)\ncat\\(''agresti cstat:'', agresti_res$cstat, ''\\\\n''\\)\ncat\\(''agresti rb:'', agresti_res$rb, ''\\\\n''\\)\ncat\\(''boundary_corrected:'', agresti_res$boundary_corrected, ''\\\\n''\\)\ncat\\(''p_hat_original:'', agresti_res$p_hat_original, ''\\\\n''\\)\n\")",
+      "Bash(dir:*)",
+      "Bash(\"C:\\\\Program Files\\\\R\\\\R-4.5.1\\\\bin\\\\Rscript.exe\" -e \"cat\\(''R is working''\\)\")",
+      "Bash(\"C:\\\\Program Files\\\\R\\\\R-4.5.1\\\\bin\\\\Rscript.exe\" -e \"\ndevtools::load_all\\(quiet = TRUE\\)\nx_sep <- 1:5\ny_sep <- 6:10\n\n# Check the raw rbs_calc output\nr_raw <- TOSTER:::rbs_calc\\(x_sep, y_sep, mu = 0, paired = FALSE\\)\ncat\\(''rbs_calc result:'', r_raw, ''\\\\n''\\)\n\np_raw <- \\(r_raw + 1\\) / 2\ncat\\(''p_hat \\(cstat\\):'', p_raw, ''\\\\n''\\)\n\n# Check what ses_compute_agresti returns\nagresti_res <- TOSTER:::ses_compute_agresti\\(x_sep, y_sep, paired = FALSE\\)\ncat\\(''agresti cstat:'', agresti_res$cstat, ''\\\\n''\\)\ncat\\(''agresti rb:'', agresti_res$rb, ''\\\\n''\\)\ncat\\(''boundary_corrected:'', agresti_res$boundary_corrected, ''\\\\n''\\)\ncat\\(''p_hat_original:'', agresti_res$p_hat_original, ''\\\\n''\\)\n\")",
+      "Bash(\"C:\\\\Program Files\\\\R\\\\R-4.4.1\\\\bin\\\\Rscript.exe\" -e \"\ndevtools::load_all\\(quiet = TRUE\\)\nx_sep <- 1:5\ny_sep <- 6:10\n\n# Check the raw rbs_calc output\nr_raw <- TOSTER:::rbs_calc\\(x_sep, y_sep, mu = 0, paired = FALSE\\)\ncat\\(''rbs_calc result:'', r_raw, ''\\\\n''\\)\n\np_raw <- \\(r_raw + 1\\) / 2\ncat\\(''p_hat \\(cstat\\):'', p_raw, ''\\\\n''\\)\n\n# Check what ses_compute_agresti returns\nagresti_res <- TOSTER:::ses_compute_agresti\\(x_sep, y_sep, paired = FALSE\\)\ncat\\(''agresti cstat:'', agresti_res$cstat, ''\\\\n''\\)\ncat\\(''agresti rb:'', agresti_res$rb, ''\\\\n''\\)\ncat\\(''boundary_corrected:'', agresti_res$boundary_corrected, ''\\\\n''\\)\ncat\\(''p_hat_original:'', agresti_res$p_hat_original, ''\\\\n''\\)\n\")",
+      "Bash(\"C:\\\\Program Files\\\\R\\\\R-4.4.1\\\\bin\\\\Rscript.exe\" test_debug.R)",
+      "Bash(\"C:\\\\Program Files\\\\R\\\\R-4.4.1\\\\bin\\\\Rscript.exe\" -e \"devtools::test\\(filter = ''ses_calc''\\)\")",
+      "Bash(\"C:\\\\Program Files\\\\R\\\\R-4.4.1\\\\bin\\\\Rscript.exe\" -e \"devtools::check\\(\\)\")",
+      "Bash(\"C:\\\\Program Files\\\\R\\\\R-4.4.1\\\\bin\\\\Rscript.exe\" -e \"devtools::check\\(vignettes = FALSE\\)\")"
     ]
   }
 }

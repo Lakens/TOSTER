@@ -90,8 +90,8 @@
 #' ## Confidence Intervals
 #'
 #' Confidence intervals are computed using the percentile method on the permutation distribution.
-#' For bounded scales, intervals are clamped to the valid range (e.g., [-1, 1] for rb,
-#' [0, 1] for cstat).
+#' For bounded scales, intervals are clamped to the valid range (e.g., \eqn{[-1, 1]} for rb,
+#' \eqn{[0, 1]} for cstat).
 #'
 #' ## Ties
 #'
@@ -470,7 +470,7 @@ perm_ses_test.default <- function(x,
   names(stat) <- "observed"
 
   param <- R_used
-  names(param) <- "R"
+  names(param) <- "N-permutations"
 
   if (exact_perm) {
     method_prefix <- "Exact Permutation"
