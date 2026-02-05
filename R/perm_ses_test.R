@@ -318,6 +318,7 @@ perm_ses_test.default <- function(x,
     }
 
     PERM_ES <- numeric(R_used)
+    PERM_EFF <- numeric(R_used)  # Shifted distribution for CI construction
     for (i in seq_len(R_used)) {
       flip <- signs_matrix[i, ] < 0  # TRUE where sign is -1
 
@@ -331,6 +332,7 @@ perm_ses_test.default <- function(x,
         y_perm <- ifelse(flip, x, y)
       }
       PERM_ES[i] <- compute_perm_es(x_perm, y_perm, paired_flag = TRUE, ses_type = ses)
+      PERM_EFF[i] <- PERM_ES[i] + (obs_es - null_under_H0)
     }
 
   } else {
@@ -351,12 +353,14 @@ perm_ses_test.default <- function(x,
     N <- n1 + length(y)
 
     PERM_ES <- numeric(R_used)
+    PERM_EFF <- numeric(R_used)  # Shifted distribution for CI construction
     for (i in seq_len(R_used)) {
       idx_x <- idx_x_matrix[i, ]
       idx_y <- setdiff(seq_len(N), idx_x)
       x_perm <- all_data[idx_x]
       y_perm <- all_data[idx_y]
       PERM_ES[i] <- compute_perm_es(x_perm, y_perm, paired_flag = FALSE, ses_type = ses)
+      PERM_EFF[i] <- PERM_ES[i] + (obs_es - null_under_H0)
     }
   }
 
@@ -422,19 +426,19 @@ perm_ses_test.default <- function(x,
     perm.pval <- min(p_low, p_high)
   }
 
-  # --- Compute confidence intervals ---
+  # --- Compute confidence intervals from shifted permutation distribution ---
   if (alternative == "two.sided") {
-    perm.cint <- quantile(PERM_ES, c(alpha / 2, 1 - alpha / 2), names = FALSE)
+    perm.cint <- quantile(PERM_EFF, c(alpha / 2, 1 - alpha / 2), names = FALSE)
   } else if (alternative == "less") {
     lower_min <- switch(ses,
                         "rb" = -1, "cstat" = 0, "odds" = 0, "logodds" = -Inf)
-    perm.cint <- c(lower_min, quantile(PERM_ES, conf.level, names = FALSE))
+    perm.cint <- c(lower_min, quantile(PERM_EFF, conf.level, names = FALSE))
   } else if (alternative == "greater") {
     upper_max <- switch(ses,
                         "rb" = 1, "cstat" = 1, "odds" = Inf, "logodds" = Inf)
-    perm.cint <- c(quantile(PERM_ES, 1 - conf.level, names = FALSE), upper_max)
+    perm.cint <- c(quantile(PERM_EFF, 1 - conf.level, names = FALSE), upper_max)
   } else if (alternative %in% c("equivalence", "minimal.effect")) {
-    perm.cint <- quantile(PERM_ES, c(alpha, 1 - alpha), names = FALSE)
+    perm.cint <- quantile(PERM_EFF, c(alpha, 1 - alpha), names = FALSE)
   }
 
   # Clamp to valid range
@@ -505,6 +509,7 @@ perm_ses_test.default <- function(x,
 
   if (keep_perm) {
     rval$perm.dist <- PERM_ES
+    rval$perm.eff <- PERM_EFF  # Shifted distribution used for CIs
   }
 
   class(rval) <- "htest"
