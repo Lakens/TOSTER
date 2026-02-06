@@ -29,8 +29,9 @@
 #'       study design. Resolves to "score" for two-sample independent designs and "agresti"
 #'       for one-sample or paired designs. Note that the bootstrap version does not use the
 #'       score CI method directly; "auto" simply controls which SE formula is used internally.
-#'     - "agresti": Uses the Agresti/Lehmann placement-based variance estimation.
-#'       This method has better asymptotic properties.
+#'     - "agresti": Uses the Agresti/Lehmann placement-based variance estimation
+#'       with the log-odds working scale, which has better asymptotic properties
+#'       (faster convergence to normality per Agresti, 1980).
 #'     - "fisher": Uses the legacy Fisher z-transformation method. Retained for backward
 #'       compatibility.
 #' @param output a character string specifying the output format:
@@ -58,7 +59,9 @@
 #'   - Calculate the raw effect size using the original data
 #'   - Create R bootstrap samples by resampling with replacement from the original data
 #'   - Calculate the effect size for each bootstrap sample
-#'   - Apply the Fisher z-transformation to stabilize variance for rank-biserial correlation values
+#'   - Transform bootstrap estimates to the working scale for CI construction:
+#'     the log-odds scale when `se_method = "agresti"` (default), or Fisher z
+#'     when `se_method = "fisher"`
 #'   - Calculate confidence intervals using the specified method
 #'   - Back-transform the confidence intervals to the original scale
 #'   - Convert to the requested effect size measure (if not rank-biserial)
@@ -229,6 +232,18 @@ boot_ses_calc.default = function(x,
     se_method <- if (is_two_sample) "agresti" else "agresti"
   }
 
+  # Working-scale transformations
+  # Fisher z: atanh(rb), back-transform: tanh(z)
+  # Log-odds: log((1+rb)/(1-rb)) = 2*atanh(rb), back-transform: tanh(lo/2)
+  if (se_method == "fisher") {
+    to_working   <- function(rb) atanh(rb)
+    from_working <- function(w)  tanh(w)
+  } else {
+    # agresti: log-odds scale
+    to_working   <- function(rb) log((1 + rb) / (1 - rb))  # = 2 * atanh(rb)
+    from_working <- function(w)  (exp(w) - 1) / (exp(w) + 1)  # = tanh(w/2)
+  }
+
   # Set default null.value based on effect size type
   if (is.null(null.value)) {
     null.value <- switch(ses,
@@ -275,8 +290,10 @@ boot_ses_calc.default = function(x,
       if (abs(rb) >= 1) {
         return(NA)
       }
-      se_z <- se_rb / (1 - rb^2)
-      return(se_z)
+      # Delta method: SE on log-odds scale
+      # d/d(rb) log((1+rb)/(1-rb)) = 2/(1-rb^2)
+      se_logodds <- 2 * se_rb / (1 - rb^2)
+      return(se_logodds)
     } else {
       if (paired || is.null(y_boot)) {
         n1 <- if(is.null(y_boot)) length(x_boot) else length(x_boot)
@@ -313,7 +330,7 @@ boot_ses_calc.default = function(x,
     if (se_method == "agresti") {
       est_results <- ses_compute_agresti(x = data$x, y = data$y, paired = TRUE, mu = mu)
       raw_rb <- est_results$rb
-      raw_SE <- est_results$se_rb / (1 - raw_rb^2)
+      raw_SE <- 2 * est_results$se_rb / (1 - raw_rb^2)  # SE on log-odds scale
     } else {
       maxw <- (nd^2 + nd) / 2
       raw_SE = sqrt((2 * nd^3 + 3 * nd^2 + nd) / 6) / maxw
@@ -344,7 +361,7 @@ boot_ses_calc.default = function(x,
                           alpha = alpha,
                           se_method = se_method,
                           output = "data.frame")
-      boots = c(boots, atanh(res_boot$estimate))
+      boots = c(boots, to_working(res_boot$estimate))
 
       rfSE <- compute_boot_se(data$x[sampler], data$y[sampler], paired = TRUE, se_method, mu)
       boots_se = c(boots_se, rfSE)
@@ -368,7 +385,7 @@ boot_ses_calc.default = function(x,
     if (se_method == "agresti") {
       est_results <- ses_compute_agresti(x = i1, y = i2, paired = FALSE, mu = mu)
       raw_rb <- est_results$rb
-      raw_SE <- est_results$se_rb / (1 - raw_rb^2)
+      raw_SE <- 2 * est_results$se_rb / (1 - raw_rb^2)  # SE on log-odds scale
     } else {
       raw_SE = sqrt((n1 + n2 + 1) / (3 * n1 * n2))
     }
@@ -397,7 +414,7 @@ boot_ses_calc.default = function(x,
                           alpha = alpha,
                           se_method = se_method,
                           output = "data.frame")
-      boots = c(boots, atanh(res_boot$estimate))
+      boots = c(boots, to_working(res_boot$estimate))
 
       rfSE <- compute_boot_se(x_boot$values, y_boot$values, paired = FALSE, se_method, mu)
       boots_se = c(boots_se, rfSE)
@@ -421,7 +438,7 @@ boot_ses_calc.default = function(x,
     if (se_method == "agresti") {
       est_results <- ses_compute_agresti(x = x1, y = NULL, paired = FALSE, mu = mu)
       raw_rb <- est_results$rb
-      raw_SE <- est_results$se_rb / (1 - raw_rb^2)
+      raw_SE <- 2 * est_results$se_rb / (1 - raw_rb^2)  # SE on log-odds scale
     } else {
       maxw <- (nd^2 + nd) / 2
       raw_SE = sqrt((2 * nd^3 + 3 * nd^2 + nd) / 6) / maxw
@@ -448,7 +465,7 @@ boot_ses_calc.default = function(x,
                           alpha = alpha,
                           se_method = se_method,
                           output = "data.frame")
-      boots = c(boots, atanh(res_boot$estimate))
+      boots = c(boots, to_working(res_boot$estimate))
 
       rfSE <- compute_boot_se(x_boot, NULL, paired = FALSE, se_method, mu)
       boots_se = c(boots_se, rfSE)
@@ -459,18 +476,18 @@ boot_ses_calc.default = function(x,
     message("Bootstrapped results contain extreme results (i.e., no overlap), caution advised interpreting confidence intervals.")
   }
 
-  # Get CI on Fisher Z scale
-  zci = switch(boot_ci,
+  # Get CI on working scale (log-odds for agresti, Fisher z for fisher)
+  wci = switch(boot_ci,
                "stud" = stud(boots_est = boots, boots_se = boots_se,
-                             se0=raw_SE, t0 = atanh(raw_ses$estimate[1L]),
+                             se0 = raw_SE, t0 = to_working(raw_ses$estimate[1L]),
                              alpha = if(alternative %in% c("equivalence", "minimal.effect")) alpha * 2 else alpha),
                "perc" = perc(boots, if(alternative %in% c("equivalence", "minimal.effect")) alpha * 2 else alpha),
-               "basic" = basic(boots, t0 = atanh(raw_ses$estimate),
+               "basic" = basic(boots, t0 = to_working(raw_ses$estimate),
                                if(alternative %in% c("equivalence", "minimal.effect")) alpha * 2 else alpha))
 
   # Transform back to rb scale
-  rci = tanh(zci)
-  rboots = tanh(boots)
+  rci = from_working(wci)
+  rboots = from_working(boots)
 
   # Transform to requested effect size scale
   boots_transformed = switch(ses,
@@ -593,7 +610,7 @@ boot_ses_calc.default = function(x,
 
   # Note: bootstrap methodology details
   note_text <- paste0("Bootstrap CI: ", boot_ci,
-                      "; SE method: ", if (se_method == "agresti") "Agresti/Lehmann placement" else "Fisher z-transform")
+                      "; SE method: ", if (se_method == "agresti") "Agresti/Lehmann placement (log-odds scale)" else "Fisher z-transform")
 
   # Build output
   if (output == "data.frame") {
