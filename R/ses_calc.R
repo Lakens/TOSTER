@@ -25,7 +25,10 @@
 #'   or shift (for independent samples) is to be estimated (default = 0).
 #' @param se_method a character string specifying the method for computing standard errors and
 #'   confidence intervals:
-#'     - "agresti": (default) Uses the Agresti/Lehmann placement-based variance estimation with
+#'     - "auto": (default) Automatically selects the most appropriate method based on the
+#'       study design. Resolves to "score" for two-sample independent designs and "agresti"
+#'       for one-sample or paired designs.
+#'     - "agresti": Uses the Agresti/Lehmann placement-based variance estimation with
 #'       confidence intervals computed on the log-odds scale and back-transformed. This method
 #'       has better asymptotic properties and faster convergence to normality. Available for
 #'       all designs (one-sample, paired, and two-sample independent).
@@ -287,7 +290,7 @@ ses_calc <- function(x, ...,
                      paired = FALSE,
                      ses = "rb",
                      alpha = 0.05,
-                     se_method = c("agresti", "score", "fisher"),
+                     se_method = c("auto", "agresti", "score", "fisher"),
                      correct = FALSE,
                      output = c("htest", "data.frame"),
                      null.value = NULL,
@@ -308,7 +311,7 @@ ses_calc.default = function(x,
                           ses = c("rb","odds","logodds","cstat"),
                           alpha = 0.05,
                           mu = 0,
-                          se_method = c("agresti", "score", "fisher"),
+                          se_method = c("auto", "agresti", "score", "fisher"),
                           correct = FALSE,
                           output = c("htest", "data.frame"),
                           null.value = NULL,
@@ -325,16 +328,18 @@ ses_calc.default = function(x,
     stop("alpha must be a numeric value between 0 and 1")
   }
 
+  # Determine design type
+  is_two_sample <- !is.null(y) && !paired
+
+  # Resolve "auto" se_method based on design type
+  if (se_method == "auto") {
+    se_method <- if (is_two_sample) "score" else "agresti"
+  }
+
   # Score method only available for two-sample independent
-  if (se_method == "score") {
-    if (is.null(y)) {
-      stop("se_method = 'score' is only available for two-sample independent designs. ",
-           "For one-sample designs, use se_method = 'agresti'.")
-    }
-    if (paired) {
-      stop("se_method = 'score' is only available for two-sample independent designs. ",
-           "For paired designs, use se_method = 'agresti'.")
-    }
+  if (se_method == "score" && !is_two_sample) {
+    stop("se_method = 'score' is only available for two-sample independent designs. ",
+         "For one-sample or paired designs, use se_method = 'agresti'.")
   }
 
   # Continuity correction only used with score method

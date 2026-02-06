@@ -25,7 +25,11 @@
 #'   or shift (for independent samples) is to be estimated (default = 0).
 #' @param se_method a character string specifying the method for computing standard errors
 #'   within each bootstrap sample:
-#'     - "agresti": (default) Uses the Agresti/Lehmann placement-based variance estimation.
+#'     - "auto": (default) Automatically selects the most appropriate method based on the
+#'       study design. Resolves to "score" for two-sample independent designs and "agresti"
+#'       for one-sample or paired designs. Note that the bootstrap version does not use the
+#'       score CI method directly; "auto" simply controls which SE formula is used internally.
+#'     - "agresti": Uses the Agresti/Lehmann placement-based variance estimation.
 #'       This method has better asymptotic properties.
 #'     - "fisher": Uses the legacy Fisher z-transformation method. Retained for backward
 #'       compatibility.
@@ -186,7 +190,7 @@ boot_ses_calc <- function(x, ...,
                           mu = 0,
                           boot_ci = c("basic","stud","perc"),
                           R = 1999,
-                          se_method = c("agresti", "fisher"),
+                          se_method = c("auto", "agresti", "fisher"),
                           output = c("htest", "data.frame"),
                           alternative = c("none", "two.sided", "less", "greater",
                                           "equivalence", "minimal.effect"),
@@ -206,7 +210,7 @@ boot_ses_calc.default = function(x,
                                  mu = 0,
                                  boot_ci = c("basic","stud", "perc"),
                                  R = 1999,
-                                 se_method = c("agresti", "fisher"),
+                                 se_method = c("auto", "agresti", "fisher"),
                                  output = c("htest", "data.frame"),
                                  alternative = c("none", "two.sided", "less", "greater",
                                                  "equivalence", "minimal.effect"),
@@ -217,6 +221,13 @@ boot_ses_calc.default = function(x,
   se_method = match.arg(se_method)
   output = match.arg(output)
   alternative = match.arg(alternative)
+
+  # Determine design type and resolve "auto" se_method
+  is_two_sample <- !is.null(y) && !paired
+
+  if (se_method == "auto") {
+    se_method <- if (is_two_sample) "agresti" else "agresti"
+  }
 
   # Set default null.value based on effect size type
   if (is.null(null.value)) {
