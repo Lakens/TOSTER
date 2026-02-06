@@ -594,68 +594,67 @@ boot_ses_calc.default = function(x,
                      "logodds" = "WMW Log-Odds",
                      "cstat" = "Concordance")
 
-  # Bootstrap SE on the transformed scale
+  # Bootstrap SE on the transformed scale (for reporting in stderr field)
   boot_se = sd(boots_transformed, na.rm = TRUE)
 
-  # Compute p-value using bootstrap distribution (only when hypothesis test requested)
+  # Studentized bootstrap pivot on working scale
+  # Centered at observed working-scale estimate, scaled by bootstrap SE
+  obs_working <- to_working(raw_ses$estimate[1L])
+  TSTAT <- (boots - obs_working) / boots_se
+
+  # Compute p-value using studentized bootstrap distribution
   if (alternative != "none") {
-    # Center the bootstrap distribution at the null value
-    # For rb/logodds: null is 0; for cstat: null is 0.5; for odds: null is 1
-
-    if (alternative == "two.sided") {
-      # Two-sided test: proportion of bootstrap values at least as extreme as observed
-      # Centered at null
-      boot_centered <- boots_transformed - null.value
-      obs_centered <- est_val - null.value
-      boot.pval <- 2 * min(mean(boot_centered <= obs_centered),
-                           mean(boot_centered > obs_centered))
-    } else if (alternative == "less") {
-      # One-sided: proportion of bootstrap values less than or equal to observed
-      boot_centered <- boots_transformed - null.value
-      obs_centered <- est_val - null.value
-      boot.pval <- mean(boot_centered <= obs_centered)
-    } else if (alternative == "greater") {
-      # One-sided: proportion of bootstrap values greater than or equal to observed
-      boot_centered <- boots_transformed - null.value
-      obs_centered <- est_val - null.value
-      boot.pval <- mean(boot_centered >= obs_centered)
-    } else if (alternative == "equivalence") {
-      # Equivalence: max of two one-sided p-values
-      # Test 1: H0: effect <= low_bound vs H1: effect > low_bound
-      # Test 2: H0: effect >= high_bound vs H1: effect < high_bound
-      boot_centered_low <- boots_transformed - low_bound
-      boot_centered_high <- boots_transformed - high_bound
-      obs_centered_low <- est_val - low_bound
-      obs_centered_high <- est_val - high_bound
-
-      p_low <- mean(boot_centered_low >= obs_centered_low)  # greater than low bound
-      p_high <- mean(boot_centered_high <= obs_centered_high)  # less than high bound
-      boot.pval <- max(p_low, p_high)
-    } else if (alternative == "minimal.effect") {
-      # Minimal effect: min of two one-sided p-values
-      # Test 1: H0: effect >= low_bound vs H1: effect < low_bound
-      # Test 2: H0: effect <= high_bound vs H1: effect > high_bound
-      boot_centered_low <- boots_transformed - low_bound
-      boot_centered_high <- boots_transformed - high_bound
-      obs_centered_low <- est_val - low_bound
-      obs_centered_high <- est_val - high_bound
-
-      p_low <- mean(boot_centered_low <= obs_centered_low)  # less than low bound
-      p_high <- mean(boot_centered_high >= obs_centered_high)  # greater than high bound
-      boot.pval <- min(p_low, p_high)
+    # Convert null value(s) from user's ses scale to rb, then to working scale
+    null_to_rb <- function(val, ses_type) {
+      switch(ses_type,
+             "rb" = val,
+             "cstat" = cstat_to_rb(val),
+             "odds" = (val - 1) / (val + 1),
+             "logodds" = tanh(val / 2))
     }
 
-    # Compute z-statistic (for reference)
+    se_obs_working <- raw_SE  # already on working scale
+
     if (alternative %in% c("equivalence", "minimal.effect")) {
-      z_low <- (est_val - low_bound) / boot_se
-      z_high <- (est_val - high_bound) / boot_se
+      null_working_l <- to_working(null_to_rb(low_bound, ses))
+      null_working_u <- to_working(null_to_rb(high_bound, ses))
+      z_obs_l <- (obs_working - null_working_l) / se_obs_working
+      z_obs_u <- (obs_working - null_working_u) / se_obs_working
+    } else {
+      null_working <- to_working(null_to_rb(null.value, ses))
+      z_obs <- (obs_working - null_working) / se_obs_working
+    }
+
+    if (alternative == "two.sided") {
+      boot.pval <- 2 * min(mean(TSTAT <= z_obs, na.rm = TRUE),
+                           mean(TSTAT > z_obs, na.rm = TRUE))
+
+    } else if (alternative == "less") {
+      boot.pval <- mean(TSTAT < z_obs, na.rm = TRUE)
+
+    } else if (alternative == "greater") {
+      boot.pval <- mean(TSTAT > z_obs, na.rm = TRUE)
+
+    } else if (alternative == "equivalence") {
+      p_l <- mean(TSTAT > z_obs_l, na.rm = TRUE)
+      p_u <- mean(TSTAT < z_obs_u, na.rm = TRUE)
+      boot.pval <- max(p_l, p_u)
+
+    } else if (alternative == "minimal.effect") {
+      p_l <- mean(TSTAT < z_obs_l, na.rm = TRUE)
+      p_u <- mean(TSTAT > z_obs_u, na.rm = TRUE)
+      boot.pval <- min(p_l, p_u)
+    }
+
+    # Report z-observed (analogous to t-observed in boot_t_test)
+    if (alternative %in% c("equivalence", "minimal.effect")) {
       if (alternative == "equivalence") {
-        z_stat <- if (abs(z_low) < abs(z_high)) z_low else z_high
+        z_stat <- if (p_l >= p_u) z_obs_l else z_obs_u
       } else {
-        z_stat <- if (abs(z_low) < abs(z_high)) z_low else z_high
+        z_stat <- if (p_l <= p_u) z_obs_l else z_obs_u
       }
     } else {
-      z_stat <- (est_val - null.value) / boot_se
+      z_stat <- z_obs
     }
   }
 
@@ -710,7 +709,7 @@ boot_ses_calc.default = function(x,
 
     # Add hypothesis test components only if requested
     if (alternative != "none") {
-      names(z_stat) <- "z"
+      names(z_stat) <- "z-observed"
 
       if (alternative %in% c("equivalence", "minimal.effect")) {
         null_val <- c(low_bound, high_bound)

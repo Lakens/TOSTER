@@ -275,7 +275,7 @@ test_that("boot_smd_calc two.sided test works", {
   expect_s3_class(result, "htest")
   expect_true(!is.null(result$statistic))
   expect_true(!is.null(result$p.value))
-  expect_equal(names(result$statistic), "z")
+  expect_equal(names(result$statistic), "z-observed")
   expect_true(result$p.value >= 0 && result$p.value <= 1)
 })
 
