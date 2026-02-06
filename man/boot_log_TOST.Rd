@@ -17,7 +17,7 @@ boot_log_TOST(x, ...)
   eqb = 1.25,
   alpha = 0.05,
   null = 1,
-  boot_ci = c("stud", "basic", "perc"),
+  boot_ci = c("stud", "basic", "perc", "bca"),
   R = 1999,
   ...
 )

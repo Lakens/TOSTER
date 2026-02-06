@@ -159,7 +159,7 @@ boot_smd_calc <- function(x, ...,
                           bias_correction = TRUE,
                           rm_correction = FALSE,
                           glass = NULL,
-                          boot_ci = c("stud","basic","perc"),
+                          boot_ci = c("stud","basic","perc","bca"),
                           R = 1999,
                           output = c("htest", "data.frame"),
                           null.value = 0,
@@ -182,7 +182,7 @@ boot_smd_calc.default = function(x,
                                  bias_correction = TRUE,
                                  rm_correction = FALSE,
                                  glass = NULL,
-                                 boot_ci = c("stud","basic","perc"),
+                                 boot_ci = c("stud","basic","perc","bca"),
                                  R = 1999,
                                  output = c("htest", "data.frame"),
                                  null.value = 0,
@@ -337,13 +337,90 @@ boot_smd_calc.default = function(x,
 
   }
 
+  # Jackknife for BCa (if needed)
+  if (boot_ci == "bca") {
+    if (paired == TRUE && !missing(y)) {
+      # Paired: delete one pair at a time
+      n_jack <- nrow(data)
+      jack_est <- numeric(n_jack)
+      for (j in seq_len(n_jack)) {
+        res_jack <- smd_calc(x = data$x[-j],
+                             y = data$y[-j],
+                             paired = paired,
+                             var.equal = var.equal,
+                             alpha = alpha,
+                             mu = mu,
+                             bias_correction = bias_correction,
+                             rm_correction = rm_correction,
+                             glass = glass,
+                             smd_ci = "z",
+                             output = "data.frame")
+        jack_est[j] <- res_jack$estimate
+      }
+    } else if (!missing(y)) {
+      # Two-sample: pooled jackknife (delete one from combined)
+      n1 <- length(i1)
+      n2 <- length(i2)
+      n_total <- n1 + n2
+      jack_est <- numeric(n_total)
+      for (j in seq_len(n1)) {
+        res_jack <- smd_calc(x = i1[-j],
+                             y = i2,
+                             paired = paired,
+                             var.equal = var.equal,
+                             alpha = alpha,
+                             mu = mu,
+                             bias_correction = bias_correction,
+                             rm_correction = rm_correction,
+                             glass = glass,
+                             smd_ci = "z",
+                             output = "data.frame")
+        jack_est[j] <- res_jack$estimate
+      }
+      for (j in seq_len(n2)) {
+        res_jack <- smd_calc(x = i1,
+                             y = i2[-j],
+                             paired = paired,
+                             var.equal = var.equal,
+                             alpha = alpha,
+                             mu = mu,
+                             bias_correction = bias_correction,
+                             rm_correction = rm_correction,
+                             glass = glass,
+                             smd_ci = "z",
+                             output = "data.frame")
+        jack_est[n1 + j] <- res_jack$estimate
+      }
+    } else {
+      # One-sample: delete one observation at a time
+      n_jack <- length(x1)
+      jack_est <- numeric(n_jack)
+      for (j in seq_len(n_jack)) {
+        res_jack <- smd_calc(x = x1[-j],
+                             paired = paired,
+                             var.equal = var.equal,
+                             alpha = alpha,
+                             mu = mu,
+                             bias_correction = bias_correction,
+                             rm_correction = rm_correction,
+                             glass = glass,
+                             smd_ci = "z",
+                             output = "data.frame")
+        jack_est[j] <- res_jack$estimate
+      }
+    }
+  }
+
+  ci_alpha <- if(alternative %in% c("equivalence", "minimal.effect")) alpha * 2 else alpha
   ci = switch(boot_ci,
               "stud" = stud(boots_est = boots, boots_se = boots_se,
                             se0=raw_smd$SE[1L], t0 = raw_smd$estimate[1L],
-                            alpha = if(alternative %in% c("equivalence", "minimal.effect")) alpha * 2 else alpha),
-              "perc" = perc(boots, if(alternative %in% c("equivalence", "minimal.effect")) alpha * 2 else alpha),
+                            alpha = ci_alpha),
+              "perc" = perc(boots, ci_alpha),
               "basic" = basic(boots, t0 = raw_smd$estimate[1L],
-                              alpha = if(alternative %in% c("equivalence", "minimal.effect")) alpha * 2 else alpha))
+                              alpha = ci_alpha),
+              "bca" = bca_ci(boots_est = boots, t0 = raw_smd$estimate[1L],
+                             jack_est = jack_est, alpha = ci_alpha))
 
   # Determine sample type and SMD label
   if(is.null(y)){

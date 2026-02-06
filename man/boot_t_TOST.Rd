@@ -24,7 +24,7 @@ boot_t_TOST(x, ...)
   glass = NULL,
   mu = 0,
   R = 1999,
-  boot_ci = c("stud", "basic", "perc"),
+  boot_ci = c("stud", "basic", "perc", "bca"),
   ...
 )
 

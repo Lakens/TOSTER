@@ -25,7 +25,7 @@
 #' @param alpha alpha level (default = 0.05).
 #' @param null the ratio value under the null hypothesis (default = 1).
 #' @param boot_ci method for bootstrap confidence interval calculation: "stud" (studentized, default),
-#'   "basic" (basic bootstrap), or "perc" (percentile bootstrap).
+#'   "basic" (basic bootstrap), "bca" (bias-corrected and accelerated), or "perc" (percentile bootstrap).
 #' @param R number of bootstrap replications (default = 1999).
 #' @param ... further arguments to be passed to or from methods.
 #'
@@ -121,7 +121,7 @@ boot_log_TOST.default <- function(x,
                                 eqb = 1.25,
                                 alpha = 0.05,
                                 null = 1,
-                                boot_ci = c("stud","basic", "perc"),
+                                boot_ci = c("stud","basic", "perc", "bca"),
                                 R = 1999, ...){
   hypothesis = match.arg(hypothesis)
   boot_ci = match.arg(boot_ci)
@@ -408,12 +408,60 @@ if(!paired){
 
   boot.se = sd(m_vec)
   d.se = sd(exp(m_vec))
+
+  # Jackknife for BCa (if needed)
+  if (boot_ci == "bca") {
+    if (is.null(y)) {
+      # Paired (already converted to differences on log scale)
+      n_jack <- nx
+      jack_est <- numeric(n_jack)
+      for (j in seq_len(n_jack)) {
+        res_jack <- log_pair(
+          x = x[-j],
+          hypothesis = hypothesis,
+          eqb = eqb,
+          alpha = alpha,
+          null = null
+        )
+        jack_est[j] <- res_jack$effsize$estimate[1]
+      }
+    } else {
+      # Two-sample: pooled jackknife (x and y are already log-transformed)
+      n_jack <- nx + ny
+      jack_est <- numeric(n_jack)
+      for (j in seq_len(nx)) {
+        res_jack <- log_TOST(x = exp(x[-j]),
+                             y = exp(y),
+                             hypothesis = hypothesis,
+                             paired = paired,
+                             var.equal = var.equal,
+                             eqb = eqb,
+                             alpha = alpha,
+                             null = null)
+        jack_est[j] <- res_jack$effsize$estimate[1]
+      }
+      for (j in seq_len(ny)) {
+        res_jack <- log_TOST(x = exp(x),
+                             y = exp(y[-j]),
+                             hypothesis = hypothesis,
+                             paired = paired,
+                             var.equal = var.equal,
+                             eqb = eqb,
+                             alpha = alpha,
+                             null = null)
+        jack_est[nx + j] <- res_jack$effsize$estimate[1]
+      }
+    }
+  }
+
   boot.cint <- switch(boot_ci,
                       "stud" = stud(boots_est = m_vec, boots_se = se_vec,
                                     se0=nullTOST$effsize$SE[1], t0 = nullTOST$effsize$estimate[1],
                                     alpha),
                       "basic" = basic(m_vec, t0 = nullTOST$effsize$estimate[1], alpha*2),
-                      "perc" = perc(m_vec, alpha*2))
+                      "perc" = perc(m_vec, alpha*2),
+                      "bca" = bca_ci(boots_est = m_vec, t0 = nullTOST$effsize$estimate[1],
+                                     jack_est = jack_est, alpha = alpha*2))
   d.cint = exp(boot.cint)
   #d.cint <- switch(boot_ci,
   #                 "basic" = basic(d_vec, t0 = nullTOST$effsize$estimate[2], alpha*2),
@@ -520,7 +568,7 @@ boot_log_TOST.formula <- function (formula, data, subset, na.action, ...){
      || (length(formula) != 3L)
      || (length(attr(terms(formula[-2L]), "term.labels")) != 1L))
     stop("'formula' missing or incorrect")
-  
+
   # Check for paired argument in ... and warn user
   dots <- list(...)
   if("paired" %in% names(dots)){
@@ -528,7 +576,7 @@ boot_log_TOST.formula <- function (formula, data, subset, na.action, ...){
       message("Using 'paired = TRUE' with the formula interface is not recommended. Please ensure your data is sorted appropriately to make the correct paired comparison.")
     }
   }
-  
+
   m <- match.call(expand.dots = FALSE)
   if(is.matrix(eval(m$data, parent.frame())))
     m$data <- as.data.frame(data)

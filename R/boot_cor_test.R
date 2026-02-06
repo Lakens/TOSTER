@@ -17,8 +17,11 @@
 #'
 #'   Can be abbreviated.
 #' @param boot_ci type of bootstrap confidence interval:
-#'   * "basic": basic/empirical bootstrap CI
-#'   * "perc": percentile bootstrap CI (default)
+#'   * "basic": basic/empirical bootstrap CI (default)
+#'   * "perc": percentile bootstrap CI
+#'   * "bca": bias-corrected and accelerated bootstrap CI. Provides second-order
+#'     accuracy by correcting for bias and skewness, but requires additional
+#'     computation via the jackknife (n extra evaluations of the statistic).
 #' @param R number of bootstrap replications (default = 1999).
 #' @param ... additional arguments passed to correlation functions, such as:
 #'   * tr: trim for Winsorized correlation (default = 0.2)
@@ -116,7 +119,7 @@ boot_cor_test <- function(x,
                                      "winsorized", "bendpercent"),
                           alpha = 0.05,
                           null = 0,
-                          boot_ci = c("basic","perc"),
+                          boot_ci = c("basic","perc","bca"),
                           R = 1999,
                           ...) {
   boot_ci = match.arg(boot_ci)
@@ -193,9 +196,26 @@ boot_cor_test <- function(x,
   alpha2 = ifelse(alternative != "two.sided",
                   alpha*2,
                   alpha)
+
+  # Jackknife for BCa (if needed)
+  if (boot_ci == "bca") {
+    jack_est <- numeric(n)
+    for (j in seq_len(n)) {
+      if (method == "bendpercent") {
+        jack_est[j] <- pbcor(x[-j], y[-j], ...)
+      } else if (method == "winsorized") {
+        jack_est[j] <- wincor(x[-j], y[-j], ...)
+      } else {
+        jack_est[j] <- cor(x[-j], y[-j], method = method)
+      }
+    }
+  }
+
   boot.cint = switch(boot_ci,
                      "basic" = basic(bvec, t0 = est, alpha2),
-                     "perc" = perc(bvec, alpha2))
+                     "perc" = perc(bvec, alpha2),
+                     "bca" = bca_ci(boots_est = bvec, t0 = est,
+                                    jack_est = jack_est, alpha = alpha2))
   #quantile(bvec, c((1 - ci) / 2, 1 - (1 - ci) / 2))
   attr(boot.cint, "conf.level") <- ci
   # pvalue

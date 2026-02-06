@@ -318,7 +318,7 @@ test_that("Run examples for two sample", {
   test1_smd_boot_basic = boot_smd_calc(x = samp1,
                                       y = samp2,
                                       alpha = .1,
-                                      boot_ci = "b",
+                                      boot_ci = "basic",
                                       R = 99,
                                       output = "data.frame")
   expect_error(boot_smd_calc(x = samp1,
@@ -574,7 +574,7 @@ test_that("Run examples for two sample", {
   test1_smd_boot_basic = boot_smd_calc(x = samp1,
                                        y = samp2,
                                        alpha = .1,
-                                       boot_ci = "b",
+                                       boot_ci = "basic",
                                        R = 99,
                                        var.equal = TRUE,
                                        bias_correction = FALSE,
@@ -698,7 +698,7 @@ test_that("Run examples for paired samples", {
                                        y = samp2,
                                        paired = TRUE,
                                        alpha = .1,
-                                       boot_ci = "b",
+                                       boot_ci = "basic",
                                        R = 99,
                                        output = "data.frame")
   expect_error(boot_smd_calc(x = samp1,

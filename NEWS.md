@@ -35,6 +35,12 @@ NEWS
   - Handles null values (single or equivalence bounds) as reference lines
   - Automatically handles two-sample t-test estimates by computing mean difference
 
+- Added BCa (bias-corrected and accelerated) bootstrap confidence intervals as a new `boot_ci = "bca"` option for:
+  - `boot_t_test`, `boot_t_TOST`, `boot_log_TOST`, `boot_smd_calc`, `boot_ses_calc`, and `boot_cor_test`
+  - BCa intervals provide second-order accuracy by correcting for bias and skewness in the bootstrap distribution
+  - Acceleration factor computed via leave-one-out jackknife (pooled jackknife for two-sample designs)
+  - Informative errors for degenerate cases with suggestion to use `boot_ci = "perc"` as fallback
+
 ## Improvements
 
 - **Permutation test terminology**: Clarified distinction between "Exact Permutation" (all permutations enumerated) and "Randomization" (permutations sampled with replacement) tests across `perm_t_test`, `hodges_lehmann`, and `brunner_munzel`

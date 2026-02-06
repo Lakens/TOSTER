@@ -11,7 +11,7 @@ boot_cor_test(
   method = c("pearson", "kendall", "spearman", "winsorized", "bendpercent"),
   alpha = 0.05,
   null = 0,
-  boot_ci = c("basic", "perc"),
+  boot_ci = c("basic", "perc", "bca"),
   R = 1999,
   ...
 )
@@ -54,8 +54,11 @@ or a vector of two values representing the lower and upper bounds
 
 \item{boot_ci}{type of bootstrap confidence interval:
 \itemize{
-\item "basic": basic/empirical bootstrap CI
-\item "perc": percentile bootstrap CI (default)
+\item "basic": basic/empirical bootstrap CI (default)
+\item "perc": percentile bootstrap CI
+\item "bca": bias-corrected and accelerated bootstrap CI. Provides second-order
+accuracy by correcting for bias and skewness, but requires additional
+computation via the jackknife (n extra evaluations of the statistic).
 }}
 
 \item{R}{number of bootstrap replications (default = 1999).}

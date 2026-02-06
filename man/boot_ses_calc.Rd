@@ -13,9 +13,9 @@ boot_ses_calc(
   ses = "rb",
   alpha = 0.05,
   mu = 0,
-  boot_ci = c("basic", "stud", "perc"),
+  boot_ci = c("basic", "stud", "perc", "bca"),
   R = 1999,
-  se_method = c("agresti", "fisher"),
+  se_method = c("auto", "agresti", "fisher"),
   output = c("htest", "data.frame"),
   alternative = c("none", "two.sided", "less", "greater", "equivalence",
     "minimal.effect"),
@@ -29,9 +29,9 @@ boot_ses_calc(
   ses = c("rb", "odds", "logodds", "cstat"),
   alpha = 0.05,
   mu = 0,
-  boot_ci = c("basic", "stud", "perc"),
+  boot_ci = c("basic", "stud", "perc", "bca"),
   R = 1999,
-  se_method = c("agresti", "fisher"),
+  se_method = c("auto", "agresti", "fisher"),
   output = c("htest", "data.frame"),
   alternative = c("none", "two.sided", "less", "greater", "equivalence",
     "minimal.effect"),
@@ -65,8 +65,13 @@ or shift (for independent samples) is to be estimated (default = 0).}
 
 \item{se_method}{a character string specifying the method for computing standard errors
 within each bootstrap sample:
-- "agresti": (default) Uses the Agresti/Lehmann placement-based variance estimation.
-This method has better asymptotic properties.
+- "auto": (default) Automatically selects the most appropriate method based on the
+study design. Resolves to "score" for two-sample independent designs and "agresti"
+for one-sample or paired designs. Note that the bootstrap version does not use the
+score CI method directly; "auto" simply controls which SE formula is used internally.
+- "agresti": Uses the Agresti/Lehmann placement-based variance estimation
+with the log-odds working scale, which has better asymptotic properties
+(faster convergence to normality per Agresti, 1980).
 - "fisher": Uses the legacy Fisher z-transformation method. Retained for backward
 compatibility.}
 
@@ -140,7 +145,9 @@ The function implements the following bootstrap approach:
 \item Calculate the raw effect size using the original data
 \item Create R bootstrap samples by resampling with replacement from the original data
 \item Calculate the effect size for each bootstrap sample
-\item Apply the Fisher z-transformation to stabilize variance for rank-biserial correlation values
+\item Transform bootstrap estimates to the working scale for CI construction:
+the log-odds scale when \code{se_method = "agresti"} (default), or Fisher z
+when \code{se_method = "fisher"}
 \item Calculate confidence intervals using the specified method
 \item Back-transform the confidence intervals to the original scale
 \item Convert to the requested effect size measure (if not rank-biserial)

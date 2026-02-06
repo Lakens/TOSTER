@@ -141,7 +141,7 @@ boot_t_test.default <- function(x,
                                                 "minimal.effect"),
                                 mu = 0,
                                 alpha = 0.05,
-                                boot_ci = c("stud","basic","perc"),
+                                boot_ci = c("stud","basic","perc","bca"),
                                 R = 1999, ...){
   alternative = match.arg(alternative)
   boot_ci = match.arg(boot_ci)
@@ -342,6 +342,28 @@ boot_t_test.default <- function(x,
     diff = mx-my
   }
 
+  # Jackknife for BCa (if needed)
+  if (boot_ci == "bca") {
+    if (is.null(y)) {
+      # One-sample or paired (paired already converted x <- x - y above)
+      n_jack <- nx
+      jack_est <- numeric(n_jack)
+      for (j in seq_len(n_jack)) {
+        jack_est[j] <- mean(x[-j])
+      }
+    } else {
+      # Two-sample: pooled jackknife (delete one from combined)
+      n_jack <- nx + ny
+      jack_est <- numeric(n_jack)
+      for (j in seq_len(nx)) {
+        jack_est[j] <- mean(x[-j]) - my
+      }
+      for (j in seq_len(ny)) {
+        jack_est[nx + j] <- mx - mean(y[-j])
+      }
+    }
+  }
+
   if(alternative %in% c("equivalence", "minimal.effect")){
 
 
@@ -360,7 +382,8 @@ boot_t_test.default <- function(x,
                                       se0 = null_test$stderr,
                                       alpha = alpha*2),
                         "basic" = basic(m_vec, t0 = diff, alpha*2),
-                        "perc" = perc(m_vec, alpha*2))
+                        "perc" = perc(m_vec, alpha*2),
+                        "bca" = bca_ci(boots_est = m_vec, t0 = diff, jack_est = jack_est, alpha = alpha*2))
 
   }
 
@@ -373,7 +396,8 @@ boot_t_test.default <- function(x,
                                       se0 = null_test$stderr,
                                       alpha*2),
                         "basic" = basic(m_vec, t0 = diff, alpha*2),
-                        "perc" = perc(m_vec, alpha*2))
+                        "perc" = perc(m_vec, alpha*2),
+                        "bca" = bca_ci(boots_est = m_vec, t0 = diff, jack_est = jack_est, alpha = alpha*2))
   }
 
   if(alternative == "two.sided"){
@@ -385,7 +409,8 @@ boot_t_test.default <- function(x,
                                       se0 = null_test$stderr,
                                       alpha),
                         "basic" = basic(m_vec, t0 = diff, alpha),
-                        "perc" = perc(m_vec, alpha))
+                        "perc" = perc(m_vec, alpha),
+                        "bca" = bca_ci(boots_est = m_vec, t0 = diff, jack_est = jack_est, alpha = alpha))
   }
 
   if(alternative == "equivalence") {
@@ -399,7 +424,8 @@ boot_t_test.default <- function(x,
                                       se0 = null_test$stderr,
                                       alpha*2),
                         "basic" = basic(m_vec, t0 = diff, alpha*2),
-                        "perc" = perc(m_vec, alpha*2))
+                        "perc" = perc(m_vec, alpha*2),
+                        "bca" = bca_ci(boots_est = m_vec, t0 = diff, jack_est = jack_est, alpha = alpha*2))
   }
 
   if(alternative == "minimal.effect") {
@@ -413,7 +439,8 @@ boot_t_test.default <- function(x,
                                       se0 = null_test$stderr,
                                       alpha*2),
                         "basic" = basic(m_vec, t0 = diff, alpha*2),
-                        "perc" = perc(m_vec, alpha*2))
+                        "perc" = perc(m_vec, alpha*2),
+                        "bca" = bca_ci(boots_est = m_vec, t0 = diff, jack_est = jack_est, alpha = alpha*2))
   }
 
   boot.se = sd(m_vec, na.rm = TRUE)

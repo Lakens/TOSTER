@@ -12,7 +12,7 @@ ses_calc(
   paired = FALSE,
   ses = "rb",
   alpha = 0.05,
-  se_method = c("agresti", "score", "fisher"),
+  se_method = c("auto", "agresti", "score", "fisher"),
   correct = FALSE,
   output = c("htest", "data.frame"),
   null.value = NULL,
@@ -27,7 +27,7 @@ ses_calc(
   ses = c("rb", "odds", "logodds", "cstat"),
   alpha = 0.05,
   mu = 0,
-  se_method = c("agresti", "score", "fisher"),
+  se_method = c("auto", "agresti", "score", "fisher"),
   correct = FALSE,
   output = c("htest", "data.frame"),
   null.value = NULL,
@@ -55,7 +55,10 @@ ses_calc(
 
 \item{se_method}{a character string specifying the method for computing standard errors and
 confidence intervals:
-- "agresti": (default) Uses the Agresti/Lehmann placement-based variance estimation with
+- "auto": (default) Automatically selects the most appropriate method based on the
+study design. Resolves to "score" for two-sample independent designs and "agresti"
+for one-sample or paired designs.
+- "agresti": Uses the Agresti/Lehmann placement-based variance estimation with
 confidence intervals computed on the log-odds scale and back-transformed. This method
 has better asymptotic properties and faster convergence to normality. Available for
 all designs (one-sample, paired, and two-sample independent).

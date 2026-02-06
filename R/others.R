@@ -52,35 +52,63 @@ tost_decision = function(hypothesis = "EQU",
 
 # Bootstrap CI functions ------
 
-## only an approximation... rather useless
-# bca <- function(boots_est, alpha = 0.05){
-#   conf.level = 1-alpha
-#   if(var(boots_est)==0){
-#     lower <- mean(boots_est)
-#     upper <- mean(boots_est)
-#     return(c(lower, upper))
-#   }
-#
-#   if(max(boots_est)==Inf | min(boots_est)==-Inf){
-#     stop("bca bootstrap CIs do not work when some values are infinite")
-#   }
-#
-#   low <- (1 - conf.level)/2
-#   high <- 1 - low
-#   sims <- length(boots_est)
-#   z.inv <- length(boots_est[boots_est < mean(boots_est)])/sims
-#   z <- qnorm(z.inv)
-#   U <- (sims - 1) * (mean(boots_est, na.rm=TRUE) - boots_est)
-#   top <- sum(U^3)
-#   under <- 6 * (sum(U^2))^{3/2}
-#   a <- top / under
-#   lower.inv <-  pnorm(z + (z + qnorm(low))/(1 - a * (z + qnorm(low))))
-#   lower <- quantile(boots_est, lower.inv, names=FALSE)
-#   upper.inv <-  pnorm(z + (z + qnorm(high))/(1 - a * (z + qnorm(high))))
-#   upper <- quantile(boots_est, upper.inv, names=FALSE)
-#   return(c(lower, upper))
-# }
+#' BCa bootstrap confidence interval (internal)
+#'
+#' Computes a bias-corrected and accelerated (BCa) bootstrap confidence interval.
+#' The BCa method provides second-order accuracy by correcting for both bias and
+#' skewness in the bootstrap distribution, using jackknife estimates to compute
+#' the acceleration factor.
+#'
+#' @param boots_est Numeric vector of bootstrap estimates (on the working scale)
+#' @param t0 Original estimate (on the same working scale as boots_est)
+#' @param jack_est Numeric vector of jackknife (leave-one-out) estimates (on the same working scale)
+#' @param alpha Significance level (e.g., 0.05 for 95% CI)
+#' @return Numeric vector of length 2: c(lower, upper)
+#' @keywords internal
+bca_ci <- function(boots_est, t0, jack_est, alpha) {
+  # Bias correction
+  z0 <- qnorm(mean(boots_est < t0))
 
+  # Check for infinite z0 (all boots on one side of t0)
+  if (!is.finite(z0)) {
+    stop(
+      "BCa bias correction is infinite (all bootstrap estimates are on one side of ",
+      "the original estimate). This may indicate a degenerate bootstrap distribution. ",
+      "Consider using boot_ci = 'perc' instead.",
+      call. = FALSE
+    )
+  }
+
+  # Acceleration via jackknife
+  L <- mean(jack_est) - jack_est
+  denom <- 6 * sum(L^2)^(3/2)
+
+  if (denom == 0) {
+    stop(
+      "BCa acceleration factor is degenerate (all jackknife estimates are identical). ",
+      "This typically occurs with constant data or extreme boundary cases. ",
+      "Consider using boot_ci = 'perc' instead.",
+      call. = FALSE
+    )
+  }
+  a <- sum(L^3) / denom
+
+  # Adjusted quantiles
+  z_alpha <- qnorm(c(alpha / 2, 1 - alpha / 2))
+  numer <- z0 + z_alpha
+  adj <- pnorm(z0 + numer / (1 - a * numer))
+
+  if (any(adj <= 0) || any(adj >= 1)) {
+    stop(
+      "BCa adjusted quantiles are outside (0, 1), indicating extreme bias or skewness ",
+      "in the bootstrap distribution. Consider using boot_ci = 'perc' instead.",
+      call. = FALSE
+    )
+  }
+
+  c(quantile(boots_est, adj[1], names = FALSE),
+    quantile(boots_est, adj[2], names = FALSE))
+}
 
 basic <- function(boots_est, t0, alpha){
   conf = 1-alpha

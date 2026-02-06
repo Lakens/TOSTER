@@ -15,7 +15,7 @@
 #' @param glass Option to calculate Glass's delta instead of Cohen's d style SMD ('glass1' uses first group's SD, 'glass2' uses second group's SD).
 #' @param mu a number indicating the true value of the mean for the two-tailed test (default = 0).
 #' @param R number of bootstrap replications (default = 1999).
-#' @param boot_ci method for bootstrap confidence interval calculation: "stud" (studentized, default), "basic" (basic bootstrap), or "perc" (percentile bootstrap).
+#' @param boot_ci method for bootstrap confidence interval calculation: "stud" (studentized, default), "basic" (basic bootstrap), "bca" (bias-corrected and accelerated), or "perc" (percentile bootstrap).
 #' @param subset an optional vector specifying a subset of observations to be used.
 #' @param na.action a function indicating what should happen when the data contain NAs.
 #' @param ... further arguments to be passed to or from methods.
@@ -122,7 +122,7 @@ boot_t_TOST.default <- function(x,
                                 glass = NULL,
                                 mu = 0,
                                 R = 1999,
-                                boot_ci = c("stud", "basic", "perc"),
+                                boot_ci = c("stud", "basic", "perc", "bca"),
                                 ...){
   boot_ci = match.arg(boot_ci)
 
@@ -505,6 +505,95 @@ boot_t_TOST.default <- function(x,
   }
 
   boot.se = sd(m_vec)
+
+  # Jackknife for BCa (if needed)
+  if (boot_ci == "bca") {
+    if (is.null(y) && !paired) {
+      # One-sample
+      n_jack <- nx
+      jack_m <- numeric(n_jack)
+      jack_d <- numeric(n_jack)
+      for (j in seq_len(n_jack)) {
+        res_jack <- t_TOST(x = x[-j],
+                           hypothesis = hypothesis,
+                           paired = FALSE,
+                           var.equal = TRUE,
+                           low_eqbound = low_eqbound,
+                           high_eqbound = high_eqbound,
+                           eqbound_type = eqbound_type,
+                           alpha = alpha,
+                           mu = mu,
+                           bias_correction = bias_correction,
+                           rm_correction = FALSE,
+                           smd_ci = "z")
+        jack_m[j] <- res_jack$effsize$estimate[1]
+        jack_d[j] <- res_jack$smd$d
+      }
+    } else if (paired) {
+      # Paired: delete one pair at a time
+      n_jack <- nrow(data)
+      jack_m <- numeric(n_jack)
+      jack_d <- numeric(n_jack)
+      for (j in seq_len(n_jack)) {
+        res_jack <- t_TOST(x = data$i1[-j],
+                           y = data$i2[-j],
+                           hypothesis = hypothesis,
+                           paired = TRUE,
+                           var.equal = FALSE,
+                           low_eqbound = low_eqbound,
+                           high_eqbound = high_eqbound,
+                           eqbound_type = eqbound_type,
+                           alpha = alpha,
+                           mu = mu,
+                           bias_correction = bias_correction,
+                           glass = glass,
+                           rm_correction = rm_correction,
+                           smd_ci = "z")
+        jack_m[j] <- res_jack$effsize$estimate[1]
+        jack_d[j] <- res_jack$smd$d
+      }
+    } else {
+      # Two-sample: pooled jackknife
+      n_jack <- nx + ny
+      jack_m <- numeric(n_jack)
+      jack_d <- numeric(n_jack)
+      for (j in seq_len(nx)) {
+        res_jack <- t_TOST(x = x[-j],
+                           y = y,
+                           hypothesis = hypothesis,
+                           paired = paired,
+                           var.equal = var.equal,
+                           low_eqbound = low_eqbound,
+                           high_eqbound = high_eqbound,
+                           eqbound_type = eqbound_type,
+                           alpha = alpha,
+                           mu = mu,
+                           bias_correction = bias_correction,
+                           rm_correction = FALSE,
+                           smd_ci = "z")
+        jack_m[j] <- res_jack$effsize$estimate[1]
+        jack_d[j] <- res_jack$smd$d
+      }
+      for (j in seq_len(ny)) {
+        res_jack <- t_TOST(x = x,
+                           y = y[-j],
+                           hypothesis = hypothesis,
+                           paired = paired,
+                           var.equal = var.equal,
+                           low_eqbound = low_eqbound,
+                           high_eqbound = high_eqbound,
+                           eqbound_type = eqbound_type,
+                           alpha = alpha,
+                           mu = mu,
+                           bias_correction = bias_correction,
+                           rm_correction = FALSE,
+                           smd_ci = "z")
+        jack_m[nx + j] <- res_jack$effsize$estimate[1]
+        jack_d[nx + j] <- res_jack$smd$d
+      }
+    }
+  }
+
   boot.cint <- switch(boot_ci,
                       "stud" = stud(m_vec,
                                     boots_se = m_se_vec,
@@ -512,7 +601,9 @@ boot_t_TOST.default <- function(x,
                                     se0 = nullTOST$effsize$SE[1],
                                     alpha*2),
                       "basic" = basic(m_vec, t0 = nullTOST$effsize$estimate[1], alpha*2),
-                      "perc" = perc(m_vec, alpha*2))
+                      "perc" = perc(m_vec, alpha*2),
+                      "bca" = bca_ci(boots_est = m_vec, t0 = nullTOST$effsize$estimate[1],
+                                     jack_est = jack_m, alpha = alpha*2))
   d.cint <- switch(boot_ci,
                    "stud" = stud(d_vec,
                                  boots_se = d_se_vec,
@@ -520,7 +611,9 @@ boot_t_TOST.default <- function(x,
                                  se0 = nullTOST$effsize$SE[2],
                                  alpha*2),
                    "basic" = basic(d_vec,t0 = nullTOST$effsize$estimate[2], alpha*2),
-                   "perc" = perc(d_vec, alpha*2))
+                   "perc" = perc(d_vec, alpha*2),
+                   "bca" = bca_ci(boots_est = d_vec, t0 = nullTOST$effsize$estimate[2],
+                                  jack_est = jack_d, alpha = alpha*2))
   d.se = sd(d_vec)
 
   TOST = nullTOST$TOST
@@ -628,7 +721,7 @@ boot_t_TOST.formula <- function (formula, data, subset, na.action, ...){
      || (length(formula) != 3L)
      || (length(attr(terms(formula[-2L]), "term.labels")) != 1L))
     stop("'formula' missing or incorrect")
-  
+
   # Check for paired argument in ... and warn user
   dots <- list(...)
   if("paired" %in% names(dots)){
@@ -636,7 +729,7 @@ boot_t_TOST.formula <- function (formula, data, subset, na.action, ...){
       message("Using 'paired = TRUE' with the formula interface is not recommended. Please ensure your data is sorted appropriately to make the correct paired comparison.")
     }
   }
-  
+
   m <- match.call(expand.dots = FALSE)
   if(is.matrix(eval(m$data, parent.frame())))
     m$data <- as.data.frame(data)

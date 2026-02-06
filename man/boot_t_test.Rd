@@ -16,7 +16,7 @@ boot_t_test(x, ...)
   alternative = c("two.sided", "less", "greater", "equivalence", "minimal.effect"),
   mu = 0,
   alpha = 0.05,
-  boot_ci = c("stud", "basic", "perc"),
+  boot_ci = c("stud", "basic", "perc", "bca"),
   R = 1999,
   ...
 )

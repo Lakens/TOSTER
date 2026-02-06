@@ -15,7 +15,8 @@ wilcox_TOST(
   low_eqbound,
   high_eqbound,
   ses = "rb",
-  alpha = 0.05
+  alpha = 0.05,
+  se_method = c("auto", "agresti", "score", "fisher")
 )
 
 \method{wilcox_TOST}{default}(
@@ -29,6 +30,7 @@ wilcox_TOST(
   ses = c("rb", "odds", "logodds", "cstat"),
   alpha = 0.05,
   mu = 0,
+  se_method = c("auto", "agresti", "score", "fisher"),
   ...
 )
 
@@ -57,6 +59,16 @@ correlation. Options also include "cstat" for concordance probability, or
 generalized odds ratio). Note that \code{ses} only determines which effect size is calculated and does not affect the equivalence bounds (\code{eqb}).}
 
 \item{alpha}{alpha level (default = 0.05)}
+
+\item{se_method}{a character string specifying the method for computing standard errors and
+confidence intervals for the effect size:
+- "auto": (default) Automatically selects the most appropriate method based on the
+study design. Resolves to "score" for two-sample independent designs and "agresti"
+for one-sample or paired designs.
+- "agresti": Uses the Agresti/Lehmann placement-based variance estimation.
+- "score": Uses the Fay-Malinovsky score-type approach. \strong{Only available for two-sample
+independent designs.}
+- "fisher": Uses the legacy Fisher z-transformation method.}
 
 \item{y}{an optional (non-empty) numeric vector of data values.}
 

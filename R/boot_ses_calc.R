@@ -191,7 +191,7 @@ boot_ses_calc <- function(x, ...,
                           ses = "rb",
                           alpha = 0.05,
                           mu = 0,
-                          boot_ci = c("basic","stud","perc"),
+                          boot_ci = c("stud", "basic", "perc","bca"),
                           R = 1999,
                           se_method = c("auto", "agresti", "fisher"),
                           output = c("htest", "data.frame"),
@@ -211,7 +211,7 @@ boot_ses_calc.default = function(x,
                                  ses = c("rb","odds","logodds","cstat"),
                                  alpha = 0.05,
                                  mu = 0,
-                                 boot_ci = c("basic","stud", "perc"),
+                                 boot_ci = c("basic","stud", "perc","bca"),
                                  R = 1999,
                                  se_method = c("auto", "agresti", "fisher"),
                                  output = c("htest", "data.frame"),
@@ -476,14 +476,77 @@ boot_ses_calc.default = function(x,
     message("Bootstrapped results contain extreme results (i.e., no overlap), caution advised interpreting confidence intervals.")
   }
 
+  # Jackknife for BCa (if needed) — on working scale
+  if (boot_ci == "bca") {
+    if (paired == TRUE && !is.null(y)) {
+      # Paired: delete one pair at a time
+      n_jack <- nrow(data)
+      jack_est <- numeric(n_jack)
+      for (j in seq_len(n_jack)) {
+        res_jack <- ses_calc(x = data$x[-j],
+                             y = data$y[-j],
+                             paired = paired,
+                             ses = "rb",
+                             mu = mu,
+                             alpha = alpha,
+                             se_method = se_method,
+                             output = "data.frame")
+        jack_est[j] <- to_working(res_jack$estimate)
+      }
+    } else if (!is.null(y)) {
+      # Two-sample: pooled jackknife (delete one from combined)
+      n_total <- n1 + n2
+      jack_est <- numeric(n_total)
+      for (j in seq_len(n1)) {
+        res_jack <- ses_calc(x = i1[-j],
+                             y = i2,
+                             paired = paired,
+                             ses = "rb",
+                             mu = mu,
+                             alpha = alpha,
+                             se_method = se_method,
+                             output = "data.frame")
+        jack_est[j] <- to_working(res_jack$estimate)
+      }
+      for (j in seq_len(n2)) {
+        res_jack <- ses_calc(x = i1,
+                             y = i2[-j],
+                             paired = paired,
+                             ses = "rb",
+                             mu = mu,
+                             alpha = alpha,
+                             se_method = se_method,
+                             output = "data.frame")
+        jack_est[n1 + j] <- to_working(res_jack$estimate)
+      }
+    } else {
+      # One-sample: delete one observation at a time
+      n_jack <- length(x1)
+      jack_est <- numeric(n_jack)
+      for (j in seq_len(n_jack)) {
+        res_jack <- ses_calc(x = x1[-j],
+                             paired = paired,
+                             ses = "rb",
+                             mu = mu,
+                             alpha = alpha,
+                             se_method = se_method,
+                             output = "data.frame")
+        jack_est[j] <- to_working(res_jack$estimate)
+      }
+    }
+  }
+
   # Get CI on working scale (log-odds for agresti, Fisher z for fisher)
+  ci_alpha <- if(alternative %in% c("equivalence", "minimal.effect")) alpha * 2 else alpha
   wci = switch(boot_ci,
                "stud" = stud(boots_est = boots, boots_se = boots_se,
                              se0 = raw_SE, t0 = to_working(raw_ses$estimate[1L]),
-                             alpha = if(alternative %in% c("equivalence", "minimal.effect")) alpha * 2 else alpha),
-               "perc" = perc(boots, if(alternative %in% c("equivalence", "minimal.effect")) alpha * 2 else alpha),
+                             alpha = ci_alpha),
+               "perc" = perc(boots, ci_alpha),
                "basic" = basic(boots, t0 = to_working(raw_ses$estimate),
-                               if(alternative %in% c("equivalence", "minimal.effect")) alpha * 2 else alpha))
+                               ci_alpha),
+               "bca" = bca_ci(boots_est = boots, t0 = to_working(raw_ses$estimate[1L]),
+                              jack_est = jack_est, alpha = ci_alpha))
 
   # Transform back to rb scale
   rci = from_working(wci)
