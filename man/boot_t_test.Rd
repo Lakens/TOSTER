@@ -47,7 +47,7 @@ boot_t_test(x, ...)
 
 \item{alpha}{alpha level (default = 0.05)}
 
-\item{boot_ci}{method for bootstrap confidence interval calculation: "stud" (studentized, default), "basic" (basic bootstrap), or "perc" (percentile bootstrap).}
+\item{boot_ci}{method for bootstrap confidence interval calculation: "stud" (studentized, default), "basic" (basic bootstrap), "bca" (bias-corrected and accelerated), or "perc" (percentile bootstrap).}
 
 \item{R}{number of bootstrap replications (default = 1999).}
 

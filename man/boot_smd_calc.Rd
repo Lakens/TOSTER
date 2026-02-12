@@ -61,7 +61,7 @@ boot_smd_calc(
 
 \item{glass}{Option to calculate Glass's delta instead of Cohen's d style SMD ('glass1' uses first group's SD, 'glass2' uses second group's SD).}
 
-\item{boot_ci}{method for bootstrap confidence interval calculation: "stud" (studentized, default), "basic" (basic bootstrap), or "perc" (percentile bootstrap).}
+\item{boot_ci}{method for bootstrap confidence interval calculation: "stud" (studentized, default), "basic" (basic bootstrap), "bca" (bias-corrected and accelerated), or "perc" (percentile bootstrap).}
 
 \item{R}{number of bootstrap replications (default = 1999).}
 

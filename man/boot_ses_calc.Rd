@@ -13,7 +13,7 @@ boot_ses_calc(
   ses = "rb",
   alpha = 0.05,
   mu = 0,
-  boot_ci = c("basic", "stud", "perc", "bca"),
+  boot_ci = c("stud", "basic", "perc", "bca"),
   R = 1999,
   se_method = c("auto", "agresti", "fisher"),
   output = c("htest", "data.frame"),
@@ -59,7 +59,7 @@ boot_ses_calc(
 \item{mu}{number indicating the value around which asymmetry (for one-sample or paired samples)
 or shift (for independent samples) is to be estimated (default = 0).}
 
-\item{boot_ci}{method for bootstrap confidence interval calculation: "stud" (studentized, default), "basic" (basic bootstrap), or "perc" (percentile bootstrap).}
+\item{boot_ci}{method for bootstrap confidence interval calculation: "stud" (studentized, default), "basic" (basic bootstrap), "bca" (bias-corrected and accelerated), or "perc" (percentile bootstrap).}
 
 \item{R}{number of bootstrap replications (default = 1999).}
 

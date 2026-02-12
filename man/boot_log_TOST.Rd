@@ -45,7 +45,7 @@ or 2 specific values that represent the lower and upper equivalence bounds (e.g.
 \item{null}{the ratio value under the null hypothesis (default = 1).}
 
 \item{boot_ci}{method for bootstrap confidence interval calculation: "stud" (studentized, default),
-"basic" (basic bootstrap), or "perc" (percentile bootstrap).}
+"basic" (basic bootstrap), "bca" (bias-corrected and accelerated), or "perc" (percentile bootstrap).}
 
 \item{R}{number of bootstrap replications (default = 1999).}
 

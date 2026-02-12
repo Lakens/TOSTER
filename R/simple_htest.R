@@ -267,6 +267,7 @@ simple_htest.default = function(x,
 
      name_val = names(ci_test$null.value)
      rval$conf.int = ci_test$conf.int
+     rval$estimate = ci_test$estimate
      rval$alternative = alternative
      rval$null.value = c(lo_bound, hi_bound)
      names(rval$null.value) = rep(name_val,2)
@@ -361,6 +362,7 @@ simple_htest.default = function(x,
 
      name_val = names(ci_test$null.value)
      rval$conf.int = ci_test$conf.int
+     rval$estimate = ci_test$estimate
      rval$alternative = alternative
      rval$null.value = c(lo_bound, hi_bound)
      names(rval$null.value) = rep(name_val,2)

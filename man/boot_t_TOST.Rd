@@ -63,7 +63,7 @@ boot_t_TOST(x, ...)
 
 \item{R}{number of bootstrap replications (default = 1999).}
 
-\item{boot_ci}{method for bootstrap confidence interval calculation: "stud" (studentized, default), "basic" (basic bootstrap), or "perc" (percentile bootstrap).}
+\item{boot_ci}{method for bootstrap confidence interval calculation: "stud" (studentized, default), "basic" (basic bootstrap), "bca" (bias-corrected and accelerated), or "perc" (percentile bootstrap).}
 
 \item{formula}{a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample test or a factor with two levels giving the corresponding groups. For paired tests, use the default method with x and y vectors instead of the formula method.}
 
