@@ -20,6 +20,10 @@ The Two One-Sided Tests (TOST) procedure is a statistical approach used to test 
 
 While the standard `t_TOST` function in TOSTER provides a parametric approach to equivalence testing, it relies on assumptions of normality and homogeneity of variance. In real-world data analysis, these assumptions are often violated, necessitating more robust alternatives. This vignette introduces several robust TOST methods available in the TOSTER package that maintain their validity under a wider range of data conditions.
 
+## Choosing by Estimand
+
+Before selecting a robust method, it is worth clarifying what quantity your equivalence bounds are intended to constrain. Different methods target different estimands, and the bounds only have their intended meaning when matched to the right one. If your bounds refer to mean differences, a permutation t-test or bootstrap approach is appropriate. If they refer to trimmed mean differences, Yuen's permutation test is the natural choice. If you are interested in stochastic dominance (P(X > Y)), the Brunner-Munzel test provides a transparent framework. The Wilcoxon-Mann-Whitney and Hodges-Lehmann procedures target the pseudo-median of pairwise differences, which coincides with mean and median differences only under a location shift assumption. When that assumption is violated, bounds set on the pseudo-median may not correspond to the magnitude of difference in means or medians that you intended to declare equivalent.
+
 ## When to Use Robust TOST Methods
 
 Consider using the robust alternatives to `t_TOST` when:
@@ -48,7 +52,7 @@ The Wilcoxon group of tests (includes Mann-Whitney U-test) provide a non-paramet
 
 ## Why WMW Tests Can Be Misleading
 
-While the Wilcoxon-Mann-Whitney (WMW) tests are widely used as the "non-parametric alternative" to the t-test, there are important reasons to be cautious about their interpretation --- particularly in the equivalence testing context.
+While the Wilcoxon-Mann-Whitney (WMW) tests are widely used as the "non-parametric alternative" to the t-test, there are important reasons to be cautious about their interpretation, particularly in the equivalence testing context.
 
 ### What WMW actually tests
 
@@ -74,7 +78,7 @@ Only under a **location-shift assumption** (the two distributions have identical
 
 ### The problem for equivalence testing
 
-This interpretive difficulty becomes even more pronounced in the equivalence testing context. When we perform TOST with Wilcoxon tests via `wilcox_TOST`, we are testing whether a location shift parameter (the Hodges-Lehmann pseudomedian of pairwise differences) falls within equivalence bounds. But the relationship between this parameter and familiar quantities like means or medians depends on the location-shift and symmetry assumptions. If these assumptions are violated, the equivalence bounds may not correspond to the magnitude of difference you intended to declare equivalent.
+This interpretive difficulty is especially pronounced for equivalence testing. When we perform TOST with Wilcoxon tests via `wilcox_TOST`, the equivalence bounds are applied to the pseudo-median of pairwise differences. But this quantity corresponds to the difference in means or medians only under the location shift assumption. When distributions differ in shape, a bound of $\pm 2$ units on the pseudo-median of pairwise differences does not guarantee that means or medians are within $\pm 2$ of each other. The researcher may believe they are bounding mean or median differences when they are in fact bounding a different quantity entirely.
 
 ### What to use instead
 
@@ -130,16 +134,11 @@ When interpreting the output of `wilcox_TOST`, pay attention to:
 2. The equivalence test p-value (`TOSTp`), which should be < alpha to claim equivalence
 3. The rank-biserial correlation (`rb`) and its confidence interval 
 
-A statistically significant equivalence test (p < alpha) indicates that the observed effect is statistically within your specified equivalence bounds. The rank-biserial correlation provides a measure of effect size, with values ranging from -1 to 1:
-
-- Values near 0 indicate negligible association
-- Values around ±0.3 indicate a small effect
-- Values around ±0.5 indicate a moderate effect
-- Values around ±0.7 or greater indicate a large effect
+A statistically significant equivalence test (p < alpha) indicates that the observed effect is statistically within your specified equivalence bounds. The rank-biserial correlation provides a measure of effect size, with values ranging from -1 to 1 much like any correlation coefficient. A value of 0 indicates no difference between groups, while values closer to -1 or 1 indicate stronger effects in either direction. The confidence interval for the rank-biserial correlation can help you understand the precision of your standarized effect size estimate.
 
 ## Standardized Effect Sizes
 
-The `wilcox_TOST` function reports a standardized effect size (SES) alongside the equivalence test. By default, this is the rank-biserial correlation, but you can select other effect sizes --- concordance probability, WMW odds, or WMW log-odds --- via the `ses` argument. Changing `ses` only affects which effect size is reported; it does **not** change the equivalence test itself.
+The `wilcox_TOST` function reports a standardized effect size (SES) alongside the equivalence test. By default, this is the rank-biserial correlation, but you can select other effect sizes (concordance probability, WMW odds, or WMW log-odds) via the `ses` argument. Changing `ses` only affects which effect size is reported; it does **not** change the equivalence test itself.
 
 ```{r}
 # Rank biserial
@@ -210,7 +209,7 @@ Where:
 - $p_{null}$ is the null hypothesis value (typically 0.5)
 - $s$ is the rank-based Brunner-Munzel standard error
 
-The default null hypothesis $p_{null}$ is typically 0.5 (50% probability of superiority is the default null), and $s$ refers to the rank-based Brunner-Munzel standard error. The null can be modified, thereby allowing for equivalence testing *directly based on the relative effect*. Additionally, for paired samples the probability of superiority is based on a *hypothesis of exchangeability* and is not based on the difference scores^[This means the relative effect will *not* match the concordance probability provided by `ses_calc`.].
+The default null hypothesis $p_{null}$ is typically 0.5 (50% probability of superiority is the default null), and $s$ refers to the rank-based Brunner-Munzel standard error. The null can be modified, thereby allowing for equivalence testing *directly based on the relative effect*. Additionally, for paired samples the probability of superiority is based on a *hypothesis of exchangeability* and is not based on the difference scores^[This means the relative effect will *not* match the concordance probability provided by `ses_calc` for paired samples.].
 
 For more details on the calculative approach, I suggest reading @karch2021. At small sample sizes, it is recommended that the permutation version of the test (`test_method = "perm"`) be used rather than the basic test statistic approach.
 
@@ -332,7 +331,7 @@ When interpreting the Brunner-Munzel test results:
 
 - Sample sizes are moderate to large (n ≥ 15 per group)
 - You want the fastest computation
-- The relative effect estimate is not near the boundaries (0 or 1)
+- The relative effect estimate is not near the boundaries [0, 1]
 
 **Use `test_method = "logit"` when:**
 
@@ -370,18 +369,18 @@ The `hodges_lehmann` function provides a robust location test based on the Hodge
 The Hodges-Lehmann estimator has several appealing properties:
 
 1. **Robustness to outliers** The Hodges-Lehmann estimator has bounded influence, meaning individual extreme observations cannot arbitrarily distort the estimate. This provides substantially greater robustness than the mean while retaining higher efficiency than the median under normal distributions.
-2. **Efficiency:** Under normality, the Hodges-Lehmann estimator achieves about 95.5% of the efficiency of the sample mean --- a small price for substantial robustness gains.
-3. **Transparent assumptions:** Unlike `wilcox_TOST`, which requires you to reason about pseudomedians on the raw scale, the `hodges_lehmann` function makes the estimand and test explicit.
+2. **Efficiency:** Under normality, the Hodges-Lehmann estimator achieves about 95.5% of the efficiency of the sample mean, a small price for substantial robustness gains.
+3. **Transparent assumptions and distinct inference:** Unlike `wilcox_TOST`, which uses the standard Wilcoxon rank-sum test (and whose confidence interval is obtained by inverting that same test), `hodges_lehmann` constructs its test statistic by dividing the HL estimator by a robust scale estimate following @fried2011. This means that `hodges_lehmann` and `wilcox_TOST` can yield different inferential conclusions despite sharing the same point estimator, particularly in the presence of outliers or heteroscedasticity. The Fried-Dehling approach trades the exact test-CI duality of the WMW framework for greater robustness to contamination.
 
 ## Estimators
 
-For **one-sample and paired** designs, the function computes the HL1 estimator --- the median of all Walsh averages (pairwise averages including self-pairs):
+For **one-sample and paired** designs, the function computes the HL1 estimator, the median of all Walsh averages (pairwise averages including self-pairs):
 
 $$
 \hat{\theta}_{HL1} = \text{med}\left\{\frac{X_i + X_j}{2} : 1 \leq i \leq j \leq n\right\}
 $$
 
-For **two-sample** designs, the function computes the HL2 estimator --- the median of all pairwise differences between samples:
+For **two-sample** designs, the function computes the HL2 estimator, the median of all pairwise differences between samples:
 
 $$
 \hat{\Delta}_{HL2} = \text{med}\{Y_j - X_i : i = 1, \ldots, m; \; j = 1, \ldots, n\}
@@ -389,15 +388,25 @@ $$
 
 Both estimators are consistent with the pseudomedian and location shift estimates returned by `wilcox.test`.
 
+## Interpreting the Estimand
+
+It is important to understand what these estimators target, particularly for equivalence testing where the meaning of your bounds depends on the estimand.
+
+**Two-sample (HL2):** The HL2 estimates the median of the distribution of $X - Y$, where $X$ and $Y$ are independently drawn from their respective populations. In practical terms, if you repeatedly drew one observation from each group and computed the difference, the HL2 gives the value around which half of those pairwise differences would fall above and half below. This is *not* the same as the difference in population medians ($\text{median}(X) - \text{median}(Y)$), nor the difference in means. These quantities coincide under a location shift model but diverge when distributional shapes differ.
+
+**One-sample and paired (HL1):** The HL1 estimates the pseudo-median of the distribution, defined as the median of $(D + D') / 2$ where $D$ and $D'$ are independent draws from the same distribution. This is a measure of the center of symmetry rather than the 50th percentile. Under symmetry, the pseudo-median, median, and mean coincide. Under skewness, they do not. For paired equivalence testing, the question being answered is whether the pseudo-median of the within-subject difference distribution falls within the equivalence bounds, which is a subtly different question than whether the median or mean change score is small.
+
+**Implications for equivalence bounds:** When setting equivalence bounds for `hodges_lehmann`, you are bounding the pseudo-median of pairwise differences (two-sample) or the pseudo-median of within-subject differences (paired). Under the location shift assumption, these correspond directly to the difference in means or medians, and bounds have their intuitive interpretation. Without this assumption, a bound of $\pm 2$ on the pseudo-median does not guarantee that means or medians are within $\pm 2$ of each other. If your equivalence question is specifically about means, consider `perm_t_test` or `boot_t_TOST` instead. If it is about stochastic dominance, consider `brunner_munzel`.
+
 ## Test Methods
 
 The `hodges_lehmann` function supports three inference approaches controlled by the `R` argument:
 
 - **Asymptotic test** (`R = NULL`, the default): Uses kernel density estimation to approximate the variance of the Hodges-Lehmann estimator. Suitable for moderate to large samples (n $\geq$ 30 per group). Note that this produces confidence intervals that will differ from `wilcox.test` due to the different variance estimation method.
 
-- **Exact permutation test** (`R` $\geq$ max permutations): Enumerates all possible permutations and provides exact p-values with no Monte Carlo error.
+- **Exact permutation test** (`R` $\geq$ max permutations): Enumerates all possible permutations and provides exact p-values using an unstudentized approach.
 
-- **Randomization test** (`R` < max permutations): Samples `R` permutations with replacement. Uses the (b+1)/(R+1) formula by default for exact Type I error control [@phipson2010].
+- **Randomization test** (`R` < max permutations): Samples `R` permutations with replacement. Uses the (b+1)/(R+1) formula by default for exact Type I error control [@phipson2010] and is also a unstudentized approach.
 
 ## Examples
 
@@ -611,11 +620,7 @@ These two arguments control different aspects of the test:
 
 A key feature of `perm_t_test` is its support for trimmed means via the `tr` argument. When `tr > 0`, the function uses Yuen's approach: trimmed means for location estimation and winsorized variances for standard error calculation. This combination is particularly powerful because it provides robustness against outliers (through trimming) together with exact or near-exact inference (through permutation).
 
-Trimming is helpful when:
-
-- Data contain outliers or extreme values that would unduly influence the mean
-- Distributions have heavy tails
-- You want robust location estimates without sacrificing the exactness of permutation inference
+Trimming is helpful when you want robust location estimates without sacrificing the exactness of permutation inference (e.g., extreme values that distort the mean and/or distributions have heavy tails).
 
 A common choice is `tr = 0.1` (10% trimming) or `tr = 0.2` (20% trimming), though the optimal amount depends on the suspected degree of contamination.
 
@@ -807,7 +812,7 @@ Both methods test the same hypothesis and should yield similar conclusions. Key 
 | Effect size plots | No | Yes |
 | Best for | Small samples, exact inference | Moderate samples, visualization |
 
-For very small samples where exact permutations are feasible, permutation testing is generally preferred because it provides exact p-values (i.e., no need to set a seed). For larger samples or when you want the visualization capabilities of `boot_t_TOST`, bootstrapping is a good choice. When outliers are a concern, using `perm_t_test` with trimming combines the benefits of exact inference with robust location estimation.
+For very small samples where exact permutations are feasible, permutation testing is generally preferred because it provides exact p-values (i.e., no need to set a seed). For larger samples or when you want the visualization capabilities of `boot_t_TOST` or `boot_t_test`, bootstrapping is a good choice. When outliers are a concern, using `perm_t_test` with trimming combines the benefits of exact inference with robust location estimation.
 
 # Ratio of Difference (Log Transformed)
 
@@ -908,7 +913,7 @@ The `ses_calc` and `boot_ses_calc` functions calculate non-parametric standardiz
 
 ### Rank-Biserial Correlation
 
-The rank-biserial correlation is a fairly intuitive measure of effect size which has the same interpretation as the common language effect size [@Kerby_2014]. However, instead of assuming normality and equal variances, it calculates the number of favorable (positive) and unfavorable (negative) pairs based on their respective ranks.
+The rank-biserial correlation is a fairly intuitive measure of effect size which has a similar interpretation as the common language effect size [@Kerby_2014]. However, instead of assuming normality and equal variances, it calculates the number of favorable (positive) and unfavorable (negative) pairs based on their respective ranks.
 
 For the two sample case, the correlation is calculated as the proportion of favorable pairs minus the unfavorable pairs.
 
@@ -1006,7 +1011,7 @@ The WMW odds can be interpreted similarly to a traditional odds ratio, represent
 
 ## Confidence Interval Methods
 
-As of v0.9.0, the TOSTER package defaults to the **Agresti** method (`se_method = "agresti"`) for computing standard errors and confidence intervals for all SES functions. This method uses placement-based variance estimation and conducts inference on the log-odds scale, which has better asymptotic properties (the log-odds scale is unbounded and converges to normality faster). Results are back-transformed to the requested effect size scale for reporting.
+As of `v0.9.0`, the TOSTER package defaults to the **Agresti** method (`se_method = "agresti"`) for computing standard errors and confidence intervals for all SES functions. This method uses placement-based variance estimation and conducts inference on the log-odds scale, which has better asymptotic properties (the log-odds scale is unbounded and converges to normality faster). Results are back-transformed to the requested effect size scale for reporting.
 
 The **Fisher z-transformation** method (`se_method = "fisher"`) remains available as a legacy option. This was the default in earlier versions of the package and is documented below for reference.
 
@@ -1084,7 +1089,7 @@ The `boot_ses_calc` function offers several bootstrap confidence interval method
 
 ## Hypothesis Testing with `ses_calc`
 
-As of v0.9.0, `ses_calc` supports hypothesis testing directly on the effect size scale by setting the `alternative` argument. This allows you to test whether a non-parametric effect size differs from a specified value, or whether it falls within equivalence bounds --- without needing the raw-scale equivalence bounds required by `wilcox_TOST`.
+As of v0.9.0, `ses_calc` supports hypothesis testing directly on the effect size scale by setting the `alternative` argument. This allows you to test whether a non-parametric effect size differs from a specified value, or whether it falls within equivalence bounds, without needing the raw-scale equivalence bounds required by `wilcox_TOST`.
 
 ```{r}
 # Two-sided test: does the rank-biserial differ from 0?
@@ -1121,7 +1126,7 @@ ses_calc(formula = extra ~ group,
 
 ## Permutation-Based Effect Size Testing with `perm_ses_test`
 
-When asymptotic approximations may be unreliable --- particularly with small samples --- `perm_ses_test` provides distribution-free inference for the same non-parametric effect sizes. Rather than relying on normal approximations, it constructs the null distribution of the effect size through permutation.
+When asymptotic approximations may be unreliable, particularly with small samples, `perm_ses_test` provides distribution-free inference for the same non-parametric effect sizes. Rather than relying on normal approximations, it constructs the null distribution of the effect size through permutation.
 
 ```{r}
 # Permutation test of rank-biserial correlation
@@ -1160,15 +1165,15 @@ For small samples where exact permutations are feasible, `perm_ses_test` is gene
 
 # Summary Comparison of Robust TOST Methods
 
-| Method | Key Advantages | Limitations | Best Use Cases |
-|--------|---------------|-------------|---------------|
-| **Wilcoxon-Mann-Whitney** | Simple, widely accepted | Ambiguous hypothesis; not about means or medians (see caveats above) | Ordinal data; legacy analyses |
-| **Brunner-Munzel** | Clear interpretation, robust to heteroscedasticity | Computationally intensive with permutation | Stochastic superiority/dominance |
-| **Hodges-Lehmann** | Robust location, explicit estimand | Requires location-shift assumption for full interpretation | Robust location shift testing |
-| **Permutation t-test** | Exact p-values (small samples), supports trimmed means | Computationally intensive for large samples | Mean differences with small samples |
-| **Bootstrap t-test** | Flexible, visualization of effect distributions | Results vary between runs | Mean differences with moderate samples |
-| **Log-Transformed** | Focuses on relative differences, stabilizes variance | Requires positive data | Bioequivalence, ratio comparisons |
-| **SES calc / Perm SES test** | Tests directly on effect size scale | Requires large samples (asymptotic) or many permutations | Non-parametric effect size testing |
+| Method | Estimand | Key Advantages | Limitations | Best Use Cases |
+|--------|----------|---------------|-------------|---------------|
+| **Wilcoxon-Mann-Whitney** | Pseudo-median of pairwise differences (two-sample) or Walsh averages (paired) | Simple, widely accepted | Estimand $\neq$ mean or median difference without location shift assumption | Ordinal data; legacy analyses |
+| **Brunner-Munzel** | $P(X > Y) + 0.5 \cdot P(X = Y)$ | Clear interpretation, robust to heteroscedasticity | Not a location measure | Stochastic superiority/dominance |
+| **Hodges-Lehmann** | Same as WMW, with Fried-Dehling inference | Robust location, outlier resistant | Same estimand caveats as WMW; inference differs from `wilcox_TOST` | Robust location shift testing with outlier protection |
+| **Permutation t-test** | $\mu_X - \mu_Y$ (or trimmed means if `tr` > 0) | Exact p-values, direct mean comparison | Outlier sensitive (unless trimmed) | Mean differences with small samples |
+| **Bootstrap t-test** | $\mu_X - \mu_Y$ | Flexible, visualization | Results vary between runs | Mean differences with moderate samples |
+| **Log-Transformed** | $\log(\mu_Y / \mu_X)$ | Ratio-based, stabilizes variance | Requires positive data | Bioequivalence, ratio comparisons |
+| **SES calc / Perm SES test** | Non-parametric effect sizes (rank-biserial, concordance, odds) | Tests directly on effect size scale | Requires large samples (asymptotic) or many permutations | Non-parametric effect size testing |
 
 # Conclusion
 
