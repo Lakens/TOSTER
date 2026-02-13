@@ -10,7 +10,7 @@ hush = function(code) {
 }
 
 test_that("Run examples for one sample", {
-
+  skip_on_cran()
   set.seed(31653464)
 
   samp1 = rnorm(33)
@@ -136,7 +136,7 @@ test_that("Run examples for one sample", {
 
 
 test_that("Run examples for two sample", {
-
+  skip_on_cran()
   set.seed(76584441)
 
   samp1 = rnorm(25)
@@ -247,7 +247,7 @@ test_that("Run examples for two sample", {
 
 
 test_that("Run examples for paired samples", {
-
+  skip_on_cran()
   set.seed(921387)
 
   samp1 = rnorm(25)

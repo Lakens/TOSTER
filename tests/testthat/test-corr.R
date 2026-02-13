@@ -153,6 +153,7 @@ test_that("Run examples for z_cor_test", {
 })
 
 test_that("cor_test: equ and met", {
+  skip_on_cran()
 
   set.seed(5533428)
 
@@ -231,6 +232,7 @@ test_that("cor_test: equ and met", {
 })
 
 test_that("Run examples for boot_cor_test", {
+  skip_on_cran()
 
   set.seed(76584441)
 
@@ -377,6 +379,7 @@ test_that("Run examples for boot_cor_test", {
 })
 
 test_that("Run examples for boot_compare_cor", {
+  skip_on_cran()
 
   set.seed(8922)
   x1 = rnorm(40)

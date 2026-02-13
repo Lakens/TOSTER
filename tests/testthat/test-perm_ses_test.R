@@ -10,6 +10,7 @@ hush = function(code) {
 # === Basic two-sample tests ===
 
 test_that("perm_ses_test: two-sample returns valid htest for all ses types", {
+  skip_on_cran()
   set.seed(300)
   x <- rnorm(8)
   y <- rnorm(8, mean = 0.5)
@@ -28,6 +29,7 @@ test_that("perm_ses_test: two-sample returns valid htest for all ses types", {
 })
 
 test_that("perm_ses_test: point estimates match ses_calc", {
+  skip_on_cran()
   set.seed(301)
   x <- rnorm(10)
   y <- rnorm(10, mean = 0.5)
@@ -44,6 +46,7 @@ test_that("perm_ses_test: point estimates match ses_calc", {
 # === Paired samples ===
 
 test_that("perm_ses_test: paired samples", {
+  skip_on_cran()
   set.seed(302)
   x <- rnorm(10)
   y <- x + rnorm(10, mean = 0.3, sd = 1)
@@ -55,6 +58,7 @@ test_that("perm_ses_test: paired samples", {
 })
 
 test_that("perm_ses_test: paired point estimate matches ses_calc", {
+  skip_on_cran()
   set.seed(303)
   x <- rnorm(8)
   y <- x + rnorm(8, mean = 0.5, sd = 1)
@@ -68,6 +72,7 @@ test_that("perm_ses_test: paired point estimate matches ses_calc", {
 # === One-sample ===
 
 test_that("perm_ses_test: one-sample", {
+  skip_on_cran()
   set.seed(304)
   x <- rnorm(10, mean = 1)
 
@@ -78,6 +83,7 @@ test_that("perm_ses_test: one-sample", {
 })
 
 test_that("perm_ses_test: one-sample point estimate matches ses_calc", {
+  skip_on_cran()
   set.seed(305)
   x <- rnorm(8, mean = 0.5)
 
@@ -90,6 +96,7 @@ test_that("perm_ses_test: one-sample point estimate matches ses_calc", {
 # === One-sided alternatives ===
 
 test_that("perm_ses_test: one-sided alternatives", {
+  skip_on_cran()
   set.seed(306)
   x <- rnorm(12, mean = 2)
   y <- rnorm(12)
@@ -108,6 +115,7 @@ test_that("perm_ses_test: one-sided alternatives", {
 # === Equivalence testing ===
 
 test_that("perm_ses_test: equivalence testing", {
+  skip_on_cran()
   set.seed(307)
   x <- rnorm(15)
   y <- rnorm(15, mean = 0.1)
@@ -136,6 +144,7 @@ test_that("perm_ses_test: equivalence requires two bounds", {
 # === Minimal effect testing ===
 
 test_that("perm_ses_test: minimal effect testing", {
+  skip_on_cran()
   set.seed(309)
   x <- rnorm(15, mean = 2)
   y <- rnorm(15)
@@ -153,6 +162,7 @@ test_that("perm_ses_test: minimal effect testing", {
 # === Formula interface ===
 
 test_that("perm_ses_test: formula interface", {
+  skip_on_cran()
   set.seed(310)
   df <- data.frame(
     val = c(rnorm(10), rnorm(10, mean = 0.5)),
@@ -165,6 +175,7 @@ test_that("perm_ses_test: formula interface", {
 })
 
 test_that("perm_ses_test: formula with paired warns", {
+  skip_on_cran()
   set.seed(311)
   df <- data.frame(
     val = c(rnorm(10), rnorm(10, mean = 0.5)),
@@ -180,6 +191,7 @@ test_that("perm_ses_test: formula with paired warns", {
 # === Exact vs randomization ===
 
 test_that("perm_ses_test: exact permutation for small samples", {
+  skip_on_cran()
   x <- c(1, 2, 3, 4, 5)
   y <- c(3, 4, 5, 6, 7)
 
@@ -191,6 +203,7 @@ test_that("perm_ses_test: exact permutation for small samples", {
 })
 
 test_that("perm_ses_test: randomization when R specified", {
+  skip_on_cran()
   set.seed(312)
   x <- rnorm(20)
   y <- rnorm(20, mean = 0.5)
@@ -203,6 +216,7 @@ test_that("perm_ses_test: randomization when R specified", {
 # === Complete separation ===
 
 test_that("perm_ses_test: complete separation on rb/cstat scale works", {
+  skip_on_cran()
   x <- c(10, 11, 12)
   y <- c(1, 2, 3)
 
@@ -215,6 +229,7 @@ test_that("perm_ses_test: complete separation on rb/cstat scale works", {
 })
 
 test_that("perm_ses_test: complete separation warns on odds scale", {
+  skip_on_cran()
   x <- c(10, 11, 12)
   y <- c(1, 2, 3)
 
@@ -247,6 +262,7 @@ test_that("perm_ses_test: invalid R rejected", {
 # === Permutation distribution stored ===
 
 test_that("perm_ses_test: perm.dist stored when keep_perm = TRUE", {
+  skip_on_cran()
   set.seed(313)
   x <- rnorm(8)
   y <- rnorm(8, mean = 0.5)
@@ -264,6 +280,7 @@ test_that("perm_ses_test: perm.dist stored when keep_perm = TRUE", {
 # === Confidence intervals ===
 
 test_that("perm_ses_test: CI bounds are ordered", {
+  skip_on_cran()
   set.seed(314)
   x <- rnorm(10)
   y <- rnorm(10, mean = 0.5)
@@ -277,6 +294,7 @@ test_that("perm_ses_test: CI bounds are ordered", {
 })
 
 test_that("perm_ses_test: CI within valid range for rb", {
+  skip_on_cran()
   set.seed(315)
   x <- rnorm(10)
   y <- rnorm(10, mean = 0.5)
@@ -287,6 +305,7 @@ test_that("perm_ses_test: CI within valid range for rb", {
 })
 
 test_that("perm_ses_test: CI within valid range for cstat", {
+  skip_on_cran()
   set.seed(316)
   x <- rnorm(10)
   y <- rnorm(10, mean = 0.5)
@@ -299,6 +318,7 @@ test_that("perm_ses_test: CI within valid range for cstat", {
 # === Different ses scales produce consistent results ===
 
 test_that("perm_ses_test: effect size transformations are consistent", {
+  skip_on_cran()
   set.seed(317)
   x <- rnorm(8)
   y <- rnorm(8, mean = 0.5)
@@ -322,6 +342,7 @@ test_that("perm_ses_test: effect size transformations are consistent", {
 # === Non-symmetric two-sided test ===
 
 test_that("perm_ses_test: non-symmetric two-sided test works", {
+  skip_on_cran()
   set.seed(318)
   x <- rnorm(10)
   y <- rnorm(10, mean = 0.5)
@@ -339,6 +360,7 @@ test_that("perm_ses_test: non-symmetric two-sided test works", {
 # === Exact paired permutation ===
 
 test_that("perm_ses_test: exact paired permutation", {
+  skip_on_cran()
   x <- c(1, 2, 3, 4, 5)
   y <- c(2, 3, 4, 5, 6)
 

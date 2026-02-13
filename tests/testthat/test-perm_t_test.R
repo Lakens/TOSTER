@@ -18,6 +18,7 @@ paired_y <- c(5.6, 5.2, 6.7, 6.1, 6.5, 5.8, 5.3, 6.2)
 
 
 test_that("perm_t_test returns htest object with all expected components", {
+  skip_on_cran()
   set.seed(123)
   result <- perm_t_test(x_sample, y_sample, R = 199)
 
@@ -42,6 +43,7 @@ test_that("perm_t_test returns htest object with all expected components", {
 })
 
 test_that("perm_t_test keeps permutation distribution when keep_perm = TRUE", {
+  skip_on_cran()
   set.seed(123)
   result_keep <- perm_t_test(x_sample, y_sample, R = 99, keep_perm = TRUE)
   result_no_keep <- perm_t_test(x_sample, y_sample, R = 99, keep_perm = FALSE)
@@ -57,6 +59,7 @@ test_that("perm_t_test keeps permutation distribution when keep_perm = TRUE", {
 
 
 test_that("one-sample perm_t_test works correctly", {
+  skip_on_cran()
   set.seed(123)
   result <- perm_t_test(x_sample, mu = 5, R = 199)
 
@@ -75,6 +78,7 @@ test_that("one-sample perm_t_test works correctly", {
 })
 
 test_that("one-sample perm_t_test handles mu = 0 correctly", {
+  skip_on_cran()
   set.seed(123)
   # Generate data with mean noticeably different from 0
   x_nonzero <- rnorm(20, mean = 3, sd = 1)
@@ -88,6 +92,7 @@ test_that("one-sample perm_t_test handles mu = 0 correctly", {
 # Two-Sample Tests-----------------
 
 test_that("two-sample perm_t_test works with default settings", {
+  skip_on_cran()
   set.seed(123)
   result <- perm_t_test(x_sample, y_sample, R = 199)
 
@@ -99,6 +104,7 @@ test_that("two-sample perm_t_test works with default settings", {
 })
 
 test_that("two-sample perm_t_test works with var.equal = TRUE", {
+  skip_on_cran()
   set.seed(123)
   result <- perm_t_test(x_sample, y_sample, var.equal = TRUE, R = 199)
 
@@ -108,6 +114,7 @@ test_that("two-sample perm_t_test works with var.equal = TRUE", {
 })
 
 test_that("two-sample perm_t_test works with formula interface", {
+  skip_on_cran()
   set.seed(123)
   # Using built-in sleep data
   result <- perm_t_test(extra ~ group, data = sleep, R = 199)
@@ -120,6 +127,7 @@ test_that("two-sample perm_t_test works with formula interface", {
 # Paired Tests-----------------
 
 test_that("paired perm_t_test works correctly", {
+  skip_on_cran()
   set.seed(123)
   result <- perm_t_test(paired_x, paired_y, paired = TRUE, R = 199)
 
@@ -129,6 +137,7 @@ test_that("paired perm_t_test works correctly", {
 })
 
 test_that("paired perm_t_test detects significant difference", {
+  skip_on_cran()
   set.seed(123)
   # These paired samples have a consistent positive difference with some variability
   before <- c(5, 6, 7, 8, 9, 10, 11, 12)
@@ -145,6 +154,7 @@ test_that("paired perm_t_test detects significant difference", {
 # Alternative Hypotheses -----------------
 test_that("alternative = 'two.sided' works correctly",
 {
+  skip_on_cran()
   set.seed(123)
   result <- perm_t_test(x_sample, y_sample, alternative = "two.sided", R = 199)
 
@@ -154,6 +164,7 @@ test_that("alternative = 'two.sided' works correctly",
 })
 
 test_that("alternative = 'less' works correctly", {
+  skip_on_cran()
   set.seed(123)
   result <- perm_t_test(x_sample, y_sample, alternative = "less", R = 199)
 
@@ -163,6 +174,7 @@ test_that("alternative = 'less' works correctly", {
 })
 
 test_that("alternative = 'greater' works correctly", {
+  skip_on_cran()
   set.seed(123)
   result <- perm_t_test(x_sample, y_sample, alternative = "greater", R = 199)
 
@@ -172,6 +184,7 @@ test_that("alternative = 'greater' works correctly", {
 })
 
 test_that("alternative = 'equivalence' works correctly", {
+  skip_on_cran()
   set.seed(123)
   result <- perm_t_test(x_sample, y_sample,
                         alternative = "equivalence",
@@ -186,6 +199,7 @@ test_that("alternative = 'equivalence' works correctly", {
 })
 
 test_that("alternative = 'minimal.effect' works correctly", {
+  skip_on_cran()
   set.seed(123)
   result <- perm_t_test(x_sample, y_sample,
                         alternative = "minimal.effect",
@@ -197,6 +211,7 @@ test_that("alternative = 'minimal.effect' works correctly", {
 })
 
 test_that("equivalence with single mu value creates symmetric bounds", {
+  skip_on_cran()
   set.seed(123)
   result <- perm_t_test(x_sample, y_sample,
                         alternative = "equivalence",
@@ -209,6 +224,7 @@ test_that("equivalence with single mu value creates symmetric bounds", {
 # Trimming (Yuen's Test) -----------------
 
 test_that("trimmed t-test (tr > 0) works correctly", {
+  skip_on_cran()
   set.seed(123)
   result <- perm_t_test(x_sample, y_sample, tr = 0.1, R = 199)
 
@@ -218,6 +234,7 @@ test_that("trimmed t-test (tr > 0) works correctly", {
 })
 
 test_that("one-sample trimmed t-test works", {
+  skip_on_cran()
   set.seed(123)
   result <- perm_t_test(x_sample, mu = 5, tr = 0.2, R = 199)
 
@@ -226,6 +243,7 @@ test_that("one-sample trimmed t-test works", {
 })
 
 test_that("paired trimmed t-test works", {
+  skip_on_cran()
   set.seed(123)
   result <- perm_t_test(paired_x, paired_y, paired = TRUE, tr = 0.1, R = 199)
 
@@ -237,6 +255,7 @@ test_that("paired trimmed t-test works", {
 # P-value Method Tests -----------------
 
 test_that("p_method = 'plusone' produces valid p-values", {
+  skip_on_cran()
   set.seed(123)
   result <- perm_t_test(x_sample, y_sample, R = 199, p_method = "plusone")
 
@@ -245,6 +264,7 @@ test_that("p_method = 'plusone' produces valid p-values", {
 })
 
 test_that("p_method = 'exact' produces valid p-values", {
+  skip_on_cran()
   set.seed(123)
   result <- perm_t_test(x_sample, y_sample, R = 199, p_method = "exact")
 
@@ -253,6 +273,7 @@ test_that("p_method = 'exact' produces valid p-values", {
 })
 
 test_that("different p_methods can produce different results", {
+  skip_on_cran()
   set.seed(123)
   result_plus <- perm_t_test(x_sample, y_sample, R = 99, p_method = "plusone")
   set.seed(123)
@@ -267,6 +288,7 @@ test_that("different p_methods can produce different results", {
 # Studentized vs Non-Studentized Tests-----------------
 
 test_that("perm_se = TRUE (studentized) produces valid results", {
+  skip_on_cran()
   set.seed(123)
   result <- perm_t_test(x_sample, y_sample, perm_se = TRUE, R = 199)
 
@@ -276,6 +298,7 @@ test_that("perm_se = TRUE (studentized) produces valid results", {
 })
 
 test_that("perm_se = FALSE (non-studentized) produces valid results", {
+  skip_on_cran()
   set.seed(123)
   result <- perm_t_test(x_sample, y_sample, perm_se = FALSE, R = 199)
 
@@ -285,6 +308,7 @@ test_that("perm_se = FALSE (non-studentized) produces valid results", {
 })
 
 test_that("studentized and non-studentized can produce different results", {
+  skip_on_cran()
   set.seed(123)
   result_stud <- perm_t_test(x_sample, y_sample, perm_se = TRUE, R = 199)
   set.seed(123)
@@ -303,6 +327,7 @@ test_that("studentized and non-studentized can produce different results", {
 # Symmetric vs Equal-Tail Two-Sided Tests-----------------
 
 test_that("symmetric = TRUE works for two-sided test", {
+  skip_on_cran()
   set.seed(123)
   result <- perm_t_test(x_sample, y_sample,
                         alternative = "two.sided",
@@ -313,6 +338,7 @@ test_that("symmetric = TRUE works for two-sided test", {
 })
 
 test_that("symmetric = FALSE works for two-sided test", {
+  skip_on_cran()
   set.seed(123)
   result <- perm_t_test(x_sample, y_sample,
                         alternative = "two.sided",
@@ -326,6 +352,7 @@ test_that("symmetric = FALSE works for two-sided test", {
 # Exact Permutation Tests-----------------
 
 test_that("exact permutation is computed for small samples", {
+  skip_on_cran()
   set.seed(123)
   small_x <- c(1, 2, 3, 4)
   small_y <- c(5, 6, 7)
@@ -343,6 +370,7 @@ test_that("exact permutation is computed for small samples", {
 })
 
 test_that("exact permutation for one-sample small samples", {
+  skip_on_cran()
   set.seed(123)
   small_x <- c(1, 2, 3, 4, 5)
 
@@ -357,6 +385,7 @@ test_that("exact permutation for one-sample small samples", {
 })
 
 test_that("Randomization is used when R is specified and smaller than max perms", {
+  skip_on_cran()
   set.seed(123)
   # Large enough sample that R = 199 triggers Randomization
   result <- perm_t_test(x_sample, y_sample, R = 199)
@@ -369,6 +398,7 @@ test_that("Randomization is used when R is specified and smaller than max perms"
 # Missing Value Handling -----------------
 
 test_that("perm_t_test handles NA values correctly", {
+  skip_on_cran()
   set.seed(123)
   x_na <- c(x_sample, NA, NA)
   y_na <- c(NA, y_sample, NA)
@@ -379,6 +409,7 @@ test_that("perm_t_test handles NA values correctly", {
   # Should work with reduced sample
 })
 test_that("paired test handles NA values correctly", {
+  skip_on_cran()
   set.seed(123)
   x_na <- c(paired_x, NA)
   y_na <- c(paired_y, NA)
@@ -463,6 +494,7 @@ test_that("error for incorrect formula", {
 # Reproducibility Tests -----------------
 
 test_that("results are reproducible with set.seed", {
+  skip_on_cran()
   set.seed(42)
   result1 <- perm_t_test(x_sample, y_sample, R = 199)
   set.seed(42)
@@ -477,6 +509,7 @@ test_that("results are reproducible with set.seed", {
 # Specific Value Tests (Regression Tests) -----------------
 
 test_that("t-statistic matches expected calculation", {
+  skip_on_cran()
   set.seed(123)
   x <- c(1, 2, 3, 4, 5)
   y <- c(6, 7, 8, 9, 10)
@@ -495,6 +528,7 @@ test_that("t-statistic matches expected calculation", {
 })
 
 test_that("one-sample t-statistic matches expected calculation", {
+  skip_on_cran()
   x <- c(1, 2, 3, 4, 5)
   mu <- 2
 
@@ -509,6 +543,7 @@ test_that("one-sample t-statistic matches expected calculation", {
 })
 
 test_that("degrees of freedom are correct for two-sample Welch test", {
+  skip_on_cran()
   x <- c(1, 2, 3, 4, 5)
   y <- c(6, 7, 8, 9, 10)
 
@@ -528,6 +563,7 @@ test_that("degrees of freedom are correct for two-sample Welch test", {
 })
 
 test_that("degrees of freedom are correct for two-sample pooled test", {
+  skip_on_cran()
   x <- c(1, 2, 3, 4, 5)
   y <- c(6, 7, 8, 9, 10)
 
@@ -541,6 +577,7 @@ test_that("degrees of freedom are correct for two-sample pooled test", {
 # Confidence Interval Tests-----------------
 
 test_that("confidence intervals have correct coverage property conceptually", {
+  skip_on_cran()
   set.seed(123)
   # Generate data where true difference is 0
   x_null <- rnorm(20, mean = 5, sd = 2)
@@ -555,6 +592,7 @@ test_that("confidence intervals have correct coverage property conceptually", {
 })
 
 test_that("confidence level attribute is correct", {
+  skip_on_cran()
   result_two <- perm_t_test(x_sample, y_sample, alternative = "two.sided",
                              alpha = 0.05, R = 199)
   expect_equal(attr(result_two$conf.int, "conf.level"), 0.95)
@@ -572,6 +610,7 @@ test_that("confidence level attribute is correct", {
 # Method String Tests-----------------
 
 test_that("method string reflects test type correctly", {
+  skip_on_cran()
   # Two-sample Welch
   result1 <- perm_t_test(x_sample, y_sample, var.equal = FALSE, R = 199)
   expect_match(result1$method, "Welch")
@@ -599,6 +638,7 @@ test_that("method string reflects test type correctly", {
 # Permutation Distribution Tests-----------------
 
 test_that("permutation distribution has correct length", {
+  skip_on_cran()
   set.seed(123)
   R <- 199
   result <- perm_t_test(x_sample, y_sample, R = R, keep_perm = TRUE)
@@ -608,6 +648,7 @@ test_that("permutation distribution has correct length", {
 })
 
 test_that("permutation distribution is numeric", {
+  skip_on_cran()
   set.seed(123)
   result <- perm_t_test(x_sample, y_sample, R = 199, keep_perm = TRUE)
 
@@ -621,6 +662,7 @@ test_that("permutation distribution is numeric", {
 # Edge Cases -----------------
 
 test_that("handles equal samples", {
+  skip_on_cran()
   set.seed(123)
   x_eq <- c(1, 2, 3, 4, 5)
 
@@ -631,6 +673,7 @@ test_that("handles equal samples", {
 })
 
 test_that("handles samples with equal means but different variances", {
+  skip_on_cran()
   set.seed(123)
   x_same_mean <- c(4, 5, 6)
   y_same_mean <- c(2, 5, 8)  # Same mean, different variance
@@ -644,6 +687,7 @@ test_that("handles samples with equal means but different variances", {
 })
 
 test_that("handles very small samples for paired test", {
+  skip_on_cran()
   set.seed(123)
   x_tiny <- c(1, 2, 3)
   y_tiny <- c(2.1, 2.8, 4.2)  # Add variability to differences
@@ -661,6 +705,7 @@ test_that("handles very small samples for paired test", {
 # Comparison with Standard t.test (Direction Consistency) -----------------
 
 test_that("direction of effect matches t.test", {
+  skip_on_cran()
   set.seed(123)
   # Clear difference: x < y
   x_low <- c(1, 2, 3, 4, 5)
@@ -680,6 +725,7 @@ test_that("direction of effect matches t.test", {
 })
 
 test_that("one-sided tests give appropriate p-values", {
+  skip_on_cran()
   set.seed(123)
   # x clearly less than y
   x_low <- c(1, 2, 3, 4, 5)
@@ -698,6 +744,7 @@ test_that("one-sided tests give appropriate p-values", {
 # Alpha Level Tests -----------------
 
 test_that("different alpha levels produce appropriate confidence intervals", {
+  skip_on_cran()
   set.seed(123)
 
   result_05 <- perm_t_test(x_sample, y_sample, alpha = 0.05, R = 299)
@@ -714,6 +761,7 @@ test_that("different alpha levels produce appropriate confidence intervals", {
 # Print Method Test-----------------
 
 test_that("print method works without error", {
+  skip_on_cran()
   result <- perm_t_test(x_sample, y_sample, R = 99)
 
   # Should print without error

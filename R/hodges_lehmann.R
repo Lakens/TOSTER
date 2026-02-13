@@ -8,12 +8,11 @@
 #'
 #' @section Purpose:
 #' The Hodges-Lehmann estimator provides a robust alternative to the mean for testing
-#' location differences. It has a breakdown point of approximately 29.3%, meaning it
-#' remains stable even when nearly 30% of the data are outliers. This function offers:
+#' location differences. It is arguably a more stable option in the presense of outliers. This function offers:
 #'
 #'   * Exact permutation tests for small samples
 #'   * Randomization tests (permutation with replacement) for larger samples
-#'   * Asymptotic tests using kernel density estimation
+#'   * Asymptotic tests using kernel density estimation of the scale parameter
 #'   * Support for equivalence and minimal effect testing
 #'   * An interface that mirrors `wilcox.test` and `perm_t_test`
 #'
@@ -68,7 +67,7 @@
 #'
 #' ## Test Methods
 #'
-#' **Asymptotic test (R = NULL):** Uses kernel density estimation to estimate the
+#' **Asymptotic test (R = NULL):** Uses kernel density estimation (Fried & Dehling, 2011) to estimate the
 #' variance of the Hodges-Lehmann estimator (note: this generates confidence intervals that will differ from [stats::wilcox.test()]). The test statistic follows an approximate
 #' normal distribution. This method may have issues with very heavy-tailed distributions,
 #' very skewed distributions, or small sample sizes (n < 30 per group). In these cases,

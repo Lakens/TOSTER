@@ -18,6 +18,7 @@ paired_y <- c(5.6, 5.2, 6.7, 6.1, 6.5, 5.8, 5.3, 6.2)
 # =============================================================================
 
 test_that("hodges_lehmann returns htest object with all expected components", {
+  skip_on_cran()
   set.seed(123)
   result <- hodges_lehmann(x_sample, y_sample, R = 199)
 
@@ -40,6 +41,7 @@ test_that("hodges_lehmann returns htest object with all expected components", {
 })
 
 test_that("hodges_lehmann keeps permutation distribution when keep_perm = TRUE", {
+  skip_on_cran()
   set.seed(123)
   result_keep <- hodges_lehmann(x_sample, y_sample, R = 99, keep_perm = TRUE)
   result_no_keep <- hodges_lehmann(x_sample, y_sample, R = 99, keep_perm = FALSE)
@@ -141,6 +143,7 @@ test_that("one-sample hodges_lehmann works correctly (asymptotic)", {
 })
 
 test_that("one-sample hodges_lehmann works correctly (permutation)", {
+  skip_on_cran()
   set.seed(123)
   result <- hodges_lehmann(x_sample, mu = 5, R = 199)
 
@@ -150,6 +153,7 @@ test_that("one-sample hodges_lehmann works correctly (permutation)", {
 })
 
 test_that("one-sample hodges_lehmann handles mu = 0 correctly", {
+  skip_on_cran()
   set.seed(123)
   # Generate data with mean noticeably different from 0
   x_nonzero <- rnorm(20, mean = 3, sd = 1)
@@ -175,6 +179,7 @@ test_that("two-sample hodges_lehmann works with asymptotic method", {
 })
 
 test_that("two-sample hodges_lehmann works with permutation method", {
+  skip_on_cran()
   set.seed(123)
   result <- hodges_lehmann(x_sample, y_sample, R = 199)
 
@@ -184,6 +189,7 @@ test_that("two-sample hodges_lehmann works with permutation method", {
 })
 
 test_that("two-sample hodges_lehmann works with formula interface", {
+  skip_on_cran()
   set.seed(123)
   # Using built-in sleep data
   result <- hodges_lehmann(extra ~ group, data = sleep, R = 199)
@@ -197,6 +203,7 @@ test_that("two-sample hodges_lehmann works with formula interface", {
 # =============================================================================
 
 test_that("paired hodges_lehmann works correctly", {
+  skip_on_cran()
   set.seed(123)
   result <- hodges_lehmann(paired_x, paired_y, paired = TRUE, R = 199)
 
@@ -206,6 +213,7 @@ test_that("paired hodges_lehmann works correctly", {
 })
 
 test_that("paired hodges_lehmann detects significant difference", {
+  skip_on_cran()
   set.seed(123)
   # These paired samples have a consistent positive difference
   before <- c(5, 6, 7, 8, 9, 10, 11, 12)
@@ -224,6 +232,7 @@ test_that("paired hodges_lehmann detects significant difference", {
 # =============================================================================
 
 test_that("alternative = 'two.sided' works correctly", {
+  skip_on_cran()
   set.seed(123)
   result <- hodges_lehmann(x_sample, y_sample, alternative = "two.sided", R = 199)
 
@@ -233,6 +242,7 @@ test_that("alternative = 'two.sided' works correctly", {
 })
 
 test_that("alternative = 'less' works correctly", {
+  skip_on_cran()
   set.seed(123)
   result <- hodges_lehmann(x_sample, y_sample, alternative = "less", R = 199)
 
@@ -242,6 +252,7 @@ test_that("alternative = 'less' works correctly", {
 })
 
 test_that("alternative = 'greater' works correctly", {
+  skip_on_cran()
   set.seed(123)
   result <- hodges_lehmann(x_sample, y_sample, alternative = "greater", R = 199)
 
@@ -251,6 +262,7 @@ test_that("alternative = 'greater' works correctly", {
 })
 
 test_that("alternative = 'equivalence' works correctly", {
+  skip_on_cran()
   set.seed(123)
   result <- hodges_lehmann(x_sample, y_sample,
                            alternative = "equivalence",
@@ -265,6 +277,7 @@ test_that("alternative = 'equivalence' works correctly", {
 })
 
 test_that("alternative = 'minimal.effect' works correctly", {
+  skip_on_cran()
   set.seed(123)
   result <- hodges_lehmann(x_sample, y_sample,
                            alternative = "minimal.effect",
@@ -276,6 +289,7 @@ test_that("alternative = 'minimal.effect' works correctly", {
 })
 
 test_that("equivalence with single mu value creates symmetric bounds", {
+  skip_on_cran()
   set.seed(123)
   result <- hodges_lehmann(x_sample, y_sample,
                            alternative = "equivalence",
@@ -289,6 +303,7 @@ test_that("equivalence with single mu value creates symmetric bounds", {
 # =============================================================================
 
 test_that("scale = 'S1' works correctly", {
+  skip_on_cran()
   set.seed(123)
   result <- hodges_lehmann(x_sample, y_sample, R = 199, scale = "S1")
 
@@ -298,6 +313,7 @@ test_that("scale = 'S1' works correctly", {
 })
 
 test_that("scale = 'S2' works correctly", {
+  skip_on_cran()
   set.seed(123)
   result <- hodges_lehmann(x_sample, y_sample, R = 199, scale = "S2")
 
@@ -307,6 +323,7 @@ test_that("scale = 'S2' works correctly", {
 })
 
 test_that("different scale estimators can produce different results", {
+  skip_on_cran()
   set.seed(123)
   result_s1 <- hodges_lehmann(x_sample, y_sample, R = 199, scale = "S1")
   set.seed(123)
@@ -325,6 +342,7 @@ test_that("different scale estimators can produce different results", {
 # =============================================================================
 
 test_that("p_method = 'plusone' produces valid p-values", {
+  skip_on_cran()
   set.seed(123)
   result <- hodges_lehmann(x_sample, y_sample, R = 199, p_method = "plusone")
 
@@ -333,6 +351,7 @@ test_that("p_method = 'plusone' produces valid p-values", {
 })
 
 test_that("p_method = 'exact' produces valid p-values", {
+  skip_on_cran()
   set.seed(123)
   result <- hodges_lehmann(x_sample, y_sample, R = 199, p_method = "exact")
 
@@ -341,6 +360,7 @@ test_that("p_method = 'exact' produces valid p-values", {
 })
 
 test_that("p_method defaults to 'exact' for exact permutation", {
+  skip_on_cran()
   set.seed(123)
   small_x <- c(1, 2, 3, 4)
   small_y <- c(5, 6, 7)
@@ -360,6 +380,7 @@ test_that("p_method defaults to 'exact' for exact permutation", {
 # =============================================================================
 
 test_that("exact permutation is computed for small two-sample", {
+  skip_on_cran()
   set.seed(123)
   small_x <- c(1, 2, 3, 4)
   small_y <- c(5, 6, 7)
@@ -376,6 +397,7 @@ test_that("exact permutation is computed for small two-sample", {
 })
 
 test_that("exact permutation for one-sample small samples", {
+  skip_on_cran()
   set.seed(123)
   small_x <- c(1, 2, 3, 4, 5)
 
@@ -390,6 +412,7 @@ test_that("exact permutation for one-sample small samples", {
 })
 
 test_that("Randomization is used when R is specified and smaller than max perms", {
+  skip_on_cran()
   set.seed(123)
   # Large enough sample that R = 199 triggers Randomization
   result <- hodges_lehmann(x_sample, y_sample, R = 199)
@@ -431,6 +454,7 @@ test_that("asymptotic CIs are finite for two-sided test", {
 # =============================================================================
 
 test_that("hodges_lehmann handles NA values correctly", {
+  skip_on_cran()
   set.seed(123)
   x_na <- c(x_sample, NA, NA)
   y_na <- c(NA, y_sample, NA)
@@ -441,6 +465,7 @@ test_that("hodges_lehmann handles NA values correctly", {
 })
 
 test_that("paired test handles NA values correctly", {
+  skip_on_cran()
   set.seed(123)
   x_na <- c(paired_x, NA)
   y_na <- c(paired_y, NA)
@@ -519,6 +544,7 @@ test_that("error for incorrect formula", {
 # =============================================================================
 
 test_that("results are reproducible with set.seed for permutation test", {
+  skip_on_cran()
   set.seed(42)
   result1 <- hodges_lehmann(x_sample, y_sample, R = 199)
   set.seed(42)
@@ -543,6 +569,7 @@ test_that("asymptotic test is deterministic", {
 # =============================================================================
 
 test_that("confidence level attribute is correct", {
+  skip_on_cran()
   result_two <- hodges_lehmann(x_sample, y_sample, alternative = "two.sided",
                                alpha = 0.05, R = 199)
   expect_equal(attr(result_two$conf.int, "conf.level"), 0.95)
@@ -557,6 +584,7 @@ test_that("confidence level attribute is correct", {
 })
 
 test_that("different alpha produces appropriate confidence intervals", {
+  skip_on_cran()
   set.seed(123)
 
   result_95 <- hodges_lehmann(x_sample, y_sample, alpha = 0.05, R = 299)
@@ -574,6 +602,7 @@ test_that("different alpha produces appropriate confidence intervals", {
 # =============================================================================
 
 test_that("method string reflects test type correctly", {
+  skip_on_cran()
   # Two-sample asymptotic
   result1 <- hodges_lehmann(x_sample, y_sample)
   expect_match(result1$method, "Asymptotic")
@@ -598,6 +627,7 @@ test_that("method string reflects test type correctly", {
 # =============================================================================
 
 test_that("permutation distribution has correct length", {
+  skip_on_cran()
   set.seed(123)
   R <- 199
   result <- hodges_lehmann(x_sample, y_sample, R = R, keep_perm = TRUE)
@@ -607,6 +637,7 @@ test_that("permutation distribution has correct length", {
 })
 
 test_that("permutation distribution is numeric", {
+  skip_on_cran()
   set.seed(123)
   result <- hodges_lehmann(x_sample, y_sample, R = 199, keep_perm = TRUE)
 
@@ -621,6 +652,7 @@ test_that("permutation distribution is numeric", {
 # =============================================================================
 
 test_that("handles samples with equal values", {
+  skip_on_cran()
   set.seed(123)
   x_const <- rep(5, 10)
 
@@ -632,6 +664,7 @@ test_that("handles samples with equal values", {
 })
 
 test_that("handles samples with different variances", {
+  skip_on_cran()
   set.seed(123)
   x_low_var <- c(4, 5, 6)
   y_high_var <- c(2, 5, 8)  # Same median, different variance
@@ -642,6 +675,7 @@ test_that("handles samples with different variances", {
 })
 
 test_that("handles very small samples for paired test", {
+  skip_on_cran()
   set.seed(123)
   x_tiny <- c(1, 2, 3)
   y_tiny <- c(2.1, 2.8, 4.2)
@@ -675,6 +709,7 @@ test_that("direction of effect matches wilcox.test", {
 })
 
 test_that("one-sided tests give appropriate p-values", {
+  skip_on_cran()
   set.seed(123)
   # x clearly less than y
   x_low <- c(1, 2, 3, 4, 5)
@@ -695,6 +730,7 @@ test_that("one-sided tests give appropriate p-values", {
 # =============================================================================
 
 test_that("print method works without error", {
+  skip_on_cran()
   result <- hodges_lehmann(x_sample, y_sample, R = 99)
 
   # Should print without error

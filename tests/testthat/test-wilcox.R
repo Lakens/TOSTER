@@ -41,14 +41,37 @@ test_that("Run examples for one sample", {
   expect_s3_class(test1_ses_htest, "htest")
   expect_equal(unname(test1_ses_htest$estimate), test1$effsize$estimate[2])
 
+})
+
+test_that("Bootstrap tests for one sample", {
+  skip_on_cran()
+
+  set.seed(3164964)
+  samp1 = rnorm(33)
+
   test1_ses  = boot_ses_calc(x = samp1,
                         alpha = .1,
                         boot_ci = "s")
+  expect_s3_class(test1_ses, "htest")
   test1_ses  = boot_ses_calc(x = samp1,
                         alpha = .1,
                         boot_ci = "p")
+  expect_s3_class(test1_ses, "htest")
   test1_ses  = boot_ses_calc(x = samp1,
                         alpha = .1)
+  expect_s3_class(test1_ses, "htest")
+
+})
+
+test_that("Run examples for one sample continued", {
+
+  set.seed(3164964)
+
+  samp1 = rnorm(33)
+
+  test1 = wilcox_TOST(x = samp1,
+                 low_eqbound = -.5,
+                 high_eqbound = .5)
   ash = as_htest(test1)
 
   test3 = wilcox_TOST(x = samp1,
@@ -115,6 +138,59 @@ test_that("Run examples for two sample", {
                                data = df_samp,
                                ses = "logodds",
                                output = "data.frame")
+
+  # Test htest output (new default)
+  test1_smd_htest = ses_calc(formula = y ~ group, data = df_samp)
+  expect_s3_class(test1_smd_htest, "htest")
+
+  expect_error(ses_calc(formula = y ~ group,
+                        data = df_samp,
+                        alpha = 1.1))
+
+  test3 = wilcox_TOST(formula = y ~ group,
+                      data = df_samp,
+                      low_eqbound = -.5,
+                      high_eqbound = .5,
+                      hypothesis = "MET")
+
+  expect_equal(1-test1$TOST$p.value[2],
+               test3$TOST$p.value[2],
+               tolerance = .003)
+
+  expect_equal(1-test1$TOST$p.value[3],
+               test3$TOST$p.value[3],
+               tolerance = .003)
+  prtest = hush(print(test3))
+
+})
+
+test_that("Bootstrap tests for two sample", {
+  skip_on_cran()
+
+  set.seed(651466441)
+
+  samp1 = rnorm(25)
+  samp2 = rnorm(25)
+
+  df_samp = data.frame(y = c(samp1,samp2),
+                       group = c(rep("g1",25),
+                                 rep("g2",25)))
+
+  test1_smd = ses_calc(formula = y ~ group,
+                       data = df_samp,
+                       output = "data.frame")
+  test1_smd_cstat = ses_calc(formula = y ~ group,
+                             data = df_samp,
+                             ses = "cstat",
+                             output = "data.frame")
+  test1_smd_odds = ses_calc(formula = y ~ group,
+                            data = df_samp,
+                            ses = "odds",
+                            output = "data.frame")
+  test1_smd_logodds = ses_calc(formula = y ~ group,
+                               data = df_samp,
+                               ses = "logodds",
+                               output = "data.frame")
   test1_smd_boot = boot_ses_calc(formula = y ~ group,
                        data = df_samp,
                        R = 99)
@@ -140,29 +216,6 @@ test_that("Run examples for two sample", {
                test1_smd_odds$estimate)
   expect_equal(unname(test1_smd_boot_logodds$estimate),
                test1_smd_logodds$estimate)
-
-  # Test htest output (new default)
-  test1_smd_htest = ses_calc(formula = y ~ group, data = df_samp)
-  expect_s3_class(test1_smd_htest, "htest")
-
-  expect_error(ses_calc(formula = y ~ group,
-                        data = df_samp,
-                        alpha = 1.1))
-
-  test3 = wilcox_TOST(formula = y ~ group,
-                      data = df_samp,
-                      low_eqbound = -.5,
-                      high_eqbound = .5,
-                      hypothesis = "MET")
-
-  expect_equal(1-test1$TOST$p.value[2],
-               test3$TOST$p.value[2],
-               tolerance = .003)
-
-  expect_equal(1-test1$TOST$p.value[3],
-               test3$TOST$p.value[3],
-               tolerance = .003)
-  prtest = hush(print(test3))
 
 })
 
@@ -205,10 +258,6 @@ test_that("Run examples for paired samples", {
                       paired = TRUE,
                       eqb =  .5)
 
-  test1_ses = boot_ses_calc(x = samp1,
-                      y = samp2,
-                      paired = TRUE)
-
   test3 = wilcox_TOST(x = samp1,
                  y = samp2,
                  paired = TRUE,
@@ -225,6 +274,21 @@ test_that("Run examples for paired samples", {
                tolerance = .005)
 
   prtest = hush(print(test1))
+
+})
+
+test_that("Bootstrap tests for paired samples", {
+  skip_on_cran()
+
+  set.seed(789461245)
+
+  samp1 = rnorm(25)
+  samp2 = rnorm(25)
+
+  test1_ses = boot_ses_calc(x = samp1,
+                      y = samp2,
+                      paired = TRUE)
+  expect_s3_class(test1_ses, "htest")
 
 })
 

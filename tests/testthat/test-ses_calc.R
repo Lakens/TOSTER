@@ -440,6 +440,7 @@ test_that("ses_calc: fisher method hypothesis test", {
 # === boot_ses_calc tests ===
 
 test_that("boot_ses_calc: default output is htest with no hypothesis test", {
+  skip_on_cran()
   set.seed(200)
   x <- rnorm(15)
   y <- rnorm(15, mean = 0.5)
@@ -460,6 +461,7 @@ test_that("boot_ses_calc: default output is htest with no hypothesis test", {
 })
 
 test_that("boot_ses_calc: hypothesis test when alternative specified", {
+  skip_on_cran()
   set.seed(201)
   x <- rnorm(15)
   y <- rnorm(15, mean = 0.8)
@@ -478,6 +480,7 @@ test_that("boot_ses_calc: hypothesis test when alternative specified", {
 })
 
 test_that("boot_ses_calc: point estimates match ses_calc", {
+  skip_on_cran()
   set.seed(202)
   x <- rnorm(20)
   y <- rnorm(20, mean = 0.5)
@@ -491,6 +494,7 @@ test_that("boot_ses_calc: point estimates match ses_calc", {
 })
 
 test_that("boot_ses_calc: all bootstrap CI methods work", {
+  skip_on_cran()
   set.seed(203)
   x <- rnorm(15)
   y <- rnorm(15, mean = 0.5)
@@ -504,6 +508,7 @@ test_that("boot_ses_calc: all bootstrap CI methods work", {
 })
 
 test_that("boot_ses_calc: data.frame output", {
+  skip_on_cran()
   set.seed(204)
   x <- rnorm(15)
   y <- rnorm(15, mean = 0.5)
@@ -515,6 +520,7 @@ test_that("boot_ses_calc: data.frame output", {
 })
 
 test_that("boot_ses_calc: paired samples", {
+  skip_on_cran()
   set.seed(205)
   x <- rnorm(15)
   y <- x + rnorm(15, mean = 0.3, sd = 1)
@@ -525,6 +531,7 @@ test_that("boot_ses_calc: paired samples", {
 })
 
 test_that("boot_ses_calc: one-sample", {
+  skip_on_cran()
   set.seed(206)
   x <- rnorm(15, mean = 1)
 
@@ -534,6 +541,7 @@ test_that("boot_ses_calc: one-sample", {
 })
 
 test_that("boot_ses_calc: equivalence testing", {
+  skip_on_cran()
   set.seed(207)
   x <- rnorm(20)
   y <- rnorm(20, mean = 0.1)
@@ -549,6 +557,7 @@ test_that("boot_ses_calc: equivalence testing", {
 })
 
 test_that("boot_ses_calc: minimal effect testing", {
+  skip_on_cran()
   set.seed(208)
   x <- rnorm(20, mean = 2)
   y <- rnorm(20)
@@ -563,6 +572,7 @@ test_that("boot_ses_calc: minimal effect testing", {
 })
 
 test_that("boot_ses_calc: equivalence requires two bounds", {
+  skip_on_cran()
   set.seed(209)
   x <- rnorm(15)
   y <- rnorm(15)
@@ -575,6 +585,7 @@ test_that("boot_ses_calc: equivalence requires two bounds", {
 })
 
 test_that("boot_ses_calc: complete separation stops with error", {
+  skip_on_cran()
   x <- c(10, 11, 12)
   y <- c(1, 2, 3)
   expect_error(
@@ -584,6 +595,7 @@ test_that("boot_ses_calc: complete separation stops with error", {
 })
 
 test_that("boot_ses_calc: formula interface", {
+  skip_on_cran()
   set.seed(210)
   df <- data.frame(
     val = c(rnorm(15), rnorm(15, mean = 0.5)),
@@ -595,6 +607,7 @@ test_that("boot_ses_calc: formula interface", {
 })
 
 test_that("boot_ses_calc: formula with paired warns", {
+  skip_on_cran()
   set.seed(211)
   df <- data.frame(
     val = c(rnorm(15), rnorm(15, mean = 0.5)),
@@ -607,6 +620,7 @@ test_that("boot_ses_calc: formula with paired warns", {
 })
 
 test_that("boot_ses_calc: one-sided alternatives", {
+  skip_on_cran()
   set.seed(212)
   x <- rnorm(20, mean = 2)
   y <- rnorm(20)
@@ -620,6 +634,7 @@ test_that("boot_ses_calc: one-sided alternatives", {
 })
 
 test_that("boot_ses_calc: agresti vs fisher se_method", {
+  skip_on_cran()
   set.seed(213)
   x <- rnorm(20)
   y <- rnorm(20, mean = 0.5)
@@ -632,6 +647,7 @@ test_that("boot_ses_calc: agresti vs fisher se_method", {
 })
 
 test_that("boot_ses_calc: boot component included in htest output", {
+  skip_on_cran()
   set.seed(214)
   x <- rnorm(15)
   y <- rnorm(15, mean = 0.5)

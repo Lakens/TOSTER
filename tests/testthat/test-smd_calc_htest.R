@@ -233,6 +233,7 @@ test_that("smd_calc paired htest works", {
 # --- boot_smd_calc htest output ---
 
 test_that("boot_smd_calc returns htest by default", {
+  skip_on_cran()
   set.seed(42)
   x <- rnorm(20, mean = 5, sd = 2)
   y <- rnorm(20, mean = 6, sd = 2)
@@ -254,6 +255,7 @@ test_that("boot_smd_calc returns htest by default", {
 })
 
 test_that("boot_smd_calc htest estimate matches data.frame", {
+  skip_on_cran()
   set.seed(42)
   x <- rnorm(20, mean = 5, sd = 2)
   y <- rnorm(20, mean = 6, sd = 2)
@@ -266,6 +268,7 @@ test_that("boot_smd_calc htest estimate matches data.frame", {
 })
 
 test_that("boot_smd_calc two.sided test works", {
+  skip_on_cran()
   set.seed(42)
   x <- rnorm(30, mean = 5, sd = 2)
   y <- rnorm(30, mean = 7, sd = 2)
@@ -280,6 +283,7 @@ test_that("boot_smd_calc two.sided test works", {
 })
 
 test_that("boot_smd_calc equivalence test works", {
+  skip_on_cran()
   set.seed(42)
   x <- rnorm(30, mean = 5, sd = 2)
   y <- rnorm(30, mean = 5.1, sd = 2)
@@ -295,6 +299,7 @@ test_that("boot_smd_calc equivalence test works", {
 })
 
 test_that("boot_smd_calc minimal.effect test works", {
+  skip_on_cran()
   set.seed(42)
   x <- rnorm(30, mean = 5, sd = 2)
   y <- rnorm(30, mean = 7, sd = 2)
@@ -308,6 +313,7 @@ test_that("boot_smd_calc minimal.effect test works", {
 })
 
 test_that("boot_smd_calc one-sided tests work", {
+  skip_on_cran()
   set.seed(42)
   x <- rnorm(30, mean = 5, sd = 2)
   y <- rnorm(30, mean = 7, sd = 2)
@@ -324,6 +330,7 @@ test_that("boot_smd_calc one-sided tests work", {
 })
 
 test_that("boot_smd_calc errors on bad equivalence bounds", {
+  skip_on_cran()
   set.seed(42)
   x <- rnorm(20)
   y <- rnorm(20)
@@ -336,6 +343,7 @@ test_that("boot_smd_calc errors on bad equivalence bounds", {
 })
 
 test_that("boot_smd_calc formula interface returns htest", {
+  skip_on_cran()
   set.seed(42)
   df <- data.frame(
     value = c(rnorm(20, 5, 2), rnorm(20, 6, 2)),
@@ -348,6 +356,7 @@ test_that("boot_smd_calc formula interface returns htest", {
 })
 
 test_that("boot_smd_calc method string is correct", {
+  skip_on_cran()
   set.seed(42)
   x <- rnorm(20, mean = 5, sd = 2)
   y <- rnorm(20, mean = 6, sd = 2)

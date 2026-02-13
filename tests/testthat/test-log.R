@@ -9,6 +9,7 @@ hush = function(code) {
 
 
 test_that("Run examples for two sample", {
+  skip_on_cran()
 
   set.seed(2525894)
   dat1 = mtcars
@@ -112,11 +113,12 @@ test_that("Run examples for two sample", {
 
 
 test_that("Run examples for paired samples", {
+  skip_on_cran()
 
   set.seed(922287)
   sleep2 = sleep
   sleep2$sleep = sleep2$extra + 4
-  
+
   # Test error for negative values in extra column (using vectors for paired test)
   expect_error(boot_log_TOST(
     x = sleep2$extra[sleep2$group == 1],
