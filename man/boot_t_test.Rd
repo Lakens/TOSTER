@@ -16,6 +16,7 @@ boot_t_test(x, ...)
   alternative = c("two.sided", "less", "greater", "equivalence", "minimal.effect"),
   mu = 0,
   alpha = 0.05,
+  tr = 0,
   boot_ci = c("stud", "basic", "perc", "bca"),
   R = 1999,
   ...
@@ -46,6 +47,11 @@ boot_t_test(x, ...)
 * For equivalence/minimal.effect: two values representing the lower and upper bounds}
 
 \item{alpha}{alpha level (default = 0.05)}
+
+\item{tr}{the fraction (0 to 0.5) of observations to be trimmed from
+each end before computing the mean and winsorized variance.
+Default is 0 (no trimming). When tr > 0, the function performs
+a bootstrapped Yuen's trimmed t-test.}
 
 \item{boot_ci}{method for bootstrap confidence interval calculation: "stud" (studentized, default), "basic" (basic bootstrap), "bca" (bias-corrected and accelerated), or "perc" (percentile bootstrap).}
 
@@ -80,7 +86,8 @@ distribution, not from this statistic and the degrees of freedom).
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 
-Performs t-tests with bootstrapped p-values and confidence intervals. This function supports
+Performs t-tests with bootstrapped p-values and confidence intervals, with optional
+trimmed means (Yuen's approach) for robust inference. This function supports
 standard hypothesis testing alternatives as well as equivalence and minimal effect testing,
 all with the familiar \code{htest} output structure.
 }
@@ -118,6 +125,13 @@ For two-sample tests, the test is of \eqn{\bar x - \bar y} (mean of x minus mean
 For paired samples, the test is of the difference scores (z),
 wherein \eqn{z = x - y}, and the test is of \eqn{\bar z} (mean of the difference scores).
 For one-sample tests, the test is of \eqn{\bar x} (mean of x).
+
+When \code{tr > 0}, the function uses Yuen's trimmed t-test approach: trimmed means
+are computed by removing the fraction \code{tr} of observations from each tail,
+and winsorized variances are used in place of standard variances. This provides
+robustness against outliers and heavy-tailed distributions. The bootstrap
+procedure recomputes trimmed means and winsorized standard errors for each
+bootstrap replicate.
 
 Unlike the \code{t_TOST} function, this function returns a standard \code{htest} object for
 compatibility with other R functions, while still providing the benefits of bootstrapping.
@@ -173,9 +187,15 @@ boot_t_test(mpg ~ am, data = mtcars,
             mu = c(-3, 3),
             R = 999)
 
+# Example 6: Bootstrapped Yuen's trimmed t-test (10\% trimming)
+boot_t_test(extra ~ group, data = sleep, tr = 0.1, R = 999)
+
 }
 \references{
 Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press.
+
+Yuen, K. K. (1974). The two-sample trimmed t for unequal population variances.
+Biometrika, 61(1), 165-170.
 }
 \seealso{
 Other Robust tests: 

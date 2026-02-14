@@ -131,7 +131,7 @@ This estimator is consistent with the location shift estimate returned by
 
 \subsection{Test Methods}{
 
-\strong{Asymptotic test (R = NULL):} Uses kernel density estimation to estimate the
+\strong{Asymptotic test (R = NULL):} Uses kernel density estimation (Fried & Dehling, 2011) to estimate the
 variance of the Hodges-Lehmann estimator (note: this generates confidence intervals that will differ from \code{\link[stats:wilcox.test]{stats::wilcox.test()}}). The test statistic follows an approximate
 normal distribution. This method may have issues with very heavy-tailed distributions,
 very skewed distributions, or small sample sizes (n < 30 per group). In these cases,
@@ -198,12 +198,11 @@ specified by \code{mu}
 \section{Purpose}{
 
 The Hodges-Lehmann estimator provides a robust alternative to the mean for testing
-location differences. It has a breakdown point of approximately 29.3\%, meaning it
-remains stable even when nearly 30\% of the data are outliers. This function offers:
+location differences. It is arguably a more stable option in the presense of outliers. This function offers:
 \itemize{
 \item Exact permutation tests for small samples
 \item Randomization tests (permutation with replacement) for larger samples
-\item Asymptotic tests using kernel density estimation
+\item Asymptotic tests using kernel density estimation of the scale parameter
 \item Support for equivalence and minimal effect testing
 \item An interface that mirrors \code{wilcox.test} and \code{perm_t_test}
 }

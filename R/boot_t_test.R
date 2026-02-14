@@ -2,7 +2,8 @@
 #' @description
 #' `r lifecycle::badge('stable')`
 #'
-#' Performs t-tests with bootstrapped p-values and confidence intervals. This function supports
+#' Performs t-tests with bootstrapped p-values and confidence intervals, with optional
+#' trimmed means (Yuen's approach) for robust inference. This function supports
 #' standard hypothesis testing alternatives as well as equivalence and minimal effect testing,
 #' all with the familiar `htest` output structure.
 #'
@@ -26,6 +27,11 @@
 #' @param mu a number or vector specifying the null hypothesis value(s):
 #'     * For standard alternatives: a single value (default = 0)
 #'     * For equivalence/minimal.effect: two values representing the lower and upper bounds
+#'
+#' @param tr the fraction (0 to 0.5) of observations to be trimmed from
+#'     each end before computing the mean and winsorized variance.
+#'     Default is 0 (no trimming). When tr > 0, the function performs
+#'     a bootstrapped Yuen's trimmed t-test.
 #'
 #' @details
 #' This function performs bootstrapped t-tests, providing more robust inference than standard
@@ -56,6 +62,13 @@
 #' For paired samples, the test is of the difference scores (z),
 #' wherein \eqn{z = x - y}, and the test is of \eqn{\bar z} (mean of the difference scores).
 #' For one-sample tests, the test is of \eqn{\bar x} (mean of x).
+#'
+#' When `tr > 0`, the function uses Yuen's trimmed t-test approach: trimmed means
+#' are computed by removing the fraction `tr` of observations from each tail,
+#' and winsorized variances are used in place of standard variances. This provides
+#' robustness against outliers and heavy-tailed distributions. The bootstrap
+#' procedure recomputes trimmed means and winsorized standard errors for each
+#' bootstrap replicate.
 #'
 #' Unlike the `t_TOST` function, this function returns a standard `htest` object for
 #' compatibility with other R functions, while still providing the benefits of bootstrapping.
@@ -115,8 +128,14 @@
 #'             mu = c(-3, 3),
 #'             R = 999)
 #'
+#' # Example 6: Bootstrapped Yuen's trimmed t-test (10% trimming)
+#' boot_t_test(extra ~ group, data = sleep, tr = 0.1, R = 999)
+#'
 #' @references
 #' Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press.
+#'
+#' Yuen, K. K. (1974). The two-sample trimmed t for unequal population variances.
+#' Biometrika, 61(1), 165-170.
 #'
 #' @family Robust tests
 #' @name boot_t_test
@@ -141,6 +160,7 @@ boot_t_test.default <- function(x,
                                                 "minimal.effect"),
                                 mu = 0,
                                 alpha = 0.05,
+                                tr = 0,
                                 boot_ci = c("stud","basic","perc","bca"),
                                 R = 1999, ...){
   alternative = match.arg(alternative)
@@ -149,6 +169,11 @@ boot_t_test.default <- function(x,
   if(!missing(alpha) && (length(alpha) != 1 || !is.finite(alpha) ||
                          alpha < 0 || alpha > 1)) {
     stop("'alpha' must be a single number between 0 and 1")
+  }
+
+  if (!missing(tr) && (length(tr) != 1 || !is.finite(tr) ||
+                       tr < 0 || tr >= 0.5)) {
+    stop("'tr' must be a single number between 0 and 0.5 (exclusive)")
   }
 
 
@@ -160,15 +185,34 @@ boot_t_test.default <- function(x,
     dname <- deparse(substitute(x))
   }
 
-  null_test = simple_htest(x = x,
-                           y = y,
-                           test = "t.test",
-                           var.equal = var.equal,
-                           paired = paired,
-                           alternative = alternative,
-                           mu = mu,
-                           alpha = 0.05)
-  mu = null_test$null.value
+  # When tr == 0, use simple_htest for initial statistics (backward compat)
+  # When tr > 0, compute initial stats directly since t.test() doesn't support trimming
+  if (tr == 0) {
+    null_test = simple_htest(x = x,
+                             y = y,
+                             test = "t.test",
+                             var.equal = var.equal,
+                             paired = paired,
+                             alternative = alternative,
+                             mu = mu,
+                             alpha = 0.05)
+    mu = null_test$null.value
+  } else {
+    # Handle mu for equivalence/minimal.effect the same way simple_htest does
+    if (alternative %in% c("equivalence", "minimal.effect")) {
+      if (length(mu) == 1) {
+        if (mu == 0) {
+          stop("mu cannot be zero if alternative is equivalence or minimal.effect")
+        }
+        mu = c(mu, -1 * mu)
+      }
+      mu = sort(mu)
+      names(mu) = rep("mean difference", 2)
+    } else {
+      names(mu) = "mean difference"
+    }
+  }
+
   m_vec <- rep(NA, times=length(R)) # mean difference vector
   m_se_vec <- rep(NA, times=length(R)) # mean difference vector
   if(alternative %in% c("equivalence","minimal.effect")){
@@ -194,10 +238,6 @@ boot_t_test.default <- function(x,
 
   }else{
     dname <- deparse(substitute(x))
-    #if (paired) {
-    #  stop("'y' is missing for paired test")
-    #}
-
     xok <- !is.na(x)
     yok <- NULL
   }
@@ -207,120 +247,310 @@ boot_t_test.default <- function(x,
     y <- NULL
   }
   nx <- length(x)
-  mx <- mean(x)
-  vx <- var(x)
+
+  # Sample size check for trimming
+  if (tr > 0) {
+    g <- floor(tr * nx)
+    effective_x <- nx - 2 * g
+    if (effective_x < 2) {
+      min_n <- ceiling(2 / (1 - 2 * tr)) + 1
+      stop("Sample size too small for specified trimming proportion. ",
+           "With tr = ", tr, ", need at least ", min_n,
+           " observations, but only have ", nx, ".")
+    }
+  }
+
+  # Compute location and scale for x
+  if (tr > 0) {
+    mx <- trimmed_mean(x, tr)
+    vx <- winsorized_var(x, tr)
+  } else {
+    mx <- mean(x)
+    vx <- var(x)
+  }
+
   if (is.null(y)) {
     if (nx < 2)
       stop("not enough 'x' observations")
-    df <- nx - 1
-    stderr <- sqrt(vx/nx)
+
+    if (tr > 0) {
+      hx <- effective_n(nx, tr)
+      df <- hx - 1
+      stderr <- sqrt((nx - 1) * vx / (hx * (hx - 1)))
+    } else {
+      df <- nx - 1
+      stderr <- sqrt(vx/nx)
+    }
+
     if (stderr < 10 * .Machine$double.eps * abs(mx)){
       stop("data are essentially constant")
     }
     tstat <- (mx - mu)/stderr
 
-    method <- if (paired) "Bootstrapped Paired t-test" else "Bootstrapped One Sample t-test"
-    #estimate <- setNames(mx, if (paired) "mean of the differences" else "mean of x")
-    #x.cent <- x - mx # remove to have an untransformed matrix
-    X <- matrix(sample(x, size = nx*R, replace = TRUE), nrow = R)
-    MX <- rowMeans(X - mx)
-    VX <- rowSums((X - MX) ^ 2) / (nx - 1)
-    MZ2 = NA
-    VZ2 = NA
-    for(i in 1:R){
-      zi = X[i,]
-      MZ2[i] = mean(zi - mx)
-      VZ2[i] <- sum((zi - MZ2[i]) ^ 2) / (nx - 1) #rowSums((X - MX) ^ 2) / (nx - 1)
+    # Method string
+    if (paired) {
+      method <- if (tr > 0) "Bootstrapped Paired Yuen t-test" else "Bootstrapped Paired t-test"
+    } else {
+      method <- if (tr > 0) "Bootstrapped One Sample Yuen t-test" else "Bootstrapped One Sample t-test"
     }
 
-    STDERR <- sqrt(VX/nx)
-    TSTAT <- (MX)/STDERR
-    #TSTAT_low <- (MX-low_eqbound)/STDERR
-    #TSTAT_high <- (MX-high_eqbound)/STDERR
-    EFF <- MX+mx
+    # Estimate labels
+    if (tr > 0) {
+      estimate <- setNames(mx, if (paired) "trimmed mean of the differences"
+                                else "trimmed mean of x")
+    } else {
+      estimate <- setNames(mx, if (paired) "mean of the differences"
+                                else "mean of x")
+    }
 
-    for(i in 1:nrow(X)){
-      dat = X[i,]
+    X <- matrix(sample(x, size = nx*R, replace = TRUE), nrow = R)
 
-      m_vec[i] <- mean(dat, na.rm=TRUE) # mean difference vector
-      m_se_vec[i] <- sd(dat, na.rm = TRUE)/sqrt(length(na.omit(dat)))
+    if (tr == 0) {
+      # Keep existing vectorized path for speed
+      MX <- rowMeans(X - mx)
+      VX <- rowSums((X - MX) ^ 2) / (nx - 1)
+      MZ2 = NA
+      VZ2 = NA
+      for(i in 1:R){
+        zi = X[i,]
+        MZ2[i] = mean(zi - mx)
+        VZ2[i] <- sum((zi - MZ2[i]) ^ 2) / (nx - 1)
+      }
 
+      STDERR <- sqrt(VX/nx)
+      TSTAT <- (MX)/STDERR
+      EFF <- MX+mx
+
+      for(i in 1:nrow(X)){
+        dat = X[i,]
+        m_vec[i] <- mean(dat, na.rm=TRUE)
+        m_se_vec[i] <- sd(dat, na.rm = TRUE)/sqrt(length(na.omit(dat)))
+      }
+    } else {
+      # Trimmed path
+      TSTAT <- numeric(R)
+      hx <- effective_n(nx, tr)
+
+      for (i in 1:R) {
+        dat <- X[i, ]
+        mx_boot <- trimmed_mean(dat, tr)
+        vx_boot <- winsorized_var(dat, tr)
+        se_boot <- sqrt((nx - 1) * vx_boot / (hx * (hx - 1)))
+
+        # Centered trimmed mean (under the null)
+        mx_centered <- trimmed_mean(dat - mx, tr)
+
+        if (se_boot > 10 * .Machine$double.eps) {
+          TSTAT[i] <- mx_centered / se_boot
+        } else {
+          TSTAT[i] <- 0
+        }
+
+        m_vec[i] <- mx_boot
+        m_se_vec[i] <- se_boot
+      }
     }
   }
 
   if(!is.null(y) && !paired){
     ny <- length(y)
+
+    # Sample size check for y with trimming
+    if (tr > 0) {
+      g_y <- floor(tr * ny)
+      effective_y <- ny - 2 * g_y
+      if (effective_y < 2) {
+        min_n <- ceiling(2 / (1 - 2 * tr)) + 1
+        stop("Sample size too small for specified trimming proportion. ",
+             "With tr = ", tr, ", need at least ", min_n,
+             " observations, but only have ", ny, ".")
+      }
+    }
+
     if(nx < 1 || (!var.equal && nx < 2))
       stop("not enough 'x' observations")
     if(ny < 1 || (!var.equal && ny < 2))
       stop("not enough 'y' observations")
     if(var.equal && nx + ny < 3)
       stop("not enough observations")
-    my <- mean(y)
-    vy <- var(y)
-    method <- paste("Bootstrapped", paste(if (!var.equal) "Welch", "Two Sample t-test"))
-    estimate <- c(mx, my)
-    names(estimate) <- c("mean of x", "mean of y")
+
+    if (tr > 0) {
+      my <- trimmed_mean(y, tr)
+      vy <- winsorized_var(y, tr)
+    } else {
+      my <- mean(y)
+      vy <- var(y)
+    }
+
+    # Method string
+    if (tr > 0) {
+      method <- paste("Bootstrapped",
+                      if (!var.equal) "Welch",
+                      "Yuen Two Sample t-test")
+      method <- gsub("\\s+", " ", method)
+    } else {
+      method <- paste("Bootstrapped", paste(if (!var.equal) "Welch", "Two Sample t-test"))
+    }
+
+    # Estimate labels
+    if (tr > 0) {
+      estimate <- c(mx, my)
+      names(estimate) <- c("trimmed mean of x", "trimmed mean of y")
+    } else {
+      estimate <- c(mx, my)
+      names(estimate) <- c("mean of x", "mean of y")
+    }
+
     if(var.equal){
-      df <- nx + ny - 2
-      v <- 0
-      if (nx > 1){
-        v <- v + (nx - 1) * vx
+      if (tr > 0) {
+        hx <- effective_n(nx, tr)
+        hy <- effective_n(ny, tr)
+        df <- pooled_wins_df(nx, ny, tr)
+        v_pooled <- ((hx - 1) * vx + (hy - 1) * vy) / df
+        stderr <- sqrt(v_pooled * ((nx - 1) / (hx * (hx - 1)) +
+                                    (ny - 1) / (hy * (hy - 1))))
+      } else {
+        df <- nx + ny - 2
+        v <- 0
+        if (nx > 1){
+          v <- v + (nx - 1) * vx
+        }
+        if (ny > 1){
+          v <- v + (ny - 1) * vy
+        }
+        v <- v/df
+        stderr <- sqrt(v * (1/nx + 1/ny))
       }
 
-      if (ny > 1){
-        v <- v + (ny - 1) * vy
-      }
-
-      v <- v/df
-      stderr <- sqrt(v * (1/nx + 1/ny))
       z <- c(x, y)
-      mz <- mean(z)
-      #Z <- matrix(sample(z, size = (nx+ny)*R, replace = TRUE), nrow = R)
+      if (tr > 0) {
+        mz <- trimmed_mean(z, tr)
+      } else {
+        mz <- mean(z)
+      }
+
       X <- matrix(sample(x, size = nx*R, replace = TRUE), nrow = R)
       Y <- matrix(sample(y, size = ny*R, replace = TRUE), nrow = R)
-      MX <- rowMeans(X - mx + mz)
-      MY <- rowMeans(Y - my + mz)
-      V <- (rowSums((X-MX)^2) + rowSums((Y-MY)^2))/df
-      STDERR <- sqrt(V*(1/nx + 1/ny))
-      EFF <- (MX+mx) - (MY+my)
 
-      #d_vec <- rep(NA, times=length(R))
-      for(i in 1:nrow(X)){
-        #dat = Z[i,]
-        dat_x = X[i,]#dat[1:nx]
-        dat_y = Y[i,]#dat[(nx+1):(nx+ny)]
+      if (tr == 0) {
+        MX <- rowMeans(X - mx + mz)
+        MY <- rowMeans(Y - my + mz)
+        V <- (rowSums((X-MX)^2) + rowSums((Y-MY)^2))/df
+        STDERR <- sqrt(V*(1/nx + 1/ny))
+        EFF <- (MX+mx) - (MY+my)
 
-        m_vec[i] <- mean(dat_x, na.rm=TRUE) - mean(dat_y,na.rm=TRUE)  # mean difference vector
-        m_se_vec[i] <- sqrt(sd(dat_x, na.rm=TRUE)^2/length(na.omit(dat_x)) + sd(dat_y, na.rm=TRUE)^2/length(na.omit(dat_y)))
+        for(i in 1:nrow(X)){
+          dat_x = X[i,]
+          dat_y = Y[i,]
+          m_vec[i] <- mean(dat_x, na.rm=TRUE) - mean(dat_y,na.rm=TRUE)
+          m_se_vec[i] <- sqrt(sd(dat_x, na.rm=TRUE)^2/length(na.omit(dat_x)) + sd(dat_y, na.rm=TRUE)^2/length(na.omit(dat_y)))
+        }
+      } else {
+        # Trimmed path - equal variance
+        TSTAT <- numeric(R)
+        hx <- effective_n(nx, tr)
+        hy <- effective_n(ny, tr)
+        df_pool <- pooled_wins_df(nx, ny, tr)
 
+        for (i in 1:R) {
+          dat_x <- X[i, ]
+          dat_y <- Y[i, ]
+
+          mx_boot <- trimmed_mean(dat_x, tr)
+          my_boot <- trimmed_mean(dat_y, tr)
+          vx_boot <- winsorized_var(dat_x, tr)
+          vy_boot <- winsorized_var(dat_y, tr)
+
+          v_pooled_boot <- ((hx - 1) * vx_boot + (hy - 1) * vy_boot) / df_pool
+          se_boot <- sqrt(v_pooled_boot * ((nx - 1) / (hx * (hx - 1)) +
+                                            (ny - 1) / (hy * (hy - 1))))
+
+          # Centered under the null
+          mx_cent <- trimmed_mean(dat_x - mx + mz, tr)
+          my_cent <- trimmed_mean(dat_y - my + mz, tr)
+
+          if (se_boot > 10 * .Machine$double.eps) {
+            TSTAT[i] <- (mx_cent - my_cent) / se_boot
+          } else {
+            TSTAT[i] <- 0
+          }
+
+          m_vec[i] <- mx_boot - my_boot
+          m_se_vec[i] <- se_boot
+        }
       }
     }else{
-      stderrx <- sqrt(vx/nx)
-      stderry <- sqrt(vy/ny)
-      stderr <- sqrt(stderrx^2 + stderry^2)
-      df <- stderr^4/(stderrx^4/(nx - 1) + stderry^4/(ny - 1))
+      if (tr > 0) {
+        hx <- effective_n(nx, tr)
+        hy <- effective_n(ny, tr)
+        dx <- (nx - 1) * vx / (hx * (hx - 1))
+        dy <- (ny - 1) * vy / (hy * (hy - 1))
+        stderr <- sqrt(dx + dy)
+        df <- yuen_welch_df(nx, ny, vx, vy, tr)
+      } else {
+        stderrx <- sqrt(vx/nx)
+        stderry <- sqrt(vy/ny)
+        stderr <- sqrt(stderrx^2 + stderry^2)
+        df <- stderr^4/(stderrx^4/(nx - 1) + stderry^4/(ny - 1))
+      }
+
       z <- c(x, y)
-      mz <- mean(z)
+      if (tr > 0) {
+        mz <- trimmed_mean(z, tr)
+      } else {
+        mz <- mean(z)
+      }
+
       x.cent <- x - mx + mz
       y.cent <- y - my + mz
       X <- matrix(sample(x, size = nx*R, replace = TRUE), nrow = R)
       Y <- matrix(sample(y, size = ny*R, replace = TRUE), nrow = R)
-      MX <- rowMeans(X - mx + mz)
-      MY <- rowMeans(Y - my + mz)
-      VX <- rowSums((X-MX)^2)/(nx-1)
-      VY <- rowSums((Y-MY)^2)/(ny-1)
-      STDERR <- sqrt(VX/nx + VY/ny)
-      EFF <- (MX+mx) - (MY+my)
 
-      for(i in 1:nrow(X)){
-        #dat = Z[i,]
-        dat_x = X[i,]#dat[1:nx]
-        dat_y = Y[i,]#dat[(nx+1):(nx+ny)]
+      if (tr == 0) {
+        MX <- rowMeans(X - mx + mz)
+        MY <- rowMeans(Y - my + mz)
+        VX <- rowSums((X-MX)^2)/(nx-1)
+        VY <- rowSums((Y-MY)^2)/(ny-1)
+        STDERR <- sqrt(VX/nx + VY/ny)
+        EFF <- (MX+mx) - (MY+my)
 
-        m_vec[i] <- mean(dat_x, na.rm=TRUE) - mean(dat_y,na.rm=TRUE)  # mean difference vector
-        m_se_vec[i] <- sqrt(sd(dat_x, na.rm=TRUE)^2/length(na.omit(dat_x)) + sd(dat_y, na.rm=TRUE)^2/length(na.omit(dat_y)))
+        for(i in 1:nrow(X)){
+          dat_x = X[i,]
+          dat_y = Y[i,]
+          m_vec[i] <- mean(dat_x, na.rm=TRUE) - mean(dat_y,na.rm=TRUE)
+          m_se_vec[i] <- sqrt(sd(dat_x, na.rm=TRUE)^2/length(na.omit(dat_x)) + sd(dat_y, na.rm=TRUE)^2/length(na.omit(dat_y)))
+        }
+      } else {
+        # Trimmed path - Welch/Yuen
+        TSTAT <- numeric(R)
+        hx <- effective_n(nx, tr)
+        hy <- effective_n(ny, tr)
 
+        for (i in 1:R) {
+          dat_x <- X[i, ]
+          dat_y <- Y[i, ]
+
+          mx_boot <- trimmed_mean(dat_x, tr)
+          my_boot <- trimmed_mean(dat_y, tr)
+          vx_boot <- winsorized_var(dat_x, tr)
+          vy_boot <- winsorized_var(dat_y, tr)
+
+          dx_boot <- (nx - 1) * vx_boot / (hx * (hx - 1))
+          dy_boot <- (ny - 1) * vy_boot / (hy * (hy - 1))
+          se_boot <- sqrt(dx_boot + dy_boot)
+
+          mx_cent <- trimmed_mean(dat_x - mx + mz, tr)
+          my_cent <- trimmed_mean(dat_y - my + mz, tr)
+
+          if (se_boot > 10 * .Machine$double.eps) {
+            TSTAT[i] <- (mx_cent - my_cent) / se_boot
+          } else {
+            TSTAT[i] <- 0
+          }
+
+          m_vec[i] <- mx_boot - my_boot
+          m_se_vec[i] <- se_boot
+        }
       }
     }
     if (stderr < 10 * .Machine$double.eps * max(abs(mx), abs(my))){
@@ -328,12 +558,10 @@ boot_t_test.default <- function(x,
     }
 
     tstat <- (mx - my - mu)/stderr
-    # Remember tstat[which.max( abs(tstat) )]
-    #TSTAT <- (MX - MY)/STDERR
 
-    TSTAT <- (MX-MY)/STDERR
-    #TSTAT_low <- (MX-low_eqbound)/STDERR
-    #TSTAT_high <- (MX-high_eqbound)/STDERR
+    if (tr == 0) {
+      TSTAT <- (MX-MY)/STDERR
+    }
   }
 
   if(is.null(y)){
@@ -349,27 +577,28 @@ boot_t_test.default <- function(x,
       n_jack <- nx
       jack_est <- numeric(n_jack)
       for (j in seq_len(n_jack)) {
-        jack_est[j] <- mean(x[-j])
+        jack_est[j] <- trimmed_mean(x[-j], tr)
       }
     } else {
       # Two-sample: pooled jackknife (delete one from combined)
       n_jack <- nx + ny
       jack_est <- numeric(n_jack)
       for (j in seq_len(nx)) {
-        jack_est[j] <- mean(x[-j]) - my
+        jack_est[j] <- trimmed_mean(x[-j], tr) - trimmed_mean(y, tr)
       }
       for (j in seq_len(ny)) {
-        jack_est[nx + j] <- mx - mean(y[-j])
+        jack_est[nx + j] <- trimmed_mean(x, tr) - trimmed_mean(y[-j], tr)
       }
     }
   }
 
   if(alternative %in% c("equivalence", "minimal.effect")){
-
-
     tstat_l = (diff-min(mu))/stderr
     tstat_u = (diff-max(mu))/stderr
   }
+
+  # se0 for studentized CI: use the observed stderr
+  se0_val <- stderr
 
   if (alternative == "less") {
 
@@ -379,7 +608,7 @@ boot_t_test.default <- function(x,
                         "stud" = stud(m_vec,
                                       boots_se = m_se_vec,
                                       t0 = diff,
-                                      se0 = null_test$stderr,
+                                      se0 = se0_val,
                                       alpha = alpha*2),
                         "basic" = basic(m_vec, t0 = diff, alpha*2),
                         "perc" = perc(m_vec, alpha*2),
@@ -393,7 +622,7 @@ boot_t_test.default <- function(x,
                         "stud" = stud(m_vec,
                                       boots_se = m_se_vec,
                                       t0 = diff,
-                                      se0 = null_test$stderr,
+                                      se0 = se0_val,
                                       alpha*2),
                         "basic" = basic(m_vec, t0 = diff, alpha*2),
                         "perc" = perc(m_vec, alpha*2),
@@ -406,7 +635,7 @@ boot_t_test.default <- function(x,
                         "stud" = stud(m_vec,
                                       boots_se = m_se_vec,
                                       t0 = diff,
-                                      se0 = null_test$stderr,
+                                      se0 = se0_val,
                                       alpha),
                         "basic" = basic(m_vec, t0 = diff, alpha),
                         "perc" = perc(m_vec, alpha),
@@ -421,7 +650,7 @@ boot_t_test.default <- function(x,
                         "stud" = stud(m_vec,
                                       boots_se = m_se_vec,
                                       t0 = diff,
-                                      se0 = null_test$stderr,
+                                      se0 = se0_val,
                                       alpha*2),
                         "basic" = basic(m_vec, t0 = diff, alpha*2),
                         "perc" = perc(m_vec, alpha*2),
@@ -436,7 +665,7 @@ boot_t_test.default <- function(x,
                         "stud" = stud(m_vec,
                                       boots_se = m_se_vec,
                                       t0 = diff,
-                                      se0 = null_test$stderr,
+                                      se0 = se0_val,
                                       alpha*2),
                         "basic" = basic(m_vec, t0 = diff, alpha*2),
                         "perc" = perc(m_vec, alpha*2),
@@ -471,18 +700,29 @@ boot_t_test.default <- function(x,
   names(tstat_report) <- "t-observed"
   names(df) <- "df"
 
+  # Build estimate and data.name from appropriate sources
+  if (tr > 0) {
+    rval_estimate <- estimate
+    rval_null <- mu
+    rval_dname <- dname
+  } else {
+    rval_estimate <- null_test$estimate
+    rval_null <- null_test$null.value
+    rval_dname <- null_test$data.name
+  }
+
   rval = list(
     statistic = tstat_report,
     parameter = df,
     p.value = boot.pval,
     stderr = boot.se,
     conf.int = boot.cint,
-    estimate = null_test$estimate,
-    null.value = null_test$null.value,
+    estimate = rval_estimate,
+    null.value = rval_null,
     alternative = alternative,
     method = method,
     boot = m_vec,
-    data.name = null_test$data.name,
+    data.name = rval_dname,
     call = match.call()
   )
 
@@ -500,7 +740,7 @@ boot_t_test.formula <- function (formula, data, subset, na.action, ...){
      || (length(formula) != 3L)
      || (length(attr(terms(formula[-2L]), "term.labels")) != 1L))
     stop("'formula' missing or incorrect")
-  
+
   # Check for paired argument in ... and warn user
   dots <- list(...)
   if("paired" %in% names(dots)){
@@ -508,7 +748,7 @@ boot_t_test.formula <- function (formula, data, subset, na.action, ...){
       message("Using 'paired = TRUE' with the formula interface is not recommended. Please ensure your data is sorted appropriately to make the correct paired comparison.")
     }
   }
-  
+
   m <- match.call(expand.dots = FALSE)
   if(is.matrix(eval(m$data, parent.frame())))
     m$data <- as.data.frame(data)
