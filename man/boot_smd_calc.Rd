@@ -15,6 +15,7 @@ boot_smd_calc(
   bias_correction = TRUE,
   rm_correction = FALSE,
   glass = NULL,
+  denom = c("auto", "z", "rm", "pooled", "avg", "glass1", "glass2"),
   boot_ci = c("stud", "basic", "perc", "bca"),
   R = 1999,
   output = c("htest", "data.frame"),
@@ -33,6 +34,7 @@ boot_smd_calc(
   bias_correction = TRUE,
   rm_correction = FALSE,
   glass = NULL,
+  denom = c("auto", "z", "rm", "pooled", "avg", "glass1", "glass2"),
   boot_ci = c("stud", "basic", "perc", "bca"),
   R = 1999,
   output = c("htest", "data.frame"),
@@ -60,6 +62,20 @@ boot_smd_calc(
 \item{rm_correction}{Repeated measures correction to make standardized mean difference Cohen's d(rm). This only applies to repeated/paired samples. Default is FALSE.}
 
 \item{glass}{Option to calculate Glass's delta instead of Cohen's d style SMD ('glass1' uses first group's SD, 'glass2' uses second group's SD).}
+
+\item{denom}{a character string specifying the denominator for standardization:
+- "auto": (default) Uses the standard denominator based on design and other arguments
+(glass, rm_correction, var.equal).
+- "z": SD of differences (Cohen's d_z). Valid for paired and one-sample designs.
+- "rm": Repeated-measures corrected (Cohen's d_rm). Valid for paired designs only.
+- "pooled": Pooled SD (Cohen's d_s). Valid for independent samples only.
+- "avg": Root-mean-square SD (Cohen's d_av). Valid for independent samples only.
+- "glass1": First group's (x) SD (Glass's delta). Valid for paired and independent designs.
+- "glass2": Second group's (y) SD (Glass's delta). Valid for paired and independent designs.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{When set to any value other than "auto", this overrides the glass, rm_correction,
+and var.equal arguments. The bias_correction argument is not affected.
+}\if{html}{\out{</div>}}}
 
 \item{boot_ci}{method for bootstrap confidence interval calculation: "stud" (studentized, default), "basic" (basic bootstrap), "bca" (bias-corrected and accelerated), or "perc" (percentile bootstrap).}
 
@@ -162,6 +178,12 @@ The function supports three study designs:
 \item Two-sample independent design: Standardizes the difference between two group means
 \item Paired samples design: Standardizes the mean difference between paired observations
 }
+
+The \code{denom} parameter provides a direct way to select the standardization denominator.
+When \code{denom} is not "auto", it takes precedence over the \code{glass}, \code{rm_correction}, and
+\code{var.equal} arguments, which are overridden as needed. A message is emitted if any
+explicitly provided arguments are overridden. The \code{bias_correction} argument is always
+respected regardless of \code{denom}.
 
 For detailed information on calculation methods, see \code{vignette("SMD_calcs")}.
 }

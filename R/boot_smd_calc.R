@@ -31,6 +31,18 @@
 #'     - "greater": Test whether SMD is greater than null.value
 #'     - "equivalence": Test whether SMD is between specified bounds
 #'     - "minimal.effect": Test whether SMD is outside specified bounds
+#' @param denom a character string specifying the denominator for standardization:
+#'     - "auto": (default) Uses the standard denominator based on design and other arguments
+#'       (glass, rm_correction, var.equal).
+#'     - "z": SD of differences (Cohen's d_z). Valid for paired and one-sample designs.
+#'     - "rm": Repeated-measures corrected (Cohen's d_rm). Valid for paired designs only.
+#'     - "pooled": Pooled SD (Cohen's d_s). Valid for independent samples only.
+#'     - "avg": Root-mean-square SD (Cohen's d_av). Valid for independent samples only.
+#'     - "glass1": First group's (x) SD (Glass's delta). Valid for paired and independent designs.
+#'     - "glass2": Second group's (y) SD (Glass's delta). Valid for paired and independent designs.
+#'
+#'     When set to any value other than "auto", this overrides the glass, rm_correction,
+#'     and var.equal arguments. The bias_correction argument is not affected.
 #'
 #' @details
 #' This function calculates bootstrapped confidence intervals for standardized mean differences.
@@ -59,6 +71,12 @@
 #'   * One-sample design: Standardizes the difference between the sample mean and zero (or other specified value)
 #'   * Two-sample independent design: Standardizes the difference between two group means
 #'   * Paired samples design: Standardizes the mean difference between paired observations
+#'
+#' The `denom` parameter provides a direct way to select the standardization denominator.
+#' When `denom` is not "auto", it takes precedence over the `glass`, `rm_correction`, and
+#' `var.equal` arguments, which are overridden as needed. A message is emitted if any
+#' explicitly provided arguments are overridden. The `bias_correction` argument is always
+#' respected regardless of `denom`.
 #'
 #' For detailed information on calculation methods, see `vignette("SMD_calcs")`.
 #'
@@ -159,6 +177,8 @@ boot_smd_calc <- function(x, ...,
                           bias_correction = TRUE,
                           rm_correction = FALSE,
                           glass = NULL,
+                          denom = c("auto", "z", "rm", "pooled", "avg",
+                                    "glass1", "glass2"),
                           boot_ci = c("stud","basic","perc","bca"),
                           R = 1999,
                           output = c("htest", "data.frame"),
@@ -182,6 +202,8 @@ boot_smd_calc.default = function(x,
                                  bias_correction = TRUE,
                                  rm_correction = FALSE,
                                  glass = NULL,
+                                 denom = c("auto", "z", "rm", "pooled", "avg",
+                                           "glass1", "glass2"),
                                  boot_ci = c("stud","basic","perc","bca"),
                                  R = 1999,
                                  output = c("htest", "data.frame"),
@@ -189,9 +211,43 @@ boot_smd_calc.default = function(x,
                                  alternative = c("none", "two.sided", "less", "greater",
                                                  "equivalence", "minimal.effect"),
                                  ...) {
+  denom = match.arg(denom)
   boot_ci = match.arg(boot_ci)
   output = match.arg(output)
   alternative = match.arg(alternative)
+
+  # Capture explicit-pass status before any modifications
+  var.equal_explicit <- !missing(var.equal)
+  rm_correction_explicit <- !missing(rm_correction)
+  glass_explicit <- !missing(glass)
+
+  # Determine sample_type early for denom resolution
+  if(is.null(y)){
+    sample_type = "One Sample"
+  } else if(paired == TRUE) {
+    sample_type = "Paired Sample"
+  } else {
+    sample_type = "Two Sample"
+  }
+
+  # Resolve denom ONCE - messages emitted here, not in loop
+  resolved <- resolve_denom(
+    denom = denom,
+    sample_type = sample_type,
+    var.equal = var.equal,
+    rm_correction = rm_correction,
+    glass = if (glass_explicit) glass else NULL,
+    var.equal_explicit = var.equal_explicit,
+    rm_correction_explicit = rm_correction_explicit,
+    glass_explicit = glass_explicit
+  )
+
+  for (msg in resolved$messages) message(msg)
+
+  # Apply resolved values for all subsequent smd_calc calls
+  var.equal <- resolved$var.equal
+  rm_correction <- resolved$rm_correction
+  glass <- resolved$glass
 
   # Handle equivalence/minimal.effect bounds
   if (alternative %in% c("equivalence", "minimal.effect")) {
@@ -422,15 +478,7 @@ boot_smd_calc.default = function(x,
               "bca" = bca_ci(boots_est = boots, t0 = raw_smd$estimate[1L],
                              jack_est = jack_est, alpha = ci_alpha))
 
-  # Determine sample type and SMD label
-  if(is.null(y)){
-    sample_type = "One Sample"
-  } else if(paired == TRUE) {
-    sample_type = "Paired Sample"
-  } else {
-    sample_type = "Two Sample"
-  }
-
+  # Determine SMD label
   smd_label <- if (bias_correction) {
     if (!is.null(glass) && glass %in% c("glass1", "glass2")) {
       paste0("Glass's ", ifelse(glass == "glass1", "delta1", "delta2"))

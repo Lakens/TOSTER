@@ -770,4 +770,113 @@ get_ncp_t2 = function (ncp, df, conf.level = 0.95,
   return(Result)
 }
 
+# Internal helper to resolve denom into concrete arguments
+# Returns a list with resolved values of: glass, rm_correction, var.equal
+# and a character vector of messages to emit (if any)
+resolve_denom <- function(denom,
+                          sample_type,
+                          var.equal,
+                          rm_correction,
+                          glass,
+                          var.equal_explicit = FALSE,
+                          rm_correction_explicit = FALSE,
+                          glass_explicit = FALSE) {
+
+  msgs <- character(0)
+
+  if (denom == "auto") {
+    # Return current values unchanged, no messages
+    return(list(
+      var.equal = var.equal,
+      rm_correction = rm_correction,
+      glass = glass,
+      messages = msgs
+    ))
+  }
+
+  # --- Design-validity checks ---
+  paired_only <- c("rm")
+  paired_or_one <- c("z")
+  ind_only <- c("pooled", "avg")
+  needs_two_samples <- c("glass1", "glass2", "rm")
+
+  if (denom %in% ind_only && sample_type != "Two Sample") {
+    stop(paste0("denom = '", denom, "' is only valid for independent samples designs."))
+  }
+  if (denom %in% paired_only && sample_type != "Paired Sample") {
+    stop(paste0("denom = '", denom, "' is only valid for paired samples designs."))
+  }
+  if (denom %in% paired_or_one && sample_type == "Two Sample") {
+    stop(paste0("denom = '", denom, "' is not valid for independent samples designs."))
+  }
+  if (denom %in% needs_two_samples && sample_type == "One Sample") {
+    stop(paste0("denom = '", denom, "' is not valid for one-sample designs."))
+  }
+
+  # --- Remapping with conflict detection ---
+  new_glass <- glass
+  new_rm <- rm_correction
+  new_var.equal <- var.equal
+
+  if (denom == "z") {
+    if (rm_correction_explicit && isTRUE(rm_correction)) {
+      msgs <- c(msgs, "denom = 'z' overrides rm_correction to FALSE.")
+    }
+    if (glass_explicit && !is.null(glass)) {
+      msgs <- c(msgs, "denom = 'z' overrides glass argument.")
+    }
+    new_rm <- FALSE
+    new_glass <- NULL
+
+  } else if (denom == "rm") {
+    if (rm_correction_explicit && !isTRUE(rm_correction)) {
+      msgs <- c(msgs, "denom = 'rm' overrides rm_correction to TRUE.")
+    }
+    if (glass_explicit && !is.null(glass)) {
+      msgs <- c(msgs, "denom = 'rm' overrides glass argument.")
+    }
+    new_rm <- TRUE
+    new_glass <- NULL
+
+  } else if (denom == "pooled") {
+    if (var.equal_explicit && !isTRUE(var.equal)) {
+      msgs <- c(msgs, "denom = 'pooled' overrides var.equal to TRUE.")
+    }
+    if (glass_explicit && !is.null(glass)) {
+      msgs <- c(msgs, "denom = 'pooled' overrides glass argument.")
+    }
+    new_var.equal <- TRUE
+    new_glass <- NULL
+    new_rm <- FALSE
+
+  } else if (denom == "avg") {
+    if (var.equal_explicit && isTRUE(var.equal)) {
+      msgs <- c(msgs, "denom = 'avg' overrides var.equal to FALSE.")
+    }
+    if (glass_explicit && !is.null(glass)) {
+      msgs <- c(msgs, "denom = 'avg' overrides glass argument.")
+    }
+    new_var.equal <- FALSE
+    new_glass <- NULL
+    new_rm <- FALSE
+
+  } else if (denom %in% c("glass1", "glass2")) {
+    if (glass_explicit && !is.null(glass) && glass != denom) {
+      msgs <- c(msgs, paste0("denom = '", denom, "' overrides glass argument."))
+    }
+    if (rm_correction_explicit && isTRUE(rm_correction)) {
+      msgs <- c(msgs, paste0("denom = '", denom, "' overrides rm_correction to FALSE."))
+    }
+    new_glass <- denom
+    new_rm <- FALSE
+  }
+
+  return(list(
+    var.equal = new_var.equal,
+    rm_correction = new_rm,
+    glass = new_glass,
+    messages = msgs
+  ))
+}
+
 utils::globalVariables(c("sd1"))

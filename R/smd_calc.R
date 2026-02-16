@@ -29,6 +29,18 @@
 #'     - "greater": Test whether SMD is greater than null.value
 #'     - "equivalence": Test whether SMD is between specified bounds
 #'     - "minimal.effect": Test whether SMD is outside specified bounds
+#' @param denom a character string specifying the denominator for standardization:
+#'     - "auto": (default) Uses the standard denominator based on design and other arguments
+#'       (glass, rm_correction, var.equal).
+#'     - "z": SD of differences (Cohen's d_z). Valid for paired and one-sample designs.
+#'     - "rm": Repeated-measures corrected (Cohen's d_rm). Valid for paired designs only.
+#'     - "pooled": Pooled SD (Cohen's d_s). Valid for independent samples only.
+#'     - "avg": Root-mean-square SD (Cohen's d_av). Valid for independent samples only.
+#'     - "glass1": First group's (x) SD (Glass's delta). Valid for paired and independent designs.
+#'     - "glass2": Second group's (y) SD (Glass's delta). Valid for paired and independent designs.
+#'
+#'     When set to any value other than "auto", this overrides the glass, rm_correction,
+#'     and var.equal arguments. The bias_correction argument is not affected.
 #' @param test_method a character string specifying the method for hypothesis testing:
 #'     - "z": Use z-statistic (normal distribution)
 #'     - "t": Use t-statistic with degrees of freedom from the SMD calculation
@@ -51,6 +63,12 @@
 #'   * "goulet": Uses the Goulet-Pelletier method
 #'   * "t": Uses the central t-distribution
 #'   * "z": Uses the normal distribution
+#'
+#' The `denom` parameter provides a direct way to select the standardization denominator.
+#' When `denom` is not "auto", it takes precedence over the `glass`, `rm_correction`, and
+#' `var.equal` arguments, which are overridden as needed. A message is emitted if any
+#' explicitly provided arguments are overridden. The `bias_correction` argument is always
+#' respected regardless of `denom`.
 #'
 #' For detailed information on calculation methods, see `vignette("SMD_calcs")`.
 #'
@@ -109,7 +127,13 @@
 #'          alternative = "two.sided", null.value = 0,
 #'          test_method = "t", smd_ci = "t")
 #'
-#' # Example 8: Legacy data.frame output
+#' # Example 8: Direct denominator selection
+#' smd_calc(x = group1, y = group2, denom = "pooled")
+#' smd_calc(x = group1, y = group2, denom = "avg")
+#' smd_calc(x = before, y = after, paired = TRUE, denom = "rm")
+#' smd_calc(x = group1, y = group2, denom = "glass1", bias_correction = TRUE)
+#'
+#' # Example 9: Legacy data.frame output
 #' smd_calc(x = group1, y = group2, output = "data.frame")
 #'
 #' @family effect sizes
@@ -124,6 +148,8 @@ smd_calc <- function(x, ...,
                      bias_correction = TRUE,
                      rm_correction = FALSE,
                      glass = NULL,
+                     denom = c("auto", "z", "rm", "pooled", "avg",
+                               "glass1", "glass2"),
                      smd_ci = c("nct", "goulet", "t", "z"),
                      output = c("htest", "data.frame"),
                      null.value = 0,
@@ -148,6 +174,8 @@ smd_calc.default = function(x,
                             bias_correction = TRUE,
                             rm_correction = FALSE,
                             glass = NULL,
+                            denom = c("auto", "z", "rm", "pooled", "avg",
+                                      "glass1", "glass2"),
                             smd_ci = c("nct", "goulet", "t", "z"),
                             output = c("htest", "data.frame"),
                             null.value = 0,
@@ -155,6 +183,13 @@ smd_calc.default = function(x,
                                             "equivalence", "minimal.effect"),
                             test_method = c("z", "t"),
                             ...) {
+
+  denom = match.arg(denom)
+
+  # Capture explicit-pass status before modifying defaults
+  var.equal_explicit <- !missing(var.equal)
+  rm_correction_explicit <- !missing(rm_correction)
+  glass_explicit <- !missing(glass)
 
   if(is.null(glass)){
     glass = "no"
@@ -178,23 +213,47 @@ smd_calc.default = function(x,
     sample_type = "Two Sample"
   }
 
+  # Resolve denom and remap arguments
+  # Pass glass as NULL when it was not explicitly provided by the user
+  resolved <- resolve_denom(
+    denom = denom,
+    sample_type = sample_type,
+    var.equal = var.equal,
+    rm_correction = rm_correction,
+    glass = if (glass_explicit) glass else NULL,
+    var.equal_explicit = var.equal_explicit,
+    rm_correction_explicit = rm_correction_explicit,
+    glass_explicit = glass_explicit
+  )
+
+  # Emit any override messages
+  for (msg in resolved$messages) message(msg)
+
+  # Apply resolved values
+  var.equal <- resolved$var.equal
+  rm_correction <- resolved$rm_correction
+  glass <- resolved$glass
+  if(is.null(glass)){
+    glass = "no"
+  }
+
   if(glass == "glass1" || glass == "glass2"){
     if(glass == "glass1"){
-      denom = "glass1"
+      int_denom = "glass1"
     }
 
     if(glass == "glass2"){
-      denom = "glass2"
+      int_denom = "glass2"
     }
   } else{
     if(sample_type != "Two Sample" ){
       if(rm_correction){
-        denom = "rm"
+        int_denom = "rm"
       } else {
-        denom = "z"
+        int_denom = "z"
       }
     } else{
-      denom = "d"
+      int_denom = "d"
     }
   }
 
@@ -261,7 +320,7 @@ smd_calc.default = function(x,
       sd2 = sd2,
       r12 = r12,
       type = smd_type,
-      denom = denom,
+      denom = int_denom,
       alpha = alpha/2,
       smd_ci = smd_ci
     )
@@ -287,7 +346,7 @@ smd_calc.default = function(x,
       type = smd_type,
       var.equal = var.equal,
       alpha = alpha/2,
-      denom = denom,
+      denom = int_denom,
       smd_ci = smd_ci
     )
 
@@ -353,12 +412,12 @@ smd_calc.default = function(x,
     if(paired == TRUE && !missing(y)){
       cohen_res_ci = d_est_pair(
         n = n, m1 = m1, m2 = m2, sd1 = sd1, sd2 = sd2, r12 = r12,
-        type = smd_type, denom = denom, alpha = alpha, smd_ci = smd_ci
+        type = smd_type, denom = int_denom, alpha = alpha, smd_ci = smd_ci
       )
     } else if(!missing(y)){
       cohen_res_ci = d_est_ind(
         n1 = n1, n2 = n2, m1 = m1, m2 = m2, sd1 = sd1, sd2 = sd2,
-        type = smd_type, var.equal = var.equal, alpha = alpha, denom = denom, smd_ci = smd_ci
+        type = smd_type, var.equal = var.equal, alpha = alpha, denom = int_denom, smd_ci = smd_ci
       )
     } else {
       cohen_res_ci = d_est_one(

@@ -15,6 +15,7 @@ smd_calc(
   bias_correction = TRUE,
   rm_correction = FALSE,
   glass = NULL,
+  denom = c("auto", "z", "rm", "pooled", "avg", "glass1", "glass2"),
   smd_ci = c("nct", "goulet", "t", "z"),
   output = c("htest", "data.frame"),
   null.value = 0,
@@ -33,6 +34,7 @@ smd_calc(
   bias_correction = TRUE,
   rm_correction = FALSE,
   glass = NULL,
+  denom = c("auto", "z", "rm", "pooled", "avg", "glass1", "glass2"),
   smd_ci = c("nct", "goulet", "t", "z"),
   output = c("htest", "data.frame"),
   null.value = 0,
@@ -60,6 +62,20 @@ smd_calc(
 \item{rm_correction}{Repeated measures correction to make standardized mean difference Cohen's d(rm). This only applies to repeated/paired samples. Default is FALSE.}
 
 \item{glass}{An option to calculate Glass's delta as an alternative to Cohen's d type SMD. Default is NULL to not calculate Glass's delta, 'glass1' will use the first group's SD as the denominator whereas 'glass2' will use the 2nd group's SD.}
+
+\item{denom}{a character string specifying the denominator for standardization:
+- "auto": (default) Uses the standard denominator based on design and other arguments
+(glass, rm_correction, var.equal).
+- "z": SD of differences (Cohen's d_z). Valid for paired and one-sample designs.
+- "rm": Repeated-measures corrected (Cohen's d_rm). Valid for paired designs only.
+- "pooled": Pooled SD (Cohen's d_s). Valid for independent samples only.
+- "avg": Root-mean-square SD (Cohen's d_av). Valid for independent samples only.
+- "glass1": First group's (x) SD (Glass's delta). Valid for paired and independent designs.
+- "glass2": Second group's (y) SD (Glass's delta). Valid for paired and independent designs.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{When set to any value other than "auto", this overrides the glass, rm_correction,
+and var.equal arguments. The bias_correction argument is not affected.
+}\if{html}{\out{</div>}}}
 
 \item{smd_ci}{Method for calculating SMD confidence intervals. Methods include 'goulet', 'noncentral t' (nct), 'central t' (t), and 'normal method' (z).}
 
@@ -149,6 +165,12 @@ Different confidence interval calculation methods are available:
 \item "z": Uses the normal distribution
 }
 
+The \code{denom} parameter provides a direct way to select the standardization denominator.
+When \code{denom} is not "auto", it takes precedence over the \code{glass}, \code{rm_correction}, and
+\code{var.equal} arguments, which are overridden as needed. A message is emitted if any
+explicitly provided arguments are overridden. The \code{bias_correction} argument is always
+respected regardless of \code{denom}.
+
 For detailed information on calculation methods, see \code{vignette("SMD_calcs")}.
 }
 \section{Purpose}{
@@ -198,7 +220,13 @@ smd_calc(x = group1, y = group2,
          alternative = "two.sided", null.value = 0,
          test_method = "t", smd_ci = "t")
 
-# Example 8: Legacy data.frame output
+# Example 8: Direct denominator selection
+smd_calc(x = group1, y = group2, denom = "pooled")
+smd_calc(x = group1, y = group2, denom = "avg")
+smd_calc(x = before, y = after, paired = TRUE, denom = "rm")
+smd_calc(x = group1, y = group2, denom = "glass1", bias_correction = TRUE)
+
+# Example 9: Legacy data.frame output
 smd_calc(x = group1, y = group2, output = "data.frame")
 
 }

@@ -58,7 +58,9 @@
       "Bash(where.exe:*)",
       "Bash(findstr:*)",
       "Bash(\"/c/Program Files/R/R-4.5.1/bin/Rscript.exe\" -e \"devtools::load_all\\(\\); testthat::test_file\\(''tests/testthat/test-boot_t_test_trimmed.R''\\)\")",
-      "Bash(\"/c/Program Files/R/R-4.5.1/bin/Rscript.exe\" -e \"devtools::load_all\\(\\); devtools::test\\(\\)\")"
+      "Bash(\"/c/Program Files/R/R-4.5.1/bin/Rscript.exe\" -e \"devtools::load_all\\(\\); devtools::test\\(\\)\")",
+      "Bash(\"C:/Program Files/R/R-4.5.1/bin/Rscript.exe\" -e \"devtools::load_all\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER''\\)\")",
+      "Bash(\"C:/Program Files/R/R-4.5.1/bin/Rscript.exe\" -e \"devtools::load_all\\(\\); testthat::test_file\\(''tests/testthat/test-denom_param.R''\\)\")"
     ]
   }
 }
