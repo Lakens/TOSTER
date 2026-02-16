@@ -60,7 +60,21 @@
       "Bash(\"/c/Program Files/R/R-4.5.1/bin/Rscript.exe\" -e \"devtools::load_all\\(\\); testthat::test_file\\(''tests/testthat/test-boot_t_test_trimmed.R''\\)\")",
       "Bash(\"/c/Program Files/R/R-4.5.1/bin/Rscript.exe\" -e \"devtools::load_all\\(\\); devtools::test\\(\\)\")",
       "Bash(\"C:/Program Files/R/R-4.5.1/bin/Rscript.exe\" -e \"devtools::load_all\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER''\\)\")",
-      "Bash(\"C:/Program Files/R/R-4.5.1/bin/Rscript.exe\" -e \"devtools::load_all\\(\\); testthat::test_file\\(''tests/testthat/test-denom_param.R''\\)\")"
+      "Bash(\"C:/Program Files/R/R-4.5.1/bin/Rscript.exe\" -e \"devtools::load_all\\(\\); testthat::test_file\\(''tests/testthat/test-denom_param.R''\\)\")",
+      "Bash(cmd /c \"where Rscript 2>nul\")",
+      "Bash(cmd /c \"where R 2>nul\")",
+      "Bash(cmd /c \"dir /s /b \"\"C:\\\\Program Files\\\\R\\\\*.exe\"\" 2>nul | findstr Rscript\")",
+      "Bash(cmd /c \"dir /s /b \"\"C:\\\\Program Files\\\\R\"\" 2>nul\")",
+      "Bash(cmd /c \"where /R C:\\\\ Rscript.exe 2>nul\")",
+      "Bash(cmd /c \"dir /s /b C:\\\\R\\\\*.exe 2>nul\")",
+      "Bash(cmd /c \"dir /s /b \"\"%LOCALAPPDATA%\\\\Programs\\\\R\"\" 2>nul\")",
+      "Bash(cmd /c \"dir /s /b \"\"%USERPROFILE%\\\\AppData\\\\Local\\\\R\"\" 2>nul\")",
+      "Bash(echo:*)",
+      "Bash(\"/c/Users/caldwellaaron/AppData/Local/Programs/R/R-4.3.2/bin/Rscript.exe\" -e \"setwd\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER''\\); devtools::load_all\\(\\); testthat::test_file\\(''tests/testthat/test-htest_output_updates.R''\\)\")",
+      "Bash(\"/c/Users/caldwellaaron/AppData/Local/Programs/R/R-4.3.2/bin/Rscript.exe\" -e \"setwd\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER''\\); devtools::load_all\\(\\); testthat::test_file\\(''tests/testthat/test-htest.R''\\)\")",
+      "Bash(\"/c/Users/caldwellaaron/AppData/Local/Programs/R/R-4.3.2/bin/Rscript.exe\" -e \"setwd\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER''\\); devtools::load_all\\(\\); testthat::test_file\\(''tests/testthat/test-hodges_lehmann.R''\\)\")",
+      "Bash(\"/c/Users/caldwellaaron/AppData/Local/Programs/R/R-4.3.2/bin/Rscript.exe\" -e \"setwd\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER''\\); devtools::load_all\\(\\); testthat::test_file\\(''tests/testthat/test-perm_t_test.R''\\)\")",
+      "Bash(\"/c/Users/caldwellaaron/AppData/Local/Programs/R/R-4.3.2/bin/Rscript.exe\" -e \"setwd\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER''\\); devtools::load_all\\(\\); testthat::test_file\\(''tests/testthat/test-boot_t_test_trimmed.R''\\)\")"
     ]
   }
 }

@@ -99,8 +99,8 @@ test_that("two-sample perm_t_test works with default settings", {
   expect_s3_class(result, "htest")
   expect_true(grepl("Two Sample", result$method))
   expect_true(grepl("Welch", result$method))  # Default is var.equal = FALSE
-  expect_length(result$estimate, 2)
-  expect_named(result$estimate, c("mean of x", "mean of y"))
+  expect_length(result$estimate, 3)
+  expect_named(result$estimate, c("mean of x", "mean of y", "mean difference (x - y)"))
 })
 
 test_that("two-sample perm_t_test works with var.equal = TRUE", {
@@ -133,7 +133,7 @@ test_that("paired perm_t_test works correctly", {
 
   expect_s3_class(result, "htest")
   expect_true(grepl("Paired", result$method))
-  expect_named(result$estimate, "mean of the differences")
+  expect_named(result$estimate, "mean of the differences (z = x - y)")
 })
 
 test_that("paired perm_t_test detects significant difference", {
@@ -230,7 +230,10 @@ test_that("trimmed t-test (tr > 0) works correctly", {
 
   expect_s3_class(result, "htest")
   expect_true(grepl("Yuen", result$method))
-  expect_named(result$estimate, c("trimmed mean of x", "trimmed mean of y"))
+  expect_equal(length(result$estimate), 3)
+  expect_equal(names(result$estimate)[1:2],
+               c("trimmed mean of x", "trimmed mean of y"))
+  expect_true(grepl("trimmed mean difference", names(result$estimate)[3]))
 })
 
 test_that("one-sample trimmed t-test works", {
@@ -239,7 +242,7 @@ test_that("one-sample trimmed t-test works", {
   result <- perm_t_test(x_sample, mu = 5, tr = 0.2, R = 199)
 
   expect_true(grepl("Yuen", result$method))
-  expect_named(result$estimate, "trimmed mean of x")
+  expect_true(grepl("trimmed mean of x", names(result$estimate)))
 })
 
 test_that("paired trimmed t-test works", {

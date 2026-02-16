@@ -386,6 +386,29 @@ describe_htest = function(htest,alpha = NULL,digits = 3){
   return(print_state)
 }
 
+#' @keywords internal
+#' @noRd
+# Substitute generic "x"/"y" labels with actual group level names
+# in estimate names and sample_size names for formula interface methods
+relabel_for_formula <- function(result, lvls) {
+  # Relabel estimate names
+  if (!is.null(names(result$estimate))) {
+    nms <- names(result$estimate)
+    nms <- gsub("\\bof x\\b", paste0("of ", lvls[1]), nms)
+    nms <- gsub("\\bof y\\b", paste0("of ", lvls[2]), nms)
+    nms <- gsub("\\(x - y", paste0("(", lvls[1], " - ", lvls[2]), nms)
+    nms <- gsub("\\(z = x - y", paste0("(z = ", lvls[1], " - ", lvls[2]), nms)
+    names(result$estimate) <- nms
+  }
+
+  # Relabel sample_size names
+  if (!is.null(result$sample_size) && length(result$sample_size) == 2) {
+    names(result$sample_size) <- lvls
+  }
+
+  result
+}
+
 rounder_stat = function(number,
                         digits = 3){
   if(is.na(number) || !is.numeric(number)){

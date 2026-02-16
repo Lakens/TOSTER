@@ -44,6 +44,26 @@ NEWS
 
 ## Improvements
 
+- `simple_htest()`, `boot_t_test()`, `perm_t_test()`, and `hodges_lehmann()`
+  now produce more informative estimate labels that indicate the direction of
+  calculation (e.g., `"mean difference (treatment - control)"` when using the
+  formula interface).
+- For two-sample mean-based tests (`simple_htest` with t-test, `boot_t_test`,
+  `perm_t_test`), the mean difference is now appended as a third element of
+  `$estimate`, while preserving existing group means at positions 1-2
+  (backwards-compatible).
+- Paired test estimates are labeled to clarify the differencing operation,
+  e.g., `"mean of the differences (z = x - y)"`.
+- Wilcoxon/Mann-Whitney estimates in `simple_htest()` are labeled as
+  `"Hodges-Lehmann estimate"` with direction indicated.
+- `hodges_lehmann()` estimate labels updated for clarity: `"pseudomedian of x"`
+  for one-sample, `"Hodges-Lehmann estimate (x - y)"` for two-sample, and
+  `"Hodges-Lehmann estimate (z = x - y)"` for paired tests.
+- Trimmed mean labels in `boot_t_test()` and `perm_t_test()` now include the
+  trimming proportion, e.g., `"trimmed mean difference (x - y, tr = 0.1)"`.
+- A `$sample_size` element (named numeric vector) is now included in the
+  returned `htest` object for all four functions. For two-sample formula calls,
+  names reflect the actual factor levels.
 - **Permutation test terminology**: Clarified distinction between "Exact Permutation" (all permutations enumerated) and "Randomization" (permutations sampled with replacement) tests across `perm_t_test`, `hodges_lehmann`, and `brunner_munzel`
 - **p_method auto-selection**: Added intelligent default for `p_method` argument in permutation-based functions:
   - `NULL` (default): Automatically selects "exact" for exact permutation tests and "plusone" for randomization tests

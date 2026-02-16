@@ -521,7 +521,8 @@ perm_t_test.default <- function(x,
     }
 
     estimate <- setNames(mx, if (paired) {
-      if (tr > 0) "trimmed mean of the differences" else "mean of the differences"
+      if (tr > 0) paste0("trimmed mean of the differences (z = x - y, tr = ", tr, ")")
+      else "mean of the differences (z = x - y)"
     } else {
       if (tr > 0) "trimmed mean of x" else "mean of x"
     })
@@ -650,11 +651,12 @@ perm_t_test.default <- function(x,
     }
 
     if (tr > 0) {
-      estimate <- c(mx, my)
-      names(estimate) <- c("trimmed mean of x", "trimmed mean of y")
+      estimate <- c(mx, my, mx - my)
+      names(estimate) <- c("trimmed mean of x", "trimmed mean of y",
+                            paste0("trimmed mean difference (x - y, tr = ", tr, ")"))
     } else {
-      estimate <- c(mx, my)
-      names(estimate) <- c("mean of x", "mean of y")
+      estimate <- c(mx, my, mx - my)
+      names(estimate) <- c("mean of x", "mean of y", "mean difference (x - y)")
     }
 
     # Generate permutation distribution
@@ -786,6 +788,8 @@ perm_t_test.default <- function(x,
   }
 
   # Set up null value
+  # TODO: Consider updating null.value names to indicate direction
+  # (e.g., "difference in means (x - y)") for consistency with estimate labels
   if (alternative %in% c("equivalence", "minimal.effect")) {
     null.value <- mu
     names(null.value) <- rep("difference in means", 2)
@@ -846,6 +850,14 @@ perm_t_test.default <- function(x,
   names(tstat_report) <- "t-observed"
   names(df) <- "df"
 
+  # Compute sample_size
+  # Note: for paired, x <- x - y has already been done so y is NULL and nx is n_pairs
+  if (is.null(y)) {
+    sample_size <- c(n = nx)
+  } else {
+    sample_size <- c(nx = nx, ny = ny)
+  }
+
   # Build output
   rval <- list(
     statistic = tstat_report,
@@ -860,7 +872,8 @@ perm_t_test.default <- function(x,
     data.name = dname,
     call = match.call(),
     R = R,
-    R.used = R_used
+    R.used = R_used,
+    sample_size = sample_size
   )
 
   if (keep_perm) {
@@ -912,5 +925,6 @@ perm_t_test.formula <- function(formula, data, subset, na.action, ...) {
   DATA <- setNames(split(mf[[response]], g), c("x", "y"))
   y <- do.call("perm_t_test", c(DATA, list(...)))
   y$data.name <- DNAME
+  y <- relabel_for_formula(y, levels(g))
   y
 }

@@ -152,6 +152,16 @@ simple_htest.default = function(x,
    }
  }
 
+ # Compute sample sizes for output
+ if (is.null(y)) {
+   sample_size <- c(n = sum(!is.na(x)))
+ } else if (paired) {
+   complete <- complete.cases(x, y)
+   sample_size <- c(n = sum(complete))
+ } else {
+   sample_size <- c(nx = sum(!is.na(x)), ny = sum(!is.na(y)))
+ }
+
  if(alternative %in% c("equivalence","minimal.effect")){
 
    if(length(mu) == 1){
@@ -405,6 +415,40 @@ simple_htest.default = function(x,
 
  }
 
+  # Augment estimate labels and add mean difference for two-sample t-tests
+  if (test == "t.test") {
+    if (!is.null(y) && !paired) {
+      # Two-sample: append mean difference as third element
+      mdiff <- rval$estimate[1] - rval$estimate[2]
+      names(mdiff) <- paste0("mean difference (",
+                              gsub("^mean of ", "", names(rval$estimate)[1]),
+                              " - ",
+                              gsub("^mean of ", "", names(rval$estimate)[2]),
+                              ")")
+      rval$estimate <- c(rval$estimate, mdiff)
+    } else if (paired) {
+      # Paired: relabel to indicate differencing
+      names(rval$estimate) <- "mean of the differences (z = x - y)"
+    }
+    # One-sample: leave as "mean of x" (unchanged)
+  }
+
+  if (test == "wilcox.test") {
+    if (is.null(y)) {
+      # One-sample
+      names(rval$estimate) <- "pseudomedian of x"
+    } else if (paired) {
+      names(rval$estimate) <- "Hodges-Lehmann estimate (z = x - y)"
+    } else {
+      names(rval$estimate) <- "Hodges-Lehmann estimate (x - y)"
+    }
+  }
+
+  # TODO: Consider updating null.value names to indicate direction
+  # (e.g., "difference in means (x - y)") for consistency with estimate labels
+
+  rval$sample_size <- sample_size
+
   return(rval)
 
 }
@@ -447,6 +491,7 @@ simple_htest.formula = function(formula,
   DATA <- setNames(split(mf[[response]], g), c("x", "y"))
   y <- do.call("simple_htest", c(DATA, list(...)))
   y$data.name <- DNAME
+  y <- relabel_for_formula(y, levels(g))
   y
 
 }

@@ -76,7 +76,7 @@ test_that("two-sample Welch trimmed bootstrap works", {
 
   expect_s3_class(res, "htest")
   expect_true(grepl("Welch Yuen", res$method))
-  expect_length(res$estimate, 2)
+  expect_length(res$estimate, 3)
   expect_true(all(grepl("trimmed mean", names(res$estimate))))
 })
 

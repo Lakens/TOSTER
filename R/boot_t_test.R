@@ -207,9 +207,9 @@ boot_t_test.default <- function(x,
         mu = c(mu, -1 * mu)
       }
       mu = sort(mu)
-      names(mu) = rep("mean difference", 2)
+      names(mu) = rep(paste0("trimmed mean difference (tr = ", tr, ")"), 2)
     } else {
-      names(mu) = "mean difference"
+      names(mu) = paste0("trimmed mean difference (tr = ", tr, ")")
     }
   }
 
@@ -296,8 +296,9 @@ boot_t_test.default <- function(x,
 
     # Estimate labels
     if (tr > 0) {
-      estimate <- setNames(mx, if (paired) "trimmed mean of the differences"
-                                else "trimmed mean of x")
+      estimate <- setNames(mx, if (paired)
+        paste0("trimmed mean of the differences (z = x - y, tr = ", tr, ")")
+        else "trimmed mean of x")
     } else {
       estimate <- setNames(mx, if (paired) "mean of the differences"
                                 else "mean of x")
@@ -394,8 +395,9 @@ boot_t_test.default <- function(x,
 
     # Estimate labels
     if (tr > 0) {
-      estimate <- c(mx, my)
-      names(estimate) <- c("trimmed mean of x", "trimmed mean of y")
+      estimate <- c(mx, my, mx - my)
+      names(estimate) <- c("trimmed mean of x", "trimmed mean of y",
+                            paste0("trimmed mean difference (x - y, tr = ", tr, ")"))
     } else {
       estimate <- c(mx, my)
       names(estimate) <- c("mean of x", "mean of y")
@@ -711,6 +713,20 @@ boot_t_test.default <- function(x,
     rval_dname <- null_test$data.name
   }
 
+  # Compute sample_size
+  if (tr > 0) {
+    # When tr > 0, compute directly from data
+    # Note: for paired, x <- x - y has already been done so y is NULL
+    if (is.null(y)) {
+      sample_size <- c(n = nx)
+    } else {
+      sample_size <- c(nx = nx, ny = ny)
+    }
+  } else {
+    # When tr == 0, inherit from simple_htest which now includes sample_size
+    sample_size <- null_test$sample_size
+  }
+
   rval = list(
     statistic = tstat_report,
     parameter = df,
@@ -723,7 +739,8 @@ boot_t_test.default <- function(x,
     method = method,
     boot = m_vec,
     data.name = rval_dname,
-    call = match.call()
+    call = match.call(),
+    sample_size = sample_size
   )
 
   class(rval) = "htest"
@@ -765,5 +782,6 @@ boot_t_test.formula <- function (formula, data, subset, na.action, ...){
   DATA <- setNames(split(mf[[response]], g), c("x", "y"))
   y <- do.call("boot_t_test", c(DATA, list(...)))
   y$data.name <- DNAME
+  y <- relabel_for_formula(y, levels(g))
   y
 }

@@ -132,7 +132,7 @@ test_that("one-sample hodges_lehmann works correctly (asymptotic)", {
   expect_true(grepl("One Sample", result$method))
   expect_true(grepl("Asymptotic", result$method))
   expect_equal(result$null.value, c("location" = 5))
-  expect_named(result$estimate, "pseudomedian")
+  expect_named(result$estimate, "pseudomedian of x")
 
   # P-value should be in valid range
   expect_gte(result$p.value, 0)
@@ -175,7 +175,7 @@ test_that("two-sample hodges_lehmann works with asymptotic method", {
   expect_s3_class(result, "htest")
   expect_true(grepl("Two Sample", result$method))
   expect_true(grepl("Asymptotic", result$method))
-  expect_named(result$estimate, "difference in location")
+  expect_named(result$estimate, "Hodges-Lehmann estimate (x - y)")
 })
 
 test_that("two-sample hodges_lehmann works with permutation method", {
@@ -209,7 +209,7 @@ test_that("paired hodges_lehmann works correctly", {
 
   expect_s3_class(result, "htest")
   expect_true(grepl("Paired", result$method))
-  expect_named(result$estimate, "pseudomedian of differences")
+  expect_named(result$estimate, "Hodges-Lehmann estimate (z = x - y)")
 })
 
 test_that("paired hodges_lehmann detects significant difference", {

@@ -482,7 +482,7 @@ hodges_lehmann.default <- function(x,
 
     # Compute observed estimate
     estimate <- hl1_est(x)
-    names(estimate) <- if (paired) "pseudomedian of differences" else "pseudomedian"
+    names(estimate) <- if (paired) "Hodges-Lehmann estimate (z = x - y)" else "pseudomedian of x"
 
     if (test_method == "asymptotic") {
       # ----- Asymptotic test -----
@@ -652,7 +652,7 @@ hodges_lehmann.default <- function(x,
 
     # Compute observed estimate
     estimate <- hl2_est(x, y)
-    names(estimate) <- "difference in location"
+    names(estimate) <- "Hodges-Lehmann estimate (x - y)"
 
     if (test_method == "asymptotic") {
       # ----- Asymptotic test -----
@@ -842,6 +842,8 @@ hodges_lehmann.default <- function(x,
   # ==========================================================================
 
   # Null value
+  # TODO: Consider updating null.value names to indicate direction
+  # (e.g., "location (x - y)") for consistency with estimate labels
   if (alternative %in% c("equivalence", "minimal.effect")) {
     null.value <- mu
     names(null.value) <- rep("location", 2)
@@ -874,6 +876,17 @@ hodges_lehmann.default <- function(x,
 
   names(tstat_report) <- "Z"
 
+  # Compute sample_size
+  # Note: for paired, x <- x - y has already been done so y is NULL
+  # In hodges_lehmann, two-sample sizes are m and n (not nx/ny)
+  if (is.null(y)) {
+    # n is in scope from line ~440 (one-sample/paired)
+    sample_size <- c(n = n)
+  } else {
+    # m and n are in scope from lines ~447-448 (two-sample)
+    sample_size <- c(nx = m, ny = n)
+  }
+
   rval <- list(
     statistic = tstat_report,
     p.value = pval,
@@ -885,7 +898,8 @@ hodges_lehmann.default <- function(x,
     data.name = dname,
     call = match.call(),
     R = R,
-    R.used = R.used
+    R.used = R.used,
+    sample_size = sample_size
   )
 
   if (keep_perm && !is.null(TSTAT)) {
@@ -938,5 +952,6 @@ hodges_lehmann.formula <- function(formula, data, subset, na.action, ...) {
   DATA <- stats::setNames(split(mf[[response]], g), c("x", "y"))
   y <- do.call("hodges_lehmann", c(DATA, list(...)))
   y$data.name <- DNAME
+  y <- relabel_for_formula(y, levels(g))
   y
 }
