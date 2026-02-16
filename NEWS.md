@@ -19,6 +19,7 @@ NEWS
     - `test_method` argument (`"z"` or `"t"`) controls the reference distribution for `smd_calc`
     - Degrees of freedom included in output when `test_method = "t"`
     - Bootstrap p-values for `boot_smd_calc` computed from empirical distribution
+    - New `denom` argument for direct denominator selection (`"z"`, `"rm"`, `"pooled"`, `"avg"`, `"glass1"`, `"glass2"`), overriding `glass`, `rm_correction`, and `var.equal` as needed; informative messages on conflicts
   - Added `perm_ses_test` function for permutation-based hypothesis testing of standardized effect sizes (rank-biserial, WMW odds, log-odds, concordance)
     - Supports exact permutation and randomization inference
     - Full support for equivalence and minimal effect testing
