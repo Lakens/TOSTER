@@ -207,6 +207,8 @@ describe_htest(res_t)
 For an equivalence test, the description adapts to reflect the TOST procedure:
 
 ```{r}
+res_equiv <- simple_htest(extra ~ group, data = sleep, 
+                           mu = 2, alternative = "equivalence")
 describe_htest(res_equiv)
 ```
 

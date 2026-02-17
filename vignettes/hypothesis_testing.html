@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Hypothesis Testing with TOSTER</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Hypothesis Testing with TOSTER</h1>
+
+
+
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>TOSTER was originally conceived as an equivalence testing package,
+but it is really a general-purpose hypothesis testing toolkit.
+Equivalence testing via the two one-sided tests (TOST) procedure is one
+of its core features, but the package also supports standard null
+hypothesis significance tests, non-inferiority testing, and
+superiority-by-a-margin testing through a single, consistent
+interface.</p>
+<p>Many of TOSTER’s test functions return objects of class
+<code>htest</code>, the same structure used by base R functions like
+<code>t.test()</code>, <code>wilcox.test()</code>, and
+<code>cor.test()</code>. This means results from TOSTER plug directly
+into existing R workflows. On top of this, TOSTER provides helper
+functions for tabulating, describing, and plotting test results that
+work with most <code>htest</code> objects.</p>
+<p>The central idea is simple: hypothesis testing involves specifying a
+null hypothesis, choosing an alternative, and evaluating by a test. By
+adjusting the <code>alternative</code> and <code>mu</code> arguments in
+TOSTER’s functions, you can move seamlessly between testing frameworks.
+A standard nil-hypothesis test, an equivalence test, a non-inferiority
+analysis, and a superiority-by-a-margin test are all handled by the same
+interface.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(TOSTER)</span></code></pre></div>
+<p>Throughout this vignette we use the built-in <code>sleep</code>
+dataset, which contains extra hours of sleep (<code>extra</code>) for 10
+subjects under two drug conditions (<code>group</code>).</p>
+</div>
+<div id="the-simple_htest-interface" class="section level2">
+<h2>The <code>simple_htest</code> Interface</h2>
+<p><code>simple_htest()</code> is a unified wrapper for common two-group
+(and one-sample) hypothesis tests. It calls base R’s
+<code>t.test()</code> or <code>wilcox.test()</code> under the hood but
+improves the output in two ways:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Sample sizes are reported</strong> directly in the output
+(base R does not show <em>n</em>).</li>
+<li><strong>The effect is shown explicitly</strong> as a difference
+(e.g., “mean difference (1 - 2)”) rather than listing two group means
+and leaving the reader to compute the difference.</li>
+</ol>
+<div id="basic-usage-two-sample-t-test" class="section level3">
+<h3>Basic usage: two-sample t-test</h3>
+<p>A standard two-sided t-test with <code>simple_htest</code> looks just
+like <code>t.test()</code> but with a formula interface and explicit
+<code>mu</code> argument:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">simple_htest</span>(extra <span class="sc">~</span> group,</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>             <span class="at">data =</span> sleep,</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>             <span class="at">mu =</span> <span class="dv">0</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>             <span class="at">alternative =</span> <span class="st">&quot;two.sided&quot;</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&gt;  Welch Two Sample t-test</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt; data:  extra by group</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co">#&gt; t = -1.8608, df = 17.776, p-value = 0.07939</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: true difference in means is not equal to 0</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="co">#&gt;  -3.3654832  0.2054832</span></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="co">#&gt;               mean of 1               mean of 2 mean difference (1 - 2) </span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="co">#&gt;                    0.75                    2.33                   -1.58</span></span></code></pre></div>
+<p>Compare this with base R’s <code>t.test()</code>:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">t.test</span>(extra <span class="sc">~</span> group, <span class="at">data =</span> sleep)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co">#&gt;  Welch Two Sample t-test</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt; data:  extra by group</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; t = -1.8608, df = 17.776, p-value = 0.07939</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: true difference in means between group 1 and group 2 is not equal to 0</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt;  -3.3654832  0.2054832</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt; mean in group 1 mean in group 2 </span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt;            0.75            2.33</span></span></code></pre></div>
+<p>Notice that <code>simple_htest</code> reports the sample sizes in
+each group and appends the mean difference to the output, saving the
+reader a calculation step.</p>
+</div>
+<div id="wilcoxon-test" class="section level3">
+<h3>Wilcoxon test</h3>
+<p>To run a nonparametric Wilcoxon rank-sum test instead of a t-test,
+set the <code>test</code> argument:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">simple_htest</span>(extra <span class="sc">~</span> group,</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>             <span class="at">data =</span> sleep,</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>             <span class="at">test =</span> <span class="st">&quot;wilcox.test&quot;</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>             <span class="at">mu =</span> <span class="dv">0</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>             <span class="at">alternative =</span> <span class="st">&quot;two.sided&quot;</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt;  Wilcoxon rank sum test with continuity correction</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; data:  extra by group</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; W = 25.5, p-value = 0.06933</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: true location shift is not equal to 0</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt;  -3.59994709  0.09995356</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt; Hodges-Lehmann estimate (1 - 2) </span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt;                       -1.346388</span></span></code></pre></div>
+<p>The output includes the Hodges-Lehmann estimate of the location shift
+and, again, sample sizes.</p>
+</div>
+<div id="equivalence-testing-tost" class="section level3">
+<h3>Equivalence testing (TOST)</h3>
+<p>To test whether the difference between groups falls <em>within</em> a
+set of equivalence bounds, set <code>alternative = &quot;equivalence&quot;</code>
+and specify the bounds via <code>mu</code>. The TOST procedure tests the
+null hypothesis that the true effect lies outside the bounds using two
+one-sided tests.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">simple_htest</span>(extra <span class="sc">~</span> group,</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>             <span class="at">data =</span> sleep,</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>             <span class="at">mu =</span> <span class="dv">2</span>,</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>             <span class="at">alternative =</span> <span class="st">&quot;equivalence&quot;</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co">#&gt;  Welch Two Sample t-test</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co">#&gt; data:  extra by group</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co">#&gt; t = 0.49465, df = 17.776, p-value = 0.3135</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: equivalence</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co">#&gt; null values:</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co">#&gt; difference in means difference in means </span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co">#&gt;                  -2                   2 </span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co">#&gt; 90 percent confidence interval:</span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co">#&gt;  -3.0533815 -0.1066185</span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="co">#&gt;               mean of 1               mean of 2 mean difference (1 - 2) </span></span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="co">#&gt;                    0.75                    2.33                   -1.58</span></span></code></pre></div>
+<p>Here, <code>mu = 2</code> defines symmetric equivalence bounds of
+(-2, 2). The confidence interval is reported at the 1 - 2α level (90% by
+default), which is the appropriate interval for TOST. If the 90% CI
+falls entirely within the bounds, the test is significant and we can
+conclude equivalence.</p>
+<p>You can also specify asymmetric bounds by passing a two-element
+vector:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">simple_htest</span>(extra <span class="sc">~</span> group,</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>             <span class="at">data =</span> sleep,</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>             <span class="at">mu =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">3</span>),</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>             <span class="at">alternative =</span> <span class="st">&quot;equivalence&quot;</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#&gt;  Welch Two Sample t-test</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt; data:  extra by group</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co">#&gt; t = -0.68308, df = 17.776, p-value = 0.7483</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: equivalence</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt; null values:</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co">#&gt; difference in means difference in means </span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt;                  -1                   3 </span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="co">#&gt; 90 percent confidence interval:</span></span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co">#&gt;  -3.0533815 -0.1066185</span></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co">#&gt;               mean of 1               mean of 2 mean difference (1 - 2) </span></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt;                    0.75                    2.33                   -1.58</span></span></code></pre></div>
+</div>
+</div>
+<div id="beyond-equivalence-non-inferiority-and-superiority-by-a-margin" class="section level2">
+<h2>Beyond Equivalence: Non-Inferiority and Superiority by a Margin</h2>
+<p>TOSTER handles the full family of margin-based hypothesis tests, not
+just equivalence.</p>
+<p><strong>Non-inferiority testing</strong> asks: “Is the effect not
+worse than some threshold?” This is operationalized as a one-sided test
+against a shifted null. For instance, if we want to show that the mean
+difference between drug groups is not less than -1 (i.e., group 1 is not
+meaningfully worse than group 2 by more than 1 hour), we test with
+<code>mu = -1</code> and <code>alternative = &quot;greater&quot;</code>:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">simple_htest</span>(extra <span class="sc">~</span> group,</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>             <span class="at">data =</span> sleep,</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>             <span class="at">mu =</span> <span class="sc">-</span><span class="dv">1</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>             <span class="at">alternative =</span> <span class="st">&quot;greater&quot;</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="co">#&gt;  Welch Two Sample t-test</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co">#&gt; data:  extra by group</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co">#&gt; t = -0.68308, df = 17.776, p-value = 0.7483</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: true difference in means is greater than -1</span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co">#&gt;  -3.053381       Inf</span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="co">#&gt;               mean of 1               mean of 2 mean difference (1 - 2) </span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="co">#&gt;                    0.75                    2.33                   -1.58</span></span></code></pre></div>
+<p>If the p-value is below α, we can conclude non-inferiority: the true
+difference is greater than -1.</p>
+<p><strong>Superiority by a margin</strong> asks: “Does the effect
+exceed a positive threshold?” For example, to test whether the
+difference exceeds +1 hour:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">simple_htest</span>(extra <span class="sc">~</span> group,</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>             <span class="at">data =</span> sleep,</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>             <span class="at">mu =</span> <span class="dv">1</span>,</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>             <span class="at">alternative =</span> <span class="st">&quot;greater&quot;</span>)</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co">#&gt;  Welch Two Sample t-test</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt; data:  extra by group</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="co">#&gt; t = -3.0385, df = 17.776, p-value = 0.9964</span></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: true difference in means is greater than 1</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="co">#&gt;  -3.053381       Inf</span></span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="co">#&gt;               mean of 1               mean of 2 mean difference (1 - 2) </span></span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="co">#&gt;                    0.75                    2.33                   -1.58</span></span></code></pre></div>
+<p>These are one-sided tests against a non-zero null, not equivalence
+tests. TOSTER handles them through the same <code>simple_htest</code>
+interface by adjusting <code>mu</code> and <code>alternative</code>.</p>
+</div>
+<div id="other-test-functions" class="section level2">
+<h2>Other Test Functions</h2>
+<p>TOSTER provides several additional functions that return
+<code>htest</code> objects. Each supports the same
+<code>alternative</code> options (“two.sided”, “less”, “greater”,
+“equivalence”, “minimal.effect”), making them interchangeable with the
+helper functions described later. Here are just a few key functions in
+the package:</p>
+<div id="brunner-munzel-test" class="section level3">
+<h3>Brunner-Munzel test</h3>
+<p>The Brunner-Munzel test is a robust nonparametric test for stochastic
+superiority. Unlike the Wilcoxon test, it does not assume equal
+variances or equal shape of distributions. The null hypothesis is that
+the relative effect (probability that a random observation from one
+group exceeds one from the other) equals 0.5:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">brunner_munzel</span>(extra <span class="sc">~</span> group, <span class="at">data =</span> sleep)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="co">#&gt; Sample size in at least one group is small. Permutation test (test_method = &#39;perm&#39;) is highly recommended.</span></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co">#&gt;  Two-sample Brunner-Munzel test</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="co">#&gt; data:  extra by group</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co">#&gt; t = -2.1447, df = 16.898, p-value = 0.04682</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: true relative effect is not equal to 0.5</span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co">#&gt;  0.01387048 0.49612952</span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="co">#&gt; P(1&gt;2) + .5*P(1=2) </span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="co">#&gt;              0.255</span></span></code></pre></div>
+</div>
+<div id="correlation-test" class="section level3">
+<h3>Correlation test</h3>
+<p><code>z_cor_test()</code> tests correlations using Fisher’s
+z-transformation and supports equivalence bounds on the correlation
+coefficient:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">z_cor_test</span>(mtcars<span class="sc">$</span>mpg, mtcars<span class="sc">$</span>hp,</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>           <span class="at">method =</span> <span class="st">&quot;pearson&quot;</span>,</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>           <span class="at">alternative =</span> <span class="st">&quot;two.sided&quot;</span>,</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>           <span class="at">null =</span> <span class="dv">0</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="co">#&gt;  Pearson&#39;s product-moment correlation</span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="co">#&gt; data:  mtcars$mpg and mtcars$hp</span></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="co">#&gt; z = -5.5772, N = 32, p-value = 2.444e-08</span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: true correlation is not equal to 0</span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="co">#&gt;  -0.8852686 -0.5860994</span></span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="co">#&gt;        cor </span></span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a><span class="co">#&gt; -0.7761684</span></span></code></pre></div>
+</div>
+<div id="bootstrap-t-test" class="section level3">
+<h3>Bootstrap t-test</h3>
+<p><code>boot_t_test()</code> provides a bootstrap alternative to the
+standard t-test, which is useful when distributional assumptions are
+questionable:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2101</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="fu">boot_t_test</span>(extra <span class="sc">~</span> group,</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>            <span class="at">data =</span> sleep,</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>            <span class="at">mu =</span> <span class="dv">0</span>,</span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>            <span class="at">alternative =</span> <span class="st">&quot;two.sided&quot;</span>,</span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>            <span class="at">R =</span> <span class="dv">999</span>)</span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="co">#&gt;  Bootstrapped Welch Two Sample t-test</span></span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a><span class="co">#&gt; data:  extra by group</span></span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a><span class="co">#&gt; t-observed = -1.8608, df = 17.776, p-value = 0.04805</span></span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: true difference in means is not equal to 0</span></span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a><span class="co">#&gt;  -3.3481655  0.1582626</span></span>
+<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
+<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a><span class="co">#&gt;               mean of 1               mean of 2 mean difference (1 - 2) </span></span>
+<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a><span class="co">#&gt;                    0.75                    2.33                   -1.58</span></span></code></pre></div>
+</div>
+<div id="permutation-t-test" class="section level3">
+<h3>Permutation t-test</h3>
+<p><code>perm_t_test()</code> provides a permutation-based test that
+makes minimal distributional assumptions:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">8251</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="fu">perm_t_test</span>(extra <span class="sc">~</span> group,</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>            <span class="at">data =</span> sleep,</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>            <span class="at">mu =</span> <span class="dv">0</span>,</span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>            <span class="at">alternative =</span> <span class="st">&quot;two.sided&quot;</span>,</span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>            <span class="at">R =</span> <span class="dv">999</span>)</span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="co">#&gt; Note: Number of permutations (R = 999) is less than 1000. Consider increasing R for more stable p-value estimates.</span></span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="co">#&gt;  Randomization Permutation Welch Two Sample t-test</span></span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a><span class="co">#&gt; data:  extra by group</span></span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a><span class="co">#&gt; t-observed = -1.8608, df = 17.776, p-value = 0.096</span></span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: true difference in means is not equal to 0</span></span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a><span class="co">#&gt;  -3.4  0.2</span></span>
+<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
+<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a><span class="co">#&gt;               mean of 1               mean of 2 mean difference (1 - 2) </span></span>
+<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a><span class="co">#&gt;                    0.75                    2.33                   -1.58</span></span></code></pre></div>
+<p>All of these functions return objects of class <code>htest</code>, so
+the helper functions described next work identically with any of
+them.</p>
+</div>
+</div>
+<div id="converting-t_tost-results" class="section level2">
+<h2>Converting <code>t_TOST</code> Results</h2>
+<p>Users of TOSTER’s original <code>t_TOST()</code> and
+<code>wilcox_TOST()</code> functions can convert their results to
+<code>htest</code> format using <code>as_htest()</code>. This allows the
+full suite of helper functions to be used with older-style TOST
+output.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>tost_res <span class="ot">&lt;-</span> <span class="fu">t_TOST</span>(extra <span class="sc">~</span> group,</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>                   <span class="at">data =</span> sleep,</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>                   <span class="at">eqb =</span> <span class="dv">2</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a><span class="fu">as_htest</span>(tost_res)</span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a><span class="co">#&gt;  Welch Two Sample t-test</span></span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a><span class="co">#&gt; data:  extra by group</span></span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a><span class="co">#&gt; t = 0.49465, df = 17.776, p-value = 0.3135</span></span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: equivalence</span></span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a><span class="co">#&gt; null values:</span></span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a><span class="co">#&gt; mean difference mean difference </span></span>
+<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a><span class="co">#&gt;              -2               2 </span></span>
+<span id="cb13-14"><a href="#cb13-14" tabindex="-1"></a><span class="co">#&gt; 90 percent confidence interval:</span></span>
+<span id="cb13-15"><a href="#cb13-15" tabindex="-1"></a><span class="co">#&gt;  -3.0533815 -0.1066185</span></span>
+<span id="cb13-16"><a href="#cb13-16" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
+<span id="cb13-17"><a href="#cb13-17" tabindex="-1"></a><span class="co">#&gt; mean difference </span></span>
+<span id="cb13-18"><a href="#cb13-18" tabindex="-1"></a><span class="co">#&gt;           -1.58</span></span></code></pre></div>
+<p>The resulting <code>htest</code> object contains the test statistic,
+p-value, confidence interval, and equivalence bounds from the original
+TOST analysis. Note, the <code>htest</code> output will only show the
+equivalence test, not the two one-sided tests separately or the
+nil-hypothesis significance test, but the key information is preserved
+for reporting.</p>
+</div>
+<div id="helper-functions-for-reporting" class="section level2">
+<h2>Helper Functions for Reporting</h2>
+<p>TOSTER includes three helper functions that work with any
+<code>htest</code> object: <code>df_htest()</code> for tabulation,
+<code>describe_htest()</code> for text descriptions, and
+<code>plot_htest_est()</code> for visualization.</p>
+<div id="df_htest-tabulating-results" class="section level3">
+<h3><code>df_htest()</code>: Tabulating results</h3>
+<p><code>df_htest()</code> converts an <code>htest</code> object into a
+data frame, making it easy to build summary tables:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>res_t <span class="ot">&lt;-</span> <span class="fu">simple_htest</span>(extra <span class="sc">~</span> group, <span class="at">data =</span> sleep, <span class="at">mu =</span> <span class="dv">0</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="fu">df_htest</span>(res_t)</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="co">#&gt;                    method         t       df    p.value mean difference</span></span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="co">#&gt; 1 Welch Two Sample t-test -1.860813 17.77647 0.07939414           -1.58</span></span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a><span class="co">#&gt;         SE  lower.ci  upper.ci conf.level alternative null</span></span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a><span class="co">#&gt; 1 0.849091 -3.365483 0.2054832       0.95   two.sided    0</span></span></code></pre></div>
+<p>The <code>test_statistics</code>, <code>show_ci</code>, and
+<code>extract_names</code> arguments control which columns appear in the
+output.</p>
+</div>
+<div id="describe_htest-text-descriptions" class="section level3">
+<h3><code>describe_htest()</code>: Text descriptions</h3>
+<p><code>describe_htest()</code> generates a formatted text summary
+suitable for reporting:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="fu">describe_htest</span>(res_t)</span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="co">#&gt; [1] &quot;The Welch Two Sample t-test is not statistically significant (t(17.776) = -1.86, p = 0.079, mean of 1 = 0.75, mean of 2 = 2.33, mean difference (1 - 2) = -1.58, 95% C.I.[-3.37, 0.205]) at a 0.05 alpha-level. The null hypothesis cannot be rejected. At the desired error rate, it cannot be stated that the true difference in means is not equal to 0.&quot;</span></span></code></pre></div>
+<p>For an equivalence test, the description adapts to reflect the TOST
+procedure:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>res_equiv <span class="ot">&lt;-</span> <span class="fu">simple_htest</span>(extra <span class="sc">~</span> group, <span class="at">data =</span> sleep, </span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>                           <span class="at">mu =</span> <span class="dv">2</span>, <span class="at">alternative =</span> <span class="st">&quot;equivalence&quot;</span>)</span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a><span class="fu">describe_htest</span>(res_equiv)</span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a><span class="co">#&gt; [1] &quot;The Welch Two Sample t-test is not statistically significant (t(17.776) = 0.495, p = 0.313, mean of 1 = 0.75, mean of 2 = 2.33, mean difference (1 - 2) = -1.58, 90% C.I.[-3.05, -0.107]) at a 0.05 alpha-level. The null hypothesis cannot be rejected. At the desired error rate, it cannot be stated that the true difference in means is between -2 and 2.&quot;</span></span></code></pre></div>
+<p>This is useful for inline reporting in R Markdown. For example, you
+could write <code>`r describe_htest(res_t)`</code> to embed the result
+directly in a sentence.</p>
+</div>
+<div id="plot_htest_est-estimate-plots" class="section level3">
+<h3><code>plot_htest_est()</code>: Estimate plots</h3>
+<p><code>plot_htest_est()</code> produces a point-range plot showing the
+point estimate and confidence interval alongside the null value(s):</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="fu">plot_htest_est</span>(res_t)</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+<p>For equivalence tests, the plot displays both equivalence bounds as
+dashed reference lines:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="fu">plot_htest_est</span>(res_equiv)</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+<p>Set <code>describe = FALSE</code> for a cleaner plot without the
+statistical summary in the subtitle:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="fu">plot_htest_est</span>(res_equiv, <span class="at">describe =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+<p>Because the result is a <code>ggplot2</code> object, you can
+customize it further with standard ggplot2 functions.</p>
+</div>
+</div>
+<div id="putting-it-all-together" class="section level2">
+<h2>Putting It All Together</h2>
+<p>Here is a compact workflow tying together the full set of tools. We
+run an equivalence test, tabulate the result, describe it in text, and
+visualize it:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a><span class="co"># Run equivalence test</span></span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">simple_htest</span>(extra <span class="sc">~</span> group,</span>
+<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a>                       <span class="at">data =</span> sleep,</span>
+<span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a>                       <span class="at">mu =</span> <span class="dv">2</span>,</span>
+<span id="cb20-5"><a href="#cb20-5" tabindex="-1"></a>                       <span class="at">alternative =</span> <span class="st">&quot;equivalence&quot;</span>)</span>
+<span id="cb20-6"><a href="#cb20-6" tabindex="-1"></a></span>
+<span id="cb20-7"><a href="#cb20-7" tabindex="-1"></a><span class="co"># Tabulate</span></span>
+<span id="cb20-8"><a href="#cb20-8" tabindex="-1"></a><span class="fu">df_htest</span>(result)</span>
+<span id="cb20-9"><a href="#cb20-9" tabindex="-1"></a><span class="co">#&gt;                    method         t       df   p.value mean difference       SE</span></span>
+<span id="cb20-10"><a href="#cb20-10" tabindex="-1"></a><span class="co">#&gt; 1 Welch Two Sample t-test 0.4946466 17.77647 0.3134536           -1.58 0.849091</span></span>
+<span id="cb20-11"><a href="#cb20-11" tabindex="-1"></a><span class="co">#&gt;    lower.ci   upper.ci conf.level alternative null1 null2</span></span>
+<span id="cb20-12"><a href="#cb20-12" tabindex="-1"></a><span class="co">#&gt; 1 -3.053381 -0.1066185        0.9 equivalence    -2     2</span></span>
+<span id="cb20-13"><a href="#cb20-13" tabindex="-1"></a></span>
+<span id="cb20-14"><a href="#cb20-14" tabindex="-1"></a><span class="co"># Describe</span></span>
+<span id="cb20-15"><a href="#cb20-15" tabindex="-1"></a><span class="fu">describe_htest</span>(result)</span>
+<span id="cb20-16"><a href="#cb20-16" tabindex="-1"></a><span class="co">#&gt; [1] &quot;The Welch Two Sample t-test is not statistically significant (t(17.776) = 0.495, p = 0.313, mean of 1 = 0.75, mean of 2 = 2.33, mean difference (1 - 2) = -1.58, 90% C.I.[-3.05, -0.107]) at a 0.05 alpha-level. The null hypothesis cannot be rejected. At the desired error rate, it cannot be stated that the true difference in means is between -2 and 2.&quot;</span></span>
+<span id="cb20-17"><a href="#cb20-17" tabindex="-1"></a></span>
+<span id="cb20-18"><a href="#cb20-18" tabindex="-1"></a><span class="co"># Visualize</span></span>
+<span id="cb20-19"><a href="#cb20-19" tabindex="-1"></a><span class="fu">plot_htest_est</span>(result)</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+<p>TOSTER provides a consistent, informative interface for hypothesis
+testing that goes well beyond equivalence. Whether you need a standard
+t-test with better output, a non-inferiority analysis, or a full TOST
+procedure, the same tools apply.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

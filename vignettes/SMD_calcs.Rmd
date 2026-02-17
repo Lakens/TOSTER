@@ -76,7 +76,7 @@ It is my belief that SMDs provide another interesting description of the sample,
 and have very limited inferential utility (though exceptions apply). 
 You may disagree, and if you are basing your inferences on the SMD, and the
 associated confidence intervals, we recommend you go with a
-bootstrapping approach (see `boot_t_TOST`) [@Kirby2013] as it is a more robust option.
+bootstrapping approach (see `boot_smd_calc`) [@Kirby2013] as it is a more robust option.
 
 In this section we will detail on the calculations that are involved in
 calculating the SMD, their associated degrees of freedom, non-centrality

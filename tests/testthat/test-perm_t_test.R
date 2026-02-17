@@ -715,7 +715,7 @@ test_that("direction of effect matches t.test", {
   y_high <- c(10, 11, 12, 13, 14)
 
   perm_result <- perm_t_test(x_low, y_high, R = 199)
-  t_result <- t.test(x_low, y_high)
+  t_result <- simple_htest(x_low, y_high, test = "t")
 
   # Signs should match (compare numeric values without names)
 
