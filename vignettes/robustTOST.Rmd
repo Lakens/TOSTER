@@ -22,7 +22,7 @@ While the standard `t_TOST` function in TOSTER provides a parametric approach to
 
 ## Choosing by Estimand
 
-Before selecting a robust method, it is worth clarifying what quantity your equivalence bounds are intended to constrain. Different methods target different estimands, and the bounds only have their intended meaning when matched to the right one. If your bounds refer to mean differences, a permutation t-test or bootstrap approach is appropriate. If they refer to trimmed mean differences, Yuen's permutation test is the natural choice. If you are interested in stochastic dominance (P(X > Y)), the Brunner-Munzel test provides a transparent framework. The Wilcoxon-Mann-Whitney and Hodges-Lehmann procedures target the pseudo-median of pairwise differences, which coincides with mean and median differences only under a location shift assumption. When that assumption is violated, bounds set on the pseudo-median may not correspond to the magnitude of difference in means or medians that you intended to declare equivalent.
+Before selecting a robust method, it is worth clarifying what quantity your equivalence bounds are intended to constrain. Different methods target different estimands, and the bounds only have their intended meaning when matched to the right one. If your bounds refer to mean differences, a permutation t-test or bootstrap approach is appropriate. If they refer to trimmed mean differences due to concerns about heavy tails (outliers), Yuen's trimmed bootstrap or permutation test are natural choices. If you are interested in stochastic dominance (P(X > Y)), the Brunner-Munzel test provides a transparent framework. The Wilcoxon-Mann-Whitney and Hodges-Lehmann procedures target the pseudo-median of pairwise differences, which coincides with mean and median differences only under a location shift assumption. When that assumption is violated, bounds set on the pseudo-median may not correspond to the magnitude of difference in means or medians that you intended to declare equivalent.
 
 ## When to Use Robust TOST Methods
 
@@ -56,7 +56,7 @@ While the Wilcoxon-Mann-Whitney (WMW) tests are widely used as the "non-parametr
 
 ### What WMW actually tests
 
-A common misconception is that the WMW test compares medians [see @karch2021; @divine2018]. **Without additional assumptions**, the WMW test is a test of stochastic equality:
+A common misconception is that the WMW test compares medians [see @karch2021; @divine2018]. **Without additional assumptions**, the two-tailed WMW test is a test of stochastic equality:
 
 $$
 H_0: p = \Pr(X < Y) + \frac{1}{2}\Pr(X = Y) = 0.5
@@ -82,7 +82,7 @@ This interpretive difficulty is especially pronounced for equivalence testing. W
 
 ### What to use instead
 
-**For differences in means (or trimmed means):** Use `perm_t_test` or `boot_t_TOST`. These test hypotheses directly about means while relaxing distributional assumptions.
+**For differences in means (or trimmed means):** Use `perm_t_test` or `boot_t_TOST`. These test hypotheses directly about means while relaxing some distributional assumptions.
 
 **For stochastic superiority:** Use `brunner_munzel`, which provides a clearer framework with an interpretable effect size (the relative effect, $\hat{p}$) and directly supports equivalence and minimal effect testing.
 
@@ -96,11 +96,6 @@ The `wilcox_TOST` function remains available for situations where rank-based tes
 
 TOSTER's version is the `wilcox_TOST` function. Overall, this function operates extremely similar to the `t_TOST` function. However, the standardized mean difference (SMD) is *not* calculated. Instead the rank-biserial correlation is calculated for *all* types of comparisons (e.g., two sample, one sample, and paired samples). Also, there is no plotting capability at this time for the output of this function.
 
-The `wilcox_TOST` function is particularly useful when:
-
-- You're working with ordinal data
-- You're concerned about outliers influencing your results
-- You need a test that makes minimal assumptions about the underlying distributions
 
 ### Understanding the Equivalence Bounds (`eqb`)
 
@@ -162,6 +157,18 @@ wilcox_TOST(formula = extra ~ group,
 
 For details on how each effect size is calculated, the available confidence interval methods, and how to perform hypothesis testing directly on the effect size scale, see the [Standardized Effect Sizes: Estimation and Testing] section later in this vignette.
 
+### Interface with `wilcox.test`
+
+You can also just directly use `wilcox.test` through the `simple_htest` function. This might be useful if you find the interface of `wilcox.test` more intuitive for certain applications than `wilcox_TOST`, or if you want to perform a standard WMW test without the TOST framework.
+
+```{r}
+simple_htest(formula = extra ~ group,
+                      data = sleep,
+                      test = "w", alternative = "e",
+                      mu = .5)
+```
+
+
 # Brunner-Munzel Test
 
 As Karch (2021) explained, there are some reasons to dislike the Wilcoxon-Mann-Whitney (WMW) family of tests as the non-parametric alternative to the t-test. Regardless of the underlying statistical arguments^[I would like to note that I think the statistical properties of the WMW tests are sound, and Frank Harrell has written [many](https://www.fharrell.com/post/po/) [blogposts](https://www.fharrell.com/post/wpo/) outlining their sound application in biomedicine.], it can be argued that the interpretation of the WMW tests, especially when involving equivalence testing, is difficult.
@@ -176,7 +183,7 @@ The Brunner-Munzel test [@brunner2000; @neubert2007] offers several advantages o
 3. It provides a more interpretable effect size measure (the "relative effect")
 4. It maintains good statistical properties even with unequal sample sizes
 
-The Brunner-Munzel test is based on calculating the "stochastic superiority" [@karch2021], which is usually referred to as the relative effect, based on the ranks of the two groups being compared (X and Y). A Brunner-Munzel type test is then a directional test of an effect, and answers a question akin to "what is the probability that a randomly sampled value of X will be greater than Y?"
+The Brunner-Munzel test is based on calculating the "stochastic superiority" [@karch2021], which is usually referred to as the relative effect, based on the ranks of the two groups being compared (X and Y). A Brunner-Munzel type test is then a directional test of an effect, and answers a question akin to "what is the probability that a randomly sampled value of X will be greater than Y?"^[In the literature you will often see it denoted as P(X<Y) however, in R the typical convention is x - y (e.g., `t.test`) so for consistency we have flipped the direction to P(X>Y).]
 
 $$
 \hat p = P(X>Y) + 0.5 \cdot P(X=Y)
@@ -209,7 +216,7 @@ Where:
 - $p_{null}$ is the null hypothesis value (typically 0.5)
 - $s$ is the rank-based Brunner-Munzel standard error
 
-The default null hypothesis $p_{null}$ is typically 0.5 (50% probability of superiority is the default null), and $s$ refers to the rank-based Brunner-Munzel standard error. The null can be modified, thereby allowing for equivalence testing *directly based on the relative effect*. Additionally, for paired samples the probability of superiority is based on a *hypothesis of exchangeability* and is not based on the difference scores^[This means the relative effect will *not* match the concordance probability provided by `ses_calc` for paired samples.].
+The default null hypothesis $p_{null}$ is typically 0.5 (50% probability of superiority (tie) is the default null), and $s$ refers to the rank-based Brunner-Munzel standard error. The null can be modified, thereby allowing for equivalence testing *directly based on the relative effect*. Additionally, for paired samples the probability of superiority is based on a *hypothesis of exchangeability* and is not based on the difference scores^[This means the relative effect will *not* match the concordance probability provided by `ses_calc` for paired samples.].
 
 For more details on the calculative approach, I suggest reading @karch2021. At small sample sizes, it is recommended that the permutation version of the test (`test_method = "perm"`) be used rather than the basic test statistic approach.
 
@@ -345,11 +352,11 @@ When interpreting the Brunner-Munzel test results:
 - You want better Type I error control in small samples
 - Precision is more important than computational speed
 
-Note that the permutation approach can be computationally intensive for large datasets. Additionally, with a permutation test you may observe situations where the confidence interval and the p-value would yield *different* conclusions.
+Note that the permutation approach can be computationally intensive for large datasets. Additionally, with a permutation test you may observe situations where the confidence interval and the p-value would yield *different* conclusions though they should closely match in most cases.
 
 ## Non-Inferiority Testing
 
-The Brunner-Munzel test can be used for non-inferiority testing in clinical trials with ordered categorical data [@munzel2003]. By setting appropriate bounds, you can test whether a new treatment is not relevantly inferior to a standard:
+The Brunner-Munzel test can be used for non-inferiority testing with ordered categorical data [@munzel2003]. By setting appropriate bounds, you can test whether a new treatment is not relevantly inferior to a standard:
     
 ```{r}
 # Example: test non-inferiority with lower bound of 0.35

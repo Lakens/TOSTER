@@ -21,7 +21,8 @@ boot_smd_calc(
   output = c("htest", "data.frame"),
   null.value = 0,
   alternative = c("none", "two.sided", "less", "greater", "equivalence",
-    "minimal.effect")
+    "minimal.effect"),
+  tr = 0
 )
 
 \method{boot_smd_calc}{default}(
@@ -41,6 +42,7 @@ boot_smd_calc(
   null.value = 0,
   alternative = c("none", "two.sided", "less", "greater", "equivalence",
     "minimal.effect"),
+  tr = 0,
   ...
 )
 
@@ -96,6 +98,15 @@ and var.equal arguments. The bias_correction argument is not affected.
 - "greater": Test whether SMD is greater than null.value
 - "equivalence": Test whether SMD is between specified bounds
 - "minimal.effect": Test whether SMD is outside specified bounds}
+
+\item{tr}{a numeric value specifying the proportion of observations to trim from each
+tail when computing trimmed means and Winsorized variances (default = 0, no trimming).
+Must be in the range [0, 0.5). Common choices are 0.1 (10\\% trimming) and 0.2
+(20\\% trimming). When tr > 0, the effect size uses trimmed means for the numerator
+and the rescaled Winsorized standard deviation for the denominator, following
+Algina, Keselman, and Penfield (2005). The rescaling ensures the robust effect
+size equals Cohen's delta when data are normally distributed.
+Note: tr > 0 is not compatible with denom = "rm".}
 
 \item{y}{an optional (non-empty) numeric vector of data values.}
 
@@ -259,6 +270,11 @@ result <- boot_smd_calc(x = group1, y = group2,
                       output = "data.frame",
                       R = 999)
 
+}
+\references{
+Algina, J., Keselman, H. J., & Penfield, R. D. (2005). An alternative to Cohen's
+standardized mean difference effect size: A robust parameter and confidence interval
+in the two independent groups case. \emph{Psychological Methods}, \emph{10}(3), 317-328.
 }
 \seealso{
 Other effect sizes: 

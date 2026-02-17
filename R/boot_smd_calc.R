@@ -43,6 +43,14 @@
 #'
 #'     When set to any value other than "auto", this overrides the glass, rm_correction,
 #'     and var.equal arguments. The bias_correction argument is not affected.
+#' @param tr a numeric value specifying the proportion of observations to trim from each
+#'     tail when computing trimmed means and Winsorized variances (default = 0, no trimming).
+#'     Must be in the range \[0, 0.5). Common choices are 0.1 (10\% trimming) and 0.2
+#'     (20\% trimming). When tr > 0, the effect size uses trimmed means for the numerator
+#'     and the rescaled Winsorized standard deviation for the denominator, following
+#'     Algina, Keselman, and Penfield (2005). The rescaling ensures the robust effect
+#'     size equals Cohen's delta when data are normally distributed.
+#'     Note: tr > 0 is not compatible with denom = "rm".
 #'
 #' @details
 #' This function calculates bootstrapped confidence intervals for standardized mean differences.
@@ -79,6 +87,11 @@
 #' respected regardless of `denom`.
 #'
 #' For detailed information on calculation methods, see `vignette("SMD_calcs")`.
+#'
+#' @references
+#' Algina, J., Keselman, H. J., & Penfield, R. D. (2005). An alternative to Cohen's
+#'   standardized mean difference effect size: A robust parameter and confidence interval
+#'   in the two independent groups case. \emph{Psychological Methods}, \emph{10}(3), 317-328.
 #'
 #' @return
 #' If `output = "htest"` (default), returns a list with class `"htest"` containing:
@@ -184,7 +197,8 @@ boot_smd_calc <- function(x, ...,
                           output = c("htest", "data.frame"),
                           null.value = 0,
                           alternative = c("none", "two.sided", "less", "greater",
-                                          "equivalence", "minimal.effect")){
+                                          "equivalence", "minimal.effect"),
+                          tr = 0){
   UseMethod("boot_smd_calc")
 }
 
@@ -210,11 +224,17 @@ boot_smd_calc.default = function(x,
                                  null.value = 0,
                                  alternative = c("none", "two.sided", "less", "greater",
                                                  "equivalence", "minimal.effect"),
+                                 tr = 0,
                                  ...) {
   denom = match.arg(denom)
   boot_ci = match.arg(boot_ci)
   output = match.arg(output)
   alternative = match.arg(alternative)
+
+  # Validate tr
+  if (!is.numeric(tr) || length(tr) != 1 || tr < 0 || tr >= 0.5) {
+    stop("'tr' must be a single numeric value in [0, 0.5)")
+  }
 
   # Capture explicit-pass status before any modifications
   var.equal_explicit <- !missing(var.equal)
@@ -248,6 +268,12 @@ boot_smd_calc.default = function(x,
   var.equal <- resolved$var.equal
   rm_correction <- resolved$rm_correction
   glass <- resolved$glass
+
+  # tr > 0 with rm denom
+  if (tr > 0 && isTRUE(rm_correction)) {
+    stop("The repeated measures denominator (denom = 'rm') is not currently supported with trimming (tr > 0). ",
+         "Consider using denom = 'z' for paired designs with trimming.")
+  }
 
   # Handle equivalence/minimal.effect bounds
   if (alternative %in% c("equivalence", "minimal.effect")) {
@@ -288,6 +314,7 @@ boot_smd_calc.default = function(x,
                        bias_correction = bias_correction,
                        rm_correction = rm_correction,
                        glass = glass,
+                       tr = tr,
                        smd_ci = "z",
                        output = "data.frame")
 
@@ -305,6 +332,7 @@ boot_smd_calc.default = function(x,
                           bias_correction = bias_correction,
                           rm_correction = rm_correction,
                           glass = glass,
+                          tr = tr,
                           smd_ci = "z",
                           output = "data.frame")
       boots = c(boots, res_boot$estimate)
@@ -329,6 +357,7 @@ boot_smd_calc.default = function(x,
                        bias_correction = bias_correction,
                        rm_correction = rm_correction,
                        glass = glass,
+                       tr = tr,
                        smd_ci = "z",
                        output = "data.frame")
 
@@ -350,6 +379,7 @@ boot_smd_calc.default = function(x,
                           bias_correction = bias_correction,
                           rm_correction = rm_correction,
                           glass = glass,
+                          tr = tr,
                           smd_ci = "z",
                           output = "data.frame")
       boots = c(boots, res_boot$estimate)
@@ -368,6 +398,7 @@ boot_smd_calc.default = function(x,
                        bias_correction = bias_correction,
                        rm_correction = rm_correction,
                        glass = glass,
+                       tr = tr,
                        smd_ci = "z",
                        output = "data.frame")
 
@@ -385,6 +416,7 @@ boot_smd_calc.default = function(x,
                           bias_correction = bias_correction,
                           rm_correction = rm_correction,
                           glass = glass,
+                          tr = tr,
                           smd_ci = "z",
                           output = "data.frame")
       boots = c(boots, res_boot$estimate)
@@ -409,6 +441,7 @@ boot_smd_calc.default = function(x,
                              bias_correction = bias_correction,
                              rm_correction = rm_correction,
                              glass = glass,
+                             tr = tr,
                              smd_ci = "z",
                              output = "data.frame")
         jack_est[j] <- res_jack$estimate
@@ -429,6 +462,7 @@ boot_smd_calc.default = function(x,
                              bias_correction = bias_correction,
                              rm_correction = rm_correction,
                              glass = glass,
+                             tr = tr,
                              smd_ci = "z",
                              output = "data.frame")
         jack_est[j] <- res_jack$estimate
@@ -443,6 +477,7 @@ boot_smd_calc.default = function(x,
                              bias_correction = bias_correction,
                              rm_correction = rm_correction,
                              glass = glass,
+                             tr = tr,
                              smd_ci = "z",
                              output = "data.frame")
         jack_est[n1 + j] <- res_jack$estimate
@@ -460,6 +495,7 @@ boot_smd_calc.default = function(x,
                              bias_correction = bias_correction,
                              rm_correction = rm_correction,
                              glass = glass,
+                             tr = tr,
                              smd_ci = "z",
                              output = "data.frame")
         jack_est[j] <- res_jack$estimate
@@ -479,14 +515,15 @@ boot_smd_calc.default = function(x,
                              jack_est = jack_est, alpha = ci_alpha))
 
   # Determine SMD label
+  trim_note <- if (tr > 0) paste0(" (", tr * 100, "% trimmed)") else ""
   smd_label <- if (bias_correction) {
     if (!is.null(glass) && glass %in% c("glass1", "glass2")) {
-      paste0("Glass's ", ifelse(glass == "glass1", "delta1", "delta2"))
+      paste0("Glass's ", ifelse(glass == "glass1", "delta1", "delta2"), trim_note)
     } else {
-      "Hedges' g"
+      paste0("Hedges' g", trim_note)
     }
   } else {
-    "Cohen's d"
+    paste0("Cohen's d", trim_note)
   }
 
   # Bootstrap SE (for reporting in stderr field)

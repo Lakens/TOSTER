@@ -21,7 +21,8 @@ smd_calc(
   null.value = 0,
   alternative = c("none", "two.sided", "less", "greater", "equivalence",
     "minimal.effect"),
-  test_method = c("z", "t")
+  test_method = c("z", "t"),
+  tr = 0
 )
 
 \method{smd_calc}{default}(
@@ -41,6 +42,7 @@ smd_calc(
   alternative = c("none", "two.sided", "less", "greater", "equivalence",
     "minimal.effect"),
   test_method = c("z", "t"),
+  tr = 0,
   ...
 )
 
@@ -98,6 +100,15 @@ and var.equal arguments. The bias_correction argument is not affected.
 \item{test_method}{a character string specifying the method for hypothesis testing:
 - "z": Use z-statistic (normal distribution)
 - "t": Use t-statistic with degrees of freedom from the SMD calculation}
+
+\item{tr}{a numeric value specifying the proportion of observations to trim from each
+tail when computing trimmed means and Winsorized variances (default = 0, no trimming).
+Must be in the range [0, 0.5). Common choices are 0.1 (10\\% trimming) and 0.2
+(20\\% trimming). When tr > 0, the effect size uses trimmed means for the numerator
+and the rescaled Winsorized standard deviation for the denominator, following
+Algina, Keselman, and Penfield (2005). The rescaling ensures the robust effect
+size equals Cohen's delta when data are normally distributed.
+Note: tr > 0 is not compatible with denom = "rm" or smd_ci = "goulet".}
 
 \item{y}{an optional (non-empty) numeric vector of data values.}
 
@@ -171,6 +182,15 @@ When \code{denom} is not "auto", it takes precedence over the \code{glass}, \cod
 explicitly provided arguments are overridden. The \code{bias_correction} argument is always
 respected regardless of \code{denom}.
 
+When \code{tr > 0}, the function computes a robust standardized mean difference
+using trimmed means and Winsorized variances. The trimmed mean removes a proportion
+\code{tr} of observations from each tail before computing the mean. The Winsorized
+variance replaces trimmed observations with the nearest remaining values before
+computing the variance. A rescaling constant ensures the robust effect size equals
+Cohen's delta under normality. This approach is recommended when distributions
+are heavy-tailed or contain outliers, as the robust effect size better reflects
+the separation between distributions than the standard Cohen's d (Algina et al., 2005).
+
 For detailed information on calculation methods, see \code{vignette("SMD_calcs")}.
 }
 \section{Purpose}{
@@ -229,6 +249,14 @@ smd_calc(x = group1, y = group2, denom = "glass1", bias_correction = TRUE)
 # Example 9: Legacy data.frame output
 smd_calc(x = group1, y = group2, output = "data.frame")
 
+}
+\references{
+Algina, J., Keselman, H. J., & Penfield, R. D. (2005). An alternative to Cohen's
+standardized mean difference effect size: A robust parameter and confidence interval
+in the two independent groups case. \emph{Psychological Methods}, \emph{10}(3), 317-328.
+
+Yuen, K. K., & Dixon, W. J. (1973). The approximate behaviour and performance of
+the two-sample trimmed t. \emph{Biometrika}, \emph{60}(2), 369-374.
 }
 \seealso{
 Other effect sizes: 

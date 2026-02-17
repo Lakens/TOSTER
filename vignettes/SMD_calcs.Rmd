@@ -703,4 +703,128 @@ ggplot(df2,
   theme_classic()
 ```
 
+# Robust Standardized Mean Differences with Trimming
+
+## Motivation
+
+The standard SMD relies on the ordinary mean and standard deviation, which are sensitive to outliers and heavy-tailed distributions. When distributions are non-normal:
+
+- Heavy tails inflate the standard deviation, making the SMD appear smaller than the true distributional separation warrants.
+- Outliers can distort the mean difference, pulling the numerator in unpredictable directions.
+
+@Algina_Keselman_Penfield_2005 proposed a robust alternative that uses **trimmed means** for location and **Winsorized variances** for scale, with a rescaling constant to maintain comparability with Cohen's $\delta$ under normality.
+
+## How Trimming Works
+
+**Trimmed mean.** Given an ordered sample $x_{(1)} \leq x_{(2)} \leq \cdots \leq x_{(n)}$ and a trimming proportion $\gamma$ (the `tr` argument), let $g = \lfloor \gamma \cdot n \rfloor$ observations be removed from each tail. The trimmed mean is:
+
+$$
+\bar{X}_t = \frac{1}{n - 2g} \sum_{i=g+1}^{n-g} x_{(i)}
+$$
+
+This reduces the influence of extreme values on the location estimate.
+
+**Winsorized variance.** Rather than discarding the trimmed observations, Winsorization replaces them with the nearest remaining value. Define the Winsorized sample $w_i$ as:
+
+$$
+w_i = \begin{cases}
+x_{(g+1)} & \text{if } x_i \leq x_{(g+1)} \\
+x_i & \text{if } x_{(g+1)} < x_i < x_{(n-g)} \\
+x_{(n-g)} & \text{if } x_i \geq x_{(n-g)}
+\end{cases}
+$$
+
+The Winsorized variance is then computed as the ordinary sample variance of the Winsorized values:
+
+$$
+S_W^2 = \frac{1}{n-1} \sum_{i=1}^{n} (w_i - \bar{w})^2
+$$
+
+This provides a robust scale estimate that down-weights the influence of extreme observations.
+
+**Rescaling constant.** To ensure the robust SMD equals Cohen's $\delta$ under normality, a rescaling constant $c(\gamma)$ is applied [@Algina_Keselman_Penfield_2005]. Let $a = \Phi^{-1}(1 - \gamma)$ where $\Phi^{-1}$ is the standard normal quantile function and $\phi$ is the standard normal density. Then:
+
+$$
+c(\gamma) = \sqrt{1 - 2\gamma + 2\gamma a^2 - 2a\,\phi(a)}
+$$
+
+When $\gamma = 0$, $c(0) = 1$ and the formula reduces to the ordinary Cohen's $d$. For $\gamma = 0.2$ (20% trimming), $c(0.2) \approx 0.642$.
+
+**Robust SMD.** The robust effect size for two independent samples is then:
+
+$$
+d_R = c(\gamma) \cdot \frac{\bar{X}_{t2} - \bar{X}_{t1}}{S_W}
+$$
+
+where $S_W$ is based on a pooled, averaged, or single-group Winsorized standard deviation (depending on the `denom` argument), following the same denominator options as the standard SMD.
+
+**Effective sample size.** Trimming reduces the effective sample size to $h = n - 2g$, which replaces $n$ in all degrees-of-freedom calculations. For example, in the two-sample pooled case with equal trimming, $df = h_1 + h_2 - 2$.
+
+## Usage Examples
+
+All trimming functionality is controlled by the `tr` parameter, which defaults to 0 (no trimming):
+
+```{r}
+set.seed(8484)
+group1 <- rnorm(40, mean = 100, sd = 15)
+group2 <- rnorm(40, mean = 110, sd = 15)
+
+# Standard Cohen's d
+smd_calc(x = group1, y = group2, bias_correction = FALSE)
+
+# Robust version with 20% trimming (Algina et al., 2005)
+smd_calc(x = group1, y = group2, bias_correction = FALSE, tr = 0.2)
+
+# Robust Hedges' g with 10% trimming
+smd_calc(x = group1, y = group2, bias_correction = TRUE, tr = 0.1)
+```
+
+Bootstrap confidence intervals can also be computed with trimming:
+
+```{r}
+boot_smd_calc(x = group1, y = group2, tr = 0.2, R = 999, boot_ci = "perc")
+```
+
+## Choosing a Trimming Proportion
+
+- `tr = 0.2` (20% trimming) is the most common recommendation in the robust statistics literature and is the default used by Algina et al.
+- `tr = 0.1` offers a compromise between robustness and efficiency.
+- `tr = 0` recovers the standard (non-robust) SMD.
+- Higher values provide more protection against outliers but lose more information from the tails.
+
+## Worked Example with Contaminated Data
+
+To illustrate the benefit of trimming, consider data from a contaminated normal distribution where 10% of observations come from a distribution with much larger variance:
+
+```{r}
+set.seed(7171)
+n <- 50
+
+# Clean data from known populations
+x_clean <- rnorm(n, mean = 0, sd = 1)
+y_clean <- rnorm(n, mean = 0.5, sd = 1)
+
+# Contaminated version: replace 10% with outliers
+n_contam <- ceiling(0.1 * n)
+x_contam <- c(x_clean[1:(n - n_contam)], rnorm(n_contam, mean = 0, sd = 10))
+y_contam <- c(y_clean[1:(n - n_contam)], rnorm(n_contam, mean = 0.5, sd = 10))
+
+# Standard Cohen's d: attenuated by inflated SD
+smd_calc(x = x_contam, y = y_contam, bias_correction = FALSE, smd_ci = "z")
+
+# Trimmed version: closer to the true separation
+smd_calc(x = x_contam, y = y_contam, bias_correction = FALSE, tr = 0.2, smd_ci = "z")
+
+# For reference: Cohen's d on the clean data
+smd_calc(x = x_clean, y = y_clean, bias_correction = FALSE, smd_ci = "z")
+```
+
+The trimmed SMD is more resistant to the contaminating observations and provides an estimate closer to what we would obtain from the clean data.
+
+## Limitations
+
+- The `denom = "rm"` option (repeated measures correction) is not currently supported with trimming.
+- The `smd_ci = "goulet"` CI method is not supported with trimming.
+- The noncentral-t CI with trimming may still have some coverage issues for very heavy-tailed distributions; the percentile or BCa bootstrap (via `boot_smd_calc`) is recommended in such cases, following Algina et al.'s findings.
+
 # References

@@ -77,3 +77,42 @@ ggplot(df2,
   labs(y = "", x = "Difference in SMDs (bootstrapped estimates)") +
   theme_classic()
 
+## -----------------------------------------------------------------------------
+set.seed(8484)
+group1 <- rnorm(40, mean = 100, sd = 15)
+group2 <- rnorm(40, mean = 110, sd = 15)
+
+# Standard Cohen's d
+smd_calc(x = group1, y = group2, bias_correction = FALSE)
+
+# Robust version with 20% trimming (Algina et al., 2005)
+smd_calc(x = group1, y = group2, bias_correction = FALSE, tr = 0.2)
+
+# Robust Hedges' g with 10% trimming
+smd_calc(x = group1, y = group2, bias_correction = TRUE, tr = 0.1)
+
+## -----------------------------------------------------------------------------
+boot_smd_calc(x = group1, y = group2, tr = 0.2, R = 999, boot_ci = "perc")
+
+## -----------------------------------------------------------------------------
+set.seed(7171)
+n <- 50
+
+# Clean data from known populations
+x_clean <- rnorm(n, mean = 0, sd = 1)
+y_clean <- rnorm(n, mean = 0.5, sd = 1)
+
+# Contaminated version: replace 10% with outliers
+n_contam <- ceiling(0.1 * n)
+x_contam <- c(x_clean[1:(n - n_contam)], rnorm(n_contam, mean = 0, sd = 10))
+y_contam <- c(y_clean[1:(n - n_contam)], rnorm(n_contam, mean = 0.5, sd = 10))
+
+# Standard Cohen's d: attenuated by inflated SD
+smd_calc(x = x_contam, y = y_contam, bias_correction = FALSE, smd_ci = "z")
+
+# Trimmed version: closer to the true separation
+smd_calc(x = x_contam, y = y_contam, bias_correction = FALSE, tr = 0.2, smd_ci = "z")
+
+# For reference: Cohen's d on the clean data
+smd_calc(x = x_clean, y = y_clean, bias_correction = FALSE, smd_ci = "z")
+

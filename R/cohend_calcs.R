@@ -13,7 +13,12 @@ d_est_pair <- function(n,
                        type = "g",
                        denom = "z",
                        alpha = .05,
-                       smd_ci = "goulet"){
+                       smd_ci = "goulet",
+                       tr = 0){
+
+  # Trimming adjustments
+  cg <- trim_rescale(tr)
+  h <- trim_h(n, tr)
 
   sdif <- sqrt(sd1 ^ 2 + sd2 ^ 2 - 2 * r12 * sd1 * sd2)
   if(denom == "z"){
@@ -26,13 +31,21 @@ d_est_pair <- function(n,
     d_denom = sd2
   }
 
-  df <- n-1
+  if (tr > 0) {
+    df <- h - 1
+  } else {
+    df <- n - 1
+  }
   hn <- 1 / n
-  cohend = abs(m1-m2) / d_denom
+  cohend = cg * abs(m1-m2) / d_denom
   if(smd_ci == "goulet"){
     d_df = 2*(n)-2
   } else {
-    d_df = n-1
+    if (tr > 0) {
+      d_df = h - 1
+    } else {
+      d_df = n - 1
+    }
   }
 
   #J <- gamma(df / 2) / (sqrt(df / 2) * gamma((df - 1) / 2))
@@ -45,59 +58,57 @@ d_est_pair <- function(n,
 
   if(denom == "z"){
     if (type == 'g') {
-      #cohend <-  cohend * J
       smd_label = "Hedges's g(z)"
     } else {
       smd_label = "Cohen's d(z)"
     }
   } else if(denom == "rm"){
     if (type == 'g') {
-      #cohend <-  cohend * J
       smd_label = "Hedges's g(rm)"
     } else {
       smd_label = "Cohen's d(rm)"
     }
   } else if(denom %in% c("glass1","glass2")){
     if (type == 'g') {
-      #cohend <-  cohend * J
       smd_label = "Glass's delta(g)"
     } else {
       smd_label = "Glass's delta(d)"
     }
   }
 
-  d_lambda <- cohend * sqrt(n / (2*(1 - r12)))
+  if (tr > 0) {
+    # For trimmed paired, use h-based SE and noncentrality
+    if (denom == "z") {
+      # Yuen-adjusted SE for differences
+      SE_yuen <- d_denom / sqrt(h) * sqrt((n - 1) / (h - 1))
+      d_lambda <- abs(m1 - m2) / SE_yuen
+      d_unscaled <- cohend / (cg * J)
+      d_sigma <- cg * sqrt(1 / h * ((n - 1) / (h - 1))) *
+        sqrt(d_unscaled^2 / (2 * (h - 1)) + 1)
+      d_sigma <- d_sigma * J
+    } else if (denom %in% c("glass1", "glass2")) {
+      SE_yuen <- d_denom / sqrt(h) * sqrt((n - 1) / (h - 1))
+      d_lambda <- abs(m1 - m2) / SE_yuen
+      d_unscaled <- cohend / (cg * J)
+      d_s1 <- sdif^2 / (d_denom^2 * (h - 1)) + d_unscaled^2 / (2 * (h - 1))
+      d_sigma <- cg * J * sqrt(d_s1)
+    }
+  } else {
+    d_lambda <- cohend * sqrt(n / (2*(1 - r12)))
 
-  # Equation 4b Goulet-Pelletier and Cousineau, 2018
-  # ((2*(1-r12))/n)
-  d_sigma = sqrt((d_df/(d_df-2)) * ((2*(1-r12))/n)*(1+cohend^2*(n/(2*(1-r12)))) - cohend^2/J^2)
-  if(denom == "z"){
-    d_sigma = d_sigma * sqrt(2*(1-r12))
-  }
-  if(smd_ci == "nct" && denom != "rm"){
-    #d_sigma = d_denom / sqrt(n)
-    # d_sigma = sqrt(1/n + (cohend^2/(2*n)))
-    # from metafor
-    # vi[i] <- 1/ni[i] + (1 - (mi[i]-2)/(mi[i]*cmi[i]^2)) * yi[i]^2 # Viechtbauer, 2007d, equation 26; see [c]
-    d_sigma2 =  1/n + (1 - (d_df-2)/(d_df*J^2)) * cohend^2
-    d_sigma = sqrt(d_sigma2)
-  }
-  if(denom %in% c("glass1","glass2")){
-    #sep1 = (n-1)/(n*(n-3))
-    #sep2 = (2*(1-r12)+cohend^2*n)
-    #sep3 = cohend^2/(J)^2
-    # Borenstein 2009 --- adopted from metafor
-    # # abadoned 22 April 2024 in favor of heteroscedastic option from Bonett (below)
-    #d_s1 = J^2*(2*(((1-r12)/n)+((cohend^2*J^(-1))/(2*n))))
-      #sqrt(sep1*sep2-sep3)
-    #d_sigma = sqrt(d_s1)
-    ## From metafor
-    # vi[i] <- sddiffi[i]^2/(sd1i[i]^2*(ni[i]-1)) + yi[i]^2 / (2*(ni[i]-1))
-    ## Bonett, 2008a, equation 13
-    # note: Bonett (2008a) plugs the uncorrected yi into the equation for vi;
-    #  here, the corrected value is plugged in for consistency with [a]
-    d_s1 = sdif^2/(d_denom^2*(df)) + cohend^2 / (2*(df))
-    d_sigma = sqrt(d_s1)
+    # Equation 4b Goulet-Pelletier and Cousineau, 2018
+    d_sigma = sqrt((d_df/(d_df-2)) * ((2*(1-r12))/n)*(1+cohend^2*(n/(2*(1-r12)))) - cohend^2/J^2)
+    if(denom == "z"){
+      d_sigma = d_sigma * sqrt(2*(1-r12))
+    }
+    if(smd_ci == "nct" && denom != "rm"){
+      d_sigma2 =  1/n + (1 - (d_df-2)/(d_df*J^2)) * cohend^2
+      d_sigma = sqrt(d_sigma2)
+    }
+    if(denom %in% c("glass1","glass2")){
+      d_s1 = sdif^2/(d_denom^2*(df)) + cohend^2 / (2*(df))
+      d_sigma = sqrt(d_s1)
+    }
   }
 
   if(smd_ci == "goulet"){
@@ -119,16 +130,29 @@ d_est_pair <- function(n,
   }
 
   if(smd_ci == "nct"){
-    if(denom == "rm"){
-      t_stat <- (abs(m1 - m2) / (sqrt((sd1^2 + sd2^2)-(2*r12*sd1*sd2))/sqrt(n))) * sqrt(2*(1-r12))
-    }else{
-      SE1 <- d_denom / sqrt(n)
-      t_stat = abs(m1 - m2) / SE1
-    }
+    if (tr > 0) {
+      if (denom == "z") {
+        SE1 <- d_denom / sqrt(h) * sqrt((n - 1) / (h - 1))
+      } else {
+        SE1 <- d_denom / sqrt(h) * sqrt((n - 1) / (h - 1))
+      }
+      t_stat <- abs(m1 - m2) / SE1
+      ts <- get_ncp_t2(t_stat, d_df, conf.level = 1-alpha*2)
+      conv_factor <- cg * (1 / sqrt(h)) * sqrt((n - 1) / (h - 1))
+      dlow <- ts[1] * conv_factor * J
+      dhigh <- ts[2] * conv_factor * J
+    } else {
+      if(denom == "rm"){
+        t_stat <- (abs(m1 - m2) / (sqrt((sd1^2 + sd2^2)-(2*r12*sd1*sd2))/sqrt(n))) * sqrt(2*(1-r12))
+      }else{
+        SE1 <- d_denom / sqrt(n)
+        t_stat = abs(m1 - m2) / SE1
+      }
 
-    ts <- get_ncp_t2(t_stat, d_df, conf.level = 1-alpha*2)
-    dlow <- ts[1] * sqrt(hn) * J
-    dhigh <- ts[2] * sqrt(hn) * J
+      ts <- get_ncp_t2(t_stat, d_df, conf.level = 1-alpha*2)
+      dlow <- ts[1] * sqrt(hn) * J
+      dhigh <- ts[2] * sqrt(hn) * J
+    }
   } else{
     t_stat = NULL
     hn = NULL
@@ -149,7 +173,11 @@ d_est_pair <- function(n,
     tdlow <- dlow
     dlow <- dhigh * -1
     dhigh <- tdlow * -1
-    d_lambda <- cohend * sqrt(n / (2*(1 - r12)))
+    if (tr > 0) {
+      d_lambda <- -d_lambda
+    } else {
+      d_lambda <- cohend * sqrt(n / (2*(1 - r12)))
+    }
     t_stat = -1*t_stat
   }
   if(smd_ci != "goulet"){
@@ -184,24 +212,47 @@ d_est_ind <- function(n1,
                       var.equal = TRUE,
                       alpha = .05,
                       denom = "d",
-                      smd_ci = "goulet"){
+                      smd_ci = "goulet",
+                      tr = 0){
 
+  # Trimming adjustments
+  cg <- trim_rescale(tr)
+  h1 <- trim_h(n1, tr)
+  h2 <- trim_h(n2, tr)
+  N <- n1 + n2
 
   if (var.equal) {
     denomSD <- sqrt((((n1 - 1)*(sd1^2)) + (n2 - 1)*(sd2^2))/((n1+n2)-2)) #calculate sd pooled
-    d_df = n1 + n2 - 2
-    hn <- (1 / n1 + 1 / n2)
+    if (tr > 0) {
+      d_df <- h1 + h2 - 2
+      hn <- (1 / h1 + 1 / h2) * ((N - 2) / (h1 + h2 - 2))
+    } else {
+      d_df = n1 + n2 - 2
+      hn <- (1 / n1 + 1 / n2)
+    }
   } else {
     denomSD <- sqrt((sd1^2 + sd2^2)/2) #calculate sd root mean squared for Welch's t-test
-    d_df1 = (n1 - 1)*(n2 - 1)*(sd1^2+sd2^2)^2
-    d_df2 = (n2-1)*sd1^4+(n1-1)*sd2^4
-    d_df = d_df1/d_df2
-    hn <- (2 * (n2 * sd1^2 + n1 * sd2^2)) / (n1 * n2 * (sd1^2 + sd2^2))
+    if (tr > 0) {
+      # Welch-Satterthwaite with Winsorized variances and h
+      d_df1 = (sd1^2/h1 + sd2^2/h2)^2
+      d_df2 = (sd1^2/h1)^2/(h1-1) + (sd2^2/h2)^2/(h2-1)
+      d_df = d_df1/d_df2
+      hn <- (2 * (h2 * sd1^2 + h1 * sd2^2)) / (h1 * h2 * (sd1^2 + sd2^2))
+    } else {
+      d_df1 = (n1 - 1)*(n2 - 1)*(sd1^2+sd2^2)^2
+      d_df2 = (n2-1)*sd1^4+(n1-1)*sd2^4
+      d_df = d_df1/d_df2
+      hn <- (2 * (n2 * sd1^2 + n1 * sd2^2)) / (n1 * n2 * (sd1^2 + sd2^2))
+    }
   }
 
   if (denom == "glass1"){
     denomSD <- sd1
-    d_df = n1 -1
+    if (tr > 0) {
+      d_df = h1 - 1
+    } else {
+      d_df = n1 - 1
+    }
     hn <- 1 / n2 + denomSD^2 / (n1 * denomSD^2)
     n_glass = n1
     nn_glass = n2
@@ -209,7 +260,11 @@ d_est_ind <- function(n1,
   } else if (denom == "glass2"){
     denomSD <- sd2
     hn <- 1 / n2 + denomSD^2 / (n1 * denomSD^2)
-    d_df = n2 - 1
+    if (tr > 0) {
+      d_df = h2 - 1
+    } else {
+      d_df = n2 - 1
+    }
     n_glass = n2
     nn_glass = n1
     sdn_glass = sd1
@@ -218,16 +273,12 @@ d_est_ind <- function(n1,
 
   denomSD[is.na(denomSD)] <- NaN
 
-  #denomSD <- jmvcore::tryNaN(sqrt(((n1-1)*v[1]+(n2-1)*v[2])/(n1+n2-2)))
-  d <- abs(m1-m2)/denomSD # Cohen's d
-
-  #d[is.na(d)] <- NaN
+  d <- cg * abs(m1-m2)/denomSD # Cohen's d (or robust version)
 
   cohend = d
   ntilde <- harm_mean(n1,n2)
 
   # Compute unbiased Hedges's g
-  # Use the lgamma function, and update to what Goulet-Pelletier & Cousineau used; works with larger inputs
   if(type == "g"){
     J = hedge_J(d_df)
   } else {
@@ -259,19 +310,46 @@ d_est_ind <- function(n1,
   }
 
 
-
-  if(var.equal == TRUE && !(denom %in% c("glass1","glass2"))){
-    mult_lamb = sqrt((n1*n2*(sd1^2 + sd2^2))/(2*(n2*sd1^2 + n1*sd2^2)))
-    d_lambda = cohend * mult_lamb
-  } else if(denom %in% c("glass1","glass2")){
-    d_lambda <- cohend * sqrt(ntilde/2)
+  if (tr > 0) {
+    # Trimmed SE and noncentrality
+    d_unscaled <- cohend / (cg * J)
+    if (var.equal && !(denom %in% c("glass1", "glass2"))) {
+      # Pooled Winsorized: Yuen-Dixon adjusted variance
+      S_tilde2 <- (N - 2) * denomSD^2 / (h1 + h2 - 2)
+      S_tilde <- sqrt(S_tilde2)
+      SE1 <- S_tilde * sqrt(1/h1 + 1/h2)
+      d_lambda <- abs(m1 - m2) / SE1
+      conv <- cg * sqrt((h1 + h2) * (N - 2) / (h1 * h2 * (h1 + h2 - 2)))
+      d_sigma <- conv * sqrt(d_unscaled^2 / (2 * (h1 + h2 - 2)) + (h1 + h2) / (h1 * h2))
+      d_sigma <- d_sigma * J
+    } else if (denom %in% c("glass1", "glass2")) {
+      h_glass <- if (denom == "glass1") h1 else h2
+      SE1 <- denomSD / sqrt(h_glass) * sqrt((n_glass - 1) / (h_glass - 1))
+      d_lambda <- abs(m1 - m2) / SE1
+      d_sigma <- cg * J * sqrt((sdn_glass^2/denomSD^2)/(nn_glass-1) + 1/(h_glass-1) + d_unscaled^2/(2*(h_glass-1)))
+    } else {
+      # avg (Welch) with trimming
+      se1 <- sqrt(sd1^2 / h1)
+      se2 <- sqrt(sd2^2 / h2)
+      SE1 <- sqrt(se1^2 + se2^2)
+      d_lambda <- abs(m1 - m2) / SE1
+      d_sigma2 <- cg^2 * (d_unscaled^2 * (sd1^4 / (h1-1) + sd2^4 / (h2-1)) / (8*denomSD^4) +
+        (sd1^2 / (h1-1) + sd2^2 / (h2-1)) / denomSD^2)
+      d_sigma <- sqrt(d_sigma2) * J
+    }
   } else {
-    d_lambda <- cohend * sqrt(ntilde/2)
+    if(var.equal == TRUE && !(denom %in% c("glass1","glass2"))){
+      mult_lamb = sqrt((n1*n2*(sd1^2 + sd2^2))/(2*(n2*sd1^2 + n1*sd2^2)))
+      d_lambda = cohend * mult_lamb
+    } else if(denom %in% c("glass1","glass2")){
+      d_lambda <- cohend * sqrt(ntilde/2)
+    } else {
+      d_lambda <- cohend * sqrt(ntilde/2)
+    }
   }
 
   # add options for cohend here
   if(smd_ci == "goulet"){
-  #d_sigma = sqrt((n1+n2)/(n1*n2)+(cohend^2/(2*(n1+n2))))
   d_sigma = sqrt((d_df/(d_df-2)) * (2/ntilde) *(1+cohend^2*(ntilde/2)) - cohend^2/J^2)
   # Confidence interval of the SMD from Goulet-Pelletier & Cousineau
   tlow <- qt(1 / 2 - (1-alpha*2) / 2, df = d_df, ncp = d_lambda)
@@ -283,61 +361,64 @@ d_est_ind <- function(n1,
     dlow <- tlow / d_lambda * cohend
     dhigh <- thigh / d_lambda * cohend
   }
-  } else{
+  } else if (tr == 0) {
     if (denom %in% c("glass1", "glass2")) {
       N = n1 + n2
-      # morris and deshon 2002
-      # d_sigma = sqrt((1 / ntilde) * ((N - 2) / (N - 4)) * (1 + ntilde *
-      #                                                        cohend ^ 2) - cohend ^ 2 / J ^ 2)
-      # Algina, Keselman, and Penfield (2006) from Delacre et al 2021
-      #d_sigma2 = d_df / (d_df -2) * (1/n_glass + sdn_glass^2/(nn_glass*denomSD^2))+ cohend^2 * (d_df/(d_df-2)-J^2)
-      #  # Bonett, 2008a, equation 12
-      ### adapted from metafor SMD1H
-      ### vi <- (sd1i^2/sd2i^2)/(n1i-1) + 1/(n2i-1) + yi^2/(2*(n2i-1))
       d_sigma2 = (sdn_glass^2/denomSD^2)/(nn_glass-1) + 1/(n_glass-1) + cohend^2/(2*(n_glass-1))
       d_sigma = sqrt(d_sigma2)
     } else {
       if (var.equal) {
-        #d_sigma = sqrt(((n1 + n2) / (n1 * n2) + d ^ 2 / (2 * (n1 + n2))) * J ^ 2)
-        #vi[i] <- 1/n1i[i] + 1/n2i[i] + (1 - (mi[i]-2)/(mi[i]*cmi[i]^2)) * yi[i]^2 # Hedges, 1983b, equation 9; see [c]
         d_sigma2 =  1/n1 + 1/n2 + (1 - (d_df-2)/(d_df*J^2)) * cohend^2
         d_sigma = sqrt(d_sigma2)
       } else{
-        # par1 = 2*(sd1^2/n1+sd2^2/n2)/(sd1^2+sd2^2)
-        # par2 = d_df/(d_df-2)-J^2
-        # d_sigma = sqrt(d_df/(d_df-2)*par1+cohend^2*par2)
-        # Adopted from metfor
-        # vi[i] <- yi[i]^2 * (sd1i[i]^4 / (n1i[i]-1) + sd2i[i]^4 / (n2i[i]-1)) / (8*sdpi[i]^4) +
-        #(sd1i[i]^2 / (n1i[i]-1) + sd2i[i]^2 / (n2i[i]-1)) / sdpi[i]^2 # Bonett, 2008a, equation 8; Bonett, 2009, equation 5
         d_sigma2 = cohend^2 * (sd1^4 / (n1-1) + sd2^4 / (n2-1)) / (8*denomSD^4) +
-          (sd1^2 / (n1-1) + sd2^2 / (n2-1)) / denomSD^2 # Bonett, 2008a, equation 8; Bonett, 2009, equation 5
+          (sd1^2 / (n1-1) + sd2^2 / (n2-1)) / denomSD^2
         d_sigma = sqrt(d_sigma2)
       }
     }
-
   }
 
   if(smd_ci == "nct"){
-    if( !(denom %in% c("glass1","glass2"))){
-      #d_sigma = denomSD * sqrt(1 / n1 + 1 / n2)
-      if(var.equal){
-        SE1 = denomSD * sqrt(1 / n1 + 1 / n2)
+    if (tr > 0) {
+      # SE1 and d_lambda already computed in trimming block above
+      t_stat <- abs(m1 - m2) / SE1
+      ts <- get_ncp_t2(t_stat, d_df, conf.level = 1-alpha*2)
+      if (var.equal && !(denom %in% c("glass1", "glass2"))) {
+        conv <- cg * sqrt((h1 + h2) * (N - 2) / (h1 * h2 * (h1 + h2 - 2)))
+        dlow <- ts[1] * conv * J
+        dhigh <- ts[2] * conv * J
+      } else if (denom %in% c("glass1", "glass2")) {
+        h_glass <- if (denom == "glass1") h1 else h2
+        conv <- cg * (1 / sqrt(h_glass)) * sqrt((n_glass - 1) / (h_glass - 1))
+        dlow <- ts[1] * conv * J
+        dhigh <- ts[2] * conv * J
       } else {
-        se1 <- sqrt(sd1^2 / n1)
-        se2 <- sqrt(sd2^2 / n2)
-        SE1 <- sqrt(se1^2 + se2^2)
+        # Welch avg
+        conv <- cg * SE1 / denomSD
+        dlow <- ts[1] * conv * J
+        dhigh <- ts[2] * conv * J
       }
-
-      t_stat = abs(m1-m2)/SE1
-      ts <- get_ncp_t2(t_stat, d_df, conf.level = 1-alpha*2)
     } else {
-      SE1 = (denomSD * sqrt(1 / n_glass + sdn_glass^2 / (nn_glass * denomSD^2)))
-      d_df <- n1+n2 - 2
-      t_stat = abs(m1-m2)/SE1
-      ts <- get_ncp_t2(t_stat, d_df, conf.level = 1-alpha*2)
+      if( !(denom %in% c("glass1","glass2"))){
+        if(var.equal){
+          SE1 = denomSD * sqrt(1 / n1 + 1 / n2)
+        } else {
+          se1 <- sqrt(sd1^2 / n1)
+          se2 <- sqrt(sd2^2 / n2)
+          SE1 <- sqrt(se1^2 + se2^2)
+        }
+
+        t_stat = abs(m1-m2)/SE1
+        ts <- get_ncp_t2(t_stat, d_df, conf.level = 1-alpha*2)
+      } else {
+        SE1 = (denomSD * sqrt(1 / n_glass + sdn_glass^2 / (nn_glass * denomSD^2)))
+        d_df <- n1+n2 - 2
+        t_stat = abs(m1-m2)/SE1
+        ts <- get_ncp_t2(t_stat, d_df, conf.level = 1-alpha*2)
+      }
+      dlow <- ts[1] * sqrt(hn) * J
+      dhigh <- ts[2] * sqrt(hn) * J
     }
-    dlow <- ts[1] * sqrt(hn) * J
-    dhigh <- ts[2] * sqrt(hn) * J
   } else {
     t_stat = NULL
     hn = NULL
@@ -359,13 +440,17 @@ d_est_ind <- function(n1,
     dlow <- dhigh * -1
     dhigh <- tdlow * -1
     t_stat = -1*t_stat
-    if(var.equal == TRUE && !(denom %in% c("glass1","glass2"))){
-      mult_lamb = sqrt((n1*n2*(sd1^2 + sd2^2))/(2*(n2*sd1^2 + n1*sd2^2)))
-      d_lambda = cohend * mult_lamb
-    } else if(denom %in% c("glass1","glass2")){
-      d_lambda <- cohend * sqrt(ntilde/2)
+    if (tr == 0) {
+      if(var.equal == TRUE && !(denom %in% c("glass1","glass2"))){
+        mult_lamb = sqrt((n1*n2*(sd1^2 + sd2^2))/(2*(n2*sd1^2 + n1*sd2^2)))
+        d_lambda = cohend * mult_lamb
+      } else if(denom %in% c("glass1","glass2")){
+        d_lambda <- cohend * sqrt(ntilde/2)
+      } else {
+        d_lambda <- cohend * sqrt(ntilde/2)
+      }
     } else {
-      d_lambda <- cohend * sqrt(ntilde/2)
+      d_lambda <- -d_lambda
     }
   }
 
@@ -450,10 +535,19 @@ d_est_one <- function(n,
                       testValue,
                       type = "g",
                       alpha = .05,
-                      smd_ci = "goulet"){
+                      smd_ci = "goulet",
+                      tr = 0){
 
-  cohend <- abs(mu-testValue)/sd # Cohen's d
-  df <- n-1
+  # Trimming adjustments
+  cg <- trim_rescale(tr)
+  h <- trim_h(n, tr)
+
+  cohend <- cg * abs(mu-testValue)/sd # Cohen's d (or robust version)
+  if (tr > 0) {
+    df <- h - 1
+  } else {
+    df <- n - 1
+  }
   d_df = df
   hn <- 1 / n
   # Compute unbiased Hedges' g
@@ -471,12 +565,25 @@ d_est_one <- function(n,
     smd_label = "Cohen's d"
   }
 
-  d_lambda <- cohend * sqrt(n)
-  if(smd_ci == "goulet"){
-    d_sigma = sqrt((df/(df-2)) * (1/n) *(1+cohend^2*(n/1)) - cohend^2/J^2)
+  if (tr > 0) {
+    # Noncentrality: lambda = (trimmed mean diff / Winsorized SE)
+    # SE_trimmed = sd / sqrt(h) * sqrt((n-1)/(h-1)) for Yuen adjustment
+    SE_yuen <- sd / sqrt(h) * sqrt((n - 1) / (h - 1))
+    d_lambda <- abs(mu - testValue) / SE_yuen
+    # SE of d_R: uses the noncentral-t approximation with trimming
+    d_unscaled <- cohend / (cg * J)  # remove cg and J to get raw ratio
+    d_sigma <- cg * sqrt(1 / h * ((n - 1) / (h - 1))) *
+      sqrt(d_unscaled^2 / (2 * (h - 1)) + 1)
+    d_sigma <- d_sigma * J
   } else {
-    d_sigma = sqrt(1/n + (cohend^2/(2*n)))
+    d_lambda <- cohend * sqrt(n)
+    if(smd_ci == "goulet"){
+      d_sigma = sqrt((df/(df-2)) * (1/n) *(1+cohend^2*(n/1)) - cohend^2/J^2)
+    } else {
+      d_sigma = sqrt(1/n + (cohend^2/(2*n)))
+    }
   }
+
   if(smd_ci == "goulet"){
   #d_sigma = sqrt((df + 1)/(df - 1)*(2/n)*(1 + cohend^2/8))
 
@@ -497,12 +604,21 @@ d_est_one <- function(n,
   }
 
   if(smd_ci == "nct"){
-    SE1 <- sd / sqrt(n)
-    t_stat = abs(mu-testValue) / SE1
-    ts <- get_ncp_t2(t_stat, d_df, conf.level = 1-alpha*2)
-    dlow <- ts[1] * sqrt(hn)*J
-    dhigh <- ts[2] * sqrt(hn)*J
-
+    if (tr > 0) {
+      SE1 <- sd / sqrt(h) * sqrt((n - 1) / (h - 1))
+      t_stat <- abs(mu - testValue) / SE1
+      ts <- get_ncp_t2(t_stat, d_df, conf.level = 1-alpha*2)
+      # Convert noncentrality to delta_R
+      conv_factor <- cg * (1 / sqrt(h)) * sqrt((n - 1) / (h - 1))
+      dlow <- ts[1] * conv_factor * J
+      dhigh <- ts[2] * conv_factor * J
+    } else {
+      SE1 <- sd / sqrt(n)
+      t_stat = abs(mu-testValue) / SE1
+      ts <- get_ncp_t2(t_stat, d_df, conf.level = 1-alpha*2)
+      dlow <- ts[1] * sqrt(hn)*J
+      dhigh <- ts[2] * sqrt(hn)*J
+    }
   } else {
     t_stat = NULL
     hn = NULL
@@ -768,6 +884,34 @@ get_ncp_t2 = function (ncp, df, conf.level = 0.95,
   Result <- c(c(Low.M1, Low.M2)[Best.Low],
               c(Upper.M1, Upper.M2)[Best.Up])
   return(Result)
+}
+
+# Internal helper: Winsorized variance
+# Replaces the g smallest and g largest observations with the nearest remaining
+# values, then computes the variance of the Winsorized sample.
+winvar <- function(x, tr = 0.2) {
+  n <- length(x)
+  g <- floor(tr * n)
+  if (g == 0) return(var(x))
+  y <- sort(x)
+  y[seq_len(g)] <- y[g + 1L]
+  y[seq.int(n - g + 1L, n)] <- y[n - g]
+  var(y)
+}
+
+# Internal helper: Rescaling constant for trimmed SMD
+# Returns c(gamma) such that c(gamma) * (trimmed mean diff / Winsorized SD)
+# equals Cohen's delta under normality.
+trim_rescale <- function(tr) {
+  if (tr == 0) return(1)
+  a <- qnorm(1 - tr)
+  sqrt(1 - 2 * tr + 2 * tr * a^2 - 2 * a * dnorm(a))
+}
+
+# Internal helper: Effective sample size after trimming
+# h = n - 2 * floor(tr * n)
+trim_h <- function(n, tr) {
+  n - 2L * floor(tr * n)
 }
 
 # Internal helper to resolve denom into concrete arguments

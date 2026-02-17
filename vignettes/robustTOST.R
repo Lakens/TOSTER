@@ -29,6 +29,12 @@ wilcox_TOST(formula = extra ~ group,
                       eqb = .5)
 
 ## -----------------------------------------------------------------------------
+simple_htest(formula = extra ~ group,
+                      data = sleep,
+                      test = "w", alternative = "e",
+                      mu = .5)
+
+## -----------------------------------------------------------------------------
 # Default studentized test (t-approximation)
 brunner_munzel(formula = extra ~ group,
                data = sleep)

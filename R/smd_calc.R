@@ -44,6 +44,14 @@
 #' @param test_method a character string specifying the method for hypothesis testing:
 #'     - "z": Use z-statistic (normal distribution)
 #'     - "t": Use t-statistic with degrees of freedom from the SMD calculation
+#' @param tr a numeric value specifying the proportion of observations to trim from each
+#'     tail when computing trimmed means and Winsorized variances (default = 0, no trimming).
+#'     Must be in the range \[0, 0.5). Common choices are 0.1 (10\% trimming) and 0.2
+#'     (20\% trimming). When tr > 0, the effect size uses trimmed means for the numerator
+#'     and the rescaled Winsorized standard deviation for the denominator, following
+#'     Algina, Keselman, and Penfield (2005). The rescaling ensures the robust effect
+#'     size equals Cohen's delta when data are normally distributed.
+#'     Note: tr > 0 is not compatible with denom = "rm" or smd_ci = "goulet".
 #'
 #' @details
 #' This function calculates standardized mean differences (SMD) for various study designs:
@@ -70,7 +78,24 @@
 #' explicitly provided arguments are overridden. The `bias_correction` argument is always
 #' respected regardless of `denom`.
 #'
+#' When \code{tr > 0}, the function computes a robust standardized mean difference
+#' using trimmed means and Winsorized variances. The trimmed mean removes a proportion
+#' \code{tr} of observations from each tail before computing the mean. The Winsorized
+#' variance replaces trimmed observations with the nearest remaining values before
+#' computing the variance. A rescaling constant ensures the robust effect size equals
+#' Cohen's delta under normality. This approach is recommended when distributions
+#' are heavy-tailed or contain outliers, as the robust effect size better reflects
+#' the separation between distributions than the standard Cohen's d (Algina et al., 2005).
+#'
 #' For detailed information on calculation methods, see `vignette("SMD_calcs")`.
+#'
+#' @references
+#' Algina, J., Keselman, H. J., & Penfield, R. D. (2005). An alternative to Cohen's
+#'   standardized mean difference effect size: A robust parameter and confidence interval
+#'   in the two independent groups case. \emph{Psychological Methods}, \emph{10}(3), 317-328.
+#'
+#' Yuen, K. K., & Dixon, W. J. (1973). The approximate behaviour and performance of
+#'   the two-sample trimmed t. \emph{Biometrika}, \emph{60}(2), 369-374.
 #'
 #' @return
 #' If `output = "htest"` (default), returns a list with class `"htest"` containing:
@@ -155,7 +180,8 @@ smd_calc <- function(x, ...,
                      null.value = 0,
                      alternative = c("none", "two.sided", "less", "greater",
                                      "equivalence", "minimal.effect"),
-                     test_method = c("z", "t")){
+                     test_method = c("z", "t"),
+                     tr = 0){
   UseMethod("smd_calc")
 }
 
@@ -182,6 +208,7 @@ smd_calc.default = function(x,
                             alternative = c("none", "two.sided", "less", "greater",
                                             "equivalence", "minimal.effect"),
                             test_method = c("z", "t"),
+                            tr = 0,
                             ...) {
 
   denom = match.arg(denom)
@@ -198,6 +225,17 @@ smd_calc.default = function(x,
   output = match.arg(output)
   alternative = match.arg(alternative)
   test_method = match.arg(test_method)
+
+  # Validate tr
+  if (!is.numeric(tr) || length(tr) != 1 || tr < 0 || tr >= 0.5) {
+    stop("'tr' must be a single numeric value in [0, 0.5)")
+  }
+
+  # tr > 0 with goulet CI
+  if (tr > 0 && smd_ci == "goulet") {
+    stop("The Goulet-Pelletier CI method (smd_ci = 'goulet') is not supported with trimming (tr > 0). ",
+         "Consider using smd_ci = 'nct' or smd_ci = 'z' instead.")
+  }
 
   if(bias_correction){
     smd_type = 'g'
@@ -261,6 +299,12 @@ smd_calc.default = function(x,
     stop("The alpha must be a numeric value between 0 and 1")
   }
 
+  # tr > 0 with rm denom
+  if (tr > 0 && (int_denom == "rm" || (denom == "auto" && rm_correction))) {
+    stop("The repeated measures denominator (denom = 'rm') is not currently supported with trimming (tr > 0). ",
+         "Consider using denom = 'z' for paired designs with trimming.")
+  }
+
   if (!is.null(y)) {
     dname <- paste(deparse(substitute(x)), "and",
                    deparse(substitute(y)))
@@ -305,10 +349,28 @@ smd_calc.default = function(x,
     n <- nrow(data)
     i1 <- data$i1
     i2 <- data$i2
-    m1 <- mean(i1)
-    m2 <- mean(i2) + mu
-    sd1  <- sd(i1)
-    sd2  <- sd(i2)
+
+    # Validate trimming does not remove too many observations
+    if (tr > 0) {
+      h_check <- trim_h(n, tr)
+      if (h_check < 2) {
+        stop("Trimming proportion tr = ", tr,
+             " removes too many observations from a group of size ", n,
+             ". At least 2 observations must remain after trimming.")
+      }
+    }
+
+    if (tr > 0) {
+      m1 <- mean(i1, trim = tr)
+      m2 <- mean(i2, trim = tr) + mu
+      sd1 <- sqrt(winvar(i1, tr = tr))
+      sd2 <- sqrt(winvar(i2, tr = tr))
+    } else {
+      m1 <- mean(i1)
+      m2 <- mean(i2) + mu
+      sd1  <- sd(i1)
+      sd2  <- sd(i2)
+    }
     r12 <- cor(i1, i2)
 
     # Calculate Cohens d
@@ -322,7 +384,8 @@ smd_calc.default = function(x,
       type = smd_type,
       denom = int_denom,
       alpha = alpha/2,
-      smd_ci = smd_ci
+      smd_ci = smd_ci,
+      tr = tr
     )
 
   } else if(!missing(y)){
@@ -331,10 +394,29 @@ smd_calc.default = function(x,
     y1 = na.omit(y)
     n1 = length(x1)
     n2 = length(y1)
-    m1 = mean(x1)
-    m2 = mean(y1) + mu
-    sd1 = sd(x1)
-    sd2 = sd(y1)
+
+    # Validate trimming does not remove too many observations
+    if (tr > 0) {
+      min_group_n <- min(n1, n2)
+      h_check <- trim_h(min_group_n, tr)
+      if (h_check < 2) {
+        stop("Trimming proportion tr = ", tr,
+             " removes too many observations from a group of size ", min_group_n,
+             ". At least 2 observations must remain after trimming.")
+      }
+    }
+
+    if (tr > 0) {
+      m1 = mean(x1, trim = tr)
+      m2 = mean(y1, trim = tr) + mu
+      sd1 = sqrt(winvar(x1, tr = tr))
+      sd2 = sqrt(winvar(y1, tr = tr))
+    } else {
+      m1 = mean(x1)
+      m2 = mean(y1) + mu
+      sd1 = sd(x1)
+      sd2 = sd(y1)
+    }
 
     cohen_res = d_est_ind(
       n1 = n1,
@@ -347,15 +429,32 @@ smd_calc.default = function(x,
       var.equal = var.equal,
       alpha = alpha/2,
       denom = int_denom,
-      smd_ci = smd_ci
+      smd_ci = smd_ci,
+      tr = tr
     )
 
   } else {
 
     x1 = na.omit(x)
     n1 = length(x1)
-    m1 = mean(x1) + mu
-    sd1 = sd(x1)
+
+    # Validate trimming does not remove too many observations
+    if (tr > 0) {
+      h_check <- trim_h(n1, tr)
+      if (h_check < 2) {
+        stop("Trimming proportion tr = ", tr,
+             " removes too many observations from a group of size ", n1,
+             ". At least 2 observations must remain after trimming.")
+      }
+    }
+
+    if (tr > 0) {
+      m1 = mean(x1, trim = tr) + mu
+      sd1 = sqrt(winvar(x1, tr = tr))
+    } else {
+      m1 = mean(x1) + mu
+      sd1 = sd(x1)
+    }
 
     cohen_res = d_est_one(
       n = n1,
@@ -364,7 +463,8 @@ smd_calc.default = function(x,
       type = smd_type,
       testValue = 0,
       alpha = alpha/2,
-      smd_ci = smd_ci
+      smd_ci = smd_ci,
+      tr = tr
     )
 
   }
@@ -388,14 +488,15 @@ smd_calc.default = function(x,
   df <- cohen_res$d_df
 
   # Determine SMD label
+  trim_note <- if (tr > 0) paste0(" (", tr * 100, "% trimmed)") else ""
   smd_label <- if (bias_correction) {
     if (glass != "no" && glass %in% c("glass1", "glass2")) {
-      paste0("Glass's ", ifelse(glass == "glass1", "delta1", "delta2"))
+      paste0("Glass's ", ifelse(glass == "glass1", "delta1", "delta2"), trim_note)
     } else {
-      "Hedges' g"
+      paste0("Hedges' g", trim_note)
     }
   } else {
-    "Cohen's d"
+    paste0("Cohen's d", trim_note)
   }
 
   # Construct method description
@@ -412,17 +513,20 @@ smd_calc.default = function(x,
     if(paired == TRUE && !missing(y)){
       cohen_res_ci = d_est_pair(
         n = n, m1 = m1, m2 = m2, sd1 = sd1, sd2 = sd2, r12 = r12,
-        type = smd_type, denom = int_denom, alpha = alpha, smd_ci = smd_ci
+        type = smd_type, denom = int_denom, alpha = alpha, smd_ci = smd_ci,
+        tr = tr
       )
     } else if(!missing(y)){
       cohen_res_ci = d_est_ind(
         n1 = n1, n2 = n2, m1 = m1, m2 = m2, sd1 = sd1, sd2 = sd2,
-        type = smd_type, var.equal = var.equal, alpha = alpha, denom = int_denom, smd_ci = smd_ci
+        type = smd_type, var.equal = var.equal, alpha = alpha, denom = int_denom, smd_ci = smd_ci,
+        tr = tr
       )
     } else {
       cohen_res_ci = d_est_one(
         n = n1, mu = m1, sd = sd1, type = smd_type, testValue = 0,
-        alpha = alpha, smd_ci = smd_ci
+        alpha = alpha, smd_ci = smd_ci,
+        tr = tr
       )
     }
     conf.int <- c(cohen_res_ci$dlow, cohen_res_ci$dhigh)
