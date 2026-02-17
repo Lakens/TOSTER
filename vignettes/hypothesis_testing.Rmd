@@ -1,0 +1,258 @@
+---
+title: "Hypothesis Testing with TOSTER"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Hypothesis Testing with TOSTER}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Introduction
+
+TOSTER was originally conceived as an equivalence testing package, but it is really a general-purpose hypothesis testing toolkit. Equivalence testing via the two one-sided tests (TOST) procedure is one of its core features, but the package also supports standard null hypothesis significance tests, non-inferiority testing, and superiority-by-a-margin testing through a single, consistent interface.
+
+Many of TOSTER's test functions return objects of class `htest`, the same structure used by base R functions like `t.test()`, `wilcox.test()`, and `cor.test()`. This means results from TOSTER plug directly into existing R workflows. On top of this, TOSTER provides helper functions for tabulating, describing, and plotting test results that work with most `htest` objects.
+
+The central idea is simple: hypothesis testing involves specifying a null hypothesis, choosing an alternative, and evaluating by a test. By adjusting the `alternative` and `mu` arguments in TOSTER's functions, you can move seamlessly between testing frameworks. A standard nil-hypothesis test, an equivalence test, a non-inferiority analysis, and a superiority-by-a-margin test are all handled by the same interface.
+
+```{r setup}
+library(TOSTER)
+```
+
+Throughout this vignette we use the built-in `sleep` dataset, which contains extra hours of sleep (`extra`) for 10 subjects under two drug conditions (`group`).
+
+## The `simple_htest` Interface
+
+`simple_htest()` is a unified wrapper for common two-group (and one-sample) hypothesis tests. It calls base R's `t.test()` or `wilcox.test()` under the hood but improves the output in two ways:
+
+1. **Sample sizes are reported** directly in the output (base R does not show *n*).
+2. **The effect is shown explicitly** as a difference (e.g., "mean difference (1 - 2)") rather than listing two group means and leaving the reader to compute the difference.
+
+### Basic usage: two-sample t-test
+
+A standard two-sided t-test with `simple_htest` looks just like `t.test()` but with a formula interface and explicit `mu` argument:
+
+```{r}
+simple_htest(extra ~ group,
+             data = sleep,
+             mu = 0,
+             alternative = "two.sided")
+```
+
+Compare this with base R's `t.test()`:
+
+```{r}
+t.test(extra ~ group, data = sleep)
+```
+
+Notice that `simple_htest` reports the sample sizes in each group and appends the mean difference to the output, saving the reader a calculation step.
+
+### Wilcoxon test
+
+To run a nonparametric Wilcoxon rank-sum test instead of a t-test, set the `test` argument:
+
+```{r}
+simple_htest(extra ~ group,
+             data = sleep,
+             test = "wilcox.test",
+             mu = 0,
+             alternative = "two.sided")
+```
+
+The output includes the Hodges-Lehmann estimate of the location shift and, again, sample sizes.
+
+### Equivalence testing (TOST)
+
+To test whether the difference between groups falls *within* a set of equivalence bounds, set `alternative = "equivalence"` and specify the bounds via `mu`. The TOST procedure tests the null hypothesis that the true effect lies outside the bounds using two one-sided tests.
+
+```{r}
+simple_htest(extra ~ group,
+             data = sleep,
+             mu = 2,
+             alternative = "equivalence")
+```
+
+Here, `mu = 2` defines symmetric equivalence bounds of (-2, 2). The confidence interval is reported at the 1 - 2&alpha; level (90% by default), which is the appropriate interval for TOST. If the 90% CI falls entirely within the bounds, the test is significant and we can conclude equivalence.
+
+You can also specify asymmetric bounds by passing a two-element vector:
+
+```{r}
+simple_htest(extra ~ group,
+             data = sleep,
+             mu = c(-1, 3),
+             alternative = "equivalence")
+```
+
+## Beyond Equivalence: Non-Inferiority and Superiority by a Margin
+
+TOSTER handles the full family of margin-based hypothesis tests, not just equivalence.
+
+**Non-inferiority testing** asks: "Is the effect not worse than some threshold?" This is operationalized as a one-sided test against a shifted null. For instance, if we want to show that the mean difference between drug groups is not less than -1 (i.e., group 1 is not meaningfully worse than group 2 by more than 1 hour), we test with `mu = -1` and `alternative = "greater"`:
+
+```{r}
+simple_htest(extra ~ group,
+             data = sleep,
+             mu = -1,
+             alternative = "greater")
+```
+
+If the p-value is below &alpha;, we can conclude non-inferiority: the true difference is greater than -1.
+
+**Superiority by a margin** asks: "Does the effect exceed a positive threshold?" For example, to test whether the difference exceeds +1 hour:
+
+```{r}
+simple_htest(extra ~ group,
+             data = sleep,
+             mu = 1,
+             alternative = "greater")
+```
+
+These are one-sided tests against a non-zero null, not equivalence tests. TOSTER handles them through the same `simple_htest` interface by adjusting `mu` and `alternative`.
+
+## Other Test Functions
+
+TOSTER provides several additional functions that return `htest` objects. Each supports the same `alternative` options ("two.sided", "less", "greater", "equivalence", "minimal.effect"), making them interchangeable with the helper functions described later. Here are just a few key functions in the package:
+
+### Brunner-Munzel test
+
+The Brunner-Munzel test is a robust nonparametric test for stochastic superiority. Unlike the Wilcoxon test, it does not assume equal variances or equal shape of distributions. The null hypothesis is that the relative effect (probability that a random observation from one group exceeds one from the other) equals 0.5:
+
+```{r}
+brunner_munzel(extra ~ group, data = sleep)
+```
+
+### Correlation test
+
+`z_cor_test()` tests correlations using Fisher's z-transformation and supports equivalence bounds on the correlation coefficient:
+
+```{r}
+z_cor_test(mtcars$mpg, mtcars$hp,
+           method = "pearson",
+           alternative = "two.sided",
+           null = 0)
+```
+
+### Bootstrap t-test
+
+`boot_t_test()` provides a bootstrap alternative to the standard t-test, which is useful when distributional assumptions are questionable:
+```{r}
+set.seed(2101)
+boot_t_test(extra ~ group,
+            data = sleep,
+            mu = 0,
+            alternative = "two.sided",
+            R = 999)
+```
+
+### Permutation t-test
+
+`perm_t_test()` provides a permutation-based test that makes minimal distributional assumptions:
+
+```{r}
+set.seed(8251)
+perm_t_test(extra ~ group,
+            data = sleep,
+            mu = 0,
+            alternative = "two.sided",
+            R = 999)
+```
+
+All of these functions return objects of class `htest`, so the helper functions described next work identically with any of them.
+
+## Converting `t_TOST` Results
+
+Users of TOSTER's original `t_TOST()` and `wilcox_TOST()` functions can convert their results to `htest` format using `as_htest()`. This allows the full suite of helper functions to be used with older-style TOST output.
+
+```{r}
+tost_res <- t_TOST(extra ~ group,
+                   data = sleep,
+                   eqb = 2)
+as_htest(tost_res)
+```
+
+The resulting `htest` object contains the test statistic, p-value, confidence interval, and equivalence bounds from the original TOST analysis. Note, the `htest` output will only show the equivalence test, not the two one-sided tests separately or the nil-hypothesis significance test, but the key information is preserved for reporting.
+
+## Helper Functions for Reporting
+
+TOSTER includes three helper functions that work with any `htest` object: `df_htest()` for tabulation, `describe_htest()` for text descriptions, and `plot_htest_est()` for visualization.
+
+### `df_htest()`: Tabulating results
+
+`df_htest()` converts an `htest` object into a data frame, making it easy to build summary tables:
+
+```{r}
+res_t <- simple_htest(extra ~ group, data = sleep, mu = 0)
+df_htest(res_t)
+```
+
+
+
+The `test_statistics`, `show_ci`, and `extract_names` arguments control which columns appear in the output.
+
+### `describe_htest()`: Text descriptions
+
+`describe_htest()` generates a formatted text summary suitable for reporting:
+
+```{r}
+describe_htest(res_t)
+```
+
+For an equivalence test, the description adapts to reflect the TOST procedure:
+
+```{r}
+describe_htest(res_equiv)
+```
+
+This is useful for inline reporting in R Markdown. For example, you could write `` `r knitr::inline_expr('describe_htest(res_t)')` `` to embed the result directly in a sentence.
+
+### `plot_htest_est()`: Estimate plots
+
+`plot_htest_est()` produces a point-range plot showing the point estimate and confidence interval alongside the null value(s):
+
+```{r, fig.width=6, fig.height=3}
+plot_htest_est(res_t)
+```
+
+For equivalence tests, the plot displays both equivalence bounds as dashed reference lines:
+
+```{r, fig.width=6, fig.height=3}
+plot_htest_est(res_equiv)
+```
+
+Set `describe = FALSE` for a cleaner plot without the statistical summary in the subtitle:
+
+```{r, fig.width=6, fig.height=3}
+plot_htest_est(res_equiv, describe = FALSE)
+```
+
+Because the result is a `ggplot2` object, you can customize it further with standard ggplot2 functions.
+
+## Putting It All Together
+
+Here is a compact workflow tying together the full set of tools. We run an equivalence test, tabulate the result, describe it in text, and visualize it:
+
+```{r, fig.width=6, fig.height=3}
+# Run equivalence test
+result <- simple_htest(extra ~ group,
+                       data = sleep,
+                       mu = 2,
+                       alternative = "equivalence")
+
+# Tabulate
+df_htest(result)
+
+# Describe
+describe_htest(result)
+
+# Visualize
+plot_htest_est(result)
+```
+
+TOSTER provides a consistent, informative interface for hypothesis testing that goes well beyond equivalence. Whether you need a standard t-test with better output, a non-inferiority analysis, or a full TOST procedure, the same tools apply.

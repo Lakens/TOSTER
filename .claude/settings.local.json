@@ -74,7 +74,9 @@
       "Bash(\"/c/Users/caldwellaaron/AppData/Local/Programs/R/R-4.3.2/bin/Rscript.exe\" -e \"setwd\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER''\\); devtools::load_all\\(\\); testthat::test_file\\(''tests/testthat/test-htest.R''\\)\")",
       "Bash(\"/c/Users/caldwellaaron/AppData/Local/Programs/R/R-4.3.2/bin/Rscript.exe\" -e \"setwd\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER''\\); devtools::load_all\\(\\); testthat::test_file\\(''tests/testthat/test-hodges_lehmann.R''\\)\")",
       "Bash(\"/c/Users/caldwellaaron/AppData/Local/Programs/R/R-4.3.2/bin/Rscript.exe\" -e \"setwd\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER''\\); devtools::load_all\\(\\); testthat::test_file\\(''tests/testthat/test-perm_t_test.R''\\)\")",
-      "Bash(\"/c/Users/caldwellaaron/AppData/Local/Programs/R/R-4.3.2/bin/Rscript.exe\" -e \"setwd\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER''\\); devtools::load_all\\(\\); testthat::test_file\\(''tests/testthat/test-boot_t_test_trimmed.R''\\)\")"
+      "Bash(\"/c/Users/caldwellaaron/AppData/Local/Programs/R/R-4.3.2/bin/Rscript.exe\" -e \"setwd\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER''\\); devtools::load_all\\(\\); testthat::test_file\\(''tests/testthat/test-boot_t_test_trimmed.R''\\)\")",
+      "Bash(\"C:\\\\Program Files\\\\R\\\\R-4.5.1\\\\bin\\\\Rscript.exe\" -e \"devtools::build_vignettes\\(pkg = ''C:/Users/caldwellaaron/Documents/GitHub/TOSTER'', install = FALSE\\)\")",
+      "Bash(\"C:\\\\Program Files\\\\R\\\\R-4.5.1\\\\bin\\\\Rscript.exe\" -e \"knitr::purl\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER/vignettes/hypothesis_testing.Rmd'', output = tempfile\\(fileext = ''.R''\\)\\)\")"
     ]
   }
 }
