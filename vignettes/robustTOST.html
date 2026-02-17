@@ -980,7 +980,7 @@ usually referred to as the relative effect, based on the ranks of the
 two groups being compared (X and Y). A Brunner-Munzel type test is then
 a directional test of an effect, and answers a question akin to “what is
 the probability that a randomly sampled value of X will be greater than
-Y?”</p>
+Y?”<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a></p>
 <p><span class="math display">\[
 \hat p = P(X&gt;Y) + 0.5 \cdot P(X=Y)
 \]</span></p>
@@ -1021,12 +1021,12 @@ value (typically 0.5)</li>
 Brunner-Munzel standard error</li>
 </ul>
 <p>The default null hypothesis <span class="math inline">\(p_{null}\)</span> is typically 0.5 (50%
-probability of superiority is the default null), and <span class="math inline">\(s\)</span> refers to the rank-based Brunner-Munzel
+probability of superiority (tie) is the default null), and <span class="math inline">\(s\)</span> refers to the rank-based Brunner-Munzel
 standard error. The null can be modified, thereby allowing for
 equivalence testing <em>directly based on the relative effect</em>.
 Additionally, for paired samples the probability of superiority is based
 on a <em>hypothesis of exchangeability</em> and is not based on the
-difference scores<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>.</p>
+difference scores<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a>.</p>
 <p>For more details on the calculative approach, I suggest reading <span class="citation">Karch (2021)</span>. At small sample sizes, it is
 recommended that the permutation version of the test
 (<code>test_method = &quot;perm&quot;</code>) be used rather than the basic test
@@ -1281,14 +1281,15 @@ superiority is statistically confined to your specified range</li>
 <p>Note that the permutation approach can be computationally intensive
 for large datasets. Additionally, with a permutation test you may
 observe situations where the confidence interval and the p-value would
-yield <em>different</em> conclusions.</p>
+yield <em>different</em> conclusions though they should closely match in
+most cases.</p>
 </div>
 <div id="non-inferiority-testing" class="section level2">
 <h2>Non-Inferiority Testing</h2>
-<p>The Brunner-Munzel test can be used for non-inferiority testing in
-clinical trials with ordered categorical data <span class="citation">(Munzel and Hauschke 2003)</span>. By setting
-appropriate bounds, you can test whether a new treatment is not
-relevantly inferior to a standard:</p>
+<p>The Brunner-Munzel test can be used for non-inferiority testing with
+ordered categorical data <span class="citation">(Munzel and Hauschke
+2003)</span>. By setting appropriate bounds, you can test whether a new
+treatment is not relevantly inferior to a standard:</p>
 <div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" tabindex="-1"></a><span class="co"># Example: test non-inferiority with lower bound of 0.35</span></span>
 <span id="cb36-2"><a href="#cb36-2" tabindex="-1"></a><span class="co"># (i.e., the new treatment should not be substantially worse)</span></span>
 <span id="cb36-3"><a href="#cb36-3" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
@@ -2241,7 +2242,7 @@ ones</p>
 <div id="why-use-the-natural-log-transformation" class="section level2">
 <h2>Why Use The Natural Log Transformation?</h2>
 <p>The <a href="https://www.fda.gov/regulatory-information/search-fda-guidance-documents/bioavailability-and-bioequivalence-studies-submitted-ndas-or-inds-general-considerations">United
-States Food and Drug Administration (FDA)</a><a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a> has stated a rationale
+States Food and Drug Administration (FDA)</a><a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a> has stated a rationale
 for using the log transformed values:</p>
 <blockquote>
 <p>Using logarithmic transformation, the general linear statistical
@@ -2376,7 +2377,7 @@ precise test.</p>
 <p>The <code>ses_calc</code> and <code>boot_ses_calc</code> functions
 calculate non-parametric standardized effect sizes (rank-biserial
 correlation, WMW odds, concordance probability, or log-odds) with
-confidence intervals<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a>. As of v0.9.0, <code>ses_calc</code> also
+confidence intervals<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a>. As of v0.9.0, <code>ses_calc</code> also
 supports hypothesis testing directly on the effect size scale.</p>
 <div id="available-effect-sizes" class="section level2">
 <h2>Available Effect Sizes</h2>
@@ -2450,7 +2451,7 @@ observations (or pairs) - The final value ranges from -1 to 1</p>
 <div id="concordance-probability" class="section level3">
 <h3>Concordance Probability</h3>
 <p>The concordance probability (also known as the c-statistic, c-index,
-or probability of superiority<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a>) is converted from the rank-biserial
+or probability of superiority<a href="#fn6" class="footnote-ref" id="fnref6"><sup>6</sup></a>) is converted from the rank-biserial
 correlation:</p>
 <p><span class="math display">\[
 c = \frac{(r_{biserial} + 1)}{2}
@@ -2470,7 +2471,7 @@ differ.</p>
 <div id="wmw-odds" class="section level3">
 <h3>WMW Odds</h3>
 <p>The Wilcoxon-Mann-Whitney odds <span class="citation">(O’Brien and
-Castelloe 2006)</span>, also known as the “Generalized Odds Ratio”<a href="#fn6" class="footnote-ref" id="fnref6"><sup>6</sup></a> <span class="citation">(Agresti 1980)</span>, is calculated by converting the
+Castelloe 2006)</span>, also known as the “Generalized Odds Ratio”<a href="#fn7" class="footnote-ref" id="fnref7"><sup>7</sup></a> <span class="citation">(Agresti 1980)</span>, is calculated by converting the
 c-statistic:</p>
 <p><span class="math display">\[
 WMW_{odds} = e^{logit(c)}
@@ -3055,22 +3056,26 @@ Molecular Biology</em> 9 (1). <a href="https://doi.org/10.2202/1544-6115.1585">h
 <li id="fn1"><p>I would like to note that I think the statistical
 properties of the WMW tests are sound, and Frank Harrell has written <a href="https://www.fharrell.com/post/po/">many</a> <a href="https://www.fharrell.com/post/wpo/">blogposts</a> outlining their
 sound application in biomedicine.<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
-<li id="fn2"><p>This means the relative effect will <em>not</em> match
+<li id="fn2"><p>In the literature you will often see it denoted as
+P(X&lt;Y) however, in R the typical convention is x - y (e.g.,
+<code>t.test</code>) so for consistency we have flipped the direction to
+P(X&gt;Y).<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
+<li id="fn3"><p>This means the relative effect will <em>not</em> match
 the concordance probability provided by <code>ses_calc</code> for paired
-samples.<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
-<li id="fn3"><p>Food and Drug Administration (2014). Bioavailability and
+samples.<a href="#fnref3" class="footnote-back">↩︎</a></p></li>
+<li id="fn4"><p>Food and Drug Administration (2014). Bioavailability and
 Bioequivalence Studies Submitted in NDAs or INDs — General
 Considerations.Center for Drug Evaluation and Research. Docket:
-FDA-2014-D-0204<a href="#fnref3" class="footnote-back">↩︎</a></p></li>
-<li id="fn4"><p>The results from <code>ses_calc</code> and
+FDA-2014-D-0204<a href="#fnref4" class="footnote-back">↩︎</a></p></li>
+<li id="fn5"><p>The results from <code>ses_calc</code> and
 <code>boot_ses_calc</code> can differ substantially because the
 bootstrap CI method is typically more conservative than the asymptotic
 method. This difference is more apparent with extremely small samples
-like that in the <code>sleep</code> dataset.<a href="#fnref4" class="footnote-back">↩︎</a></p></li>
-<li id="fn5"><p>Directly inspired by this blog post from Professor Frank
-Harrell <a href="https://hbiostat.org/blog/post/wpo/" class="uri">https://hbiostat.org/blog/post/wpo/</a><a href="#fnref5" class="footnote-back">↩︎</a></p></li>
-<li id="fn6"><p>As noted by my frequent collaborator this name is quite
-weird since it is not a ratio of odds… but simply an odds!<a href="#fnref6" class="footnote-back">↩︎</a></p></li>
+like that in the <code>sleep</code> dataset.<a href="#fnref5" class="footnote-back">↩︎</a></p></li>
+<li id="fn6"><p>Directly inspired by this blog post from Professor Frank
+Harrell <a href="https://hbiostat.org/blog/post/wpo/" class="uri">https://hbiostat.org/blog/post/wpo/</a><a href="#fnref6" class="footnote-back">↩︎</a></p></li>
+<li id="fn7"><p>As noted by my frequent collaborator this name is quite
+weird since it is not a ratio of odds… but simply an odds!<a href="#fnref7" class="footnote-back">↩︎</a></p></li>
 </ol>
 </div>
 
