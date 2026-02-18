@@ -479,14 +479,16 @@ brunner_munzel.default = function(x,
         test_stat_low <- sqrt(n) * (pd - low_eqbound) / sqrt(v)
         test_stat_high <- sqrt(n) * (pd - high_eqbound) / sqrt(v)
 
-        # One-sided p-values
+        # One-sided p-values using count-based logic routed through bm_compute_perm_pval
         # For lower bound test: H0: p <= low vs H1: p > low
         # Large test_stat_low supports H1, so p-value = P(T >= t_obs)
-        p_greater_low <- mean(Tperm >= test_stat_low)
-
+        b_greater_low <- sum(Tperm >= test_stat_low)
         # For upper bound test: H0: p >= high vs H1: p < high
         # Small (negative) test_stat_high supports H1, so p-value = P(T <= t_obs)
-        p_less_high <- mean(Tperm <= test_stat_high)
+        b_less_high <- sum(Tperm <= test_stat_high)
+
+        p_greater_low <- bm_compute_perm_pval(b_greater_low, n_perm_actual, p_method)
+        p_less_high <- bm_compute_perm_pval(b_less_high, n_perm_actual, p_method)
 
         if(alternative == "equivalence") {
           # Both conditions must be met: p > low AND p < high
@@ -524,14 +526,23 @@ brunner_munzel.default = function(x,
         # Observed test statistic centered at mu
         test_stat <- sqrt(n) * (pd - mu) / sqrt(v)
 
-        p1perm <- mean(Tperm <= test_stat)
+        # Count extreme values for p-value calculation
+        b_less <- sum(Tperm <= test_stat)
+        b_greater <- sum(Tperm >= test_stat)
+        b_two_sided <- sum(abs(Tperm) >= abs(test_stat))
+
         pq1 <- sort(Tperm)[(floor((1-alpha/2)*n_perm_actual)+1)]
         pq2 <- sort(Tperm)[(floor((1-alpha)*n_perm_actual)+1)]
 
+        # Compute p-values using selected method
+        p_less <- bm_compute_perm_pval(b_less, n_perm_actual, p_method)
+        p_greater <- bm_compute_perm_pval(b_greater, n_perm_actual, p_method)
+        p_two_sided <- bm_compute_perm_pval(b_two_sided, n_perm_actual, p_method)
+
         p.value = switch(alternative,
-                         "two.sided" = min(2*p1perm, 2*(1-p1perm)),
-                         "less" = p1perm,
-                         "greater" = 1-p1perm)
+                         "two.sided" = p_two_sided,
+                         "less" = p_less,
+                         "greater" = p_greater)
 
         pd.lower = switch(alternative,
                           "two.sided" = pd - pq1*sqrt(v/n),
