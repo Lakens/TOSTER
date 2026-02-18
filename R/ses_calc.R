@@ -389,13 +389,17 @@ ses_calc.default = function(x,
   }
 
   if (!is.null(y)) {
-    XNAME <- deparse(substitute(x))
-    YNAME <- deparse(substitute(y))
-    dname <- paste(XNAME, "and", YNAME)
+    dname <- paste(deparse(substitute(x)), "and",
+                   deparse(substitute(y)))
+    # Use simple generic names for default method since variable names
+    # may be expressions (e.g., 1:10, c(7:20, 200)) which look messy.
+    # Formula method will overwrite these with actual factor level names.
+    XNAME <- "X"
+    YNAME <- "Y"
   } else {
-    XNAME <- deparse(substitute(x))
+    dname <- deparse(substitute(x))
+    XNAME <- "X"
     YNAME <- NULL
-    dname <- XNAME
   }
 
   # Handle NA removal

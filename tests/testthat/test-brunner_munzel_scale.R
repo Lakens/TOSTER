@@ -54,8 +54,8 @@ test_that("brunner_munzel scale works with paired samples", {
   y <- c(2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
          12, 13, 14, 15, 16, 17, 18, 19, 20, 21)
   res <- brunner_munzel(x, y, paired = TRUE, scale = "difference")
-  # Check paired label uses difference notation: 'x' - 'y'
-  expect_true(grepl("'x' - 'y'", names(res$estimate), fixed = TRUE))
+  # Check paired label uses difference notation: 'X' - 'Y' (default method uses generic names)
+  expect_true(grepl("'X' - 'Y'", names(res$estimate), fixed = TRUE))
 })
 
 test_that("brunner_munzel scale works with equivalence tests", {
