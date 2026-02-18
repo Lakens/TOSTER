@@ -389,10 +389,13 @@ ses_calc.default = function(x,
   }
 
   if (!is.null(y)) {
-    dname <- paste(deparse(substitute(x)), "and",
-                   deparse(substitute(y)))
+    XNAME <- deparse(substitute(x))
+    YNAME <- deparse(substitute(y))
+    dname <- paste(XNAME, "and", YNAME)
   } else {
-    dname <- deparse(substitute(x))
+    XNAME <- deparse(substitute(x))
+    YNAME <- NULL
+    dname <- XNAME
   }
 
   # Handle NA removal
@@ -611,11 +614,23 @@ ses_calc.default = function(x,
                       "logodds" = eta_hat)
   }
 
-  ses_name <- switch(ses,
-                     "rb" = "Rank-Biserial Correlation",
-                     "odds" = "WMW Odds",
-                     "logodds" = "WMW Log-Odds",
-                     "cstat" = "Concordance")
+  # Map ses type to scale for label construction --------
+  ses_scale <- switch(ses,
+    "cstat"   = "probability",
+    "rb"      = "difference",
+    "logodds" = "logodds",
+    "odds"    = "odds"
+  )
+
+  ses_name <- prob_notation_label(ses_scale, XNAME, YNAME, paired)
+
+  # Human-readable name for method string --------
+  method_name <- switch(ses,
+    "rb"      = "Rank-Biserial Correlation",
+    "cstat"   = "Concordance",
+    "odds"    = "WMW Odds",
+    "logodds" = "WMW Log-Odds"
+  )
 
   # Build output
   if (output == "data.frame") {
@@ -626,7 +641,7 @@ ses_calc.default = function(x,
       upper.ci = ci_val[2],
       conf.level = conf.level,
       se_method = se_method,
-      row.names = ses_name
+      row.names = method_name
     )
     return(effsize)
 
@@ -635,7 +650,7 @@ ses_calc.default = function(x,
 
     # Method string: "<Sample Type> <Estimate Name> <test|estimate with CI>"
     method_suffix <- if (alternative != "none") "test" else "estimate with CI"
-    method_desc <- paste0(sample_type, " ", ses_name, " ", method_suffix)
+    method_desc <- paste0(sample_type, " ", method_name, " ", method_suffix)
 
     # Note: SE/CI methodology details
     if (se_method == "agresti") {
@@ -889,10 +904,32 @@ ses_calc.formula = function(formula,
   DATA <- setNames(split(mf[[response]], g), c("x", "y"))
   y <- do.call("ses_calc", c(DATA, list(...)))
 
-
-  # Update data.name for htest output
-
+  # Update data.name and relabel estimate with actual group names
   if (inherits(y, "htest")) {
+    y$data.name <- DNAME
+
+    # Reconstruct label with actual factor level names
+    XNAME <- levels(g)[1]
+    YNAME <- levels(g)[2]
+    dots <- list(...)
+    ses <- if (!is.null(dots$ses)) match.arg(dots$ses,
+      c("rb", "odds", "logodds", "cstat")) else "rb"
+
+    ses_scale <- switch(ses,
+      "cstat"   = "probability",
+      "rb"      = "difference",
+      "logodds" = "logodds",
+      "odds"    = "odds"
+    )
+
+    names(y$estimate) <- prob_notation_label(ses_scale, XNAME, YNAME,
+                                             paired = isTRUE(dots$paired))
+
+    # Also update null.value names if they used ses_name
+    if (!is.null(y$null.value) && length(y$null.value) == 1) {
+      names(y$null.value) <- names(y$estimate)
+    }
+  } else if (is.data.frame(y)) {
     y$data.name <- DNAME
   }
 

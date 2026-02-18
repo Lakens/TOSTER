@@ -271,6 +271,7 @@ Lehmann, E.L. (1975). \emph{Nonparametrics: Statistical Methods Based on Ranks}.
 Other effect sizes: 
 \code{\link{boot_smd_calc}()},
 \code{\link{ses_calc}()},
-\code{\link{smd_calc}()}
+\code{\link{smd_calc}()},
+\code{\link{trans_rank_prob}()}
 }
 \concept{effect sizes}

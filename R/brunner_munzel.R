@@ -11,6 +11,25 @@
 #'   * For "equivalence" or "minimal.effect": two values representing the lower and upper bounds
 #'     for the relative effect. Values must be between 0 and 1.
 #'
+#'   Note: `mu` is always specified on the probability scale regardless of the `scale` argument.
+#'   The `scale` argument only affects how results are reported; it does not change the hypothesis
+#'   being tested.
+#'
+#' @param scale a character string specifying the scale for the reported estimate,
+#'   standard error, confidence interval, and null value. The test itself always operates
+#'   on the probability scale internally; this argument only transforms the output.
+#'
+#'   \describe{
+#'     \item{"probability"}{(default): \eqn{p = P(X > Y) + 0.5 \cdot P(X = Y)}, range \eqn{[0, 1]},
+#'       null at stochastic equality = 0.5}
+#'     \item{"difference"}{\eqn{P(X > Y) - P(X < Y) = 2p - 1}, range \eqn{[-1, 1]},
+#'       null = 0}
+#'     \item{"logodds"}{\eqn{\log[p / (1 - p)]}, range \eqn{(-\infty, \infty)},
+#'       null = 0}
+#'     \item{"odds"}{\eqn{p / (1 - p)}, range \eqn{(0, \infty)},
+#'       null = 1}
+#'   }
+#'
 #' @param test_method a character string specifying the test method to use:
 #'
 #'   * "t" (default): approximate t-distribution with Satterthwaite-Welch degrees of freedom
@@ -185,6 +204,13 @@
 #'                mu = c(0.35, 0.65),
 #'                test_method = "perm")
 #'
+#' # Report on the difference scale: P(X>Y) - P(X<Y)
+#' brunner_munzel(mpg ~ am, data = mtcars, scale = "difference")
+#'
+#' # Report as odds
+#' brunner_munzel(mpg ~ am, data = mtcars, scale = "odds")
+#'
+#' @seealso [trans_rank_prob()] for standalone transformation of probability-scale effect sizes.
 #' @references
 #' Arboretti, R., Pesarin, F. & Salmaso, L. (2021). A unified approach to permutation testing for equivalence.
 #' Stat Methods Appl 30, 1033-1052. doi: 10.1007/s10260-020-00548-0
@@ -264,6 +290,8 @@ brunner_munzel <- function(x,
                                            "minimal.effect"),
                            mu = 0.5,
                            alpha = 0.05,
+                           scale = c("probability", "difference",
+                                     "logodds", "odds"),
                            test_method = c("t", "logit", "perm"),
                            R = 10000,
                            p_method = NULL,
@@ -289,6 +317,8 @@ brunner_munzel.default = function(x,
                                                   "minimal.effect"),
                                   mu = 0.5,
                                   alpha = 0.05,
+                                  scale = c("probability", "difference",
+                                            "logodds", "odds"),
                                   test_method = c("t", "logit", "perm"),
                                   R = 10000,
                                   p_method = NULL,
@@ -321,6 +351,7 @@ brunner_munzel.default = function(x,
 
   alternative = match.arg(alternative)
   test_method = match.arg(test_method)
+  scale = match.arg(scale)
   # p_method validation deferred until we know if exact or randomization
 
   # Validate mu based on alternative
@@ -1075,11 +1106,33 @@ brunner_munzel.default = function(x,
     message("Note: Confidence interval bounds were clamped to the [0, 1] range.")
   }
 
+  # Rescale output to requested scale --------
+  transformed <- trans_rank_prob(
+    estimate = pd,
+    se = std_err,
+    ci = c(pd.lower, pd.upper),
+    null = mu,
+    from = "probability",
+    to = scale
+  )
+
+  pd       <- transformed$estimate
+  std_err  <- transformed$se
+  pd.lower <- transformed$ci[1]
+  pd.upper <- transformed$ci[2]
+  mu       <- transformed$null
+
   # Prepare output
   if(alternative %in% c("equivalence", "minimal.effect")) {
     names(mu) <- c("lower bound", "upper bound")
   } else {
-    names(mu) <- "relative effect"
+    null_label <- switch(scale,
+      "probability" = "relative effect",
+      "difference"  = "relative effect (difference)",
+      "logodds"     = "relative effect (logodds)",
+      "odds"        = "relative effect (odds)"
+    )
+    names(mu) <- null_label
   }
 
   if(test_method == "perm"){
@@ -1096,9 +1149,9 @@ brunner_munzel.default = function(x,
   cint = c(pd.lower, pd.upper)
   attr(cint, "conf.level") = conf.level
   estimate = pd
-  # Use actual group names in estimate label
-  # XNAME and YNAME are set from input variable names or overwritten by formula method
-  names(estimate) = paste0("P(", XNAME, ">", YNAME, ") + .5*P(", XNAME, "=", YNAME, ")")
+
+  # Build estimate label --------
+  names(estimate) <- prob_notation_label(scale, XNAME, YNAME, paired)
 
   rval <- list(statistic = test_stat,
                parameter = param,
@@ -1153,11 +1206,17 @@ brunner_munzel.formula = function(formula,
   DATA <- setNames(split(mf[[response]], g), c("x", "y"))
   y <- do.call("brunner_munzel", c(DATA, list(...)))
   y$data.name <- DNAME
-  # Update estimate label with actual factor level names
-  # First level becomes "x" (XNAME), second level becomes "y" (YNAME)
+
+  # Reconstruct label with actual factor level names
   XNAME <- levels(g)[1]
   YNAME <- levels(g)[2]
-  names(y$estimate) <- paste0("P(", XNAME, ">", YNAME, ") + .5*P(", XNAME, "=", YNAME, ")")
+  dots <- list(...)
+  scale <- if (!is.null(dots$scale)) match.arg(dots$scale,
+    c("probability", "difference", "logodds", "odds")) else "probability"
+
+  names(y$estimate) <- prob_notation_label(scale, XNAME, YNAME,
+                                           paired = isTRUE(dots$paired))
+
   y
 
 }

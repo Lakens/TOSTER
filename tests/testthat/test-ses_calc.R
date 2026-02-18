@@ -939,3 +939,76 @@ test_that("score_pvalue_wmw returns valid p-values", {
   expect_true(res$p.value <= 1)
   expect_true(is.numeric(res$z.statistic))
 })
+
+# ses_calc updated labels --------
+
+test_that("ses_calc two-sample labels use quoted P('x'>'y') notation", {
+  set.seed(123)
+  x <- rnorm(20)
+  y <- rnorm(20, mean = 1)
+
+  res_rb <- ses_calc(x, y, ses = "rb")
+  expect_true(grepl("P('x'>'y') - P('x'<'y')", names(res_rb$estimate), fixed = TRUE))
+
+  res_cstat <- ses_calc(x, y, ses = "cstat")
+  expect_true(grepl("P('x'>'y') + .5*P('x'='y')", names(res_cstat$estimate), fixed = TRUE))
+
+  res_odds <- ses_calc(x, y, ses = "odds")
+  expect_true(grepl("odds(", names(res_odds$estimate), fixed = TRUE))
+  expect_true(grepl("'x'", names(res_odds$estimate), fixed = TRUE))
+
+  res_lo <- ses_calc(x, y, ses = "logodds")
+  expect_true(grepl("logodds(", names(res_lo$estimate), fixed = TRUE))
+  expect_true(grepl("'x'", names(res_lo$estimate), fixed = TRUE))
+})
+
+test_that("ses_calc paired labels use quoted P('x' - 'y'>0) notation", {
+  data(sleep)
+  res <- with(sleep, ses_calc(extra[group == 1], extra[group == 2],
+                              paired = TRUE, ses = "cstat"))
+  # Paired: should show the difference expression with quoted names
+  lbl <- names(res$estimate)
+  expect_true(grepl(">0)", lbl, fixed = TRUE))
+  expect_true(grepl(" - ", lbl, fixed = TRUE))
+})
+
+test_that("ses_calc one-sample labels use quoted variable name", {
+  x <- rnorm(20, mean = 1)
+  res <- ses_calc(x, ses = "cstat")
+  # One-sample: P('x'>0) + .5*P('x'=0)
+  expect_true(grepl("'x'", names(res$estimate), fixed = TRUE))
+  expect_true(grepl(">0)", names(res$estimate), fixed = TRUE))
+})
+
+test_that("ses_calc method string retains human-readable name", {
+  set.seed(123)
+  x <- rnorm(20)
+  y <- rnorm(20, mean = 1)
+  res <- ses_calc(x, y, ses = "rb")
+  expect_true(grepl("Rank-Biserial Correlation", res$method))
+})
+
+test_that("ses_calc data.frame output uses human-readable row names", {
+  set.seed(123)
+  x <- rnorm(20)
+  y <- rnorm(20, mean = 1)
+  res <- ses_calc(x, y, ses = "rb", output = "data.frame")
+  expect_equal(rownames(res), "Rank-Biserial Correlation")
+})
+
+test_that("ses_calc numeric values unchanged by label update", {
+  set.seed(42)
+  x <- rnorm(30)
+  y <- rnorm(30, mean = 0.5)
+
+  res <- ses_calc(x, y, ses = "rb")
+  expect_true(is.numeric(res$estimate))
+  expect_true(is.finite(res$estimate))
+})
+
+test_that("ses_calc formula method labels use actual group names", {
+  res <- ses_calc(mpg ~ am, data = mtcars, ses = "rb")
+  # Formula method should use quoted factor level names
+  expect_true(grepl("'0'", names(res$estimate), fixed = TRUE))
+  expect_true(grepl("'1'", names(res$estimate), fixed = TRUE))
+})

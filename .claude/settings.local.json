@@ -80,7 +80,9 @@
       "Bash(NOT_CRAN=true \"C:/Program Files/R/R-4.5.1/bin/Rscript.exe\":*)",
       "Bash(\"C:/Program Files/R/R-4.5.1/bin/Rscript.exe\" -e \"cat\\(''R works\\\\n''\\)\")",
       "Bash(\"C:/Program Files/R/R-4.5.1/bin/Rscript.exe\" -e \"cat\\(requireNamespace\\(''TOSTER'', quietly=TRUE\\)\\)\")",
-      "Bash(\"C:/Program Files/R/R-4.5.1/bin/Rscript.exe\" diagnose_bm.R)"
+      "Bash(\"C:/Program Files/R/R-4.5.1/bin/Rscript.exe\" diagnose_bm.R)",
+      "Bash(\"C:\\\\Program Files\\\\R\\\\R-4.5.1\\\\bin\\\\Rscript.exe\" -e \"devtools::document\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER''\\)\")",
+      "Bash(\"C:\\\\Program Files\\\\R\\\\R-4.5.1\\\\bin\\\\Rscript.exe\" -e \"devtools::test\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER''\\)\")"
     ]
   }
 }

@@ -912,9 +912,9 @@ The bootstrapped version is particularly recommended when:
 - Data show notable deviations from log-normality
 - You want to ensure robust confidence intervals
 
-# Standardized Effect Sizes: Estimation and Testing
+# Standardized, Rank-Based, Effect Sizes: Estimation and Testing
 
-The `ses_calc` and `boot_ses_calc` functions calculate non-parametric standardized effect sizes (rank-biserial correlation, WMW odds, concordance probability, or log-odds) with confidence intervals^[The results from `ses_calc` and `boot_ses_calc` can differ substantially because the bootstrap CI method is typically more conservative than the asymptotic method. This difference is more apparent with extremely small samples like that in the `sleep` dataset.]. As of v0.9.0, `ses_calc` also supports hypothesis testing directly on the effect size scale.
+The `ses_calc` and `boot_ses_calc` functions calculate rank based standardized effect sizes (rank-biserial correlation, WMW odds, concordance probability, or log-odds) with confidence intervals^[The results from `ses_calc` and `boot_ses_calc` can differ substantially because the bootstrap CI method is typically more conservative than the asymptotic method. This difference is more apparent with extremely small samples like that in the `sleep` dataset.]. As of v0.9.0, `ses_calc` also supports hypothesis testing directly on the effect size scale.
 
 ## Available Effect Sizes
 

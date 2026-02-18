@@ -12,7 +12,7 @@
 
 <meta name="author" content="Aaron R. Caldwell" />
 
-<meta name="date" content="2026-02-17" />
+<meta name="date" content="2026-02-18" />
 
 <title>Robust TOST Procedures</title>
 
@@ -364,7 +364,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Robust TOST Procedures</h1>
 <h4 class="author">Aaron R. Caldwell</h4>
-<h4 class="date">2026-02-17</h4>
+<h4 class="date">2026-02-18</h4>
 
 
 <div id="TOC">
@@ -513,8 +513,8 @@ Ratio</a></li>
 <li><a href="#bootstrap-log" id="toc-bootstrap-log">Bootstrap +
 Log</a></li>
 </ul></li>
-<li><a href="#standardized-effect-sizes-estimation-and-testing" id="toc-standardized-effect-sizes-estimation-and-testing">Standardized
-Effect Sizes: Estimation and Testing</a>
+<li><a href="#standardized-rank-based-effect-sizes-estimation-and-testing" id="toc-standardized-rank-based-effect-sizes-estimation-and-testing">Standardized,
+Rank-Based, Effect Sizes: Estimation and Testing</a>
 <ul>
 <li><a href="#available-effect-sizes" id="toc-available-effect-sizes">Available Effect Sizes</a>
 <ul>
@@ -921,9 +921,8 @@ equivalence test itself.</p>
 ## Concordance              0.255 [0.1215, 0.4719]         0.9</code></pre>
 <p>For details on how each effect size is calculated, the available
 confidence interval methods, and how to perform hypothesis testing
-directly on the effect size scale, see the <a href="#standardized-effect-sizes-estimation-and-testing">Standardized
-Effect Sizes: Estimation and Testing</a> section later in this
-vignette.</p>
+directly on the effect size scale, see the [Standardized Effect Sizes:
+Estimation and Testing] section later in this vignette.</p>
 <div id="interface-with-wilcox.test" class="section level3">
 <h3>Interface with <code>wilcox.test</code></h3>
 <p>You can also just directly use <code>wilcox.test</code> through the
@@ -935,6 +934,10 @@ standard WMW test without the TOST framework.</p>
 <span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>                      <span class="at">data =</span> sleep,</span>
 <span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>                      <span class="at">test =</span> <span class="st">&quot;w&quot;</span>, <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>,</span>
 <span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>                      <span class="at">mu =</span> .<span class="dv">5</span>)</span></code></pre></div>
+<pre><code>## Warning in wilcox.test.default(x = x, y = y, paired = paired, mu = 0, conf.int
+## = TRUE, : cannot compute exact p-value with ties</code></pre>
+<pre><code>## Warning in wilcox.test.default(x = x, y = y, paired = paired, mu = 0, conf.int
+## = TRUE, : cannot compute exact confidence intervals with ties</code></pre>
 <pre><code>## 
 ##  Wilcoxon rank sum exact test
 ## 
@@ -1060,9 +1063,9 @@ situations.</p></li>
 <code>brunner_munzel</code> function allows for standard hypothesis
 tests (“two.sided”, “less”, “greater”) as well as equivalence and
 minimal effect tests.</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="co"># Default studentized test (t-approximation)</span></span>
-<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>               <span class="at">data =</span> sleep)</span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co"># Default studentized test (t-approximation)</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>               <span class="at">data =</span> sleep)</span></code></pre></div>
 <pre><code>## Sample size in at least one group is small. Permutation test (test_method = &#39;perm&#39;) is highly recommended.</code></pre>
 <pre><code>## 
 ##  Two-sample Brunner-Munzel test
@@ -1075,18 +1078,18 @@ minimal effect tests.</p>
 ## sample estimates:
 ## P(1&gt;2) + .5*P(1=2) 
 ##              0.255</code></pre>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="co"># Permutation test (recommended for small samples)</span></span>
-<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
-<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>               <span class="at">test_method =</span> <span class="st">&quot;perm&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="co"># Permutation test (recommended for small samples)</span></span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>               <span class="at">test_method =</span> <span class="st">&quot;perm&quot;</span>)</span></code></pre></div>
 <pre><code>## 
 ##  Two-sample Brunner-Munzel Randomization test
 ## 
 ## data:  extra by group
-## t-observed = -2.1447, N-permutations = 10000, p-value = 0.05949
+## t-observed = -2.1447, N-permutations = 10000, p-value = 0.05259
 ## alternative hypothesis: true relative effect is not equal to 0.5
 ## 95 percent confidence interval:
-##  0.0000000 0.5144564
+##  0.004234416 0.501463380
 ## sample estimates:
 ## P(1&gt;2) + .5*P(1=2) 
 ##              0.255</code></pre>
@@ -1096,10 +1099,10 @@ minimal effect tests.</p>
 <p>When the relative effect estimate is close to 0 or 1, the standard
 confidence intervals may extend beyond the valid [0, 1] range. The logit
 transformation method addresses this:</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="co"># Logit transformation for range-preserving CIs</span></span>
-<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
-<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>               <span class="at">test_method =</span> <span class="st">&quot;logit&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="co"># Logit transformation for range-preserving CIs</span></span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>               <span class="at">test_method =</span> <span class="st">&quot;logit&quot;</span>)</span></code></pre></div>
 <pre><code>## Sample size in at least one group is small. Permutation test (test_method = &#39;perm&#39;) is highly recommended.</code></pre>
 <pre><code>## 
 ##  Two-sample Brunner-Munzel test (logit)
@@ -1119,11 +1122,11 @@ transformation method addresses this:</p>
 equivalence testing via the <code>alternative</code> argument. For
 equivalence tests, you specify bounds for the relative effect using the
 <code>mu</code> argument:</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="co"># Equivalence test: is the relative effect between 0.3 and 0.7?</span></span>
-<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
-<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a>               <span class="at">alternative =</span> <span class="st">&quot;equivalence&quot;</span>,</span>
-<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a>               <span class="at">mu =</span> <span class="fu">c</span>(<span class="fl">0.3</span>, <span class="fl">0.7</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="co"># Equivalence test: is the relative effect between 0.3 and 0.7?</span></span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
+<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a>               <span class="at">alternative =</span> <span class="st">&quot;equivalence&quot;</span>,</span>
+<span id="cb21-5"><a href="#cb21-5" tabindex="-1"></a>               <span class="at">mu =</span> <span class="fu">c</span>(<span class="fl">0.3</span>, <span class="fl">0.7</span>))</span></code></pre></div>
 <pre><code>## Sample size in at least one group is small. Permutation test (test_method = &#39;perm&#39;) is highly recommended.</code></pre>
 <pre><code>## 
 ##  Two-sample Brunner-Munzel test
@@ -1139,24 +1142,24 @@ equivalence tests, you specify bounds for the relative effect using the
 ## sample estimates:
 ## P(1&gt;2) + .5*P(1=2) 
 ##              0.255</code></pre>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a><span class="co"># Permutation-based equivalence test</span></span>
-<span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb22-3"><a href="#cb22-3" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
-<span id="cb22-4"><a href="#cb22-4" tabindex="-1"></a>               <span class="at">alternative =</span> <span class="st">&quot;equivalence&quot;</span>,</span>
-<span id="cb22-5"><a href="#cb22-5" tabindex="-1"></a>               <span class="at">mu =</span> <span class="fu">c</span>(<span class="fl">0.3</span>, <span class="fl">0.7</span>),</span>
-<span id="cb22-6"><a href="#cb22-6" tabindex="-1"></a>               <span class="at">test_method =</span> <span class="st">&quot;perm&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a><span class="co"># Permutation-based equivalence test</span></span>
+<span id="cb24-2"><a href="#cb24-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb24-3"><a href="#cb24-3" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
+<span id="cb24-4"><a href="#cb24-4" tabindex="-1"></a>               <span class="at">alternative =</span> <span class="st">&quot;equivalence&quot;</span>,</span>
+<span id="cb24-5"><a href="#cb24-5" tabindex="-1"></a>               <span class="at">mu =</span> <span class="fu">c</span>(<span class="fl">0.3</span>, <span class="fl">0.7</span>),</span>
+<span id="cb24-6"><a href="#cb24-6" tabindex="-1"></a>               <span class="at">test_method =</span> <span class="st">&quot;perm&quot;</span>)</span></code></pre></div>
 <pre><code>## NOTE: Permutation-based TOST for equivalence/minimal.effect testing.</code></pre>
 <pre><code>## 
 ##  Two-sample Brunner-Munzel Randomization test
 ## 
 ## data:  extra by group
-## t-observed = -0.39392, N-permutations = 10000, p-value = 0.6552
+## t-observed = -0.39392, N-permutations = 10000, p-value = 0.6585
 ## alternative hypothesis: equivalence
 ## null values:
 ## lower bound upper bound 
 ##         0.3         0.7 
 ## 90 percent confidence interval:
-##  0.05645152 0.45354848
+##  0.05336724 0.45663276
 ## sample estimates:
 ## P(1&gt;2) + .5*P(1=2) 
 ##              0.255</code></pre>
@@ -1165,11 +1168,11 @@ equivalence tests, you specify bounds for the relative effect using the
 <h3>Minimal Effect Testing</h3>
 <p>You can also test whether the relative effect falls <em>outside</em>
 specified bounds (minimal effect test):</p>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a><span class="co"># Minimal effect test: is the relative effect outside 0.4 to 0.6?</span></span>
-<span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
-<span id="cb25-4"><a href="#cb25-4" tabindex="-1"></a>               <span class="at">alternative =</span> <span class="st">&quot;minimal.effect&quot;</span>,</span>
-<span id="cb25-5"><a href="#cb25-5" tabindex="-1"></a>               <span class="at">mu =</span> <span class="fu">c</span>(<span class="fl">0.4</span>, <span class="fl">0.6</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a><span class="co"># Minimal effect test: is the relative effect outside 0.4 to 0.6?</span></span>
+<span id="cb27-2"><a href="#cb27-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb27-3"><a href="#cb27-3" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
+<span id="cb27-4"><a href="#cb27-4" tabindex="-1"></a>               <span class="at">alternative =</span> <span class="st">&quot;minimal.effect&quot;</span>,</span>
+<span id="cb27-5"><a href="#cb27-5" tabindex="-1"></a>               <span class="at">mu =</span> <span class="fu">c</span>(<span class="fl">0.4</span>, <span class="fl">0.6</span>))</span></code></pre></div>
 <pre><code>## Sample size in at least one group is small. Permutation test (test_method = &#39;perm&#39;) is highly recommended.</code></pre>
 <pre><code>## 
 ##  Two-sample Brunner-Munzel test
@@ -1191,10 +1194,10 @@ specified bounds (minimal effect test):</p>
 <p>The Brunner-Munzel test can also be applied to paired samples using
 the <code>paired</code> argument. Note that for paired samples, the test
 is based on a hypothesis of exchangeability:</p>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a><span class="co"># Paired samples test</span></span>
-<span id="cb28-2"><a href="#cb28-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">x =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">1</span>],</span>
-<span id="cb28-3"><a href="#cb28-3" tabindex="-1"></a>               <span class="at">y =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">2</span>],</span>
-<span id="cb28-4"><a href="#cb28-4" tabindex="-1"></a>               <span class="at">paired =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a><span class="co"># Paired samples test</span></span>
+<span id="cb30-2"><a href="#cb30-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">x =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">1</span>],</span>
+<span id="cb30-3"><a href="#cb30-3" tabindex="-1"></a>               <span class="at">y =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">2</span>],</span>
+<span id="cb30-4"><a href="#cb30-4" tabindex="-1"></a>               <span class="at">paired =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <pre><code>## Sample size in at least one group is small. Permutation test (test_method = &#39;perm&#39;) is highly recommended.</code></pre>
 <pre><code>## 
 ##  Exact paired Brunner-Munzel test
@@ -1205,13 +1208,13 @@ is based on a hypothesis of exchangeability:</p>
 ## 95 percent confidence interval:
 ##  0.1062776 0.4037224
 ## sample estimates:
-## P(X&gt;Y) + .5*P(X=Y) 
+## P(Z&gt;0) + .5*P(Z=0) 
 ##              0.255</code></pre>
-<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" tabindex="-1"></a><span class="co"># Paired samples with permutation test</span></span>
-<span id="cb31-2"><a href="#cb31-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">x =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">1</span>],</span>
-<span id="cb31-3"><a href="#cb31-3" tabindex="-1"></a>               <span class="at">y =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">2</span>],</span>
-<span id="cb31-4"><a href="#cb31-4" tabindex="-1"></a>               <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb31-5"><a href="#cb31-5" tabindex="-1"></a>               <span class="at">test_method =</span> <span class="st">&quot;perm&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" tabindex="-1"></a><span class="co"># Paired samples with permutation test</span></span>
+<span id="cb33-2"><a href="#cb33-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">x =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">1</span>],</span>
+<span id="cb33-3"><a href="#cb33-3" tabindex="-1"></a>               <span class="at">y =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">2</span>],</span>
+<span id="cb33-4"><a href="#cb33-4" tabindex="-1"></a>               <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb33-5"><a href="#cb33-5" tabindex="-1"></a>               <span class="at">test_method =</span> <span class="st">&quot;perm&quot;</span>)</span></code></pre></div>
 <pre><code>## 
 ##  Paired Brunner-Munzel Exact Permutation test
 ## 
@@ -1221,16 +1224,16 @@ is based on a hypothesis of exchangeability:</p>
 ## 95 percent confidence interval:
 ##  0.1233862 0.3866138
 ## sample estimates:
-## P(X&gt;Y) + .5*P(X=Y) 
+## P(Z&gt;0) + .5*P(Z=0) 
 ##              0.255</code></pre>
 </div>
 <div id="testing-against-a-non-standard-null" class="section level3">
 <h3>Testing Against a Non-Standard Null</h3>
 <p>You can test against null values other than 0.5:</p>
-<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" tabindex="-1"></a><span class="co"># Test if the relative effect differs from 0.3</span></span>
-<span id="cb33-2"><a href="#cb33-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb33-3"><a href="#cb33-3" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
-<span id="cb33-4"><a href="#cb33-4" tabindex="-1"></a>               <span class="at">mu =</span> <span class="fl">0.3</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" tabindex="-1"></a><span class="co"># Test if the relative effect differs from 0.3</span></span>
+<span id="cb35-2"><a href="#cb35-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb35-3"><a href="#cb35-3" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
+<span id="cb35-4"><a href="#cb35-4" tabindex="-1"></a>               <span class="at">mu =</span> <span class="fl">0.3</span>)</span></code></pre></div>
 <pre><code>## Sample size in at least one group is small. Permutation test (test_method = &#39;perm&#39;) is highly recommended.</code></pre>
 <pre><code>## 
 ##  Two-sample Brunner-Munzel test
@@ -1290,12 +1293,12 @@ most cases.</p>
 ordered categorical data <span class="citation">(Munzel and Hauschke
 2003)</span>. By setting appropriate bounds, you can test whether a new
 treatment is not relevantly inferior to a standard:</p>
-<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" tabindex="-1"></a><span class="co"># Example: test non-inferiority with lower bound of 0.35</span></span>
-<span id="cb36-2"><a href="#cb36-2" tabindex="-1"></a><span class="co"># (i.e., the new treatment should not be substantially worse)</span></span>
-<span id="cb36-3"><a href="#cb36-3" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb36-4"><a href="#cb36-4" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
-<span id="cb36-5"><a href="#cb36-5" tabindex="-1"></a>               <span class="at">alternative =</span> <span class="st">&quot;greater&quot;</span>,</span>
-<span id="cb36-6"><a href="#cb36-6" tabindex="-1"></a>               <span class="at">mu =</span> <span class="fl">0.35</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" tabindex="-1"></a><span class="co"># Example: test non-inferiority with lower bound of 0.35</span></span>
+<span id="cb38-2"><a href="#cb38-2" tabindex="-1"></a><span class="co"># (i.e., the new treatment should not be substantially worse)</span></span>
+<span id="cb38-3"><a href="#cb38-3" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb38-4"><a href="#cb38-4" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
+<span id="cb38-5"><a href="#cb38-5" tabindex="-1"></a>               <span class="at">alternative =</span> <span class="st">&quot;greater&quot;</span>,</span>
+<span id="cb38-6"><a href="#cb38-6" tabindex="-1"></a>               <span class="at">mu =</span> <span class="fl">0.35</span>)</span></code></pre></div>
 <pre><code>## Sample size in at least one group is small. Permutation test (test_method = &#39;perm&#39;) is highly recommended.</code></pre>
 <pre><code>## 
 ##  Two-sample Brunner-Munzel test
@@ -1427,11 +1430,11 @@ unstudentized approach.</p></li>
 <h2>Examples</h2>
 <div id="basic-two-sample-test-1" class="section level3">
 <h3>Basic Two-Sample Test</h3>
-<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&#39;sleep&#39;</span>)</span>
-<span id="cb39-2"><a href="#cb39-2" tabindex="-1"></a></span>
-<span id="cb39-3"><a href="#cb39-3" tabindex="-1"></a><span class="co"># Asymptotic Hodges-Lehmann test</span></span>
-<span id="cb39-4"><a href="#cb39-4" tabindex="-1"></a><span class="fu">hodges_lehmann</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb39-5"><a href="#cb39-5" tabindex="-1"></a>               <span class="at">data =</span> sleep)</span></code></pre></div>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&#39;sleep&#39;</span>)</span>
+<span id="cb41-2"><a href="#cb41-2" tabindex="-1"></a></span>
+<span id="cb41-3"><a href="#cb41-3" tabindex="-1"></a><span class="co"># Asymptotic Hodges-Lehmann test</span></span>
+<span id="cb41-4"><a href="#cb41-4" tabindex="-1"></a><span class="fu">hodges_lehmann</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb41-5"><a href="#cb41-5" tabindex="-1"></a>               <span class="at">data =</span> sleep)</span></code></pre></div>
 <pre><code>## 
 ##  Asymptotic Hodges-Lehmann Two Sample Test
 ## 
@@ -1447,18 +1450,18 @@ unstudentized approach.</p></li>
 <div id="permutation-based-test" class="section level3">
 <h3>Permutation-Based Test</h3>
 <p>For small samples, the permutation approach is recommended:</p>
-<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" tabindex="-1"></a><span class="co"># Permutation test</span></span>
-<span id="cb41-2"><a href="#cb41-2" tabindex="-1"></a><span class="fu">hodges_lehmann</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb41-3"><a href="#cb41-3" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
-<span id="cb41-4"><a href="#cb41-4" tabindex="-1"></a>               <span class="at">R =</span> <span class="dv">1999</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" tabindex="-1"></a><span class="co"># Permutation test</span></span>
+<span id="cb43-2"><a href="#cb43-2" tabindex="-1"></a><span class="fu">hodges_lehmann</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb43-3"><a href="#cb43-3" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
+<span id="cb43-4"><a href="#cb43-4" tabindex="-1"></a>               <span class="at">R =</span> <span class="dv">1999</span>)</span></code></pre></div>
 <pre><code>## 
 ##  Randomization Hodges-Lehmann Two Sample Test
 ## 
 ## data:  extra by group
-## Z = -0.72973, p-value = 0.1265
+## Z = -0.72973, p-value = 0.137
 ## alternative hypothesis: true location is not equal to 0
 ## 95 percent confidence interval:
-##  -3.15  0.45
+##  -3.2500  0.4525
 ## sample estimates:
 ## Hodges-Lehmann estimate (1 - 2) 
 ##                           -1.35</code></pre>
@@ -1468,17 +1471,17 @@ unstudentized approach.</p></li>
 <p>The function directly supports equivalence testing via the
 <code>alternative</code> argument. Equivalence bounds are specified on
 the pseudomedian (or location shift) scale:</p>
-<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" tabindex="-1"></a><span class="co"># Equivalence test: is the location shift within ±2 units?</span></span>
-<span id="cb43-2"><a href="#cb43-2" tabindex="-1"></a><span class="fu">hodges_lehmann</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb43-3"><a href="#cb43-3" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
-<span id="cb43-4"><a href="#cb43-4" tabindex="-1"></a>               <span class="at">alternative =</span> <span class="st">&quot;equivalence&quot;</span>,</span>
-<span id="cb43-5"><a href="#cb43-5" tabindex="-1"></a>               <span class="at">mu =</span> <span class="dv">2</span>,</span>
-<span id="cb43-6"><a href="#cb43-6" tabindex="-1"></a>               <span class="at">R =</span> <span class="dv">1999</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" tabindex="-1"></a><span class="co"># Equivalence test: is the location shift within ±2 units?</span></span>
+<span id="cb45-2"><a href="#cb45-2" tabindex="-1"></a><span class="fu">hodges_lehmann</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb45-3"><a href="#cb45-3" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
+<span id="cb45-4"><a href="#cb45-4" tabindex="-1"></a>               <span class="at">alternative =</span> <span class="st">&quot;equivalence&quot;</span>,</span>
+<span id="cb45-5"><a href="#cb45-5" tabindex="-1"></a>               <span class="at">mu =</span> <span class="dv">2</span>,</span>
+<span id="cb45-6"><a href="#cb45-6" tabindex="-1"></a>               <span class="at">R =</span> <span class="dv">1999</span>)</span></code></pre></div>
 <pre><code>## 
 ##  Randomization Hodges-Lehmann Two Sample Test
 ## 
 ## data:  extra by group
-## Z = 0.67686, p-value = 0.29
+## Z = 0.68277, p-value = 0.288
 ## alternative hypothesis: equivalence
 ## null values:
 ## location location 
@@ -1512,11 +1515,11 @@ have proper standard error estimates.</p>
 </div>
 <div id="paired-samples-1" class="section level3">
 <h3>Paired Samples</h3>
-<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" tabindex="-1"></a><span class="co"># Paired Hodges-Lehmann test</span></span>
-<span id="cb45-2"><a href="#cb45-2" tabindex="-1"></a><span class="fu">hodges_lehmann</span>(<span class="at">x =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">1</span>],</span>
-<span id="cb45-3"><a href="#cb45-3" tabindex="-1"></a>               <span class="at">y =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">2</span>],</span>
-<span id="cb45-4"><a href="#cb45-4" tabindex="-1"></a>               <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb45-5"><a href="#cb45-5" tabindex="-1"></a>               <span class="at">R =</span> <span class="dv">1999</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" tabindex="-1"></a><span class="co"># Paired Hodges-Lehmann test</span></span>
+<span id="cb47-2"><a href="#cb47-2" tabindex="-1"></a><span class="fu">hodges_lehmann</span>(<span class="at">x =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">1</span>],</span>
+<span id="cb47-3"><a href="#cb47-3" tabindex="-1"></a>               <span class="at">y =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">2</span>],</span>
+<span id="cb47-4"><a href="#cb47-4" tabindex="-1"></a>               <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb47-5"><a href="#cb47-5" tabindex="-1"></a>               <span class="at">R =</span> <span class="dv">1999</span>)</span></code></pre></div>
 <pre><code>## Computing all 1024 exact permutations.</code></pre>
 <pre><code>## 
 ##  Exact Permutation Hodges-Lehmann Paired Test
@@ -1532,23 +1535,23 @@ have proper standard error estimates.</p>
 </div>
 <div id="minimal-effect-testing-1" class="section level3">
 <h3>Minimal Effect Testing</h3>
-<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" tabindex="-1"></a><span class="co"># Minimal effect test: is the location shift outside ±0.5?</span></span>
-<span id="cb48-2"><a href="#cb48-2" tabindex="-1"></a><span class="fu">hodges_lehmann</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb48-3"><a href="#cb48-3" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
-<span id="cb48-4"><a href="#cb48-4" tabindex="-1"></a>               <span class="at">alternative =</span> <span class="st">&quot;minimal.effect&quot;</span>,</span>
-<span id="cb48-5"><a href="#cb48-5" tabindex="-1"></a>               <span class="at">mu =</span> <span class="fl">0.5</span>,</span>
-<span id="cb48-6"><a href="#cb48-6" tabindex="-1"></a>               <span class="at">R =</span> <span class="dv">1999</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" tabindex="-1"></a><span class="co"># Minimal effect test: is the location shift outside ±0.5?</span></span>
+<span id="cb50-2"><a href="#cb50-2" tabindex="-1"></a><span class="fu">hodges_lehmann</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb50-3"><a href="#cb50-3" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
+<span id="cb50-4"><a href="#cb50-4" tabindex="-1"></a>               <span class="at">alternative =</span> <span class="st">&quot;minimal.effect&quot;</span>,</span>
+<span id="cb50-5"><a href="#cb50-5" tabindex="-1"></a>               <span class="at">mu =</span> <span class="fl">0.5</span>,</span>
+<span id="cb50-6"><a href="#cb50-6" tabindex="-1"></a>               <span class="at">R =</span> <span class="dv">1999</span>)</span></code></pre></div>
 <pre><code>## 
 ##  Randomization Hodges-Lehmann Two Sample Test
 ## 
 ## data:  extra by group
-## Z = -0.88936, p-value = 0.2135
+## Z = -0.89898, p-value = 0.221
 ## alternative hypothesis: minimal.effect
 ## null values:
 ## location location 
 ##     -0.5      0.5 
 ## 90 percent confidence interval:
-##  -2.85  0.20
+##  -2.805  0.150
 ## sample estimates:
 ## Hodges-Lehmann estimate (1 - 2) 
 ##                           -1.35</code></pre>
@@ -1852,21 +1855,21 @@ on the suspected degree of contamination.</p>
 </div>
 <div id="example-basic-permutation-test" class="section level2">
 <h2>Example: Basic Permutation Test</h2>
-<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&#39;sleep&#39;</span>)</span>
-<span id="cb50-2"><a href="#cb50-2" tabindex="-1"></a></span>
-<span id="cb50-3"><a href="#cb50-3" tabindex="-1"></a><span class="co"># Two-sample permutation t-test</span></span>
-<span id="cb50-4"><a href="#cb50-4" tabindex="-1"></a>perm_result <span class="ot">&lt;-</span> <span class="fu">perm_t_test</span>(extra <span class="sc">~</span> group, </span>
-<span id="cb50-5"><a href="#cb50-5" tabindex="-1"></a>                           <span class="at">data =</span> sleep,</span>
-<span id="cb50-6"><a href="#cb50-6" tabindex="-1"></a>                           <span class="at">R =</span> <span class="dv">1999</span>)</span>
-<span id="cb50-7"><a href="#cb50-7" tabindex="-1"></a>perm_result</span></code></pre></div>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&#39;sleep&#39;</span>)</span>
+<span id="cb52-2"><a href="#cb52-2" tabindex="-1"></a></span>
+<span id="cb52-3"><a href="#cb52-3" tabindex="-1"></a><span class="co"># Two-sample permutation t-test</span></span>
+<span id="cb52-4"><a href="#cb52-4" tabindex="-1"></a>perm_result <span class="ot">&lt;-</span> <span class="fu">perm_t_test</span>(extra <span class="sc">~</span> group, </span>
+<span id="cb52-5"><a href="#cb52-5" tabindex="-1"></a>                           <span class="at">data =</span> sleep,</span>
+<span id="cb52-6"><a href="#cb52-6" tabindex="-1"></a>                           <span class="at">R =</span> <span class="dv">1999</span>)</span>
+<span id="cb52-7"><a href="#cb52-7" tabindex="-1"></a>perm_result</span></code></pre></div>
 <pre><code>## 
 ##  Randomization Permutation Welch Two Sample t-test
 ## 
 ## data:  extra by group
-## t-observed = -1.8608, df = 17.776, p-value = 0.0835
+## t-observed = -1.8608, df = 17.776, p-value = 0.0765
 ## alternative hypothesis: true difference in means is not equal to 0
 ## 95 percent confidence interval:
-##  -3.340  0.142
+##  -3.320  0.141
 ## sample estimates:
 ##               mean of 1               mean of 2 mean difference (1 - 2) 
 ##                    0.75                    2.33                   -1.58</code></pre>
@@ -1875,13 +1878,13 @@ on the suspected degree of contamination.</p>
 <h2>Example: Permutation Test with Trimming</h2>
 <p>When outliers are a concern, combining permutation with trimming
 provides doubly robust inference:</p>
-<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" tabindex="-1"></a><span class="co"># Simulate data with outliers</span></span>
-<span id="cb52-2"><a href="#cb52-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
-<span id="cb52-3"><a href="#cb52-3" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">rnorm</span>(<span class="dv">18</span>, <span class="at">mean =</span> <span class="dv">0</span>), <span class="dv">8</span>, <span class="dv">12</span>)  <span class="co"># Two outliers</span></span>
-<span id="cb52-4"><a href="#cb52-4" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">20</span>, <span class="at">mean =</span> <span class="dv">0</span>)</span>
-<span id="cb52-5"><a href="#cb52-5" tabindex="-1"></a></span>
-<span id="cb52-6"><a href="#cb52-6" tabindex="-1"></a><span class="co"># Standard permutation test (sensitive to outliers)</span></span>
-<span id="cb52-7"><a href="#cb52-7" tabindex="-1"></a><span class="fu">perm_t_test</span>(x, y, <span class="at">R =</span> <span class="dv">999</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" tabindex="-1"></a><span class="co"># Simulate data with outliers</span></span>
+<span id="cb54-2"><a href="#cb54-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb54-3"><a href="#cb54-3" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">rnorm</span>(<span class="dv">18</span>, <span class="at">mean =</span> <span class="dv">0</span>), <span class="dv">8</span>, <span class="dv">12</span>)  <span class="co"># Two outliers</span></span>
+<span id="cb54-4"><a href="#cb54-4" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">20</span>, <span class="at">mean =</span> <span class="dv">0</span>)</span>
+<span id="cb54-5"><a href="#cb54-5" tabindex="-1"></a></span>
+<span id="cb54-6"><a href="#cb54-6" tabindex="-1"></a><span class="co"># Standard permutation test (sensitive to outliers)</span></span>
+<span id="cb54-7"><a href="#cb54-7" tabindex="-1"></a><span class="fu">perm_t_test</span>(x, y, <span class="at">R =</span> <span class="dv">999</span>)</span></code></pre></div>
 <pre><code>## Note: Number of permutations (R = 999) is less than 1000. Consider increasing R for more stable p-value estimates.</code></pre>
 <pre><code>## 
 ##  Randomization Permutation Welch Two Sample t-test
@@ -1894,8 +1897,8 @@ provides doubly robust inference:</p>
 ## sample estimates:
 ##               mean of x               mean of y mean difference (x - y) 
 ##               1.2479377              -0.2081052               1.4560429</code></pre>
-<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" tabindex="-1"></a><span class="co"># Trimmed permutation test (robust to outliers)</span></span>
-<span id="cb55-2"><a href="#cb55-2" tabindex="-1"></a><span class="fu">perm_t_test</span>(x, y, <span class="at">tr =</span> <span class="fl">0.1</span>, <span class="at">R =</span> <span class="dv">999</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" tabindex="-1"></a><span class="co"># Trimmed permutation test (robust to outliers)</span></span>
+<span id="cb57-2"><a href="#cb57-2" tabindex="-1"></a><span class="fu">perm_t_test</span>(x, y, <span class="at">tr =</span> <span class="fl">0.1</span>, <span class="at">R =</span> <span class="dv">999</span>)</span></code></pre></div>
 <pre><code>## Note: Number of permutations (R = 999) is less than 1000. Consider increasing R for more stable p-value estimates.</code></pre>
 <pre><code>## 
 ##  Randomization Permutation Welch Yuen Two Sample t-test
@@ -1917,12 +1920,12 @@ provides doubly robust inference:</p>
 <h2>Example: Equivalence Testing with Permutation</h2>
 <p>The <code>perm_t_test</code> function supports TOSTER’s equivalence
 and minimal effect alternatives:</p>
-<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" tabindex="-1"></a><span class="co"># Equivalence test: is the effect within ±3 units?</span></span>
-<span id="cb58-2"><a href="#cb58-2" tabindex="-1"></a><span class="fu">perm_t_test</span>(extra <span class="sc">~</span> group, </span>
-<span id="cb58-3"><a href="#cb58-3" tabindex="-1"></a>            <span class="at">data =</span> sleep,</span>
-<span id="cb58-4"><a href="#cb58-4" tabindex="-1"></a>            <span class="at">alternative =</span> <span class="st">&quot;equivalence&quot;</span>,</span>
-<span id="cb58-5"><a href="#cb58-5" tabindex="-1"></a>            <span class="at">mu =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>),</span>
-<span id="cb58-6"><a href="#cb58-6" tabindex="-1"></a>            <span class="at">R =</span> <span class="dv">999</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" tabindex="-1"></a><span class="co"># Equivalence test: is the effect within ±3 units?</span></span>
+<span id="cb60-2"><a href="#cb60-2" tabindex="-1"></a><span class="fu">perm_t_test</span>(extra <span class="sc">~</span> group, </span>
+<span id="cb60-3"><a href="#cb60-3" tabindex="-1"></a>            <span class="at">data =</span> sleep,</span>
+<span id="cb60-4"><a href="#cb60-4" tabindex="-1"></a>            <span class="at">alternative =</span> <span class="st">&quot;equivalence&quot;</span>,</span>
+<span id="cb60-5"><a href="#cb60-5" tabindex="-1"></a>            <span class="at">mu =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>),</span>
+<span id="cb60-6"><a href="#cb60-6" tabindex="-1"></a>            <span class="at">R =</span> <span class="dv">999</span>)</span></code></pre></div>
 <pre><code>## Note: Number of permutations (R = 999) is less than 1000. Consider increasing R for more stable p-value estimates.</code></pre>
 <pre><code>## 
 ##  Randomization Permutation Welch Two Sample t-test
@@ -1947,14 +1950,14 @@ permutations and prints a message. For example, with a paired sample of
 n = 10, there are <span class="math inline">\(2^{10} = 1024\)</span>
 possible sign permutations, so requesting <code>R = 1999</code> would
 trigger exact computation.</p>
-<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" tabindex="-1"></a><span class="co"># Small paired sample - exact permutations will be computed</span></span>
-<span id="cb61-2"><a href="#cb61-2" tabindex="-1"></a>before <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">5.1</span>, <span class="fl">4.8</span>, <span class="fl">6.2</span>, <span class="fl">5.7</span>, <span class="fl">6.0</span>, <span class="fl">5.5</span>, <span class="fl">4.9</span>, <span class="fl">5.8</span>)</span>
-<span id="cb61-3"><a href="#cb61-3" tabindex="-1"></a>after <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">5.6</span>, <span class="fl">5.2</span>, <span class="fl">6.7</span>, <span class="fl">6.1</span>, <span class="fl">6.5</span>, <span class="fl">5.8</span>, <span class="fl">5.3</span>, <span class="fl">6.2</span>)</span>
-<span id="cb61-4"><a href="#cb61-4" tabindex="-1"></a></span>
-<span id="cb61-5"><a href="#cb61-5" tabindex="-1"></a><span class="fu">perm_t_test</span>(<span class="at">x =</span> before, <span class="at">y =</span> after,</span>
-<span id="cb61-6"><a href="#cb61-6" tabindex="-1"></a>            <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb61-7"><a href="#cb61-7" tabindex="-1"></a>            <span class="at">alternative =</span> <span class="st">&quot;less&quot;</span>,</span>
-<span id="cb61-8"><a href="#cb61-8" tabindex="-1"></a>            <span class="at">R =</span> <span class="dv">999</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" tabindex="-1"></a><span class="co"># Small paired sample - exact permutations will be computed</span></span>
+<span id="cb63-2"><a href="#cb63-2" tabindex="-1"></a>before <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">5.1</span>, <span class="fl">4.8</span>, <span class="fl">6.2</span>, <span class="fl">5.7</span>, <span class="fl">6.0</span>, <span class="fl">5.5</span>, <span class="fl">4.9</span>, <span class="fl">5.8</span>)</span>
+<span id="cb63-3"><a href="#cb63-3" tabindex="-1"></a>after <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">5.6</span>, <span class="fl">5.2</span>, <span class="fl">6.7</span>, <span class="fl">6.1</span>, <span class="fl">6.5</span>, <span class="fl">5.8</span>, <span class="fl">5.3</span>, <span class="fl">6.2</span>)</span>
+<span id="cb63-4"><a href="#cb63-4" tabindex="-1"></a></span>
+<span id="cb63-5"><a href="#cb63-5" tabindex="-1"></a><span class="fu">perm_t_test</span>(<span class="at">x =</span> before, <span class="at">y =</span> after,</span>
+<span id="cb63-6"><a href="#cb63-6" tabindex="-1"></a>            <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb63-7"><a href="#cb63-7" tabindex="-1"></a>            <span class="at">alternative =</span> <span class="st">&quot;less&quot;</span>,</span>
+<span id="cb63-8"><a href="#cb63-8" tabindex="-1"></a>            <span class="at">R =</span> <span class="dv">999</span>)</span></code></pre></div>
 <pre><code>## Computing all 256 exact permutations.</code></pre>
 <pre><code>## 
 ##  Exact Permutation Paired t-test
@@ -2061,17 +2064,17 @@ good balance between precision and computational efficiency.</p>
 <p>We can use the sleep data to see the bootstrapped results. Notice
 that the plots show how the re-sampling via bootstrapping indicates the
 instability of Hedges’s d<sub>z</sub>.</p>
-<div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&#39;sleep&#39;</span>)</span>
-<span id="cb64-2"><a href="#cb64-2" tabindex="-1"></a></span>
-<span id="cb64-3"><a href="#cb64-3" tabindex="-1"></a><span class="co"># For paired tests with bootstrap methods, use separate vectors</span></span>
-<span id="cb64-4"><a href="#cb64-4" tabindex="-1"></a>test1 <span class="ot">=</span> <span class="fu">boot_t_TOST</span>(<span class="at">x =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">1</span>],</span>
-<span id="cb64-5"><a href="#cb64-5" tabindex="-1"></a>                    <span class="at">y =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">2</span>],</span>
-<span id="cb64-6"><a href="#cb64-6" tabindex="-1"></a>                      <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb64-7"><a href="#cb64-7" tabindex="-1"></a>                      <span class="at">eqb =</span> .<span class="dv">5</span>,</span>
-<span id="cb64-8"><a href="#cb64-8" tabindex="-1"></a>                    <span class="at">R =</span> <span class="dv">499</span>)</span>
-<span id="cb64-9"><a href="#cb64-9" tabindex="-1"></a></span>
-<span id="cb64-10"><a href="#cb64-10" tabindex="-1"></a></span>
-<span id="cb64-11"><a href="#cb64-11" tabindex="-1"></a><span class="fu">print</span>(test1)</span></code></pre></div>
+<div class="sourceCode" id="cb66"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&#39;sleep&#39;</span>)</span>
+<span id="cb66-2"><a href="#cb66-2" tabindex="-1"></a></span>
+<span id="cb66-3"><a href="#cb66-3" tabindex="-1"></a><span class="co"># For paired tests with bootstrap methods, use separate vectors</span></span>
+<span id="cb66-4"><a href="#cb66-4" tabindex="-1"></a>test1 <span class="ot">=</span> <span class="fu">boot_t_TOST</span>(<span class="at">x =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">1</span>],</span>
+<span id="cb66-5"><a href="#cb66-5" tabindex="-1"></a>                    <span class="at">y =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">2</span>],</span>
+<span id="cb66-6"><a href="#cb66-6" tabindex="-1"></a>                      <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb66-7"><a href="#cb66-7" tabindex="-1"></a>                      <span class="at">eqb =</span> .<span class="dv">5</span>,</span>
+<span id="cb66-8"><a href="#cb66-8" tabindex="-1"></a>                    <span class="at">R =</span> <span class="dv">499</span>)</span>
+<span id="cb66-9"><a href="#cb66-9" tabindex="-1"></a></span>
+<span id="cb66-10"><a href="#cb66-10" tabindex="-1"></a></span>
+<span id="cb66-11"><a href="#cb66-11" tabindex="-1"></a><span class="fu">print</span>(test1)</span></code></pre></div>
 <pre><code>## 
 ## Bootstrapped Paired t-test
 ## 
@@ -2091,7 +2094,7 @@ instability of Hedges’s d<sub>z</sub>.</p>
 ## Raw             -1.580 0.3786 [-3.0262, -1.0343]         0.9
 ## Hedges&#39;s g(z)   -1.174 0.7657   [-1.3935, 1.252]         0.9
 ## Note: studentized bootstrap ci method utilized.</code></pre>
-<div class="sourceCode" id="cb66"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" tabindex="-1"></a><span class="fu">plot</span>(test1)</span></code></pre></div>
+<div class="sourceCode" id="cb68"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" tabindex="-1"></a><span class="fu">plot</span>(test1)</span></code></pre></div>
 <p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
 <div id="interpreting-bootstrap-tost-results" class="section level3">
 <h3>Interpreting Bootstrap TOST Results</h3>
@@ -2115,25 +2118,25 @@ effect size falls entirely within the equivalence bounds.</p>
 <h1>Comparing Bootstrap and Permutation Approaches</h1>
 <p>To illustrate the similarities and differences between these methods,
 let’s apply both to the same dataset:</p>
-<div class="sourceCode" id="cb67"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" tabindex="-1"></a><span class="co"># Same equivalence test using both methods</span></span>
-<span id="cb67-2"><a href="#cb67-2" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&#39;sleep&#39;</span>)</span>
-<span id="cb67-3"><a href="#cb67-3" tabindex="-1"></a></span>
-<span id="cb67-4"><a href="#cb67-4" tabindex="-1"></a><span class="co"># Bootstrap approach</span></span>
-<span id="cb67-5"><a href="#cb67-5" tabindex="-1"></a>boot_result <span class="ot">&lt;-</span> <span class="fu">boot_t_test</span>(extra <span class="sc">~</span> group, </span>
-<span id="cb67-6"><a href="#cb67-6" tabindex="-1"></a>                           <span class="at">data =</span> sleep,</span>
-<span id="cb67-7"><a href="#cb67-7" tabindex="-1"></a>                           <span class="at">alternative =</span> <span class="st">&quot;equivalence&quot;</span>,</span>
-<span id="cb67-8"><a href="#cb67-8" tabindex="-1"></a>                           <span class="at">mu =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>),</span>
-<span id="cb67-9"><a href="#cb67-9" tabindex="-1"></a>                           <span class="at">R =</span> <span class="dv">999</span>)</span>
-<span id="cb67-10"><a href="#cb67-10" tabindex="-1"></a></span>
-<span id="cb67-11"><a href="#cb67-11" tabindex="-1"></a><span class="co"># Permutation approach  </span></span>
-<span id="cb67-12"><a href="#cb67-12" tabindex="-1"></a>perm_result <span class="ot">&lt;-</span> <span class="fu">perm_t_test</span>(extra <span class="sc">~</span> group,</span>
-<span id="cb67-13"><a href="#cb67-13" tabindex="-1"></a>                           <span class="at">data =</span> sleep,</span>
-<span id="cb67-14"><a href="#cb67-14" tabindex="-1"></a>                           <span class="at">alternative =</span> <span class="st">&quot;equivalence&quot;</span>, </span>
-<span id="cb67-15"><a href="#cb67-15" tabindex="-1"></a>                           <span class="at">mu =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>),</span>
-<span id="cb67-16"><a href="#cb67-16" tabindex="-1"></a>                           <span class="at">R =</span> <span class="dv">999</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb69"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" tabindex="-1"></a><span class="co"># Same equivalence test using both methods</span></span>
+<span id="cb69-2"><a href="#cb69-2" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&#39;sleep&#39;</span>)</span>
+<span id="cb69-3"><a href="#cb69-3" tabindex="-1"></a></span>
+<span id="cb69-4"><a href="#cb69-4" tabindex="-1"></a><span class="co"># Bootstrap approach</span></span>
+<span id="cb69-5"><a href="#cb69-5" tabindex="-1"></a>boot_result <span class="ot">&lt;-</span> <span class="fu">boot_t_test</span>(extra <span class="sc">~</span> group, </span>
+<span id="cb69-6"><a href="#cb69-6" tabindex="-1"></a>                           <span class="at">data =</span> sleep,</span>
+<span id="cb69-7"><a href="#cb69-7" tabindex="-1"></a>                           <span class="at">alternative =</span> <span class="st">&quot;equivalence&quot;</span>,</span>
+<span id="cb69-8"><a href="#cb69-8" tabindex="-1"></a>                           <span class="at">mu =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>),</span>
+<span id="cb69-9"><a href="#cb69-9" tabindex="-1"></a>                           <span class="at">R =</span> <span class="dv">999</span>)</span>
+<span id="cb69-10"><a href="#cb69-10" tabindex="-1"></a></span>
+<span id="cb69-11"><a href="#cb69-11" tabindex="-1"></a><span class="co"># Permutation approach  </span></span>
+<span id="cb69-12"><a href="#cb69-12" tabindex="-1"></a>perm_result <span class="ot">&lt;-</span> <span class="fu">perm_t_test</span>(extra <span class="sc">~</span> group,</span>
+<span id="cb69-13"><a href="#cb69-13" tabindex="-1"></a>                           <span class="at">data =</span> sleep,</span>
+<span id="cb69-14"><a href="#cb69-14" tabindex="-1"></a>                           <span class="at">alternative =</span> <span class="st">&quot;equivalence&quot;</span>, </span>
+<span id="cb69-15"><a href="#cb69-15" tabindex="-1"></a>                           <span class="at">mu =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>),</span>
+<span id="cb69-16"><a href="#cb69-16" tabindex="-1"></a>                           <span class="at">R =</span> <span class="dv">999</span>)</span></code></pre></div>
 <pre><code>## Note: Number of permutations (R = 999) is less than 1000. Consider increasing R for more stable p-value estimates.</code></pre>
-<div class="sourceCode" id="cb69"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" tabindex="-1"></a><span class="co"># Compare results</span></span>
-<span id="cb69-2"><a href="#cb69-2" tabindex="-1"></a>boot_result</span></code></pre></div>
+<div class="sourceCode" id="cb71"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" tabindex="-1"></a><span class="co"># Compare results</span></span>
+<span id="cb71-2"><a href="#cb71-2" tabindex="-1"></a>boot_result</span></code></pre></div>
 <pre><code>## 
 ##  Bootstrapped Welch Two Sample t-test
 ## 
@@ -2148,7 +2151,7 @@ let’s apply both to the same dataset:</p>
 ## sample estimates:
 ##               mean of 1               mean of 2 mean difference (1 - 2) 
 ##                    0.75                    2.33                   -1.58</code></pre>
-<div class="sourceCode" id="cb71"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" tabindex="-1"></a>perm_result</span></code></pre></div>
+<div class="sourceCode" id="cb73"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" tabindex="-1"></a>perm_result</span></code></pre></div>
 <pre><code>## 
 ##  Randomization Permutation Welch Two Sample t-test
 ## 
@@ -2289,10 +2292,10 @@ data follow a multiplicative rather than additive pattern.</p>
 <p>For example, we could compare whether the cars of different
 transmissions are “equivalent” with regards to gas mileage. We can use
 the default equivalence bounds (<code>eqb = 1.25</code>).</p>
-<div class="sourceCode" id="cb73"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" tabindex="-1"></a><span class="fu">log_TOST</span>(</span>
-<span id="cb73-2"><a href="#cb73-2" tabindex="-1"></a>  mpg <span class="sc">~</span> am,</span>
-<span id="cb73-3"><a href="#cb73-3" tabindex="-1"></a>  <span class="at">data =</span> mtcars</span>
-<span id="cb73-4"><a href="#cb73-4" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb75"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" tabindex="-1"></a><span class="fu">log_TOST</span>(</span>
+<span id="cb75-2"><a href="#cb75-2" tabindex="-1"></a>  mpg <span class="sc">~</span> am,</span>
+<span id="cb75-3"><a href="#cb75-3" tabindex="-1"></a>  <span class="at">data =</span> mtcars</span>
+<span id="cb75-4"><a href="#cb75-4" tabindex="-1"></a>)</span></code></pre></div>
 <pre><code>## 
 ## Log-transformed Welch Two Sample t-test
 ## 
@@ -2340,11 +2343,11 @@ on the logarithmic scale can be biased, and it is recommended that
 bootstrapped tests be utilized instead. Therefore, the
 <code>boot_log_TOST</code> function can be utilized to perform a more
 precise test.</p>
-<div class="sourceCode" id="cb75"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" tabindex="-1"></a><span class="fu">boot_log_TOST</span>(</span>
-<span id="cb75-2"><a href="#cb75-2" tabindex="-1"></a>  mpg <span class="sc">~</span> am,</span>
-<span id="cb75-3"><a href="#cb75-3" tabindex="-1"></a>  <span class="at">data =</span> mtcars,</span>
-<span id="cb75-4"><a href="#cb75-4" tabindex="-1"></a>  <span class="at">R =</span> <span class="dv">499</span></span>
-<span id="cb75-5"><a href="#cb75-5" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb77"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" tabindex="-1"></a><span class="fu">boot_log_TOST</span>(</span>
+<span id="cb77-2"><a href="#cb77-2" tabindex="-1"></a>  mpg <span class="sc">~</span> am,</span>
+<span id="cb77-3"><a href="#cb77-3" tabindex="-1"></a>  <span class="at">data =</span> mtcars,</span>
+<span id="cb77-4"><a href="#cb77-4" tabindex="-1"></a>  <span class="at">R =</span> <span class="dv">499</span></span>
+<span id="cb77-5"><a href="#cb77-5" tabindex="-1"></a>)</span></code></pre></div>
 <pre><code>## 
 ## Bootstrapped Log Welch Two Sample t-test
 ## 
@@ -2372,10 +2375,10 @@ precise test.</p>
 </ul>
 </div>
 </div>
-<div id="standardized-effect-sizes-estimation-and-testing" class="section level1">
-<h1>Standardized Effect Sizes: Estimation and Testing</h1>
+<div id="standardized-rank-based-effect-sizes-estimation-and-testing" class="section level1">
+<h1>Standardized, Rank-Based, Effect Sizes: Estimation and Testing</h1>
 <p>The <code>ses_calc</code> and <code>boot_ses_calc</code> functions
-calculate non-parametric standardized effect sizes (rank-biserial
+calculate rank based standardized effect sizes (rank-biserial
 correlation, WMW odds, concordance probability, or log-odds) with
 confidence intervals<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a>. As of v0.9.0, <code>ses_calc</code> also
 supports hypothesis testing directly on the effect size scale.</p>
@@ -2565,11 +2568,11 @@ setting equivalence bounds on the raw scale, <code>ses_calc</code> works
 directly with the standardized effect size. By default (with
 <code>alternative = &quot;none&quot;</code>), it returns an effect size estimate
 and confidence interval with no hypothesis test:</p>
-<div class="sourceCode" id="cb77"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" tabindex="-1"></a><span class="co"># Rank-biserial correlation for paired data</span></span>
-<span id="cb77-2"><a href="#cb77-2" tabindex="-1"></a><span class="fu">ses_calc</span>(<span class="at">x =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">1</span>],</span>
-<span id="cb77-3"><a href="#cb77-3" tabindex="-1"></a>         <span class="at">y =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">2</span>],</span>
-<span id="cb77-4"><a href="#cb77-4" tabindex="-1"></a>         <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb77-5"><a href="#cb77-5" tabindex="-1"></a>         <span class="at">ses =</span> <span class="st">&quot;rb&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb79"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" tabindex="-1"></a><span class="co"># Rank-biserial correlation for paired data</span></span>
+<span id="cb79-2"><a href="#cb79-2" tabindex="-1"></a><span class="fu">ses_calc</span>(<span class="at">x =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">1</span>],</span>
+<span id="cb79-3"><a href="#cb79-3" tabindex="-1"></a>         <span class="at">y =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">2</span>],</span>
+<span id="cb79-4"><a href="#cb79-4" tabindex="-1"></a>         <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb79-5"><a href="#cb79-5" tabindex="-1"></a>         <span class="at">ses =</span> <span class="st">&quot;rb&quot;</span>)</span></code></pre></div>
 <pre><code>## 
 ##  Paired Sample Rank-Biserial Correlation estimate with CI
 ## 
@@ -2579,17 +2582,17 @@ and confidence interval with no hypothesis test:</p>
 ## 95 percent confidence interval:
 ##  -1  1
 ## sample estimates:
-## Rank-Biserial Correlation 
-##                 0.9818182</code></pre>
+## P(Z&gt;0) - P(Z&lt;0) 
+##       0.9818182</code></pre>
 <p>The bootstrapped version provides a resampling-based alternative:</p>
-<div class="sourceCode" id="cb79"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" tabindex="-1"></a><span class="co"># Setting bootstrap replications low to</span></span>
-<span id="cb79-2"><a href="#cb79-2" tabindex="-1"></a><span class="do">## reduce compiling time of vignette</span></span>
-<span id="cb79-3"><a href="#cb79-3" tabindex="-1"></a><span class="fu">boot_ses_calc</span>(<span class="at">x =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">1</span>],</span>
-<span id="cb79-4"><a href="#cb79-4" tabindex="-1"></a>              <span class="at">y =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">2</span>],</span>
-<span id="cb79-5"><a href="#cb79-5" tabindex="-1"></a>         <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb79-6"><a href="#cb79-6" tabindex="-1"></a>         <span class="at">R =</span> <span class="dv">199</span>,</span>
-<span id="cb79-7"><a href="#cb79-7" tabindex="-1"></a>         <span class="at">boot_ci =</span> <span class="st">&quot;perc&quot;</span>, <span class="co"># recommend percentile bootstrap for paired SES</span></span>
-<span id="cb79-8"><a href="#cb79-8" tabindex="-1"></a>         <span class="at">ses =</span> <span class="st">&quot;rb&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb81"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" tabindex="-1"></a><span class="co"># Setting bootstrap replications low to</span></span>
+<span id="cb81-2"><a href="#cb81-2" tabindex="-1"></a><span class="do">## reduce compiling time of vignette</span></span>
+<span id="cb81-3"><a href="#cb81-3" tabindex="-1"></a><span class="fu">boot_ses_calc</span>(<span class="at">x =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">1</span>],</span>
+<span id="cb81-4"><a href="#cb81-4" tabindex="-1"></a>              <span class="at">y =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">2</span>],</span>
+<span id="cb81-5"><a href="#cb81-5" tabindex="-1"></a>         <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb81-6"><a href="#cb81-6" tabindex="-1"></a>         <span class="at">R =</span> <span class="dv">199</span>,</span>
+<span id="cb81-7"><a href="#cb81-7" tabindex="-1"></a>         <span class="at">boot_ci =</span> <span class="st">&quot;perc&quot;</span>, <span class="co"># recommend percentile bootstrap for paired SES</span></span>
+<span id="cb81-8"><a href="#cb81-8" tabindex="-1"></a>         <span class="at">ses =</span> <span class="st">&quot;rb&quot;</span>)</span></code></pre></div>
 <pre><code>## Complete separation detected (all pairwise comparisons favor one group). A Haldane-type shrinkage correction was applied to enable confidence interval construction on the log-odds scale. For more reliable inference at boundaries, consider perm_ses_test() for permutation-based p-values and intervals.
 ## Complete separation detected (all pairwise comparisons favor one group). A Haldane-type shrinkage correction was applied to enable confidence interval construction on the log-odds scale. For more reliable inference at boundaries, consider perm_ses_test() for permutation-based p-values and intervals.
 ## Complete separation detected (all pairwise comparisons favor one group). A Haldane-type shrinkage correction was applied to enable confidence interval construction on the log-odds scale. For more reliable inference at boundaries, consider perm_ses_test() for permutation-based p-values and intervals.
@@ -2697,23 +2700,23 @@ directly on the effect size scale by setting the
 non-parametric effect size differs from a specified value, or whether it
 falls within equivalence bounds, without needing the raw-scale
 equivalence bounds required by <code>wilcox_TOST</code>.</p>
-<div class="sourceCode" id="cb82"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1" tabindex="-1"></a><span class="co"># Two-sided test: does the rank-biserial differ from 0?</span></span>
-<span id="cb82-2"><a href="#cb82-2" tabindex="-1"></a><span class="fu">ses_calc</span>(<span class="at">x =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">1</span>],</span>
-<span id="cb82-3"><a href="#cb82-3" tabindex="-1"></a>         <span class="at">y =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">2</span>],</span>
-<span id="cb82-4"><a href="#cb82-4" tabindex="-1"></a>         <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb82-5"><a href="#cb82-5" tabindex="-1"></a>         <span class="at">ses =</span> <span class="st">&quot;rb&quot;</span>,</span>
-<span id="cb82-6"><a href="#cb82-6" tabindex="-1"></a>         <span class="at">alternative =</span> <span class="st">&quot;two.sided&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb84"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1" tabindex="-1"></a><span class="co"># Two-sided test: does the rank-biserial differ from 0?</span></span>
+<span id="cb84-2"><a href="#cb84-2" tabindex="-1"></a><span class="fu">ses_calc</span>(<span class="at">x =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">1</span>],</span>
+<span id="cb84-3"><a href="#cb84-3" tabindex="-1"></a>         <span class="at">y =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">2</span>],</span>
+<span id="cb84-4"><a href="#cb84-4" tabindex="-1"></a>         <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb84-5"><a href="#cb84-5" tabindex="-1"></a>         <span class="at">ses =</span> <span class="st">&quot;rb&quot;</span>,</span>
+<span id="cb84-6"><a href="#cb84-6" tabindex="-1"></a>         <span class="at">alternative =</span> <span class="st">&quot;two.sided&quot;</span>)</span></code></pre></div>
 <pre><code>## 
 ##  Paired Sample Rank-Biserial Correlation test
 ## 
 ## data:  sleep$extra[sleep$group == 1] and sleep$extra[sleep$group == 2]
 ## z = 0.2255, p-value = 0.8216
-## alternative hypothesis: true Rank-Biserial Correlation is not equal to 0
+## alternative hypothesis: true P(Z&gt;0) - P(Z&lt;0) is not equal to 0
 ## 95 percent confidence interval:
 ##  -1  1
 ## sample estimates:
-## Rank-Biserial Correlation 
-##                 0.9818182</code></pre>
+## P(Z&gt;0) - P(Z&lt;0) 
+##       0.9818182</code></pre>
 <div id="equivalence-testing-on-the-effect-size-scale" class="section level3">
 <h3>Equivalence Testing on the Effect Size Scale</h3>
 <p>One advantage of testing directly on the effect size scale is that
@@ -2721,13 +2724,13 @@ equivalence bounds have a more intuitive interpretation. Rather than
 specifying bounds in raw units (which depends on the location-shift
 assumption), you can specify bounds directly in terms of the effect
 size:</p>
-<div class="sourceCode" id="cb84"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1" tabindex="-1"></a><span class="co"># Equivalence test: is the rank-biserial within [-0.3, 0.3]?</span></span>
-<span id="cb84-2"><a href="#cb84-2" tabindex="-1"></a><span class="fu">ses_calc</span>(<span class="at">x =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">1</span>],</span>
-<span id="cb84-3"><a href="#cb84-3" tabindex="-1"></a>         <span class="at">y =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">2</span>],</span>
-<span id="cb84-4"><a href="#cb84-4" tabindex="-1"></a>         <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb84-5"><a href="#cb84-5" tabindex="-1"></a>         <span class="at">ses =</span> <span class="st">&quot;rb&quot;</span>,</span>
-<span id="cb84-6"><a href="#cb84-6" tabindex="-1"></a>         <span class="at">alternative =</span> <span class="st">&quot;equivalence&quot;</span>,</span>
-<span id="cb84-7"><a href="#cb84-7" tabindex="-1"></a>         <span class="at">null.value =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.3</span>, <span class="fl">0.3</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb86"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb86-1"><a href="#cb86-1" tabindex="-1"></a><span class="co"># Equivalence test: is the rank-biserial within [-0.3, 0.3]?</span></span>
+<span id="cb86-2"><a href="#cb86-2" tabindex="-1"></a><span class="fu">ses_calc</span>(<span class="at">x =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">1</span>],</span>
+<span id="cb86-3"><a href="#cb86-3" tabindex="-1"></a>         <span class="at">y =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">2</span>],</span>
+<span id="cb86-4"><a href="#cb86-4" tabindex="-1"></a>         <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb86-5"><a href="#cb86-5" tabindex="-1"></a>         <span class="at">ses =</span> <span class="st">&quot;rb&quot;</span>,</span>
+<span id="cb86-6"><a href="#cb86-6" tabindex="-1"></a>         <span class="at">alternative =</span> <span class="st">&quot;equivalence&quot;</span>,</span>
+<span id="cb86-7"><a href="#cb86-7" tabindex="-1"></a>         <span class="at">null.value =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.3</span>, <span class="fl">0.3</span>))</span></code></pre></div>
 <pre><code>## Hypothesis test conducted on log-odds scale. Bounds [-0.3, 0.3] on rb scale correspond to [-0.619, 0.619] on log-odds scale.</code></pre>
 <pre><code>## 
 ##  Paired Sample Rank-Biserial Correlation test
@@ -2741,29 +2744,29 @@ size:</p>
 ## 90 percent confidence interval:
 ##  -1  1
 ## sample estimates:
-## Rank-Biserial Correlation 
-##                 0.9818182</code></pre>
+## P(Z&gt;0) - P(Z&lt;0) 
+##       0.9818182</code></pre>
 <p>When using <code>ses_calc</code> for hypothesis testing, the
 <code>se_method</code> argument (described in the <a href="#confidence-interval-methods">Confidence Interval Methods</a>
 section above) also controls how test statistics are computed. The
 default Agresti method conducts tests on the log-odds scale, while the
 Fisher method uses z-transformation. See above for details.</p>
-<div class="sourceCode" id="cb87"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb87-1"><a href="#cb87-1" tabindex="-1"></a><span class="co"># Using the Agresti method (default) with WMW odds</span></span>
-<span id="cb87-2"><a href="#cb87-2" tabindex="-1"></a><span class="fu">ses_calc</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb87-3"><a href="#cb87-3" tabindex="-1"></a>         <span class="at">data =</span> sleep,</span>
-<span id="cb87-4"><a href="#cb87-4" tabindex="-1"></a>         <span class="at">ses =</span> <span class="st">&quot;odds&quot;</span>,</span>
-<span id="cb87-5"><a href="#cb87-5" tabindex="-1"></a>         <span class="at">alternative =</span> <span class="st">&quot;two.sided&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb89"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb89-1"><a href="#cb89-1" tabindex="-1"></a><span class="co"># Using the Agresti method (default) with WMW odds</span></span>
+<span id="cb89-2"><a href="#cb89-2" tabindex="-1"></a><span class="fu">ses_calc</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb89-3"><a href="#cb89-3" tabindex="-1"></a>         <span class="at">data =</span> sleep,</span>
+<span id="cb89-4"><a href="#cb89-4" tabindex="-1"></a>         <span class="at">ses =</span> <span class="st">&quot;odds&quot;</span>,</span>
+<span id="cb89-5"><a href="#cb89-5" tabindex="-1"></a>         <span class="at">alternative =</span> <span class="st">&quot;two.sided&quot;</span>)</span></code></pre></div>
 <pre><code>## 
 ##  Two Sample WMW Odds test
 ## 
 ## data:  extra by group
 ## z = -1.8541, p-value = 0.06372
-## alternative hypothesis: true WMW Odds is not equal to 1
+## alternative hypothesis: true odds(P(X&gt;Y) + .5*P(X=Y)) is not equal to 1
 ## 95 percent confidence interval:
 ##  0.1185837 1.0570531
 ## sample estimates:
-##  WMW Odds 
-## 0.3422819</code></pre>
+## odds(P(X&gt;Y) + .5*P(X=Y)) 
+##                0.3422819</code></pre>
 </div>
 </div>
 <div id="permutation-based-effect-size-testing-with-perm_ses_test" class="section level2">
@@ -2774,12 +2777,12 @@ small samples, <code>perm_ses_test</code> provides distribution-free
 inference for the same non-parametric effect sizes. Rather than relying
 on normal approximations, it constructs the null distribution of the
 effect size through permutation.</p>
-<div class="sourceCode" id="cb89"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb89-1"><a href="#cb89-1" tabindex="-1"></a><span class="co"># Permutation test of rank-biserial correlation</span></span>
-<span id="cb89-2"><a href="#cb89-2" tabindex="-1"></a><span class="fu">perm_ses_test</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb89-3"><a href="#cb89-3" tabindex="-1"></a>              <span class="at">data =</span> sleep,</span>
-<span id="cb89-4"><a href="#cb89-4" tabindex="-1"></a>              <span class="at">ses =</span> <span class="st">&quot;rb&quot;</span>,</span>
-<span id="cb89-5"><a href="#cb89-5" tabindex="-1"></a>              <span class="at">alternative =</span> <span class="st">&quot;two.sided&quot;</span>,</span>
-<span id="cb89-6"><a href="#cb89-6" tabindex="-1"></a>              <span class="at">R =</span> <span class="dv">1999</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb91"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb91-1"><a href="#cb91-1" tabindex="-1"></a><span class="co"># Permutation test of rank-biserial correlation</span></span>
+<span id="cb91-2"><a href="#cb91-2" tabindex="-1"></a><span class="fu">perm_ses_test</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb91-3"><a href="#cb91-3" tabindex="-1"></a>              <span class="at">data =</span> sleep,</span>
+<span id="cb91-4"><a href="#cb91-4" tabindex="-1"></a>              <span class="at">ses =</span> <span class="st">&quot;rb&quot;</span>,</span>
+<span id="cb91-5"><a href="#cb91-5" tabindex="-1"></a>              <span class="at">alternative =</span> <span class="st">&quot;two.sided&quot;</span>,</span>
+<span id="cb91-6"><a href="#cb91-6" tabindex="-1"></a>              <span class="at">R =</span> <span class="dv">1999</span>)</span></code></pre></div>
 <pre><code>## 
 ##  Randomization Permutation Rank-Biserial Correlation Test (Two-Sample)
 ## 
@@ -2795,13 +2798,13 @@ effect size through permutation.</p>
 <h3>Equivalence Testing with Permutation</h3>
 <p>The function supports equivalence testing using the
 intersection-union nonparametric combination (IU-NPC) approach <span class="citation">(Arboretti et al. 2021)</span>:</p>
-<div class="sourceCode" id="cb91"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb91-1"><a href="#cb91-1" tabindex="-1"></a><span class="co"># Permutation-based equivalence test on the concordance scale</span></span>
-<span id="cb91-2"><a href="#cb91-2" tabindex="-1"></a><span class="fu">perm_ses_test</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb91-3"><a href="#cb91-3" tabindex="-1"></a>              <span class="at">data =</span> sleep,</span>
-<span id="cb91-4"><a href="#cb91-4" tabindex="-1"></a>              <span class="at">ses =</span> <span class="st">&quot;cstat&quot;</span>,</span>
-<span id="cb91-5"><a href="#cb91-5" tabindex="-1"></a>              <span class="at">alternative =</span> <span class="st">&quot;equivalence&quot;</span>,</span>
-<span id="cb91-6"><a href="#cb91-6" tabindex="-1"></a>              <span class="at">mu =</span> <span class="fu">c</span>(<span class="fl">0.3</span>, <span class="fl">0.7</span>),</span>
-<span id="cb91-7"><a href="#cb91-7" tabindex="-1"></a>              <span class="at">R =</span> <span class="dv">1999</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb93"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb93-1"><a href="#cb93-1" tabindex="-1"></a><span class="co"># Permutation-based equivalence test on the concordance scale</span></span>
+<span id="cb93-2"><a href="#cb93-2" tabindex="-1"></a><span class="fu">perm_ses_test</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb93-3"><a href="#cb93-3" tabindex="-1"></a>              <span class="at">data =</span> sleep,</span>
+<span id="cb93-4"><a href="#cb93-4" tabindex="-1"></a>              <span class="at">ses =</span> <span class="st">&quot;cstat&quot;</span>,</span>
+<span id="cb93-5"><a href="#cb93-5" tabindex="-1"></a>              <span class="at">alternative =</span> <span class="st">&quot;equivalence&quot;</span>,</span>
+<span id="cb93-6"><a href="#cb93-6" tabindex="-1"></a>              <span class="at">mu =</span> <span class="fu">c</span>(<span class="fl">0.3</span>, <span class="fl">0.7</span>),</span>
+<span id="cb93-7"><a href="#cb93-7" tabindex="-1"></a>              <span class="at">R =</span> <span class="dv">1999</span>)</span></code></pre></div>
 <pre><code>## 
 ##  Randomization Permutation Concordance Test (Two-Sample)
 ## 

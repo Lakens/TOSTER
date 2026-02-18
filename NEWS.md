@@ -7,6 +7,24 @@ NEWS
 
 ## New Features
 
+- New `trans_rank_prob()` function for transforming probability-scale effect sizes
+  between four scales: probability (concordance), difference (rank-biserial),
+  log-odds, and odds. Supports bidirectional transformation via `from` and `to`
+  arguments with delta-method standard errors and monotonic CI endpoint mapping.
+
+- `brunner_munzel()` gains a `scale` argument to report results on alternative
+  scales ("probability", "difference", "logodds", "odds") without changing the
+  underlying test. The default `scale = "probability"` preserves existing behavior.
+
+- `ses_calc()` estimate labels now use probability notation (e.g.,
+  `P(X>Y) - P(X<Y)` instead of `Rank-Biserial Correlation`). The `$method`
+  string and data frame row names retain human-readable names. Code that parses
+  `names(result$estimate)` may need updating.
+
+- `ses_calc()` paired sample labels use `P(Z>0)` notation (where Z = X - Y);
+  one-sample labels use `P(X>0)`.
+
+
 - Effect size calculators now support hypothesis testing and `htest` output:
   - `ses_calc` and `boot_ses_calc` updated with `output`, `alternative`, and `null.value` arguments
     - Default output is now `"htest"` class; use `output = "data.frame"` for legacy format
