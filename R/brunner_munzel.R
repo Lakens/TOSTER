@@ -2,7 +2,7 @@
 #' @description
 #' `r lifecycle::badge("maturing")`
 #'
-#' This is a generic function that performs a generalized asymptotic Brunner-Munzel test in a fashion similar to [t.test].
+#' This is a generic function that performs a generalized Brunner-Munzel test in a fashion similar to [t.test].
 #' @param paired a logical indicating whether you want a paired test.
 #' @param mu a number or vector specifying the null hypothesis value(s):
 #'
@@ -130,6 +130,17 @@
 #' the studentized permutation distribution converges to the same limit regardless of the
 #' centering, following the asymptotic theory of Janssen (1997) and Neubert & Brunner (2007).
 #'
+#' Because the equivalence bounds are specified directly on the relative effect
+#' scale (i.e., as probabilities between 0 and 1), this avoids the difficulty
+#' noted by Arboretti et al. (2021, point IU.7) that arises when margins must
+#' be expressed in terms of rank transformations.
+#'
+#' These are uncalibrated (naive) procedures. For the IU direction
+#' (`"equivalence"`), the procedure can be conservative when sample sizes are
+#' small or when the equivalence bounds are close to 0.5. For the UI direction
+#' (`"minimal.effect"`), the conservatism is less pronounced. See Arboretti
+#' et al. (2021) for a detailed discussion of calibration
+#'
 #' @return A list with class `"htest"` containing the following components:
 #'
 #'   - "statistic": the value of the test statistic.
@@ -171,6 +182,9 @@
 #'                test_method = "perm")
 #'
 #' @references
+#' Arboretti, R., Pesarin, F. & Salmaso, L. (2021). A unified approach to permutation testing for equivalence.
+#' Stat Methods Appl 30, 1033-1052. doi: 10.1007/s10260-020-00548-0
+#'
 #' Brunner, E., Munzel, U. (2000). The Nonparametric Behrens-Fisher Problem: Asymptotic Theory and a Small Sample Approximation. Biometrical Journal 42, 17 -25.
 #'
 #' Neubert, K., Brunner, E., (2006). A Studentized Permutation Test for the Nonparametric Behrens-Fisher Problem. Computational Statistics and Data Analysis.

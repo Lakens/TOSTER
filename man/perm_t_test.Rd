@@ -171,6 +171,42 @@ For one-sample tests, the test is of \eqn{\bar x} (mean of x).
 
 If the number of possible permutations is less than R, all exact permutations are computed
 and a message is printed to the console.
+\subsection{Permutation Approach to Equivalence and Minimal Effect Testing}{
+
+When \code{alternative = "equivalence"} or \code{alternative = "minimal.effect"}, the
+function performs two one-sided permutation tests and combines them following
+the nonparametric combination (NPC) framework of Arboretti, Pesarin, and
+Salmaso (2021).
+
+The \code{"equivalence"} alternative implements the \strong{intersection-union (IU)}
+approach: the null hypothesis is non-equivalence and the alternative is
+equivalence. Two one-sided p-values are computed and the global p-value is
+their maximum. The \code{"minimal.effect"} alternative implements the
+\strong{union-intersection (UI)} approach: the null hypothesis is equivalence and
+the alternative is non-equivalence. The global p-value is the minimum of the
+two one-sided p-values. Both partial tests are evaluated against the same
+permutation distribution (i.e., the same set of permuted samples), which
+preserves the negative dependence between the two test statistics as required
+by the NPC theory.
+
+The permutation distribution is constructed under the exchangeability null
+(i.e., by permuting the unshifted data), while the observed test statistics
+are centered at the equivalence bounds. This differs from the shifted-data
+algorithm described in Arboretti et al. (2021), which permutes margin-shifted
+pooled samples. Under the default studentized permutation approach
+(\code{perm_se = TRUE}), the two methods are asymptotically equivalent
+(Janssen, 1997; Chung & Romano, 2013). The exchangeability-based approach
+avoids the computational cost of constructing and permuting two separate
+shifted datasets.
+
+Note that these are \emph{uncalibrated} (naive) procedures in the terminology of
+Arboretti et al. (2021). For the IU direction (\code{"equivalence"}), the naive
+approach can be conservative when sample sizes or equivalence margins are
+small relative to the variability in the data. For the UI direction
+(\code{"minimal.effect"}), the impact of not calibrating is smaller because the
+calibrated critical value lies in the narrower interval
+\eqn{[\alpha/2, \alpha]} rather than \eqn{[\alpha, (1+\alpha)/2)}.
+}
 }
 \section{Purpose}{
 
@@ -232,6 +268,9 @@ perm_t_test(x = before, y = after,
 
 }
 \references{
+Arboretti, R., Pesarin, F. & Salmaso, L. (2021). A unified approach to permutation testing for equivalence.
+Stat Methods Appl 30, 1033-1052. doi: 10.1007/s10260-020-00548-0
+
 Efron, B., & Tibshirani, R. J. (1993). An Introduction to the Bootstrap. Chapman and Hall/CRC.
 
 Janssen, A. (1997). Studentized permutation tests for non-i.i.d. hypotheses and the
