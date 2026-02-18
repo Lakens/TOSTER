@@ -72,8 +72,8 @@ It is important to remember that all of these methods are only *approximations*
 of confidence intervals (of varying degrees of quality)
 and therefore should be interpreted with caution.
 
-It is my belief that SMDs provide another interesting description of the sample, 
-and have very limited inferential utility (though exceptions apply). 
+It is my belief that SMDs provide another interesting quantitive effect size description, 
+but have dubious and limited inferential utility [see @Senn_2011 and @Baguley_2009; though many may disagree]. 
 You may disagree, and if you are basing your inferences on the SMD, and the
 associated confidence intervals, we recommend you go with a
 bootstrapping approach (see `boot_smd_calc`) [@Kirby2013] as it is a more robust option.
