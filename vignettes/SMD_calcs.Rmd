@@ -37,7 +37,7 @@ difference (or mean in the case of a one-sample test) divided by the
 standard deviation.
 
 $$
-Cohen's \space d = \frac{Mean}{SD}
+Cohen's \space d = \frac{Mean}{SD} = SMD
 $$
 
 However, two major problems arise: bias and the calculation of the
@@ -98,11 +98,11 @@ The correction factor^[This calculation was derived from the supplementary mater
 
     J <- exp ( lgamma(df/2) - log(sqrt(df/2)) - lgamma((df-1)/2) )
 
-Hedges g (bias corrected Cohen's d) can then be calculated by
-multiplying d by J
+Hedges g (bias corrected SMD) can then be calculated by
+multiplying the SMD by J
 
 $$
-g = d \cdot J
+g = SMD \cdot J
 $$
 When the bias correction is not applied, J is equal to 1.
 
