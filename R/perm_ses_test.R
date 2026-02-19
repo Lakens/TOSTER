@@ -264,11 +264,8 @@ perm_ses_test.default <- function(x,
 
   # --- Helper: compute effect size for a permuted sample ---
   compute_perm_es <- function(x_perm, y_perm, paired_flag, ses_type) {
-    if (paired_flag) {
-      r_rbs <- rbs_calc(x = y_perm, y = x_perm, mu = 0, paired = TRUE)
-    } else {
-      r_rbs <- rbs_calc(x = x_perm, y = y_perm, mu = 0, paired = FALSE)
-    }
+    # Natural order for all designs: P(X - Y > 0)
+    r_rbs <- rbs_calc(x = x_perm, y = y_perm, mu = 0, paired = paired_flag)
     p_hat <- (r_rbs + 1) / 2
     switch(ses_type,
            "rb" = r_rbs,
@@ -278,11 +275,12 @@ perm_ses_test.default <- function(x,
   }
 
   # --- Compute observed effect size ---
+  # Compute observed effect size using natural order: P(X - Y > 0)
   if (is.null(y)) {
-    # One-sample: compare x to 0 using paired convention with y = rep(0, n)
-    r_rbs_obs <- rbs_calc(x = rep(0, n1), y = x, mu = 0, paired = TRUE)
+    # One-sample: compare x to 0
+    r_rbs_obs <- rbs_calc(x = x, y = rep(0, n1), mu = 0, paired = TRUE)
   } else if (paired) {
-    r_rbs_obs <- rbs_calc(x = y, y = x, mu = 0, paired = TRUE)
+    r_rbs_obs <- rbs_calc(x = x, y = y, mu = 0, paired = TRUE)
   } else {
     r_rbs_obs <- rbs_calc(x = x, y = y, mu = 0, paired = FALSE)
   }

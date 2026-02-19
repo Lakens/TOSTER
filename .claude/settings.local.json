@@ -97,7 +97,23 @@
       "Bash(\"C:/Program Files/R/R-4.4.1/bin/Rscript.exe\":*)",
       "Bash(\"C:/Program Files/R/R-4.4.1/bin/Rscript.exe\" \"C:/Users/caldwellaaron/Documents/GitHub/TOSTER/junk/test_sleep.R\")",
       "Bash(\"C:/Program Files/R/R-4.4.1/bin/Rscript.exe\" -e \"devtools::test\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER'', filter = ''tTOST''\\)\")",
-      "Bash(\"C:/Program Files/R/R-4.4.1/bin/Rscript.exe\" -e \"devtools::test\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER''\\)\")"
+      "Bash(\"C:/Program Files/R/R-4.4.1/bin/Rscript.exe\" -e \"devtools::test\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER''\\)\")",
+      "Bash(cmd /c \"dir /s /b \"\"C:\\\\Program Files\\\\R\\\\Rscript.exe\"\" 2>nul\")",
+      "Bash(cmd /c \"dir /s /b \"\"C:\\\\Program Files \\(x86\\)\\\\R\\\\Rscript.exe\"\" 2>nul\")",
+      "Bash(cmd /c \"dir /s /b \"\"C:\\\\Users\\\\caldwellaaron\\\\AppData\\\\Local\\\\Programs\\\\R\\\\Rscript.exe\"\" 2>nul\")",
+      "Bash(\"C:\\\\Program Files\\\\R\\\\R-4.5.1\\\\bin\\\\Rscript.exe\" -e \"devtools::test\\(filter = ''ses_calc''\\)\")",
+      "Bash(\"C:\\\\Program Files\\\\R\\\\R-4.5.1\\\\bin\\\\Rscript.exe\" -e:*)",
+      "Bash(\"C:\\\\Program Files\\\\R\\\\R-4.5.1\\\\bin\\\\Rscript.exe\" \"C:\\\\Users\\\\caldwellaaron\\\\Documents\\\\GitHub\\\\TOSTER\\\\junk\\\\test_phat.R\")",
+      "Bash(\"C:\\\\Program Files\\\\R\\\\R-4.5.1\\\\bin\\\\Rscript.exe\" \"C:\\\\Users\\\\caldwellaaron\\\\Documents\\\\GitHub\\\\TOSTER\\\\junk\\\\test_phat2.R\")",
+      "Bash(\"C:\\\\Program Files\\\\R\\\\R-4.5.1\\\\bin\\\\Rscript.exe\" \"C:\\\\Users\\\\caldwellaaron\\\\Documents\\\\GitHub\\\\TOSTER\\\\junk\\\\test_phat3.R\")",
+      "Bash(\"C:\\\\Program Files\\\\R\\\\R-4.5.1\\\\bin\\\\Rscript.exe\" -e \"devtools::test\\(\\)\")",
+      "Bash(\"C:\\\\Program Files\\\\R\\\\R-4.5.1\\\\bin\\\\Rscript.exe\" \"C:\\\\Users\\\\caldwellaaron\\\\Documents\\\\GitHub\\\\TOSTER\\\\junk\\\\debug_direction.R\")",
+      "Bash(\"C:\\\\Program Files\\\\R\\\\R-4.5.1\\\\bin\\\\Rscript.exe\" -e \"library\\(TOSTER\\); data\\(sleep\\); res <- ses_calc\\(x=sleep$extra[sleep$group==2], y=sleep$extra[sleep$group==1], paired=TRUE, ses=''cstat'', se_method=''agresti''\\); cat\\(as.numeric\\(res$estimate\\)\\)\")",
+      "Bash(\"C:\\\\Program Files\\\\R\\\\R-4.5.1\\\\bin\\\\Rscript.exe\" \"C:\\\\Users\\\\caldwellaaron\\\\Documents\\\\GitHub\\\\TOSTER\\\\junk\\\\check_installed.R\")",
+      "Bash(\"C:\\\\Program Files\\\\R\\\\R-4.5.1\\\\bin\\\\Rscript.exe\" \"C:\\\\Users\\\\caldwellaaron\\\\Documents\\\\GitHub\\\\TOSTER\\\\junk\\\\debug_direction2.R\")",
+      "Bash(\"C:/Program Files/R/R-4.4.2/bin/Rscript.exe\" -e \"devtools::test\\(filter = ''ses_calc''\\)\")",
+      "Bash(Rscript.exe:*)",
+      "Bash(\"/c/Program Files/R/R-4.5.1/bin/Rscript.exe\" -e \"devtools::test\\(filter = ''ses_calc''\\)\")"
     ]
   }
 }

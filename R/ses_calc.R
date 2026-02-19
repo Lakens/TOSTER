@@ -25,22 +25,23 @@
 #'   or shift (for independent samples) is to be estimated (default = 0).
 #' @param se_method a character string specifying the method for computing standard errors and
 #'   confidence intervals:
-#'     - "auto": (default) Automatically selects the most appropriate method based on the
-#'       study design. Resolves to "score" for two-sample independent designs and "agresti"
-#'       for one-sample or paired designs.
+#'     - "score": (default) Uses a score-type approach where confidence intervals are
+#'       constructed by test inversion (finding the values of the concordance
+#'       probability where the score statistic equals the critical value), then
+#'       transformed to the requested effect size scale. This method has
+#'       better small-sample coverage than the Wald-based methods and
+#'       produces confidence intervals that are coherent with the corresponding
+#'       rank-based test. Available for all designs.
+#'       For two-sample independent designs, uses the Fay-Malinovsky approach
+#'       based on the proportional odds model (see Fay and Malinovsky, 2018).
+#'       For paired/one-sample designs, uses a Wilson score approach based on
+#'       the independent-signs model for the signed-rank statistic, producing
+#'       p-values that match `wilcox.test(..., paired = TRUE, exact = FALSE)`
+#'       at the standard null of 0.5.
 #'     - "agresti": Uses the Agresti/Lehmann placement-based variance estimation with
 #'       confidence intervals computed on the log-odds scale and back-transformed. This method
 #'       has better asymptotic properties and faster convergence to normality. Available for
 #'       all designs (one-sample, paired, and two-sample independent).
-#'     - "score": Uses the Fay-Malinovsky score-type approach based on the
-#'       proportional odds model. Confidence intervals are constructed by
-#'       test inversion (finding the values of the concordance probability
-#'       where the score statistic equals the critical value), then
-#'       transformed to the requested effect size scale. This method has
-#'       better small-sample coverage than the Wald-based methods and
-#'       produces confidence intervals that are compatible with the
-#'       Wilcoxon-Mann-Whitney test. **Only available for two-sample
-#'       independent designs.** See Fay and Malinovsky (2018) for details.
 #'     - "fisher": Uses the legacy Fisher z-transformation method for confidence intervals.
 #'       This method is retained for backward compatibility.
 #' @param correct logical; whether to apply a continuity correction to the
@@ -119,20 +120,28 @@
 #'     requested effect size scale. This ensures that intervals respect the natural bounds of each
 #'     measure (e.g., \eqn{[0, 1]} for cstat, \eqn{[-1, 1]} for rb).
 #'
-#'   - **Score method** (`se_method = "score"`): Uses the Fay-Malinovsky approach based on the
-#'     V_LAPH variance function from the proportional odds model. Confidence intervals are
+#'   - **Score method** (`se_method = "score"`): Uses a score-type approach where the variance
+#'     is evaluated at the candidate parameter value, not the estimate. Confidence intervals are
 #'     constructed via test inversion: finding the values of \eqn{\phi} (concordance probability)
 #'     where the score statistic equals the critical value. This method has better small-sample
-#'     coverage than Wald-type methods because the variance is evaluated at the candidate
-#'     parameter value, not the estimate.
+#'     coverage than Wald-type methods and guarantees CI/p-value coherence for equivalence testing.
 #'
-#'     The reported standard error is descriptive (computed from V_LAPH at \eqn{\hat{\phi}}),
-#'     but the confidence interval is **not** computed as estimate ± z × SE. Instead, it comes
-#'     from test inversion, which gives better coverage properties.
+#'     For **two-sample independent** designs, uses the Fay-Malinovsky V_LAPH variance function
+#'     from the proportional odds model. The reported SE is descriptive (from V_LAPH at
+#'     \eqn{\hat{\phi}}), and the CI comes from root-finding.
+#'
+#'     For **paired/one-sample** designs, uses a Wilson score approach based on the independent
+#'     signs model. Under this model, each pair's sign is Bernoulli(\eqn{\pi}) independent of rank,
+#'     giving \eqn{T^+} known mean \eqn{\pi S} and variance \eqn{\pi(1-\pi)Q}, where
+#'     \eqn{S = N(N+1)/2} and \eqn{Q = \sum r_i^2}. The CI has a closed-form Wilson-score
+#'     solution (no root-finding needed). At \eqn{\pi_0 = 0.5}, the score test reproduces the
+#'     Wilcoxon signed-rank z exactly.
+#'
+#'     The reported standard error is descriptive, but the confidence interval is **not** computed
+#'     as estimate ± z × SE. Instead, it comes from test inversion.
 #'
 #'     When `correct = TRUE`, a continuity correction is applied that makes p-values match
-#'     `wilcox.test(..., exact = FALSE, correct = TRUE)`. This method is only available for
-#'     two-sample independent designs.
+#'     `wilcox.test(..., exact = FALSE, correct = TRUE)`.
 #'
 #'   - **Fisher method** (`se_method = "fisher"`): This legacy method uses Fisher's z-transformation
 #'     (arctanh) for the rank-biserial correlation. Confidence intervals for other effect sizes
@@ -157,14 +166,16 @@
 #' The Agresti placement variance is then evaluated at the corrected estimate. A message
 #' is printed when this correction is applied. For more reliable inference at boundaries,
 #' consider [perm_ses_test()] for permutation-based p-values and intervals, or
-#' `se_method = "score"` (two-sample designs only) for score-type intervals that handle
+#' `se_method = "score"` for score-type intervals that handle
 #' boundaries naturally without correction.
 #'
-#' For `se_method = "score"` (two-sample only), no correction is needed. The score-type
-#' CI is constructed via test inversion, where the variance function V_LAPH(phi) is
+#' For `se_method = "score"`, no correction is needed. The score-type
+#' CI is constructed via test inversion, where the variance function is
 #' evaluated at candidate parameter values in the interior of (0, 1). When
 #' \eqn{\hat{p} = 1}, the upper CI bound is trivially 1 and the lower bound is found
-#' by root-finding. No modification of the point estimate is required.
+#' by the score inversion. No modification of the point estimate is required.
+#' This applies to both two-sample (via root-finding) and paired/one-sample
+#' (via the closed-form Wilson quadratic) designs.
 #'
 #' For two-sample designs using the Agresti method, a score-type CI is automatically
 #' used as a fallback at boundaries for better interval coverage.
@@ -290,7 +301,7 @@ ses_calc <- function(x, ...,
                      paired = FALSE,
                      ses = "rb",
                      alpha = 0.05,
-                     se_method = c("auto", "agresti", "score", "fisher"),
+                     se_method = c("score", "agresti", "fisher"),
                      correct = FALSE,
                      output = c("htest", "data.frame"),
                      null.value = NULL,
@@ -311,7 +322,7 @@ ses_calc.default = function(x,
                           ses = c("rb","odds","logodds","cstat"),
                           alpha = 0.05,
                           mu = 0,
-                          se_method = c("auto", "agresti", "score", "fisher"),
+                          se_method = c("score", "agresti", "fisher"),
                           correct = FALSE,
                           output = c("htest", "data.frame"),
                           null.value = NULL,
@@ -330,17 +341,6 @@ ses_calc.default = function(x,
 
   # Determine design type
   is_two_sample <- !is.null(y) && !paired
-
-  # Resolve "auto" se_method based on design type
-  if (se_method == "auto") {
-    se_method <- if (is_two_sample) "score" else "agresti"
-  }
-
-  # Score method only available for two-sample independent
-  if (se_method == "score" && !is_two_sample) {
-    stop("se_method = 'score' is only available for two-sample independent designs. ",
-         "For one-sample or paired designs, use se_method = 'agresti'.")
-  }
 
   # Continuity correction only used with score method
   if (correct && se_method != "score") {
@@ -422,15 +422,14 @@ ses_calc.default = function(x,
   }
 
   # Compute point estimate using existing function
-  # Note: rbs_calc for paired/one-sample expects x and y swapped
-  # For one-sample: rbs() sets y=rep(0,n), paired=TRUE, then swaps to x=zeros, y=original
-  # For paired: we pass y as first arg, x as second (see rbs() lines 92-100)
+  # Note: rbs_calc for paired computes z = x - y - mu and uses signed ranks.
+  # We pass x, y in the natural order so that the estimate represents P(X - Y > 0).
   if (is.null(y)) {
-    # One-sample: match rbs() convention - zeros first, then data
-    r_rbs <- rbs_calc(x = rep(0, length(x)), y = x, mu = mu, paired = TRUE)
+    # One-sample: compare x to mu (zeros represent the reference)
+    r_rbs <- rbs_calc(x = x, y = rep(0, length(x)), mu = mu, paired = TRUE)
   } else if (paired) {
-    # Paired: match rbs() convention - swap x and y
-    r_rbs <- rbs_calc(x = y, y = x, mu = mu, paired = TRUE)
+    # Paired: natural order, P(X - Y > 0)
+    r_rbs <- rbs_calc(x = x, y = y, mu = mu, paired = TRUE)
   } else {
     # Two-sample: no swap
     r_rbs <- rbs_calc(x = x, y = y, mu = mu, paired = FALSE)
@@ -505,70 +504,144 @@ ses_calc.default = function(x,
                      "logodds" = est_results$se_logodds)
 
   } else if (se_method == "score") {
-    # Fay-Malinovsky score-type method (two-sample only)
-    # Note: validation already ensured this is two-sample independent
 
-    # Compute tie factor
-    tf <- wmw_tie_factor(x - mu, y)
+    if (is_two_sample) {
+      # Fay-Malinovsky score-type method (two-sample)
 
-    # Handle degenerate case: all values in both groups identical
-    if (tf == 0) {
-      warning("All values in both groups are identical. ",
-              "Effect size is undefined (phi = 0.5 with zero variance).")
-      se_val <- NA
-      ci_val <- c(0, 1)
-      # p_hat is already 0.5 from rbs_calc
+      # Compute tie factor
+      tf <- wmw_tie_factor(x - mu, y)
+
+      # Handle degenerate case: all values in both groups identical
+      if (tf == 0) {
+        warning("All values in both groups are identical. ",
+                "Effect size is undefined (phi = 0.5 with zero variance).")
+        se_val <- NA
+        ci_val <- c(0, 1)
+        # p_hat is already 0.5 from rbs_calc
+      } else {
+        # Compute CI on cstat scale via test inversion
+        ci_cstat <- score_ci_wmw(phi_hat = p_hat, tf = tf, n1 = n1, n2 = n2,
+                                  conf.level = conf.level, correct = correct)
+
+        # Compute descriptive SE from V_LAPH evaluated at phi_hat
+        # Use boundary-safe phi for SE computation
+        p_hat_safe <- pmin(pmax(p_hat, 1e-10), 1 - 1e-10)
+        se_cstat <- sqrt(v_laph(p_hat_safe, tf, n1, n2))
+
+        # Delta method SEs for other scales (descriptive only; CIs come from
+        # transforming the cstat CI bounds, not from SE +/- z)
+        se_rb <- 2 * se_cstat
+        se_odds <- se_cstat / (1 - p_hat_safe)^2
+        se_logodds <- se_cstat / (p_hat_safe * (1 - p_hat_safe))
+
+        # Transform CI bounds to all scales
+        ci_rb <- 2 * ci_cstat - 1
+        ci_odds <- ci_cstat / (1 - ci_cstat)
+        ci_logodds <- log(ci_cstat / (1 - ci_cstat))
+
+        # Extract for requested scale
+        se_val <- switch(ses,
+                         "rb" = se_rb,
+                         "cstat" = se_cstat,
+                         "odds" = se_odds,
+                         "logodds" = se_logodds)
+
+        ci_val <- switch(ses,
+                         "rb" = ci_rb,
+                         "cstat" = ci_cstat,
+                         "odds" = ci_odds,
+                         "logodds" = ci_logodds)
+      }
+
+      # Create est_results for consistency (used in hypothesis testing)
+      est_results <- list(
+        cstat = p_hat,
+        rb = r_rbs,
+        odds = alpha_hat,
+        logodds = eta_hat,
+        se_cstat = if(exists("se_cstat")) se_cstat else NA,
+        se_rb = if(exists("se_rb")) se_rb else NA,
+        se_odds = if(exists("se_odds")) se_odds else NA,
+        se_logodds = if(exists("se_logodds")) se_logodds else NA,
+        paired = FALSE,
+        n1 = n1,
+        n2 = n2,
+        boundary_corrected = FALSE,
+        tf = tf
+      )
+
     } else {
-      # Compute CI on cstat scale via test inversion
-      ci_cstat <- score_ci_wmw(phi_hat = p_hat, tf = tf, n1 = n1, n2 = n2,
-                                conf.level = conf.level, correct = correct)
+      # Wilson score-type method (paired/one-sample)
 
-      # Compute descriptive SE from V_LAPH evaluated at phi_hat
-      # Use boundary-safe phi for SE computation
-      p_hat_safe <- pmin(pmax(p_hat, 1e-10), 1 - 1e-10)
-      se_cstat <- sqrt(v_laph(p_hat_safe, tf, n1, n2))
+      # Get paired rank information
+      # Use original x, y order so that d = x - y - mu and
+      # p_hat = P(X - Y > 0), matching the label convention.
+      if (is.null(y)) {
+        pri <- paired_rank_info(x, mu = mu)
+      } else {
+        pri <- paired_rank_info(x, y, mu = mu)
+      }
 
-      # Delta method SEs for other scales (descriptive only; CIs come from
-      # transforming the cstat CI bounds, not from SE +/- z)
-      se_rb <- 2 * se_cstat
-      se_odds <- se_cstat / (1 - p_hat_safe)^2
-      se_logodds <- se_cstat / (p_hat_safe * (1 - p_hat_safe))
+      n_eff <- pri$n_eff
+      S_paired <- pri$S
+      Q_paired <- pri$Q
+      p_hat_pri <- pri$p_hat
 
-      # Transform CI bounds to all scales
-      ci_rb <- 2 * ci_cstat - 1
-      ci_odds <- ci_cstat / (1 - ci_cstat)
-      ci_logodds <- log(ci_cstat / (1 - ci_cstat))
+      # Handle degenerate case
+      if (n_eff < 1 || Q_paired == 0) {
+        warning("Insufficient non-zero differences for score-type inference.")
+        se_val <- NA
+        ci_val <- c(0, 1)
+      } else {
+        # Compute CI on cstat scale via Wilson-score inversion
+        ci_cstat <- score_ci_paired(p_hat = p_hat_pri, n_eff = n_eff,
+                                     Q = Q_paired, conf.level = conf.level,
+                                     correct = correct)
 
-      # Extract for requested scale
-      se_val <- switch(ses,
-                       "rb" = se_rb,
-                       "cstat" = se_cstat,
-                       "odds" = se_odds,
-                       "logodds" = se_logodds)
+        # Compute descriptive SEs
+        se_list <- score_se_paired(p_hat_pri, n_eff, Q_paired)
+        se_cstat <- se_list$se_cstat
+        se_rb <- se_list$se_rb
+        se_odds <- se_list$se_odds
+        se_logodds <- se_list$se_logodds
 
-      ci_val <- switch(ses,
-                       "rb" = ci_rb,
-                       "cstat" = ci_cstat,
-                       "odds" = ci_odds,
-                       "logodds" = ci_logodds)
+        # Transform CI bounds to all scales
+        ci_rb <- 2 * ci_cstat - 1
+        ci_odds <- ci_cstat / (1 - ci_cstat)
+        ci_logodds <- log(ci_cstat / (1 - ci_cstat))
+
+        # Extract for requested scale
+        se_val <- switch(ses,
+                         "rb" = se_rb,
+                         "cstat" = se_cstat,
+                         "odds" = se_odds,
+                         "logodds" = se_logodds)
+
+        ci_val <- switch(ses,
+                         "rb" = ci_rb,
+                         "cstat" = ci_cstat,
+                         "odds" = ci_odds,
+                         "logodds" = ci_logodds)
+      }
+
+      # Create est_results for consistency (used in hypothesis testing)
+      est_results <- list(
+        cstat = p_hat,
+        rb = r_rbs,
+        odds = alpha_hat,
+        logodds = eta_hat,
+        se_cstat = if(exists("se_cstat")) se_cstat else NA,
+        se_rb = if(exists("se_rb")) se_rb else NA,
+        se_odds = if(exists("se_odds")) se_odds else NA,
+        se_logodds = if(exists("se_logodds")) se_logodds else NA,
+        paired = TRUE,
+        n1 = n_eff,
+        n2 = NULL,
+        boundary_corrected = FALSE,
+        # Store paired rank info for hypothesis testing
+        paired_rank_info = pri
+      )
     }
-
-    # Create est_results for consistency (used in hypothesis testing)
-    est_results <- list(
-      cstat = p_hat,
-      rb = r_rbs,
-      odds = alpha_hat,
-      logodds = eta_hat,
-      se_cstat = if(exists("se_cstat")) se_cstat else NA,
-      se_rb = if(exists("se_rb")) se_rb else NA,
-      se_odds = if(exists("se_odds")) se_odds else NA,
-      se_logodds = if(exists("se_logodds")) se_logodds else NA,
-      paired = FALSE,
-      n1 = n1,
-      n2 = n2,
-      boundary_corrected = FALSE,
-      tf = tf
-    )
 
   } else {
     # Legacy Fisher method
@@ -667,7 +740,11 @@ ses_calc.default = function(x,
         note_text <- paste0(note_text, "; hypothesis test conducted on log-odds scale")
       }
     } else if (se_method == "score") {
-      note_text <- "SE: Fay-Malinovsky V_LAPH; CI: score-type test inversion"
+      if (is_two_sample) {
+        note_text <- "SE: Fay-Malinovsky V_LAPH; CI: score-type test inversion"
+      } else {
+        note_text <- "SE: Wilson score variance; CI: Wilson score interval"
+      }
       if (correct) note_text <- paste0(note_text, " with continuity correction")
       if (alternative != "none") {
         note_text <- paste0(note_text, "; score-type hypothesis test on cstat scale")
@@ -812,51 +889,99 @@ ses_calc.default = function(x,
 
     # Score method hypothesis testing
     if (alternative != "none" && se_method == "score") {
-      tf <- est_results$tf
 
-      if (alternative %in% c("equivalence", "minimal.effect")) {
-        # Transform bounds to cstat scale
-        phi_low <- to_cstat(low_bound, ses)
-        phi_high <- to_cstat(high_bound, ses)
+      if (is_two_sample) {
+        # Two-sample: use Fay-Malinovsky score test
+        tf <- est_results$tf
 
-        # Score tests against each bound
-        res_low <- score_pvalue_wmw(p_hat, phi_low, tf, n1, n2,
-                                     alternative = "greater", correct = correct)
-        res_high <- score_pvalue_wmw(p_hat, phi_high, tf, n1, n2,
-                                      alternative = "less", correct = correct)
+        if (alternative %in% c("equivalence", "minimal.effect")) {
+          phi_low <- to_cstat(low_bound, ses)
+          phi_high <- to_cstat(high_bound, ses)
 
-        if (alternative == "equivalence") {
-          p_val <- max(res_low$p.value, res_high$p.value)
-          z_stat <- if (abs(res_low$z.statistic) < abs(res_high$z.statistic)) {
-            res_low$z.statistic
+          res_low <- score_pvalue_wmw(p_hat, phi_low, tf, n1, n2,
+                                       alternative = "greater", correct = correct)
+          res_high <- score_pvalue_wmw(p_hat, phi_high, tf, n1, n2,
+                                        alternative = "less", correct = correct)
+
+          if (alternative == "equivalence") {
+            p_val <- max(res_low$p.value, res_high$p.value)
+            z_stat <- if (abs(res_low$z.statistic) < abs(res_high$z.statistic)) {
+              res_low$z.statistic
+            } else {
+              res_high$z.statistic
+            }
           } else {
-            res_high$z.statistic
+            p_val <- min(res_low$p.value, res_high$p.value)
+            z_stat <- if (abs(res_low$z.statistic) < abs(res_high$z.statistic)) {
+              res_low$z.statistic
+            } else {
+              res_high$z.statistic
+            }
           }
+
+          null_val <- c(low_bound, high_bound)
+          names(null_val) <- c("lower bound", "upper bound")
+
         } else {
-          # minimal.effect
-          p_val <- min(res_low$p.value, res_high$p.value)
-          z_stat <- if (abs(res_low$z.statistic) < abs(res_high$z.statistic)) {
-            res_low$z.statistic
-          } else {
-            res_high$z.statistic
-          }
+          phi_null <- to_cstat(null.value, ses)
+
+          res <- score_pvalue_wmw(p_hat, phi_null, tf, n1, n2,
+                                   alternative = alternative, correct = correct)
+
+          z_stat <- res$z.statistic
+          p_val <- res$p.value
+
+          null_val <- null.value
+          names(null_val) <- ses_name
         }
 
-        null_val <- c(low_bound, high_bound)
-        names(null_val) <- c("lower bound", "upper bound")
-
       } else {
-        # Standard alternatives: two.sided, less, greater
-        phi_null <- to_cstat(null.value, ses)
+        # Paired/one-sample: use Wilson score test
+        pri <- est_results$paired_rank_info
+        p_hat_pri <- pri$p_hat
+        n_eff <- pri$n_eff
+        Q_paired <- pri$Q
 
-        res <- score_pvalue_wmw(p_hat, phi_null, tf, n1, n2,
-                                 alternative = alternative, correct = correct)
+        if (alternative %in% c("equivalence", "minimal.effect")) {
+          phi_low <- to_cstat(low_bound, ses)
+          phi_high <- to_cstat(high_bound, ses)
 
-        z_stat <- res$z.statistic
-        p_val <- res$p.value
+          res_low <- score_pvalue_paired(p_hat_pri, phi_low, n_eff, Q_paired,
+                                          alternative = "greater", correct = correct)
+          res_high <- score_pvalue_paired(p_hat_pri, phi_high, n_eff, Q_paired,
+                                           alternative = "less", correct = correct)
 
-        null_val <- null.value
-        names(null_val) <- ses_name
+          if (alternative == "equivalence") {
+            p_val <- max(res_low$p.value, res_high$p.value)
+            z_stat <- if (abs(res_low$z.statistic) < abs(res_high$z.statistic)) {
+              res_low$z.statistic
+            } else {
+              res_high$z.statistic
+            }
+          } else {
+            p_val <- min(res_low$p.value, res_high$p.value)
+            z_stat <- if (abs(res_low$z.statistic) < abs(res_high$z.statistic)) {
+              res_low$z.statistic
+            } else {
+              res_high$z.statistic
+            }
+          }
+
+          null_val <- c(low_bound, high_bound)
+          names(null_val) <- c("lower bound", "upper bound")
+
+        } else {
+          phi_null <- to_cstat(null.value, ses)
+
+          res <- score_pvalue_paired(p_hat_pri, phi_null, n_eff, Q_paired,
+                                      alternative = alternative, correct = correct)
+
+          z_stat <- res$z.statistic
+          p_val <- res$p.value
+
+          null_val <- null.value
+          names(null_val) <- ses_name
+        }
       }
 
       names(z_stat) <- "z"

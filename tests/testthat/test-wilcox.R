@@ -27,7 +27,6 @@ test_that("Run examples for one sample", {
   # Test data.frame output for backward compatibility
   test1_ses_df  = ses_calc(x = samp1,
                            alpha = .1,
-                           se_method = "auto",
                            output = "data.frame")
   expect_equal(test1$effsize$estimate[2],
                test1_ses_df$estimate)

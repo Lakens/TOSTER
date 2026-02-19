@@ -56,21 +56,25 @@ ses_calc(
 \item{se_method}{a character string specifying the method for computing standard errors and
 confidence intervals:
 - "auto": (default) Automatically selects the most appropriate method based on the
-study design. Resolves to "score" for two-sample independent designs and "agresti"
-for one-sample or paired designs.
+study design. Currently resolves to "score" for two-sample independent designs
+and "agresti" for one-sample or paired designs.
 - "agresti": Uses the Agresti/Lehmann placement-based variance estimation with
 confidence intervals computed on the log-odds scale and back-transformed. This method
 has better asymptotic properties and faster convergence to normality. Available for
 all designs (one-sample, paired, and two-sample independent).
-- "score": Uses the Fay-Malinovsky score-type approach based on the
-proportional odds model. Confidence intervals are constructed by
-test inversion (finding the values of the concordance probability
-where the score statistic equals the critical value), then
+- "score": Uses a score-type approach where confidence intervals are
+constructed by test inversion (finding the values of the concordance
+probability where the score statistic equals the critical value), then
 transformed to the requested effect size scale. This method has
 better small-sample coverage than the Wald-based methods and
-produces confidence intervals that are compatible with the
-Wilcoxon-Mann-Whitney test. \strong{Only available for two-sample
-independent designs.} See Fay and Malinovsky (2018) for details.
+produces confidence intervals that are coherent with the corresponding
+rank-based test. Available for all designs.
+For two-sample independent designs, uses the Fay-Malinovsky approach
+based on the proportional odds model (see Fay and Malinovsky, 2018).
+For paired/one-sample designs, uses a Wilson score approach based on
+the independent-signs model for the signed-rank statistic, producing
+p-values that match \code{wilcox.test(..., paired = TRUE, exact = FALSE)}
+at the standard null of 0.5.
 - "fisher": Uses the legacy Fisher z-transformation method for confidence intervals.
 This method is retained for backward compatibility.}
 
@@ -195,20 +199,28 @@ Standard errors for other effect size scales are obtained via the delta method. 
 Confidence intervals are constructed on the log-odds scale and back-transformed to the
 requested effect size scale. This ensures that intervals respect the natural bounds of each
 measure (e.g., \eqn{[0, 1]} for cstat, \eqn{[-1, 1]} for rb).
-\item \strong{Score method} (\code{se_method = "score"}): Uses the Fay-Malinovsky approach based on the
-V_LAPH variance function from the proportional odds model. Confidence intervals are
+\item \strong{Score method} (\code{se_method = "score"}): Uses a score-type approach where the variance
+is evaluated at the candidate parameter value, not the estimate. Confidence intervals are
 constructed via test inversion: finding the values of \eqn{\phi} (concordance probability)
 where the score statistic equals the critical value. This method has better small-sample
-coverage than Wald-type methods because the variance is evaluated at the candidate
-parameter value, not the estimate.
+coverage than Wald-type methods and guarantees CI/p-value coherence for equivalence testing.
 
-The reported standard error is descriptive (computed from V_LAPH at \eqn{\hat{\phi}}),
-but the confidence interval is \strong{not} computed as estimate ± z × SE. Instead, it comes
-from test inversion, which gives better coverage properties.
+For \strong{two-sample independent} designs, uses the Fay-Malinovsky V_LAPH variance function
+from the proportional odds model. The reported SE is descriptive (from V_LAPH at
+\eqn{\hat{\phi}}), and the CI comes from root-finding.
+
+For \strong{paired/one-sample} designs, uses a Wilson score approach based on the independent
+signs model. Under this model, each pair's sign is Bernoulli(\eqn{\pi}) independent of rank,
+giving \eqn{T^+} known mean \eqn{\pi S} and variance \eqn{\pi(1-\pi)Q}, where
+\eqn{S = N(N+1)/2} and \eqn{Q = \sum r_i^2}. The CI has a closed-form Wilson-score
+solution (no root-finding needed). At \eqn{\pi_0 = 0.5}, the score test reproduces the
+Wilcoxon signed-rank z exactly.
+
+The reported standard error is descriptive, but the confidence interval is \strong{not} computed
+as estimate ± z × SE. Instead, it comes from test inversion.
 
 When \code{correct = TRUE}, a continuity correction is applied that makes p-values match
-\code{wilcox.test(..., exact = FALSE, correct = TRUE)}. This method is only available for
-two-sample independent designs.
+\code{wilcox.test(..., exact = FALSE, correct = TRUE)}.
 \item \strong{Fisher method} (\code{se_method = "fisher"}): This legacy method uses Fisher's z-transformation
 (arctanh) for the rank-biserial correlation. Confidence intervals for other effect sizes
 are obtained by simple transformation of the rank-biserial CI bounds.
@@ -234,14 +246,16 @@ for smaller samples.
 The Agresti placement variance is then evaluated at the corrected estimate. A message
 is printed when this correction is applied. For more reliable inference at boundaries,
 consider \code{\link[=perm_ses_test]{perm_ses_test()}} for permutation-based p-values and intervals, or
-\code{se_method = "score"} (two-sample designs only) for score-type intervals that handle
+\code{se_method = "score"} for score-type intervals that handle
 boundaries naturally without correction.
 
-For \code{se_method = "score"} (two-sample only), no correction is needed. The score-type
-CI is constructed via test inversion, where the variance function V_LAPH(phi) is
+For \code{se_method = "score"}, no correction is needed. The score-type
+CI is constructed via test inversion, where the variance function is
 evaluated at candidate parameter values in the interior of (0, 1). When
 \eqn{\hat{p} = 1}, the upper CI bound is trivially 1 and the lower bound is found
-by root-finding. No modification of the point estimate is required.
+by the score inversion. No modification of the point estimate is required.
+This applies to both two-sample (via root-finding) and paired/one-sample
+(via the closed-form Wilson quadratic) designs.
 
 For two-sample designs using the Agresti method, a score-type CI is automatically
 used as a fallback at boundaries for better interval coverage.

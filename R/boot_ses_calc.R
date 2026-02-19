@@ -25,11 +25,7 @@
 #'   or shift (for independent samples) is to be estimated (default = 0).
 #' @param se_method a character string specifying the method for computing standard errors
 #'   within each bootstrap sample:
-#'     - "auto": (default) Automatically selects the most appropriate method based on the
-#'       study design. Resolves to "score" for two-sample independent designs and "agresti"
-#'       for one-sample or paired designs. Note that the bootstrap version does not use the
-#'       score CI method directly; "auto" simply controls which SE formula is used internally.
-#'     - "agresti": Uses the Agresti/Lehmann placement-based variance estimation
+#'     - "agresti": (default) Uses the Agresti/Lehmann placement-based variance estimation
 #'       with the log-odds working scale, which has better asymptotic properties
 #'       (faster convergence to normality per Agresti, 1980).
 #'     - "fisher": Uses the legacy Fisher z-transformation method. Retained for backward
@@ -193,7 +189,7 @@ boot_ses_calc <- function(x, ...,
                           mu = 0,
                           boot_ci = c("stud", "basic", "perc","bca"),
                           R = 1999,
-                          se_method = c("auto", "agresti", "fisher"),
+                          se_method = c("agresti", "fisher"),
                           output = c("htest", "data.frame"),
                           alternative = c("none", "two.sided", "less", "greater",
                                           "equivalence", "minimal.effect"),
@@ -213,7 +209,7 @@ boot_ses_calc.default = function(x,
                                  mu = 0,
                                  boot_ci = c("basic","stud", "perc","bca"),
                                  R = 1999,
-                                 se_method = c("auto", "agresti", "fisher"),
+                                 se_method = c("agresti", "fisher"),
                                  output = c("htest", "data.frame"),
                                  alternative = c("none", "two.sided", "less", "greater",
                                                  "equivalence", "minimal.effect"),
@@ -224,13 +220,6 @@ boot_ses_calc.default = function(x,
   se_method = match.arg(se_method)
   output = match.arg(output)
   alternative = match.arg(alternative)
-
-  # Determine design type and resolve "auto" se_method
-  is_two_sample <- !is.null(y) && !paired
-
-  if (se_method == "auto") {
-    se_method <- if (is_two_sample) "agresti" else "agresti"
-  }
 
   # Working-scale transformations
   # Fisher z: atanh(rb), back-transform: tanh(z)
@@ -337,7 +326,7 @@ boot_ses_calc.default = function(x,
     }
 
     # Check for complete separation (paired case)
-    p_init <- rb_to_cstat(rbs_calc(x = data$y, y = data$x, mu = mu, paired = TRUE))
+    p_init <- rb_to_cstat(rbs_calc(x = data$x, y = data$y, mu = mu, paired = TRUE))
     check_complete_separation(p_init)
 
     raw_ses = ses_calc(x = data$x,
@@ -431,7 +420,7 @@ boot_ses_calc.default = function(x,
     d_nonzero <- d[d != 0]
     if (length(d_nonzero) > 0) {
       # Compute concordance probability from signed ranks
-      p_init <- rb_to_cstat(rbs_calc(x = rep(mu, length(x1)), y = x1, mu = 0, paired = TRUE))
+      p_init <- rb_to_cstat(rbs_calc(x = x1, y = rep(mu, length(x1)), mu = 0, paired = TRUE))
       check_complete_separation(p_init)
     }
 

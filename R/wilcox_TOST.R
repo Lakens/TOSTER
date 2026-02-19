@@ -18,12 +18,10 @@
 #' generalized odds ratio). Note that `ses` only determines which effect size is calculated and does not affect the equivalence bounds (`eqb`).
 #' @param se_method a character string specifying the method for computing standard errors and
 #'   confidence intervals for the effect size:
-#'     - "auto": (default) Automatically selects the most appropriate method based on the
-#'       study design. Resolves to "score" for two-sample independent designs and "agresti"
-#'       for one-sample or paired designs.
+#'     - "score": (default) Uses a score-type approach with test-inversion CIs. For two-sample
+#'       designs, uses the Fay-Malinovsky approach. For paired/one-sample, uses a Wilson score
+#'       approach. Produces CIs coherent with the Wilcoxon-Mann-Whitney / signed-rank test.
 #'     - "agresti": Uses the Agresti/Lehmann placement-based variance estimation.
-#'     - "score": Uses the Fay-Malinovsky score-type approach. **Only available for two-sample
-#'       independent designs.**
 #'     - "fisher": Uses the legacy Fisher z-transformation method.
 #' @details
 #' For details on the calculations in this function see `vignette("robustTOST")`. For details on the Wilcoxon-Mann-Whitney tests see [stats::wilcox.test].
@@ -72,7 +70,7 @@ wilcox_TOST <- function(x, ...,
                         high_eqbound,
                         ses = "rb",
                         alpha = 0.05,
-                        se_method = c("auto", "agresti", "score", "fisher")){
+                        se_method = c("score", "agresti", "fisher")){
   UseMethod("wilcox_TOST")
 }
 
@@ -92,24 +90,11 @@ wilcox_TOST.default = function(x,
                           ses = c("rb","odds", "logodds", "cstat"),
                           alpha = 0.05,
                           mu = 0,
-                          se_method = c("auto", "agresti", "score", "fisher"),
+                          se_method = c("score", "agresti", "fisher"),
                           ...) {
 
   ses = match.arg(ses)
   se_method = match.arg(se_method)
-
-  # Determine design type and resolve "auto" se_method
-  is_two_sample <- !is.null(y) && !paired
-
-  if (se_method == "auto") {
-    se_method <- if (is_two_sample) "score" else "agresti"
-  }
-
-  # Score method only available for two-sample independent
-  if (se_method == "score" && !is_two_sample) {
-    stop("se_method = 'score' is only available for two-sample independent designs. ",
-         "For one-sample or paired designs, use se_method = 'agresti'.")
-  }
 
   if(is.null(y)){
     sample_type = "One Sample"

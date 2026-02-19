@@ -157,6 +157,204 @@ to_cstat <- function(value, from_scale) {
   )
 }
 
+# === Score-type functions for paired/one-sample designs ===
+
+#' Extract paired rank information for score-based inference
+#'
+#' Computes the key quantities from paired/one-sample data needed for
+#' score-based inference: N (non-zero differences), S, Q, T+, p_hat.
+#'
+#' @param x numeric vector (first sample or one-sample data)
+#' @param y numeric vector (second sample), or NULL for one-sample
+#' @param mu hypothesized difference (default 0)
+#' @return list with n_eff, S, Q, T_plus, p_hat
+#' @noRd
+paired_rank_info <- function(x, y = NULL, mu = 0) {
+  if (is.null(y)) {
+    d <- x - mu
+  } else {
+    d <- x - y - mu
+  }
+
+  # Remove zeros (ties with mu)
+  d <- d[d != 0]
+  N <- length(d)
+
+  if (N == 0) {
+    return(list(n_eff = 0, S = 0, Q = 0, T_plus = 0, p_hat = 0.5))
+  }
+
+  # Rank absolute differences (average ties)
+  r <- rank(abs(d))
+
+  # T+ = sum of ranks where d > 0
+  T_plus <- sum(r[d > 0])
+
+  S <- N * (N + 1) / 2
+  Q <- sum(r^2)
+  p_hat <- T_plus / S
+
+  list(
+    n_eff = N,
+    S     = S,
+    Q     = Q,
+    T_plus = T_plus,
+    p_hat  = p_hat
+  )
+}
+
+#' Score CI for paired designs (Wilson-type)
+#'
+#' Computes a Wilson-score-type confidence interval for the concordance
+#' probability (cstat) from paired/one-sample signed-rank data.
+#'
+#' The CI inverts the score test, yielding a quadratic in pi0 with
+#' closed-form solution (no root-finding needed).
+#'
+#' @param p_hat concordance estimate (T_plus / S)
+#' @param n_eff number of non-zero differences
+#' @param Q sum of squared (average) ranks
+#' @param conf.level confidence level
+#' @param correct logical; apply continuity correction?
+#' @return numeric vector of length 2: (lower, upper) on cstat scale
+#' @noRd
+score_ci_paired <- function(p_hat, n_eff, Q,
+                            conf.level = 0.95,
+                            correct = FALSE) {
+
+  S <- n_eff * (n_eff + 1) / 2
+
+  if (n_eff < 1 || Q == 0) {
+    return(c(0, 1))
+  }
+
+  alpha <- 1 - conf.level
+  z_crit <- qnorm(1 - alpha / 2)
+  z2 <- z_crit^2
+
+  # Ratio that appears in Wilson formula
+  c_val <- z2 * Q / S^2
+
+  # Helper: solve the Wilson quadratic for a given "center" a
+  # Returns (lower_root, upper_root)
+  wilson_roots <- function(a) {
+    A <- 1 + c_val
+    B <- -(2 * a + c_val)
+    C <- a^2
+
+    disc <- B^2 - 4 * A * C
+    if (disc < 0) disc <- 0
+
+    lo <- (-B - sqrt(disc)) / (2 * A)
+    hi <- (-B + sqrt(disc)) / (2 * A)
+    c(lo, hi)
+  }
+
+  if (!correct) {
+    roots <- wilson_roots(p_hat)
+    lower <- roots[1]
+    upper <- roots[2]
+  } else {
+    # Continuity correction: shift p_hat by h = 0.5/S toward pi0
+    # Lower bound: use a' = min(p_hat + h, 1), take smaller root
+    # Upper bound: use a'' = max(p_hat - h, 0), take larger root
+    h <- 0.5 / S
+
+    roots_low  <- wilson_roots(min(p_hat + h, 1))
+    roots_high <- wilson_roots(max(p_hat - h, 0))
+
+    lower <- roots_low[1]
+    upper <- roots_high[2]
+  }
+
+  # Clamp to [0, 1]
+  lower <- max(0, lower)
+  upper <- min(1, upper)
+
+  c(lower, upper)
+}
+
+#' Score p-value for paired designs
+#'
+#' Computes a score-type p-value for testing H0: pi = pi0,
+#' where pi is the concordance probability.
+#' At pi0 = 0.5 this matches wilcox.test(..., exact = FALSE).
+#'
+#' @param p_hat concordance estimate
+#' @param pi0 null hypothesis value on cstat scale
+#' @param n_eff number of non-zero differences
+#' @param Q sum of squared (average) ranks
+#' @param alternative "two.sided", "less", or "greater"
+#' @param correct apply continuity correction?
+#' @return list with z.statistic and p.value
+#' @noRd
+score_pvalue_paired <- function(p_hat, pi0, n_eff, Q,
+                                alternative = "two.sided",
+                                correct = FALSE) {
+
+  S <- n_eff * (n_eff + 1) / 2
+
+  if (n_eff < 1 || Q == 0) {
+    return(list(z.statistic = NA_real_, p.value = NA_real_))
+  }
+
+  # Variance under H0
+  var_null <- pi0 * (1 - pi0) * Q / S^2
+  se_null  <- sqrt(var_null)
+
+  if (se_null < .Machine$double.eps) {
+    return(list(z.statistic = NA_real_, p.value = NA_real_))
+  }
+
+  if (correct) {
+    h <- 0.5 / S
+    numer <- max(abs(p_hat - pi0) - h, 0)
+    z <- numer / se_null * sign(p_hat - pi0)
+    # Edge case: if p_hat == pi0 after correction, z = 0
+    if (p_hat == pi0) z <- 0
+  } else {
+    z <- (p_hat - pi0) / se_null
+  }
+
+  p_val <- switch(alternative,
+    "two.sided" = 2 * pnorm(-abs(z)),
+    "less"      = pnorm(z),
+    "greater"   = pnorm(z, lower.tail = FALSE)
+  )
+
+  list(z.statistic = z, p.value = p_val)
+}
+
+#' Descriptive SE for paired score method
+#'
+#' Computes descriptive standard errors evaluated at p_hat.
+#' These are for reporting; the CI comes from test inversion, not SE +/- z.
+#'
+#' @param p_hat concordance estimate
+#' @param n_eff number of non-zero differences
+#' @param Q sum of squared (average) ranks
+#' @return list with se_cstat, se_rb, se_logodds, se_odds
+#' @noRd
+score_se_paired <- function(p_hat, n_eff, Q) {
+
+  S <- n_eff * (n_eff + 1) / 2
+
+  # Boundary-safe p_hat for SE computation
+  p_safe <- pmin(pmax(p_hat, 1e-10), 1 - 1e-10)
+
+  se_cstat   <- sqrt(p_safe * (1 - p_safe) * Q / S^2)
+  se_rb      <- 2 * se_cstat
+  se_logodds <- se_cstat / (p_safe * (1 - p_safe))
+  se_odds    <- se_cstat / (1 - p_safe)^2
+
+  list(
+    se_cstat   = se_cstat,
+    se_rb      = se_rb,
+    se_logodds = se_logodds,
+    se_odds    = se_odds
+  )
+}
+
 # === Score-type CI functions (Fay & Malinovsky 2018) ===
 
 #' Compute tie adjustment factor for WMW variance
@@ -431,13 +629,13 @@ ses_compute_agresti <- function(x, y = NULL, paired = FALSE, mu = 0,
   if (paired) {
     # === PAIRED SAMPLES ===
     # Use rbs_calc to get the point estimate (ensures consistency)
-    # Note: rbs_calc expects x and y swapped for paired (it computes x - y)
-    r_hat <- rbs_calc(x = y, y = x, mu = mu, paired = TRUE)
+    # Natural order: P(X - Y > 0)
+    r_hat <- rbs_calc(x = x, y = y, mu = mu, paired = TRUE)
     p_hat <- rb_to_cstat(r_hat)
     p_hat_original <- p_hat
 
     # Compute variance using Agresti method
-    d <- y - x - mu
+    d <- x - y - mu
     d_nonzero <- d[d != 0]
     n_nonzero <- length(d_nonzero)
 
