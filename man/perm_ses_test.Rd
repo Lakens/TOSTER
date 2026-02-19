@@ -112,7 +112,7 @@ A list with class \code{"htest"} containing:
 }
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#maturing}{\figure{lifecycle-maturing.svg}{options: alt='[Maturing]'}}}{\strong{[Maturing]}}
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 
 Performs permutation-based hypothesis tests for non-parametric effect sizes including
 concordance probability (c-statistic), rank-biserial correlation, WMW odds, and WMW log-odds.
