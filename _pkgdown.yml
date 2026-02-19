@@ -24,7 +24,7 @@ reference:
   contents:
   - t_TOST
   - tsum_TOST
-  - extract_r_paired
+
 
 - subtitle: "Correlations"
   desc: >
@@ -35,17 +35,23 @@ reference:
   - corsum_test
 
 
-- subtitle: "Robust"
+- subtitle: "Robust tests of the mean"
   desc: >
     Functions that are robust alternatives to the t-test
   contents:
-  - wilcox_TOST
   - boot_t_TOST
   - log_TOST
   - boot_log_TOST
-  - brunner_munzel
   - perm_t_test
   - boot_t_test
+
+- subtitle: "Robust tests of stochastic dominance"
+  desc: >
+    Functions that are robust alternatives to testing for means or mean difference using rank-based methods
+  contents:
+  - wilcox_TOST
+  - brunner_munzel
+  - hodges_lehmann
 
 - subtitle: "ANOVA"
   desc: >
@@ -66,12 +72,21 @@ reference:
   - TOSTt-methods
   - TOSTnp-methods
 
+- subtitle: "Miscellaneous Helpers"
+  desc: >
+    Functions for helping with various tasks, usually for data preparation
+  contents:
+  - extract_r_paired
+  - rank_diff
+  - trans_rank_prob
+
 - subtitle: "Hypothesis Test Helpers"
   desc: >
     Functions for simple hypothesis tests or aide in interpreting these simple tests
   contents:
   - htest-helpers
   - simple_htest
+  - plot_htest_est
 
 
 - title: "Standardized Effect Sizes"
@@ -84,6 +99,7 @@ reference:
   - boot_smd_calc
   - ses_calc
   - boot_ses_calc
+  - perm_ses_test
   - rbs
   - np_ses
 
