@@ -138,7 +138,7 @@ simple_htest.default = function(x,
      when = "0.9.0",
      what = "simple_htest(test = 'brunner_munzel')",
      with = "brunner_munzel()",
-     details = "The Brunner-Munzel test has been removed from simple_htest(). Please use brunner_munzel() directly for full functionality including permutation tests and improved output labeling."
+     details = "The Brunner-Munzel test has been deprecated from simple_htest(). Please use brunner_munzel() directly for full functionality including permutation tests and improved output labeling."
    )
  }
 
@@ -466,7 +466,7 @@ simple_htest.formula = function(formula,
      || (length(formula) != 3L)
      || (length(attr(terms(formula[-2L]), "term.labels")) != 1L))
     stop("'formula' missing or incorrect")
-  
+
   # Check for paired argument in ... and warn user
   dots <- list(...)
   if("paired" %in% names(dots)){
@@ -474,7 +474,7 @@ simple_htest.formula = function(formula,
       message("Using 'paired = TRUE' with the formula interface is not recommended. Please ensure your data is sorted appropriately to make the correct paired comparison.")
     }
   }
-  
+
   m <- match.call(expand.dots = FALSE)
   if(is.matrix(eval(m$data, parent.frame())))
     m$data <- as.data.frame(data)

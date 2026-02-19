@@ -72,6 +72,9 @@ at the standard null of 0.5.
 confidence intervals computed on the log-odds scale and back-transformed. This method
 has better asymptotic properties and faster convergence to normality. Available for
 all designs (one-sample, paired, and two-sample independent).
+However, this method can produce degenerate intervals at the boundaries
+(when all pairwise comparisons favor one group),
+in which case a Haldane-type shrinkage correction is applied to enable interval construction.
 - "fisher": Uses the legacy Fisher z-transformation method for confidence intervals.
 This method is retained for backward compatibility.}
 
