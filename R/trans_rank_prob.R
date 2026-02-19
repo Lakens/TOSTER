@@ -182,11 +182,10 @@ prob_notation_label <- function(scale, xname, yname = NULL, paired = FALSE) {
     prob_label <- paste0("P(", xq, ">0) + .5*P(", xq, "=0)")
     diff_label <- paste0("P(", xq, ">0) - P(", xq, "<0)")
   } else if (paired) {
-    # Paired: show difference explicitly
+    # Paired: same convention as two-sample
     yq <- paste0("'", yname, "'")
-    d_expr <- paste0(xq, " - ", yq)
-    prob_label <- paste0("P(", d_expr, ">0) + .5*P(", d_expr, "=0)")
-    diff_label <- paste0("P(", d_expr, ">0) - P(", d_expr, "<0)")
+    prob_label <- paste0("P(", xq, ">", yq, ") + .5*P(", xq, "=", yq, ")")
+    diff_label <- paste0("P(", xq, ">", yq, ") - P(", xq, "<", yq, ")")
   } else {
     # Two-sample independent
     yq <- paste0("'", yname, "'")

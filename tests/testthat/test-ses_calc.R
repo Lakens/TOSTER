@@ -962,14 +962,14 @@ test_that("ses_calc two-sample labels use quoted P('X'>'Y') notation", {
   expect_true(grepl("'X'", names(res_lo$estimate), fixed = TRUE))
 })
 
-test_that("ses_calc paired labels use quoted P('X' - 'Y'>0) notation", {
+test_that("ses_calc paired labels use quoted P('X'>'Y') notation", {
   data(sleep)
   res <- with(sleep, ses_calc(extra[group == 1], extra[group == 2],
                               paired = TRUE, ses = "cstat"))
-  # Paired: should show the difference expression 'X' - 'Y'
+  # Paired: same convention as two-sample P('X'>'Y') + .5*P('X'='Y')
   lbl <- names(res$estimate)
-  expect_true(grepl("'X' - 'Y'", lbl, fixed = TRUE))
-  expect_true(grepl(">0)", lbl, fixed = TRUE))
+  expect_true(grepl("'X'>'Y'", lbl, fixed = TRUE))
+  expect_true(grepl("'X'='Y'", lbl, fixed = TRUE))
 })
 
 test_that("ses_calc one-sample labels use quoted P('X'>0) notation", {

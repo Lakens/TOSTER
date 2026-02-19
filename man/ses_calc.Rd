@@ -12,7 +12,7 @@ ses_calc(
   paired = FALSE,
   ses = "rb",
   alpha = 0.05,
-  se_method = c("auto", "agresti", "score", "fisher"),
+  se_method = c("score", "agresti", "fisher"),
   correct = FALSE,
   output = c("htest", "data.frame"),
   null.value = NULL,
@@ -27,7 +27,7 @@ ses_calc(
   ses = c("rb", "odds", "logodds", "cstat"),
   alpha = 0.05,
   mu = 0,
-  se_method = c("auto", "agresti", "score", "fisher"),
+  se_method = c("score", "agresti", "fisher"),
   correct = FALSE,
   output = c("htest", "data.frame"),
   null.value = NULL,
@@ -55,14 +55,7 @@ ses_calc(
 
 \item{se_method}{a character string specifying the method for computing standard errors and
 confidence intervals:
-- "auto": (default) Automatically selects the most appropriate method based on the
-study design. Currently resolves to "score" for two-sample independent designs
-and "agresti" for one-sample or paired designs.
-- "agresti": Uses the Agresti/Lehmann placement-based variance estimation with
-confidence intervals computed on the log-odds scale and back-transformed. This method
-has better asymptotic properties and faster convergence to normality. Available for
-all designs (one-sample, paired, and two-sample independent).
-- "score": Uses a score-type approach where confidence intervals are
+- "score": (default) Uses a score-type approach where confidence intervals are
 constructed by test inversion (finding the values of the concordance
 probability where the score statistic equals the critical value), then
 transformed to the requested effect size scale. This method has
@@ -75,6 +68,10 @@ For paired/one-sample designs, uses a Wilson score approach based on
 the independent-signs model for the signed-rank statistic, producing
 p-values that match \code{wilcox.test(..., paired = TRUE, exact = FALSE)}
 at the standard null of 0.5.
+- "agresti": Uses the Agresti/Lehmann placement-based variance estimation with
+confidence intervals computed on the log-odds scale and back-transformed. This method
+has better asymptotic properties and faster convergence to normality. Available for
+all designs (one-sample, paired, and two-sample independent).
 - "fisher": Uses the legacy Fisher z-transformation method for confidence intervals.
 This method is retained for backward compatibility.}
 

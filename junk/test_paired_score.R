@@ -114,8 +114,22 @@ compare_paired(
   y = sleep$extra[sleep$group == 1],
   label = "sleep data"
 )
+test1 = ses_calc( x = sleep$extra[sleep$group == 2],y = sleep$extra[sleep$group == 1], paired = TRUE, ses = "c",
+          se_method = "score")
+ses_calc( x = sleep$extra[sleep$group == 2],y = sleep$extra[sleep$group == 1], paired = F,
+          ses = "c",
+          se_method = "score")
 
+ses_calc( x = sleep$extra[sleep$group == 2],y = sleep$extra[sleep$group == 1], paired = T,
+          ses = "c",
+          se_method = "score")
+brunner_munzel(x = sleep$extra[sleep$group == 2],y = sleep$extra[sleep$group == 1], paired = F)
+brunner_munzel(x = sleep$extra[sleep$group == 2],y = sleep$extra[sleep$group == 1], paired = T)
+
+wilcox_TOST(x = sleep$extra[sleep$group == 2],y = sleep$extra[sleep$group == 1], paired = TRUE, eqb = 1)
+t.test(x = sleep$extra[sleep$group == 2],y = sleep$extra[sleep$group == 1], paired = TRUE )
 # Test 2: Data with ties --------
+#
 cat("=== Test 2: Data with ties ===\n\n")
 compare_paired(
   x = c(1, 2, 2, 3, 4, 5, 5, 6),

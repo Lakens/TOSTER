@@ -625,7 +625,7 @@ brunner_munzel.default = function(x,
 
     } else if(test_method == "logit") {
       # Logit transformation method for paired samples
-      METHOD = "Exact paired Brunner-Munzel test (logit)"
+      METHOD = "paired Brunner-Munzel test (logit)"
 
       # Clamp pd locally for logit transformation only
       pd_logit_use <- pd
@@ -709,7 +709,7 @@ brunner_munzel.default = function(x,
 
     } else {
       # Asymptotic (t-distribution) approach
-      METHOD = "Exact paired Brunner-Munzel test"
+      METHOD = "Paired Brunner-Munzel test"
 
       if(alternative %in% c("equivalence", "minimal.effect")) {
         # Test statistics for each bound
