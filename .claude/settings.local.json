@@ -83,7 +83,21 @@
       "Bash(\"C:/Program Files/R/R-4.5.1/bin/Rscript.exe\" diagnose_bm.R)",
       "Bash(\"C:\\\\Program Files\\\\R\\\\R-4.5.1\\\\bin\\\\Rscript.exe\" -e \"devtools::document\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER''\\)\")",
       "Bash(\"C:\\\\Program Files\\\\R\\\\R-4.5.1\\\\bin\\\\Rscript.exe\" -e \"devtools::test\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER''\\)\")",
-      "Bash(\"C:\\\\Program Files\\\\R\\\\R-4.5.1\\\\bin\\\\Rscript.exe\" -e \"devtools::document\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER''\\); devtools::test\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER''\\)\")"
+      "Bash(\"C:\\\\Program Files\\\\R\\\\R-4.5.1\\\\bin\\\\Rscript.exe\" -e \"devtools::document\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER''\\); devtools::test\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER''\\)\")",
+      "Bash(\"C:/Program Files/R/R-4.4.1/bin/Rscript.exe\" -e \"cat\\(''R works\\\\n''\\); cat\\(R.version.string, ''\\\\n''\\)\")",
+      "Bash(\"C:/Program Files/R/R-4.4.1/bin/Rscript.exe\" \"C:/Users/caldwellaaron/Documents/GitHub/TOSTER/junk/test_ses_bug.R\")",
+      "Bash(\"C:/Program Files/R/R-4.4.1/bin/Rscript.exe\" \"C:/Users/caldwellaaron/Documents/GitHub/TOSTER/junk/test_ses_bug2.R\")",
+      "Bash(\"C:/Program Files/R/R-4.4.1/bin/Rscript.exe\" \"C:/Users/caldwellaaron/Documents/GitHub/TOSTER/junk/test_ses_bug3.R\")",
+      "Bash(\"C:/Program Files/R/R-4.4.1/bin/Rscript.exe\" \"C:/Users/caldwellaaron/Documents/GitHub/TOSTER/junk/test_placement_paired.R\")",
+      "Bash(\"C:/Program Files/R/R-4.4.1/bin/Rscript.exe\" \"C:/Users/caldwellaaron/Documents/GitHub/TOSTER/junk/test_placement_paired2.R\")",
+      "Bash(\"C:/Program Files/R/R-4.4.1/bin/Rscript.exe\" \"C:/Users/caldwellaaron/Documents/GitHub/TOSTER/junk/test_rbs_zeros.R\")",
+      "Bash(\"C:/Program Files/R/R-4.4.1/bin/Rscript.exe\" \"C:/Users/caldwellaaron/Documents/GitHub/TOSTER/junk/test_fix.R\")",
+      "Bash(\"C:/Program Files/R/R-4.4.1/bin/Rscript.exe\" \"C:/Users/caldwellaaron/Documents/GitHub/TOSTER/junk/test_plan_tests.R\")",
+      "Bash(\"C:/Program Files/R/R-4.4.1/bin/Rscript.exe\" -e \"devtools::test\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER'', filter = ''ses_calc''\\)\")",
+      "Bash(\"C:/Program Files/R/R-4.4.1/bin/Rscript.exe\":*)",
+      "Bash(\"C:/Program Files/R/R-4.4.1/bin/Rscript.exe\" \"C:/Users/caldwellaaron/Documents/GitHub/TOSTER/junk/test_sleep.R\")",
+      "Bash(\"C:/Program Files/R/R-4.4.1/bin/Rscript.exe\" -e \"devtools::test\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER'', filter = ''tTOST''\\)\")",
+      "Bash(\"C:/Program Files/R/R-4.4.1/bin/Rscript.exe\" -e \"devtools::test\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER''\\)\")"
     ]
   }
 }

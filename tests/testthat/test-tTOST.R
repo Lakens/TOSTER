@@ -1594,9 +1594,17 @@ test_that("Formula methods reject paired = TRUE", {
     "Using 'paired = TRUE' with the formula interface is not recommended"
   )
   
+  # sleep data has complete separation after zero-exclusion, so use
+
+  # custom data with mixed-sign differences for boot_ses_calc
+  set.seed(42)
+  df_mixed <- data.frame(
+    val = c(rnorm(10), rnorm(10, mean = 0.3)),
+    grp = factor(rep(c("A", "B"), each = 10))
+  )
   expect_message(
-    boot_ses_calc(extra ~ group, data = sleep, paired = TRUE, R = 10),
+    hush(boot_ses_calc(val ~ grp, data = df_mixed, paired = TRUE, R = 10)),
     "Using 'paired = TRUE' with the formula interface is not recommended"
   )
-  
+
 })

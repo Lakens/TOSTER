@@ -1012,3 +1012,66 @@ test_that("ses_calc formula method labels use actual group names", {
   expect_true(grepl("'0'", names(res$estimate), fixed = TRUE))
   expect_true(grepl("'1'", names(res$estimate), fixed = TRUE))
 })
+
+# === Zero differences handling tests ===
+
+test_that("rbs_calc: paired excludes zero differences", {
+  # With zeros included, rbs_calc should give the same result as without zeros
+  z_full <- c(1, 2, 3, 4, 5, 0, 0, 0, 0, 0)
+  z_nz <- c(1, 2, 3, 4, 5)
+
+  rb_full <- TOSTER:::rbs_calc(rep(0, length(z_full)), z_full, mu = 0, paired = TRUE)
+  rb_nz <- TOSTER:::rbs_calc(rep(0, length(z_nz)), z_nz, mu = 0, paired = TRUE)
+  expect_equal(rb_full, rb_nz)
+})
+
+test_that("rbs_calc: paired all zeros returns zero", {
+  z_all_zero <- c(0, 0, 0, 0, 0)
+  rb <- TOSTER:::rbs_calc(rep(0, 5), z_all_zero, mu = 0, paired = TRUE)
+  expect_equal(rb, 0)
+})
+
+test_that("ses_calc one-sample with zeros produces non-degenerate CI", {
+  z <- c(-5, -4, -3, -2, -1, 0, 0, 0, 1, 2)
+  result <- ses_calc(z)
+  ci <- result$conf.int
+  expect_true(ci[2] - ci[1] < 2,
+              info = "CI should not span the full [-1, 1] range; likely variance bug with zeros")
+})
+
+test_that("ses_calc one-sample p-value is consistent with wilcox.test when zeros present", {
+  z <- c(-5, -4, -3, -2, -1, 0, 0, 0, 1, 2)
+  wt <- suppressWarnings(wilcox.test(z))
+  sc <- ses_calc(z, alternative = "two.sided")
+  expect_true(
+    (wt$p.value < 0.10 && sc$p.value < 0.10) || (wt$p.value >= 0.10 && sc$p.value >= 0.10),
+    info = paste0("Directional disagreement: wilcox.test p=", round(wt$p.value, 4),
+                  " vs ses_calc p=", round(sc$p.value, 4))
+  )
+})
+
+test_that("ses_calc paired with zero differences produces non-degenerate CI", {
+  x <- c(10, 20, 30, 40, 50, 60, 60, 60, 70, 80)
+  y <- c(15, 24, 33, 42, 51, 60, 60, 60, 69, 78)
+  result <- ses_calc(x = x, y = y, paired = TRUE)
+  ci <- result$conf.int
+  expect_true(ci[2] - ci[1] < 2,
+              info = "Paired CI should not span the full range when zero differences exist")
+})
+
+test_that("ses_calc one-sample without zeros is unaffected by fix", {
+  z <- c(-5, -3, -1, 2, 4, 6, 8, 10)
+  result <- ses_calc(z, alternative = "two.sided")
+  expect_true(result$conf.int[1] > -1)
+  expect_true(result$conf.int[2] < 1)
+  expect_true(is.finite(result$p.value))
+})
+
+test_that("adding zeros to one-sample data does not inflate SE", {
+  z_no_zeros <- c(-5, -4, -3, -2, -1)
+  z_with_zeros <- c(-5, -4, -3, -2, -1, 0, 0, 0)
+  se_no_zeros <- suppressMessages(ses_calc(z_no_zeros)$stderr)
+  se_with_zeros <- suppressMessages(ses_calc(z_with_zeros)$stderr)
+  expect_true(se_with_zeros < se_no_zeros * 5,
+              info = "SE with zeros should not be dramatically larger than without")
+})

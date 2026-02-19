@@ -3,6 +3,8 @@ rbs_calc = function (x, y,
   # adapted from effectsize R package
   if (paired) {
     z <- (x-y) - mu
+    z <- z[z != 0]
+    if (length(z) == 0) return(0)
     abs_z = abs(z)
     RR = -1 * rank(abs_z) * sign(z)
     Rplus = sum(RR[RR > 0])
