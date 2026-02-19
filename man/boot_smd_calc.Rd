@@ -279,6 +279,7 @@ in the two independent groups case. \emph{Psychological Methods}, \emph{10}(3), 
 \seealso{
 Other effect sizes: 
 \code{\link{boot_ses_calc}()},
+\code{\link{rank_diff}()},
 \code{\link{ses_calc}()},
 \code{\link{smd_calc}()},
 \code{\link{trans_rank_prob}()}

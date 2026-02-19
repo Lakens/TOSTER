@@ -117,7 +117,8 @@
       "Bash(\"C:\\\\Program Files\\\\R\\\\R-4.5.1\\\\bin\\\\Rscript.exe\" -e \"testthat::test_file\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER/tests/testthat/test-ses_calc.R''\\)\")",
       "Bash(\"C:\\\\Program Files\\\\R\\\\R-4.5.1\\\\bin\\\\Rscript.exe\" -e \"devtools::load_all\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER''\\); testthat::test_file\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER/tests/testthat/test-ses_calc.R''\\)\")",
       "Bash(\"C:\\\\Program Files\\\\R\\\\R-4.5.1\\\\bin\\\\Rscript.exe\" -e \"devtools::load_all\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER''\\); testthat::test_file\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER/tests/testthat/test-brunner_munzel.R''\\)\")",
-      "Bash(\"C:\\\\Program Files\\\\R\\\\R-4.5.1\\\\bin\\\\Rscript.exe\" -e \"devtools::load_all\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER''\\); testthat::test_file\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER/tests/testthat/test-brunner_munzel_scale.R''\\)\")"
+      "Bash(\"C:\\\\Program Files\\\\R\\\\R-4.5.1\\\\bin\\\\Rscript.exe\" -e \"devtools::load_all\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER''\\); testthat::test_file\\(''C:/Users/caldwellaaron/Documents/GitHub/TOSTER/tests/testthat/test-brunner_munzel_scale.R''\\)\")",
+      "Bash(export PATH=\"/c/Program Files/R/R-4.5.1/bin:$PATH\")"
     ]
   }
 }
