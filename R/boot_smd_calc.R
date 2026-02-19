@@ -515,17 +515,32 @@ boot_smd_calc.default = function(x,
               "bca" = bca_ci(boots_est = boots, t0 = raw_smd$estimate[1L],
                              jack_est = jack_est, alpha = ci_alpha))
 
-  # Determine SMD label
-  trim_note <- if (tr > 0) paste0(" (", tr * 100, "% trimmed)") else ""
-  smd_label <- if (bias_correction) {
-    if (!is.null(glass) && glass %in% c("glass1", "glass2")) {
-      paste0("Glass's ", ifelse(glass == "glass1", "delta1", "delta2"), trim_note)
-    } else {
-      paste0("Hedges' g", trim_note)
-    }
+  # Derive int_denom from resolved state (mirrors smd_calc logic)
+  int_denom <- if (!is.null(glass) && glass %in% c("glass1", "glass2")) {
+    glass
+  } else if (sample_type != "Two Sample") {
+    if (isTRUE(rm_correction)) "rm" else "z"
   } else {
-    paste0("Cohen's d", trim_note)
+    "d"
   }
+
+  # Derive denom_tag for estimate label subscript --------
+  denom_tag <- if (int_denom == "d") {
+    if (var.equal) "s" else "av"
+  } else if (int_denom %in% c("z", "rm")) {
+    int_denom
+  } else if (int_denom == "glass1") {
+    "x"
+  } else if (int_denom == "glass2") {
+    "y"
+  } else {
+    NULL
+  }
+
+  # Determine SMD label --------
+  smd_type_letter <- if (bias_correction) "g" else "d"
+  trim_note <- if (tr > 0) paste0(", ", tr * 100, "% trimmed") else ""
+  smd_label <- paste0("SMD (", smd_type_letter, "[", denom_tag, "]", trim_note, ")")
 
   # Bootstrap SE (for reporting in stderr field)
   boot_se <- sd(boots, na.rm = TRUE)
@@ -596,7 +611,7 @@ boot_smd_calc.default = function(x,
   } else {
     # htest output
     estimate <- raw_smd$estimate
-    names(estimate) <- row.names(raw_smd)
+    names(estimate) <- smd_label
 
     conf.int <- c(ci[1], ci[2])
     attr(conf.int, "conf.level") <- conf.level
@@ -604,19 +619,17 @@ boot_smd_calc.default = function(x,
     # Compute SMD notation label for method description
     XNAME <- "x"
     YNAME <- if (!is.null(y)) "y" else NULL
-    # Derive int_denom from resolved state (mirrors smd_calc logic)
-    int_denom <- if (!is.null(glass) && glass %in% c("glass1", "glass2")) {
-      glass
-    } else if (sample_type != "Two Sample") {
-      if (isTRUE(rm_correction)) "rm" else "z"
-    } else {
-      "d"
-    }
-    sd_label <- resolve_sd_label(denom, int_denom, xname = XNAME, yname = if (!is.null(y)) "y" else "x")
+    sd_label <- resolve_sd_label(denom, int_denom,
+                                 xname = XNAME,
+                                 yname = if (!is.null(y)) "y" else "x",
+                                 var.equal = var.equal)
     notation <- smd_notation_label(xname = XNAME, yname = YNAME, denom_label = sd_label)
 
+    # Merge notation into the SMD label: "SMD (g[av]=(x-y)/SD_avg)"
+    smd_method_label <- paste0("SMD (", smd_type_letter, "[", denom_tag, "]=", notation, trim_note, ")")
+
     method_suffix <- if (alternative != "none") "test" else "estimate with CI"
-    method_desc <- paste0("Bootstrapped ", sample_type, " ", smd_label, " ", notation, " ", method_suffix)
+    method_desc <- paste0("Bootstrapped ", sample_type, " ", smd_method_label, " ", method_suffix)
 
     note_text <- paste0("Bootstrap CI: ", boot_ci)
 
@@ -640,7 +653,7 @@ boot_smd_calc.default = function(x,
         names(null_val) <- c("lower bound", "upper bound")
       } else {
         null_val <- null.value
-        names(null_val) <- smd_label
+        names(null_val) <- "SMD"
       }
 
       rval$statistic <- z_stat
@@ -701,10 +714,20 @@ boot_smd_calc.formula = function(formula,
     YNAME <- levels(g)[2]
     xq <- quote_if_numeric(XNAME)
     yq <- quote_if_numeric(YNAME)
-    y$method <- gsub("\\(\\(x-y\\)", paste0("((", xq, "-", yq, ")"), y$method)
-    y$method <- gsub("\\(\\(x\\)", paste0("((", xq, ")"), y$method)
+    y$method <- gsub("=\\(x-y\\)", paste0("=(", xq, "-", yq, ")"), y$method)
+    y$method <- gsub("=\\(x\\)", paste0("=(", xq, ")"), y$method)
     y$method <- gsub("/SD_x\\)", paste0("/SD_", xq, ")"), y$method)
     y$method <- gsub("/SD_y\\)", paste0("/SD_", yq, ")"), y$method)
+
+    # Replace generic group names in estimate label and method string
+    # (Glass bracket notation: [x] -> [A], [y] -> [B])
+    est_name <- names(y$estimate)
+    est_name <- gsub("\\[x\\]", paste0("[", xq, "]"), est_name)
+    est_name <- gsub("\\[y\\]", paste0("[", yq, "]"), est_name)
+    names(y$estimate) <- est_name
+
+    y$method <- gsub("\\[x\\]", paste0("[", xq, "]"), y$method)
+    y$method <- gsub("\\[y\\]", paste0("[", yq, "]"), y$method)
   }
 
   y

@@ -49,10 +49,10 @@ test_that("smd_calc htest method string is correct", {
   x <- rnorm(20, mean = 5, sd = 2)
   y <- rnorm(20, mean = 6, sd = 2)
 
-  # Two Sample Hedges' g (default)
+  # Two Sample SMD (default: bias_correction=TRUE, var.equal=FALSE)
   r1 <- smd_calc(x = x, y = y)
   expect_true(grepl("Two Sample", r1$method))
-  expect_true(grepl("Hedges' g", r1$method))
+  expect_true(grepl("SMD (g[av]=", r1$method, fixed = TRUE))
   expect_true(grepl("estimate with CI", r1$method))
 
   # Paired Sample
@@ -63,13 +63,13 @@ test_that("smd_calc htest method string is correct", {
   r3 <- smd_calc(x = x)
   expect_true(grepl("One Sample", r3$method))
 
-  # Cohen's d
+  # SMD (d[...]=...) when bias_correction = FALSE
   r4 <- smd_calc(x = x, y = y, bias_correction = FALSE)
-  expect_true(grepl("Cohen's d", r4$method))
+  expect_true(grepl("SMD (d[av]=", r4$method, fixed = TRUE))
 
-  # Glass's delta
+  # Glass with default bias correction => SMD (g[x]=...)
   r5 <- smd_calc(x = x, y = y, glass = "glass1")
-  expect_true(grepl("Glass's delta1", r5$method))
+  expect_true(grepl("SMD (g[x]=", r5$method, fixed = TRUE))
 
   # With test, method says "test" not "estimate with CI"
   r6 <- smd_calc(x = x, y = y, alternative = "two.sided")
@@ -364,7 +364,7 @@ test_that("boot_smd_calc method string is correct", {
   r1 <- boot_smd_calc(x = x, y = y, R = 99)
   expect_true(grepl("Bootstrapped", r1$method))
   expect_true(grepl("Two Sample", r1$method))
-  expect_true(grepl("Hedges' g", r1$method))
+  expect_true(grepl("SMD (g[av]=", r1$method, fixed = TRUE))
 
   r2 <- boot_smd_calc(x = x, y = y, R = 99,
                        alternative = "two.sided", null.value = 0)

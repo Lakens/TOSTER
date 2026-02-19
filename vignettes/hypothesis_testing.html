@@ -400,8 +400,10 @@ like <code>t.test()</code> but with a formula interface and explicit
 <span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
 <span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="co">#&gt;  -3.3654832  0.2054832</span></span>
 <span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
-<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="co">#&gt;               mean of 1               mean of 2 mean difference (1 - 2) </span></span>
-<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="co">#&gt;                    0.75                    2.33                   -1.58</span></span></code></pre></div>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="co">#&gt;           mean of group &#39;1&#39;           mean of group &#39;2&#39; </span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="co">#&gt;                        0.75                        2.33 </span></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="co">#&gt; mean difference (&#39;1&#39; - &#39;2&#39;) </span></span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="co">#&gt;                       -1.58</span></span></code></pre></div>
 <p>Compare this with base R’s <code>t.test()</code>:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">t.test</span>(extra <span class="sc">~</span> group, <span class="at">data =</span> sleep)</span>
 <span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="co">#&gt; </span></span>
@@ -437,10 +439,10 @@ set the <code>test</code> argument:</p>
 <span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
 <span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt;  -3.59994709  0.09995356</span></span>
 <span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
-<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt; Hodges-Lehmann estimate (1 - 2) </span></span>
-<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt;                       -1.346388</span></span></code></pre></div>
-<p>The output includes the Hodges-Lehmann estimate of the location shift
-and, again, sample sizes.</p>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt; Hodges-Lehmann estimate (&#39;1&#39; - &#39;2&#39;) </span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt;                           -1.346388</span></span></code></pre></div>
+<p>The output includes the Hodges-Lehmann estimate of the location
+shift.</p>
 </div>
 <div id="equivalence-testing-tost" class="section level3">
 <h3>Equivalence testing (TOST)</h3>
@@ -465,8 +467,10 @@ one-sided tests.</p>
 <span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co">#&gt; 90 percent confidence interval:</span></span>
 <span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co">#&gt;  -3.0533815 -0.1066185</span></span>
 <span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
-<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="co">#&gt;               mean of 1               mean of 2 mean difference (1 - 2) </span></span>
-<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="co">#&gt;                    0.75                    2.33                   -1.58</span></span></code></pre></div>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="co">#&gt;           mean of group &#39;1&#39;           mean of group &#39;2&#39; </span></span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="co">#&gt;                        0.75                        2.33 </span></span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a><span class="co">#&gt; mean difference (&#39;1&#39; - &#39;2&#39;) </span></span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a><span class="co">#&gt;                       -1.58</span></span></code></pre></div>
 <p>Here, <code>mu = 2</code> defines symmetric equivalence bounds of
 (-2, 2). The confidence interval is reported at the 1 - 2α level (90% by
 default), which is the appropriate interval for TOST. If the 90% CI
@@ -490,8 +494,10 @@ vector:</p>
 <span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="co">#&gt; 90 percent confidence interval:</span></span>
 <span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co">#&gt;  -3.0533815 -0.1066185</span></span>
 <span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
-<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co">#&gt;               mean of 1               mean of 2 mean difference (1 - 2) </span></span>
-<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt;                    0.75                    2.33                   -1.58</span></span></code></pre></div>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co">#&gt;           mean of group &#39;1&#39;           mean of group &#39;2&#39; </span></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt;                        0.75                        2.33 </span></span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="co">#&gt; mean difference (&#39;1&#39; - &#39;2&#39;) </span></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="co">#&gt;                       -1.58</span></span></code></pre></div>
 </div>
 </div>
 <div id="beyond-equivalence-non-inferiority-and-superiority-by-a-margin" class="section level2">
@@ -517,8 +523,10 @@ meaningfully worse than group 2 by more than 1 hour), we test with
 <span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
 <span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co">#&gt;  -3.053381       Inf</span></span>
 <span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
-<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="co">#&gt;               mean of 1               mean of 2 mean difference (1 - 2) </span></span>
-<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="co">#&gt;                    0.75                    2.33                   -1.58</span></span></code></pre></div>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="co">#&gt;           mean of group &#39;1&#39;           mean of group &#39;2&#39; </span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="co">#&gt;                        0.75                        2.33 </span></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="co">#&gt; mean difference (&#39;1&#39; - &#39;2&#39;) </span></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="co">#&gt;                       -1.58</span></span></code></pre></div>
 <p>If the p-value is below α, we can conclude non-inferiority: the true
 difference is greater than -1.</p>
 <p><strong>Superiority by a margin</strong> asks: “Does the effect
@@ -537,8 +545,10 @@ difference exceeds +1 hour:</p>
 <span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
 <span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="co">#&gt;  -3.053381       Inf</span></span>
 <span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
-<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="co">#&gt;               mean of 1               mean of 2 mean difference (1 - 2) </span></span>
-<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="co">#&gt;                    0.75                    2.33                   -1.58</span></span></code></pre></div>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="co">#&gt;           mean of group &#39;1&#39;           mean of group &#39;2&#39; </span></span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="co">#&gt;                        0.75                        2.33 </span></span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a><span class="co">#&gt; mean difference (&#39;1&#39; - &#39;2&#39;) </span></span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a><span class="co">#&gt;                       -1.58</span></span></code></pre></div>
 <p>These are one-sided tests against a non-zero null, not equivalence
 tests. TOSTER handles them through the same <code>simple_htest</code>
 interface by adjusting <code>mu</code> and <code>alternative</code>.</p>
@@ -569,26 +579,26 @@ group exceeds one from the other) equals 0.5:</p>
 <span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
 <span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co">#&gt;  0.01387048 0.49612952</span></span>
 <span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
-<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="co">#&gt; P(1&gt;2) + .5*P(1=2) </span></span>
-<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="co">#&gt;              0.255</span></span></code></pre></div>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="co">#&gt; P(&#39;1&#39;&gt;&#39;2&#39;) + .5*P(&#39;1&#39;=&#39;2&#39;) </span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="co">#&gt;                      0.255</span></span></code></pre></div>
 </div>
-<div id="correlation-test" class="section level3">
-<h3>Correlation test</h3>
-<p><code>z_cor_test()</code> tests correlations using Fisher’s
+<div id="bootstrap-correlation-test" class="section level3">
+<h3>Bootstrap Correlation test</h3>
+<p><code>boot_cor_test()</code> tests correlations using Fisher’s
 z-transformation and supports equivalence bounds on the correlation
 coefficient:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">z_cor_test</span>(mtcars<span class="sc">$</span>mpg, mtcars<span class="sc">$</span>hp,</span>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">boot_cor_test</span>(mtcars<span class="sc">$</span>mpg, mtcars<span class="sc">$</span>hp,</span>
 <span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>           <span class="at">method =</span> <span class="st">&quot;pearson&quot;</span>,</span>
 <span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>           <span class="at">alternative =</span> <span class="st">&quot;two.sided&quot;</span>,</span>
 <span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>           <span class="at">null =</span> <span class="dv">0</span>)</span>
 <span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="co">#&gt;  Pearson&#39;s product-moment correlation</span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="co">#&gt;  Bootstrapped Pearson&#39;s product-moment correlation</span></span>
 <span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="co">#&gt; data:  mtcars$mpg and mtcars$hp</span></span>
-<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="co">#&gt; z = -5.5772, N = 32, p-value = 2.444e-08</span></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="co">#&gt; N = 32, p-value &lt; 2.2e-16</span></span>
 <span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: true correlation is not equal to 0</span></span>
 <span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
-<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="co">#&gt;  -0.8852686 -0.5860994</span></span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="co">#&gt;  -0.8520390 -0.6779034</span></span>
 <span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
 <span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="co">#&gt;        cor </span></span>
 <span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a><span class="co">#&gt; -0.7761684</span></span></code></pre></div>
@@ -613,8 +623,10 @@ questionable:</p>
 <span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
 <span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a><span class="co">#&gt;  -3.3481655  0.1582626</span></span>
 <span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
-<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a><span class="co">#&gt;               mean of 1               mean of 2 mean difference (1 - 2) </span></span>
-<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a><span class="co">#&gt;                    0.75                    2.33                   -1.58</span></span></code></pre></div>
+<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a><span class="co">#&gt;           mean of group &#39;1&#39;           mean of group &#39;2&#39; </span></span>
+<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a><span class="co">#&gt;                        0.75                        2.33 </span></span>
+<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a><span class="co">#&gt; mean difference (&#39;1&#39; - &#39;2&#39;) </span></span>
+<span id="cb11-19"><a href="#cb11-19" tabindex="-1"></a><span class="co">#&gt;                       -1.58</span></span></code></pre></div>
 </div>
 <div id="permutation-t-test" class="section level3">
 <h3>Permutation t-test</h3>
@@ -636,8 +648,10 @@ makes minimal distributional assumptions:</p>
 <span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
 <span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a><span class="co">#&gt;  -3.4  0.2</span></span>
 <span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
-<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a><span class="co">#&gt;               mean of 1               mean of 2 mean difference (1 - 2) </span></span>
-<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a><span class="co">#&gt;                    0.75                    2.33                   -1.58</span></span></code></pre></div>
+<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a><span class="co">#&gt;           mean of group &#39;1&#39;           mean of group &#39;2&#39; </span></span>
+<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a><span class="co">#&gt;                        0.75                        2.33 </span></span>
+<span id="cb12-19"><a href="#cb12-19" tabindex="-1"></a><span class="co">#&gt; mean difference (&#39;1&#39; - &#39;2&#39;) </span></span>
+<span id="cb12-20"><a href="#cb12-20" tabindex="-1"></a><span class="co">#&gt;                       -1.58</span></span></code></pre></div>
 <p>All of these functions return objects of class <code>htest</code>, so
 the helper functions described next work identically with any of
 them.</p>
@@ -700,13 +714,13 @@ output.</p>
 <p><code>describe_htest()</code> generates a formatted text summary
 suitable for reporting:</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="fu">describe_htest</span>(res_t)</span>
-<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="co">#&gt; [1] &quot;The Welch Two Sample t-test is not statistically significant (t(17.776) = -1.86, p = 0.079, mean of 1 = 0.75, mean of 2 = 2.33, mean difference (1 - 2) = -1.58, 95% C.I.[-3.37, 0.205]) at a 0.05 alpha-level. The null hypothesis cannot be rejected. At the desired error rate, it cannot be stated that the true difference in means is not equal to 0.&quot;</span></span></code></pre></div>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="co">#&gt; [1] &quot;The Welch Two Sample t-test is not statistically significant (t(17.776) = -1.86, p = 0.079, mean of group &#39;1&#39; = 0.75, mean of group &#39;2&#39; = 2.33, mean difference (&#39;1&#39; - &#39;2&#39;) = -1.58, 95% C.I.[-3.37, 0.205]) at a 0.05 alpha-level. The null hypothesis cannot be rejected. At the desired error rate, it cannot be stated that the true difference in means is not equal to 0.&quot;</span></span></code></pre></div>
 <p>For an equivalence test, the description adapts to reflect the TOST
 procedure:</p>
 <div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>res_equiv <span class="ot">&lt;-</span> <span class="fu">simple_htest</span>(extra <span class="sc">~</span> group, <span class="at">data =</span> sleep, </span>
 <span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>                           <span class="at">mu =</span> <span class="dv">2</span>, <span class="at">alternative =</span> <span class="st">&quot;equivalence&quot;</span>)</span>
 <span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a><span class="fu">describe_htest</span>(res_equiv)</span>
-<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a><span class="co">#&gt; [1] &quot;The Welch Two Sample t-test is not statistically significant (t(17.776) = 0.495, p = 0.313, mean of 1 = 0.75, mean of 2 = 2.33, mean difference (1 - 2) = -1.58, 90% C.I.[-3.05, -0.107]) at a 0.05 alpha-level. The null hypothesis cannot be rejected. At the desired error rate, it cannot be stated that the true difference in means is between -2 and 2.&quot;</span></span></code></pre></div>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a><span class="co">#&gt; [1] &quot;The Welch Two Sample t-test is not statistically significant (t(17.776) = 0.495, p = 0.313, mean of group &#39;1&#39; = 0.75, mean of group &#39;2&#39; = 2.33, mean difference (&#39;1&#39; - &#39;2&#39;) = -1.58, 90% C.I.[-3.05, -0.107]) at a 0.05 alpha-level. The null hypothesis cannot be rejected. At the desired error rate, it cannot be stated that the true difference in means is between -2 and 2.&quot;</span></span></code></pre></div>
 <p>This is useful for inline reporting in R Markdown. For example, you
 could write <code>`r describe_htest(res_t)`</code> to embed the result
 directly in a sentence.</p>
@@ -749,7 +763,7 @@ visualize it:</p>
 <span id="cb20-13"><a href="#cb20-13" tabindex="-1"></a></span>
 <span id="cb20-14"><a href="#cb20-14" tabindex="-1"></a><span class="co"># Describe</span></span>
 <span id="cb20-15"><a href="#cb20-15" tabindex="-1"></a><span class="fu">describe_htest</span>(result)</span>
-<span id="cb20-16"><a href="#cb20-16" tabindex="-1"></a><span class="co">#&gt; [1] &quot;The Welch Two Sample t-test is not statistically significant (t(17.776) = 0.495, p = 0.313, mean of 1 = 0.75, mean of 2 = 2.33, mean difference (1 - 2) = -1.58, 90% C.I.[-3.05, -0.107]) at a 0.05 alpha-level. The null hypothesis cannot be rejected. At the desired error rate, it cannot be stated that the true difference in means is between -2 and 2.&quot;</span></span>
+<span id="cb20-16"><a href="#cb20-16" tabindex="-1"></a><span class="co">#&gt; [1] &quot;The Welch Two Sample t-test is not statistically significant (t(17.776) = 0.495, p = 0.313, mean of group &#39;1&#39; = 0.75, mean of group &#39;2&#39; = 2.33, mean difference (&#39;1&#39; - &#39;2&#39;) = -1.58, 90% C.I.[-3.05, -0.107]) at a 0.05 alpha-level. The null hypothesis cannot be rejected. At the desired error rate, it cannot be stated that the true difference in means is between -2 and 2.&quot;</span></span>
 <span id="cb20-17"><a href="#cb20-17" tabindex="-1"></a></span>
 <span id="cb20-18"><a href="#cb20-18" tabindex="-1"></a><span class="co"># Visualize</span></span>
 <span id="cb20-19"><a href="#cb20-19" tabindex="-1"></a><span class="fu">plot_htest_est</span>(result)</span></code></pre></div>

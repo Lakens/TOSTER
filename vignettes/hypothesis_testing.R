@@ -51,7 +51,7 @@ simple_htest(extra ~ group,
 brunner_munzel(extra ~ group, data = sleep)
 
 ## -----------------------------------------------------------------------------
-z_cor_test(mtcars$mpg, mtcars$hp,
+boot_cor_test(mtcars$mpg, mtcars$hp,
            method = "pearson",
            alternative = "two.sided",
            null = 0)

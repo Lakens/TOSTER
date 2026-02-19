@@ -12,7 +12,7 @@
 
 <meta name="author" content="Aaron R. Caldwell" />
 
-<meta name="date" content="2026-02-18" />
+<meta name="date" content="2026-02-19" />
 
 <title>Standardized Mean Differences</title>
 
@@ -365,7 +365,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <h1 class="title toc-ignore">Standardized Mean Differences</h1>
 <h3 class="subtitle">The calculation of Cohen’s d type effect sizes</h3>
 <h4 class="author">Aaron R. Caldwell</h4>
-<h4 class="date">2026-02-18</h4>
+<h4 class="date">2026-02-19</h4>
 
 
 <div id="TOC">
@@ -432,10 +432,10 @@ Contaminated Data</a></li>
 helpful in interpreting data and are essential for meta-analysis. In
 psychology, effect sizes are very often reported as an SMD rather than
 raw units (though either is fine: see <span class="citation">Caldwell
-and Vigotsky (2020)</span>). In most papers the SMD is reported as
-Cohen’s d<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>. The simplest form involves reporting the
-mean difference (or mean in the case of a one-sample test) divided by
-the standard deviation.</p>
+and Vigotsky (<a href="#ref-Caldwell2020">2020</a>)</span>). In most
+papers the SMD is reported as Cohen’s d<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>. The simplest form
+involves reporting the mean difference (or mean in the case of a
+one-sample test) divided by the standard deviation.</p>
 <p><span class="math display">\[
 Cohen&#39;s \space d = \frac{Mean}{SD} = SMD
 \]</span></p>
@@ -450,38 +450,38 @@ involves the noncentral <em>t</em> distribution. This requires
 calculating a non-centrality parameter (lambda: <span class="math inline">\(\lambda\)</span>), degrees of freedom (<span class="math inline">\(df\)</span>), or even the standard error (sigma:
 <span class="math inline">\(\sigma\)</span>) for the SMD. None of these
 are easy to determine and these calculations are hotly debated in the
-statistics literature <span class="citation">(Cousineau and
-Goulet-Pelletier 2021)</span>.</p>
+statistics literature <span class="citation">(<a href="#ref-Cousineau2021">Cousineau and Goulet-Pelletier
+2021</a>)</span>.</p>
 <p>In this package we originally opted to make the default SMD
-confidence intervals as the formulation outlined by <span class="citation">Goulet-Pelletier and Cousineau (2018)</span>. We found
-that that these calculations were simple to implement and provided
-fairly accurate coverage for the confidence intervals for any type of
-SMD (independent, paired, or one sample). However, even the authors have
-outlined some issues with the method in a newer publication <span class="citation">(Cousineau and Goulet-Pelletier 2021)</span>. Other
-packages, such as <code>MOTE</code> <span class="citation">(Buchanan et
-al. 2019)</span> or <code>effectsize</code> <span class="citation">(Ben-Shachar, Lüdecke, and Makowski 2020)</span>, use a
-simpler formulation of the noncentral t-distribution (nct). The default
-option in the package is the nct type of confidence intervals. We have
-created an argument for all TOST functions (<code>tsum_TOST</code> and
-<code>t_TOST</code>) named <code>smd_ci</code> which allow the user to
-specify “goulet” (for the <span class="citation">Cousineau and
-Goulet-Pelletier (2021)</span> method), “nct” (this will approximately
-match the results of <span class="citation">Buchanan et al.
-(2019)</span> and <span class="citation">Ben-Shachar, Lüdecke, and
-Makowski (2020)</span>), “t” (central t method), or “z” (normal method).
-We would recommend using “nct” as the default for any analysis but as
-<span class="citation">Viechtbauer (2007)</span> points out the
+confidence intervals as the formulation outlined by <span class="citation">Goulet-Pelletier and Cousineau (<a href="#ref-Goulet_2018">2018</a>)</span>. We found that that these
+calculations were simple to implement and provided fairly accurate
+coverage for the confidence intervals for any type of SMD (independent,
+paired, or one sample). However, even the authors have outlined some
+issues with the method in a newer publication <span class="citation">(<a href="#ref-Cousineau2021">Cousineau and Goulet-Pelletier
+2021</a>)</span>. Other packages, such as <code>MOTE</code> <span class="citation">(<a href="#ref-MOTE">Buchanan et al. 2019</a>)</span>
+or <code>effectsize</code> <span class="citation">(<a href="#ref-effectsize">Ben-Shachar, Lüdecke, and Makowski
+2020</a>)</span>, use a simpler formulation of the noncentral
+t-distribution (nct). The default option in the package is the nct type
+of confidence intervals. We have created an argument for all TOST
+functions (<code>tsum_TOST</code> and <code>t_TOST</code>) named
+<code>smd_ci</code> which allow the user to specify “goulet” (for the
+<span class="citation">Cousineau and Goulet-Pelletier (<a href="#ref-Cousineau2021">2021</a>)</span> method), “nct” (this will
+approximately match the results of <span class="citation">Buchanan et
+al. (<a href="#ref-MOTE">2019</a>)</span> and <span class="citation">Ben-Shachar, Lüdecke, and Makowski (<a href="#ref-effectsize">2020</a>)</span>), “t” (central t method), or “z”
+(normal method). We would recommend using “nct” as the default for any
+analysis but as <span class="citation">Viechtbauer (<a href="#ref-viechtbauer2007approximate">2007</a>)</span> points out the
 approximate methods usually suffice. It is important to remember that
 all of these methods are only <em>approximations</em> of confidence
 intervals (of varying degrees of quality) and therefore should be
 interpreted with caution.</p>
 <p>It is my belief that SMDs provide another interesting quantitive
 effect size description, but have dubious and limited inferential
-utility [see <span class="citation">Senn (2011)</span> and <span class="citation">Baguley (2009)</span>; though many may disagree]. You
-may disagree, and if you are basing your inferences on the SMD, and the
-associated confidence intervals, we recommend you go with a
-bootstrapping approach (see <code>boot_smd_calc</code>) <span class="citation">(Kirby and Gerlanc 2013)</span> as it is a more robust
-option.</p>
+utility [see <span class="citation">Senn (<a href="#ref-Senn_2011">2011</a>)</span> and <span class="citation">Baguley (<a href="#ref-Baguley_2009">2009</a>)</span>;
+though many may disagree]. You may disagree, and if you are basing your
+inferences on the SMD, and the associated confidence intervals, we
+recommend you go with a bootstrapping approach (see
+<code>boot_smd_calc</code>) <span class="citation">(<a href="#ref-Kirby2013">Kirby and Gerlanc 2013</a>)</span> as it is a more
+robust option.</p>
 <p>In this section we will detail on the calculations that are involved
 in calculating the SMD, their associated degrees of freedom,
 non-centrality parameter, and variance. If these SMDs are being reported
@@ -528,7 +528,7 @@ d_{av} = \frac {\bar{x}_1 - \bar{x}_2} {s_{av}}
 \]</span></p>
 <p>Note: the x with the bar above it (pronounced as “x-bar”) refers the
 the means of group 1 and 2 respectively.</p>
-<p>The degrees of freedom for Cohen’s d(av), derived from <span class="citation">Delacre et al. (2021)</span>, is the following:</p>
+<p>The degrees of freedom for Cohen’s d(av), derived from <span class="citation">Delacre et al. (<a href="#ref-delacre2021">2021</a>)</span>, is the following:</p>
 <p><span class="math display">\[
 df = \frac{(n_1-1)(n_2-1)(s_1^2+s_2^2)^2}{(n_2-1) \cdot s_1^4+(n_1-1)
 \cdot s_2^4}
@@ -536,8 +536,8 @@ df = \frac{(n_1-1)(n_2-1)(s_1^2+s_2^2)^2}{(n_2-1) \cdot s_1^4+(n_1-1)
 <p>The non-centrality parameter (<span class="math inline">\(\lambda\)</span>) is calculated as the
 following:</p>
 <ol style="list-style-type: decimal">
-<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
-(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier (<a href="#ref-Cousineau2021">2021</a>)</span> method
+(<code>smd_ci = &quot;goulet&quot;</code>):</li>
 </ol>
 <p><span class="math display">\[
 \lambda =  d_{av} \times \sqrt{\frac{n_1 \cdot
@@ -551,7 +551,7 @@ n_2(\sigma^2_1+\sigma^2_2)}{2 \cdot (n_2 \cdot \sigma^2_1+n_1 \cdot
 \lambda = \frac{2 \cdot (n_2 \cdot \sigma_1^2 + n_1 \cdot \sigma_2^2)}
 {n_1 \cdot n_2 \cdot (\sigma_1^2 + \sigma_2^2)}
 \]</span> The standard error (<span class="math inline">\(\sigma\)</span>) of Cohen’s d(av) is calculated as
-the following from <span class="citation">Bonett (2009)</span><a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a>:</p>
+the following from <span class="citation">Bonett (<a href="#ref-bonett2009meta">2009</a>)</span><a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a>:</p>
 <p><span class="math display">\[
 \sigma_{SMD} = \sqrt{d^2 \cdot (\frac{s_1^4}{n_1-1}+\frac{s_2^4}{n_2-1})
 \div 8 \cdot s_{av}^4 + (\frac{s_1^2}{n_1-1}+\frac{s_2^2}{n_2-1}) \div
@@ -576,8 +576,8 @@ df = n_1 + n_2 - 2
 <p>The non-centrality parameter (<span class="math inline">\(\lambda\)</span>) is calculated as the
 following:</p>
 <ol style="list-style-type: decimal">
-<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
-(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier (<a href="#ref-Cousineau2021">2021</a>)</span> method
+(<code>smd_ci = &quot;goulet&quot;</code>):</li>
 </ol>
 <p><span class="math display">\[
 \lambda = d \cdot \sqrt \frac{\tilde n}{2}
@@ -597,8 +597,8 @@ following:</p>
 <p>The standard error (<span class="math inline">\(\sigma\)</span>) of
 Cohen’s d is calculated as the following:</p>
 <ol style="list-style-type: decimal">
-<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
-(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier (<a href="#ref-Cousineau2021">2021</a>)</span> method
+(<code>smd_ci = &quot;goulet&quot;</code>):</li>
 </ol>
 <p><span class="math display">\[
 \sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{2}{\tilde n} (1+d^2
@@ -606,8 +606,8 @@ Cohen’s d is calculated as the following:</p>
 \]</span></p>
 <ol start="2" style="list-style-type: decimal">
 <li>Under all other methods (nct, t, or z) it is calculated using the
-“unbiased” estimate from <span class="citation">Viechtbauer
-(2007)</span> (table 1; equation 26)<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a>:</li>
+“unbiased” estimate from <span class="citation">Viechtbauer (<a href="#ref-viechtbauer2007approximate">2007</a>)</span> (table 1;
+equation 26)<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a>:</li>
 </ol>
 <p><span class="math display">\[
 \sigma_{SMD} = \sqrt{\frac{1}{n_1} + \frac{1}{n_2} + (1 - \frac{df-2}{df
@@ -633,8 +633,8 @@ df = n_c - 1
 <p>The non-centrality parameter (<span class="math inline">\(\lambda\)</span>) is calculated as the
 following:</p>
 <ol style="list-style-type: decimal">
-<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
-(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier (<a href="#ref-Cousineau2021">2021</a>)</span> method
+(<code>smd_ci = &quot;goulet&quot;</code>):</li>
 </ol>
 <p><span class="math display">\[
 \lambda = d \cdot \sqrt \frac{\tilde n}{2}
@@ -654,15 +654,15 @@ following:</p>
 <p>The standard error (<span class="math inline">\(\sigma\)</span>) of
 Glass’s delta is calculated as the following:</p>
 <ol style="list-style-type: decimal">
-<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
-(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier (<a href="#ref-Cousineau2021">2021</a>)</span> method
+(<code>smd_ci = &quot;goulet&quot;</code>):</li>
 </ol>
 <p><span class="math display">\[
 \sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{2}{\tilde n} (1+d^2
 \cdot \frac{\tilde n}{2}) -\frac{d^2}{J}}
 \]</span></p>
 <ol start="2" style="list-style-type: decimal">
-<li>Under all other methods<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a> (nct, t, or z) derived from <span class="citation">Bonett (2008)</span>:</li>
+<li>Under all other methods<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a> (nct, t, or z) derived from <span class="citation">Bonett (<a href="#ref-bonett2008">2008</a>)</span>:</li>
 </ol>
 <p><span class="math display">\[
 \sigma_{SMD} = \sqrt{\frac{s_e^2 \div s_c^2}{n_e-1}+ \frac{1}{n_c-1}+
@@ -698,8 +698,8 @@ d_{z} = \frac {\bar{x}_1 - \bar{x}_2} {s_{diff}}
 \]</span></p>
 <p>The degrees of freedom for Cohen’s d(z) is the following:</p>
 <ol style="list-style-type: decimal">
-<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
-(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier (<a href="#ref-Cousineau2021">2021</a>)</span> method
+(<code>smd_ci = &quot;goulet&quot;</code>):</li>
 </ol>
 <p><span class="math display">\[
 df = 2 \cdot (N_{pairs}-1)
@@ -713,8 +713,8 @@ df = N - 1
 <p>The non-centrality parameter (<span class="math inline">\(\lambda\)</span>) is calculated as the
 following:</p>
 <ol style="list-style-type: decimal">
-<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
-(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier (<a href="#ref-Cousineau2021">2021</a>)</span> method
+(<code>smd_ci = &quot;goulet&quot;</code>):</li>
 </ol>
 <p><span class="math display">\[
 \lambda = d_{z} \cdot \sqrt \frac{N_{pairs}}{2 \cdot (1-r_{12})}
@@ -728,8 +728,8 @@ following:</p>
 <p>The standard error (<span class="math inline">\(\sigma\)</span>) of
 Cohen’s d(z) is calculated as the following:</p>
 <ol style="list-style-type: decimal">
-<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
-(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier (<a href="#ref-Cousineau2021">2021</a>)</span> method
+(<code>smd_ci = &quot;goulet&quot;</code>):</li>
 </ol>
 <p><span class="math display">\[
 \sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{2 \cdot (1-r_{12})}{n}
@@ -738,8 +738,8 @@ Cohen’s d(z) is calculated as the following:</p>
 \]</span></p>
 <ol start="2" style="list-style-type: decimal">
 <li>Under all other methods (nct, t, or z) it calculated using the
-“unbiased” estimate from <span class="citation">Viechtbauer
-(2007)</span> (table 1; equation 26)<a href="#fn6" class="footnote-ref" id="fnref6"><sup>6</sup></a>:</li>
+“unbiased” estimate from <span class="citation">Viechtbauer (<a href="#ref-viechtbauer2007approximate">2007</a>)</span> (table 1;
+equation 26)<a href="#fn6" class="footnote-ref" id="fnref6"><sup>6</sup></a>:</li>
 </ol>
 <p><span class="math display">\[
 \sigma_{SMD} = \sqrt{\frac{1}{N} + (1 - \frac{df-2}{df \cdot J^2}) \cdot
@@ -749,9 +749,9 @@ d_z^2}
 <div id="cohens-drm-correlation-corrected" class="section level2">
 <h2>Cohen’s d(rm): Correlation Corrected</h2>
 <p>For this calculation, the same values for the same calculations above
-is adjusted for the correlation between measures. As <span class="citation">Goulet-Pelletier and Cousineau (2018)</span> mention,
-this is useful for when effect sizes are being compared for studies that
-involve between and within subjects designs.</p>
+is adjusted for the correlation between measures. As <span class="citation">Goulet-Pelletier and Cousineau (<a href="#ref-Goulet_2018">2018</a>)</span> mention, this is useful for
+when effect sizes are being compared for studies that involve between
+and within subjects designs.</p>
 <p>First, the standard deviation of the difference scores are
 calculated</p>
 <p><span class="math display">\[
@@ -766,8 +766,8 @@ d_{rm} = \frac {\bar{x}_1 - \bar{x}_2}{s_{diff}} \cdot \sqrt {2 \cdot
 \]</span></p>
 <p>The degrees of freedom for Cohen’s d(rm) is the following:</p>
 <ol style="list-style-type: decimal">
-<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
-(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier (<a href="#ref-Cousineau2021">2021</a>)</span> method
+(<code>smd_ci = &quot;goulet&quot;</code>):</li>
 </ol>
 <p><span class="math display">\[
 df = 2 \cdot (N_{pairs}-1)
@@ -781,8 +781,8 @@ df = N - 1
 <p>The non-centrality parameter (<span class="math inline">\(\lambda\)</span>) is calculated as the
 following:</p>
 <ol style="list-style-type: decimal">
-<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
-(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier (<a href="#ref-Cousineau2021">2021</a>)</span> method
+(<code>smd_ci = &quot;goulet&quot;</code>):</li>
 </ol>
 <p><span class="math display">\[
 \lambda = d_{rm} \cdot \sqrt \frac{N_{pairs}}{2 \cdot (1-r_{12})}
@@ -815,8 +815,8 @@ d = \frac {\bar{x}_1 - \bar{x}_2} {s_{c}}
 \]</span></p>
 <p>The degrees of freedom for Glass’s delta is the following:</p>
 <ol style="list-style-type: decimal">
-<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
-(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier (<a href="#ref-Cousineau2021">2021</a>)</span> method
+(<code>smd_ci = &quot;goulet&quot;</code>):</li>
 </ol>
 <p><span class="math display">\[
 df = 2 \cdot N - 1
@@ -830,8 +830,8 @@ df = N - 1
 <p>The non-centrality parameter (<span class="math inline">\(\lambda\)</span>) is calculated as the
 following:</p>
 <ol style="list-style-type: decimal">
-<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
-(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier (<a href="#ref-Cousineau2021">2021</a>)</span> method
+(<code>smd_ci = &quot;goulet&quot;</code>):</li>
 </ol>
 <p><span class="math display">\[
 \lambda = d \cdot \sqrt{\frac{N}{2 \cdot (1 - r_{12})}}
@@ -843,7 +843,7 @@ following:</p>
 \lambda = \frac{1}{N}
 \]</span></p>
 <p>The standard error (<span class="math inline">\(\sigma\)</span>) of
-Glass’s delta is calculated as the following derived<a href="#fn8" class="footnote-ref" id="fnref8"><sup>8</sup></a> from <span class="citation">Bonett (2008)</span>:</p>
+Glass’s delta is calculated as the following derived<a href="#fn8" class="footnote-ref" id="fnref8"><sup>8</sup></a> from <span class="citation">Bonett (<a href="#ref-bonett2008">2008</a>)</span>:</p>
 <p><span class="math display">\[
 \sigma_{SMD} =     \sqrt{\frac{s_{diff}^2}{s_c^2 \cdot df} +
 \frac{d^2}{2 \cdot df}}
@@ -876,8 +876,8 @@ following:</p>
 <p>The standard error (<span class="math inline">\(\sigma\)</span>) of
 Cohen’s d is calculated as the following:</p>
 <ol style="list-style-type: decimal">
-<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
-(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier (<a href="#ref-Cousineau2021">2021</a>)</span> method
+(<code>smd_ci = &quot;goulet&quot;</code>):</li>
 </ol>
 <p><span class="math display">\[
 \sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{1}{N} (1+d^2 \cdot N)
@@ -893,26 +893,25 @@ Cohen’s d is calculated as the following:</p>
 <div id="confidence-intervals" class="section level1">
 <h1>Confidence Intervals</h1>
 <p>For the SMDs calculated in this package we use the non-central
-<em>t</em> method, those outlined by <span class="citation">Goulet-Pelletier and Cousineau (2018)</span>, and
-approximate methods using the <em>t</em> and normal distributions. These
-calculations are only approximations and newer formulations may provide
-better coverage <span class="citation">(e.g., Cousineau and
-Goulet-Pelletier 2021)</span>. In any case, if the calculation of
+<em>t</em> method, those outlined by <span class="citation">Goulet-Pelletier and Cousineau (<a href="#ref-Goulet_2018">2018</a>)</span>, and approximate methods using
+the <em>t</em> and normal distributions. These calculations are only
+approximations and newer formulations may provide better coverage <span class="citation">(e.g., <a href="#ref-Cousineau2021">Cousineau and
+Goulet-Pelletier 2021</a>)</span>. In any case, if the calculation of
 confidence intervals for SMDs is of the utmost importance then I would
 strongly recommend using bootstrapping techniques rather than any of
-these approximations whenever possible <span class="citation">(Kirby and
-Gerlanc 2013)</span>.</p>
+these approximations whenever possible <span class="citation">(<a href="#ref-Kirby2013">Kirby and Gerlanc 2013</a>)</span>.</p>
 <p>The calculations of the confidence intervals for the
 <code>goulet</code> and <code>nct</code> methods involve a two step
 process: 1) using the noncentral <em>t</em>-distribution to calculate
 the lower and upper bounds of <span class="math inline">\(\lambda\)</span>, and 2) transforming this back to
 the effect size estimate. These noncentrality methods are not without
-their detractors <span class="citation">(Spanos 2021)</span>. The normal
-and <em>t</em> methods are much simpler and less computationally
-intensive, but may have varying levels of accuracy <span class="citation">(see Viechtbauer 2007 for more details)</span>.</p>
+their detractors <span class="citation">(<a href="#ref-spanos2021">Spanos 2021</a>)</span>. The normal and
+<em>t</em> methods are much simpler and less computationally intensive,
+but may have varying levels of accuracy <span class="citation">(see <a href="#ref-viechtbauer2007approximate">Viechtbauer 2007</a> for more
+details)</span>.</p>
 <div id="cousineau2021-method-smd_ci-goulet" class="section level2">
-<h2><span class="citation">Cousineau and Goulet-Pelletier (2021)</span>
-Method (smd_ci = “goulet”)</h2>
+<h2><span class="citation">Cousineau and Goulet-Pelletier (<a href="#ref-Cousineau2021">2021</a>)</span> Method (smd_ci =
+“goulet”)</h2>
 <p>Calculate confidence intervals around <span class="math inline">\(\lambda\)</span>.</p>
 <p><span class="math display">\[
 t_L = t_{(1/2-(1-\alpha)/2,\space df, \space \lambda)} \\
@@ -928,8 +927,9 @@ d_U = \frac{t_U}{\lambda} \cdot d
 <h2>The non-central t-method (smd_ci = “nct”)</h2>
 <p>This method is commonly reported in the literature and in other R
 packages (e.g., <code>effectsize</code>). However, it is not without
-criticism <span class="citation">(Spanos 2021; Viechtbauer
-2007)</span>.</p>
+criticism <span class="citation">(<a href="#ref-spanos2021">Spanos
+2021</a>; <a href="#ref-viechtbauer2007approximate">Viechtbauer
+2007</a>)</span>.</p>
 <p>In thise method, you calculate the non-centrality parameters
 necessary to form confidence intervals wherein the observed t-statistic
 (<span class="math inline">\(t_{obs}\)</span>)is utilized.</p>
@@ -946,8 +946,8 @@ d_U = t_U \cdot \sqrt{\lambda} \cdot J
 <div id="central-t-method" class="section level2">
 <h2>Central t-method</h2>
 <p>This is less commonly used though it might perform alright in some
-scenarios, and as <span class="citation">Bonett (2008)</span> and <span class="citation">Viechtbauer (2007)</span> report it might perform
-adequately under with an adequately large sample size.</p>
+scenarios, and as <span class="citation">Bonett (<a href="#ref-bonett2008">2008</a>)</span> and <span class="citation">Viechtbauer (<a href="#ref-viechtbauer2007approximate">2007</a>)</span> report it might
+perform adequately under with an adequately large sample size.</p>
 <p>The limits of the t-distribution at the given alpha-level and degrees
 of freedom (<code>qt(1-alpha,df)</code>) are multiplied by the standard
 error of the calculated SMD.</p>
@@ -958,8 +958,7 @@ CI = SMD \space \pm \space t_{(1-\alpha,df)} \cdot \sigma_{SMD}
 <div id="normal-method" class="section level2">
 <h2>Normal method</h2>
 <p>This method will often be the most liberal estimate for the
-confidence interval. But as <span class="citation">Bonett (2008)</span>
-and <span class="citation">Viechtbauer (2007)</span> report, it might
+confidence interval. But as <span class="citation">Bonett (<a href="#ref-bonett2008">2008</a>)</span> and <span class="citation">Viechtbauer (<a href="#ref-viechtbauer2007approximate">2007</a>)</span> report, it might
 perform adequately under with an adequately large sample size. The use
 of the normal distribution can be justified by the fact that SMDs are
 asympototically normal.</p>
@@ -984,7 +983,7 @@ SMD. Therefore, I created the <code>smd_calc</code> and
 <span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>         <span class="at">smd_ci =</span> <span class="st">&quot;nct&quot;</span>,</span>
 <span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>         <span class="at">bias_correction =</span> F)</span>
 <span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt;  Paired Sample Cohen&#39;s d estimate with CI</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt;  Paired Sample Cohen&#39;s d[z] ((x-y)/SD_z) estimate with CI</span></span>
 <span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co">#&gt; data:  sleep$extra[sleep$group == 1] and sleep$extra[sleep$group == 2]</span></span>
 <span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
@@ -992,8 +991,8 @@ SMD. Therefore, I created the <code>smd_calc</code> and
 <span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
 <span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="co">#&gt;  -2.1180165 -0.4146278</span></span>
 <span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
-<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="co">#&gt; Cohen&#39;s d </span></span>
-<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="co">#&gt; -1.284558</span></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="co">#&gt; Cohen&#39;s d[z] </span></span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="co">#&gt;    -1.284558</span></span>
 <span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a></span>
 <span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a><span class="co"># Setting bootstrap replications low to</span></span>
 <span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a><span class="do">## reduce compiling time of vignette</span></span>
@@ -1004,15 +1003,15 @@ SMD. Therefore, I created the <code>smd_calc</code> and
 <span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a>         <span class="at">boot_ci =</span> <span class="st">&quot;stud&quot;</span>,</span>
 <span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a>         <span class="at">bias_correction =</span> F)</span>
 <span id="cb2-27"><a href="#cb2-27" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb2-28"><a href="#cb2-28" tabindex="-1"></a><span class="co">#&gt;  Bootstrapped Paired Sample Cohen&#39;s d estimate with CI</span></span>
+<span id="cb2-28"><a href="#cb2-28" tabindex="-1"></a><span class="co">#&gt;  Bootstrapped Paired Sample Cohen&#39;s d[z] ((x-y)/SD_z) estimate with CI</span></span>
 <span id="cb2-29"><a href="#cb2-29" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb2-30"><a href="#cb2-30" tabindex="-1"></a><span class="co">#&gt; data:  sleep$extra[sleep$group == 1] and sleep$extra[sleep$group == 2]</span></span>
 <span id="cb2-31"><a href="#cb2-31" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb2-32"><a href="#cb2-32" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: none</span></span>
 <span id="cb2-33"><a href="#cb2-33" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
-<span id="cb2-34"><a href="#cb2-34" tabindex="-1"></a><span class="co">#&gt;  -1.704853  3.038811</span></span>
+<span id="cb2-34"><a href="#cb2-34" tabindex="-1"></a><span class="co">#&gt;  -1.785040  2.125079</span></span>
 <span id="cb2-35"><a href="#cb2-35" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
-<span id="cb2-36"><a href="#cb2-36" tabindex="-1"></a><span class="co">#&gt; Cohen&#39;s d(z) </span></span>
+<span id="cb2-36"><a href="#cb2-36" tabindex="-1"></a><span class="co">#&gt; Cohen&#39;s d[z] </span></span>
 <span id="cb2-37"><a href="#cb2-37" tabindex="-1"></a><span class="co">#&gt;    -1.284558</span></span></code></pre></div>
 </div>
 <div id="plotting-smds" class="section level1">
@@ -1176,10 +1175,10 @@ smaller than the true distributional separation warrants.</li>
 <li>Outliers can distort the mean difference, pulling the numerator in
 unpredictable directions.</li>
 </ul>
-<p><span class="citation">Algina, Keselman, and Penfield (2005)</span>
-proposed a robust alternative that uses <strong>trimmed means</strong>
-for location and <strong>Winsorized variances</strong> for scale, with a
-rescaling constant to maintain comparability with Cohen’s <span class="math inline">\(\delta\)</span> under normality.</p>
+<p><span class="citation">Algina, Keselman, and Penfield (<a href="#ref-Algina_Keselman_Penfield_2005">2005</a>)</span> proposed a
+robust alternative that uses <strong>trimmed means</strong> for location
+and <strong>Winsorized variances</strong> for scale, with a rescaling
+constant to maintain comparability with Cohen’s <span class="math inline">\(\delta\)</span> under normality.</p>
 </div>
 <div id="how-trimming-works" class="section level2">
 <h2>How Trimming Works</h2>
@@ -1213,8 +1212,8 @@ of extreme observations.</p>
 <p><strong>Rescaling constant.</strong> To ensure the robust SMD equals
 Cohen’s <span class="math inline">\(\delta\)</span> under normality, a
 rescaling constant <span class="math inline">\(c(\gamma)\)</span> is
-applied <span class="citation">(Algina, Keselman, and Penfield
-2005)</span>. Let <span class="math inline">\(a = \Phi^{-1}(1 -
+applied <span class="citation">(<a href="#ref-Algina_Keselman_Penfield_2005">Algina, Keselman, and Penfield
+2005</a>)</span>. Let <span class="math inline">\(a = \Phi^{-1}(1 -
 \gamma)\)</span> where <span class="math inline">\(\Phi^{-1}\)</span> is
 the standard normal quantile function and <span class="math inline">\(\phi\)</span> is the standard normal density.
 Then:</p>
@@ -1250,7 +1249,7 @@ parameter, which defaults to 0 (no trimming):</p>
 <span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co"># Standard Cohen&#39;s d</span></span>
 <span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="fu">smd_calc</span>(<span class="at">x =</span> group1, <span class="at">y =</span> group2, <span class="at">bias_correction =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt;  Two Sample Cohen&#39;s d estimate with CI</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt;  Two Sample Cohen&#39;s d[av] ((x-y)/SD_avg) estimate with CI</span></span>
 <span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co">#&gt; data:  group1 and group2</span></span>
 <span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
@@ -1258,13 +1257,13 @@ parameter, which defaults to 0 (no trimming):</p>
 <span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
 <span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="co">#&gt;  -1.2513096 -0.3380927</span></span>
 <span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
-<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a><span class="co">#&gt;  Cohen&#39;s d </span></span>
-<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a><span class="co">#&gt; -0.7971844</span></span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a><span class="co">#&gt; Cohen&#39;s d[av] </span></span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a><span class="co">#&gt;    -0.7971844</span></span>
 <span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a></span>
 <span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a><span class="co"># Robust version with 20% trimming (Algina et al., 2005)</span></span>
 <span id="cb8-20"><a href="#cb8-20" tabindex="-1"></a><span class="fu">smd_calc</span>(<span class="at">x =</span> group1, <span class="at">y =</span> group2, <span class="at">bias_correction =</span> <span class="cn">FALSE</span>, <span class="at">tr =</span> <span class="fl">0.2</span>)</span>
 <span id="cb8-21"><a href="#cb8-21" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb8-22"><a href="#cb8-22" tabindex="-1"></a><span class="co">#&gt;  Two Sample Cohen&#39;s d (20% trimmed) estimate with CI</span></span>
+<span id="cb8-22"><a href="#cb8-22" tabindex="-1"></a><span class="co">#&gt;  Two Sample Cohen&#39;s d[av] (20% trimmed) ((x-y)/SD_avg) estimate with CI</span></span>
 <span id="cb8-23"><a href="#cb8-23" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb8-24"><a href="#cb8-24" tabindex="-1"></a><span class="co">#&gt; data:  group1 and group2</span></span>
 <span id="cb8-25"><a href="#cb8-25" tabindex="-1"></a><span class="co">#&gt; </span></span>
@@ -1272,13 +1271,13 @@ parameter, which defaults to 0 (no trimming):</p>
 <span id="cb8-27"><a href="#cb8-27" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
 <span id="cb8-28"><a href="#cb8-28" tabindex="-1"></a><span class="co">#&gt;  -1.2375852 -0.4333599</span></span>
 <span id="cb8-29"><a href="#cb8-29" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
-<span id="cb8-30"><a href="#cb8-30" tabindex="-1"></a><span class="co">#&gt; Cohen&#39;s d (20% trimmed) </span></span>
-<span id="cb8-31"><a href="#cb8-31" tabindex="-1"></a><span class="co">#&gt;               -0.839284</span></span>
+<span id="cb8-30"><a href="#cb8-30" tabindex="-1"></a><span class="co">#&gt; Cohen&#39;s d[av] (20% trimmed) </span></span>
+<span id="cb8-31"><a href="#cb8-31" tabindex="-1"></a><span class="co">#&gt;                   -0.839284</span></span>
 <span id="cb8-32"><a href="#cb8-32" tabindex="-1"></a></span>
 <span id="cb8-33"><a href="#cb8-33" tabindex="-1"></a><span class="co"># Robust Hedges&#39; g with 10% trimming</span></span>
 <span id="cb8-34"><a href="#cb8-34" tabindex="-1"></a><span class="fu">smd_calc</span>(<span class="at">x =</span> group1, <span class="at">y =</span> group2, <span class="at">bias_correction =</span> <span class="cn">TRUE</span>, <span class="at">tr =</span> <span class="fl">0.1</span>)</span>
 <span id="cb8-35"><a href="#cb8-35" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb8-36"><a href="#cb8-36" tabindex="-1"></a><span class="co">#&gt;  Two Sample Hedges&#39; g (10% trimmed) estimate with CI</span></span>
+<span id="cb8-36"><a href="#cb8-36" tabindex="-1"></a><span class="co">#&gt;  Two Sample Hedges&#39; g[av] (10% trimmed) ((x-y)/SD_avg) estimate with CI</span></span>
 <span id="cb8-37"><a href="#cb8-37" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb8-38"><a href="#cb8-38" tabindex="-1"></a><span class="co">#&gt; data:  group1 and group2</span></span>
 <span id="cb8-39"><a href="#cb8-39" tabindex="-1"></a><span class="co">#&gt; </span></span>
@@ -1286,22 +1285,23 @@ parameter, which defaults to 0 (no trimming):</p>
 <span id="cb8-41"><a href="#cb8-41" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
 <span id="cb8-42"><a href="#cb8-42" tabindex="-1"></a><span class="co">#&gt;  -1.1585132 -0.3166612</span></span>
 <span id="cb8-43"><a href="#cb8-43" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
-<span id="cb8-44"><a href="#cb8-44" tabindex="-1"></a><span class="co">#&gt; Hedges&#39; g (10% trimmed) </span></span>
-<span id="cb8-45"><a href="#cb8-45" tabindex="-1"></a><span class="co">#&gt;              -0.7405285</span></span></code></pre></div>
+<span id="cb8-44"><a href="#cb8-44" tabindex="-1"></a><span class="co">#&gt; Hedges&#39; g[av] (10% trimmed) </span></span>
+<span id="cb8-45"><a href="#cb8-45" tabindex="-1"></a><span class="co">#&gt;                  -0.7405285</span></span></code></pre></div>
 <p>Bootstrap confidence intervals can also be computed with
 trimming:</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">boot_smd_calc</span>(<span class="at">x =</span> group1, <span class="at">y =</span> group2, <span class="at">tr =</span> <span class="fl">0.2</span>, <span class="at">R =</span> <span class="dv">999</span>, <span class="at">boot_ci =</span> <span class="st">&quot;perc&quot;</span>)</span>
 <span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="co">#&gt;  Bootstrapped Two Sample Hedges&#39; g (20% trimmed) estimate with CI</span></span>
-<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co">#&gt; data:  group1 and group2</span></span>
-<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: none</span></span>
-<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
-<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt;  -1.3211342 -0.3052718</span></span>
-<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
-<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co">#&gt; Hedges&#39;s g(av) </span></span>
-<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="co">#&gt;     -0.8252612</span></span></code></pre></div>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="co">#&gt;  Bootstrapped Two Sample Hedges&#39; g[av] (20% trimmed) ((x-y)/SD_avg)</span></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co">#&gt;  estimate with CI</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="co">#&gt; data:  group1 and group2</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: none</span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co">#&gt;  -1.3211342 -0.3052718</span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="co">#&gt; Hedges&#39; g[av] (20% trimmed) </span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="co">#&gt;                  -0.8252612</span></span></code></pre></div>
 </div>
 <div id="choosing-a-trimming-proportion" class="section level2">
 <h2>Choosing a Trimming Proportion</h2>
@@ -1336,7 +1336,7 @@ distribution with much larger variance:</p>
 <span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="co"># Standard Cohen&#39;s d: attenuated by inflated SD</span></span>
 <span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="fu">smd_calc</span>(<span class="at">x =</span> x_contam, <span class="at">y =</span> y_contam, <span class="at">bias_correction =</span> <span class="cn">FALSE</span>, <span class="at">smd_ci =</span> <span class="st">&quot;z&quot;</span>)</span>
 <span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a><span class="co">#&gt;  Two Sample Cohen&#39;s d estimate with CI</span></span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a><span class="co">#&gt;  Two Sample Cohen&#39;s d[av] ((x-y)/SD_avg) estimate with CI</span></span>
 <span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a><span class="co">#&gt; data:  x_contam and y_contam</span></span>
 <span id="cb10-19"><a href="#cb10-19" tabindex="-1"></a><span class="co">#&gt; </span></span>
@@ -1344,13 +1344,13 @@ distribution with much larger variance:</p>
 <span id="cb10-21"><a href="#cb10-21" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
 <span id="cb10-22"><a href="#cb10-22" tabindex="-1"></a><span class="co">#&gt;  -0.6777352  0.1182594</span></span>
 <span id="cb10-23"><a href="#cb10-23" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
-<span id="cb10-24"><a href="#cb10-24" tabindex="-1"></a><span class="co">#&gt;  Cohen&#39;s d </span></span>
-<span id="cb10-25"><a href="#cb10-25" tabindex="-1"></a><span class="co">#&gt; -0.2797379</span></span>
+<span id="cb10-24"><a href="#cb10-24" tabindex="-1"></a><span class="co">#&gt; Cohen&#39;s d[av] </span></span>
+<span id="cb10-25"><a href="#cb10-25" tabindex="-1"></a><span class="co">#&gt;    -0.2797379</span></span>
 <span id="cb10-26"><a href="#cb10-26" tabindex="-1"></a></span>
 <span id="cb10-27"><a href="#cb10-27" tabindex="-1"></a><span class="co"># Trimmed version: closer to the true separation</span></span>
 <span id="cb10-28"><a href="#cb10-28" tabindex="-1"></a><span class="fu">smd_calc</span>(<span class="at">x =</span> x_contam, <span class="at">y =</span> y_contam, <span class="at">bias_correction =</span> <span class="cn">FALSE</span>, <span class="at">tr =</span> <span class="fl">0.2</span>, <span class="at">smd_ci =</span> <span class="st">&quot;z&quot;</span>)</span>
 <span id="cb10-29"><a href="#cb10-29" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb10-30"><a href="#cb10-30" tabindex="-1"></a><span class="co">#&gt;  Two Sample Cohen&#39;s d (20% trimmed) estimate with CI</span></span>
+<span id="cb10-30"><a href="#cb10-30" tabindex="-1"></a><span class="co">#&gt;  Two Sample Cohen&#39;s d[av] (20% trimmed) ((x-y)/SD_avg) estimate with CI</span></span>
 <span id="cb10-31"><a href="#cb10-31" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb10-32"><a href="#cb10-32" tabindex="-1"></a><span class="co">#&gt; data:  x_contam and y_contam</span></span>
 <span id="cb10-33"><a href="#cb10-33" tabindex="-1"></a><span class="co">#&gt; </span></span>
@@ -1358,13 +1358,13 @@ distribution with much larger variance:</p>
 <span id="cb10-35"><a href="#cb10-35" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
 <span id="cb10-36"><a href="#cb10-36" tabindex="-1"></a><span class="co">#&gt;  -0.4386941  0.2234265</span></span>
 <span id="cb10-37"><a href="#cb10-37" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
-<span id="cb10-38"><a href="#cb10-38" tabindex="-1"></a><span class="co">#&gt; Cohen&#39;s d (20% trimmed) </span></span>
-<span id="cb10-39"><a href="#cb10-39" tabindex="-1"></a><span class="co">#&gt;              -0.1076338</span></span>
+<span id="cb10-38"><a href="#cb10-38" tabindex="-1"></a><span class="co">#&gt; Cohen&#39;s d[av] (20% trimmed) </span></span>
+<span id="cb10-39"><a href="#cb10-39" tabindex="-1"></a><span class="co">#&gt;                  -0.1076338</span></span>
 <span id="cb10-40"><a href="#cb10-40" tabindex="-1"></a></span>
 <span id="cb10-41"><a href="#cb10-41" tabindex="-1"></a><span class="co"># For reference: Cohen&#39;s d on the clean data</span></span>
 <span id="cb10-42"><a href="#cb10-42" tabindex="-1"></a><span class="fu">smd_calc</span>(<span class="at">x =</span> x_clean, <span class="at">y =</span> y_clean, <span class="at">bias_correction =</span> <span class="cn">FALSE</span>, <span class="at">smd_ci =</span> <span class="st">&quot;z&quot;</span>)</span>
 <span id="cb10-43"><a href="#cb10-43" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb10-44"><a href="#cb10-44" tabindex="-1"></a><span class="co">#&gt;  Two Sample Cohen&#39;s d estimate with CI</span></span>
+<span id="cb10-44"><a href="#cb10-44" tabindex="-1"></a><span class="co">#&gt;  Two Sample Cohen&#39;s d[av] ((x-y)/SD_avg) estimate with CI</span></span>
 <span id="cb10-45"><a href="#cb10-45" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb10-46"><a href="#cb10-46" tabindex="-1"></a><span class="co">#&gt; data:  x_clean and y_clean</span></span>
 <span id="cb10-47"><a href="#cb10-47" tabindex="-1"></a><span class="co">#&gt; </span></span>
@@ -1372,8 +1372,8 @@ distribution with much larger variance:</p>
 <span id="cb10-49"><a href="#cb10-49" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
 <span id="cb10-50"><a href="#cb10-50" tabindex="-1"></a><span class="co">#&gt;  -0.5792533  0.2143381</span></span>
 <span id="cb10-51"><a href="#cb10-51" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
-<span id="cb10-52"><a href="#cb10-52" tabindex="-1"></a><span class="co">#&gt;  Cohen&#39;s d </span></span>
-<span id="cb10-53"><a href="#cb10-53" tabindex="-1"></a><span class="co">#&gt; -0.1824576</span></span></code></pre></div>
+<span id="cb10-52"><a href="#cb10-52" tabindex="-1"></a><span class="co">#&gt; Cohen&#39;s d[av] </span></span>
+<span id="cb10-53"><a href="#cb10-53" tabindex="-1"></a><span class="co">#&gt;    -0.1824576</span></span></code></pre></div>
 <p>The trimmed SMD is more resistant to the contaminating observations
 and provides an estimate closer to what we would obtain from the clean
 data.</p>
@@ -1492,8 +1492,7 @@ since many times researchers are not reporting Jacob Cohen’s original
 formulation. Therefore it is more accurate descriptor to label any SMD
 as SMD<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
 <li id="fn2"><p>This calculation was derived from the supplementary
-material of <span class="citation">Cousineau and Goulet-Pelletier
-(2021)</span>.<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
+material of <span class="citation">Cousineau and Goulet-Pelletier (<a href="#ref-Cousineau2021">2021</a>)</span>.<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
 <li id="fn3"><p>This changed from the original formulation, I believe
 the current version is a better estimate<a href="#fnref3" class="footnote-back">↩︎</a></p></li>
 <li id="fn4"><p>This assumes degrees of freedom of N-2<a href="#fnref4" class="footnote-back">↩︎</a></p></li>
@@ -1503,12 +1502,10 @@ this wasn’t very accurate. We now use what is used in the metafor R
 package for the “SMD1H” which is the use of one sample SD as the
 denominator under the assumption of heterogeneous variances<a href="#fnref5" class="footnote-back">↩︎</a></p></li>
 <li id="fn6"><p>This assumes degrees of freedom of N-1<a href="#fnref6" class="footnote-back">↩︎</a></p></li>
-<li id="fn7"><p>This is incorrectly stated in the article by <span class="citation">Goulet-Pelletier and Cousineau (2018)</span>; the
-correct notation is provided by <span class="citation">Lakens
-(2013)</span><a href="#fnref7" class="footnote-back">↩︎</a></p></li>
-<li id="fn8"><p>Originally, <span class="citation">Borenstein et al.
-(2021)</span> was utilized for this SE calculation. However, upon
-finding the estimate from <span class="citation">Bonett (2008)</span>,
+<li id="fn7"><p>This is incorrectly stated in the article by <span class="citation">Goulet-Pelletier and Cousineau (<a href="#ref-Goulet_2018">2018</a>)</span>; the correct notation is
+provided by <span class="citation">Lakens (<a href="#ref-lakens2013">2013</a>)</span><a href="#fnref7" class="footnote-back">↩︎</a></p></li>
+<li id="fn8"><p>Originally, <span class="citation">Borenstein et al. (<a href="#ref-borenstein">2021</a>)</span> was utilized for this SE
+calculation. However, upon finding the estimate from <span class="citation">Bonett (<a href="#ref-bonett2008">2008</a>)</span>,
 which is utilized in the <code>metafor</code> R package for heterogenous
 variance estimates, we have opted to use this estimate instead.<a href="#fnref8" class="footnote-back">↩︎</a></p></li>
 <li id="fn9"><p>The results differ greatly because the bootstrap CI
