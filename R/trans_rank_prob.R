@@ -173,22 +173,30 @@ d_from_probability <- function(p, scale) {
 # @param yname character; quoted name for the second group/variable (or NULL for one-sample)
 # @param paired logical; whether the comparison is paired
 # @return character string label
-prob_notation_label <- function(scale, xname, yname = NULL, paired = FALSE) {
-  # Quote the names
-  xq <- paste0("'", xname, "'")
+prob_notation_label <- function(scale, xname, yname = NULL, paired = FALSE,
+                                paired_style = c("direct", "difference")) {
+  paired_style <- match.arg(paired_style)
+
+  # Quote names only when they are numeric
+  quote_if_numeric <- function(nm) {
+    if (grepl("^-?\\d*\\.?\\d+$", nm)) paste0("'", nm, "'") else nm
+  }
+
+  xq <- quote_if_numeric(xname)
 
   if (is.null(yname)) {
     # One-sample: compare against 0
     prob_label <- paste0("P(", xq, ">0) + .5*P(", xq, "=0)")
     diff_label <- paste0("P(", xq, ">0) - P(", xq, "<0)")
-  } else if (paired) {
-    # Paired: same convention as two-sample
-    yq <- paste0("'", yname, "'")
-    prob_label <- paste0("P(", xq, ">", yq, ") + .5*P(", xq, "=", yq, ")")
-    diff_label <- paste0("P(", xq, ">", yq, ") - P(", xq, "<", yq, ")")
+  } else if (paired && paired_style == "difference") {
+    # Paired with difference-score notation: P(X - Y>0)
+    yq <- quote_if_numeric(yname)
+    d_expr <- paste0(xq, " - ", yq)
+    prob_label <- paste0("P(", d_expr, ">0) + .5*P(", d_expr, "=0)")
+    diff_label <- paste0("P(", d_expr, ">0) - P(", d_expr, "<0)")
   } else {
-    # Two-sample independent
-    yq <- paste0("'", yname, "'")
+    # Two-sample independent (or paired with direct notation): P(X>Y)
+    yq <- quote_if_numeric(yname)
     prob_label <- paste0("P(", xq, ">", yq, ") + .5*P(", xq, "=", yq, ")")
     diff_label <- paste0("P(", xq, ">", yq, ") - P(", xq, "<", yq, ")")
   }

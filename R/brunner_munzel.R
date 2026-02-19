@@ -390,6 +390,7 @@ brunner_munzel.default = function(x,
     # Formula method will overwrite these with actual factor level names
     XNAME <- "X"
     YNAME <- "Y"
+    default_names <- TRUE
     if(paired) {
       if(length(x) != length(y))
         stop("'x' and 'y' must have the same length")

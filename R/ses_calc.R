@@ -42,6 +42,9 @@
 #'       confidence intervals computed on the log-odds scale and back-transformed. This method
 #'       has better asymptotic properties and faster convergence to normality. Available for
 #'       all designs (one-sample, paired, and two-sample independent).
+#'       However, this method can produce degenerate intervals at the boundaries
+#'       (when all pairwise comparisons favor one group),
+#'       in which case a Haldane-type shrinkage correction is applied to enable interval construction.
 #'     - "fisher": Uses the legacy Fisher z-transformation method for confidence intervals.
 #'       This method is retained for backward compatibility.
 #' @param correct logical; whether to apply a continuity correction to the
@@ -699,7 +702,8 @@ ses_calc.default = function(x,
     "odds"    = "odds"
   )
 
-  ses_name <- prob_notation_label(ses_scale, XNAME, YNAME, paired)
+  ses_name <- prob_notation_label(ses_scale, XNAME, YNAME, paired,
+                                  paired_style = "difference")
 
   # Human-readable name for method string --------
   method_name <- switch(ses,
@@ -1052,7 +1056,8 @@ ses_calc.formula = function(formula,
     )
 
     names(y$estimate) <- prob_notation_label(ses_scale, XNAME, YNAME,
-                                             paired = isTRUE(dots$paired))
+                                             paired = isTRUE(dots$paired),
+                                             paired_style = "difference")
 
     # Also update null.value names if they used ses_name
     if (!is.null(y$null.value) && length(y$null.value) == 1) {

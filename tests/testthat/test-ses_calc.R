@@ -942,41 +942,41 @@ test_that("score_pvalue_wmw returns valid p-values", {
 
 # ses_calc updated labels --------
 
-test_that("ses_calc two-sample labels use quoted P('X'>'Y') notation", {
+test_that("ses_calc two-sample labels use P(X>Y) notation", {
   set.seed(123)
   x <- rnorm(20)
   y <- rnorm(20, mean = 1)
 
   res_rb <- ses_calc(x, y, ses = "rb")
-  expect_true(grepl("P('X'>'Y') - P('X'<'Y')", names(res_rb$estimate), fixed = TRUE))
+  expect_true(grepl("P(X>Y) - P(X<Y)", names(res_rb$estimate), fixed = TRUE))
 
   res_cstat <- ses_calc(x, y, ses = "cstat")
-  expect_true(grepl("P('X'>'Y') + .5*P('X'='Y')", names(res_cstat$estimate), fixed = TRUE))
+  expect_true(grepl("P(X>Y) + .5*P(X=Y)", names(res_cstat$estimate), fixed = TRUE))
 
   res_odds <- ses_calc(x, y, ses = "odds")
   expect_true(grepl("odds(", names(res_odds$estimate), fixed = TRUE))
-  expect_true(grepl("'X'", names(res_odds$estimate), fixed = TRUE))
+  expect_true(grepl("X>Y", names(res_odds$estimate), fixed = TRUE))
 
   res_lo <- ses_calc(x, y, ses = "logodds")
   expect_true(grepl("logodds(", names(res_lo$estimate), fixed = TRUE))
-  expect_true(grepl("'X'", names(res_lo$estimate), fixed = TRUE))
+  expect_true(grepl("X>Y", names(res_lo$estimate), fixed = TRUE))
 })
 
-test_that("ses_calc paired labels use quoted P('X'>'Y') notation", {
+test_that("ses_calc paired labels use P(X - Y>0) notation", {
   data(sleep)
   res <- with(sleep, ses_calc(extra[group == 1], extra[group == 2],
                               paired = TRUE, ses = "cstat"))
-  # Paired: same convention as two-sample P('X'>'Y') + .5*P('X'='Y')
+  # Paired ses_calc: difference-score notation P(X - Y>0) + .5*P(X - Y=0)
   lbl <- names(res$estimate)
-  expect_true(grepl("'X'>'Y'", lbl, fixed = TRUE))
-  expect_true(grepl("'X'='Y'", lbl, fixed = TRUE))
+  expect_true(grepl("X - Y", lbl, fixed = TRUE))
+  expect_true(grepl(">0)", lbl, fixed = TRUE))
 })
 
-test_that("ses_calc one-sample labels use quoted P('X'>0) notation", {
+test_that("ses_calc one-sample labels use P(X>0) notation", {
   x <- rnorm(20, mean = 1)
   res <- ses_calc(x, ses = "cstat")
-  # One-sample: P('X'>0) + .5*P('X'=0)
-  expect_true(grepl("'X'", names(res$estimate), fixed = TRUE))
+  # One-sample: P(X>0) + .5*P(X=0) — X is not numeric so unquoted
+  expect_true(grepl("P(X>0)", names(res$estimate), fixed = TRUE))
   expect_true(grepl(">0)", names(res$estimate), fixed = TRUE))
 })
 
