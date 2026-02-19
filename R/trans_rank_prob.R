@@ -83,6 +83,7 @@
 #'
 #' @seealso [brunner_munzel()], [ses_calc()]
 #' @family effect sizes
+#' @importFrom stats dlogis
 #' @export
 trans_rank_prob <- function(estimate,
                             se = NULL,
