@@ -99,6 +99,7 @@
 #' @export simple_htest
 
 
+# TODO: add xname and yname arguments to allow user-specified group labels
 #simple_htest <- setClass("simple_htest")
 simple_htest <- function(x, ...,
                          paired = FALSE,
@@ -416,31 +417,34 @@ simple_htest.default = function(x,
  }
 
   # Augment estimate labels and add mean difference for two-sample t-tests
+  XNAME <- "x"
+  YNAME <- if (!is.null(y)) "y" else NULL
   if (test == "t.test") {
     if (!is.null(y) && !paired) {
-      # Two-sample: append mean difference as third element
+      # Two-sample: relabel group means and append mean difference as third element
+      est_labels <- ttest_estimate_label(type = "t", xname = XNAME, yname = YNAME, paired = FALSE)
+      names(rval$estimate) <- est_labels
       mdiff <- rval$estimate[1] - rval$estimate[2]
-      names(mdiff) <- paste0("mean difference (",
-                              gsub("^mean of ", "", names(rval$estimate)[1]),
-                              " - ",
-                              gsub("^mean of ", "", names(rval$estimate)[2]),
-                              ")")
+      names(mdiff) <- paste0("mean difference (", XNAME, " - ", YNAME, ")")
       rval$estimate <- c(rval$estimate, mdiff)
     } else if (paired) {
       # Paired: relabel to indicate differencing
-      names(rval$estimate) <- "mean of the differences (z = x - y)"
+      names(rval$estimate) <- ttest_estimate_label(type = "t", xname = XNAME, yname = YNAME, paired = TRUE)
     }
-    # One-sample: leave as "mean of x" (unchanged)
+    # One-sample: relabel
+    if (is.null(y) && !paired) {
+      names(rval$estimate) <- ttest_estimate_label(type = "t", xname = XNAME, yname = NULL, paired = FALSE)
+    }
   }
 
   if (test == "wilcox.test") {
     if (is.null(y)) {
       # One-sample
-      names(rval$estimate) <- "pseudomedian of x"
+      names(rval$estimate) <- ttest_estimate_label(type = "wilcoxon", xname = XNAME, yname = NULL, paired = FALSE)
     } else if (paired) {
-      names(rval$estimate) <- "Hodges-Lehmann estimate (z = x - y)"
+      names(rval$estimate) <- ttest_estimate_label(type = "wilcoxon", xname = XNAME, yname = YNAME, paired = TRUE)
     } else {
-      names(rval$estimate) <- "Hodges-Lehmann estimate (x - y)"
+      names(rval$estimate) <- ttest_estimate_label(type = "wilcoxon", xname = XNAME, yname = YNAME, paired = FALSE)
     }
   }
 
@@ -491,7 +495,34 @@ simple_htest.formula = function(formula,
   DATA <- setNames(split(mf[[response]], g), c("x", "y"))
   y <- do.call("simple_htest", c(DATA, list(...)))
   y$data.name <- DNAME
-  y <- relabel_for_formula(y, levels(g))
+
+  # Resolve actual group labels from factor levels
+  XNAME <- levels(g)[1]
+  YNAME <- levels(g)[2]
+
+  # Determine which test was used
+  dots <- list(...)
+  test_arg <- if (!is.null(dots$test)) match.arg(dots$test, c("t.test", "wilcox.test", "brunner_munzel")) else "t.test"
+  is_paired <- isTRUE(dots$paired)
+
+  if (test_arg == "t.test") {
+    est_labels <- ttest_estimate_label(type = "t", xname = XNAME, yname = YNAME, paired = is_paired)
+    if (!is_paired) {
+      # Two-sample: 3 elements (group means + difference)
+      diff_label <- paste0("mean difference (", quote_if_numeric(XNAME), " - ", quote_if_numeric(YNAME), ")")
+      names(y$estimate) <- c(est_labels, diff_label)
+    } else {
+      names(y$estimate) <- est_labels
+    }
+  } else if (test_arg == "wilcox.test") {
+    names(y$estimate) <- ttest_estimate_label(type = "wilcoxon", xname = XNAME, yname = YNAME, paired = is_paired)
+  }
+
+  # Relabel sample_size names
+  if (!is.null(y$sample_size) && length(y$sample_size) == 2) {
+    names(y$sample_size) <- levels(g)
+  }
+
   y
 
 }

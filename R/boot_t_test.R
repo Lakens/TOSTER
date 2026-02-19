@@ -141,6 +141,7 @@
 #' @name boot_t_test
 #' @export boot_t_test
 
+# TODO: add xname and yname arguments to allow user-specified group labels
 boot_t_test <- function(x, ...){
   UseMethod("boot_t_test")
 }
@@ -295,13 +296,16 @@ boot_t_test.default <- function(x,
     }
 
     # Estimate labels
+    XNAME <- "x"
+    YNAME <- "y"
     if (tr > 0) {
       estimate <- setNames(mx, if (paired)
-        paste0("trimmed mean of the differences (z = x - y, tr = ", tr, ")")
-        else "trimmed mean of x")
+        paste0("trimmed mean of the differences (z = ", XNAME, " - ", YNAME, ", tr = ", tr, ")")
+        else paste0("trimmed mean of ", XNAME))
     } else {
-      estimate <- setNames(mx, if (paired) "mean of the differences"
-                                else "mean of x")
+      estimate <- setNames(mx, if (paired)
+        ttest_estimate_label(type = "t", xname = XNAME, yname = YNAME, paired = TRUE)
+        else ttest_estimate_label(type = "t", xname = XNAME, yname = NULL, paired = FALSE))
     }
 
     X <- matrix(sample(x, size = nx*R, replace = TRUE), nrow = R)
@@ -394,13 +398,17 @@ boot_t_test.default <- function(x,
     }
 
     # Estimate labels
+    XNAME <- "x"
+    YNAME <- "y"
     if (tr > 0) {
       estimate <- c(mx, my, mx - my)
-      names(estimate) <- c("trimmed mean of x", "trimmed mean of y",
-                            paste0("trimmed mean difference (x - y, tr = ", tr, ")"))
+      names(estimate) <- c(paste0("trimmed mean of ", XNAME),
+                            paste0("trimmed mean of ", YNAME),
+                            paste0("trimmed mean difference (", XNAME, " - ", YNAME, ", tr = ", tr, ")"))
     } else {
+      est_labels <- ttest_estimate_label(type = "t", xname = XNAME, yname = YNAME, paired = FALSE)
       estimate <- c(mx, my)
-      names(estimate) <- c("mean of x", "mean of y")
+      names(estimate) <- est_labels
     }
 
     if(var.equal){
@@ -782,6 +790,38 @@ boot_t_test.formula <- function (formula, data, subset, na.action, ...){
   DATA <- setNames(split(mf[[response]], g), c("x", "y"))
   y <- do.call("boot_t_test", c(DATA, list(...)))
   y$data.name <- DNAME
-  y <- relabel_for_formula(y, levels(g))
+
+  # Resolve actual group labels from factor levels
+  XNAME <- levels(g)[1]
+  YNAME <- levels(g)[2]
+  xq <- quote_if_numeric(XNAME)
+  yq <- quote_if_numeric(YNAME)
+
+  is_paired <- isTRUE(dots$paired)
+  tr_val <- if (!is.null(dots$tr)) dots$tr else 0
+
+  if (tr_val > 0) {
+    # Trimmed labels: substitute group names
+    nms <- names(y$estimate)
+    nms <- gsub("\\bof x\\b", paste0("of ", xq), nms)
+    nms <- gsub("\\bof y\\b", paste0("of ", yq), nms)
+    nms <- gsub("\\(x - y", paste0("(", xq, " - ", yq), nms)
+    nms <- gsub("\\(z = x - y", paste0("(z = ", xq, " - ", yq), nms)
+    names(y$estimate) <- nms
+  } else {
+    if (!is_paired && length(y$estimate) >= 2) {
+      est_labels <- ttest_estimate_label(type = "t", xname = XNAME, yname = YNAME, paired = FALSE)
+      diff_label <- paste0("mean difference (", xq, " - ", yq, ")")
+      names(y$estimate) <- c(est_labels, diff_label)
+    } else if (is_paired) {
+      names(y$estimate) <- ttest_estimate_label(type = "t", xname = XNAME, yname = YNAME, paired = TRUE)
+    }
+  }
+
+  # Relabel sample_size names
+  if (!is.null(y$sample_size) && length(y$sample_size) == 2) {
+    names(y$sample_size) <- levels(g)
+  }
+
   y
 }

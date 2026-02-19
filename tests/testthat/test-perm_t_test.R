@@ -100,7 +100,7 @@ test_that("two-sample perm_t_test works with default settings", {
   expect_true(grepl("Two Sample", result$method))
   expect_true(grepl("Welch", result$method))  # Default is var.equal = FALSE
   expect_length(result$estimate, 3)
-  expect_named(result$estimate, c("mean of x", "mean of y", "mean difference (x - y)"))
+  expect_named(result$estimate, c("mean of group x", "mean of group y", "mean difference (x - y)"))
 })
 
 test_that("two-sample perm_t_test works with var.equal = TRUE", {

@@ -2,6 +2,7 @@
 # - Estimate labeling and mean difference appending
 # - Sample size in output
 # - Formula interface group name substitution
+# - quote_if_numeric() quoting of numeric factor levels
 
 hush = function(code) {
   sink(nullfile())
@@ -16,12 +17,10 @@ hush = function(code) {
 test_that("simple_htest t-test: two-sample estimate has 3 elements with correct structure", {
   res <- hush(simple_htest(1:10, y = c(7:20), mu = 0))
 
-
-  # Should have 3 estimates: mean of x, mean of y, mean difference
-
+  # Should have 3 estimates: mean of group x, mean of group y, mean difference
   expect_equal(length(res$estimate), 3)
-  expect_equal(names(res$estimate)[1], "mean of x")
-  expect_equal(names(res$estimate)[2], "mean of y")
+  expect_equal(names(res$estimate)[1], "mean of group x")
+  expect_equal(names(res$estimate)[2], "mean of group y")
   expect_true(grepl("mean difference", names(res$estimate)[3]))
   expect_true(grepl("x - y", names(res$estimate)[3]))
 
@@ -33,9 +32,9 @@ test_that("simple_htest t-test: two-sample estimate has 3 elements with correct 
   expect_equal(unname(res$estimate[1]), mean(1:10))
   expect_equal(unname(res$estimate[2]), mean(7:20))
 
-  # Named indexing still works
-  expect_equal(unname(res$estimate["mean of x"]), mean(1:10))
-  expect_equal(unname(res$estimate["mean of y"]), mean(7:20))
+  # Named indexing with new labels
+  expect_equal(unname(res$estimate["mean of group x"]), mean(1:10))
+  expect_equal(unname(res$estimate["mean of group y"]), mean(7:20))
 })
 
 test_that("simple_htest t-test: paired label", {
@@ -57,7 +56,7 @@ test_that("simple_htest t-test: one-sample label unchanged", {
 test_that("simple_htest wilcox: estimate labels", {
   # One-sample
   res_one <- hush(simple_htest(1:20, test = "w", mu = 0))
-  expect_equal(names(res_one$estimate), "pseudomedian of x")
+  expect_equal(names(res_one$estimate), "(pseudo)median of x")
 
   # Paired
   data(sleep)
@@ -72,17 +71,32 @@ test_that("simple_htest wilcox: estimate labels", {
   expect_equal(names(res_two$estimate), "Hodges-Lehmann estimate (x - y)")
 })
 
-test_that("simple_htest: formula interface substitutes group names", {
+test_that("simple_htest: formula interface substitutes group names with quoting", {
   data(sleep)
   res <- hush(simple_htest(extra ~ group, data = sleep, mu = 0))
   nms <- names(res$estimate)
-  expect_true(grepl("mean of 1", nms[1]))
-  expect_true(grepl("mean of 2", nms[2]))
-  expect_true(grepl("1 - 2", nms[3]))
+  # sleep$group levels are "1" and "2" -> should be quoted as '1' and '2'
+  expect_equal(nms[1], "mean of group '1'")
+  expect_equal(nms[2], "mean of group '2'")
+  expect_true(grepl("'1' - '2'", nms[3]))
 
   # Wilcoxon formula
   res_w <- hush(simple_htest(extra ~ group, data = sleep, test = "w", mu = 0))
-  expect_true(grepl("1 - 2", names(res_w$estimate)))
+  expect_true(grepl("'1' - '2'", names(res_w$estimate)))
+})
+
+test_that("simple_htest: formula with non-numeric factor levels", {
+  # Create data with text factor levels
+  df <- data.frame(
+    value = c(rnorm(10, 20), rnorm(10, 25)),
+    group = factor(rep(c("auto", "manual"), each = 10))
+  )
+  res <- hush(simple_htest(value ~ group, data = df, mu = 0))
+  nms <- names(res$estimate)
+  # Text levels should NOT be quoted
+  expect_equal(nms[1], "mean of group auto")
+  expect_equal(nms[2], "mean of group manual")
+  expect_true(grepl("auto - manual", nms[3]))
 })
 
 test_that("simple_htest: sample_size correctness", {
@@ -132,8 +146,7 @@ test_that("simple_htest: equivalence/MET paths work with new estimate structure"
   y_sleep <- sleep$extra[sleep$group == 2]
   res_met <- hush(simple_htest(x_sleep, y_sleep, paired = TRUE,
                                alternative = "m", mu = 2))
-  expect_equal(names(res_met$estimate),
-               "mean of the differences (z = x - y)")
+  expect_equal(names(res_met$estimate), "mean of the differences (z = x - y)")
 })
 
 # ===========================================================================
@@ -180,7 +193,7 @@ test_that("boot_t_test with tr > 0: paired label includes tr", {
                           mu = 0, tr = tr_val, R = 99))
 
   expect_equal(length(res$estimate), 1)
-  expect_true(grepl("z = x - y", names(res$estimate)))
+  expect_true(grepl("x - y", names(res$estimate)))
   expect_true(grepl(as.character(tr_val), names(res$estimate)))
 })
 
@@ -209,9 +222,9 @@ test_that("boot_t_test: formula interface substitutes group names", {
   res <- hush(boot_t_test(extra ~ group, data = sleep, mu = 0, R = 99))
 
   nms <- names(res$estimate)
-  expect_true(grepl("mean of 1", nms[1]))
-  expect_true(grepl("mean of 2", nms[2]))
-  expect_true(grepl("1 - 2", nms[3]))
+  expect_true(grepl("'1'", nms[1]))
+  expect_true(grepl("'2'", nms[2]))
+  expect_true(grepl("'1' - '2'", nms[3]))
   expect_equal(names(res$sample_size), c("1", "2"))
 
   # With trimming
@@ -219,9 +232,9 @@ test_that("boot_t_test: formula interface substitutes group names", {
   res_tr <- hush(boot_t_test(extra ~ group, data = sleep,
                              mu = 0, tr = 0.1, R = 99))
   nms_tr <- names(res_tr$estimate)
-  expect_true(grepl("trimmed mean of 1", nms_tr[1]))
-  expect_true(grepl("trimmed mean of 2", nms_tr[2]))
-  expect_true(grepl("1 - 2", nms_tr[3]))
+  expect_true(grepl("trimmed mean of '1'", nms_tr[1]))
+  expect_true(grepl("trimmed mean of '2'", nms_tr[2]))
+  expect_true(grepl("'1' - '2'", nms_tr[3]))
 })
 
 test_that("boot_t_test: null.value names include tr for tr > 0", {
@@ -242,8 +255,8 @@ test_that("perm_t_test: two-sample estimate has 3 elements", {
   res <- hush(perm_t_test(1:10, y = c(7:20), mu = 0, R = 99))
 
   expect_equal(length(res$estimate), 3)
-  expect_equal(names(res$estimate)[1], "mean of x")
-  expect_equal(names(res$estimate)[2], "mean of y")
+  expect_equal(names(res$estimate)[1], "mean of group x")
+  expect_equal(names(res$estimate)[2], "mean of group y")
   expect_equal(names(res$estimate)[3], "mean difference (x - y)")
   expect_equal(unname(res$estimate[3]),
                unname(res$estimate[1] - res$estimate[2]))
@@ -264,7 +277,7 @@ test_that("perm_t_test: paired label with and without trimming", {
   tr_val <- 0.1
   res_tr <- hush(perm_t_test(x_sleep, y_sleep, paired = TRUE,
                              mu = 0, tr = tr_val, R = 99))
-  expect_true(grepl("z = x - y", names(res_tr$estimate)))
+  expect_true(grepl("x - y", names(res_tr$estimate)))
   expect_true(grepl(as.character(tr_val), names(res_tr$estimate)))
 })
 
@@ -304,9 +317,9 @@ test_that("perm_t_test: formula interface substitutes group names", {
   res <- hush(perm_t_test(extra ~ group, data = sleep, mu = 0, R = 99))
 
   nms <- names(res$estimate)
-  expect_true(grepl("mean of 1", nms[1]))
-  expect_true(grepl("mean of 2", nms[2]))
-  expect_true(grepl("1 - 2", nms[3]))
+  expect_true(grepl("'1'", nms[1]))
+  expect_true(grepl("'2'", nms[2]))
+  expect_true(grepl("'1' - '2'", nms[3]))
   expect_equal(names(res$sample_size), c("1", "2"))
 })
 
@@ -317,7 +330,7 @@ test_that("perm_t_test: formula interface substitutes group names", {
 test_that("hodges_lehmann: estimate labels", {
   # One-sample
   res_one <- hush(hodges_lehmann(1:20, mu = 0))
-  expect_equal(names(res_one$estimate), "pseudomedian of x")
+  expect_equal(names(res_one$estimate), "(pseudo)median of x")
 
   # Paired
   before <- c(5.1, 4.8, 6.2, 5.7, 6.0, 5.5, 4.9, 5.8)
@@ -353,12 +366,12 @@ test_that("hodges_lehmann: sample_size correctness", {
   expect_equal(res_paired$sample_size, c(n = 8L))
 })
 
-test_that("hodges_lehmann: formula interface substitutes group names", {
+test_that("hodges_lehmann: formula interface substitutes group names with quoting", {
   data(sleep)
   res <- hush(hodges_lehmann(extra ~ group, data = sleep, mu = 0))
 
-  # HL doesn't use "of x"/"of y" in its labels, but uses "(x - y)"
-  expect_true(grepl("1 - 2", names(res$estimate)))
+  # sleep$group levels "1"/"2" should be quoted
+  expect_true(grepl("'1' - '2'", names(res$estimate)))
   expect_equal(names(res$sample_size), c("1", "2"))
 })
 
@@ -399,17 +412,30 @@ test_that("Formula interface group names are consistent across functions", {
                  info = paste("Failed for", res$method))
   }
 
-  # Mean-based tests should all have 3 estimates with group names
+  # Mean-based tests should all have 3 estimates with quoted group names
   for (res in list(res_simple, res_boot, res_perm)) {
     expect_equal(length(res$estimate), 3,
                  info = paste("Failed for", res$method))
-    expect_true(grepl("1 - 2", names(res$estimate)[3]),
+    expect_true(grepl("'1' - '2'", names(res$estimate)[3]),
                 info = paste("Failed for", res$method))
   }
 
-  # HL should have 1 estimate with group names
+  # HL should have 1 estimate with quoted group names
   expect_equal(length(res_hl$estimate), 1)
-  expect_true(grepl("1 - 2", names(res_hl$estimate)))
+  expect_true(grepl("'1' - '2'", names(res_hl$estimate)))
+})
+
+test_that("quote_if_numeric quotes numeric names and leaves text names alone", {
+  # Numeric names get quoted
+  expect_equal(TOSTER:::quote_if_numeric("0"), "'0'")
+  expect_equal(TOSTER:::quote_if_numeric("1"), "'1'")
+  expect_equal(TOSTER:::quote_if_numeric("3.14"), "'3.14'")
+  expect_equal(TOSTER:::quote_if_numeric("-2"), "'-2'")
+
+  # Non-numeric names are unchanged
+  expect_equal(TOSTER:::quote_if_numeric("auto"), "auto")
+  expect_equal(TOSTER:::quote_if_numeric("group_A"), "group_A")
+  expect_equal(TOSTER:::quote_if_numeric("1a"), "1a")
 })
 
 test_that("relabel_for_formula is idempotent on non-matching patterns", {

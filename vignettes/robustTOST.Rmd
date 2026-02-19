@@ -1073,26 +1073,6 @@ ses_calc(x = sleep$extra[sleep$group == 1],
          ses = "rb")
 ```
 
-The bootstrapped version provides a resampling-based alternative:
-
-```{r}
-# Setting bootstrap replications low to
-## reduce compiling time of vignette
-boot_ses_calc(x = sleep$extra[sleep$group == 1],
-              y = sleep$extra[sleep$group == 2],
-         paired = TRUE,
-         R = 199,
-         boot_ci = "perc", # recommend percentile bootstrap for paired SES
-         ses = "rb")
-```
-
-### Choosing Between Bootstrap CI Methods
-
-The `boot_ses_calc` function offers several bootstrap confidence interval methods through the `boot_ci` parameter:
-
-- **"perc"** (Percentile): Simple and intuitive, works well for symmetric distributions
-- **"basic"**: Similar to percentile but adjusts for bias, more conservative
-- **"stud"** (Studentized): Uses the standard error of each bootstrap sample, more accurate for skewed distributions
 
 ## Hypothesis Testing with `ses_calc`
 
@@ -1131,44 +1111,11 @@ ses_calc(formula = extra ~ group,
          alternative = "two.sided")
 ```
 
-## Permutation-Based Effect Size Testing with `perm_ses_test`
+## Permutation & Boostrap Based Effect Size Testing with `perm_ses_test`and `boot_ses_test`
 
-When asymptotic approximations may be unreliable, particularly with small samples, `perm_ses_test` provides distribution-free inference for the same non-parametric effect sizes. Rather than relying on normal approximations, it constructs the null distribution of the effect size through permutation.
+When asymptotic approximations may be unreliable, particularly with small samples, `perm_ses_test` provides distribution-free inference for the same non-parametric effect sizes. Rather than relying on normal approximations, it constructs the null distribution of the effect size through permutation. Additionally, `boot_ses_calc` uses bootstrapping to estimate the sampling distribution of the effect size, *but* cannot work in situations where there is complete separation between groups (e.g., all values in one group are higher than the other), which can occur with small samples and large effects.
 
-```{r}
-# Permutation test of rank-biserial correlation
-perm_ses_test(formula = extra ~ group,
-              data = sleep,
-              ses = "rb",
-              alternative = "two.sided",
-              R = 1999)
-```
 
-### Equivalence Testing with Permutation
-
-The function supports equivalence testing using the intersection-union nonparametric combination (IU-NPC) approach [@arboretti2021]:
-
-```{r}
-# Permutation-based equivalence test on the concordance scale
-perm_ses_test(formula = extra ~ group,
-              data = sleep,
-              ses = "cstat",
-              alternative = "equivalence",
-              mu = c(0.3, 0.7),
-              R = 1999)
-```
-
-### When to Use `perm_ses_test` vs. `ses_calc`
-
-| Feature | `ses_calc` | `perm_ses_test` |
-|---------|-----------|-----------------|
-| Inference method | Asymptotic (normal approximation) | Distribution-free (permutation) |
-| P-values | Based on z-statistic | Exact or randomization-based |
-| Best for | Moderate to large samples | Small samples |
-| Speed | Fast (closed-form) | Slower (requires permutations) |
-| Exact p-values | No | Yes (when all permutations enumerated) |
-
-For small samples where exact permutations are feasible, `perm_ses_test` is generally preferred. For larger samples, `ses_calc` with the Agresti method provides reliable inference with minimal computational cost.
 
 # Summary Comparison of Robust TOST Methods
 

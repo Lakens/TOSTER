@@ -163,6 +163,19 @@ d_from_probability <- function(p, scale) {
   )
 }
 
+# Internal: Quote group names that look numeric --------
+#
+# Wraps a name in single quotes if it parses as a number.
+# Prevents ambiguity in estimate labels (e.g., factor level "0" vs the number 0).
+# Used by prob_notation_label() and ttest_estimate_label().
+#
+# @param nm character; the name to possibly quote
+# @return character
+# @noRd
+quote_if_numeric <- function(nm) {
+  if (grepl("^-?\\d*\\.?\\d+$", nm)) paste0("'", nm, "'") else nm
+}
+
 # Build probability-notation estimate labels --------
 #
 # Constructs the probability-notation label for an estimate on a given scale.
@@ -176,11 +189,6 @@ d_from_probability <- function(p, scale) {
 prob_notation_label <- function(scale, xname, yname = NULL, paired = FALSE,
                                 paired_style = c("direct", "difference")) {
   paired_style <- match.arg(paired_style)
-
-  # Quote names only when they are numeric
-  quote_if_numeric <- function(nm) {
-    if (grepl("^-?\\d*\\.?\\d+$", nm)) paste0("'", nm, "'") else nm
-  }
 
   xq <- quote_if_numeric(xname)
 

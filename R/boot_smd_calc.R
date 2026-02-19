@@ -182,6 +182,7 @@
 
 # Bootstrap -------
 
+# TODO: add xname and yname arguments to allow user-specified group labels
 #smd_calc <- setClass("smd_calc")
 boot_smd_calc <- function(x, ...,
                           paired = FALSE,
@@ -600,8 +601,22 @@ boot_smd_calc.default = function(x,
     conf.int <- c(ci[1], ci[2])
     attr(conf.int, "conf.level") <- conf.level
 
+    # Compute SMD notation label for method description
+    XNAME <- "x"
+    YNAME <- if (!is.null(y)) "y" else NULL
+    # Derive int_denom from resolved state (mirrors smd_calc logic)
+    int_denom <- if (!is.null(glass) && glass %in% c("glass1", "glass2")) {
+      glass
+    } else if (sample_type != "Two Sample") {
+      if (isTRUE(rm_correction)) "rm" else "z"
+    } else {
+      "d"
+    }
+    sd_label <- resolve_sd_label(denom, int_denom, xname = XNAME, yname = if (!is.null(y)) "y" else "x")
+    notation <- smd_notation_label(xname = XNAME, yname = YNAME, denom_label = sd_label)
+
     method_suffix <- if (alternative != "none") "test" else "estimate with CI"
-    method_desc <- paste0("Bootstrapped ", sample_type, " ", smd_label, " ", method_suffix)
+    method_desc <- paste0("Bootstrapped ", sample_type, " ", smd_label, " ", notation, " ", method_suffix)
 
     note_text <- paste0("Bootstrap CI: ", boot_ci)
 
@@ -677,9 +692,19 @@ boot_smd_calc.formula = function(formula,
   DATA <- setNames(split(mf[[response]], g), c("x", "y"))
   y <- do.call("boot_smd_calc", c(DATA, list(...)))
 
-  # Update data.name for htest output
+  # Update data.name and relabel notation in method string for htest output
   if (inherits(y, "htest")) {
     y$data.name <- DNAME
+
+    # Replace generic "(x"/"(y" notation with actual group names
+    XNAME <- levels(g)[1]
+    YNAME <- levels(g)[2]
+    xq <- quote_if_numeric(XNAME)
+    yq <- quote_if_numeric(YNAME)
+    y$method <- gsub("\\(\\(x-y\\)", paste0("((", xq, "-", yq, ")"), y$method)
+    y$method <- gsub("\\(\\(x\\)", paste0("((", xq, ")"), y$method)
+    y$method <- gsub("/SD_x\\)", paste0("/SD_", xq, ")"), y$method)
+    y$method <- gsub("/SD_y\\)", paste0("/SD_", yq, ")"), y$method)
   }
 
   y

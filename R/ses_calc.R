@@ -299,6 +299,7 @@
 #' @export ses_calc
 
 
+# TODO: add xname and yname arguments to allow user-specified group labels
 #ses_calc <- setClass("ses_calc")
 ses_calc <- function(x, ...,
                      paired = FALSE,

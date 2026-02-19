@@ -279,6 +279,7 @@ bm_compute_perm_pval <- function(b, R, p_method) {
   }
 }
 
+# TODO: add xname and yname arguments to allow user-specified group labels
 #brunner_munzel <- setClass("brunner_munzel")
 brunner_munzel <- function(x,
                            ...,

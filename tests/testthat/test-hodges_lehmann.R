@@ -132,7 +132,7 @@ test_that("one-sample hodges_lehmann works correctly (asymptotic)", {
   expect_true(grepl("One Sample", result$method))
   expect_true(grepl("Asymptotic", result$method))
   expect_equal(result$null.value, c("location" = 5))
-  expect_named(result$estimate, "pseudomedian of x")
+  expect_named(result$estimate, "(pseudo)median of x")
 
   # P-value should be in valid range
   expect_gte(result$p.value, 0)

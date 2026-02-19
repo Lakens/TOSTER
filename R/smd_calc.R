@@ -165,6 +165,7 @@
 #' @name smd_calc
 #' @export smd_calc
 
+# TODO: add xname and yname arguments to allow user-specified group labels
 #smd_calc <- setClass("smd_calc")
 smd_calc <- function(x, ...,
                      paired = FALSE,
@@ -499,9 +500,14 @@ smd_calc.default = function(x,
     paste0("Cohen's d", trim_note)
   }
 
-  # Construct method description
+  # Construct method description with notation label
+  XNAME <- "x"
+  YNAME <- if (!is.null(y)) "y" else NULL
+  sd_label <- resolve_sd_label(denom, int_denom, xname = XNAME, yname = if (!is.null(y)) "y" else "x")
+  notation <- smd_notation_label(xname = XNAME, yname = YNAME, denom_label = sd_label)
+
   method_suffix <- if (alternative != "none") "test" else "estimate with CI"
-  method_desc <- paste0(sample_type, " ", smd_label, " ", method_suffix)
+  method_desc <- paste0(sample_type, " ", smd_label, " ", notation, " ", method_suffix)
 
   # Set up estimate with name
   estimate <- est_val
@@ -645,9 +651,19 @@ smd_calc.formula = function(formula,
   DATA <- setNames(split(mf[[response]], g), c("x", "y"))
   y <- do.call("smd_calc", c(DATA, list(...)))
 
-  # Update data.name for htest output
+  # Update data.name and relabel notation in method string for htest output
   if (inherits(y, "htest")) {
     y$data.name <- DNAME
+
+    # Replace generic "(x"/"(y" notation with actual group names
+    XNAME <- levels(g)[1]
+    YNAME <- levels(g)[2]
+    xq <- quote_if_numeric(XNAME)
+    yq <- quote_if_numeric(YNAME)
+    y$method <- gsub("\\(\\(x-y\\)", paste0("((", xq, "-", yq, ")"), y$method)
+    y$method <- gsub("\\(\\(x\\)", paste0("((", xq, ")"), y$method)
+    y$method <- gsub("/SD_x\\)", paste0("/SD_", xq, ")"), y$method)
+    y$method <- gsub("/SD_y\\)", paste0("/SD_", yq, ")"), y$method)
   }
 
   y

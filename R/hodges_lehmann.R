@@ -184,6 +184,7 @@
 #' @name hodges_lehmann
 #' @export hodges_lehmann
 
+# TODO: add xname and yname arguments to allow user-specified group labels
 hodges_lehmann <- function(x, ...) {
   UseMethod("hodges_lehmann")
 }
@@ -481,8 +482,14 @@ hodges_lehmann.default <- function(x,
   if (is.null(y)) {
 
     # Compute observed estimate
+    XNAME <- "x"
+    YNAME <- "y"
     estimate <- hl1_est(x)
-    names(estimate) <- if (paired) "Hodges-Lehmann estimate (z = x - y)" else "pseudomedian of x"
+    names(estimate) <- if (paired) {
+      ttest_estimate_label(type = "wilcoxon", xname = XNAME, yname = YNAME, paired = TRUE)
+    } else {
+      ttest_estimate_label(type = "wilcoxon", xname = XNAME, yname = NULL, paired = FALSE)
+    }
 
     if (test_method == "asymptotic") {
       # ----- Asymptotic test -----
@@ -651,8 +658,10 @@ hodges_lehmann.default <- function(x,
     n <- length(y)
 
     # Compute observed estimate
+    XNAME <- "x"
+    YNAME <- "y"
     estimate <- hl2_est(x, y)
-    names(estimate) <- "Hodges-Lehmann estimate (x - y)"
+    names(estimate) <- ttest_estimate_label(type = "wilcoxon", xname = XNAME, yname = YNAME, paired = FALSE)
 
     if (test_method == "asymptotic") {
       # ----- Asymptotic test -----
@@ -952,6 +961,18 @@ hodges_lehmann.formula <- function(formula, data, subset, na.action, ...) {
   DATA <- stats::setNames(split(mf[[response]], g), c("x", "y"))
   y <- do.call("hodges_lehmann", c(DATA, list(...)))
   y$data.name <- DNAME
-  y <- relabel_for_formula(y, levels(g))
+
+  # Resolve actual group labels from factor levels
+  XNAME <- levels(g)[1]
+  YNAME <- levels(g)[2]
+  is_paired <- isTRUE(dots$paired)
+
+  names(y$estimate) <- ttest_estimate_label(type = "wilcoxon", xname = XNAME, yname = YNAME, paired = is_paired)
+
+  # Relabel sample_size names
+  if (!is.null(y$sample_size) && length(y$sample_size) == 2) {
+    names(y$sample_size) <- levels(g)
+  }
+
   y
 }
