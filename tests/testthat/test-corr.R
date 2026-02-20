@@ -642,3 +642,61 @@ test_that("Run examples for corsum_test",{
                0.84,
                tolerance = .001)
 })
+
+test_that("z_cor_test: jackknife SE and cor.se", {
+
+  set.seed(424242)
+  x <- rnorm(20)
+  y <- x + rnorm(20, sd = 0.5)
+
+  # (a) jackknife SE differs from analytic (typically larger for small n)
+  for (m in c("pearson", "spearman", "kendall")) {
+    res_a <- z_cor_test(x, y, method = m)
+    res_j <- z_cor_test(x, y, method = m, se_method = "jackknife")
+
+    expect_true(res_a$stderr["z.se"] != res_j$stderr["z.se"],
+                label = paste0("jackknife SE differs for ", m))
+  }
+
+  # (b) CI and p-value use the same SE under jackknife
+  # Verify CI width changes when switching to jackknife
+  res_a <- z_cor_test(x, y, method = "pearson")
+  res_j <- z_cor_test(x, y, method = "pearson", se_method = "jackknife")
+
+  ci_width_a <- diff(res_a$conf.int)
+  ci_width_j <- diff(res_j$conf.int)
+  expect_true(ci_width_a != ci_width_j,
+              label = "CI width changes with jackknife SE")
+
+  # p-values should also differ
+
+  expect_true(res_a$p.value != res_j$p.value,
+              label = "p-value changes with jackknife SE")
+
+  # (c) cor.se equals (1 - r^2) * z.se to numerical precision
+  for (m in c("pearson", "spearman", "kendall")) {
+    res <- z_cor_test(x, y, method = m)
+    r <- unname(res$estimate)
+    expected_cor_se <- (1 - r^2) * res$stderr["z.se"]
+    expect_equal(unname(res$stderr["cor.se"]),
+                 unname(expected_cor_se),
+                 tolerance = 1e-10,
+                 label = paste0("cor.se delta method for ", m))
+
+    # also check jackknife path
+    res_j <- z_cor_test(x, y, method = m, se_method = "jackknife")
+    r_j <- unname(res_j$estimate)
+    expected_cor_se_j <- (1 - r_j^2) * res_j$stderr["z.se"]
+    expect_equal(unname(res_j$stderr["cor.se"]),
+                 unname(expected_cor_se_j),
+                 tolerance = 1e-10,
+                 label = paste0("cor.se delta method (jackknife) for ", m))
+  }
+
+  # jackknife works with equivalence testing
+  res_eq <- z_cor_test(x, y, method = "pearson",
+                       alternative = "e", null = 0.8,
+                       se_method = "jackknife")
+  expect_true(is.finite(res_eq$p.value))
+  expect_length(res_eq$stderr, 2)
+})

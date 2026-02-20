@@ -10,7 +10,8 @@ z_cor_test(
   alternative = c("two.sided", "less", "greater", "equivalence", "minimal.effect"),
   method = c("pearson", "kendall", "spearman"),
   alpha = 0.05,
-  null = 0
+  null = 0,
+  se_method = c("analytic", "jackknife")
 )
 }
 \arguments{
@@ -38,6 +39,10 @@ One of "pearson", "kendall", or "spearman", can be abbreviated.}
 \item For equivalence/minimal effect tests: either a single value (symmetric bounds ±value will be created)
 or a vector of two values representing the lower and upper bounds
 }}
+
+\item{se_method}{a character string indicating the method for computing the standard error.
+One of "analytic" (default) or "jackknife". The jackknife SE is computed on the Fisher z scale
+using leave-one-out resampling.}
 }
 \value{
 A list with class "htest" containing the following components:
@@ -47,7 +52,9 @@ A list with class "htest" containing the following components:
 \item \strong{parameter}: the degrees of freedom or number of observations.
 \item \strong{conf.int}: a confidence interval for the measure of association appropriate to the specified alternative hypothesis.
 \item \strong{estimate}: the estimated measure of association, with name "cor", "tau", or "rho" corresponding to the method employed.
-\item \strong{stderr}: the standard error of the test statistic.
+\item \strong{stderr}: a named vector with \code{z.se} (standard error on the Fisher z scale, used for inference)
+and \code{cor.se} (delta method SE on the correlation scale, for descriptive purposes).
+Note that \code{cor.se} underestimates true sampling variability as |r| approaches 1.
 \item \strong{null.value}: the value of the association measure under the null hypothesis.
 \item \strong{alternative}: character string indicating the alternative hypothesis.
 \item \strong{method}: a character string indicating how the association was measured.
@@ -64,8 +71,10 @@ cor.test, this function allows users to set the null to a value other than zero 
 equivalence testing.
 }
 \details{
-This function uses Fisher's z transformation for the correlations, but uses Fieller's
-correction of the standard error for Spearman's \eqn{\rho} and Kendall's \eqn{\tau}.
+This function uses Fisher's z transformation for the correlations.
+For Spearman's \eqn{\rho}, the Bonett-Wright \eqn{\rho}-dependent SE formula
+\eqn{\sqrt{(1 + r^2/2) / (n - 3)}} is used rather than the fixed 1.06 constant.
+For Kendall's \eqn{\tau}, Fieller's correction is applied.
 
 The function supports both standard hypothesis testing and equivalence/minimal effect testing:
 \itemize{
@@ -82,6 +91,11 @@ When performing equivalence or minimal effect testing:
 \item If a single value is provided for \code{null}, symmetric bounds ± value will be used
 \item If two values are provided for \code{null}, they will be used as the lower and upper bounds
 }
+
+When \code{se_method = "jackknife"}, the standard error is computed via leave-one-out
+resampling on the Fisher z scale, which can provide better calibration for small
+samples or non-standard correlation methods. The jackknife SE is used for both
+the test statistic and the confidence interval.
 
 See \code{vignette("correlations")} for more details.
 }
@@ -109,6 +123,9 @@ z_cor_test(x, y, method = "spearman",
 Goertzen, J. R., & Cribbie, R. A. (2010). Detecting a lack of association: An equivalence
 testing approach. British Journal of Mathematical and Statistical Psychology, 63(3), 527-537.
 https://doi.org/10.1348/000711009X475853, formula page 531.
+
+Bonett, D. G., & Wright, T. A. (2000). Sample size requirements for estimating
+Pearson, Kendall and Spearman correlations. Psychometrika, 65(1), 23-28.
 }
 \seealso{
 Other Correlations: 

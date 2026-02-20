@@ -364,7 +364,7 @@ score_se_paired <- function(p_hat, n_eff, Q) {
 #'
 #' @param x numeric vector, group 1
 #' @param y numeric vector, group 2
-#' @return scalar tie factor in [0, 1]; equals 1 when no ties
+#' @return scalar tie factor in 0, 1; equals 1 when no ties
 #' @noRd
 wmw_tie_factor <- function(x, y) {
   r <- rank(c(x, y))

@@ -1,6 +1,7 @@
 cor_to_ci <- function(cor, n, ci = 0.95,
                       method = "pearson",
-                      correction = "fieller", ...) {
+                      correction = "fieller",
+                      se = NULL, ...) {
   method <- match.arg(tolower(method),
                       c("pearson", "kendall", "spearman"),
                       several.ok = FALSE)
@@ -8,13 +9,15 @@ cor_to_ci <- function(cor, n, ci = 0.95,
   if (method == "kendall") {
     out <- .cor_to_ci_kendall(cor, n,
                               ci = ci,
-                              correction = correction, ...)
+                              correction = correction,
+                              se = se, ...)
   } else if (method == "spearman") {
     out <- .cor_to_ci_spearman(cor, n,
                                ci = ci,
-                               correction = correction, ...)
+                               correction = correction,
+                               se = se, ...)
   } else {
-    out <- .cor_to_ci_pearson(cor, n, ci = ci, ...)
+    out <- .cor_to_ci_pearson(cor, n, ci = ci, se = se, ...)
   }
 
   out
@@ -24,10 +27,13 @@ cor_to_ci <- function(cor, n, ci = 0.95,
 #' @importFrom stats qnorm
 .cor_to_ci_kendall <- function(cor, n,
                                ci = 0.95,
-                               correction = "fieller", ...) {
+                               correction = "fieller",
+                               se = NULL, ...) {
   # by @tsbaguley (https://rpubs.com/seriousstats/616206)
 
-  if (correction == "fieller") {
+  if (!is.null(se)) {
+    tau.se <- se
+  } else if (correction == "fieller") {
     tau.se <- (0.437 / (n - 4))^0.5
   } else {
     tau.se <- 1 / (n - 3)^0.5
@@ -48,10 +54,13 @@ cor_to_ci <- function(cor, n, ci = 0.95,
 # Spearman -----------------------------------------------------------------
 .cor_to_ci_spearman <- function(cor, n,
                                 ci = 0.95,
-                                correction = "fieller", ...) {
+                                correction = "fieller",
+                                se = NULL, ...) {
   # by @tsbaguley (https://rpubs.com/seriousstats/616206)
 
-  if (correction == "fieller") {
+  if (!is.null(se)) {
+    zrs.se <- se
+  } else if (correction == "fieller") {
     zrs.se <- (1.06 / (n - 3))^0.5
   } else if (correction == "bw") {
     zrs.se <- ((1 + (cor^2) / 2) / (n - 3))^0.5
@@ -73,9 +82,11 @@ cor_to_ci <- function(cor, n, ci = 0.95,
 
 
 # Pearson -----------------------------------------------------------------
-.cor_to_ci_pearson <- function(cor, n, ci = 0.95, ...) {
+.cor_to_ci_pearson <- function(cor, n, ci = 0.95, se = NULL, ...) {
   z <- atanh(cor)
-  se <- 1 / sqrt(n - 3) # Sample standard error
+  if (is.null(se)) {
+    se <- 1 / sqrt(n - 3) # Sample standard error
+  }
 
   # CI
   alpha <- 1 - (1 - ci) / 2
