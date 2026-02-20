@@ -262,6 +262,7 @@ the two-sample trimmed t. \emph{Biometrika}, \emph{60}(2), 369-374.
 Other effect sizes: 
 \code{\link{boot_ses_calc}()},
 \code{\link{boot_smd_calc}()},
+\code{\link{rank_diff}()},
 \code{\link{ses_calc}()},
 \code{\link{trans_rank_prob}()}
 }

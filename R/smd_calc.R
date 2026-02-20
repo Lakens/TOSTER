@@ -296,6 +296,19 @@ smd_calc.default = function(x,
     }
   }
 
+  # Derive denom_tag for estimate label subscript --------
+  denom_tag <- if (int_denom == "d") {
+    if (var.equal) "s" else "av"
+  } else if (int_denom %in% c("z", "rm")) {
+    int_denom
+  } else if (int_denom == "glass1") {
+    "x"
+  } else if (int_denom == "glass2") {
+    "y"
+  } else {
+    NULL
+  }
+
   if(!is.numeric(alpha) || alpha <=0 || alpha >=1){
     stop("The alpha must be a numeric value between 0 and 1")
   }
@@ -488,26 +501,25 @@ smd_calc.default = function(x,
   se_val <- cohen_res$d_sigma
   df <- cohen_res$d_df
 
-  # Determine SMD label
-  trim_note <- if (tr > 0) paste0(" (", tr * 100, "% trimmed)") else ""
-  smd_label <- if (bias_correction) {
-    if (glass != "no" && glass %in% c("glass1", "glass2")) {
-      paste0("Glass's ", ifelse(glass == "glass1", "delta1", "delta2"), trim_note)
-    } else {
-      paste0("Hedges' g", trim_note)
-    }
-  } else {
-    paste0("Cohen's d", trim_note)
-  }
+  # Determine SMD label --------
+  smd_type_letter <- if (bias_correction) "g" else "d"
+  trim_note <- if (tr > 0) paste0(", ", tr * 100, "% trimmed") else ""
+  smd_label <- paste0("SMD (", smd_type_letter, "[", denom_tag, "]", trim_note, ")")
 
   # Construct method description with notation label
   XNAME <- "x"
   YNAME <- if (!is.null(y)) "y" else NULL
-  sd_label <- resolve_sd_label(denom, int_denom, xname = XNAME, yname = if (!is.null(y)) "y" else "x")
+  sd_label <- resolve_sd_label(denom, int_denom,
+                               xname = XNAME,
+                               yname = if (!is.null(y)) "y" else "x",
+                               var.equal = var.equal)
   notation <- smd_notation_label(xname = XNAME, yname = YNAME, denom_label = sd_label)
 
+  # Merge notation into the SMD label: "SMD (g[av]=(x-y)/SD_avg)"
+  smd_method_label <- paste0("SMD (", smd_type_letter, "[", denom_tag, "]=", notation, trim_note, ")")
+
   method_suffix <- if (alternative != "none") "test" else "estimate with CI"
-  method_desc <- paste0(sample_type, " ", smd_label, " ", notation, " ", method_suffix)
+  method_desc <- paste0(sample_type, " ", smd_method_label, " ", method_suffix)
 
   # Set up estimate with name
   estimate <- est_val
@@ -594,7 +606,7 @@ smd_calc.default = function(x,
       }
 
       null_val <- null.value
-      names(null_val) <- smd_label
+      names(null_val) <- "SMD"
     }
 
     names(test_stat) <- test_method
@@ -660,10 +672,20 @@ smd_calc.formula = function(formula,
     YNAME <- levels(g)[2]
     xq <- quote_if_numeric(XNAME)
     yq <- quote_if_numeric(YNAME)
-    y$method <- gsub("\\(\\(x-y\\)", paste0("((", xq, "-", yq, ")"), y$method)
-    y$method <- gsub("\\(\\(x\\)", paste0("((", xq, ")"), y$method)
+    y$method <- gsub("=\\(x-y\\)", paste0("=(", xq, "-", yq, ")"), y$method)
+    y$method <- gsub("=\\(x\\)", paste0("=(", xq, ")"), y$method)
     y$method <- gsub("/SD_x\\)", paste0("/SD_", xq, ")"), y$method)
     y$method <- gsub("/SD_y\\)", paste0("/SD_", yq, ")"), y$method)
+
+    # Replace generic group names in estimate label and method string
+    # (Glass bracket notation: [x] -> [A], [y] -> [B])
+    est_name <- names(y$estimate)
+    est_name <- gsub("\\[x\\]", paste0("[", xq, "]"), est_name)
+    est_name <- gsub("\\[y\\]", paste0("[", yq, "]"), est_name)
+    names(y$estimate) <- est_name
+
+    y$method <- gsub("\\[x\\]", paste0("[", xq, "]"), y$method)
+    y$method <- gsub("\\[y\\]", paste0("[", yq, "]"), y$method)
   }
 
   y

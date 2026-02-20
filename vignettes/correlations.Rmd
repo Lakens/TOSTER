@@ -8,6 +8,7 @@ output:
 editor_options: 
   chunk_output_type: console
 bibliography: references.bib
+link-citations: true
 vignette: >
   %\VignetteIndexEntry{Correlations}
   %\VignetteEncoding{UTF-8}

@@ -2,6 +2,7 @@
 title: "Standardized Mean Differences"
 subtitle: "The calculation of Cohen's d type effect sizes"
 author: "Aaron R. Caldwell"
+link-citations: true
 date: "`r Sys.Date()`"
 output: 
   rmarkdown::html_vignette:

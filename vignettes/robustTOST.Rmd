@@ -2,6 +2,7 @@
 title: "Robust TOST Procedures"
 author: "Aaron R. Caldwell"
 date: "`r Sys.Date()`"
+link-citations: true
 output: 
   rmarkdown::html_vignette:
     toc: True

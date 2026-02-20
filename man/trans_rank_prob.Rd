@@ -109,6 +109,7 @@ trans_rank_prob(as.numeric(res$estimate),
 Other effect sizes: 
 \code{\link{boot_ses_calc}()},
 \code{\link{boot_smd_calc}()},
+\code{\link{rank_diff}()},
 \code{\link{ses_calc}()},
 \code{\link{smd_calc}()}
 }

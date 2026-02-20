@@ -81,7 +81,7 @@ smd_notation_label <- function(xname = "x",
     numerator <- paste0(xq, "-", yq)
   }
 
-  paste0("((", numerator, ")/SD_", denom_label, ")")
+  paste0("(", numerator, ")/SD_", denom_label)
 }
 
 # Internal: Resolve SD subscript label for SMD notation --------
@@ -94,7 +94,8 @@ smd_notation_label <- function(xname = "x",
 # @param yname character; second group label (used for glass2)
 # @return character string for the SD subscript
 # @noRd
-resolve_sd_label <- function(denom, int_denom, xname = "x", yname = "y") {
+resolve_sd_label <- function(denom, int_denom, xname = "x", yname = "y",
+                             var.equal = TRUE) {
   if (denom != "auto") {
     # User explicitly chose denom - use it directly (except glass -> group name)
     switch(denom,
@@ -110,7 +111,7 @@ resolve_sd_label <- function(denom, int_denom, xname = "x", yname = "y") {
     switch(int_denom,
       "z"      = "z",
       "rm"     = "rm",
-      "d"      = "pooled",
+      "d"      = if (var.equal) "pooled" else "avg",
       "glass1" = quote_if_numeric(xname),
       "glass2" = quote_if_numeric(yname)
     )

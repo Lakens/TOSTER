@@ -1,6 +1,6 @@
 #' @title Permutation Test for Standardized Effect Sizes
 #' @description
-#' `r lifecycle::badge('maturing')`
+#' `r lifecycle::badge('experimental')`
 #'
 #' Performs permutation-based hypothesis tests for non-parametric effect sizes including
 #' concordance probability (c-statistic), rank-biserial correlation, WMW odds, and WMW log-odds.

@@ -233,16 +233,6 @@ ses_calc(x = sleep$extra[sleep$group == 1],
          ses = "rb")
 
 ## -----------------------------------------------------------------------------
-# Setting bootstrap replications low to
-## reduce compiling time of vignette
-boot_ses_calc(x = sleep$extra[sleep$group == 1],
-              y = sleep$extra[sleep$group == 2],
-         paired = TRUE,
-         R = 199,
-         boot_ci = "perc", # recommend percentile bootstrap for paired SES
-         ses = "rb")
-
-## -----------------------------------------------------------------------------
 # Two-sided test: does the rank-biserial differ from 0?
 ses_calc(x = sleep$extra[sleep$group == 1],
          y = sleep$extra[sleep$group == 2],
@@ -265,21 +255,4 @@ ses_calc(formula = extra ~ group,
          data = sleep,
          ses = "odds",
          alternative = "two.sided")
-
-## -----------------------------------------------------------------------------
-# Permutation test of rank-biserial correlation
-perm_ses_test(formula = extra ~ group,
-              data = sleep,
-              ses = "rb",
-              alternative = "two.sided",
-              R = 1999)
-
-## -----------------------------------------------------------------------------
-# Permutation-based equivalence test on the concordance scale
-perm_ses_test(formula = extra ~ group,
-              data = sleep,
-              ses = "cstat",
-              alternative = "equivalence",
-              mu = c(0.3, 0.7),
-              R = 1999)
 

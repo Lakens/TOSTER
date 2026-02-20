@@ -1,6 +1,7 @@
 ---
 title: "Hypothesis Testing with TOSTER"
 output: rmarkdown::html_vignette
+link-citations: true
 vignette: >
   %\VignetteIndexEntry{Hypothesis Testing with TOSTER}
   %\VignetteEngine{knitr::rmarkdown}
@@ -66,7 +67,7 @@ simple_htest(extra ~ group,
              alternative = "two.sided")
 ```
 
-The output includes the Hodges-Lehmann estimate of the location shift and, again, sample sizes.
+The output includes the Hodges-Lehmann estimate of the location shift.
 
 ### Equivalence testing (TOST)
 
@@ -128,12 +129,12 @@ The Brunner-Munzel test is a robust nonparametric test for stochastic superiorit
 brunner_munzel(extra ~ group, data = sleep)
 ```
 
-### Correlation test
+### Bootstrap Correlation test
 
-`z_cor_test()` tests correlations using Fisher's z-transformation and supports equivalence bounds on the correlation coefficient:
+`boot_cor_test()` tests correlations using Fisher's z-transformation and supports equivalence bounds on the correlation coefficient:
 
 ```{r}
-z_cor_test(mtcars$mpg, mtcars$hp,
+boot_cor_test(mtcars$mpg, mtcars$hp,
            method = "pearson",
            alternative = "two.sided",
            null = 0)

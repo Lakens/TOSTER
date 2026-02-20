@@ -1,6 +1,7 @@
 ---
 title: "Equivalence Testing for F-tests"
 author: "Aaron R. Caldwell"
+link-citations: true
 date: "`r Sys.Date()`"
 output: 
   rmarkdown::html_vignette:
