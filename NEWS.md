@@ -62,6 +62,21 @@ NEWS
 
 ## Improvements
 
+- **Correlation SE improvements** for `z_cor_test()` and `corsum_test()`:
+  - Spearman's rho now uses the Bonett-Wright ρ-dependent SE formula
+    (`sqrt((1 + r²/2) / (n - 3))`) instead of the fixed 1.06 constant,
+    providing better calibration across the full range of ρ.
+  - `z_cor_test()` gains a `se_method` argument (`"analytic"` or `"jackknife"`)
+    for computing the standard error via leave-one-out resampling on the
+    Fisher z scale. The jackknife SE is used consistently for both the test
+    statistic and the confidence interval.
+  - Both functions now return `stderr` as a named vector with `z.se`
+    (Fisher z scale, used for inference) and `cor.se` (delta method SE on the
+    correlation scale, for descriptive purposes).
+  - The `method` string in the returned `htest` object now indicates the SE
+    type used (e.g., `"Pearson's product-moment correlation with approximate SE"`
+    or `"Spearman's rank correlation rho with jackknifed SE"`).
+
 - `simple_htest()`, `boot_t_test()`, `perm_t_test()`, and `hodges_lehmann()`
   now produce more informative estimate labels that indicate the direction of
   calculation (e.g., `"mean difference (treatment - control)"` when using the
