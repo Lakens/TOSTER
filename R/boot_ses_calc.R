@@ -152,13 +152,14 @@
 #'                         R = 99)
 #'
 #' # Example 4: Paired samples
-#' data(sleep)
-#' with(sleep, boot_ses_calc(x = extra[group == 1],
-#'                           y = extra[group == 2],
-#'                           paired = TRUE,
-#'                           ses = "rb",
-#'                           alternative = "greater",
-#'                           R = 99))
+#' set.seed(42)
+#' pre  <- c(4.5, 5.2, 3.8, 6.1, 4.9, 5.7, 3.6, 5.0, 4.3, 6.5)
+#' post <- c(5.1, 4.9, 4.5, 5.8, 5.5, 5.2, 4.3, 5.4, 4.0, 6.2)
+#' boot_ses_calc(x = pre, y = post,
+#'               paired = TRUE,
+#'               ses = "rb",
+#'               alternative = "greater",
+#'               R = 99)
 #'
 #' # Example 5: Using formula notation
 #' data(mtcars)
