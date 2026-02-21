@@ -22,6 +22,9 @@
 #'   * "bca": bias-corrected and accelerated bootstrap CI. Provides second-order
 #'     accuracy by correcting for bias and skewness, but requires additional
 #'     computation via the jackknife (n extra evaluations of the statistic).
+#'   * "stud": studentized (bootstrap-t) CI. Uses pivot statistics on the Fisher z
+#'     scale with analytical SEs. Only available for `method = "pearson"`,
+#'     `"kendall"`, or `"spearman"`.
 #' @param R number of bootstrap replications (default = 1999).
 #' @param ... additional arguments passed to correlation functions, such as:
 #'   * tr: trim for Winsorized correlation (default = 0.2)
@@ -29,7 +32,27 @@
 #'
 #' @details
 #' This function uses bootstrap methods to calculate correlation coefficients and their
-#' confidence intervals. P-values are calculated from a re-sampled null distribution.
+#' confidence intervals. P-values are computed by inverting the selected CI method,
+#' which guarantees that `p < alpha` if and only if the corresponding CI excludes the
+#' null value.
+#'
+#' **P-value computation by CI method:**
+#'
+#' * `boot_ci = "perc"`: p-values are computed from the raw bootstrap distribution
+#'   (proportion of replicates beyond the null). This is the original approach from
+#'   Wilcox (2017).
+#'
+#' * `boot_ci = "basic"`: p-values use the reflected bootstrap distribution
+#'   (`2 * est - bvec`), which is the exact inversion of the basic CI.
+#'
+#' * `boot_ci = "bca"`: p-values are derived from the BCa probability transformation,
+#'   using the same bias correction and acceleration parameters as the BCa CI.
+#'
+#' * `boot_ci = "stud"`: p-values are derived from the bootstrap pivot distribution
+#'   on the Fisher z scale. Each replicate's pivot is `(z_star - z_obs) / se_star`,
+#'   where `se_star` is the analytical SE. This method is only available for
+#'   Pearson, Kendall, and Spearman correlations, since robust methods lack
+#'   analytical SEs on the Fisher z scale.
 #'
 #' The bootstrap correlation methods in this package offer two robust correlations beyond
 #' the standard methods:
@@ -74,6 +97,7 @@
 #' * **method**: a character string indicating which bootstrapped correlation was measured.
 #' * **data.name**: a character string giving the names of the data.
 #' * **boot_res**: vector of bootstrap correlation estimates.
+#' * **boot_ci**: character string indicating which bootstrap CI method was used.
 #' * **call**: the matched call.
 #'
 #' @examples
@@ -119,7 +143,7 @@ boot_cor_test <- function(x,
                                      "winsorized", "bendpercent"),
                           alpha = 0.05,
                           null = 0,
-                          boot_ci = c("basic","perc","bca"),
+                          boot_ci = c("basic","perc","bca","stud"),
                           R = 1999,
                           ...) {
   boot_ci = match.arg(boot_ci)
@@ -127,6 +151,14 @@ boot_cor_test <- function(x,
   alternative = match.arg(alternative)
 
   method = match.arg(method)
+
+  if (boot_ci == "stud" && method %in% c("winsorized", "bendpercent")) {
+    stop(
+      "Studentized bootstrap requires an analytical SE and is only available ",
+      "for method = 'pearson', 'kendall', or 'spearman'.",
+      call. = FALSE
+    )
+  }
   nboot = R
   null.value = null
   if(!is.vector(x) || !is.vector(y)){
@@ -187,17 +219,30 @@ boot_cor_test <- function(x,
       bvec <- apply(data, 1, .corboot_wincor, x, y, ...) # get bootstrap results corr
     }
 
-
   } else {
     est <- cor(x, y, method = method)
     data <- matrix(sample(n, size=n*nboot, replace=TRUE), nrow=nboot)
     bvec <- apply(data, 1, .corboot, x, y, method = method, ...) # get bootstrap results corr
   }
+
   alpha2 = ifelse(alternative != "two.sided",
                   alpha*2,
                   alpha)
 
+  # Compute pivots for studentized bootstrap
+  tvec <- NULL
+  se_obs <- NULL
+  if (boot_ci == "stud") {
+    se_obs <- .fisher_z_se(est, n, method)
+    se_star <- .fisher_z_se(bvec, n, method)
+    z_star <- atanh(bvec)
+    z_obs <- atanh(est)
+    tvec <- (z_star - z_obs) / se_star
+  }
+
   # Jackknife for BCa (if needed)
+  z0 <- NULL
+  acc <- NULL
   if (boot_ci == "bca") {
     jack_est <- numeric(n)
     for (j in seq_len(n)) {
@@ -209,91 +254,109 @@ boot_cor_test <- function(x,
         jack_est[j] <- cor(x[-j], y[-j], method = method)
       }
     }
+    # Pre-compute BCa parameters for p-value use
+    z0 <- qnorm(mean(bvec < est))
+    L <- mean(jack_est) - jack_est
+    denom <- 6 * sum(L^2)^(3/2)
+    if (denom != 0) {
+      acc <- sum(L^3) / denom
+    } else {
+      acc <- 0
+    }
   }
 
+  # CI computation
   boot.cint = switch(boot_ci,
                      "basic" = basic(bvec, t0 = est, alpha2),
                      "perc" = perc(bvec, alpha2),
                      "bca" = bca_ci(boots_est = bvec, t0 = est,
-                                    jack_est = jack_est, alpha = alpha2))
-  #quantile(bvec, c((1 - ci) / 2, 1 - (1 - ci) / 2))
+                                    jack_est = jack_est, alpha = alpha2),
+                     "stud" = stud_ci(tvec, t0_z = atanh(est),
+                                      se_obs = se_obs, alpha = alpha2))
   attr(boot.cint, "conf.level") <- ci
-  # pvalue
-  ## note method different than Efron (e.g., t-test, SMDs, etc)
-  ## Dervied from work of Wilcox
-  if(alternative == "two.sided"){
-    phat <- (sum(bvec < null.value)+.5*sum(bvec==null.value))/nboot
-    sig <- 2 * min(phat, 1 - phat)
-  }
-  if(alternative == "greater"){
-    sig <- 1 - sum(bvec >= null.value)/nboot
-  }
-  if(alternative == "less"){
-    sig <- 1 - sum(bvec <= null.value)/nboot
-  }
-  if(alternative == "equivalence"){
-    #sig2 <- 1 - sum(bvec >= -1*null.value)/nboot
-    #sig = max(sig,sig2)
-    sig1 = 1 - sum(bvec >= min(null.value))/nboot
-    sig2 = 1 - sum(bvec <= max(null.value))/nboot
-    sig = max(sig1,sig2)
-  }
-  if(alternative == "minimal.effect"){
-    #sig2 <- 1 - sum(bvec >= -1*null.value)/nboot
-    #sig = max(sig,sig2)
-    sig1 = 1 - sum(bvec >= max(null.value))/nboot
-    sig2 = 1 - sum(bvec <= min(null.value))/nboot
-    sig = min(sig1,sig2)
+
+  # P-value computation (method-consistent)
+  if (alternative %in% c("two.sided", "greater", "less")) {
+    sig <- boot_pvalue(bvec = bvec, est = est, null = null.value,
+                       alternative = alternative, boot_ci = boot_ci,
+                       tvec = tvec, se_obs = se_obs,
+                       z0 = z0, acc = acc, nboot = nboot)
+  } else if (alternative == "equivalence") {
+    sig1 <- boot_pvalue(bvec = bvec, est = est, null = min(null.value),
+                        alternative = "greater", boot_ci = boot_ci,
+                        tvec = tvec, se_obs = se_obs,
+                        z0 = z0, acc = acc, nboot = nboot)
+    sig2 <- boot_pvalue(bvec = bvec, est = est, null = max(null.value),
+                        alternative = "less", boot_ci = boot_ci,
+                        tvec = tvec, se_obs = se_obs,
+                        z0 = z0, acc = acc, nboot = nboot)
+    sig <- max(sig1, sig2)
+  } else if (alternative == "minimal.effect") {
+    sig1 <- boot_pvalue(bvec = bvec, est = est, null = max(null.value),
+                        alternative = "greater", boot_ci = boot_ci,
+                        tvec = tvec, se_obs = se_obs,
+                        z0 = z0, acc = acc, nboot = nboot)
+    sig2 <- boot_pvalue(bvec = bvec, est = est, null = min(null.value),
+                        alternative = "less", boot_ci = boot_ci,
+                        tvec = tvec, se_obs = se_obs,
+                        z0 = z0, acc = acc, nboot = nboot)
+    sig <- min(sig1, sig2)
   }
 
+  # CI method label for method string
+  ci_label <- switch(boot_ci,
+                     "basic" = "",
+                     "perc" = " (percentile)",
+                     "bca" = " (BCa)",
+                     "stud" = " (studentized)")
 
   if (method == "pearson") {
-    # Pearson # Fisher
-    method2 <- "Bootstrapped Pearson's product-moment correlation"
+    method2 <- paste0("Bootstrapped Pearson's product-moment correlation", ci_label)
     names(null.value) = rep("correlation",length(null.value))
     rfinal = c(cor = est)
   }
   if (method == "spearman") {
-    method2 <- "Bootstrapped Spearman's rank correlation rho"
-    #  # Fieller adjusted
+    method2 <- paste0("Bootstrapped Spearman's rank correlation rho", ci_label)
     rfinal = c(rho = est)
     names(null.value) = rep("rho",length(null.value))
-
   }
   if (method == "kendall") {
-    method2 <- "Bootstrapped Kendall's rank correlation tau"
-    # # Fieller adjusted
+    method2 <- paste0("Bootstrapped Kendall's rank correlation tau", ci_label)
     rfinal = c(tau = est)
     names(null.value) = rep("tau",length(null.value))
-
   }
   if (method == "bendpercent") {
-    method2 <- "Bootstrapped percentage bend correlation pb"
-    # # Fieller adjusted
+    method2 <- paste0("Bootstrapped percentage bend correlation pb", ci_label)
     rfinal = c(pb = est)
     names(null.value) = rep("pb",length(null.value))
-
   }
   if (method == "winsorized") {
-    method2 <- "Bootstrapped Winsorized correlation wincor"
-    # # Fieller adjusted
+    method2 <- paste0("Bootstrapped Winsorized correlation wincor", ci_label)
     rfinal = c(wincor = est)
     names(null.value) = rep("wincor",length(null.value))
-
   }
   N = n
   names(N) = "N"
+
+  # SE: for stud, report both bootstrap SE and analytical z-scale SE
+  if (boot_ci == "stud") {
+    se_out <- c(boot.se = sd(bvec, na.rm = TRUE), z.se = se_obs)
+  } else {
+    se_out <- sd(bvec, na.rm = TRUE)
+  }
+
   # Store as htest
   rval <- list(p.value = sig,
                parameter = N,
                conf.int = boot.cint,
                estimate = rfinal,
-               stderr = sd(bvec,na.rm=TRUE),
+               stderr = se_out,
                null.value = null.value,
                alternative = alternative,
                method = method2,
                data.name = DNAME,
                boot_res = bvec,
+               boot_ci = boot_ci,
                call = match.call())
   class(rval) <- "htest"
   return(rval)

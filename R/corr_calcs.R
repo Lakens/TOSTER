@@ -226,3 +226,141 @@ pbcor <- function(x, y, beta=.2){
   res <- pbcor(x[isub], y[isub], ...)
   res
 }
+
+# Studentized bootstrap CI for correlations -----
+
+#' Studentized bootstrap CI on the correlation scale
+#'
+#' Computes a studentized (bootstrap-t) confidence interval by pivoting on the
+#' Fisher z scale and then back-transforming.
+#'
+#' @param tvec Numeric vector of bootstrap pivots: (z_star - z_obs) / se_star
+#' @param t0_z Observed Fisher z value: atanh(est)
+#' @param se_obs Analytical SE of z_obs
+#' @param alpha Two-tailed significance level (e.g., 0.05 for 95% CI)
+#' @return Numeric vector of length 2: c(lower, upper) on the correlation scale
+#' @keywords internal
+stud_ci <- function(tvec, t0_z, se_obs, alpha) {
+  qs <- quantile(tvec, probs = c(1 - alpha / 2, alpha / 2), names = FALSE)
+  z_bounds <- t0_z - qs * se_obs
+  tanh(z_bounds)
+}
+
+# Bootstrap p-value dispatch -----
+
+#' Compute a bootstrap p-value consistent with the selected CI method
+#'
+#' Dispatches to the appropriate p-value calculation based on the CI method,
+#' ensuring that p < alpha if and only if the corresponding CI excludes the null.
+#'
+#' @param bvec Numeric vector of bootstrap correlation estimates
+#' @param est Observed correlation estimate
+#' @param null Null hypothesis value (single numeric)
+#' @param alternative One of "two.sided", "greater", "less"
+#' @param boot_ci One of "perc", "basic", "bca", "stud"
+#' @param tvec Bootstrap pivots (required for "stud")
+#' @param se_obs Analytical SE on z scale (required for "stud")
+#' @param z0 BCa bias correction (required for "bca")
+#' @param acc BCa acceleration (required for "bca")
+#' @param nboot Number of bootstrap replicates
+#' @return A single p-value
+#' @keywords internal
+boot_pvalue <- function(bvec, est, null, alternative,
+                        boot_ci, tvec = NULL, se_obs = NULL,
+                        z0 = NULL, acc = NULL, nboot) {
+
+  if (boot_ci == "perc") {
+    sig <- .pval_perc(bvec, null, alternative, nboot)
+  } else if (boot_ci == "basic") {
+    sig <- .pval_basic(bvec, est, null, alternative, nboot)
+  } else if (boot_ci == "bca") {
+    sig <- .pval_bca(bvec, est, null, alternative, nboot,
+                     z0 = z0, acc = acc)
+  } else if (boot_ci == "stud") {
+    sig <- .pval_stud(tvec, est, null, alternative, se_obs, nboot)
+  }
+
+  sig
+}
+
+# Percentile p-value (Wilcox method) -----
+.pval_perc <- function(bvec, null, alternative, nboot) {
+  if (alternative == "two.sided") {
+    phat <- (sum(bvec < null) + 0.5 * sum(bvec == null)) / nboot
+    sig <- 2 * min(phat, 1 - phat)
+  } else if (alternative == "greater") {
+    sig <- 1 - sum(bvec >= null) / nboot
+  } else { # less
+    sig <- 1 - sum(bvec <= null) / nboot
+  }
+  sig
+}
+
+# Basic (reflected) p-value -----
+.pval_basic <- function(bvec, est, null, alternative, nboot) {
+  reflected <- 2 * est - bvec
+  if (alternative == "two.sided") {
+    phat <- (sum(reflected < null) + 0.5 * sum(reflected == null)) / nboot
+    sig <- 2 * min(phat, 1 - phat)
+  } else if (alternative == "greater") {
+    sig <- (sum(reflected < null) + 0.5 * sum(reflected == null)) / nboot
+  } else { # less
+    sig <- (sum(reflected > null) + 0.5 * sum(reflected == null)) / nboot
+  }
+  sig
+}
+
+# BCa inverted p-value -----
+.pval_bca <- function(bvec, est, null, alternative, nboot,
+                      z0, acc) {
+  # Continuity-corrected proportion below null
+  p0 <- (sum(bvec < null) + 0.5) / (nboot + 1)
+
+  z_p0 <- qnorm(p0)
+
+  # BCa-adjusted cumulative probability at the null
+  u <- z_p0 - z0
+  p_bca <- pnorm((u * (1 - acc * z0) - z0) / (1 + acc * u))
+
+  if (alternative == "two.sided") {
+    sig <- 2 * min(p_bca, 1 - p_bca)
+  } else if (alternative == "greater") {
+    sig <- p_bca
+  } else { # less
+    sig <- 1 - p_bca
+  }
+  sig
+}
+
+# Studentized (pivot) p-value -----
+.pval_stud <- function(tvec, est, null, alternative, se_obs, nboot) {
+  t_obs <- (atanh(est) - atanh(null)) / se_obs
+
+  if (alternative == "two.sided") {
+    sig <- 2 * min(mean(tvec >= t_obs), mean(tvec <= t_obs))
+  } else if (alternative == "greater") {
+    sig <- mean(tvec <= t_obs)
+  } else { # less
+    sig <- mean(tvec >= t_obs)
+  }
+  sig
+}
+
+# SE on Fisher z scale for studentized bootstrap -----
+
+#' Analytical SE on the Fisher z scale for a given correlation method
+#'
+#' @param r_star Correlation estimate (can be a vector for bootstrap replicates)
+#' @param n Sample size
+#' @param method One of "pearson", "kendall", "spearman"
+#' @return SE on the Fisher z scale
+#' @keywords internal
+.fisher_z_se <- function(r_star, n, method) {
+  if (method == "pearson") {
+    1 / sqrt(n - 3)
+  } else if (method == "spearman") {
+    sqrt((1 + r_star^2 / 2) / (n - 3))
+  } else if (method == "kendall") {
+    sqrt(0.437 / (n - 4))
+  }
+}
