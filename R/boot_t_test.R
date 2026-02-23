@@ -45,15 +45,31 @@
 #'   * Compute the p-value by comparing the original test statistic to the bootstrap distribution
 #'   * Calculate confidence intervals using the specified bootstrap method
 #'
-#' Three bootstrap confidence interval methods are available:
-#'   - *Studentized bootstrap ("stud")*: Accounts for the variability in standard error estimates
-#'   - *Basic bootstrap ("basic")*: Uses the empirical distribution of bootstrap estimates
-#'   - *Percentile bootstrap ("perc")*: Uses percentiles of the bootstrap distribution directly
+#' ## Bootstrap Confidence Interval Methods
+#'
+#' Four bootstrap confidence interval methods are available via the `boot_ci` argument:
+#'   - **Studentized bootstrap ("stud")**: Uses the bootstrap distribution of pivotal
+#'     t-statistics to account for variability in standard error estimates. This is the
+#'     default and usually provides the most accurate coverage.
+#'   - **Basic bootstrap ("basic")**: Reflects the bootstrap distribution of estimates
+#'     around the observed value.
+#'   - **Percentile bootstrap ("perc")**: Uses percentiles of the bootstrap distribution directly.
+#'   - **Bias-corrected and accelerated ("bca")**: Corrects for both bias and skewness in the
+#'     bootstrap distribution using jackknife-based acceleration. Most accurate when the
+#'     bootstrap distribution is skewed, but computationally more expensive.
+#'
+#' ## Bootstrap P-values
+#'
+#' The p-value is computed using the method that matches the selected `boot_ci`,
+#' ensuring that p < alpha if and only if the corresponding confidence interval
+#' excludes the null value (CI inversion principle). Previously, all bootstrap
+#' CI methods used the studentized (pivot) p-value, which could produce p-values
+#' inconsistent with non-studentized CIs.
 #'
 #' For different alternatives, the p-values are calculated as follows:
-#'   * "two.sided": Proportion of bootstrap statistics at least as extreme as the observed statistic (in either direction), multiplied by 2
-#'   * "less": Proportion of bootstrap statistics less than or equal to the observed statistic
-#'   * "greater": Proportion of bootstrap statistics greater than or equal to the observed statistic
+#'   * "two.sided": Two-tailed p-value from the bootstrap distribution
+#'   * "less": One-sided p-value for the hypothesis that the true value is less than the null
+#'   * "greater": One-sided p-value for the hypothesis that the true value is greater than the null
 #'   * "equivalence": Maximum of two one-sided p-values (for lower and upper bounds)
 #'   * "minimal.effect": Minimum of two one-sided p-values (for lower and upper bounds)
 #'
@@ -222,6 +238,12 @@ boot_t_test.default <- function(x,
     conf.level = 1-alpha
   }
 
+  # CI method label for method string
+  ci_label <- switch(boot_ci,
+                     "basic" = "(basic)",
+                     "perc" = " (percentile)",
+                     "bca" = " (BCa)",
+                     "stud" = " (studentized)")
 
   if(!is.null(y)){
     dname <- paste(deparse(substitute(x)), "and", deparse(substitute(y)))
@@ -310,31 +332,25 @@ boot_t_test.default <- function(x,
         else ttest_estimate_label(type = "t", xname = XNAME, yname = NULL, paired = FALSE))
     }
 
-    X <- matrix(sample(x, size = nx*R, replace = TRUE), nrow = R)
-
     if (tr == 0) {
-      # Keep existing vectorized path for speed
-      MX <- rowMeans(X - mx)
+      x.cent <- x - mx
+      X <- matrix(sample(x.cent, size = nx*R, replace = TRUE), nrow = R)
+
+      MX <- rowMeans(X)
       VX <- rowSums((X - MX) ^ 2) / (nx - 1)
-      MZ2 = NA
-      VZ2 = NA
-      for(i in 1:R){
-        zi = X[i,]
-        MZ2[i] = mean(zi - mx)
-        VZ2[i] <- sum((zi - MZ2[i]) ^ 2) / (nx - 1)
-      }
 
       STDERR <- sqrt(VX/nx)
-      TSTAT <- (MX)/STDERR
-      EFF <- MX+mx
+      TSTAT <- MX/STDERR
+      EFF <- MX + mx
 
       for(i in 1:nrow(X)){
-        dat = X[i,]
+        dat = X[i,] + mx
         m_vec[i] <- mean(dat, na.rm=TRUE)
         m_se_vec[i] <- sd(dat, na.rm = TRUE)/sqrt(length(na.omit(dat)))
       }
     } else {
       # Trimmed path
+      X <- matrix(sample(x, size = nx*R, replace = TRUE), nrow = R)
       TSTAT <- numeric(R)
       hx <- effective_n(nx, tr)
 
@@ -389,13 +405,6 @@ boot_t_test.default <- function(x,
       vy <- var(y)
     }
 
-    # CI method label for method string
-    ci_label <- switch(boot_ci,
-                       "basic" = "(basic)",
-                       "perc" = " (percentile)",
-                       "bca" = " (BCa)",
-                       "stud" = " (studentized)")
-
     # Method string
     if (tr > 0) {
       method <- paste("Bootstrapped",
@@ -449,24 +458,28 @@ boot_t_test.default <- function(x,
         mz <- mean(z)
       }
 
-      X <- matrix(sample(x, size = nx*R, replace = TRUE), nrow = R)
-      Y <- matrix(sample(y, size = ny*R, replace = TRUE), nrow = R)
-
       if (tr == 0) {
-        MX <- rowMeans(X - mx + mz)
-        MY <- rowMeans(Y - my + mz)
+        x.cent <- x - mx + mz
+        y.cent <- y - my + mz
+        X <- matrix(sample(x.cent, size = nx*R, replace = TRUE), nrow = R)
+        Y <- matrix(sample(y.cent, size = ny*R, replace = TRUE), nrow = R)
+
+        MX <- rowMeans(X)
+        MY <- rowMeans(Y)
         V <- (rowSums((X-MX)^2) + rowSums((Y-MY)^2))/df
         STDERR <- sqrt(V*(1/nx + 1/ny))
-        EFF <- (MX+mx) - (MY+my)
+        EFF <- (MX + mx) - (MY + my)
 
         for(i in 1:nrow(X)){
-          dat_x = X[i,]
-          dat_y = Y[i,]
-          m_vec[i] <- mean(dat_x, na.rm=TRUE) - mean(dat_y,na.rm=TRUE)
+          dat_x = X[i,] + mx - mz
+          dat_y = Y[i,] + my - mz
+          m_vec[i] <- mean(dat_x, na.rm=TRUE) - mean(dat_y, na.rm=TRUE)
           m_se_vec[i] <- sqrt(sd(dat_x, na.rm=TRUE)^2/length(na.omit(dat_x)) + sd(dat_y, na.rm=TRUE)^2/length(na.omit(dat_y)))
         }
       } else {
         # Trimmed path - equal variance
+        X <- matrix(sample(x, size = nx*R, replace = TRUE), nrow = R)
+        Y <- matrix(sample(y, size = ny*R, replace = TRUE), nrow = R)
         TSTAT <- numeric(R)
         hx <- effective_n(nx, tr)
         hy <- effective_n(ny, tr)
@@ -521,27 +534,29 @@ boot_t_test.default <- function(x,
         mz <- mean(z)
       }
 
-      x.cent <- x - mx + mz
-      y.cent <- y - my + mz
-      X <- matrix(sample(x, size = nx*R, replace = TRUE), nrow = R)
-      Y <- matrix(sample(y, size = ny*R, replace = TRUE), nrow = R)
-
       if (tr == 0) {
-        MX <- rowMeans(X - mx + mz)
-        MY <- rowMeans(Y - my + mz)
+        x.cent <- x - mx + mz
+        y.cent <- y - my + mz
+        X <- matrix(sample(x.cent, size = nx*R, replace = TRUE), nrow = R)
+        Y <- matrix(sample(y.cent, size = ny*R, replace = TRUE), nrow = R)
+
+        MX <- rowMeans(X)
+        MY <- rowMeans(Y)
         VX <- rowSums((X-MX)^2)/(nx-1)
         VY <- rowSums((Y-MY)^2)/(ny-1)
         STDERR <- sqrt(VX/nx + VY/ny)
-        EFF <- (MX+mx) - (MY+my)
+        EFF <- (MX + mx) - (MY + my)
 
         for(i in 1:nrow(X)){
-          dat_x = X[i,]
-          dat_y = Y[i,]
-          m_vec[i] <- mean(dat_x, na.rm=TRUE) - mean(dat_y,na.rm=TRUE)
+          dat_x = X[i,] + mx - mz
+          dat_y = Y[i,] + my - mz
+          m_vec[i] <- mean(dat_x, na.rm=TRUE) - mean(dat_y, na.rm=TRUE)
           m_se_vec[i] <- sqrt(sd(dat_x, na.rm=TRUE)^2/length(na.omit(dat_x)) + sd(dat_y, na.rm=TRUE)^2/length(na.omit(dat_y)))
         }
       } else {
         # Trimmed path - Welch/Yuen
+        X <- matrix(sample(x, size = nx*R, replace = TRUE), nrow = R)
+        Y <- matrix(sample(y, size = ny*R, replace = TRUE), nrow = R)
         TSTAT <- numeric(R)
         hx <- effective_n(nx, tr)
         hy <- effective_n(ny, tr)
@@ -620,76 +635,52 @@ boot_t_test.default <- function(x,
   # se0 for studentized CI: use the observed stderr
   se0_val <- stderr
 
-  if (alternative == "less") {
-
-    boot.pval <- mean(TSTAT < tstat)
-
-    boot.cint <- switch(boot_ci,
-                        "stud" = stud(m_vec,
-                                      boots_se = m_se_vec,
-                                      t0 = diff,
-                                      se0 = se0_val,
-                                      alpha = alpha*2),
-                        "basic" = basic(m_vec, t0 = diff, alpha*2),
-                        "perc" = perc(m_vec, alpha*2),
-                        "bca" = bca_ci(boots_est = m_vec, t0 = diff, jack_est = jack_est, alpha = alpha*2))
-
+  # Pre-compute BCa parameters for p-value use
+  z0 <- NULL; acc <- NULL
+  if (boot_ci == "bca") {
+    bca_par <- bca_params(m_vec, diff, jack_est)
+    z0 <- bca_par$z0; acc <- bca_par$acc
   }
 
-  if(alternative == "greater") {
-    boot.pval <- mean(TSTAT > tstat)
-    boot.cint <- switch(boot_ci,
-                        "stud" = stud(m_vec,
-                                      boots_se = m_se_vec,
-                                      t0 = diff,
-                                      se0 = se0_val,
-                                      alpha*2),
-                        "basic" = basic(m_vec, t0 = diff, alpha*2),
-                        "perc" = perc(m_vec, alpha*2),
-                        "bca" = bca_ci(boots_est = m_vec, t0 = diff, jack_est = jack_est, alpha = alpha*2))
-  }
+  # CI computation (alpha depends on alternative)
+  ci_alpha <- if (alternative == "two.sided") alpha else alpha * 2
+  boot.cint <- switch(boot_ci,
+                      "stud" = stud(m_vec,
+                                    boots_se = m_se_vec,
+                                    t0 = diff,
+                                    se0 = se0_val,
+                                    alpha = ci_alpha),
+                      "basic" = basic(m_vec, t0 = diff, ci_alpha),
+                      "perc" = perc(m_vec, ci_alpha),
+                      "bca" = bca_ci(boots_est = m_vec, t0 = diff,
+                                     jack_est = jack_est, alpha = ci_alpha))
 
-  if(alternative == "two.sided"){
-    boot.pval <- 2*min(mean(TSTAT <= tstat), mean(TSTAT > tstat))
-    boot.cint <- switch(boot_ci,
-                        "stud" = stud(m_vec,
-                                      boots_se = m_se_vec,
-                                      t0 = diff,
-                                      se0 = se0_val,
-                                      alpha),
-                        "basic" = basic(m_vec, t0 = diff, alpha),
-                        "perc" = perc(m_vec, alpha),
-                        "bca" = bca_ci(boots_est = m_vec, t0 = diff, jack_est = jack_est, alpha = alpha))
-  }
-
-  if(alternative == "equivalence") {
-    p_l = mean(TSTAT > tstat_l)
-    p_u = mean(TSTAT < tstat_u)
+  # P-value computation (method-consistent with CI)
+  if (alternative %in% c("two.sided", "greater", "less")) {
+    boot.pval <- boot_pvalue(bvec = m_vec, est = diff, null = mu,
+                             alternative = alternative, boot_ci = boot_ci,
+                             tvec = TSTAT, se_obs = stderr,
+                             z0 = z0, acc = acc, nboot = R)
+  } else if (alternative == "equivalence") {
+    p_l <- boot_pvalue(bvec = m_vec, est = diff, null = min(mu),
+                       alternative = "greater", boot_ci = boot_ci,
+                       tvec = TSTAT, se_obs = stderr,
+                       z0 = z0, acc = acc, nboot = R)
+    p_u <- boot_pvalue(bvec = m_vec, est = diff, null = max(mu),
+                       alternative = "less", boot_ci = boot_ci,
+                       tvec = TSTAT, se_obs = stderr,
+                       z0 = z0, acc = acc, nboot = R)
     boot.pval <- max(p_l, p_u)
-    boot.cint <- switch(boot_ci,
-                        "stud" = stud(m_vec,
-                                      boots_se = m_se_vec,
-                                      t0 = diff,
-                                      se0 = se0_val,
-                                      alpha*2),
-                        "basic" = basic(m_vec, t0 = diff, alpha*2),
-                        "perc" = perc(m_vec, alpha*2),
-                        "bca" = bca_ci(boots_est = m_vec, t0 = diff, jack_est = jack_est, alpha = alpha*2))
-  }
-
-  if(alternative == "minimal.effect") {
-    p_l = mean(TSTAT < tstat_l)
-    p_u = mean(TSTAT > tstat_u)
-    boot.pval <- min(p_l,p_u)
-    boot.cint <- switch(boot_ci,
-                        "stud" = stud(m_vec,
-                                      boots_se = m_se_vec,
-                                      t0 = diff,
-                                      se0 = se0_val,
-                                      alpha*2),
-                        "basic" = basic(m_vec, t0 = diff, alpha*2),
-                        "perc" = perc(m_vec, alpha*2),
-                        "bca" = bca_ci(boots_est = m_vec, t0 = diff, jack_est = jack_est, alpha = alpha*2))
+  } else if (alternative == "minimal.effect") {
+    p_l <- boot_pvalue(bvec = m_vec, est = diff, null = max(mu),
+                       alternative = "greater", boot_ci = boot_ci,
+                       tvec = TSTAT, se_obs = stderr,
+                       z0 = z0, acc = acc, nboot = R)
+    p_u <- boot_pvalue(bvec = m_vec, est = diff, null = min(mu),
+                       alternative = "less", boot_ci = boot_ci,
+                       tvec = TSTAT, se_obs = stderr,
+                       z0 = z0, acc = acc, nboot = R)
+    boot.pval <- min(p_l, p_u)
   }
 
   boot.se = sd(m_vec, na.rm = TRUE)

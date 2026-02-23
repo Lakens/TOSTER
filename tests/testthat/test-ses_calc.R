@@ -1323,3 +1323,24 @@ test_that("paired score handles zero differences (dropped)", {
                        alternative = "two.sided", null.value = 0.5)
   expect_equal(res_test$p.value, wt$p.value, tolerance = 1e-6)
 })
+
+# boot_ses_calc CI/p-value agreement tests -----
+
+for (ci_method in c("perc", "basic", "bca", "stud")) {
+  test_that(paste0("boot_ses_calc: CI/p-value agreement for ", ci_method), {
+    skip_on_cran()
+
+    set.seed(42)
+    x <- c(1.2, 2.3, 3.1, 4.6, 5.2, 6.7, 7.0, 8.1, 2.5, 3.3)
+    y <- c(3.5, 4.8, 5.6, 6.9, 7.2, 8.5, 9.0, 10.1, 4.5, 5.3)
+
+    res <- boot_ses_calc(x = x, y = y, ses = "rb",
+                         alternative = "two.sided",
+                         null.value = 0,
+                         boot_ci = ci_method, R = 1999)
+    ci_excludes_null <- res$conf.int[1] > 0 || res$conf.int[2] < 0
+    p_rejects <- res$p.value < 0.05
+    expect_equal(ci_excludes_null, p_rejects,
+                 label = paste(ci_method, "CI/p agreement two.sided"))
+  })
+}

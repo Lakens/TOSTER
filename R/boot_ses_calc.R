@@ -75,21 +75,40 @@
 #'
 #' ## Bootstrap Confidence Interval Methods
 #'
-#' Three bootstrap confidence interval methods are available:
-#'   - **Basic bootstrap ("basic")**: Uses the empirical distribution of bootstrap estimates
-#'   - **Studentized bootstrap ("stud")**: Accounts for the variability in standard error estimates
+#' Four bootstrap confidence interval methods are available via the `boot_ci` argument:
+#'   - **Basic bootstrap ("basic")**: Reflects the bootstrap distribution of estimates
+#'     around the observed value
+#'   - **Studentized bootstrap ("stud")**: Uses the bootstrap distribution of pivotal
+#'     t-statistics to account for variability in standard error estimates. This is the
+#'     default and usually provides the most accurate coverage.
 #'   - **Percentile bootstrap ("perc")**: Uses percentiles of the bootstrap distribution directly
+#'   - **Bias-corrected and accelerated ("bca")**: Corrects for both bias and skewness in the
+#'     bootstrap distribution using jackknife-based acceleration
+#'
+#' All CI methods operate on a working scale that is better suited
+#' to symmetric bootstrap distributions: the log-odds scale when
+#' `se_method = "agresti"` (default), or the Fisher z scale when
+#' `se_method = "fisher"`. Confidence limits are then back-transformed to the
+#' requested effect size scale.
 #'
 #' ## Hypothesis Testing
 #'
-#' When an alternative other than "two.sided" is specified, or when null.value is not the
+#' When an alternative other than "none" is specified, or when null.value is not the
 #' default, the function performs bootstrap hypothesis testing. For equivalence and minimal
 #' effect testing, specify null.value as a vector of two values (lower and upper bounds).
 #'
+#' The p-value is computed using the method that matches the selected `boot_ci`,
+#' ensuring that p < alpha if and only if the corresponding confidence interval
+#' excludes the null value (CI inversion principle). Previously, all bootstrap
+#' CI methods used the studentized (pivot) p-value, which could produce p-values
+#' inconsistent with non-studentized CIs. The null value is converted to the
+#' working scale (log-odds or Fisher z) before computing the p-value, maintaining
+#' consistency with the CI construction.
+#'
 #' For different alternatives, the p-values are calculated as follows:
-#'   * "two.sided": Proportion of bootstrap statistics at least as extreme as the observed statistic
-#'   * "less": Proportion of bootstrap statistics less than or equal to the observed statistic
-#'   * "greater": Proportion of bootstrap statistics greater than or equal to the observed statistic
+#'   * "two.sided": Two-tailed p-value from the bootstrap distribution
+#'   * "less": One-sided p-value for the hypothesis that the true value is less than the null
+#'   * "greater": One-sided p-value for the hypothesis that the true value is greater than the null
 #'   * "equivalence": Maximum of two one-sided p-values (for lower and upper bounds)
 #'   * "minimal.effect": Minimum of two one-sided p-values (for lower and upper bounds)
 #'
@@ -188,7 +207,7 @@ boot_ses_calc <- function(x, ...,
                           ses = "rb",
                           alpha = 0.05,
                           mu = 0,
-                          boot_ci = c("stud", "basic", "perc","bca"),
+                          boot_ci = c("bca", "stud", "basic", "perc"),
                           R = 1999,
                           se_method = c("agresti", "fisher"),
                           output = c("htest", "data.frame"),
@@ -587,12 +606,18 @@ boot_ses_calc.default = function(x,
   # Bootstrap SE on the transformed scale (for reporting in stderr field)
   boot_se = sd(boots_transformed, na.rm = TRUE)
 
-  # Studentized bootstrap pivot on working scale
-  # Centered at observed working-scale estimate, scaled by bootstrap SE
+  # Bootstrap pivot and p-value computation on working scale
   obs_working <- to_working(raw_ses$estimate[1L])
   TSTAT <- (boots - obs_working) / boots_se
 
-  # Compute p-value using studentized bootstrap distribution
+  # Pre-compute BCa parameters for p-value use
+  z0 <- NULL; acc <- NULL
+  if (boot_ci == "bca") {
+    bca_par <- bca_params(boots, obs_working, jack_est)
+    z0 <- bca_par$z0; acc <- bca_par$acc
+  }
+
+  # Compute p-value (method-consistent with CI) on working scale
   if (alternative != "none") {
     # Convert null value(s) from user's ses scale to rb, then to working scale
     null_to_rb <- function(val, ses_type) {
@@ -605,46 +630,57 @@ boot_ses_calc.default = function(x,
 
     se_obs_working <- raw_SE  # already on working scale
 
-    if (alternative %in% c("equivalence", "minimal.effect")) {
+    if (alternative %in% c("two.sided", "greater", "less")) {
+      null_working <- to_working(null_to_rb(null.value, ses))
+      boot.pval <- boot_pvalue(bvec = boots, est = obs_working,
+                               null = null_working,
+                               alternative = alternative, boot_ci = boot_ci,
+                               tvec = TSTAT, se_obs = se_obs_working,
+                               z0 = z0, acc = acc, nboot = R)
+    } else if (alternative == "equivalence") {
       null_working_l <- to_working(null_to_rb(low_bound, ses))
       null_working_u <- to_working(null_to_rb(high_bound, ses))
-      z_obs_l <- (obs_working - null_working_l) / se_obs_working
-      z_obs_u <- (obs_working - null_working_u) / se_obs_working
-    } else {
-      null_working <- to_working(null_to_rb(null.value, ses))
-      z_obs <- (obs_working - null_working) / se_obs_working
-    }
-
-    if (alternative == "two.sided") {
-      boot.pval <- 2 * min(mean(TSTAT <= z_obs, na.rm = TRUE),
-                           mean(TSTAT > z_obs, na.rm = TRUE))
-
-    } else if (alternative == "less") {
-      boot.pval <- mean(TSTAT < z_obs, na.rm = TRUE)
-
-    } else if (alternative == "greater") {
-      boot.pval <- mean(TSTAT > z_obs, na.rm = TRUE)
-
-    } else if (alternative == "equivalence") {
-      p_l <- mean(TSTAT > z_obs_l, na.rm = TRUE)
-      p_u <- mean(TSTAT < z_obs_u, na.rm = TRUE)
+      p_l <- boot_pvalue(bvec = boots, est = obs_working,
+                         null = null_working_l,
+                         alternative = "greater", boot_ci = boot_ci,
+                         tvec = TSTAT, se_obs = se_obs_working,
+                         z0 = z0, acc = acc, nboot = R)
+      p_u <- boot_pvalue(bvec = boots, est = obs_working,
+                         null = null_working_u,
+                         alternative = "less", boot_ci = boot_ci,
+                         tvec = TSTAT, se_obs = se_obs_working,
+                         z0 = z0, acc = acc, nboot = R)
       boot.pval <- max(p_l, p_u)
-
     } else if (alternative == "minimal.effect") {
-      p_l <- mean(TSTAT < z_obs_l, na.rm = TRUE)
-      p_u <- mean(TSTAT > z_obs_u, na.rm = TRUE)
+      null_working_l <- to_working(null_to_rb(low_bound, ses))
+      null_working_u <- to_working(null_to_rb(high_bound, ses))
+      p_l <- boot_pvalue(bvec = boots, est = obs_working,
+                         null = null_working_u,
+                         alternative = "greater", boot_ci = boot_ci,
+                         tvec = TSTAT, se_obs = se_obs_working,
+                         z0 = z0, acc = acc, nboot = R)
+      p_u <- boot_pvalue(bvec = boots, est = obs_working,
+                         null = null_working_l,
+                         alternative = "less", boot_ci = boot_ci,
+                         tvec = TSTAT, se_obs = se_obs_working,
+                         z0 = z0, acc = acc, nboot = R)
       boot.pval <- min(p_l, p_u)
     }
 
     # Report z-observed (analogous to t-observed in boot_t_test)
     if (alternative %in% c("equivalence", "minimal.effect")) {
+      null_working_l <- to_working(null_to_rb(low_bound, ses))
+      null_working_u <- to_working(null_to_rb(high_bound, ses))
+      z_obs_l <- (obs_working - null_working_l) / se_obs_working
+      z_obs_u <- (obs_working - null_working_u) / se_obs_working
       if (alternative == "equivalence") {
         z_stat <- if (p_l >= p_u) z_obs_l else z_obs_u
       } else {
         z_stat <- if (p_l <= p_u) z_obs_l else z_obs_u
       }
     } else {
-      z_stat <- z_obs
+      null_working <- to_working(null_to_rb(null.value, ses))
+      z_stat <- (obs_working - null_working) / se_obs_working
     }
   }
 

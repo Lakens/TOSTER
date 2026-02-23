@@ -14,29 +14,34 @@ boot_pvalue(
   se_obs = NULL,
   z0 = NULL,
   acc = NULL,
-  nboot
+  nboot,
+  z_transform = FALSE
 )
 }
 \arguments{
-\item{bvec}{Numeric vector of bootstrap correlation estimates}
+\item{bvec}{Numeric vector of bootstrap estimates (on the working scale)}
 
-\item{est}{Observed correlation estimate}
+\item{est}{Observed estimate (on the same scale as bvec)}
 
-\item{null}{Null hypothesis value (single numeric)}
+\item{null}{Null hypothesis value (single numeric, on the same scale as bvec)}
 
 \item{alternative}{One of "two.sided", "greater", "less"}
 
 \item{boot_ci}{One of "perc", "basic", "bca", "stud"}
 
-\item{tvec}{Bootstrap pivots (required for "stud")}
+\item{tvec}{Bootstrap pivots (required for "stud"):
+typically \code{(bvec - est) / bootstrap_se}}
 
-\item{se_obs}{Analytical SE on z scale (required for "stud")}
+\item{se_obs}{Observed standard error on the working scale (required for "stud")}
 
-\item{z0}{BCa bias correction (required for "bca")}
+\item{z0}{BCa bias correction from \code{bca_params()} (required for "bca")}
 
-\item{acc}{BCa acceleration (required for "bca")}
+\item{acc}{BCa acceleration from \code{bca_params()} (required for "bca")}
 
 \item{nboot}{Number of bootstrap replicates}
+
+\item{z_transform}{Logical indicating whether to apply Fisher z transformation
+(used for correlation estimates; default FALSE)}
 }
 \value{
 A single p-value
@@ -44,5 +49,7 @@ A single p-value
 \description{
 Dispatches to the appropriate p-value calculation based on the CI method,
 ensuring that p < alpha if and only if the corresponding CI excludes the null.
+Used by all bootstrap functions in the package (correlations, t-tests, SMD,
+SES, TOST, and log-TOST).
 }
 \keyword{internal}

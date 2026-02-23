@@ -104,19 +104,35 @@ The bootstrap procedure follows these steps:
 \item Compute the p-value by comparing the original test statistic to the bootstrap distribution
 \item Calculate confidence intervals using the specified bootstrap method
 }
+\subsection{Bootstrap Confidence Interval Methods}{
 
-Three bootstrap confidence interval methods are available:
+Four bootstrap confidence interval methods are available via the \code{boot_ci} argument:
 \itemize{
-\item \emph{Studentized bootstrap ("stud")}: Accounts for the variability in standard error estimates
-\item \emph{Basic bootstrap ("basic")}: Uses the empirical distribution of bootstrap estimates
-\item \emph{Percentile bootstrap ("perc")}: Uses percentiles of the bootstrap distribution directly
+\item \strong{Studentized bootstrap ("stud")}: Uses the bootstrap distribution of pivotal
+t-statistics to account for variability in standard error estimates. This is the
+default and usually provides the most accurate coverage.
+\item \strong{Basic bootstrap ("basic")}: Reflects the bootstrap distribution of estimates
+around the observed value.
+\item \strong{Percentile bootstrap ("perc")}: Uses percentiles of the bootstrap distribution directly.
+\item \strong{Bias-corrected and accelerated ("bca")}: Corrects for both bias and skewness in the
+bootstrap distribution using jackknife-based acceleration. Most accurate when the
+bootstrap distribution is skewed, but computationally more expensive.
 }
+}
+
+\subsection{Bootstrap P-values}{
+
+The p-value is computed using the method that matches the selected \code{boot_ci},
+ensuring that p < alpha if and only if the corresponding confidence interval
+excludes the null value (CI inversion principle). Previously, all bootstrap
+CI methods used the studentized (pivot) p-value, which could produce p-values
+inconsistent with non-studentized CIs.
 
 For different alternatives, the p-values are calculated as follows:
 \itemize{
-\item "two.sided": Proportion of bootstrap statistics at least as extreme as the observed statistic (in either direction), multiplied by 2
-\item "less": Proportion of bootstrap statistics less than or equal to the observed statistic
-\item "greater": Proportion of bootstrap statistics greater than or equal to the observed statistic
+\item "two.sided": Two-tailed p-value from the bootstrap distribution
+\item "less": One-sided p-value for the hypothesis that the true value is less than the null
+\item "greater": One-sided p-value for the hypothesis that the true value is greater than the null
 \item "equivalence": Maximum of two one-sided p-values (for lower and upper bounds)
 \item "minimal.effect": Minimum of two one-sided p-values (for lower and upper bounds)
 }
@@ -137,6 +153,7 @@ Unlike the \code{t_TOST} function, this function returns a standard \code{htest}
 compatibility with other R functions, while still providing the benefits of bootstrapping.
 
 For detailed information on calculation methods, see \code{vignette("robustTOST")}.
+}
 }
 \section{Purpose}{
 

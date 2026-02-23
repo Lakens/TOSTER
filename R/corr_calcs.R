@@ -252,18 +252,22 @@ stud_ci <- function(tvec, t0_z, se_obs, alpha) {
 #'
 #' Dispatches to the appropriate p-value calculation based on the CI method,
 #' ensuring that p < alpha if and only if the corresponding CI excludes the null.
+#' Used by all bootstrap functions in the package (correlations, t-tests, SMD,
+#' SES, TOST, and log-TOST).
 #'
-#' @param bvec Numeric vector of bootstrap correlation estimates
-#' @param est Observed correlation estimate
-#' @param null Null hypothesis value (single numeric)
+#' @param bvec Numeric vector of bootstrap estimates (on the working scale)
+#' @param est Observed estimate (on the same scale as bvec)
+#' @param null Null hypothesis value (single numeric, on the same scale as bvec)
 #' @param alternative One of "two.sided", "greater", "less"
 #' @param boot_ci One of "perc", "basic", "bca", "stud"
-#' @param tvec Bootstrap pivots (required for "stud")
-#' @param se_obs Analytical SE on z scale (required for "stud")
-#' @param z0 BCa bias correction (required for "bca")
-#' @param acc BCa acceleration (required for "bca")
+#' @param tvec Bootstrap pivots (required for "stud"):
+#'   typically `(bvec - est) / bootstrap_se`
+#' @param se_obs Observed standard error on the working scale (required for "stud")
+#' @param z0 BCa bias correction from `bca_params()` (required for "bca")
+#' @param acc BCa acceleration from `bca_params()` (required for "bca")
 #' @param nboot Number of bootstrap replicates
-#' @param z_transform Logical indicating whether to apply Fisher z transformation to estimates correlations
+#' @param z_transform Logical indicating whether to apply Fisher z transformation
+#'   (used for correlation estimates; default FALSE)
 #' @return A single p-value
 #' @keywords internal
 boot_pvalue <- function(bvec, est, null, alternative,
@@ -347,9 +351,9 @@ boot_pvalue <- function(bvec, est, null, alternative,
   if (alternative == "two.sided") {
     sig <- 2 * min(mean(tvec >= t_obs), mean(tvec <= t_obs))
   } else if (alternative == "greater") {
-    sig <- mean(tvec <= t_obs)
-  } else { # less
     sig <- mean(tvec >= t_obs)
+  } else { # less
+    sig <- mean(tvec <= t_obs)
   }
   sig
 }

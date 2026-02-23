@@ -168,12 +168,26 @@ The function implements the following bootstrap approach:
 \item Calculate confidence intervals using the specified method
 }
 
-Three bootstrap confidence interval methods are available:
+Four bootstrap confidence interval methods are available via the \code{boot_ci} argument:
 \itemize{
-\item \strong{Studentized bootstrap ("stud")}: Accounts for the variability in standard error estimates. Usually provides the most accurate coverage probability and is set as the default.
-\item \strong{Basic bootstrap ("basic")}: Uses the empirical distribution of bootstrap estimates. Simple approach that works well for symmetric distributions.
-\item \strong{Percentile bootstrap ("perc")}: Uses percentiles of the bootstrap distribution directly. More robust to skewness in the bootstrap distribution.
+\item \strong{Studentized bootstrap ("stud")}: Uses the bootstrap distribution of pivotal
+t-statistics to account for variability in standard error estimates. Usually
+provides the most accurate coverage probability and is set as the default.
+\item \strong{Basic bootstrap ("basic")}: Reflects the bootstrap distribution of estimates
+around the observed value. Simple approach that works well for symmetric distributions.
+\item \strong{Percentile bootstrap ("perc")}: Uses percentiles of the bootstrap distribution directly.
+More robust to skewness in the bootstrap distribution.
+\item \strong{Bias-corrected and accelerated ("bca")}: Corrects for both bias and skewness in the
+bootstrap distribution using jackknife-based acceleration. Most accurate when the
+bootstrap distribution is skewed, but computationally more expensive.
 }
+
+When hypothesis testing is requested (i.e., \code{alternative} is not \code{"none"}),
+the p-value is computed using the method that matches the selected \code{boot_ci},
+ensuring that p < alpha if and only if the corresponding confidence interval
+excludes the null value (CI inversion principle). Previously, all bootstrap
+CI methods used the studentized (pivot) p-value, which could produce p-values
+inconsistent with non-studentized CIs.
 
 The function supports various SMD variants:
 \itemize{

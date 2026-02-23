@@ -13,7 +13,7 @@ boot_ses_calc(
   ses = "rb",
   alpha = 0.05,
   mu = 0,
-  boot_ci = c("stud", "basic", "perc", "bca"),
+  boot_ci = c("bca", "stud", "basic", "perc"),
   R = 1999,
   se_method = c("agresti", "fisher"),
   output = c("htest", "data.frame"),
@@ -162,25 +162,44 @@ Wilcoxon statistic variance. This is retained for backward compatibility.
 
 \subsection{Bootstrap Confidence Interval Methods}{
 
-Three bootstrap confidence interval methods are available:
+Four bootstrap confidence interval methods are available via the \code{boot_ci} argument:
 \itemize{
-\item \strong{Basic bootstrap ("basic")}: Uses the empirical distribution of bootstrap estimates
-\item \strong{Studentized bootstrap ("stud")}: Accounts for the variability in standard error estimates
+\item \strong{Basic bootstrap ("basic")}: Reflects the bootstrap distribution of estimates
+around the observed value
+\item \strong{Studentized bootstrap ("stud")}: Uses the bootstrap distribution of pivotal
+t-statistics to account for variability in standard error estimates. This is the
+default and usually provides the most accurate coverage.
 \item \strong{Percentile bootstrap ("perc")}: Uses percentiles of the bootstrap distribution directly
+\item \strong{Bias-corrected and accelerated ("bca")}: Corrects for both bias and skewness in the
+bootstrap distribution using jackknife-based acceleration
 }
+
+All CI methods operate on a working scale that is better suited
+to symmetric bootstrap distributions: the log-odds scale when
+\code{se_method = "agresti"} (default), or the Fisher z scale when
+\code{se_method = "fisher"}. Confidence limits are then back-transformed to the
+requested effect size scale.
 }
 
 \subsection{Hypothesis Testing}{
 
-When an alternative other than "two.sided" is specified, or when null.value is not the
+When an alternative other than "none" is specified, or when null.value is not the
 default, the function performs bootstrap hypothesis testing. For equivalence and minimal
 effect testing, specify null.value as a vector of two values (lower and upper bounds).
 
+The p-value is computed using the method that matches the selected \code{boot_ci},
+ensuring that p < alpha if and only if the corresponding confidence interval
+excludes the null value (CI inversion principle). Previously, all bootstrap
+CI methods used the studentized (pivot) p-value, which could produce p-values
+inconsistent with non-studentized CIs. The null value is converted to the
+working scale (log-odds or Fisher z) before computing the p-value, maintaining
+consistency with the CI construction.
+
 For different alternatives, the p-values are calculated as follows:
 \itemize{
-\item "two.sided": Proportion of bootstrap statistics at least as extreme as the observed statistic
-\item "less": Proportion of bootstrap statistics less than or equal to the observed statistic
-\item "greater": Proportion of bootstrap statistics greater than or equal to the observed statistic
+\item "two.sided": Two-tailed p-value from the bootstrap distribution
+\item "less": One-sided p-value for the hypothesis that the true value is less than the null
+\item "greater": One-sided p-value for the hypothesis that the true value is greater than the null
 \item "equivalence": Maximum of two one-sided p-values (for lower and upper bounds)
 \item "minimal.effect": Minimum of two one-sided p-values (for lower and upper bounds)
 }

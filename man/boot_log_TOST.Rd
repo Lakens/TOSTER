@@ -94,15 +94,39 @@ The bootstrap procedure follows these steps:
 \itemize{
 \item Log-transform the data
 \item Perform resampling with replacement to generate bootstrap samples
-\item For each bootstrap sample, calculate test statistics and effect sizes
-\item Use the distribution of bootstrap results to compute p-values and confidence intervals
-\item Back-transform for the ratio of means
+\item For each bootstrap sample, calculate test statistics and effect sizes on the log scale
+\item Compute p-values and confidence intervals using the selected bootstrap method
+\item Back-transform confidence intervals for the ratio of means
 }
+\subsection{Bootstrap Confidence Interval Methods}{
+
+Four types of bootstrap confidence intervals are available via the \code{boot_ci} argument:
+\itemize{
+\item \strong{Studentized ("stud")}: Uses the bootstrap distribution of pivotal t-statistics
+to account for variability in standard error estimates. This is the default.
+\item \strong{Basic/Empirical ("basic")}: Reflects the bootstrap distribution of estimates
+around the observed value.
+\item \strong{Percentile ("perc")}: Uses percentiles of the bootstrap distribution directly.
+\item \strong{Bias-corrected and accelerated ("bca")}: Corrects for both bias and skewness
+in the bootstrap distribution using jackknife-based acceleration.
+}
+}
+
+\subsection{Bootstrap P-values}{
+
+The p-value for each test (two-tailed and both one-sided) is computed using
+the method that matches the selected \code{boot_ci}, ensuring that p < alpha if and
+only if the corresponding confidence interval excludes the null value
+(CI inversion principle). Previously, all bootstrap CI methods used the
+studentized (pivot) p-value, which could produce p-values inconsistent with
+non-studentized CIs. All computations are performed on the log scale, then
+back-transformed.
 
 Note that all input data must be positive (ratio scale with a true zero) since log transformation
 is applied. The function will stop with an error if any negative values are detected.
 
 For details on the calculations in this function see \code{vignette("robustTOST")}.
+}
 }
 \section{Purpose}{
 

@@ -370,3 +370,24 @@ test_that("boot_smd_calc method string is correct", {
                        alternative = "two.sided", null.value = 0)
   expect_true(grepl("test", r2$method))
 })
+
+# boot_smd_calc CI/p-value agreement tests -----
+
+for (ci_method in c("perc", "basic", "bca", "stud")) {
+  test_that(paste0("boot_smd_calc: CI/p-value agreement for ", ci_method), {
+    skip_on_cran()
+
+    set.seed(42)
+    x <- rnorm(30, mean = 0.5)
+    y <- rnorm(30)
+
+    res <- boot_smd_calc(x = x, y = y,
+                         alternative = "two.sided",
+                         null.value = 0,
+                         boot_ci = ci_method, R = 1999)
+    ci_excludes_null <- res$conf.int[1] > 0 || res$conf.int[2] < 0
+    p_rejects <- res$p.value < 0.05
+    expect_equal(ci_excludes_null, p_rejects,
+                 label = paste(ci_method, "CI/p agreement two.sided"))
+  })
+}

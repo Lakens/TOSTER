@@ -691,7 +691,7 @@ perm_t_test(x = before, y = after,
 
 # Bootstrap t-test
 
-The `boot_t_TOST` function provides bootstrap-based inference using the percentile bootstrap approach outlined by @efron93 (see chapter 16). The bootstrapped p-values are derived from the studentized version of a test of mean differences. Overall, the results should be similar to `t_TOST` but with greater robustness to distributional violations.
+The `boot_t_TOST` function provides bootstrap-based inference using the approach outlined by @efron93 (see chapter 16). Overall, the results should be similar to `t_TOST` but with greater robustness to distributional violations.
 
 ## Advantages of Bootstrapping
 
@@ -725,17 +725,34 @@ Where:
 - $sd_x^*$ and $sd_y^*$ are the standard deviations of the bootstrap samples
 - $n_x$ and $n_y$ are the sample sizes
 
-3. An approximate p-value can then be calculated as the number of bootstrapped results greater than the observed t-statistic from the sample.
-
-$$
-p_{boot} = \frac {\#t(z^{*b}) \ge t_{sample}}{B}
-$$
-
-Where:
-- $\#t(z^{*b}) \ge t_{sample}$ is the count of bootstrap t-statistics that exceed the observed t-statistic
-- B is the total number of bootstrap replications
+3. Confidence intervals and p-values are then computed from the bootstrap distribution using the method specified by the `boot_ci` argument.
 
 The same process is completed for the one sample case but with the one sample solution for the equation outlined by $t(z^{*b})$. The paired sample case in this bootstrap procedure is equivalent to the one sample solution because the test is based on the difference scores.
+
+## Bootstrap CI Methods and P-value Consistency
+
+Four bootstrap confidence interval methods are available (set via the `boot_ci` argument):
+
+- **Studentized ("stud", default)**: Uses the bootstrap distribution of pivotal t-statistics, $t^{*b} = (\bar{x}^{*b} - \bar{x}) / se^{*b}$, to construct intervals that account for variability in the standard error. This usually provides the most accurate coverage.
+- **Percentile ("perc")**: Uses quantiles of the bootstrap estimate distribution directly.
+- **Basic ("basic")**: Reflects the bootstrap estimate distribution around the observed value.
+- **Bias-corrected and accelerated ("bca")**: Adjusts for both bias and skewness in the bootstrap distribution using a jackknife-based acceleration correction. Most accurate when the bootstrap distribution is skewed.
+
+Critically, the bootstrap p-value is now computed using the same method as the confidence interval. This ensures that $p < \alpha$ if and only if the $(1 - \alpha)$ CI excludes the null value (CI inversion principle). For example, when `boot_ci = "perc"` the p-value is based on the proportion of bootstrap estimates on each side of the null:
+
+$$
+p_{perc} = 2 \min\left(\frac{\#(x^{*b} \le \theta_0)}{B},\ \frac{\#(x^{*b} \ge \theta_0)}{B}\right)
+$$
+
+while `boot_ci = "stud"` uses the corresponding pivot:
+
+$$
+p_{stud} = 2 \min\left(\frac{\#(t^{*b} \ge t_{obs})}{B},\ \frac{\#(t^{*b} \le t_{obs})}{B}\right)
+$$
+
+where $t_{obs} = (\hat\theta - \theta_0) / \hat{se}$.
+
+In previous versions of the package, all bootstrap CI methods used the studentized p-value regardless of the CI method selected. This could produce p-values that disagreed with the CI (e.g., a percentile CI excluding the null while the studentized p-value was non-significant, or vice versa). The current implementation eliminates this inconsistency.
 
 ## Choosing the Number of Bootstrap Replications
 
@@ -771,11 +788,11 @@ plot(test1)
 
 When interpreting the results of `boot_t_TOST`:
 
-1. The bootstrap p-values (`p1` and `p2`) represent the empirical probability of observing the test statistic or more extreme values under repeated sampling
-2. The confidence intervals are derived directly from the empirical distribution of bootstrap samples
+1. The bootstrap p-values (`p1` and `p2`) represent the empirical probability of observing the test statistic or more extreme values under repeated sampling, computed using a method that matches the selected `boot_ci`
+2. The confidence intervals are derived from the bootstrap distribution using the selected method (studentized, percentile, basic, or BCa)
 3. The distribution plots provide visual insight into the variability of the effect size estimate
 
-For equivalence testing, examine whether both bootstrap p-values are significant (< alpha) and whether the confidence interval for the effect size falls entirely within the equivalence bounds.
+Because the p-values and CIs are computed with the same bootstrap method, they will always agree: if the $(1 - 2\alpha)$ CI for the mean difference falls entirely within the equivalence bounds, then both one-sided bootstrap p-values will be significant at level $\alpha$, and vice versa.
 
 # Comparing Bootstrap and Permutation Approaches
 
@@ -812,11 +829,12 @@ Both methods test the same hypothesis and should yield similar conclusions. Key 
 
 ## Summary: Choosing Between Methods
 
-| Feature | Permutation (`perm_t_test`) | Bootstrap (`boot_t_TOST`) |
+| Feature | Permutation (`perm_t_test`) | Bootstrap (`boot_t_TOST`/`boot_t_test`) |
 |---------|----------------------------|---------------------------|
 | Resampling type | Without replacement | With replacement |
 | Exact p-values possible | Yes (small samples) | No |
-| Trimmed means support | Yes (`tr` argument) | No |
+| Trimmed means support | Yes (`tr` argument) | Yes (`tr` argument in `boot_t_test`) |
+| CI methods | Percentile | Studentized, percentile, basic, BCa |
 | Effect size plots | No | Yes |
 | Best for | Small samples, exact inference | Moderate samples, visualization |
 
@@ -912,6 +930,8 @@ The bootstrapped version is particularly recommended when:
 - Sample sizes are small (n < 30 per group)
 - Data show notable deviations from log-normality
 - You want to ensure robust confidence intervals
+
+Like `boot_t_TOST`, the `boot_log_TOST` function supports multiple bootstrap CI methods (studentized, percentile, basic, and BCa) via the `boot_ci` argument, with matched p-values that are guaranteed to agree with the CI. All bootstrap computations are performed on the log scale, then back-transformed.
 
 # Standardized, Rank-Based, Effect Sizes: Estimation and Testing
 
@@ -1115,6 +1135,8 @@ ses_calc(formula = extra ~ group,
 ## Permutation & Boostrap Based Effect Size Testing with `perm_ses_test`and `boot_ses_test`
 
 When asymptotic approximations may be unreliable, particularly with small samples, `perm_ses_test` provides distribution-free inference for the same non-parametric effect sizes. Rather than relying on normal approximations, it constructs the null distribution of the effect size through permutation. Additionally, `boot_ses_calc` uses bootstrapping to estimate the sampling distribution of the effect size, *but* cannot work in situations where there is complete separation between groups (e.g., all values in one group are higher than the other), which can occur with small samples and large effects.
+
+Like the other bootstrap functions in the package, `boot_ses_calc` supports multiple bootstrap CI methods (studentized, percentile, basic, and BCa) via `boot_ci`, with p-values matched to the selected CI method for guaranteed CI/p-value agreement. All bootstrap computations are performed on a working scale (log-odds for the default Agresti method, Fisher z for the Fisher method), then back-transformed to the requested effect size scale.
 
 
 

@@ -105,16 +105,31 @@ The bootstrap procedure follows these steps:
 \itemize{
 \item Resample with replacement from the original data to create R bootstrap samples
 \item For each bootstrap sample, calculate test statistics and effect sizes
-\item Use the distribution of bootstrap results to compute p-values and confidence intervals
-\item Combine results using the specified bootstrap confidence interval method
+\item Compute p-values and confidence intervals using the selected bootstrap method
+}
+\subsection{Bootstrap Confidence Interval Methods}{
+
+Four types of bootstrap confidence intervals are available via the \code{boot_ci} argument:
+\itemize{
+\item \strong{Studentized ("stud")}: Uses the bootstrap distribution of pivotal t-statistics
+to account for variability in standard error estimates. This is the default
+and usually provides the most accurate coverage.
+\item \strong{Basic/Empirical ("basic")}: Reflects the bootstrap distribution of estimates
+around the observed value.
+\item \strong{Percentile ("perc")}: Uses percentiles of the bootstrap distribution directly.
+\item \strong{Bias-corrected and accelerated ("bca")}: Corrects for both bias and skewness
+in the bootstrap distribution using jackknife-based acceleration.
+}
 }
 
-Three types of bootstrap confidence intervals are available:
-\itemize{
-\item Studentized ("stud"): Accounts for the variability in the standard error estimate
-\item Basic/Empirical ("basic"): Uses the empirical distribution of bootstrap estimates
-\item Percentile ("perc"): Uses percentiles of the bootstrap distribution
-}
+\subsection{Bootstrap P-values}{
+
+The p-value for each test (two-tailed and both one-sided) is computed using
+the method that matches the selected \code{boot_ci}, ensuring that p < alpha if and
+only if the corresponding confidence interval excludes the null value
+(CI inversion principle). Previously, all bootstrap CI methods used the
+studentized (pivot) p-value, which could produce p-values inconsistent with
+non-studentized CIs.
 
 For two-sample tests, the test is of \eqn{\bar x - \bar y} (mean of x minus mean of y).
 For paired samples, the test is of the difference scores (z),
@@ -122,6 +137,7 @@ wherein \eqn{z = x - y}, and the test is of \eqn{\bar z} (mean of the difference
 For one-sample tests, the test is of \eqn{\bar x} (mean of x).
 
 For details on the calculations in this function see \code{vignette("robustTOST")}.
+}
 }
 \section{Purpose}{
 

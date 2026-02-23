@@ -64,10 +64,24 @@
 #'   * Calculate the SMD and its standard error for each bootstrap sample
 #'   * Calculate confidence intervals using the specified method
 #'
-#' Three bootstrap confidence interval methods are available:
-#'   - **Studentized bootstrap ("stud")**: Accounts for the variability in standard error estimates. Usually provides the most accurate coverage probability and is set as the default.
-#'   - **Basic bootstrap ("basic")**: Uses the empirical distribution of bootstrap estimates. Simple approach that works well for symmetric distributions.
-#'   - **Percentile bootstrap ("perc")**: Uses percentiles of the bootstrap distribution directly. More robust to skewness in the bootstrap distribution.
+#' Four bootstrap confidence interval methods are available via the `boot_ci` argument:
+#'   - **Studentized bootstrap ("stud")**: Uses the bootstrap distribution of pivotal
+#'     t-statistics to account for variability in standard error estimates. Usually
+#'     provides the most accurate coverage probability and is set as the default.
+#'   - **Basic bootstrap ("basic")**: Reflects the bootstrap distribution of estimates
+#'     around the observed value. Simple approach that works well for symmetric distributions.
+#'   - **Percentile bootstrap ("perc")**: Uses percentiles of the bootstrap distribution directly.
+#'     More robust to skewness in the bootstrap distribution.
+#'   - **Bias-corrected and accelerated ("bca")**: Corrects for both bias and skewness in the
+#'     bootstrap distribution using jackknife-based acceleration. Most accurate when the
+#'     bootstrap distribution is skewed, but computationally more expensive.
+#'
+#' When hypothesis testing is requested (i.e., `alternative` is not `"none"`),
+#' the p-value is computed using the method that matches the selected `boot_ci`,
+#' ensuring that p < alpha if and only if the corresponding confidence interval
+#' excludes the null value (CI inversion principle). Previously, all bootstrap
+#' CI methods used the studentized (pivot) p-value, which could produce p-values
+#' inconsistent with non-studentized CIs.
 #'
 #' The function supports various SMD variants:
 #'   * Classic standardized mean difference (bias_correction = FALSE)
@@ -563,48 +577,56 @@ boot_smd_calc.default = function(x,
   # Analogous to TSTAT in boot_t_test
   TSTAT <- (boots - raw_smd$estimate[1L]) / boots_se
 
-  # Compute p-value using studentized bootstrap distribution
+  # Pre-compute BCa parameters for p-value use
+  z0 <- NULL; acc <- NULL
+  if (boot_ci == "bca") {
+    bca_par <- bca_params(boots, raw_smd$estimate[1L], jack_est)
+    z0 <- bca_par$z0; acc <- bca_par$acc
+  }
+
+  # Compute p-value (method-consistent with CI)
   if (alternative != "none") {
     est_val <- raw_smd$estimate[1L]
     se_obs <- raw_smd$SE[1L]
 
-    if (alternative %in% c("equivalence", "minimal.effect")) {
-      z_obs_l <- (est_val - low_bound) / se_obs
-      z_obs_u <- (est_val - high_bound) / se_obs
-    } else {
-      z_obs <- (est_val - null.value) / se_obs
-    }
-
-    if (alternative == "two.sided") {
-      boot.pval <- 2 * min(mean(TSTAT <= z_obs, na.rm = TRUE),
-                           mean(TSTAT > z_obs, na.rm = TRUE))
-
-    } else if (alternative == "less") {
-      boot.pval <- mean(TSTAT < z_obs, na.rm = TRUE)
-
-    } else if (alternative == "greater") {
-      boot.pval <- mean(TSTAT > z_obs, na.rm = TRUE)
-
+    if (alternative %in% c("two.sided", "greater", "less")) {
+      boot.pval <- boot_pvalue(bvec = boots, est = est_val, null = null.value,
+                               alternative = alternative, boot_ci = boot_ci,
+                               tvec = TSTAT, se_obs = se_obs,
+                               z0 = z0, acc = acc, nboot = R)
     } else if (alternative == "equivalence") {
-      p_l <- mean(TSTAT > z_obs_l, na.rm = TRUE)
-      p_u <- mean(TSTAT < z_obs_u, na.rm = TRUE)
+      p_l <- boot_pvalue(bvec = boots, est = est_val, null = low_bound,
+                         alternative = "greater", boot_ci = boot_ci,
+                         tvec = TSTAT, se_obs = se_obs,
+                         z0 = z0, acc = acc, nboot = R)
+      p_u <- boot_pvalue(bvec = boots, est = est_val, null = high_bound,
+                         alternative = "less", boot_ci = boot_ci,
+                         tvec = TSTAT, se_obs = se_obs,
+                         z0 = z0, acc = acc, nboot = R)
       boot.pval <- max(p_l, p_u)
-
     } else if (alternative == "minimal.effect") {
-      p_l <- mean(TSTAT < z_obs_l, na.rm = TRUE)
-      p_u <- mean(TSTAT > z_obs_u, na.rm = TRUE)
+      p_l <- boot_pvalue(bvec = boots, est = est_val, null = high_bound,
+                         alternative = "greater", boot_ci = boot_ci,
+                         tvec = TSTAT, se_obs = se_obs,
+                         z0 = z0, acc = acc, nboot = R)
+      p_u <- boot_pvalue(bvec = boots, est = est_val, null = low_bound,
+                         alternative = "less", boot_ci = boot_ci,
+                         tvec = TSTAT, se_obs = se_obs,
+                         z0 = z0, acc = acc, nboot = R)
       boot.pval <- min(p_l, p_u)
     }
 
     # Report z-observed (analogous to t-observed in boot_t_test)
     if (alternative %in% c("equivalence", "minimal.effect")) {
+      z_obs_l <- (est_val - low_bound) / se_obs
+      z_obs_u <- (est_val - high_bound) / se_obs
       if (alternative == "equivalence") {
         z_stat <- if (p_l >= p_u) z_obs_l else z_obs_u
       } else {
         z_stat <- if (p_l <= p_u) z_obs_l else z_obs_u
       }
     } else {
-      z_stat <- z_obs
+      z_stat <- (est_val - null.value) / se_obs
     }
   }
 

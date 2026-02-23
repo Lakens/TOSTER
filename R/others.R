@@ -110,6 +110,24 @@ bca_ci <- function(boots_est, t0, jack_est, alpha) {
     quantile(boots_est, adj[2], names = FALSE))
 }
 
+#' Compute BCa bias-correction and acceleration parameters
+#'
+#' Extracts z0 (bias correction) and acc (acceleration) from bootstrap and
+#' jackknife estimates for use with both \code{bca_ci} and \code{boot_pvalue}.
+#'
+#' @param boots_est Numeric vector of bootstrap estimates
+#' @param t0 Original estimate (on the same scale as boots_est)
+#' @param jack_est Numeric vector of jackknife (leave-one-out) estimates
+#' @return A list with components \code{z0} and \code{acc}
+#' @keywords internal
+bca_params <- function(boots_est, t0, jack_est) {
+  z0 <- qnorm(mean(boots_est < t0))
+  L <- mean(jack_est) - jack_est
+  denom <- 6 * sum(L^2)^(3/2)
+  acc <- if (denom != 0) sum(L^3) / denom else 0
+  list(z0 = z0, acc = acc)
+}
+
 basic <- function(boots_est, t0, alpha){
   conf = 1-alpha
   qq <- norm.inter(boots_est, (1 + c(conf, -conf))/2)

@@ -255,14 +255,9 @@ boot_cor_test <- function(x,
       }
     }
     # Pre-compute BCa parameters for p-value use
-    z0 <- qnorm(mean(bvec < est))
-    L <- mean(jack_est) - jack_est
-    denom <- 6 * sum(L^2)^(3/2)
-    if (denom != 0) {
-      acc <- sum(L^3) / denom
-    } else {
-      acc <- 0
-    }
+    bca_par <- bca_params(bvec, est, jack_est)
+    z0 <- bca_par$z0
+    acc <- bca_par$acc
   }
 
   # CI computation
