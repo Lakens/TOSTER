@@ -219,9 +219,26 @@ smd_calc.default = function(x,
   rm_correction_explicit <- !missing(rm_correction)
   glass_explicit <- !missing(glass)
 
+  if((denom == "auto" & (!is.null(glass))) || denom == "glass1" || denom == "glass2" ){
+    if(rm_correction){
+      origin_author_text = "bias-corrected Glass's"
+    } else{
+      origin_author_text = "Glass's"
+    }
+  } else {
+    if(rm_correction){
+      origin_author_text = "Hedges's"
+    } else{
+      origin_author_text = "Cohen's"
+    }
+  }
+
   if(is.null(glass)){
     glass = "no"
   }
+
+
+
   smd_ci = match.arg(smd_ci)
   output = match.arg(output)
   alternative = match.arg(alternative)
@@ -516,10 +533,11 @@ smd_calc.default = function(x,
   notation <- smd_notation_label(xname = XNAME, yname = YNAME, denom_label = sd_label)
 
   # Merge notation into the SMD label: "SMD (g[av]=(x-y)/SD_avg)"
-  smd_method_label <- paste0("SMD (", smd_type_letter, "[", denom_tag, "]=", notation, trim_note, ")")
+  smd_method_label <- paste0("Standardized Mean Difference (SMD; ", origin_author_text, " ", smd_type_letter, "[", denom_tag, "]=", notation, trim_note, ")")
 
-  method_suffix <- if (alternative != "none") "test" else "estimate with CI"
-  method_desc <- paste0(sample_type, " ", smd_method_label, " ", method_suffix)
+  #method_suffix <- if (alternative != "none") "test" else "estimate with CI"
+  # removed suffix to avoid redundancy with method description in htest output, which already indicates the test type and CI level
+  method_desc <- paste0(sample_type, " ", smd_method_label)
 
   # Set up estimate with name
   estimate <- est_val

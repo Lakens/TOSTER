@@ -4,7 +4,7 @@
 #'
 #' Test for association between paired samples using only the correlation coefficient and sample size.
 #' Supports Pearson's product moment correlation, Kendall's \eqn{\tau} (tau), or Spearman's \eqn{\rho} (rho).
-#' This is the updated version of the `TOSTr` function.
+#' This is the updated version of the `TOSTr` function. This test is only an approximation and should be used with extreme care.
 #'
 #' @param r correlation coefficient (the estimated value)
 #' @param n sample size (number of pairs)

@@ -12,7 +12,7 @@
 
 <meta name="author" content="Aaron R. Caldwell" />
 
-<meta name="date" content="2026-02-19" />
+<meta name="date" content="2026-02-23" />
 
 <title>Correlations</title>
 
@@ -364,7 +364,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Correlations</h1>
 <h4 class="author">Aaron R. Caldwell</h4>
-<h4 class="date">2026-02-19</h4>
+<h4 class="date">2026-02-23</h4>
 
 
 <div id="TOC">
@@ -424,7 +424,7 @@ typically very similar to those produced by <code>cor.test</code>.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># TOSTER&#39;s z-transformed correlation test</span></span>
 <span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">z_cor_test</span>(mtcars<span class="sc">$</span>mpg, mtcars<span class="sc">$</span>qsec)</span></code></pre></div>
 <pre><code>## 
-##  Pearson&#39;s product-moment correlation
+##  Pearson&#39;s product-moment correlation with approximate SE
 ## 
 ## data:  mtcars$mpg and mtcars$qsec
 ## z = 2.4023, N = 32, p-value = 0.01629
@@ -441,13 +441,13 @@ supports Spearman and Kendall correlation coefficients:</p>
 <span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
 <span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>           <span class="at">method =</span> <span class="st">&quot;spear&quot;</span>) <span class="co"># Short form accepted; &quot;spearman&quot; also works</span></span></code></pre></div>
 <pre><code>## 
-##  Spearman&#39;s rank correlation rho
+##  Spearman&#39;s rank correlation rho with approximate SE
 ## 
 ## data:  mtcars$mpg and mtcars$qsec
-## z = 2.6474, N = 32, p-value = 0.008111
+## z = 2.5882, N = 32, p-value = 0.009647
 ## alternative hypothesis: true rho is not equal to 0
 ## 95 percent confidence interval:
-##  0.1306771 0.7068501
+##  0.1222486 0.7111100
 ## sample estimates:
 ##       rho 
 ## 0.4669358</code></pre>
@@ -456,7 +456,7 @@ supports Spearman and Kendall correlation coefficients:</p>
 <span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
 <span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>           <span class="at">method =</span> <span class="st">&quot;kendall&quot;</span>)</span></code></pre></div>
 <pre><code>## 
-##  Kendall&#39;s rank correlation tau
+##  Kendall&#39;s rank correlation tau with approximate SE
 ## 
 ## data:  mtcars$mpg and mtcars$qsec
 ## z = 2.6134, N = 32, p-value = 0.008964
@@ -474,14 +474,17 @@ supports Spearman and Kendall correlation coefficients:</p>
 (TOST) or any hypothesis test where the null hypothesis isn’t zero. This
 makes it particularly useful for research questions focused on
 demonstrating practical equivalence or testing against specific
-correlation thresholds.</p>
+correlation thresholds. The main disadvantage is that it relies on the
+Fisher’s z transformation, which can be less accurate when assumptions
+are violated or when outliers are present. In such cases, the
+bootstrapped methods may provide more reliable results.</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># Equivalence test with null boundary of 0.4</span></span>
 <span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="fu">z_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
 <span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
 <span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>           <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>, <span class="co"># e for equivalence</span></span>
 <span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>           <span class="at">null =</span> .<span class="dv">4</span>)</span></code></pre></div>
 <pre><code>## 
-##  Pearson&#39;s product-moment correlation
+##  Pearson&#39;s product-moment correlation with approximate SE
 ## 
 ## data:  mtcars$mpg and mtcars$qsec
 ## z = 0.12088, N = 32, p-value = 0.5481
@@ -509,7 +512,7 @@ reviewing published literature or working with limited data access. The
 <span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>            <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>,</span>
 <span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>            <span class="at">null =</span> .<span class="dv">4</span>)</span></code></pre></div>
 <pre><code>## 
-##  Pearson&#39;s product-moment correlation
+##  Pearson&#39;s product-moment correlation with approximate SE
 ## 
 ## data:  x and y
 ## z = -3.0506, N = 105, p-value = 0.001142
@@ -542,7 +545,7 @@ violated.</p>
 ##  Bootstrapped Pearson&#39;s product-moment correlation
 ## 
 ## data:  mtcars$mpg and mtcars$qsec
-## N = 32, p-value = 0.6088
+## N = 32, p-value = 0.5198
 ## alternative hypothesis: equivalence
 ## null values:
 ## correlation correlation 
@@ -562,7 +565,7 @@ violated.</p>
 ##  Bootstrapped Spearman&#39;s rank correlation rho
 ## 
 ## data:  mtcars$mpg and mtcars$qsec
-## N = 32, p-value = 0.6713
+## N = 32, p-value = 0.6993
 ## alternative hypothesis: equivalence
 ## null values:
 ##  rho  rho 
@@ -582,7 +585,7 @@ violated.</p>
 ##  Bootstrapped Kendall&#39;s rank correlation tau
 ## 
 ## data:  mtcars$mpg and mtcars$qsec
-## N = 32, p-value = 0.2276
+## N = 32, p-value = 0.2076
 ## alternative hypothesis: equivalence
 ## null values:
 ##  tau  tau 
@@ -608,7 +611,7 @@ violations of normality:</p>
 ##  Bootstrapped Winsorized correlation wincor
 ## 
 ## data:  mtcars$mpg and mtcars$qsec
-## N = 32, p-value = 0.6878
+## N = 32, p-value = 0.6613
 ## alternative hypothesis: equivalence
 ## null values:
 ## wincor wincor 
@@ -629,7 +632,7 @@ violations of normality:</p>
 ##  Bootstrapped percentage bend correlation pb
 ## 
 ## data:  mtcars$mpg and mtcars$qsec
-## N = 32, p-value = 0.6933
+## N = 32, p-value = 0.5973
 ## alternative hypothesis: equivalence
 ## null values:
 ##   pb   pb 

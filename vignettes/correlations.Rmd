@@ -46,7 +46,7 @@ z_cor_test(mtcars$mpg,
 
 # Advantages of z_cor_test
 
-The main advantage of `z_cor_test` over the standard `cor.test` is its ability to perform equivalence testing (TOST) or any hypothesis test where the null hypothesis isn't zero. This makes it particularly useful for research questions focused on demonstrating practical equivalence or testing against specific correlation thresholds.
+The main advantage of `z_cor_test` over the standard `cor.test` is its ability to perform equivalence testing (TOST) or any hypothesis test where the null hypothesis isn't zero. This makes it particularly useful for research questions focused on demonstrating practical equivalence or testing against specific correlation thresholds. The main disadvantage is that it relies on the Fisher's z transformation, which can be less accurate when assumptions are violated or when outliers are present. In such cases, the bootstrapped methods may provide more reliable results.
 
 ```{r}
 # Equivalence test with null boundary of 0.4
