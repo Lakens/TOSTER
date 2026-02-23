@@ -33,7 +33,7 @@ Throughout this vignette we use the built-in `sleep` dataset, which contains ext
 
 `simple_htest()` is a unified wrapper for common two-group (and one-sample) hypothesis tests. It calls base R's `t.test()` or `wilcox.test()` under the hood but improves the output in two ways:
 
-1. **Sample sizes are reported** directly in the output (base R does not show *n*).
+1. **Sample sizes are reported** are saved in the output (base R does not record *n*).
 2. **The effect is shown explicitly** as a difference (e.g., "mean difference (1 - 2)") rather than listing two group means and leaving the reader to compute the difference.
 
 ### Basic usage: two-sample t-test
@@ -41,10 +41,12 @@ Throughout this vignette we use the built-in `sleep` dataset, which contains ext
 A standard two-sided t-test with `simple_htest` looks just like `t.test()` but with a formula interface and explicit `mu` argument:
 
 ```{r}
-simple_htest(extra ~ group,
+test1 = simple_htest(extra ~ group,
              data = sleep,
              mu = 0,
              alternative = "two.sided")
+
+test1$sample_size
 ```
 
 Compare this with base R's `t.test()`:
@@ -53,7 +55,7 @@ Compare this with base R's `t.test()`:
 t.test(extra ~ group, data = sleep)
 ```
 
-Notice that `simple_htest` reports the sample sizes in each group and appends the mean difference to the output, saving the reader a calculation step.
+Notice that `simple_htest` saves the sample sizes in each group and appends the mean difference to the output, saving the reader a calculation step. Additionally, notice how group labels are applied so you don't have to guess which group mean was sbutracted from which (i.e., `mean difference ('1' - '2') `).
 
 ### Wilcoxon test
 
@@ -67,7 +69,7 @@ simple_htest(extra ~ group,
              alternative = "two.sided")
 ```
 
-The output includes the Hodges-Lehmann estimate of the location shift.
+The output includes the Hodges-Lehmann estimate of the location shift. Please note that this estimate is not a the mean or median difference, but rather the median of all pairwise differences between groups (for the two-sample case) or Walsh averages (one-sample/paired). This is a robust measure of central tendency that is less sensitive to outliers than the mean difference.
 
 ### Equivalence testing (TOST)
 
