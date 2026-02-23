@@ -295,6 +295,8 @@ boot_t_test.default <- function(x,
       method <- if (tr > 0) "Bootstrapped One Sample Yuen t-test" else "Bootstrapped One Sample t-test"
     }
 
+    method = paste0(method, " ", ci_label)
+
     # Estimate labels
     XNAME <- "x"
     YNAME <- "y"
@@ -387,6 +389,13 @@ boot_t_test.default <- function(x,
       vy <- var(y)
     }
 
+    # CI method label for method string
+    ci_label <- switch(boot_ci,
+                       "basic" = "(basic)",
+                       "perc" = " (percentile)",
+                       "bca" = " (BCa)",
+                       "stud" = " (studentized)")
+
     # Method string
     if (tr > 0) {
       method <- paste("Bootstrapped",
@@ -394,7 +403,8 @@ boot_t_test.default <- function(x,
                       "Yuen Two Sample t-test")
       method <- gsub("\\s+", " ", method)
     } else {
-      method <- paste("Bootstrapped", paste(if (!var.equal) "Welch", "Two Sample t-test"))
+      method <- paste("Bootstrapped", paste(if (!var.equal) "Welch", "Two Sample t-test "),
+                      ci_label)
     }
 
     # Estimate labels

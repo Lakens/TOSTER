@@ -143,7 +143,7 @@ boot_cor_test <- function(x,
                                      "winsorized", "bendpercent"),
                           alpha = 0.05,
                           null = 0,
-                          boot_ci = c("basic","perc","bca","stud"),
+                          boot_ci = c("bca","stud", "basic", "perc"),
                           R = 1999,
                           ...) {
   boot_ci = match.arg(boot_ci)
@@ -280,32 +280,37 @@ boot_cor_test <- function(x,
     sig <- boot_pvalue(bvec = bvec, est = est, null = null.value,
                        alternative = alternative, boot_ci = boot_ci,
                        tvec = tvec, se_obs = se_obs,
-                       z0 = z0, acc = acc, nboot = nboot)
+                       z0 = z0, acc = acc, nboot = nboot,
+                       z_transform= TRUE)
   } else if (alternative == "equivalence") {
     sig1 <- boot_pvalue(bvec = bvec, est = est, null = min(null.value),
                         alternative = "greater", boot_ci = boot_ci,
                         tvec = tvec, se_obs = se_obs,
-                        z0 = z0, acc = acc, nboot = nboot)
+                        z0 = z0, acc = acc, nboot = nboot,
+                        z_transform= TRUE)
     sig2 <- boot_pvalue(bvec = bvec, est = est, null = max(null.value),
                         alternative = "less", boot_ci = boot_ci,
                         tvec = tvec, se_obs = se_obs,
-                        z0 = z0, acc = acc, nboot = nboot)
+                        z0 = z0, acc = acc, nboot = nboot,
+                        z_transform= TRUE)
     sig <- max(sig1, sig2)
   } else if (alternative == "minimal.effect") {
     sig1 <- boot_pvalue(bvec = bvec, est = est, null = max(null.value),
                         alternative = "greater", boot_ci = boot_ci,
                         tvec = tvec, se_obs = se_obs,
-                        z0 = z0, acc = acc, nboot = nboot)
+                        z0 = z0, acc = acc, nboot = nboot,
+                        z_transform= TRUE)
     sig2 <- boot_pvalue(bvec = bvec, est = est, null = min(null.value),
                         alternative = "less", boot_ci = boot_ci,
                         tvec = tvec, se_obs = se_obs,
-                        z0 = z0, acc = acc, nboot = nboot)
+                        z0 = z0, acc = acc, nboot = nboot,
+                        z_transform= TRUE)
     sig <- min(sig1, sig2)
   }
 
   # CI method label for method string
   ci_label <- switch(boot_ci,
-                     "basic" = "",
+                     "basic" = "(basic)",
                      "perc" = " (percentile)",
                      "bca" = " (BCa)",
                      "stud" = " (studentized)")

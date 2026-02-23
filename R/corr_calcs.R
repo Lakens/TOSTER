@@ -263,11 +263,13 @@ stud_ci <- function(tvec, t0_z, se_obs, alpha) {
 #' @param z0 BCa bias correction (required for "bca")
 #' @param acc BCa acceleration (required for "bca")
 #' @param nboot Number of bootstrap replicates
+#' @param z_transform Logical indicating whether to apply Fisher z transformation to estimates correlations
 #' @return A single p-value
 #' @keywords internal
 boot_pvalue <- function(bvec, est, null, alternative,
                         boot_ci, tvec = NULL, se_obs = NULL,
-                        z0 = NULL, acc = NULL, nboot) {
+                        z0 = NULL, acc = NULL, nboot,
+                        z_transform = FALSE) {
 
   if (boot_ci == "perc") {
     sig <- .pval_perc(bvec, null, alternative, nboot)
@@ -277,7 +279,8 @@ boot_pvalue <- function(bvec, est, null, alternative,
     sig <- .pval_bca(bvec, est, null, alternative, nboot,
                      z0 = z0, acc = acc)
   } else if (boot_ci == "stud") {
-    sig <- .pval_stud(tvec, est, null, alternative, se_obs, nboot)
+    sig <- .pval_stud(tvec, est, null, alternative, se_obs, nboot,
+                      z_transform = z_transform)
   }
 
   sig
@@ -333,8 +336,13 @@ boot_pvalue <- function(bvec, est, null, alternative,
 }
 
 # Studentized (pivot) p-value -----
-.pval_stud <- function(tvec, est, null, alternative, se_obs, nboot) {
-  t_obs <- (atanh(est) - atanh(null)) / se_obs
+.pval_stud <- function(tvec, est, null, alternative, se_obs, nboot, z_transform = FALSE) {
+  if(z_transform){
+    t_obs <- (atanh(est) - atanh(null)) / se_obs
+  } else{
+    t_obs <- (est - null) / se_obs
+  }
+
 
   if (alternative == "two.sided") {
     sig <- 2 * min(mean(tvec >= t_obs), mean(tvec <= t_obs))

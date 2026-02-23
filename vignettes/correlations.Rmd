@@ -207,35 +207,5 @@ When choosing which correlation method to use in TOSTER:
    - Carefully select meaningful boundaries (null values) based on your research context
    - Consider what effect size would be practically insignificant in your field
 
-# Advanced Usage
-
-## Custom Bootstrap Methods
-
-The bootstrapped functions in TOSTER allow customization of the bootstrap procedure:
-
-```{r, eval=FALSE}
-# Customizing the bootstrap procedure
-boot_cor_test(
-  x = mtcars$mpg,
-  y = mtcars$qsec,
-  method = "pearson",
-  R = 2000,  # Increasing number of bootstrap samples
-  alpha = 0.01,  # Using 99% confidence interval
-  alternative = "t"  # Two-sided test
-)
-```
-
-## Working with Missing Data
-
-By default, the correlation functions in TOSTER use pairwise complete observations:
-
-```{r, eval=FALSE}
-# Example with missing data
-x_with_na <- c(mtcars$mpg, NA, NA)
-y_with_na <- c(mtcars$qsec, 10, NA)
-
-# Default behavior handles NAs with pairwise deletion
-z_cor_test(x_with_na, y_with_na)
-```
 
 # References

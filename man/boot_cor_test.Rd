@@ -11,7 +11,7 @@ boot_cor_test(
   method = c("pearson", "kendall", "spearman", "winsorized", "bendpercent"),
   alpha = 0.05,
   null = 0,
-  boot_ci = c("basic", "perc", "bca", "stud"),
+  boot_ci = c("bca", "stud", "basic", "perc"),
   R = 1999,
   ...
 )
