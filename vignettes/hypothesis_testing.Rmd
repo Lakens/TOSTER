@@ -21,7 +21,7 @@ TOSTER was originally conceived as an equivalence testing package, but it is rea
 
 Many of TOSTER's test functions return objects of class `htest`, the same structure used by base R functions like `t.test()`, `wilcox.test()`, and `cor.test()`. This means results from TOSTER plug directly into existing R workflows. On top of this, TOSTER provides helper functions for tabulating, describing, and plotting test results that work with most `htest` objects.
 
-The central idea is simple: hypothesis testing involves specifying a null hypothesis, choosing an alternative, and evaluating by a test. By adjusting the `alternative` and `mu` arguments in TOSTER's functions, you can move seamlessly between testing frameworks. A standard nil-hypothesis test, an equivalence test, a non-inferiority analysis, and a superiority-by-a-margin test are all handled by the same interface.
+The central idea is simple: hypothesis testing involves specifying a null hypothesis, choosing an alternative, and evaluating by a test. By adjusting the `alternative` and `mu` (or `null` depending on the function) arguments in TOSTER's functions, you can move seamlessly between testing frameworks. A standard nil-hypothesis test, an equivalence test, a non-inferiority analysis, and a superiority-by-a-margin test are all handled by the same interface.
 
 ```{r setup}
 library(TOSTER)
