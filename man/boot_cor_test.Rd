@@ -78,7 +78,7 @@ A list with class "htest" containing the following components:
 \item \strong{p.value}: the bootstrap p-value of the test.
 \item \strong{parameter}: the number of observations used in the test.
 \item \strong{conf.int}: a bootstrap confidence interval for the correlation coefficient.
-\item \strong{estimate}: the estimated correlation coefficient, with name "cor", "tau", "rho", "pb", or "wincor"
+\item \strong{estimate}: the estimated correlation coefficient, with name "r", "tau", "rho", "pb", or "wincor"
 corresponding to the method employed.
 \item \strong{stderr}: the bootstrap standard error of the correlation coefficient.
 \item \strong{null.value}: the value(s) of the correlation under the null hypothesis.

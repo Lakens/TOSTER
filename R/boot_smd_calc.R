@@ -263,7 +263,7 @@ boot_smd_calc.default = function(x,
       origin_author_text = "Glass's"
     }
   } else {
-    if(rm_correction){
+    if(bias_correction){
       origin_author_text = "Hedges's"
     } else{
       origin_author_text = "Cohen's"

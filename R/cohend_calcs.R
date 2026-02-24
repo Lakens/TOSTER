@@ -221,7 +221,7 @@ d_est_ind <- function(n1,
   h2 <- trim_h(n2, tr)
   N <- n1 + n2
 
-  if (denom == "pooled" || (var.equal && denom == "auto") ) {
+  if (denom == "pooled" || (var.equal && denom %in% c("auto", "d")) ) {
     denomSD <- sqrt((((n1 - 1)*(sd1^2)) + (n2 - 1)*(sd2^2))/((n1+n2)-2)) #calculate sd pooled
     if (tr > 0) {
       d_df <- h1 + h2 - 2

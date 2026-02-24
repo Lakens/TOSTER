@@ -66,8 +66,8 @@ test_that("Run examples for z_cor_test", {
                      samp2,
                      method = "k")
 
-  expect_equal(test1$estimate,
-               test1c$estimate)
+  expect_equal(unname(test1$estimate),
+               unname(test1c$estimate))
   expect_equal(test3$estimate,
                test3c$estimate)
   expect_equal(test2$estimate,
@@ -290,8 +290,8 @@ test_that("Run examples for boot_cor_test", {
                     samp2,
                     method = "k")
 
-  expect_equal(test1$estimate,
-               test1c$estimate)
+  expect_equal(unname(test1$estimate),
+               unname(test1c$estimate))
   expect_equal(test3$estimate,
                test3c$estimate)
   expect_equal(test2$estimate,

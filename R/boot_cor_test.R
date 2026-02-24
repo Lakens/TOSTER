@@ -89,7 +89,7 @@
 #' * **p.value**: the bootstrap p-value of the test.
 #' * **parameter**: the number of observations used in the test.
 #' * **conf.int**: a bootstrap confidence interval for the correlation coefficient.
-#' * **estimate**: the estimated correlation coefficient, with name "cor", "tau", "rho", "pb", or "wincor"
+#' * **estimate**: the estimated correlation coefficient, with name "r", "tau", "rho", "pb", or "wincor"
 #'   corresponding to the method employed.
 #' * **stderr**: the bootstrap standard error of the correlation coefficient.
 #' * **null.value**: the value(s) of the correlation under the null hypothesis.
@@ -313,7 +313,7 @@ boot_cor_test <- function(x,
   if (method == "pearson") {
     method2 <- paste0("Bootstrapped Pearson's product-moment correlation", ci_label)
     names(null.value) = rep("correlation",length(null.value))
-    rfinal = c(cor = est)
+    rfinal = c(r = est)
   }
   if (method == "spearman") {
     method2 <- paste0("Bootstrapped Spearman's rank correlation rho", ci_label)
