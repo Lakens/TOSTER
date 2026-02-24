@@ -129,11 +129,11 @@ test_that("Two-sample glass='glass1' method contains SD_x", {
 test_that("Method string contains merged SMD label with notation", {
   res <- smd_calc(x = group1, y = group2, var.equal = FALSE,
                   bias_correction = FALSE)
-  expect_true(grepl("SMD (d[av]=(x-y)/SD_avg)", res$method, fixed = TRUE))
+  expect_true(grepl("SMD; Cohen's d[av]=(x-y)/SD_avg)", res$method, fixed = TRUE))
 
   res2 <- smd_calc(x = group1, y = group2, var.equal = TRUE,
                    bias_correction = TRUE)
-  expect_true(grepl("SMD (g[s]=(x-y)/SD_pooled)", res2$method, fixed = TRUE))
+  expect_true(grepl("SMD; Hedges's g[s]=(x-y)/SD_pooled)", res2$method, fixed = TRUE))
 })
 
 # --- Formula method group name substitution tests ---

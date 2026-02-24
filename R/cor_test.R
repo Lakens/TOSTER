@@ -61,7 +61,7 @@
 #' * **statistic**: the value of the test statistic with a name describing it.
 #' * **parameter**: the degrees of freedom or number of observations.
 #' * **conf.int**: a confidence interval for the measure of association appropriate to the specified alternative hypothesis.
-#' * **estimate**: the estimated measure of association, with name "cor", "tau", or "rho" corresponding to the method employed.
+#' * **estimate**: the estimated measure of association, with name "r", "tau", or "rho" corresponding to the method employed.
 #' * **stderr**: a named vector with `z.se` (standard error on the Fisher z scale, used for inference)
 #'   and `cor.se` (delta method SE on the correlation scale, for descriptive purposes).
 #'   Note that `cor.se` underestimates true sampling variability as |r| approaches 1.
@@ -166,7 +166,7 @@ z_cor_test = function(x,
     # Pearson # Fisher
     method <- "Pearson's product-moment correlation"
     names(NVAL) = rep("correlation",length(NVAL))
-    rfinal = c(cor = r_xy)
+    rfinal = c(r = r_xy)
     z.se <- 1 / sqrt(n_obs - 3)
     cor_correction <- "fieller"
   }

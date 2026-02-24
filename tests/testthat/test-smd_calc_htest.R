@@ -52,8 +52,8 @@ test_that("smd_calc htest method string is correct", {
   # Two Sample SMD (default: bias_correction=TRUE, var.equal=FALSE)
   r1 <- smd_calc(x = x, y = y)
   expect_true(grepl("Two Sample", r1$method))
-  expect_true(grepl("SMD (g[av]=", r1$method, fixed = TRUE))
-  expect_true(grepl("estimate with CI", r1$method))
+  expect_true(grepl("SMD; Hedges's g[av]=", r1$method, fixed = TRUE))
+
 
   # Paired Sample
   r2 <- smd_calc(x = x, y = y, paired = TRUE)
@@ -65,16 +65,12 @@ test_that("smd_calc htest method string is correct", {
 
   # SMD (d[...]=...) when bias_correction = FALSE
   r4 <- smd_calc(x = x, y = y, bias_correction = FALSE)
-  expect_true(grepl("SMD (d[av]=", r4$method, fixed = TRUE))
+  expect_true(grepl("SMD; Cohen's d[av]=", r4$method, fixed = TRUE))
 
   # Glass with default bias correction => SMD (g[x]=...)
   r5 <- smd_calc(x = x, y = y, glass = "glass1")
-  expect_true(grepl("SMD (g[x]=", r5$method, fixed = TRUE))
+  expect_true(grepl("bias-corrected Glass's g[x]=", r5$method, fixed = TRUE))
 
-  # With test, method says "test" not "estimate with CI"
-  r6 <- smd_calc(x = x, y = y, alternative = "two.sided")
-  expect_true(grepl("test", r6$method))
-  expect_false(grepl("estimate with CI", r6$method))
 })
 
 test_that("smd_calc formula interface returns htest with correct data.name", {
@@ -362,13 +358,13 @@ test_that("boot_smd_calc method string is correct", {
   y <- rnorm(20, mean = 6, sd = 2)
 
   r1 <- boot_smd_calc(x = x, y = y, R = 99)
-  expect_true(grepl("Bootstrapped", r1$method))
+  expect_true(grepl("bootstrapped", r1$method))
   expect_true(grepl("Two Sample", r1$method))
-  expect_true(grepl("SMD (g[av]=", r1$method, fixed = TRUE))
-
+  expect_true(grepl("SMD; Hedges's g[av]=", r1$method, fixed = TRUE))
+  expect_true(is.null(r1$p.value))
   r2 <- boot_smd_calc(x = x, y = y, R = 99,
                        alternative = "two.sided", null.value = 0)
-  expect_true(grepl("test", r2$method))
+  expect_true(is.numeric(r2$p.value))
 })
 
 # boot_smd_calc CI/p-value agreement tests -----

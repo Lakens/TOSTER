@@ -48,7 +48,7 @@ A list with class "htest" containing the following components:
 \item \strong{p.value}: the p-value of the test.
 \item \strong{parameter}: the sample size with name "N".
 \item \strong{conf.int}: a confidence interval for the correlation appropriate to the specified alternative hypothesis.
-\item \strong{estimate}: the estimated correlation coefficient, with name "cor", "tau", or "rho" corresponding to the method employed.
+\item \strong{estimate}: the estimated correlation coefficient, with name "r", "tau", or "rho" corresponding to the method employed.
 \item \strong{stderr}: a named vector with \code{z.se} (standard error on the Fisher z scale, used for inference)
 and \code{cor.se} (delta method SE on the correlation scale, for descriptive purposes).
 Note that \code{cor.se} underestimates true sampling variability as |r| approaches 1.

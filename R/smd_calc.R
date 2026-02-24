@@ -220,13 +220,13 @@ smd_calc.default = function(x,
   glass_explicit <- !missing(glass)
 
   if((denom == "auto" & (!is.null(glass))) || denom == "glass1" || denom == "glass2" ){
-    if(rm_correction){
+    if(bias_correction){
       origin_author_text = "bias-corrected Glass's"
     } else{
       origin_author_text = "Glass's"
     }
   } else {
-    if(rm_correction){
+    if(bias_correction){
       origin_author_text = "Hedges's"
     } else{
       origin_author_text = "Cohen's"
