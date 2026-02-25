@@ -30,7 +30,9 @@
 #'   has level 1-2*alpha (90% when alpha = 0.05).
 #' @param R the number of permutations. Default is `NULL`, which uses the asymptotic test.
 #'   If `R >= max_perms` (the maximum number of possible permutations), exact permutation
-#'   is computed. Otherwise, Monte Carlo (permutation with replacement; i.e., randomization testing) sampling is used.
+#'   is computed. Otherwise, Monte Carlo (permutation with replacement; i.e., randomization
+#'   testing) sampling is used. Note: permutation tests are not supported for
+#'   `alternative = "equivalence"` or `alternative = "minimal.effect"` (see Details).
 #' @param scale the scale estimator for standardizing the test statistic in permutation
 #'   tests. Options are:
 #'   * `"S2"` (default): Median of absolute pairwise differences from the median-corrected
@@ -95,24 +97,33 @@
 #'
 #' where Z is the median-corrected combined sample.
 #'
-#' ## Permutation-Based Equivalence Testing
+#' ## Permutation Tests with Non-Zero Null Values
 #'
-#' For equivalence and minimal effect testing with permutation methods, this function
-#' uses an unstudentized approach. The permutation distribution of the raw
-#' Hodges-Lehmann estimator is generated under the null hypothesis of exchangeability
-#' (no location difference), and p-values are computed by comparing the observed
-#' estimate's distance from each equivalence bound to this centered permutation
-#' distribution.
+#' For standard alternatives (`two.sided`, `less`, `greater`) with `mu != 0`,
+#' the permutation test uses an approximate approach: the observed test statistic
+#' is centered at `mu`, but the permutation distribution is generated under
+#' exchangeability (effectively `mu = 0`). Because the Hodges-Lehmann statistic
+#' divided by the S1/S2 scale estimator is not a true pivot, this comparison is
+#' approximate rather than exact. The approximation is generally adequate when
+#' `mu` is moderate relative to the scale of the data, but may lose accuracy for
+#' extreme null values. For the two-sample case, the scale estimator is
+#' recomputed for each permutation, which partially mitigates this issue.
 #'
-#' This approach ensures that the confidence interval and p-value are concordant:
-#' when the (1-2\eqn{\alpha})% confidence interval falls entirely within the equivalence
-#' bounds, the TOST p-value will be less than \eqn{\alpha}, and vice versa.
+#' ## Equivalence and Minimal Effect Testing
 #'
-#' Unlike the studentized permutation approach used for standard alternatives
-#' (two.sided, less, greater), the equivalence and minimal effect tests do not
-#' divide by a scale estimate. This is because the scale estimates (S1, S2) from
-#' Fried & Dehling (2011) provide numerical stability for standard tests but do
-#' not constitute true studentization for the Hodges-Lehmann estimator.
+#' Equivalence and minimal effect tests are only available with the asymptotic
+#' method (`R = NULL`). Permutation tests are not supported for these
+#' alternatives because the scale estimators (S1, S2) from Fried & Dehling
+#' (2011) do not produce a pivotal test statistic for the Hodges-Lehmann
+#' estimator. Without pivotality, the permutation distribution generated under
+#' the exchangeability null is not a valid reference distribution for testing
+#' at the equivalence bounds, and the resulting p-values can be unreliable.
+#' This limitation compounds with the inherent conservatism of the naive
+#' intersection-union procedure, potentially yielding substantial power loss.
+#'
+#' The asymptotic method uses kernel density estimation to approximate the
+#' standard error, which provides a proper pivot and valid boundary-null
+#' inference.
 #'
 #' ## Alternatives
 #'
@@ -160,8 +171,8 @@
 #' after <- c(5.6, 5.2, 6.7, 6.1, 6.5, 5.8, 5.3, 6.2)
 #' hodges_lehmann(before, after, paired = TRUE)
 #'
-#' # Equivalence test
-#' hodges_lehmann(x, y, alternative = "equivalence", mu = c(-1, 1), R = 999)
+#' # Equivalence test (asymptotic only)
+#' hodges_lehmann(x, y, alternative = "equivalence", mu = c(-1, 1))
 #'
 #' # Formula interface
 #' hodges_lehmann(extra ~ group, data = sleep)
@@ -397,6 +408,22 @@ hodges_lehmann.default <- function(x,
     }
   }
 
+  # Permutation not supported for equivalence/minimal.effect
+  # The S1/S2 scale estimators do not produce a pivotal test statistic for the
+  # Hodges-Lehmann estimator, so the permutation distribution under
+  # exchangeability is not a valid reference distribution for boundary-null
+  # testing. The asymptotic test is recommended for these alternatives.
+  if (!is.null(R) && alternative %in% c("equivalence", "minimal.effect")) {
+    stop(
+      "Permutation tests (R != NULL) are not supported for equivalence or ",
+      "minimal.effect alternatives in hodges_lehmann(). The scale estimators ",
+      "(S1, S2) do not produce a pivotal statistic for the Hodges-Lehmann ",
+      "estimator, so the permutation reference distribution is not valid for ",
+      "boundary-null testing. Use the asymptotic test (R = NULL) instead.",
+      call. = FALSE
+    )
+  }
+
   # Data name extraction
   if (!is.null(y)) {
     dname <- paste(deparse(substitute(x)), "and", deparse(substitute(y)))
@@ -612,39 +639,6 @@ hodges_lehmann.default <- function(x,
         b <- sum(TSTAT >= obs_stat)
         pval <- hl_perm_pval(b, R.used, p_method)
         cint <- c(stats::quantile(EFF, 1 - ci_level, names = FALSE), Inf)
-      } else if (alternative == "equivalence") {
-        # Unstudentized approach: use raw EFF distribution for both CI and p-values
-        # This ensures concordance between CI and hypothesis test
-        EFF_centered <- EFF - mean(EFF)
-        dist_to_low <- estimate - low_bound
-        dist_to_high <- estimate - high_bound
-
-        b_low <- sum(EFF_centered >= dist_to_low)
-        b_high <- sum(EFF_centered <= dist_to_high)
-        p_low <- hl_perm_pval(b_low, R.used, p_method)
-        p_high <- hl_perm_pval(b_high, R.used, p_method)
-        pval <- max(p_low, p_high)
-        cint <- stats::quantile(EFF, c(alpha, 1 - alpha), names = FALSE)
-
-        # Report binding test statistic as Z-score for interpretability
-        se_perm <- stats::sd(EFF_centered)
-        obs_stat <- if (p_low >= p_high) dist_to_low / se_perm else dist_to_high / se_perm
-      } else if (alternative == "minimal.effect") {
-        # Unstudentized approach: use raw EFF distribution for both CI and p-values
-        EFF_centered <- EFF - mean(EFF)
-        dist_to_low <- estimate - low_bound
-        dist_to_high <- estimate - high_bound
-
-        b_low <- sum(EFF_centered <= dist_to_low)
-        b_high <- sum(EFF_centered >= dist_to_high)
-        p_low <- hl_perm_pval(b_low, R.used, p_method)
-        p_high <- hl_perm_pval(b_high, R.used, p_method)
-        pval <- min(p_low, p_high)
-        cint <- stats::quantile(EFF, c(alpha, 1 - alpha), names = FALSE)
-
-        # Report binding test statistic as Z-score for interpretability
-        se_perm <- stats::sd(EFF_centered)
-        obs_stat <- if (p_low <= p_high) dist_to_low / se_perm else dist_to_high / se_perm
       }
 
       tstat_report <- obs_stat
@@ -807,39 +801,6 @@ hodges_lehmann.default <- function(x,
         b <- sum(TSTAT >= obs_stat)
         pval <- hl_perm_pval(b, R.used, p_method)
         cint <- c(stats::quantile(EFF, 1 - ci_level, names = FALSE), Inf)
-      } else if (alternative == "equivalence") {
-        # Unstudentized approach: use raw EFF distribution for both CI and p-values
-        # This ensures concordance between CI and hypothesis test
-        EFF_centered <- EFF - mean(EFF)
-        dist_to_low <- estimate - low_bound
-        dist_to_high <- estimate - high_bound
-
-        b_low <- sum(EFF_centered >= dist_to_low)
-        b_high <- sum(EFF_centered <= dist_to_high)
-        p_low <- hl_perm_pval(b_low, R.used, p_method)
-        p_high <- hl_perm_pval(b_high, R.used, p_method)
-        pval <- max(p_low, p_high)
-        cint <- stats::quantile(EFF, c(alpha, 1 - alpha), names = FALSE)
-
-        # Report binding test statistic as Z-score for interpretability
-        se_perm <- stats::sd(EFF_centered)
-        obs_stat <- if (p_low >= p_high) dist_to_low / se_perm else dist_to_high / se_perm
-      } else if (alternative == "minimal.effect") {
-        # Unstudentized approach: use raw EFF distribution for both CI and p-values
-        EFF_centered <- EFF - mean(EFF)
-        dist_to_low <- estimate - low_bound
-        dist_to_high <- estimate - high_bound
-
-        b_low <- sum(EFF_centered <= dist_to_low)
-        b_high <- sum(EFF_centered >= dist_to_high)
-        p_low <- hl_perm_pval(b_low, R.used, p_method)
-        p_high <- hl_perm_pval(b_high, R.used, p_method)
-        pval <- min(p_low, p_high)
-        cint <- stats::quantile(EFF, c(alpha, 1 - alpha), names = FALSE)
-
-        # Report binding test statistic as Z-score for interpretability
-        se_perm <- stats::sd(EFF_centered)
-        obs_stat <- if (p_low <= p_high) dist_to_low / se_perm else dist_to_high / se_perm
       }
 
       tstat_report <- obs_stat

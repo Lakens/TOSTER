@@ -445,16 +445,14 @@ The function directly supports equivalence testing via the `alternative` argumen
 
 ```{r}
 # Equivalence test: is the location shift within ±2 units?
+# Equivalence/minimal.effect alternatives use the asymptotic method only
 hodges_lehmann(formula = extra ~ group,
                data = sleep,
                alternative = "equivalence",
-               mu = 2,
-               R = 1999)
+               mu = 2)
 ```
 
-**Note on the permutation approach for equivalence testing:** When using permutation-based inference (i.e., `R` is not `NULL`), the equivalence and minimal effect tests use an *unstudentized* approach. The permutation distribution of the raw Hodges-Lehmann estimator is generated under the null hypothesis of exchangeability, and p-values are computed by comparing the observed estimate's distance from each equivalence bound to this distribution. This ensures that the confidence interval and p-value are always concordant: when the $(1 - 2\alpha)$% CI falls entirely within the equivalence bounds, the TOST p-value will be less than $\alpha$, and vice versa. This differs from the standard alternatives (`two.sided`, `less`, `greater`), which use a studentized statistic (dividing by a robust scale estimate). The unstudentized approach is necessary because the scale estimates S1 and S2 from @fried2011 provide numerical stability for standard tests but do not constitute true studentization for the Hodges-Lehmann estimator.
-
-By contrast, `brunner_munzel` and `perm_t_test` use studentized permutation approaches for all alternatives because they have proper standard error estimates.
+**Note on equivalence testing:** Equivalence and minimal effect tests are only available with the asymptotic method (`R = NULL`). Permutation tests are not supported for these alternatives because the scale estimators (S1, S2) from @fried2011 do not produce a pivotal test statistic for the Hodges-Lehmann estimator. Without pivotality, the permutation distribution generated under the exchangeability null is not a valid reference distribution for testing at the equivalence bounds. This limitation compounds with the inherent conservatism of the naive intersection-union procedure, potentially yielding substantial power loss. The asymptotic method uses kernel density estimation to approximate the standard error, which provides a proper pivot and valid boundary-null inference.
 
 ### Paired Samples
 
@@ -470,11 +468,11 @@ hodges_lehmann(x = sleep$extra[sleep$group == 1],
 
 ```{r}
 # Minimal effect test: is the location shift outside ±0.5?
+# Minimal effect alternative uses the asymptotic method only
 hodges_lehmann(formula = extra ~ group,
                data = sleep,
                alternative = "minimal.effect",
-               mu = 0.5,
-               R = 1999)
+               mu = 0.5)
 ```
 
 ## Choosing the Right Approach

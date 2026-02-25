@@ -380,15 +380,15 @@ test_that("hodges_lehmann: equivalence/MET paths work with updated labels", {
   x <- rnorm(20)
   y <- rnorm(20, mean = 0.5)
 
-  # Equivalence
+  # Equivalence (asymptotic only — permutation not supported for equivalence/MET)
   res_eq <- hush(hodges_lehmann(x, y, alternative = "equivalence",
-                                mu = c(-1, 1), R = 99))
+                                mu = c(-1, 1)))
   expect_equal(names(res_eq$estimate), "Hodges-Lehmann estimate (x - y)")
   expect_true(!is.null(res_eq$sample_size))
 
-  # MET
+  # MET (asymptotic only)
   res_met <- hush(hodges_lehmann(x, y, alternative = "minimal.effect",
-                                 mu = c(-1, 1), R = 99))
+                                 mu = c(-1, 1)))
   expect_equal(names(res_met$estimate), "Hodges-Lehmann estimate (x - y)")
 })
 

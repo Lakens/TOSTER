@@ -54,7 +54,9 @@ has level 1-2*alpha (90\% when alpha = 0.05).}
 
 \item{R}{the number of permutations. Default is \code{NULL}, which uses the asymptotic test.
 If \code{R >= max_perms} (the maximum number of possible permutations), exact permutation
-is computed. Otherwise, Monte Carlo (permutation with replacement; i.e., randomization testing) sampling is used.}
+is computed. Otherwise, Monte Carlo (permutation with replacement; i.e., randomization
+testing) sampling is used. Note: permutation tests are not supported for
+\code{alternative = "equivalence"} or \code{alternative = "minimal.effect"} (see Details).}
 
 \item{scale}{the scale estimator for standardizing the test statistic in permutation
 tests. Options are:
@@ -161,24 +163,34 @@ estimator (Fried & Dehling, 2011):
 where Z is the median-corrected combined sample.
 }
 
-\subsection{Permutation-Based Equivalence Testing}{
+\subsection{Permutation Tests with Non-Zero Null Values}{
 
-For equivalence and minimal effect testing with permutation methods, this function
-uses an unstudentized approach. The permutation distribution of the raw
-Hodges-Lehmann estimator is generated under the null hypothesis of exchangeability
-(no location difference), and p-values are computed by comparing the observed
-estimate's distance from each equivalence bound to this centered permutation
-distribution.
+For standard alternatives (\code{two.sided}, \code{less}, \code{greater}) with \code{mu != 0},
+the permutation test uses an approximate approach: the observed test statistic
+is centered at \code{mu}, but the permutation distribution is generated under
+exchangeability (effectively \code{mu = 0}). Because the Hodges-Lehmann statistic
+divided by the S1/S2 scale estimator is not a true pivot, this comparison is
+approximate rather than exact. The approximation is generally adequate when
+\code{mu} is moderate relative to the scale of the data, but may lose accuracy for
+extreme null values. For the two-sample case, the scale estimator is
+recomputed for each permutation, which partially mitigates this issue.
+}
 
-This approach ensures that the confidence interval and p-value are concordant:
-when the (1-2\eqn{\alpha})\% confidence interval falls entirely within the equivalence
-bounds, the TOST p-value will be less than \eqn{\alpha}, and vice versa.
+\subsection{Equivalence and Minimal Effect Testing}{
 
-Unlike the studentized permutation approach used for standard alternatives
-(two.sided, less, greater), the equivalence and minimal effect tests do not
-divide by a scale estimate. This is because the scale estimates (S1, S2) from
-Fried & Dehling (2011) provide numerical stability for standard tests but do
-not constitute true studentization for the Hodges-Lehmann estimator.
+Equivalence and minimal effect tests are only available with the asymptotic
+method (\code{R = NULL}). Permutation tests are not supported for these
+alternatives because the scale estimators (S1, S2) from Fried & Dehling
+(2011) do not produce a pivotal test statistic for the Hodges-Lehmann
+estimator. Without pivotality, the permutation distribution generated under
+the exchangeability null is not a valid reference distribution for testing
+at the equivalence bounds, and the resulting p-values can be unreliable.
+This limitation compounds with the inherent conservatism of the naive
+intersection-union procedure, potentially yielding substantial power loss.
+
+The asymptotic method uses kernel density estimation to approximate the
+standard error, which provides a proper pivot and valid boundary-null
+inference.
 }
 
 \subsection{Alternatives}{
@@ -227,8 +239,8 @@ before <- c(5.1, 4.8, 6.2, 5.7, 6.0, 5.5, 4.9, 5.8)
 after <- c(5.6, 5.2, 6.7, 6.1, 6.5, 5.8, 5.3, 6.2)
 hodges_lehmann(before, after, paired = TRUE)
 
-# Equivalence test
-hodges_lehmann(x, y, alternative = "equivalence", mu = c(-1, 1), R = 999)
+# Equivalence test (asymptotic only)
+hodges_lehmann(x, y, alternative = "equivalence", mu = c(-1, 1))
 
 # Formula interface
 hodges_lehmann(extra ~ group, data = sleep)

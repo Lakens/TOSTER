@@ -261,12 +261,11 @@ test_that("alternative = 'greater' works correctly", {
   expect_equal(result$conf.int[2], Inf)
 })
 
-test_that("alternative = 'equivalence' works correctly", {
-  skip_on_cran()
+test_that("alternative = 'equivalence' works correctly (asymptotic)", {
   set.seed(123)
   result <- hodges_lehmann(x_sample, y_sample,
                            alternative = "equivalence",
-                           mu = c(-2, 2), R = 199)
+                           mu = c(-2, 2))
 
   expect_equal(result$alternative, "equivalence")
   expect_length(result$null.value, 2)
@@ -276,12 +275,11 @@ test_that("alternative = 'equivalence' works correctly", {
   expect_equal(attr(result$conf.int, "conf.level"), 0.90)
 })
 
-test_that("alternative = 'minimal.effect' works correctly", {
-  skip_on_cran()
+test_that("alternative = 'minimal.effect' works correctly (asymptotic)", {
   set.seed(123)
   result <- hodges_lehmann(x_sample, y_sample,
                            alternative = "minimal.effect",
-                           mu = c(-2, 2), R = 199)
+                           mu = c(-2, 2))
 
   expect_equal(result$alternative, "minimal.effect")
   expect_length(result$null.value, 2)
@@ -289,11 +287,10 @@ test_that("alternative = 'minimal.effect' works correctly", {
 })
 
 test_that("equivalence with single mu value creates symmetric bounds", {
-  skip_on_cran()
   set.seed(123)
   result <- hodges_lehmann(x_sample, y_sample,
                            alternative = "equivalence",
-                           mu = 2, R = 199)
+                           mu = 2)
 
   expect_equal(as.numeric(result$null.value), c(-2, 2))
 })
@@ -539,6 +536,29 @@ test_that("error for incorrect formula", {
                "'formula' missing or incorrect")
 })
 
+test_that("hodges_lehmann rejects permutation for equivalence/minimal.effect", {
+  set.seed(42)
+  x <- rnorm(20)
+  y <- rnorm(20, mean = 0.3)
+
+  expect_error(
+    hodges_lehmann(x, y, alternative = "equivalence", mu = c(-1, 1), R = 999),
+    "Permutation tests.*not supported.*equivalence"
+  )
+
+  expect_error(
+    hodges_lehmann(x, y, alternative = "minimal.effect", mu = c(-1, 1), R = 999),
+    "Permutation tests.*not supported.*minimal.effect"
+  )
+
+  # Asymptotic versions should still work
+  res_eq <- hodges_lehmann(x, y, alternative = "equivalence", mu = c(-1, 1))
+  expect_s3_class(res_eq, "htest")
+
+  res_me <- hodges_lehmann(x, y, alternative = "minimal.effect", mu = c(-1, 1))
+  expect_s3_class(res_me, "htest")
+})
+
 # =============================================================================
 # Reproducibility Tests
 # =============================================================================
@@ -579,7 +599,7 @@ test_that("confidence level attribute is correct", {
   expect_equal(attr(result_less$conf.int, "conf.level"), 0.95)
 
   result_equiv <- hodges_lehmann(x_sample, y_sample, alternative = "equivalence",
-                                 mu = c(-3, 3), alpha = 0.05, R = 199)
+                                 mu = c(-3, 3), alpha = 0.05)
   expect_equal(attr(result_equiv$conf.int, "conf.level"), 0.90)
 })
 
