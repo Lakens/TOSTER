@@ -538,9 +538,8 @@ Selecting Effect Size Measures</a></li>
 <li><a href="#equivalence-testing-on-the-effect-size-scale" id="toc-equivalence-testing-on-the-effect-size-scale">Equivalence
 Testing on the Effect Size Scale</a></li>
 </ul></li>
-<li><a href="#permutation-boostrap-based-effect-size-testing-with-perm_ses_testand-boot_ses_test" id="toc-permutation-boostrap-based-effect-size-testing-with-perm_ses_testand-boot_ses_test">Permutation
-&amp; Boostrap Based Effect Size Testing with
-<code>perm_ses_test</code>and <code>boot_ses_test</code></a></li>
+<li><a href="#bootstrap-based-effect-size-testing-with-boot_ses_calc" id="toc-bootstrap-based-effect-size-testing-with-boot_ses_calc">Bootstrap Based Effect Size Testing with
+<code>boot_ses_calc</code></a></li>
 </ul></li>
 <li><a href="#summary-comparison-of-robust-tost-methods" id="toc-summary-comparison-of-robust-tost-methods">Summary Comparison of
 Robust TOST Methods</a></li>
@@ -651,7 +650,7 @@ covered in this vignette:</p>
 </tr>
 <tr class="odd">
 <td>SES estimation/testing</td>
-<td><code>ses_calc()</code> / <code>perm_ses_test()</code></td>
+<td><code>ses_calc()</code> / <code>boot_ses_calc()</code></td>
 <td>Non-parametric effect sizes with optional hypothesis testing</td>
 <td>Testing on the effect size scale directly</td>
 </tr>
@@ -740,7 +739,7 @@ equivalence and minimal effect testing.</p>
 estimator with permutation or asymptotic inference and makes the
 location-shift assumption transparent.</p>
 <p><strong>For testing effect sizes directly:</strong> Use
-<code>ses_calc</code> or <code>perm_ses_test</code> to estimate and test
+<code>ses_calc</code> or <code>boot_ses_calc</code> to estimate and test
 non-parametric standardized effect sizes (rank-biserial correlation, WMW
 odds, concordance) with proper hypothesis testing support.</p>
 <p>The <code>wilcox_TOST</code> function remains available for
@@ -2701,19 +2700,15 @@ Fisher method uses z-transformation. See above for details.</p>
 ##                        0.3422819</code></pre>
 </div>
 </div>
-<div id="permutation-boostrap-based-effect-size-testing-with-perm_ses_testand-boot_ses_test" class="section level2">
-<h2>Permutation &amp; Boostrap Based Effect Size Testing with
-<code>perm_ses_test</code>and <code>boot_ses_test</code></h2>
+<div id="bootstrap-based-effect-size-testing-with-boot_ses_calc" class="section level2">
+<h2>Bootstrap Based Effect Size Testing with
+<code>boot_ses_calc</code></h2>
 <p>When asymptotic approximations may be unreliable, particularly with
-small samples, <code>perm_ses_test</code> provides distribution-free
-inference for the same non-parametric effect sizes. Rather than relying
-on normal approximations, it constructs the null distribution of the
-effect size through permutation. Additionally,
-<code>boot_ses_calc</code> uses bootstrapping to estimate the sampling
-distribution of the effect size, <em>but</em> cannot work in situations
-where there is complete separation between groups (e.g., all values in
-one group are higher than the other), which can occur with small samples
-and large effects.</p>
+small samples, <code>boot_ses_calc</code> uses bootstrapping to estimate
+the sampling distribution of the effect size. Note that bootstrap methods
+cannot work in situations where there is complete separation between
+groups (e.g., all values in one group are higher than the other), which
+can occur with small samples and large effects.</p>
 <p>Like the other bootstrap functions in the package,
 <code>boot_ses_calc</code> supports multiple bootstrap CI methods
 (studentized, percentile, basic, and BCa) via <code>boot_ci</code>, with

@@ -290,11 +290,11 @@ Phipson, B., & Smyth, G. K. (2010). Permutation P-values should never be zero: c
 
 Other Robust tests: 
 \code{\link{boot_log_TOST}()},
+\code{\link{boot_ses_test}()},
 \code{\link{boot_t_TOST}()},
 \code{\link{boot_t_test}()},
 \code{\link{hodges_lehmann}()},
 \code{\link{log_TOST}()},
-\code{\link{perm_ses_test}()},
 \code{\link{perm_t_test}()},
 \code{\link{wilcox_TOST}()}
 }

@@ -127,7 +127,8 @@
       "Bash(\"/c/Program Files/R/R-4.5.1/bin/Rscript.exe\":*)",
       "Bash(ls:*)",
       "Bash(\"C:/Program Files/R/R-4.5.1/bin/Rscript.exe\" -e \"git diff HEAD -- tests/testthat/test-smd_calc_htest.R\")",
-      "Bash(\"C:/Program Files/R/R-4.5.1/bin/Rscript.exe\" junk/diag_bca.R)"
+      "Bash(\"C:/Program Files/R/R-4.5.1/bin/Rscript.exe\" junk/diag_bca.R)",
+      "Bash(git -C /Users/aaroncaldwell/Documents/GitHub/TOSTER check-ignore vignettes/robustTOST.html)"
     ]
   }
 }

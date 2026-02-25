@@ -216,6 +216,32 @@ the bootstrapping process. The function will issue a warning if this occurs.
 
 For detailed information on calculation methods, see \code{vignette("robustTOST")}.
 }
+
+\subsection{Edge Cases}{
+\itemize{
+\item \strong{Complete separation}: When one group entirely dominates the other
+(concordance probability = 0 or 1), the bootstrap distribution collapses
+and CIs become degenerate. The function stops with an informative error
+directing users to \code{\link[=ses_calc]{ses_calc()}} with \code{se_method = "agresti"} for
+asymptotic inference. This condition is detected before resampling begins.
+\item \strong{Near-complete separation}: When the observed rb is close to +/-1 but
+not exactly at the boundary, the working-scale transformation (log-odds
+or Fisher z) helps stabilize the bootstrap but coverage may still
+degrade. The function issues a message when bootstrap replicates contain
+infinite values after transformation, which is a symptom of this problem.
+\item \strong{Why the bootstrap fails at boundaries}: The rank-biserial is bounded
+on [-1, 1]. When the observed value is near a boundary, resampled
+values pile up at the boundary, producing a distribution that is not
+well-approximated by the symmetric bootstrap CI methods (basic,
+percentile, studentized). The log-odds and Fisher z working scales
+mitigate this by mapping [-1, 1] to the real line, but the mapping
+itself becomes unstable as rb approaches +/-1.
+\item \strong{Recommendation}: For data with complete or near-complete separation,
+prefer the asymptotic Agresti/Lehmann interval from \code{\link[=ses_calc]{ses_calc()}}, which
+handles boundary behavior more gracefully through the placement-based
+variance estimator.
+}
+}
 }
 \section{Purpose}{
 

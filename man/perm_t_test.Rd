@@ -289,12 +289,12 @@ Statistical Applications in Genetics and Molecular Biology, 9(1), Article 39.
 \seealso{
 Other Robust tests: 
 \code{\link{boot_log_TOST}()},
+\code{\link{boot_ses_test}()},
 \code{\link{boot_t_TOST}()},
 \code{\link{boot_t_test}()},
 \code{\link{brunner_munzel}()},
 \code{\link{hodges_lehmann}()},
 \code{\link{log_TOST}()},
-\code{\link{perm_ses_test}()},
 \code{\link{wilcox_TOST}()}
 }
 \concept{Robust tests}

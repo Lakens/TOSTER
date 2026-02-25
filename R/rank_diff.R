@@ -5,7 +5,7 @@
 #' Applies the Kornbrot (1990) rank difference transformation to paired data.
 #' All 2n observations are jointly ranked using midranks for ties, and the
 #' ranks corresponding to each condition are returned. The transformed data
-#' can then be passed to [ses_calc()], [perm_ses_test()], or [boot_ses_calc()]
+#' can then be passed to [ses_calc()] or [boot_ses_calc()]
 #' for effect size estimation that is invariant under monotone transformations
 #' of the original scale.
 #'

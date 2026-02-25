@@ -45,7 +45,7 @@ The following table provides a quick overview of the robust methods covered in t
 | Permutation t-test | `perm_t_test()` | Resampling without replacement, exact p-values possible | Small samples, mean differences, exact inference |
 | Bootstrap TOST | `boot_t_TOST()` | Resampling with replacement, flexible | Moderate samples, mean differences, visualization |
 | Log-Transformed TOST | `log_TOST()` | Ratio-based, for multiplicative comparisons | Comparing relative differences (e.g., bioequivalence) |
-| SES estimation/testing | `ses_calc()` / `perm_ses_test()` | Non-parametric effect sizes with optional hypothesis testing | Testing on the effect size scale directly |
+| SES estimation/testing | `ses_calc()` / `boot_ses_calc()` | Non-parametric effect sizes with optional hypothesis testing | Testing on the effect size scale directly |
 
 # Wilcoxon-Mann-Whitney TOST
 
@@ -89,7 +89,7 @@ This interpretive difficulty is especially pronounced for equivalence testing. W
 
 **For robust location testing:** Use `hodges_lehmann`, which explicitly tests the Hodges-Lehmann estimator with permutation or asymptotic inference and makes the location-shift assumption transparent.
 
-**For testing effect sizes directly:** Use `ses_calc` or `perm_ses_test` to estimate and test non-parametric standardized effect sizes (rank-biserial correlation, WMW odds, concordance) with proper hypothesis testing support.
+**For testing effect sizes directly:** Use `ses_calc` or `boot_ses_calc` to estimate and test non-parametric standardized effect sizes (rank-biserial correlation, WMW odds, concordance) with proper hypothesis testing support.
 
 The `wilcox_TOST` function remains available for situations where rank-based tests are specifically desired, such as with ordinal data or when consistency with prior analyses that used WMW tests is needed.
 
@@ -1130,9 +1130,9 @@ ses_calc(formula = extra ~ group,
          alternative = "two.sided")
 ```
 
-## Permutation & Boostrap Based Effect Size Testing with `perm_ses_test`and `boot_ses_test`
+## Bootstrap Based Effect Size Testing with `boot_ses_calc`
 
-When asymptotic approximations may be unreliable, particularly with small samples, `perm_ses_test` provides distribution-free inference for the same non-parametric effect sizes. Rather than relying on normal approximations, it constructs the null distribution of the effect size through permutation. Additionally, `boot_ses_calc` uses bootstrapping to estimate the sampling distribution of the effect size, *but* cannot work in situations where there is complete separation between groups (e.g., all values in one group are higher than the other), which can occur with small samples and large effects.
+When asymptotic approximations may be unreliable, particularly with small samples, `boot_ses_calc` uses bootstrapping to estimate the sampling distribution of the effect size. Note that bootstrap methods cannot work in situations where there is complete separation between groups (e.g., all values in one group are higher than the other), which can occur with small samples and large effects.
 
 Like the other bootstrap functions in the package, `boot_ses_calc` supports multiple bootstrap CI methods (studentized, percentile, basic, and BCa) via `boot_ci`, with p-values matched to the selected CI method for guaranteed CI/p-value agreement. All bootstrap computations are performed on a working scale (log-odds for the default Agresti method, Fisher z for the Fisher method), then back-transformed to the requested effect size scale.
 

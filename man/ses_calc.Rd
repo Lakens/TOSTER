@@ -245,8 +245,7 @@ for smaller samples.
 
 The Agresti placement variance is then evaluated at the corrected estimate. A message
 is printed when this correction is applied. For more reliable inference at boundaries,
-consider \code{\link[=perm_ses_test]{perm_ses_test()}} for permutation-based p-values and intervals, or
-\code{se_method = "score"} for score-type intervals that handle
+consider \code{se_method = "score"} for score-type intervals that handle
 boundaries naturally without correction.
 
 For \code{se_method = "score"}, no correction is needed. The score-type

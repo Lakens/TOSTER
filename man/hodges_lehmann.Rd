@@ -263,11 +263,11 @@ calculating exact P-values when permutations are randomly drawn.
 \seealso{
 Other Robust tests: 
 \code{\link{boot_log_TOST}()},
+\code{\link{boot_ses_test}()},
 \code{\link{boot_t_TOST}()},
 \code{\link{boot_t_test}()},
 \code{\link{brunner_munzel}()},
 \code{\link{log_TOST}()},
-\code{\link{perm_ses_test}()},
 \code{\link{perm_t_test}()},
 \code{\link{wilcox_TOST}()}
 }

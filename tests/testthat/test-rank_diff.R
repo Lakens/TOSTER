@@ -123,7 +123,7 @@ test_that("rank_diff: increasing monotone transform gives identical results", {
   expect_equal(unname(res_raw$estimate), unname(res_log$estimate))
 })
 
-# === Works with ses_calc, perm_ses_test, boot_ses_calc ===
+# === Works with ses_calc, boot_ses_calc ===
 
 test_that("rank_diff output works with ses_calc", {
   set.seed(123)
@@ -163,17 +163,6 @@ test_that("rank_diff output works with all se_methods", {
   }
 })
 
-test_that("rank_diff output works with perm_ses_test", {
-  set.seed(456)
-  x <- rnorm(10)
-  y <- rnorm(10, 0.5)
-
-  rd <- rank_diff(x, y)
-  res <- perm_ses_test(rd$x, rd$y, paired = TRUE, ses = "rb", R = 199)
-  expect_s3_class(res, "htest")
-  expect_true(!is.null(res$p.value))
-  expect_true(res$p.value >= 0 && res$p.value <= 1)
-})
 
 test_that("rank_diff output works with boot_ses_calc", {
   skip_on_cran()

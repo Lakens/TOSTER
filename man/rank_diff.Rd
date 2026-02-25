@@ -28,7 +28,7 @@ and a message is printed if any pairs are dropped.
 Applies the Kornbrot (1990) rank difference transformation to paired data.
 All 2n observations are jointly ranked using midranks for ties, and the
 ranks corresponding to each condition are returned. The transformed data
-can then be passed to \code{\link[=ses_calc]{ses_calc()}}, \code{\link[=perm_ses_test]{perm_ses_test()}}, or \code{\link[=boot_ses_calc]{boot_ses_calc()}}
+can then be passed to \code{\link[=ses_calc]{ses_calc()}} or \code{\link[=boot_ses_calc]{boot_ses_calc()}}
 for effect size estimation that is invariant under monotone transformations
 of the original scale.
 }

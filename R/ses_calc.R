@@ -168,8 +168,7 @@
 #'
 #' The Agresti placement variance is then evaluated at the corrected estimate. A message
 #' is printed when this correction is applied. For more reliable inference at boundaries,
-#' consider [perm_ses_test()] for permutation-based p-values and intervals, or
-#' `se_method = "score"` for score-type intervals that handle
+#' consider `se_method = "score"` for score-type intervals that handle
 #' boundaries naturally without correction.
 #'
 #' For `se_method = "score"`, no correction is needed. The score-type
@@ -471,7 +470,7 @@ ses_calc.default = function(x,
                       "se_method = 'score' for score-type intervals.")
       } else {
         msg <- paste0(msg, " For more reliable inference at boundaries, consider ",
-                      "perm_ses_test() for permutation-based p-values and intervals.")
+                      "boot_ses_calc() for bootstrap-based p-values and intervals.")
       }
 
       message(msg)
