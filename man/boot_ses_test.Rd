@@ -86,7 +86,9 @@ A list with class \code{"htest"} containing:
 \item{null.value}{Null hypothesis value(s) on the requested scale.}
 \item{data.name}{Character string giving the name(s) of the data.}
 \item{call}{The matched call.}
-\item{copula.param}{The copula correlation parameter(s) used (for diagnostics).}
+\item{model.param}{The model parameter(s) used for null generation
+(for diagnostics). For two-sample: the Lehmann gamma parameter(s).
+For paired: the sign probability parameter(s).}
 \item{boot.dist}{Bootstrap null distribution (if \code{keep_boot = TRUE} and
 standard alternative).}
 \item{boot.dist.low}{Bootstrap distribution under lower bound (if
@@ -98,16 +100,15 @@ standard alternative).}
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#experimental}{\figure{lifecycle-experimental.svg}{options: alt='[Experimental]'}}}{\strong{[Experimental]}}
 
 Performs hypothesis testing for rank-based effect sizes using a parametric
-bootstrap based on a normal copula model. This function is designed primarily
-for equivalence testing (TOST) and minimal effect testing with non-zero null
-hypotheses, where permutation-based approaches are not valid for rank-based
-effect sizes.
+bootstrap. This function is designed primarily for equivalence testing (TOST)
+and minimal effect testing with non-zero null hypotheses, where
+permutation-based approaches are not valid for rank-based effect sizes.
 }
 \details{
 This function calculates p-values for rank-based effect sizes using a
-parametric bootstrap. It generates data under the null hypothesis using a
-normal (Gaussian) copula with empirical marginals, then compares the observed
-effect size to the resulting null reference distribution.
+parametric bootstrap. It generates data under the null hypothesis and
+compares the observed effect size to the resulting null reference
+distribution.
 \subsection{Why Not Permutation?}{
 
 Permutation tests are exact and assumption-free when testing the null
@@ -119,9 +120,9 @@ data transformation that shifts rb by a fixed \eqn{\Delta}. Studentization
 (as used in \code{\link[=perm_t_test]{perm_t_test()}} and \code{\link[=brunner_munzel]{brunner_munzel()}}) cannot rescue this
 because rb is not a studentized statistic.
 
-This function uses a parametric assumption (normal copula) to generate data
-under the non-zero null. The tradeoff is that validity now depends on how
-well the copula models the true dependence structure.
+This function uses parametric models to generate data under the non-zero
+null. The tradeoff is that validity now depends on how well the model
+approximates the true data-generating process.
 
 Users who need TOST for means should use \code{\link[=boot_t_TOST]{boot_t_TOST()}}, which handles
 non-zero nulls correctly via studentization without any parametric
@@ -141,16 +142,21 @@ asymptotic intervals from \code{\link[=ses_calc]{ses_calc()}}.
 
 \subsection{Algorithm}{
 
-For each null value, the function:
-\enumerate{
-\item Maps the target rank-biserial to a normal copula correlation parameter
-using the relationship \eqn{\rho_{rb} \approx (6/\pi) \arcsin(\rho_c / 2)}.
-\item Generates B bootstrap samples by drawing uniform scores from the copula,
-then transforming to empirical marginals via quantile mapping.
-\item Computes rb for each bootstrap sample to build the null reference
-distribution.
-\item Computes p-values by comparing the observed rb to the null distribution.
-}
+\strong{Two-sample (independent)}: Uses the Lehmann alternative (proportional
+hazards) model. Data are pooled and treated as a common empirical CDF
+\eqn{F}. Under the null \eqn{P(X > Y) = \text{target}}, group Y is
+resampled from \eqn{F} and group X is resampled from a transformed CDF
+\eqn{G(t) = 1 - (1 - F(t))^{1/\gamma}} where
+\eqn{\gamma = \text{target\_cstat} / (1 - \text{target\_cstat})}. This
+produces data with the correct population rank-biserial under the
+proportional hazards assumption.
+
+\strong{Paired samples}: Uses a sign-randomization model. The absolute
+differences \eqn{|d_i| = |x_i - y_i|} are resampled with replacement, and
+signs are assigned independently with probability
+\eqn{P(\text{sign} = +) = (1 + \Delta) / 2}. This produces a bootstrap
+distribution with the correct expected signed-rank rb under the assumption
+of rank-independent sign probabilities.
 
 For equivalence testing, two null distributions are generated (one per bound)
 and the TOST p-value is the maximum of the two one-sided p-values.
@@ -160,9 +166,9 @@ and the TOST p-value is the maximum of the two one-sided p-values.
 
 This function is experimental. Important caveats:
 \itemize{
-\item Validity depends on the parametric distributional assumption (normal copula
-with empirical marginals). Unlike permutation tests, this is not
-assumption-free.
+\item Validity depends on parametric assumptions (Lehmann alternative for
+two-sample, sign-randomization for paired). Unlike permutation tests,
+this is not assumption-free.
 \item The procedure is most reliable for continuous data, moderate n (>= 20),
 and equivalence bounds not too close to +/-1.
 \item Results should be interpreted with caution and ideally cross-checked
@@ -180,15 +186,14 @@ this and no test at all, not between this and a better test.
 require test inversion across a grid of null values (Berger & Boos, 1994),
 which is computationally expensive. Use \code{\link[=boot_ses_calc]{boot_ses_calc()}} or \code{\link[=ses_calc]{ses_calc()}}
 for interval estimation.
-\item \strong{Discrete copula}: When data are discrete or heavily tied, the
-continuous normal copula generates tie-free samples, creating a mismatch.
-A discrete or empirical copula with tie-correction would address this.
-\item \strong{Tie correction}: As an intermediate step, mapping continuous copula
-draws back to the observed discrete marginal support would approximately
-preserve the tie structure.
-\item \strong{Copula family selection}: The normal copula is a reasonable default
-but other families (Frank, Clayton) may be more appropriate for certain
-data types.
+\item \strong{Rank-dependent sign model}: The current paired bootstrap assigns
+signs independently of rank. A rank-weighted sign model could improve
+accuracy by allowing the sign probability to depend on the magnitude of
+the difference.
+\item \strong{Copula-based generation}: A normal copula model could provide an
+alternative data generation mechanism, especially for paired data where
+the joint distribution matters beyond marginals. This would require
+numerical calibration of the copula parameter to the target rb.
 }
 }
 
@@ -226,8 +231,8 @@ Berger, R.L. and Boos, D.D. (1994). P values maximized over a confidence set
 for the nuisance parameter. \emph{Journal of the American Statistical Association},
 89, 1012-1016.
 
-Genest, C. and Neslehova, J. (2007). A primer on copulas for count data.
-\emph{ASTIN Bulletin}, 37, 475-515.
+Lehmann, E.L. (1975). \emph{Nonparametrics: Statistical Methods Based on Ranks}.
+Holden-Day.
 }
 \seealso{
 \code{\link[=ses_calc]{ses_calc()}} for asymptotic inference, \code{\link[=boot_ses_calc]{boot_ses_calc()}} for

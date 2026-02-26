@@ -22,7 +22,6 @@ Imports:
     ggdist,
     distributional,
     cowplot,
-    copula,
     tidyr,
     utils,
     R6,

@@ -3,16 +3,15 @@
 #' `r lifecycle::badge('experimental')`
 #'
 #' Performs hypothesis testing for rank-based effect sizes using a parametric
-#' bootstrap based on a normal copula model. This function is designed primarily
-#' for equivalence testing (TOST) and minimal effect testing with non-zero null
-#' hypotheses, where permutation-based approaches are not valid for rank-based
-#' effect sizes.
+#' bootstrap. This function is designed primarily for equivalence testing (TOST)
+#' and minimal effect testing with non-zero null hypotheses, where
+#' permutation-based approaches are not valid for rank-based effect sizes.
 #'
 #' @section Warning:
 #' This function is experimental. Important caveats:
-#' - Validity depends on the parametric distributional assumption (normal copula
-#'   with empirical marginals). Unlike permutation tests, this is not
-#'   assumption-free.
+#' - Validity depends on parametric assumptions (Lehmann alternative for
+#'   two-sample, sign-randomization for paired). Unlike permutation tests,
+#'   this is not assumption-free.
 #' - The procedure is most reliable for continuous data, moderate n (>= 20),
 #'   and equivalence bounds not too close to +/-1.
 #' - Results should be interpreted with caution and ideally cross-checked
@@ -49,9 +48,9 @@
 #'
 #' @details
 #' This function calculates p-values for rank-based effect sizes using a
-#' parametric bootstrap. It generates data under the null hypothesis using a
-#' normal (Gaussian) copula with empirical marginals, then compares the observed
-#' effect size to the resulting null reference distribution.
+#' parametric bootstrap. It generates data under the null hypothesis and
+#' compares the observed effect size to the resulting null reference
+#' distribution.
 #'
 #' ## Why Not Permutation?
 #'
@@ -64,9 +63,9 @@
 #' (as used in [perm_t_test()] and [brunner_munzel()]) cannot rescue this
 #' because rb is not a studentized statistic.
 #'
-#' This function uses a parametric assumption (normal copula) to generate data
-#' under the non-zero null. The tradeoff is that validity now depends on how
-#' well the copula models the true dependence structure.
+#' This function uses parametric models to generate data under the non-zero
+#' null. The tradeoff is that validity now depends on how well the model
+#' approximates the true data-generating process.
 #'
 #' Users who need TOST for means should use [boot_t_TOST()], which handles
 #' non-zero nulls correctly via studentization without any parametric
@@ -84,14 +83,21 @@
 #'
 #' ## Algorithm
 #'
-#' For each null value, the function:
-#' 1. Maps the target rank-biserial to a normal copula correlation parameter
-#'    using the relationship \eqn{\rho_{rb} \approx (6/\pi) \arcsin(\rho_c / 2)}.
-#' 2. Generates B bootstrap samples by drawing uniform scores from the copula,
-#'    then transforming to empirical marginals via quantile mapping.
-#' 3. Computes rb for each bootstrap sample to build the null reference
-#'    distribution.
-#' 4. Computes p-values by comparing the observed rb to the null distribution.
+#' **Two-sample (independent)**: Uses the Lehmann alternative (proportional
+#' hazards) model. Data are pooled and treated as a common empirical CDF
+#' \eqn{F}. Under the null \eqn{P(X > Y) = \text{target}}, group Y is
+#' resampled from \eqn{F} and group X is resampled from a transformed CDF
+#' \eqn{G(t) = 1 - (1 - F(t))^{1/\gamma}} where
+#' \eqn{\gamma = \text{target\_cstat} / (1 - \text{target\_cstat})}. This
+#' produces data with the correct population rank-biserial under the
+#' proportional hazards assumption.
+#'
+#' **Paired samples**: Uses a sign-randomization model. The absolute
+#' differences \eqn{|d_i| = |x_i - y_i|} are resampled with replacement, and
+#' signs are assigned independently with probability
+#' \eqn{P(\text{sign} = +) = (1 + \Delta) / 2}. This produces a bootstrap
+#' distribution with the correct expected signed-rank rb under the assumption
+#' of rank-independent sign probabilities.
 #'
 #' For equivalence testing, two null distributions are generated (one per bound)
 #' and the TOST p-value is the maximum of the two one-sided p-values.
@@ -102,15 +108,14 @@
 #'     require test inversion across a grid of null values (Berger & Boos, 1994),
 #'     which is computationally expensive. Use [boot_ses_calc()] or [ses_calc()]
 #'     for interval estimation.
-#'   \item **Discrete copula**: When data are discrete or heavily tied, the
-#'     continuous normal copula generates tie-free samples, creating a mismatch.
-#'     A discrete or empirical copula with tie-correction would address this.
-#'   \item **Tie correction**: As an intermediate step, mapping continuous copula
-#'     draws back to the observed discrete marginal support would approximately
-#'     preserve the tie structure.
-#'   \item **Copula family selection**: The normal copula is a reasonable default
-#'     but other families (Frank, Clayton) may be more appropriate for certain
-#'     data types.
+#'   \item **Rank-dependent sign model**: The current paired bootstrap assigns
+#'     signs independently of rank. A rank-weighted sign model could improve
+#'     accuracy by allowing the sign probability to depend on the magnitude of
+#'     the difference.
+#'   \item **Copula-based generation**: A normal copula model could provide an
+#'     alternative data generation mechanism, especially for paired data where
+#'     the joint distribution matters beyond marginals. This would require
+#'     numerical calibration of the copula parameter to the target rb.
 #' }
 #'
 #' @return A list with class `"htest"` containing:
@@ -121,7 +126,9 @@
 #'   \item{null.value}{Null hypothesis value(s) on the requested scale.}
 #'   \item{data.name}{Character string giving the name(s) of the data.}
 #'   \item{call}{The matched call.}
-#'   \item{copula.param}{The copula correlation parameter(s) used (for diagnostics).}
+#'   \item{model.param}{The model parameter(s) used for null generation
+#'     (for diagnostics). For two-sample: the Lehmann gamma parameter(s).
+#'     For paired: the sign probability parameter(s).}
 #'   \item{boot.dist}{Bootstrap null distribution (if `keep_boot = TRUE` and
 #'     standard alternative).}
 #'   \item{boot.dist.low}{Bootstrap distribution under lower bound (if
@@ -162,8 +169,8 @@
 #' for the nuisance parameter. *Journal of the American Statistical Association*,
 #' 89, 1012-1016.
 #'
-#' Genest, C. and Neslehova, J. (2007). A primer on copulas for count data.
-#' *ASTIN Bulletin*, 37, 475-515.
+#' Lehmann, E.L. (1975). *Nonparametrics: Statistical Methods Based on Ranks*.
+#' Holden-Day.
 #'
 #' @family Robust tests
 #' @seealso [ses_calc()] for asymptotic inference, [boot_ses_calc()] for
@@ -292,8 +299,8 @@ boot_ses_test.default <- function(x,
   if (n < 20) {
     warning(
       "Sample size is small (n = ", n, "). ",
-      "The parametric bootstrap relies on asymptotic properties of the copula fit ",
-      "that may not hold. Results should be treated as exploratory."
+      "The parametric bootstrap may not be reliable for small samples. ",
+      "Results should be treated as exploratory."
     )
   }
 
@@ -304,12 +311,12 @@ boot_ses_test.default <- function(x,
   if (abs(obs_rb) >= 0.999) {
     warning(
       "Complete or near-complete separation detected (rb = ", round(obs_rb, 3), "). ",
-      "The parametric bootstrap result is driven by the copula assumption rather than ",
-      "the data. Interpret with extreme caution."
+      "The parametric bootstrap result may be unreliable. ",
+      "Interpret with extreme caution."
     )
   }
 
-  # Convert mu from user ses scale to rb scale --------
+  # Scale conversion helpers --------
   ses_to_rb <- function(val, ses_type) {
     switch(ses_type,
            "rb" = val,
@@ -328,50 +335,72 @@ boot_ses_test.default <- function(x,
 
   obs_es <- rb_to_ses_val(obs_rb, ses)
 
-  # rb to copula parameter --------
-  rb_to_copula_param <- function(target_rb) {
-    tryCatch({
-      f <- function(rho_c) (6 / pi) * asin(rho_c / 2) - target_rb
-      uniroot(f, interval = c(-0.9999, 0.9999))$root
-    }, error = function(e) {
-      stop(
-        "Failed to map target rb = ", round(target_rb, 4),
-        " to a copula parameter. The target may be outside the achievable ",
-        "range for the normal copula. Error: ", conditionMessage(e)
-      )
-    })
+  # Bootstrap null distribution generators --------
+
+  # Two-sample: Lehmann alternative (proportional hazards) model
+  # Under G(t) = 1 - (1-F(t))^(1/gamma), P(X > Y) = gamma/(1+gamma)
+  # So gamma = target_cstat / (1 - target_cstat)
+  boot_rb_twosample <- function(x, y, target_rb, B) {
+    pooled <- c(x, y)
+    n_x_local <- length(x)
+    n_y_local <- length(y)
+    target_cstat <- (1 + target_rb) / 2
+    gamma_val <- target_cstat / (1 - target_cstat)
+
+    boot_dist <- vapply(seq_len(B), function(b) {
+      u_y <- runif(n_y_local)
+      u_x <- runif(n_x_local)
+      # Y resampled from pooled empirical CDF
+      y_boot <- quantile(pooled, u_y, type = 1)
+      # X from Lehmann-transformed CDF: quantile at 1 - (1-u)^gamma
+      x_boot <- quantile(pooled, 1 - (1 - u_x)^gamma_val, type = 1)
+      rbs_calc(x_boot, y_boot, mu = 0, paired = FALSE)
+    }, numeric(1))
+
+    list(dist = boot_dist, model_param = gamma_val)
   }
 
-  # Bootstrap null distribution generator --------
-  boot_rb_under_null <- function(x, y, target_rb, B, paired) {
-    rho_c <- rb_to_copula_param(target_rb)
-    cop <- copula::normalCopula(param = rho_c, dim = 2)
+  # Paired: sign-randomization model
+  # Resample |d_i| with replacement, assign sign + with P = (1 + target_rb) / 2
+  boot_rb_paired <- function(x, y, target_rb, B) {
+    d <- x - y
+    abs_d <- abs(d)
+    # Remove zero differences (consistent with signed-rank convention)
+    abs_d <- abs_d[abs_d != 0]
+    n_d <- length(abs_d)
+    p_sign <- (1 + target_rb) / 2
 
-    if (paired) {
-      n <- length(x)
-      boot_dist <- vapply(seq_len(B), function(b) {
-        u <- copula::rCopula(n, cop)
-        x_boot <- quantile(x, u[, 1], type = 1)
-        y_boot <- quantile(y, u[, 2], type = 1)
-        rbs_calc(x_boot, y_boot, mu = 0, paired = TRUE)
-      }, numeric(1))
-    } else {
-      n_x_local <- length(x)
-      n_y_local <- length(y)
-      # For two-sample, generate copula samples for each group size
-      # and use the copula to impose dependence structure
-      boot_dist <- vapply(seq_len(B), function(b) {
-        # Generate paired uniform scores from copula
-        # Use n = max(n_x, n_y) and sample marginals independently
-        n_cop <- max(n_x_local, n_y_local)
-        u <- copula::rCopula(n_cop, cop)
-        x_boot <- quantile(x, u[seq_len(n_x_local), 1], type = 1)
-        y_boot <- quantile(y, u[seq_len(n_y_local), 2], type = 1)
-        rbs_calc(x_boot, y_boot, mu = 0, paired = FALSE)
-      }, numeric(1))
+    if (n_d == 0) {
+      return(list(dist = rep(0, B), model_param = p_sign))
     }
 
-    list(dist = boot_dist, copula_param = rho_c)
+    boot_dist <- vapply(seq_len(B), function(b) {
+      # Resample absolute differences
+      idx <- sample(n_d, replace = TRUE)
+      abs_d_boot <- abs_d[idx]
+      # Assign signs with target probability
+      signs <- sample(c(1, -1), n_d, replace = TRUE, prob = c(p_sign, 1 - p_sign))
+      d_boot <- abs_d_boot * signs
+      # Compute signed-rank rb
+      d_nz <- d_boot[d_boot != 0]
+      n_nz <- length(d_nz)
+      if (n_nz == 0) return(0)
+      rr <- rank(abs(d_nz))
+      T_plus <- sum(rr[d_nz > 0])
+      S <- n_nz * (n_nz + 1) / 2
+      2 * T_plus / S - 1
+    }, numeric(1))
+
+    list(dist = boot_dist, model_param = p_sign)
+  }
+
+  # Dispatch to appropriate bootstrap generator
+  boot_rb_under_null <- function(x, y, target_rb, B, paired) {
+    if (paired) {
+      boot_rb_paired(x, y, target_rb, B)
+    } else {
+      boot_rb_twosample(x, y, target_rb, B)
+    }
   }
 
   # Compute p-values --------
@@ -383,7 +412,7 @@ boot_ses_test.default <- function(x,
     if (any(abs(c(mu_rb_low, mu_rb_high)) > 0.95)) {
       warning(
         "One or more equivalence bounds are close to +/-1 on the rb scale. ",
-        "The normal copula approximation is unreliable in this region."
+        "The parametric bootstrap approximation may be unreliable in this region."
       )
     }
 
@@ -392,8 +421,8 @@ boot_ses_test.default <- function(x,
 
     boot_low <- boot_low_res$dist
     boot_high <- boot_high_res$dist
-    copula_params <- c(boot_low_res$copula_param, boot_high_res$copula_param)
-    names(copula_params) <- c("lower", "upper")
+    model_params <- c(boot_low_res$model_param, boot_high_res$model_param)
+    names(model_params) <- c("lower", "upper")
 
     if (alternative == "equivalence") {
       # IU test: reject non-equivalence if inside bounds
@@ -418,14 +447,14 @@ boot_ses_test.default <- function(x,
     if (abs(mu_rb) > 0.95) {
       warning(
         "The null value is close to +/-1 on the rb scale. ",
-        "The normal copula approximation is unreliable in this region."
+        "The parametric bootstrap approximation may be unreliable in this region."
       )
     }
 
     boot_res <- boot_rb_under_null(x, y, target_rb = mu_rb, B = B, paired = paired)
     boot_dist <- boot_res$dist
-    copula_params <- boot_res$copula_param
-    names(copula_params) <- "null"
+    model_params <- boot_res$model_param
+    names(model_params) <- "null"
 
     pvalue <- switch(alternative,
                      "two.sided" = mean(abs(boot_dist - mu_rb) >= abs(obs_rb - mu_rb)),
@@ -470,7 +499,7 @@ boot_ses_test.default <- function(x,
     null.value = null_val,
     data.name = dname,
     call = match.call(),
-    copula.param = copula_params
+    model.param = model_params
   )
 
   # Add bootstrap distributions if requested
@@ -482,6 +511,20 @@ boot_ses_test.default <- function(x,
       rval$boot.dist <- rb_to_ses_val(boot_dist, ses)
     }
   }
+
+  # TODO 1 — Confidence intervals: Not provided. Adding CIs would require test
+  # inversion across a grid of null values (Berger & Boos, 1994), which is
+  # computationally expensive (B x grid size resamples). Use boot_ses_calc() or
+  # ses_calc() for interval estimation.
+
+  # TODO 2 — Rank-dependent sign model for paired: The current sign-randomization
+  # assigns signs independently of rank. A model where P(sign = +) depends on the
+  # rank of |d_i| could improve accuracy for some data configurations.
+
+  # TODO 3 — Copula-based generation: A normal copula model could provide an
+  # alternative mechanism, especially for paired data. Would require numerical
+  # calibration rather than the Spearman-to-copula formula (which applies to
+  # Spearman correlation, not the rank-biserial).
 
   class(rval) <- "htest"
   return(rval)

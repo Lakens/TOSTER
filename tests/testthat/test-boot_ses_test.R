@@ -17,9 +17,9 @@ test_that("two-sided test at mu = 0 returns plausible result", {
   expect_s3_class(res, "htest")
   expect_true(res$p.value >= 0 && res$p.value <= 1)
   # Groups differ substantially, so p-value should be small
-  expect_true(res$p.value < 0.15)
+  expect_true(res$p.value < 0.05)
   expect_true(!is.null(res$estimate))
-  expect_true(!is.null(res$copula.param))
+  expect_true(!is.null(res$model.param))
 })
 
 # Test 2: Equivalence test where obs_rb is clearly inside bounds --------
@@ -35,7 +35,7 @@ test_that("equivalence test with obs_rb inside bounds yields small p-value", {
   )
 
   expect_s3_class(res, "htest")
-  expect_true(res$p.value < 0.15)
+  expect_true(res$p.value < 0.05)
   expect_equal(res$alternative, "equivalence")
 })
 
@@ -249,7 +249,7 @@ test_that("minimal effect test returns valid result", {
   expect_s3_class(res, "htest")
   expect_equal(res$alternative, "minimal.effect")
   # Large effect well outside narrow bounds: should reject equivalence
-  expect_true(res$p.value < 0.15)
+  expect_true(res$p.value < 0.05)
 })
 
 # Test 15: keep_boot = TRUE returns bootstrap distributions --------
