@@ -25,6 +25,16 @@ boot_smd_calc(x = sleep$extra[sleep$group == 1],
          boot_ci = "stud",
          bias_correction = F)
 
+## -----------------------------------------------------------------------------
+boot_smd_calc(x = sleep$extra[sleep$group == 1],
+              y = sleep$extra[sleep$group == 2],
+         R = 199,
+         paired = TRUE,
+         boot_ci = "stud",
+         bias_correction = TRUE,
+         null.value = c(-0.5,0.5), 
+         alternative = "equ")
+
 ## ----fig.width=6, fig.height=6------------------------------------------------
 plot_smd(d = .43,
          df = 58,

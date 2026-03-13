@@ -8,10 +8,12 @@ knitr::opts_chunk$set(
 library(TOSTER)
 
 ## -----------------------------------------------------------------------------
-simple_htest(extra ~ group,
+test1 = simple_htest(extra ~ group,
              data = sleep,
              mu = 0,
              alternative = "two.sided")
+
+test1$sample_size
 
 ## -----------------------------------------------------------------------------
 t.test(extra ~ group, data = sleep)

@@ -60,8 +60,8 @@ NEWS
 
 - **Correlation SE improvements** for `z_cor_test()` and `corsum_test()`:
   - Spearman's rho now uses the Bonett-Wright ρ-dependent SE formula
-    (`sqrt((1 + r²/2) / (n - 3))`) instead of the fixed 1.06 constant,
-    providing better calibration across the full range of ρ.
+    (`sqrt((1 + r^2/2) / (n - 3))`) instead of the fixed 1.06 constant,
+    providing better calibration across the full range of rho.
   - `z_cor_test()` gains a `se_method` argument (`"analytic"` or `"jackknife"`)
     for computing the standard error via leave-one-out resampling on the
     Fisher z scale. The jackknife SE is used consistently for both the test

@@ -115,11 +115,11 @@ hodges_lehmann(formula = extra ~ group,
 
 ## -----------------------------------------------------------------------------
 # Equivalence test: is the location shift within ±2 units?
+# Equivalence/minimal.effect alternatives use the asymptotic method only
 hodges_lehmann(formula = extra ~ group,
                data = sleep,
                alternative = "equivalence",
-               mu = 2,
-               R = 1999)
+               mu = 2)
 
 ## -----------------------------------------------------------------------------
 # Paired Hodges-Lehmann test
@@ -130,11 +130,11 @@ hodges_lehmann(x = sleep$extra[sleep$group == 1],
 
 ## -----------------------------------------------------------------------------
 # Minimal effect test: is the location shift outside ±0.5?
+# Minimal effect alternative uses the asymptotic method only
 hodges_lehmann(formula = extra ~ group,
                data = sleep,
                alternative = "minimal.effect",
-               mu = 0.5,
-               R = 1999)
+               mu = 0.5)
 
 ## -----------------------------------------------------------------------------
 data('sleep')

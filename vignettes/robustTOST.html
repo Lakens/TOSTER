@@ -12,7 +12,7 @@
 
 <meta name="author" content="Aaron R. Caldwell" />
 
-<meta name="date" content="2026-02-23" />
+<meta name="date" content="2026-03-13" />
 
 <title>Robust TOST Procedures</title>
 
@@ -364,7 +364,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Robust TOST Procedures</h1>
 <h4 class="author">Aaron R. Caldwell</h4>
-<h4 class="date">2026-02-23</h4>
+<h4 class="date">2026-03-13</h4>
 
 
 <div id="TOC">
@@ -538,8 +538,8 @@ Selecting Effect Size Measures</a></li>
 <li><a href="#equivalence-testing-on-the-effect-size-scale" id="toc-equivalence-testing-on-the-effect-size-scale">Equivalence
 Testing on the Effect Size Scale</a></li>
 </ul></li>
-<li><a href="#bootstrap-based-effect-size-testing-with-boot_ses_calc" id="toc-bootstrap-based-effect-size-testing-with-boot_ses_calc">Bootstrap Based Effect Size Testing with
-<code>boot_ses_calc</code></a></li>
+<li><a href="#bootstrap-based-effect-size-testing-with-boot_ses_calc" id="toc-bootstrap-based-effect-size-testing-with-boot_ses_calc">Bootstrap
+Based Effect Size Testing with <code>boot_ses_calc</code></a></li>
 </ul></li>
 <li><a href="#summary-comparison-of-robust-tost-methods" id="toc-summary-comparison-of-robust-tost-methods">Summary Comparison of
 Robust TOST Methods</a></li>
@@ -579,6 +579,8 @@ median differences only under a location shift assumption. When that
 assumption is violated, bounds set on the pseudo-median may not
 correspond to the magnitude of difference in means or medians that you
 intended to declare equivalent.</p>
+<p><em>TL;DR</em> choose your test carefully and this should be informed
+by the estimand of interest.</p>
 </div>
 <div id="when-to-use-robust-tost-methods" class="section level2">
 <h2>When to Use Robust TOST Methods</h2>
@@ -739,9 +741,9 @@ equivalence and minimal effect testing.</p>
 estimator with permutation or asymptotic inference and makes the
 location-shift assumption transparent.</p>
 <p><strong>For testing effect sizes directly:</strong> Use
-<code>ses_calc</code> or <code>boot_ses_calc</code> to estimate and test
-non-parametric standardized effect sizes (rank-biserial correlation, WMW
-odds, concordance) with proper hypothesis testing support.</p>
+<code>ses_calc</code> to estimate and test non-parametric standardized
+effect sizes (rank-biserial correlation, WMW odds, concordance) with
+proper hypothesis testing support.</p>
 <p>The <code>wilcox_TOST</code> function remains available for
 situations where rank-based tests are specifically desired, such as with
 ordinal data or when consistency with prior analyses that used WMW tests
@@ -1068,14 +1070,15 @@ minimal effect tests.</p>
 <span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
 <span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
 <span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>               <span class="at">test_method =</span> <span class="st">&quot;perm&quot;</span>)</span></code></pre></div>
+<pre><code>## Note: Confidence interval bounds were clamped to the [0, 1] range.</code></pre>
 <pre><code>## 
 ##  Two-sample Brunner-Munzel Randomization test
 ## 
 ## data:  extra by group
-## t-observed = -2.1447, N-permutations = 10000, p-value = 0.05929
+## t-observed = -2.1447, N-permutations = 10000, p-value = 0.05949
 ## alternative hypothesis: true relative effect is not equal to 0.5
 ## 95 percent confidence interval:
-##  0.005078752 0.516774088
+##  0.0000000 0.5144564
 ## sample estimates:
 ## P(&#39;1&#39;&gt;&#39;2&#39;) + .5*P(&#39;1&#39;=&#39;2&#39;) 
 ##                      0.255</code></pre>
@@ -1085,10 +1088,10 @@ minimal effect tests.</p>
 <p>When the relative effect estimate is close to 0 or 1, the standard
 confidence intervals may extend beyond the valid [0, 1] range. The logit
 transformation method addresses this:</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="co"># Logit transformation for range-preserving CIs</span></span>
-<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
-<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>               <span class="at">test_method =</span> <span class="st">&quot;logit&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="co"># Logit transformation for range-preserving CIs</span></span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a>               <span class="at">test_method =</span> <span class="st">&quot;logit&quot;</span>)</span></code></pre></div>
 <pre><code>## Sample size in at least one group is small. Permutation test (test_method = &#39;perm&#39;) is highly recommended.</code></pre>
 <pre><code>## 
 ##  Two-sample Brunner-Munzel test (logit)
@@ -1108,11 +1111,11 @@ transformation method addresses this:</p>
 equivalence testing via the <code>alternative</code> argument. For
 equivalence tests, you specify bounds for the relative effect using the
 <code>mu</code> argument:</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="co"># Equivalence test: is the relative effect between 0.3 and 0.7?</span></span>
-<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
-<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a>               <span class="at">alternative =</span> <span class="st">&quot;equivalence&quot;</span>,</span>
-<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a>               <span class="at">mu =</span> <span class="fu">c</span>(<span class="fl">0.3</span>, <span class="fl">0.7</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a><span class="co"># Equivalence test: is the relative effect between 0.3 and 0.7?</span></span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
+<span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a>               <span class="at">alternative =</span> <span class="st">&quot;equivalence&quot;</span>,</span>
+<span id="cb20-5"><a href="#cb20-5" tabindex="-1"></a>               <span class="at">mu =</span> <span class="fu">c</span>(<span class="fl">0.3</span>, <span class="fl">0.7</span>))</span></code></pre></div>
 <pre><code>## Sample size in at least one group is small. Permutation test (test_method = &#39;perm&#39;) is highly recommended.</code></pre>
 <pre><code>## 
 ##  Two-sample Brunner-Munzel test
@@ -1128,24 +1131,24 @@ equivalence tests, you specify bounds for the relative effect using the
 ## sample estimates:
 ## P(&#39;1&#39;&gt;&#39;2&#39;) + .5*P(&#39;1&#39;=&#39;2&#39;) 
 ##                      0.255</code></pre>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a><span class="co"># Permutation-based equivalence test</span></span>
-<span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb22-3"><a href="#cb22-3" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
-<span id="cb22-4"><a href="#cb22-4" tabindex="-1"></a>               <span class="at">alternative =</span> <span class="st">&quot;equivalence&quot;</span>,</span>
-<span id="cb22-5"><a href="#cb22-5" tabindex="-1"></a>               <span class="at">mu =</span> <span class="fu">c</span>(<span class="fl">0.3</span>, <span class="fl">0.7</span>),</span>
-<span id="cb22-6"><a href="#cb22-6" tabindex="-1"></a>               <span class="at">test_method =</span> <span class="st">&quot;perm&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="co"># Permutation-based equivalence test</span></span>
+<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
+<span id="cb23-4"><a href="#cb23-4" tabindex="-1"></a>               <span class="at">alternative =</span> <span class="st">&quot;equivalence&quot;</span>,</span>
+<span id="cb23-5"><a href="#cb23-5" tabindex="-1"></a>               <span class="at">mu =</span> <span class="fu">c</span>(<span class="fl">0.3</span>, <span class="fl">0.7</span>),</span>
+<span id="cb23-6"><a href="#cb23-6" tabindex="-1"></a>               <span class="at">test_method =</span> <span class="st">&quot;perm&quot;</span>)</span></code></pre></div>
 <pre><code>## NOTE: Permutation-based TOST for equivalence/minimal.effect testing.</code></pre>
 <pre><code>## 
 ##  Two-sample Brunner-Munzel Randomization test
 ## 
 ## data:  extra by group
-## t-observed = -0.39392, N-permutations = 10000, p-value = 0.6583
+## t-observed = -0.39392, N-permutations = 10000, p-value = 0.6552
 ## alternative hypothesis: equivalence
 ## null values:
 ## lower bound upper bound 
 ##         0.3         0.7 
 ## 90 percent confidence interval:
-##  0.05575947 0.45424053
+##  0.05645152 0.45354848
 ## sample estimates:
 ## P(&#39;1&#39;&gt;&#39;2&#39;) + .5*P(&#39;1&#39;=&#39;2&#39;) 
 ##                      0.255</code></pre>
@@ -1154,11 +1157,11 @@ equivalence tests, you specify bounds for the relative effect using the
 <h3>Minimal Effect Testing</h3>
 <p>You can also test whether the relative effect falls <em>outside</em>
 specified bounds (minimal effect test):</p>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a><span class="co"># Minimal effect test: is the relative effect outside 0.4 to 0.6?</span></span>
-<span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
-<span id="cb25-4"><a href="#cb25-4" tabindex="-1"></a>               <span class="at">alternative =</span> <span class="st">&quot;minimal.effect&quot;</span>,</span>
-<span id="cb25-5"><a href="#cb25-5" tabindex="-1"></a>               <span class="at">mu =</span> <span class="fu">c</span>(<span class="fl">0.4</span>, <span class="fl">0.6</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a><span class="co"># Minimal effect test: is the relative effect outside 0.4 to 0.6?</span></span>
+<span id="cb26-2"><a href="#cb26-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb26-3"><a href="#cb26-3" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
+<span id="cb26-4"><a href="#cb26-4" tabindex="-1"></a>               <span class="at">alternative =</span> <span class="st">&quot;minimal.effect&quot;</span>,</span>
+<span id="cb26-5"><a href="#cb26-5" tabindex="-1"></a>               <span class="at">mu =</span> <span class="fu">c</span>(<span class="fl">0.4</span>, <span class="fl">0.6</span>))</span></code></pre></div>
 <pre><code>## Sample size in at least one group is small. Permutation test (test_method = &#39;perm&#39;) is highly recommended.</code></pre>
 <pre><code>## 
 ##  Two-sample Brunner-Munzel test
@@ -1180,10 +1183,10 @@ specified bounds (minimal effect test):</p>
 <p>The Brunner-Munzel test can also be applied to paired samples using
 the <code>paired</code> argument. Note that for paired samples, the test
 is based on a hypothesis of exchangeability:</p>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a><span class="co"># Paired samples test</span></span>
-<span id="cb28-2"><a href="#cb28-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">x =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">1</span>],</span>
-<span id="cb28-3"><a href="#cb28-3" tabindex="-1"></a>               <span class="at">y =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">2</span>],</span>
-<span id="cb28-4"><a href="#cb28-4" tabindex="-1"></a>               <span class="at">paired =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" tabindex="-1"></a><span class="co"># Paired samples test</span></span>
+<span id="cb29-2"><a href="#cb29-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">x =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">1</span>],</span>
+<span id="cb29-3"><a href="#cb29-3" tabindex="-1"></a>               <span class="at">y =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">2</span>],</span>
+<span id="cb29-4"><a href="#cb29-4" tabindex="-1"></a>               <span class="at">paired =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <pre><code>## Sample size in at least one group is small. Permutation test (test_method = &#39;perm&#39;) is highly recommended.</code></pre>
 <pre><code>## 
 ##  Paired Brunner-Munzel test
@@ -1196,11 +1199,11 @@ is based on a hypothesis of exchangeability:</p>
 ## sample estimates:
 ## P(X&gt;Y) + .5*P(X=Y) 
 ##              0.255</code></pre>
-<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" tabindex="-1"></a><span class="co"># Paired samples with permutation test</span></span>
-<span id="cb31-2"><a href="#cb31-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">x =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">1</span>],</span>
-<span id="cb31-3"><a href="#cb31-3" tabindex="-1"></a>               <span class="at">y =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">2</span>],</span>
-<span id="cb31-4"><a href="#cb31-4" tabindex="-1"></a>               <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb31-5"><a href="#cb31-5" tabindex="-1"></a>               <span class="at">test_method =</span> <span class="st">&quot;perm&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" tabindex="-1"></a><span class="co"># Paired samples with permutation test</span></span>
+<span id="cb32-2"><a href="#cb32-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">x =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">1</span>],</span>
+<span id="cb32-3"><a href="#cb32-3" tabindex="-1"></a>               <span class="at">y =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">2</span>],</span>
+<span id="cb32-4"><a href="#cb32-4" tabindex="-1"></a>               <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb32-5"><a href="#cb32-5" tabindex="-1"></a>               <span class="at">test_method =</span> <span class="st">&quot;perm&quot;</span>)</span></code></pre></div>
 <pre><code>## 
 ##  Paired Brunner-Munzel Exact Permutation test
 ## 
@@ -1216,10 +1219,10 @@ is based on a hypothesis of exchangeability:</p>
 <div id="testing-against-a-non-standard-null" class="section level3">
 <h3>Testing Against a Non-Standard Null</h3>
 <p>You can test against null values other than 0.5:</p>
-<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" tabindex="-1"></a><span class="co"># Test if the relative effect differs from 0.3</span></span>
-<span id="cb33-2"><a href="#cb33-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb33-3"><a href="#cb33-3" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
-<span id="cb33-4"><a href="#cb33-4" tabindex="-1"></a>               <span class="at">mu =</span> <span class="fl">0.3</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" tabindex="-1"></a><span class="co"># Test if the relative effect differs from 0.3</span></span>
+<span id="cb34-2"><a href="#cb34-2" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb34-3"><a href="#cb34-3" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
+<span id="cb34-4"><a href="#cb34-4" tabindex="-1"></a>               <span class="at">mu =</span> <span class="fl">0.3</span>)</span></code></pre></div>
 <pre><code>## Sample size in at least one group is small. Permutation test (test_method = &#39;perm&#39;) is highly recommended.</code></pre>
 <pre><code>## 
 ##  Two-sample Brunner-Munzel test
@@ -1279,12 +1282,12 @@ most cases.</p>
 ordered categorical data <span class="citation">(<a href="#ref-munzel2003">Munzel and Hauschke 2003</a>)</span>. By setting
 appropriate bounds, you can test whether a new treatment is not
 relevantly inferior to a standard:</p>
-<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" tabindex="-1"></a><span class="co"># Example: test non-inferiority with lower bound of 0.35</span></span>
-<span id="cb36-2"><a href="#cb36-2" tabindex="-1"></a><span class="co"># (i.e., the new treatment should not be substantially worse)</span></span>
-<span id="cb36-3"><a href="#cb36-3" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb36-4"><a href="#cb36-4" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
-<span id="cb36-5"><a href="#cb36-5" tabindex="-1"></a>               <span class="at">alternative =</span> <span class="st">&quot;greater&quot;</span>,</span>
-<span id="cb36-6"><a href="#cb36-6" tabindex="-1"></a>               <span class="at">mu =</span> <span class="fl">0.35</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" tabindex="-1"></a><span class="co"># Example: test non-inferiority with lower bound of 0.35</span></span>
+<span id="cb37-2"><a href="#cb37-2" tabindex="-1"></a><span class="co"># (i.e., the new treatment should not be substantially worse)</span></span>
+<span id="cb37-3"><a href="#cb37-3" tabindex="-1"></a><span class="fu">brunner_munzel</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb37-4"><a href="#cb37-4" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
+<span id="cb37-5"><a href="#cb37-5" tabindex="-1"></a>               <span class="at">alternative =</span> <span class="st">&quot;greater&quot;</span>,</span>
+<span id="cb37-6"><a href="#cb37-6" tabindex="-1"></a>               <span class="at">mu =</span> <span class="fl">0.35</span>)</span></code></pre></div>
 <pre><code>## Sample size in at least one group is small. Permutation test (test_method = &#39;perm&#39;) is highly recommended.</code></pre>
 <pre><code>## 
 ##  Two-sample Brunner-Munzel test
@@ -1416,11 +1419,11 @@ Uses the (b+1)/(R+1) formula by default for exact Type I error control
 <h2>Examples</h2>
 <div id="basic-two-sample-test-1" class="section level3">
 <h3>Basic Two-Sample Test</h3>
-<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&#39;sleep&#39;</span>)</span>
-<span id="cb39-2"><a href="#cb39-2" tabindex="-1"></a></span>
-<span id="cb39-3"><a href="#cb39-3" tabindex="-1"></a><span class="co"># Asymptotic Hodges-Lehmann test</span></span>
-<span id="cb39-4"><a href="#cb39-4" tabindex="-1"></a><span class="fu">hodges_lehmann</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb39-5"><a href="#cb39-5" tabindex="-1"></a>               <span class="at">data =</span> sleep)</span></code></pre></div>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&#39;sleep&#39;</span>)</span>
+<span id="cb40-2"><a href="#cb40-2" tabindex="-1"></a></span>
+<span id="cb40-3"><a href="#cb40-3" tabindex="-1"></a><span class="co"># Asymptotic Hodges-Lehmann test</span></span>
+<span id="cb40-4"><a href="#cb40-4" tabindex="-1"></a><span class="fu">hodges_lehmann</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb40-5"><a href="#cb40-5" tabindex="-1"></a>               <span class="at">data =</span> sleep)</span></code></pre></div>
 <pre><code>## 
 ##  Asymptotic Hodges-Lehmann Two Sample Test
 ## 
@@ -1436,18 +1439,18 @@ Uses the (b+1)/(R+1) formula by default for exact Type I error control
 <div id="permutation-based-test" class="section level3">
 <h3>Permutation-Based Test</h3>
 <p>For small samples, the permutation approach is recommended:</p>
-<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" tabindex="-1"></a><span class="co"># Permutation test</span></span>
-<span id="cb41-2"><a href="#cb41-2" tabindex="-1"></a><span class="fu">hodges_lehmann</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb41-3"><a href="#cb41-3" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
-<span id="cb41-4"><a href="#cb41-4" tabindex="-1"></a>               <span class="at">R =</span> <span class="dv">1999</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" tabindex="-1"></a><span class="co"># Permutation test</span></span>
+<span id="cb42-2"><a href="#cb42-2" tabindex="-1"></a><span class="fu">hodges_lehmann</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb42-3"><a href="#cb42-3" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
+<span id="cb42-4"><a href="#cb42-4" tabindex="-1"></a>               <span class="at">R =</span> <span class="dv">1999</span>)</span></code></pre></div>
 <pre><code>## 
 ##  Randomization Hodges-Lehmann Two Sample Test
 ## 
 ## data:  extra by group
-## Z = -0.72973, p-value = 0.1205
+## Z = -0.72973, p-value = 0.1265
 ## alternative hypothesis: true location is not equal to 0
 ## 95 percent confidence interval:
-##  -3.1525  0.4500
+##  -3.15  0.45
 ## sample estimates:
 ## Hodges-Lehmann estimate (&#39;1&#39; - &#39;2&#39;) 
 ##                               -1.35</code></pre>
@@ -1457,55 +1460,46 @@ Uses the (b+1)/(R+1) formula by default for exact Type I error control
 <p>The function directly supports equivalence testing via the
 <code>alternative</code> argument. Equivalence bounds are specified on
 the pseudomedian (or location shift) scale:</p>
-<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" tabindex="-1"></a><span class="co"># Equivalence test: is the location shift within ±2 units?</span></span>
-<span id="cb43-2"><a href="#cb43-2" tabindex="-1"></a><span class="fu">hodges_lehmann</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb43-3"><a href="#cb43-3" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
-<span id="cb43-4"><a href="#cb43-4" tabindex="-1"></a>               <span class="at">alternative =</span> <span class="st">&quot;equivalence&quot;</span>,</span>
-<span id="cb43-5"><a href="#cb43-5" tabindex="-1"></a>               <span class="at">mu =</span> <span class="dv">2</span>,</span>
-<span id="cb43-6"><a href="#cb43-6" tabindex="-1"></a>               <span class="at">R =</span> <span class="dv">1999</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" tabindex="-1"></a><span class="co"># Equivalence test: is the location shift within ±2 units?</span></span>
+<span id="cb44-2"><a href="#cb44-2" tabindex="-1"></a><span class="co"># Equivalence/minimal.effect alternatives use the asymptotic method only</span></span>
+<span id="cb44-3"><a href="#cb44-3" tabindex="-1"></a><span class="fu">hodges_lehmann</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb44-4"><a href="#cb44-4" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
+<span id="cb44-5"><a href="#cb44-5" tabindex="-1"></a>               <span class="at">alternative =</span> <span class="st">&quot;equivalence&quot;</span>,</span>
+<span id="cb44-6"><a href="#cb44-6" tabindex="-1"></a>               <span class="at">mu =</span> <span class="dv">2</span>)</span></code></pre></div>
 <pre><code>## 
-##  Randomization Hodges-Lehmann Two Sample Test
+##  Asymptotic Hodges-Lehmann Two Sample Test
 ## 
 ## data:  extra by group
-## Z = 0.65454, p-value = 0.2935
+## Z = 0.63456, p-value = 0.2629
 ## alternative hypothesis: equivalence
 ## null values:
 ## location location 
 ##       -2        2 
 ## 90 percent confidence interval:
-##  -2.95  0.35
+##  -3.0348667  0.3348667
 ## sample estimates:
 ## Hodges-Lehmann estimate (&#39;1&#39; - &#39;2&#39;) 
 ##                               -1.35</code></pre>
-<p><strong>Note on the permutation approach for equivalence
-testing:</strong> When using permutation-based inference (i.e.,
-<code>R</code> is not <code>NULL</code>), the equivalence and minimal
-effect tests use an <em>unstudentized</em> approach. The permutation
-distribution of the raw Hodges-Lehmann estimator is generated under the
-null hypothesis of exchangeability, and p-values are computed by
-comparing the observed estimate’s distance from each equivalence bound
-to this distribution. This ensures that the confidence interval and
-p-value are always concordant: when the <span class="math inline">\((1 -
-2\alpha)\)</span>% CI falls entirely within the equivalence bounds, the
-TOST p-value will be less than <span class="math inline">\(\alpha\)</span>, and vice versa. This differs from
-the standard alternatives (<code>two.sided</code>, <code>less</code>,
-<code>greater</code>), which use a studentized statistic (dividing by a
-robust scale estimate). The unstudentized approach is necessary because
-the scale estimates S1 and S2 from <span class="citation">Fried and
-Dehling (<a href="#ref-fried2011">2011</a>)</span> provide numerical
-stability for standard tests but do not constitute true studentization
-for the Hodges-Lehmann estimator.</p>
-<p>By contrast, <code>brunner_munzel</code> and <code>perm_t_test</code>
-use studentized permutation approaches for all alternatives because they
-have proper standard error estimates.</p>
+<p><strong>Note on equivalence testing:</strong> Equivalence and minimal
+effect tests are only available with the asymptotic method
+(<code>R = NULL</code>). Permutation tests are not supported for these
+alternatives because the scale estimators (S1, S2) from <span class="citation">Fried and Dehling (<a href="#ref-fried2011">2011</a>)</span> do not produce a pivotal test
+statistic for the Hodges-Lehmann estimator. Without pivotality, the
+permutation distribution generated under the exchangeability null is not
+a valid reference distribution for testing at the equivalence bounds.
+This limitation compounds with the inherent conservatism of the naive
+intersection-union procedure, potentially yielding substantial power
+loss. The asymptotic method uses kernel density estimation to
+approximate the standard error, which provides a proper pivot and valid
+boundary-null inference.</p>
 </div>
 <div id="paired-samples-1" class="section level3">
 <h3>Paired Samples</h3>
-<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" tabindex="-1"></a><span class="co"># Paired Hodges-Lehmann test</span></span>
-<span id="cb45-2"><a href="#cb45-2" tabindex="-1"></a><span class="fu">hodges_lehmann</span>(<span class="at">x =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">1</span>],</span>
-<span id="cb45-3"><a href="#cb45-3" tabindex="-1"></a>               <span class="at">y =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">2</span>],</span>
-<span id="cb45-4"><a href="#cb45-4" tabindex="-1"></a>               <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb45-5"><a href="#cb45-5" tabindex="-1"></a>               <span class="at">R =</span> <span class="dv">1999</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" tabindex="-1"></a><span class="co"># Paired Hodges-Lehmann test</span></span>
+<span id="cb46-2"><a href="#cb46-2" tabindex="-1"></a><span class="fu">hodges_lehmann</span>(<span class="at">x =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">1</span>],</span>
+<span id="cb46-3"><a href="#cb46-3" tabindex="-1"></a>               <span class="at">y =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">2</span>],</span>
+<span id="cb46-4"><a href="#cb46-4" tabindex="-1"></a>               <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb46-5"><a href="#cb46-5" tabindex="-1"></a>               <span class="at">R =</span> <span class="dv">1999</span>)</span></code></pre></div>
 <pre><code>## Computing all 1024 exact permutations.</code></pre>
 <pre><code>## 
 ##  Exact Permutation Hodges-Lehmann Paired Test
@@ -1521,23 +1515,23 @@ have proper standard error estimates.</p>
 </div>
 <div id="minimal-effect-testing-1" class="section level3">
 <h3>Minimal Effect Testing</h3>
-<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" tabindex="-1"></a><span class="co"># Minimal effect test: is the location shift outside ±0.5?</span></span>
-<span id="cb48-2"><a href="#cb48-2" tabindex="-1"></a><span class="fu">hodges_lehmann</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb48-3"><a href="#cb48-3" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
-<span id="cb48-4"><a href="#cb48-4" tabindex="-1"></a>               <span class="at">alternative =</span> <span class="st">&quot;minimal.effect&quot;</span>,</span>
-<span id="cb48-5"><a href="#cb48-5" tabindex="-1"></a>               <span class="at">mu =</span> <span class="fl">0.5</span>,</span>
-<span id="cb48-6"><a href="#cb48-6" tabindex="-1"></a>               <span class="at">R =</span> <span class="dv">1999</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" tabindex="-1"></a><span class="co"># Minimal effect test: is the location shift outside ±0.5?</span></span>
+<span id="cb49-2"><a href="#cb49-2" tabindex="-1"></a><span class="co"># Minimal effect alternative uses the asymptotic method only</span></span>
+<span id="cb49-3"><a href="#cb49-3" tabindex="-1"></a><span class="fu">hodges_lehmann</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb49-4"><a href="#cb49-4" tabindex="-1"></a>               <span class="at">data =</span> sleep,</span>
+<span id="cb49-5"><a href="#cb49-5" tabindex="-1"></a>               <span class="at">alternative =</span> <span class="st">&quot;minimal.effect&quot;</span>,</span>
+<span id="cb49-6"><a href="#cb49-6" tabindex="-1"></a>               <span class="at">mu =</span> <span class="fl">0.5</span>)</span></code></pre></div>
 <pre><code>## 
-##  Randomization Hodges-Lehmann Two Sample Test
+##  Asymptotic Hodges-Lehmann Two Sample Test
 ## 
 ## data:  extra by group
-## Z = -0.88698, p-value = 0.219
+## Z = -0.82981, p-value = 0.2033
 ## alternative hypothesis: minimal.effect
 ## null values:
 ## location location 
 ##     -0.5      0.5 
 ## 90 percent confidence interval:
-##  -2.90  0.15
+##  -3.0348667  0.3348667
 ## sample estimates:
 ## Hodges-Lehmann estimate (&#39;1&#39; - &#39;2&#39;) 
 ##                               -1.35</code></pre>
@@ -1551,6 +1545,8 @@ when:</strong></p>
 <li>Sample sizes are moderate to large (n <span class="math inline">\(\geq\)</span> 30 per group)</li>
 <li>You want the fastest computation</li>
 <li>Distributions are not extremely heavy-tailed or skewed</li>
+<li>When the null != 0 or when the alternative is “equivalence” or
+“minimal.effect”</li>
 </ul>
 <p><strong>Use the permutation test (<code>R</code> <span class="math inline">\(\geq\)</span> max permutations) when:</strong></p>
 <ul>
@@ -1839,21 +1835,21 @@ on the suspected degree of contamination.</p>
 </div>
 <div id="example-basic-permutation-test" class="section level2">
 <h2>Example: Basic Permutation Test</h2>
-<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&#39;sleep&#39;</span>)</span>
-<span id="cb50-2"><a href="#cb50-2" tabindex="-1"></a></span>
-<span id="cb50-3"><a href="#cb50-3" tabindex="-1"></a><span class="co"># Two-sample permutation t-test</span></span>
-<span id="cb50-4"><a href="#cb50-4" tabindex="-1"></a>perm_result <span class="ot">&lt;-</span> <span class="fu">perm_t_test</span>(extra <span class="sc">~</span> group, </span>
-<span id="cb50-5"><a href="#cb50-5" tabindex="-1"></a>                           <span class="at">data =</span> sleep,</span>
-<span id="cb50-6"><a href="#cb50-6" tabindex="-1"></a>                           <span class="at">R =</span> <span class="dv">1999</span>)</span>
-<span id="cb50-7"><a href="#cb50-7" tabindex="-1"></a>perm_result</span></code></pre></div>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&#39;sleep&#39;</span>)</span>
+<span id="cb51-2"><a href="#cb51-2" tabindex="-1"></a></span>
+<span id="cb51-3"><a href="#cb51-3" tabindex="-1"></a><span class="co"># Two-sample permutation t-test</span></span>
+<span id="cb51-4"><a href="#cb51-4" tabindex="-1"></a>perm_result <span class="ot">&lt;-</span> <span class="fu">perm_t_test</span>(extra <span class="sc">~</span> group, </span>
+<span id="cb51-5"><a href="#cb51-5" tabindex="-1"></a>                           <span class="at">data =</span> sleep,</span>
+<span id="cb51-6"><a href="#cb51-6" tabindex="-1"></a>                           <span class="at">R =</span> <span class="dv">1999</span>)</span>
+<span id="cb51-7"><a href="#cb51-7" tabindex="-1"></a>perm_result</span></code></pre></div>
 <pre><code>## 
 ##  Randomization Permutation Welch Two Sample t-test
 ## 
 ## data:  extra by group
-## t-observed = -1.8608, df = 17.776, p-value = 0.087
+## t-observed = -1.8608, df = 17.776, p-value = 0.0815
 ## alternative hypothesis: true difference in means is not equal to 0
 ## 95 percent confidence interval:
-##  -3.361  0.260
+##  -3.361  0.160
 ## sample estimates:
 ##           mean of group &#39;1&#39;           mean of group &#39;2&#39; 
 ##                        0.75                        2.33 
@@ -1864,13 +1860,13 @@ on the suspected degree of contamination.</p>
 <h2>Example: Permutation Test with Trimming</h2>
 <p>When outliers are a concern, combining permutation with trimming
 provides doubly robust inference:</p>
-<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" tabindex="-1"></a><span class="co"># Simulate data with outliers</span></span>
-<span id="cb52-2"><a href="#cb52-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
-<span id="cb52-3"><a href="#cb52-3" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">rnorm</span>(<span class="dv">18</span>, <span class="at">mean =</span> <span class="dv">0</span>), <span class="dv">8</span>, <span class="dv">12</span>)  <span class="co"># Two outliers</span></span>
-<span id="cb52-4"><a href="#cb52-4" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">20</span>, <span class="at">mean =</span> <span class="dv">0</span>)</span>
-<span id="cb52-5"><a href="#cb52-5" tabindex="-1"></a></span>
-<span id="cb52-6"><a href="#cb52-6" tabindex="-1"></a><span class="co"># Standard permutation test (sensitive to outliers)</span></span>
-<span id="cb52-7"><a href="#cb52-7" tabindex="-1"></a><span class="fu">perm_t_test</span>(x, y, <span class="at">R =</span> <span class="dv">999</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" tabindex="-1"></a><span class="co"># Simulate data with outliers</span></span>
+<span id="cb53-2"><a href="#cb53-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb53-3"><a href="#cb53-3" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">rnorm</span>(<span class="dv">18</span>, <span class="at">mean =</span> <span class="dv">0</span>), <span class="dv">8</span>, <span class="dv">12</span>)  <span class="co"># Two outliers</span></span>
+<span id="cb53-4"><a href="#cb53-4" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">20</span>, <span class="at">mean =</span> <span class="dv">0</span>)</span>
+<span id="cb53-5"><a href="#cb53-5" tabindex="-1"></a></span>
+<span id="cb53-6"><a href="#cb53-6" tabindex="-1"></a><span class="co"># Standard permutation test (sensitive to outliers)</span></span>
+<span id="cb53-7"><a href="#cb53-7" tabindex="-1"></a><span class="fu">perm_t_test</span>(x, y, <span class="at">R =</span> <span class="dv">999</span>)</span></code></pre></div>
 <pre><code>## Note: Number of permutations (R = 999) is less than 1000. Consider increasing R for more stable p-value estimates.</code></pre>
 <pre><code>## 
 ##  Randomization Permutation Welch Two Sample t-test
@@ -1883,8 +1879,8 @@ provides doubly robust inference:</p>
 ## sample estimates:
 ##         mean of group x         mean of group y mean difference (x - y) 
 ##               1.2479377              -0.2081052               1.4560429</code></pre>
-<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" tabindex="-1"></a><span class="co"># Trimmed permutation test (robust to outliers)</span></span>
-<span id="cb55-2"><a href="#cb55-2" tabindex="-1"></a><span class="fu">perm_t_test</span>(x, y, <span class="at">tr =</span> <span class="fl">0.1</span>, <span class="at">R =</span> <span class="dv">999</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" tabindex="-1"></a><span class="co"># Trimmed permutation test (robust to outliers)</span></span>
+<span id="cb56-2"><a href="#cb56-2" tabindex="-1"></a><span class="fu">perm_t_test</span>(x, y, <span class="at">tr =</span> <span class="fl">0.1</span>, <span class="at">R =</span> <span class="dv">999</span>)</span></code></pre></div>
 <pre><code>## Note: Number of permutations (R = 999) is less than 1000. Consider increasing R for more stable p-value estimates.</code></pre>
 <pre><code>## 
 ##  Randomization Permutation Welch Yuen Two Sample t-test
@@ -1906,12 +1902,12 @@ provides doubly robust inference:</p>
 <h2>Example: Equivalence Testing with Permutation</h2>
 <p>The <code>perm_t_test</code> function supports TOSTER’s equivalence
 and minimal effect alternatives:</p>
-<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" tabindex="-1"></a><span class="co"># Equivalence test: is the effect within ±3 units?</span></span>
-<span id="cb58-2"><a href="#cb58-2" tabindex="-1"></a><span class="fu">perm_t_test</span>(extra <span class="sc">~</span> group, </span>
-<span id="cb58-3"><a href="#cb58-3" tabindex="-1"></a>            <span class="at">data =</span> sleep,</span>
-<span id="cb58-4"><a href="#cb58-4" tabindex="-1"></a>            <span class="at">alternative =</span> <span class="st">&quot;equivalence&quot;</span>,</span>
-<span id="cb58-5"><a href="#cb58-5" tabindex="-1"></a>            <span class="at">mu =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>),</span>
-<span id="cb58-6"><a href="#cb58-6" tabindex="-1"></a>            <span class="at">R =</span> <span class="dv">999</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" tabindex="-1"></a><span class="co"># Equivalence test: is the effect within ±3 units?</span></span>
+<span id="cb59-2"><a href="#cb59-2" tabindex="-1"></a><span class="fu">perm_t_test</span>(extra <span class="sc">~</span> group, </span>
+<span id="cb59-3"><a href="#cb59-3" tabindex="-1"></a>            <span class="at">data =</span> sleep,</span>
+<span id="cb59-4"><a href="#cb59-4" tabindex="-1"></a>            <span class="at">alternative =</span> <span class="st">&quot;equivalence&quot;</span>,</span>
+<span id="cb59-5"><a href="#cb59-5" tabindex="-1"></a>            <span class="at">mu =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>),</span>
+<span id="cb59-6"><a href="#cb59-6" tabindex="-1"></a>            <span class="at">R =</span> <span class="dv">999</span>)</span></code></pre></div>
 <pre><code>## Note: Number of permutations (R = 999) is less than 1000. Consider increasing R for more stable p-value estimates.</code></pre>
 <pre><code>## 
 ##  Randomization Permutation Welch Two Sample t-test
@@ -1938,14 +1934,14 @@ permutations and prints a message. For example, with a paired sample of
 n = 10, there are <span class="math inline">\(2^{10} = 1024\)</span>
 possible sign permutations, so requesting <code>R = 1999</code> would
 trigger exact computation.</p>
-<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" tabindex="-1"></a><span class="co"># Small paired sample - exact permutations will be computed</span></span>
-<span id="cb61-2"><a href="#cb61-2" tabindex="-1"></a>before <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">5.1</span>, <span class="fl">4.8</span>, <span class="fl">6.2</span>, <span class="fl">5.7</span>, <span class="fl">6.0</span>, <span class="fl">5.5</span>, <span class="fl">4.9</span>, <span class="fl">5.8</span>)</span>
-<span id="cb61-3"><a href="#cb61-3" tabindex="-1"></a>after <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">5.6</span>, <span class="fl">5.2</span>, <span class="fl">6.7</span>, <span class="fl">6.1</span>, <span class="fl">6.5</span>, <span class="fl">5.8</span>, <span class="fl">5.3</span>, <span class="fl">6.2</span>)</span>
-<span id="cb61-4"><a href="#cb61-4" tabindex="-1"></a></span>
-<span id="cb61-5"><a href="#cb61-5" tabindex="-1"></a><span class="fu">perm_t_test</span>(<span class="at">x =</span> before, <span class="at">y =</span> after,</span>
-<span id="cb61-6"><a href="#cb61-6" tabindex="-1"></a>            <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb61-7"><a href="#cb61-7" tabindex="-1"></a>            <span class="at">alternative =</span> <span class="st">&quot;less&quot;</span>,</span>
-<span id="cb61-8"><a href="#cb61-8" tabindex="-1"></a>            <span class="at">R =</span> <span class="dv">999</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" tabindex="-1"></a><span class="co"># Small paired sample - exact permutations will be computed</span></span>
+<span id="cb62-2"><a href="#cb62-2" tabindex="-1"></a>before <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">5.1</span>, <span class="fl">4.8</span>, <span class="fl">6.2</span>, <span class="fl">5.7</span>, <span class="fl">6.0</span>, <span class="fl">5.5</span>, <span class="fl">4.9</span>, <span class="fl">5.8</span>)</span>
+<span id="cb62-3"><a href="#cb62-3" tabindex="-1"></a>after <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">5.6</span>, <span class="fl">5.2</span>, <span class="fl">6.7</span>, <span class="fl">6.1</span>, <span class="fl">6.5</span>, <span class="fl">5.8</span>, <span class="fl">5.3</span>, <span class="fl">6.2</span>)</span>
+<span id="cb62-4"><a href="#cb62-4" tabindex="-1"></a></span>
+<span id="cb62-5"><a href="#cb62-5" tabindex="-1"></a><span class="fu">perm_t_test</span>(<span class="at">x =</span> before, <span class="at">y =</span> after,</span>
+<span id="cb62-6"><a href="#cb62-6" tabindex="-1"></a>            <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb62-7"><a href="#cb62-7" tabindex="-1"></a>            <span class="at">alternative =</span> <span class="st">&quot;less&quot;</span>,</span>
+<span id="cb62-8"><a href="#cb62-8" tabindex="-1"></a>            <span class="at">R =</span> <span class="dv">999</span>)</span></code></pre></div>
 <pre><code>## Computing all 256 exact permutations.</code></pre>
 <pre><code>## 
 ##  Exact Permutation Paired t-test
@@ -2086,17 +2082,17 @@ good balance between precision and computational efficiency.</p>
 <p>We can use the sleep data to see the bootstrapped results. Notice
 that the plots show how the re-sampling via bootstrapping indicates the
 instability of Hedges’s d<sub>z</sub>.</p>
-<div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&#39;sleep&#39;</span>)</span>
-<span id="cb64-2"><a href="#cb64-2" tabindex="-1"></a></span>
-<span id="cb64-3"><a href="#cb64-3" tabindex="-1"></a><span class="co"># For paired tests with bootstrap methods, use separate vectors</span></span>
-<span id="cb64-4"><a href="#cb64-4" tabindex="-1"></a>test1 <span class="ot">=</span> <span class="fu">boot_t_TOST</span>(<span class="at">x =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">1</span>],</span>
-<span id="cb64-5"><a href="#cb64-5" tabindex="-1"></a>                    <span class="at">y =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">2</span>],</span>
-<span id="cb64-6"><a href="#cb64-6" tabindex="-1"></a>                      <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb64-7"><a href="#cb64-7" tabindex="-1"></a>                      <span class="at">eqb =</span> .<span class="dv">5</span>,</span>
-<span id="cb64-8"><a href="#cb64-8" tabindex="-1"></a>                    <span class="at">R =</span> <span class="dv">499</span>)</span>
-<span id="cb64-9"><a href="#cb64-9" tabindex="-1"></a></span>
-<span id="cb64-10"><a href="#cb64-10" tabindex="-1"></a></span>
-<span id="cb64-11"><a href="#cb64-11" tabindex="-1"></a><span class="fu">print</span>(test1)</span></code></pre></div>
+<div class="sourceCode" id="cb65"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&#39;sleep&#39;</span>)</span>
+<span id="cb65-2"><a href="#cb65-2" tabindex="-1"></a></span>
+<span id="cb65-3"><a href="#cb65-3" tabindex="-1"></a><span class="co"># For paired tests with bootstrap methods, use separate vectors</span></span>
+<span id="cb65-4"><a href="#cb65-4" tabindex="-1"></a>test1 <span class="ot">=</span> <span class="fu">boot_t_TOST</span>(<span class="at">x =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">1</span>],</span>
+<span id="cb65-5"><a href="#cb65-5" tabindex="-1"></a>                    <span class="at">y =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">2</span>],</span>
+<span id="cb65-6"><a href="#cb65-6" tabindex="-1"></a>                      <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb65-7"><a href="#cb65-7" tabindex="-1"></a>                      <span class="at">eqb =</span> .<span class="dv">5</span>,</span>
+<span id="cb65-8"><a href="#cb65-8" tabindex="-1"></a>                    <span class="at">R =</span> <span class="dv">499</span>)</span>
+<span id="cb65-9"><a href="#cb65-9" tabindex="-1"></a></span>
+<span id="cb65-10"><a href="#cb65-10" tabindex="-1"></a></span>
+<span id="cb65-11"><a href="#cb65-11" tabindex="-1"></a><span class="fu">print</span>(test1)</span></code></pre></div>
 <pre><code>## 
 ## Bootstrapped Paired t-test
 ## 
@@ -2116,8 +2112,8 @@ instability of Hedges’s d<sub>z</sub>.</p>
 ## Raw             -1.580 0.3786 [-3.0262, -1.0343]         0.9
 ## Hedges&#39;s g(z)   -1.174 0.7657   [-1.3935, 1.252]         0.9
 ## Note: studentized bootstrap ci method utilized.</code></pre>
-<div class="sourceCode" id="cb66"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" tabindex="-1"></a><span class="fu">plot</span>(test1)</span></code></pre></div>
-<p><img role="img" src="data:image/png;base64,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mKrTPOigg6J0XAta+FsVfxmmFlG+vGVtw8Knv0VhhVHGZ599VoPtvPPOcY455sg+eeaZZ+LXvva1+MYbb2TPVlpppSgzoOx+oBeh3g+qGNBPf/rTONtss8WvfvWrcb755ot0WCMRR6Nw/jjBBBPEueaaK95zzz32qt9vVViRQuLqq68ep5hiijjDDDNEEQnjyiuvrHGceOKJcfPNN8/i++yzz+I3v/nNKCNa/MMf/qDXn3zySdx6663jvvvum4XjAgb6u9/9Thv9z372Mw074YQTRhkBIvFCeQYkI1xcaKGFIuFgBCJiazj+waRFZNWKG3fccaOMIPHpp5/O3nO9+OKLx0kmmUSxkmlu9q6q/Bboj3/8o2Lwla98JU411VTxvffeix9//HHcdNNNNU7iXWeddeKHH36on4iIHBdddNE40UQTxckmmyxusskm8a9//Ws8++yzNf+UYY011rDos99lllkmXnzxxdk95TjkkEOy+x/96EfxoosuqsSNTr799ttrOpNOOmlccMEF4xNPPJHFkV7Uwu3MM8+MSyyxhLajOeecM4pUq5+//fbbcdZZZ1XMqfPxxhsvbrDBBrGs41bl6fTTT9dvLV8wj29/+9vxf/7nfyKdEQxE2o+10vzBD34QZWageE088cRx/PHH17p65513srZIGmVtAQZc1har0i5qG1aW/G9R2JtuuknLaGFFwon77LOP3ervtNNOG88777zsmUhEkfIW0UYbbaR9ln6b/t16661Z8KYwIBjC888/H//0pz9FOKLMdzWB6667TjvFnXfeGf/2t7/Fk046KU4++eRZ58hyIRe1wq655po6kpAGHHe66aaLMg3RKI444oj4wx/+MIvu008/VYkFTg0TQnoRXVC84YYb4jTTTBNlOqZhZZ6ujYu80fhGjBihHZpR5bTTTlOGCuNLGRDxTD311FGmLpF0KNt3vvOdrLPC0OgQxM37tdZaS/9IkLioQJljKxO47777Ih0TJlGr/Fnh5CI/cm222WZx2WWXja+//rqWF+YAE4JGjRoVt9pqK5UMZD4fZ5999nj++efruyoJaO+991amRkBGRDo2ZYPAgE5FI67C7cYbb9R6Il0wJb20njSy//yrwo38MiDQQcBU9I+Rjk3dgh31CwYy7dG6YlCAARRRVZ6OP/74bFCjk1FX999/fxQ9Wdxwww01HRho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HdaekiPgCOQQcAaUA8RvHQFHYOgQqGsK9re//U2nX+OM03n8iryji+hEHRA7nXEl3Kl571SzF+DueR8aJlQXAxqarHgqjoAj0GsIdJ5I02s15OV1BLoYgVKDZJ9++ml46qmnwhJLLFFY/Lfeeiu8++672buvf/3rYdZZZ83uh/OiVt7J24svvhjefPNNXd1jqbAdCC+wjz32WBgxYkSYbbbZCrPUbrjXk2cK4ngXVuegHnZqO08LPe7BQukDrtn3c+CBBwZODq+00kr513p//PHHB5a433jjjfDCCy/ofqF55523MOxQPqwn7yeeeGK45pprwhdffBF+9atfKZPFJfRw0hNPPBF23XVX3dNz5plnqs5tjjnm6JeldsK93jw73v2qcdAPOrWd9yt4zJGcrI4bbrhh3HrrreMee+yRe/vf24022iiKBPHfB21wVU/eX3/99bj22mtH2WipOb744ovjkUceOey533zzzeOTTz6p+RBzEXGNNdaIYmajX77aCfd68ux496vCQT/o5HaeL3w/HRCrRvvtt1/YeOON+zEre0CYP//5z+HDDz8MF154YXjnnXfs1bD+1pP31157LSCp2YoeGyyfe+65Yc03u83B0CTIqaeeWle//vCHP/TJVzvhXm+eHe8+VdiUm05t50WF78eA5p577sqt00SC/RmMYD3yyCOBIxtMHW644Yai+If0WT15f++990I63ZpsssmG3bXxBx98oMu+6XI7eYTJp9ROuNebZ8c7rcHmXHdqOy8q/VdPOeUUfU5H3GKLLYrC9HuGbuLqq68OU0wxhb6bZZZZwq9//euw+uqr9wvbqgci2ofrr79eox9I3scdd1xlmpYvRvKhPrOUz/uqq67aJ0/kjXxxhi2ldsDd8pPHkedFec6HGw68Lc/2m89TWd7bCW/Le72/+TK2A+5FeR+HkZa/SSedtOh94bOPP/44cKjPCL9U77//fvj3v/9tj1r+y9muRvL+zW9+s49kgZQxzTTTtDy/aQL5vLOCyOa31LQq+fr2t7+dfhbaAXfLUL15bge8Lc/2W2/e2wlvy3u9v+2Ie1HexxFFYuBvnXXWKXrf5xkrXmjfOYH9s5/9LHDyVpRKKokss8wymV6lz0ctupluuuk03wPN+yKLLKJ2lN9++20dsa+77rrwve99r0W5LI42n3dOsnNg9tprr9UP7r77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" /><!-- --></p>
+<div class="sourceCode" id="cb67"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" tabindex="-1"></a><span class="fu">plot</span>(test1)</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
 <div id="interpreting-bootstrap-tost-results" class="section level3">
 <h3>Interpreting Bootstrap TOST Results</h3>
 <p>When interpreting the results of <code>boot_t_TOST</code>:</p>
@@ -2144,25 +2140,25 @@ vice versa.</p>
 <h1>Comparing Bootstrap and Permutation Approaches</h1>
 <p>To illustrate the similarities and differences between these methods,
 let’s apply both to the same dataset:</p>
-<div class="sourceCode" id="cb67"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" tabindex="-1"></a><span class="co"># Same equivalence test using both methods</span></span>
-<span id="cb67-2"><a href="#cb67-2" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&#39;sleep&#39;</span>)</span>
-<span id="cb67-3"><a href="#cb67-3" tabindex="-1"></a></span>
-<span id="cb67-4"><a href="#cb67-4" tabindex="-1"></a><span class="co"># Bootstrap approach</span></span>
-<span id="cb67-5"><a href="#cb67-5" tabindex="-1"></a>boot_result <span class="ot">&lt;-</span> <span class="fu">boot_t_test</span>(extra <span class="sc">~</span> group, </span>
-<span id="cb67-6"><a href="#cb67-6" tabindex="-1"></a>                           <span class="at">data =</span> sleep,</span>
-<span id="cb67-7"><a href="#cb67-7" tabindex="-1"></a>                           <span class="at">alternative =</span> <span class="st">&quot;equivalence&quot;</span>,</span>
-<span id="cb67-8"><a href="#cb67-8" tabindex="-1"></a>                           <span class="at">mu =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>),</span>
-<span id="cb67-9"><a href="#cb67-9" tabindex="-1"></a>                           <span class="at">R =</span> <span class="dv">999</span>)</span>
-<span id="cb67-10"><a href="#cb67-10" tabindex="-1"></a></span>
-<span id="cb67-11"><a href="#cb67-11" tabindex="-1"></a><span class="co"># Permutation approach  </span></span>
-<span id="cb67-12"><a href="#cb67-12" tabindex="-1"></a>perm_result <span class="ot">&lt;-</span> <span class="fu">perm_t_test</span>(extra <span class="sc">~</span> group,</span>
-<span id="cb67-13"><a href="#cb67-13" tabindex="-1"></a>                           <span class="at">data =</span> sleep,</span>
-<span id="cb67-14"><a href="#cb67-14" tabindex="-1"></a>                           <span class="at">alternative =</span> <span class="st">&quot;equivalence&quot;</span>, </span>
-<span id="cb67-15"><a href="#cb67-15" tabindex="-1"></a>                           <span class="at">mu =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>),</span>
-<span id="cb67-16"><a href="#cb67-16" tabindex="-1"></a>                           <span class="at">R =</span> <span class="dv">999</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb68"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" tabindex="-1"></a><span class="co"># Same equivalence test using both methods</span></span>
+<span id="cb68-2"><a href="#cb68-2" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&#39;sleep&#39;</span>)</span>
+<span id="cb68-3"><a href="#cb68-3" tabindex="-1"></a></span>
+<span id="cb68-4"><a href="#cb68-4" tabindex="-1"></a><span class="co"># Bootstrap approach</span></span>
+<span id="cb68-5"><a href="#cb68-5" tabindex="-1"></a>boot_result <span class="ot">&lt;-</span> <span class="fu">boot_t_test</span>(extra <span class="sc">~</span> group, </span>
+<span id="cb68-6"><a href="#cb68-6" tabindex="-1"></a>                           <span class="at">data =</span> sleep,</span>
+<span id="cb68-7"><a href="#cb68-7" tabindex="-1"></a>                           <span class="at">alternative =</span> <span class="st">&quot;equivalence&quot;</span>,</span>
+<span id="cb68-8"><a href="#cb68-8" tabindex="-1"></a>                           <span class="at">mu =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>),</span>
+<span id="cb68-9"><a href="#cb68-9" tabindex="-1"></a>                           <span class="at">R =</span> <span class="dv">999</span>)</span>
+<span id="cb68-10"><a href="#cb68-10" tabindex="-1"></a></span>
+<span id="cb68-11"><a href="#cb68-11" tabindex="-1"></a><span class="co"># Permutation approach  </span></span>
+<span id="cb68-12"><a href="#cb68-12" tabindex="-1"></a>perm_result <span class="ot">&lt;-</span> <span class="fu">perm_t_test</span>(extra <span class="sc">~</span> group,</span>
+<span id="cb68-13"><a href="#cb68-13" tabindex="-1"></a>                           <span class="at">data =</span> sleep,</span>
+<span id="cb68-14"><a href="#cb68-14" tabindex="-1"></a>                           <span class="at">alternative =</span> <span class="st">&quot;equivalence&quot;</span>, </span>
+<span id="cb68-15"><a href="#cb68-15" tabindex="-1"></a>                           <span class="at">mu =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>),</span>
+<span id="cb68-16"><a href="#cb68-16" tabindex="-1"></a>                           <span class="at">R =</span> <span class="dv">999</span>)</span></code></pre></div>
 <pre><code>## Note: Number of permutations (R = 999) is less than 1000. Consider increasing R for more stable p-value estimates.</code></pre>
-<div class="sourceCode" id="cb69"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" tabindex="-1"></a><span class="co"># Compare results</span></span>
-<span id="cb69-2"><a href="#cb69-2" tabindex="-1"></a>boot_result</span></code></pre></div>
+<div class="sourceCode" id="cb70"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" tabindex="-1"></a><span class="co"># Compare results</span></span>
+<span id="cb70-2"><a href="#cb70-2" tabindex="-1"></a>boot_result</span></code></pre></div>
 <pre><code>## 
 ##  Bootstrapped Welch Two Sample t-test (studentized)
 ## 
@@ -2179,7 +2175,7 @@ let’s apply both to the same dataset:</p>
 ##                        0.75                        2.33 
 ## mean difference (&#39;1&#39; - &#39;2&#39;) 
 ##                       -1.58</code></pre>
-<div class="sourceCode" id="cb71"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" tabindex="-1"></a>perm_result</span></code></pre></div>
+<div class="sourceCode" id="cb72"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1" tabindex="-1"></a>perm_result</span></code></pre></div>
 <pre><code>## 
 ##  Randomization Permutation Welch Two Sample t-test
 ## 
@@ -2273,9 +2269,12 @@ researchers to compare the ratio of two means.</p>
 <p><span class="math display">\[
 log ( \frac{y}{x} ) = log(y) - log(x)
 \]</span></p>
-<p>Where: - y and x are the means of the two groups being compared - The
-transformation converts multiplicative relationships into additive
-ones</p>
+<p>Where:</p>
+<ul>
+<li>y and x are the means of the two groups being compared</li>
+<li>The transformation converts multiplicative relationships into
+additive ones</li>
+</ul>
 <div id="why-use-the-natural-log-transformation" class="section level2">
 <h2>Why Use The Natural Log Transformation?</h2>
 <p>The <a href="https://www.fda.gov/regulatory-information/search-fda-guidance-documents/bioavailability-and-bioequivalence-studies-submitted-ndas-or-inds-general-considerations">United
@@ -2326,10 +2325,10 @@ data follow a multiplicative rather than additive pattern.</p>
 <p>For example, we could compare whether the cars of different
 transmissions are “equivalent” with regards to gas mileage. We can use
 the default equivalence bounds (<code>eqb = 1.25</code>).</p>
-<div class="sourceCode" id="cb73"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" tabindex="-1"></a><span class="fu">log_TOST</span>(</span>
-<span id="cb73-2"><a href="#cb73-2" tabindex="-1"></a>  mpg <span class="sc">~</span> am,</span>
-<span id="cb73-3"><a href="#cb73-3" tabindex="-1"></a>  <span class="at">data =</span> mtcars</span>
-<span id="cb73-4"><a href="#cb73-4" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb74"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" tabindex="-1"></a><span class="fu">log_TOST</span>(</span>
+<span id="cb74-2"><a href="#cb74-2" tabindex="-1"></a>  mpg <span class="sc">~</span> am,</span>
+<span id="cb74-3"><a href="#cb74-3" tabindex="-1"></a>  <span class="at">data =</span> mtcars</span>
+<span id="cb74-4"><a href="#cb74-4" tabindex="-1"></a>)</span></code></pre></div>
 <pre><code>## 
 ## Log-transformed Welch Two Sample t-test
 ## 
@@ -2377,11 +2376,11 @@ on the logarithmic scale can be biased, and it is recommended that
 bootstrapped tests be utilized instead. Therefore, the
 <code>boot_log_TOST</code> function can be utilized to perform a more
 precise test.</p>
-<div class="sourceCode" id="cb75"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" tabindex="-1"></a><span class="fu">boot_log_TOST</span>(</span>
-<span id="cb75-2"><a href="#cb75-2" tabindex="-1"></a>  mpg <span class="sc">~</span> am,</span>
-<span id="cb75-3"><a href="#cb75-3" tabindex="-1"></a>  <span class="at">data =</span> mtcars,</span>
-<span id="cb75-4"><a href="#cb75-4" tabindex="-1"></a>  <span class="at">R =</span> <span class="dv">499</span></span>
-<span id="cb75-5"><a href="#cb75-5" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb76"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" tabindex="-1"></a><span class="fu">boot_log_TOST</span>(</span>
+<span id="cb76-2"><a href="#cb76-2" tabindex="-1"></a>  mpg <span class="sc">~</span> am,</span>
+<span id="cb76-3"><a href="#cb76-3" tabindex="-1"></a>  <span class="at">data =</span> mtcars,</span>
+<span id="cb76-4"><a href="#cb76-4" tabindex="-1"></a>  <span class="at">R =</span> <span class="dv">499</span></span>
+<span id="cb76-5"><a href="#cb76-5" tabindex="-1"></a>)</span></code></pre></div>
 <pre><code>## 
 ## Bootstrapped Log Welch Two Sample t-test
 ## 
@@ -2505,10 +2504,17 @@ difference between groups, while values approaching 1 indicate perfect
 separation between groups.</p>
 <p>Please note that the c-statistic is equivalent to the area under the
 receiver operating characteristic curve (AUC) in binary classification
-contexts. Additionally, the c-statistic is the same estimate that is
-produced by <code>brunner_munzel</code> with the exception of paired
-samples and one sample designs. Additionally, the CI and SE methods
-differ.</p>
+contexts. For independent two-sample designs, the c-statistic estimates
+the same quantity as that produced by <code>brunner_munzel</code>: P(X
+&gt; Y), the probability that a randomly selected observation from one
+group exceeds a randomly selected observation from the other. However,
+for paired samples and one-sample designs, the c-statistic from the
+Wilcoxon test is based on the difference scores rather than the
+cross-group comparison, estimating P(Z &gt; 0), where Z (Z = X - Y)
+represents the paired differences (or deviations from the null value).
+Additionally, the confidence interval and standard error methods differ
+between <code>brunner_munzel</code> and the c-statistic reported
+here.</p>
 </div>
 <div id="wmw-odds" class="section level3">
 <h3>WMW Odds</h3>
@@ -2547,15 +2553,15 @@ superiority by approximately 10% over Y”.</li>
 </div>
 <div id="confidence-interval-methods" class="section level2">
 <h2>Confidence Interval Methods</h2>
-<p>As of <code>v0.9.0</code>, the TOSTER package defaults to the
-<strong>Agresti</strong> method (<code>se_method = &quot;agresti&quot;</code>) for
-computing standard errors and confidence intervals for all SES
-functions. This method uses placement-based variance estimation and
-conducts inference on the log-odds scale, which has better asymptotic
-properties (the log-odds scale is unbounded and converges to normality
-faster). Results are back-transformed to the requested effect size scale
-for reporting.</p>
-<p>The <strong>Fisher z-transformation</strong> method
+<p>As of <code>v0.9.0</code>, the TOSTER package defaults to the score
+method (<code>se_method = &quot;score&quot;</code>) for computing standard errors
+and confidence intervals for all SES functions (see function
+documentation for more information). There is also the
+<strong>Agresti</strong> method. This method uses placement-based
+variance estimation and conducts inference on the log-odds scale, which
+performs fairly well when the degree of seperation between groups is not
+high. Results are back-transformed to the requested effect size scale
+for reporting. The <strong>Fisher z-transformation</strong> method
 (<code>se_method = &quot;fisher&quot;</code>) remains available as a legacy
 option. This was the default in earlier versions of the package and is
 documented below for reference.</p>
@@ -2607,11 +2613,11 @@ setting equivalence bounds on the raw scale, <code>ses_calc</code> works
 directly with the standardized effect size. By default (with
 <code>alternative = &quot;none&quot;</code>), it returns an effect size estimate
 and confidence interval with no hypothesis test:</p>
-<div class="sourceCode" id="cb77"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" tabindex="-1"></a><span class="co"># Rank-biserial correlation for paired data</span></span>
-<span id="cb77-2"><a href="#cb77-2" tabindex="-1"></a><span class="fu">ses_calc</span>(<span class="at">x =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">1</span>],</span>
-<span id="cb77-3"><a href="#cb77-3" tabindex="-1"></a>         <span class="at">y =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">2</span>],</span>
-<span id="cb77-4"><a href="#cb77-4" tabindex="-1"></a>         <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb77-5"><a href="#cb77-5" tabindex="-1"></a>         <span class="at">ses =</span> <span class="st">&quot;rb&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb78"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" tabindex="-1"></a><span class="co"># Rank-biserial correlation for paired data</span></span>
+<span id="cb78-2"><a href="#cb78-2" tabindex="-1"></a><span class="fu">ses_calc</span>(<span class="at">x =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">1</span>],</span>
+<span id="cb78-3"><a href="#cb78-3" tabindex="-1"></a>         <span class="at">y =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">2</span>],</span>
+<span id="cb78-4"><a href="#cb78-4" tabindex="-1"></a>         <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb78-5"><a href="#cb78-5" tabindex="-1"></a>         <span class="at">ses =</span> <span class="st">&quot;rb&quot;</span>)</span></code></pre></div>
 <pre><code>## 
 ##  Paired Sample Rank-Biserial Correlation estimate with CI
 ## 
@@ -2632,12 +2638,12 @@ directly on the effect size scale by setting the
 non-parametric effect size differs from a specified value, or whether it
 falls within equivalence bounds, without needing the raw-scale
 equivalence bounds required by <code>wilcox_TOST</code>.</p>
-<div class="sourceCode" id="cb79"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" tabindex="-1"></a><span class="co"># Two-sided test: does the rank-biserial differ from 0?</span></span>
-<span id="cb79-2"><a href="#cb79-2" tabindex="-1"></a><span class="fu">ses_calc</span>(<span class="at">x =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">1</span>],</span>
-<span id="cb79-3"><a href="#cb79-3" tabindex="-1"></a>         <span class="at">y =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">2</span>],</span>
-<span id="cb79-4"><a href="#cb79-4" tabindex="-1"></a>         <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb79-5"><a href="#cb79-5" tabindex="-1"></a>         <span class="at">ses =</span> <span class="st">&quot;rb&quot;</span>,</span>
-<span id="cb79-6"><a href="#cb79-6" tabindex="-1"></a>         <span class="at">alternative =</span> <span class="st">&quot;two.sided&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb80"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1" tabindex="-1"></a><span class="co"># Two-sided test: does the rank-biserial differ from 0?</span></span>
+<span id="cb80-2"><a href="#cb80-2" tabindex="-1"></a><span class="fu">ses_calc</span>(<span class="at">x =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">1</span>],</span>
+<span id="cb80-3"><a href="#cb80-3" tabindex="-1"></a>         <span class="at">y =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">2</span>],</span>
+<span id="cb80-4"><a href="#cb80-4" tabindex="-1"></a>         <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb80-5"><a href="#cb80-5" tabindex="-1"></a>         <span class="at">ses =</span> <span class="st">&quot;rb&quot;</span>,</span>
+<span id="cb80-6"><a href="#cb80-6" tabindex="-1"></a>         <span class="at">alternative =</span> <span class="st">&quot;two.sided&quot;</span>)</span></code></pre></div>
 <pre><code>## 
 ##  Paired Sample Rank-Biserial Correlation test
 ## 
@@ -2652,17 +2658,21 @@ equivalence bounds required by <code>wilcox_TOST</code>.</p>
 <div id="equivalence-testing-on-the-effect-size-scale" class="section level3">
 <h3>Equivalence Testing on the Effect Size Scale</h3>
 <p>One advantage of testing directly on the effect size scale is that
-equivalence bounds have a more intuitive interpretation. Rather than
-specifying bounds in raw units (which depends on the location-shift
-assumption), you can specify bounds directly in terms of the effect
-size:</p>
-<div class="sourceCode" id="cb81"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" tabindex="-1"></a><span class="co"># Equivalence test: is the rank-biserial within [-0.3, 0.3]?</span></span>
-<span id="cb81-2"><a href="#cb81-2" tabindex="-1"></a><span class="fu">ses_calc</span>(<span class="at">x =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">1</span>],</span>
-<span id="cb81-3"><a href="#cb81-3" tabindex="-1"></a>         <span class="at">y =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">2</span>],</span>
-<span id="cb81-4"><a href="#cb81-4" tabindex="-1"></a>         <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb81-5"><a href="#cb81-5" tabindex="-1"></a>         <span class="at">ses =</span> <span class="st">&quot;rb&quot;</span>,</span>
-<span id="cb81-6"><a href="#cb81-6" tabindex="-1"></a>         <span class="at">alternative =</span> <span class="st">&quot;equivalence&quot;</span>,</span>
-<span id="cb81-7"><a href="#cb81-7" tabindex="-1"></a>         <span class="at">null.value =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.3</span>, <span class="fl">0.3</span>))</span></code></pre></div>
+equivalence bounds have a more intuitive interpretation much like the
+<code>brunner_munzel</code> test. In fact, you should probably use the
+<code>brunner_munzel</code> approach for the two-sample case, but the
+<code>ses_calc</code> functions allow for comparison of paired samples
+and one-sample case in what that the Brunner-Munzel approach does not
+allow. Rather than specifying bounds in raw units (which depends on the
+location-shift assumption), you can specify bounds directly in terms of
+the effect size:</p>
+<div class="sourceCode" id="cb82"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1" tabindex="-1"></a><span class="co"># Equivalence test: is the rank-biserial within [-0.3, 0.3]?</span></span>
+<span id="cb82-2"><a href="#cb82-2" tabindex="-1"></a><span class="fu">ses_calc</span>(<span class="at">x =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">1</span>],</span>
+<span id="cb82-3"><a href="#cb82-3" tabindex="-1"></a>         <span class="at">y =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">2</span>],</span>
+<span id="cb82-4"><a href="#cb82-4" tabindex="-1"></a>         <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb82-5"><a href="#cb82-5" tabindex="-1"></a>         <span class="at">ses =</span> <span class="st">&quot;rb&quot;</span>,</span>
+<span id="cb82-6"><a href="#cb82-6" tabindex="-1"></a>         <span class="at">alternative =</span> <span class="st">&quot;equivalence&quot;</span>,</span>
+<span id="cb82-7"><a href="#cb82-7" tabindex="-1"></a>         <span class="at">null.value =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.3</span>, <span class="fl">0.3</span>))</span></code></pre></div>
 <pre><code>## 
 ##  Paired Sample Rank-Biserial Correlation test
 ## 
@@ -2682,11 +2692,11 @@ size:</p>
 section above) also controls how test statistics are computed. The
 default Agresti method conducts tests on the log-odds scale, while the
 Fisher method uses z-transformation. See above for details.</p>
-<div class="sourceCode" id="cb83"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1" tabindex="-1"></a><span class="co"># Using the Agresti method (default) with WMW odds</span></span>
-<span id="cb83-2"><a href="#cb83-2" tabindex="-1"></a><span class="fu">ses_calc</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
-<span id="cb83-3"><a href="#cb83-3" tabindex="-1"></a>         <span class="at">data =</span> sleep,</span>
-<span id="cb83-4"><a href="#cb83-4" tabindex="-1"></a>         <span class="at">ses =</span> <span class="st">&quot;odds&quot;</span>,</span>
-<span id="cb83-5"><a href="#cb83-5" tabindex="-1"></a>         <span class="at">alternative =</span> <span class="st">&quot;two.sided&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb84"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1" tabindex="-1"></a><span class="co"># Using the Agresti method (default) with WMW odds</span></span>
+<span id="cb84-2"><a href="#cb84-2" tabindex="-1"></a><span class="fu">ses_calc</span>(<span class="at">formula =</span> extra <span class="sc">~</span> group,</span>
+<span id="cb84-3"><a href="#cb84-3" tabindex="-1"></a>         <span class="at">data =</span> sleep,</span>
+<span id="cb84-4"><a href="#cb84-4" tabindex="-1"></a>         <span class="at">ses =</span> <span class="st">&quot;odds&quot;</span>,</span>
+<span id="cb84-5"><a href="#cb84-5" tabindex="-1"></a>         <span class="at">alternative =</span> <span class="st">&quot;two.sided&quot;</span>)</span></code></pre></div>
 <pre><code>## 
 ##  Two Sample WMW Odds test
 ## 
@@ -2705,17 +2715,16 @@ Fisher method uses z-transformation. See above for details.</p>
 <code>boot_ses_calc</code></h2>
 <p>When asymptotic approximations may be unreliable, particularly with
 small samples, <code>boot_ses_calc</code> uses bootstrapping to estimate
-the sampling distribution of the effect size. Note that bootstrap methods
-cannot work in situations where there is complete separation between
-groups (e.g., all values in one group are higher than the other), which
-can occur with small samples and large effects.</p>
+the sampling distribution of the effect size. Note that bootstrap
+methods cannot work in situations where there is complete separation
+between groups (e.g., all values in one group are higher than the
+other), which can occur with small samples and large effects.</p>
 <p>Like the other bootstrap functions in the package,
 <code>boot_ses_calc</code> supports multiple bootstrap CI methods
 (studentized, percentile, basic, and BCa) via <code>boot_ci</code>, with
 p-values matched to the selected CI method for guaranteed CI/p-value
 agreement. All bootstrap computations are performed on a working scale
-(log-odds for the default Agresti method, Fisher z for the Fisher
-method), then back-transformed to the requested effect size scale.</p>
+then back-transformed to the requested effect size scale.</p>
 </div>
 </div>
 <div id="summary-comparison-of-robust-tost-methods" class="section level1">
@@ -2786,10 +2795,10 @@ if <code>tr</code> &gt; 0)</td>
 <td>Bioequivalence, ratio comparisons</td>
 </tr>
 <tr class="odd">
-<td><strong>SES calc / Perm SES test</strong></td>
+<td>**SES calc*</td>
 <td>Non-parametric effect sizes (rank-biserial, concordance, odds)</td>
 <td>Tests directly on effect size scale</td>
-<td>Requires large samples (asymptotic) or many permutations</td>
+<td>Requires large samples (asymptotic) or many replicates</td>
 <td>Non-parametric effect size testing</td>
 </tr>
 </tbody>
@@ -2803,7 +2812,7 @@ data violate typical assumptions. By selecting the appropriate robust
 method for your specific data characteristics and research question, you
 can ensure more valid statistical inferences about equivalence or
 minimal effects.</p>
-<p>Remember that no single method is universally superior - the choice
+<p>Remember that no single method is universally superior — the choice
 depends on your data structure, sample size, and specific research
 question. When in doubt, running multiple approaches and comparing
 results can provide valuable insights into the robustness of your

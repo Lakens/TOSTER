@@ -99,6 +99,7 @@ reference:
   - boot_smd_calc
   - ses_calc
   - boot_ses_calc
+  - boot_ses_test
   - rbs
   - np_ses
 

@@ -25,6 +25,8 @@ While the standard `t_TOST` function in TOSTER provides a parametric approach to
 
 Before selecting a robust method, it is worth clarifying what quantity your equivalence bounds are intended to constrain. Different methods target different estimands, and the bounds only have their intended meaning when matched to the right one. If your bounds refer to mean differences, a permutation t-test or bootstrap approach is appropriate. If they refer to trimmed mean differences due to concerns about heavy tails (outliers), Yuen's trimmed bootstrap or permutation test are natural choices. If you are interested in stochastic dominance (P(X > Y)), the Brunner-Munzel test provides a transparent framework. The Wilcoxon-Mann-Whitney and Hodges-Lehmann procedures target the pseudo-median of pairwise differences, which coincides with mean and median differences only under a location shift assumption. When that assumption is violated, bounds set on the pseudo-median may not correspond to the magnitude of difference in means or medians that you intended to declare equivalent.
 
+*TL;DR* choose your test carefully and this should be informed by the estimand of interest.
+
 ## When to Use Robust TOST Methods
 
 Consider using the robust alternatives to `t_TOST` when:
@@ -89,7 +91,7 @@ This interpretive difficulty is especially pronounced for equivalence testing. W
 
 **For robust location testing:** Use `hodges_lehmann`, which explicitly tests the Hodges-Lehmann estimator with permutation or asymptotic inference and makes the location-shift assumption transparent.
 
-**For testing effect sizes directly:** Use `ses_calc` or `boot_ses_calc` to estimate and test non-parametric standardized effect sizes (rank-biserial correlation, WMW odds, concordance) with proper hypothesis testing support.
+**For testing effect sizes directly:** Use `ses_calc` to estimate and test non-parametric standardized effect sizes (rank-biserial correlation, WMW odds, concordance) with proper hypothesis testing support.
 
 The `wilcox_TOST` function remains available for situations where rank-based tests are specifically desired, such as with ordinal data or when consistency with prior analyses that used WMW tests is needed.
 
@@ -482,6 +484,7 @@ hodges_lehmann(formula = extra ~ group,
 - Sample sizes are moderate to large (n $\geq$ 30 per group)
 - You want the fastest computation
 - Distributions are not extremely heavy-tailed or skewed
+- When the null != 0 or when the alternative is "equivalence" or "minimal.effect"
 
 **Use the permutation test (`R` $\geq$ max permutations) when:**
 
@@ -848,6 +851,7 @@ log ( \frac{y}{x} ) = log(y) - log(x)
 $$
 
 Where:
+
 - y and x are the means of the two groups being compared
 - The transformation converts multiplicative relationships into additive ones
 
@@ -1014,7 +1018,7 @@ $$
 
 The c-statistic can be interpreted as the probability that a randomly selected observation from one group will be greater than a randomly selected observation from another group. A value of 0.5 indicates no difference between groups, while values approaching 1 indicate perfect separation between groups.
 
-Please note that the c-statistic is equivalent to the area under the receiver operating characteristic curve (AUC) in binary classification contexts. Additionally, the c-statistic is the same estimate that is produced by `brunner_munzel` with the exception of paired samples and one sample designs. Additionally, the CI and SE methods differ.
+Please note that the c-statistic is equivalent to the area under the receiver operating characteristic curve (AUC) in binary classification contexts. For independent two-sample designs, the c-statistic estimates the same quantity as that produced by `brunner_munzel`: P(X > Y), the probability that a randomly selected observation from one group exceeds a randomly selected observation from the other. However, for paired samples and one-sample designs, the c-statistic from the Wilcoxon test is based on the difference scores rather than the cross-group comparison, estimating P(Z > 0), where Z (Z = X - Y) represents the paired differences (or deviations from the null value). Additionally, the confidence interval and standard error methods differ between `brunner_munzel` and the c-statistic reported here.
 
 ### WMW Odds
 
@@ -1037,9 +1041,7 @@ The WMW odds can be interpreted similarly to a traditional odds ratio, represent
 
 ## Confidence Interval Methods
 
-As of `v0.9.0`, the TOSTER package defaults to the **Agresti** method (`se_method = "agresti"`) for computing standard errors and confidence intervals for all SES functions. This method uses placement-based variance estimation and conducts inference on the log-odds scale, which has better asymptotic properties (the log-odds scale is unbounded and converges to normality faster). Results are back-transformed to the requested effect size scale for reporting.
-
-The **Fisher z-transformation** method (`se_method = "fisher"`) remains available as a legacy option. This was the default in earlier versions of the package and is documented below for reference.
+As of `v0.9.0`, the TOSTER package defaults to the score method (`se_method = "score"`) for computing standard errors and confidence intervals for all SES functions (see function documentation for more information). There is also the **Agresti** method. This method uses placement-based variance estimation and conducts inference on the log-odds scale, which performs fairly well when the degree of seperation between groups is not high. Results are back-transformed to the requested effect size scale for reporting. The **Fisher z-transformation** method (`se_method = "fisher"`) remains available as a legacy option. This was the default in earlier versions of the package and is documented below for reference.
 
 ### Fisher z-Transformation (Legacy Method)
 
@@ -1108,7 +1110,7 @@ ses_calc(x = sleep$extra[sleep$group == 1],
 
 ### Equivalence Testing on the Effect Size Scale
 
-One advantage of testing directly on the effect size scale is that equivalence bounds have a more intuitive interpretation. Rather than specifying bounds in raw units (which depends on the location-shift assumption), you can specify bounds directly in terms of the effect size:
+One advantage of testing directly on the effect size scale is that equivalence bounds have a more intuitive interpretation much like the `brunner_munzel` test. In fact, you should probably use the `brunner_munzel` approach for the two-sample case, but the `ses_calc` functions allow for comparison of paired samples and one-sample case in what that the Brunner-Munzel approach does not allow. Rather than specifying bounds in raw units (which depends on the location-shift assumption), you can specify bounds directly in terms of the effect size:
 
 ```{r}
 # Equivalence test: is the rank-biserial within [-0.3, 0.3]?
@@ -1134,7 +1136,7 @@ ses_calc(formula = extra ~ group,
 
 When asymptotic approximations may be unreliable, particularly with small samples, `boot_ses_calc` uses bootstrapping to estimate the sampling distribution of the effect size. Note that bootstrap methods cannot work in situations where there is complete separation between groups (e.g., all values in one group are higher than the other), which can occur with small samples and large effects.
 
-Like the other bootstrap functions in the package, `boot_ses_calc` supports multiple bootstrap CI methods (studentized, percentile, basic, and BCa) via `boot_ci`, with p-values matched to the selected CI method for guaranteed CI/p-value agreement. All bootstrap computations are performed on a working scale (log-odds for the default Agresti method, Fisher z for the Fisher method), then back-transformed to the requested effect size scale.
+Like the other bootstrap functions in the package, `boot_ses_calc` supports multiple bootstrap CI methods (studentized, percentile, basic, and BCa) via `boot_ci`, with p-values matched to the selected CI method for guaranteed CI/p-value agreement. All bootstrap computations are performed on a working scale then back-transformed to the requested effect size scale.
 
 
 
@@ -1148,12 +1150,12 @@ Like the other bootstrap functions in the package, `boot_ses_calc` supports mult
 | **Permutation t-test** | $\mu_X - \mu_Y$ (or trimmed means if `tr` > 0) | Exact p-values, direct mean comparison | Outlier sensitive (unless trimmed) | Mean differences with small samples |
 | **Bootstrap t-test** | $\mu_X - \mu_Y$ | Flexible, visualization | Results vary between runs | Mean differences with moderate samples |
 | **Log-Transformed** | $\log(\mu_Y / \mu_X)$ | Ratio-based, stabilizes variance | Requires positive data | Bioequivalence, ratio comparisons |
-| **SES calc / Perm SES test** | Non-parametric effect sizes (rank-biserial, concordance, odds) | Tests directly on effect size scale | Requires large samples (asymptotic) or many permutations | Non-parametric effect size testing |
+| **SES calc* | Non-parametric effect sizes (rank-biserial, concordance, odds) | Tests directly on effect size scale | Requires large samples (asymptotic) or many replicates | Non-parametric effect size testing |
 
 # Conclusion
 
 The robust TOST procedures provided in the TOSTER package offer reliable alternatives to standard t-test based equivalence testing when data violate typical assumptions. By selecting the appropriate robust method for your specific data characteristics and research question, you can ensure more valid statistical inferences about equivalence or minimal effects.
 
-Remember that no single method is universally superior - the choice depends on your data structure, sample size, and specific research question. When in doubt, running multiple approaches and comparing results can provide valuable insights into the robustness of your conclusions.
+Remember that no single method is universally superior --- the choice depends on your data structure, sample size, and specific research question. When in doubt, running multiple approaches and comparing results can provide valuable insights into the robustness of your conclusions.
 
 # References

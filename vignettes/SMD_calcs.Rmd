@@ -74,10 +74,10 @@ of confidence intervals (of varying degrees of quality)
 and therefore should be interpreted with caution.
 
 It is my belief that SMDs provide another interesting quantitive effect size description, 
-but have dubious and limited inferential utility [see @Senn_2011 and @Baguley_2009; though many may disagree]. 
+but have dubious and limited inferential utility^[see @Senn_2011 and @Baguley_2009; though many may disagree]. 
 You may disagree, and if you are basing your inferences on the SMD, and the
 associated confidence intervals, we recommend you go with a
-bootstrapping approach (see `boot_smd_calc`) [@Kirby2013] as it is a more robust option.
+bootstrapping approach [see `boot_smd_calc` @Kirby2013] as it is a more robust option.
 
 In this section we will detail on the calculations that are involved in
 calculating the SMD, their associated degrees of freedom, non-centrality
@@ -512,7 +512,7 @@ method, those outlined by @Goulet_2018, and approximate methods using the *t* an
 approximations and newer formulations may provide better coverage
 [e.g., @Cousineau2021]. In any case, if the calculation of confidence
 intervals for SMDs is of the utmost importance then I would strongly
-recommend using bootstrapping techniques rather than any of these approximations whenever possible [@Kirby2013].
+recommend using bootstrapping techniques rather than any of these approximations whenever possible [@Kirby2013], and these method are available in the `boot_smd_calc` function.
 
 The calculations of the confidence intervals for the `goulet` and `nct` methods involve a
 two step process: 1) using the noncentral *t*-distribution to calculate
@@ -597,6 +597,20 @@ boot_smd_calc(x = sleep$extra[sleep$group == 1],
          boot_ci = "stud",
          bias_correction = F)
 ```
+
+If you have a hypothesis that is specifically about the SMD then you can use boot_smd_calc to directly test it by using the `null.value` and `alternative` value arguments. For example, you might have a hypothesis of equivalence regarding the SMD, and therefore you could set `null.value = c(-0.5,0.5)` if you hypothesis that the SMD is between 0.5 and -0.5 and `alternative = "equivalent"` to directly test this hypothesis.
+
+```{r}
+boot_smd_calc(x = sleep$extra[sleep$group == 1],
+              y = sleep$extra[sleep$group == 2],
+         R = 199,
+         paired = TRUE,
+         boot_ci = "stud",
+         bias_correction = TRUE,
+         null.value = c(-0.5,0.5), 
+         alternative = "equ")
+```
+
 
 
 # Plotting SMDs

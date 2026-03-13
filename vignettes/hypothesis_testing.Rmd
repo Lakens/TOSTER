@@ -133,7 +133,7 @@ brunner_munzel(extra ~ group, data = sleep)
 
 ### Bootstrap Correlation test
 
-`boot_cor_test()` tests correlations using Fisher's z-transformation and supports equivalence bounds on the correlation coefficient:
+`boot_cor_test()` tests correlations using the bootstrap methods similar to those mentioned by @wilcox2011introduction and supports equivalence bounds on the correlation coefficient:
 
 ```{r}
 boot_cor_test(mtcars$mpg, mtcars$hp,
