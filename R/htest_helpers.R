@@ -391,13 +391,16 @@ describe_htest = function(htest,alpha = NULL,digits = 3){
 # Substitute generic "x"/"y" labels with actual group level names
 # in estimate names and sample_size names for formula interface methods
 relabel_for_formula <- function(result, lvls) {
+  # Quote numeric-looking factor levels for display consistency
+  lq <- c(quote_if_numeric(lvls[1]), quote_if_numeric(lvls[2]))
+
   # Relabel estimate names
   if (!is.null(names(result$estimate))) {
     nms <- names(result$estimate)
-    nms <- gsub("\\bof x\\b", paste0("of ", lvls[1]), nms)
-    nms <- gsub("\\bof y\\b", paste0("of ", lvls[2]), nms)
-    nms <- gsub("\\(x - y", paste0("(", lvls[1], " - ", lvls[2]), nms)
-    nms <- gsub("\\(z = x - y", paste0("(z = ", lvls[1], " - ", lvls[2]), nms)
+    nms <- gsub("\\bof x\\b", paste0("of ", lq[1]), nms)
+    nms <- gsub("\\bof y\\b", paste0("of ", lq[2]), nms)
+    nms <- gsub("\\(x - y", paste0("(", lq[1], " - ", lq[2]), nms)
+    nms <- gsub("\\(z = x - y", paste0("(z = ", lq[1], " - ", lq[2]), nms)
     names(result$estimate) <- nms
   }
 

@@ -275,6 +275,8 @@ boot_pvalue <- function(bvec, est, null, alternative,
                         z0 = NULL, acc = NULL, nboot,
                         z_transform = FALSE) {
 
+  boot_ci <- match.arg(boot_ci, c("perc", "basic", "bca", "stud"))
+
   if (boot_ci == "perc") {
     sig <- .pval_perc(bvec, null, alternative, nboot)
   } else if (boot_ci == "basic") {
