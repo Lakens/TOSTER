@@ -97,6 +97,10 @@ print.TOSTt <- function(x,
       cat("Note: studentized bootstrap ci method utilized.")
     }
 
+    if(x$call$boot_ci == "bca"){
+      cat("Note: BCa (bias-corrected and accelerated) bootstrap ci method utilized.")
+    }
+
   }else{
     cat("Note: SMD confidence intervals are an approximation. See vignette(\"SMD_calcs\").")
   }

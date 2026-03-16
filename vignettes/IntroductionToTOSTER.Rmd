@@ -2,6 +2,7 @@
 title: "Introduction to Equivalence Testing with TOSTER"
 author: "Daniel Lakens; Updated by Aaron Caldwell"
 date: "`r Sys.Date()`"
+link-citations: true
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Introduction to Equivalence Testing with TOSTER}

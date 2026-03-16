@@ -13,6 +13,7 @@
   alternative = c("two.sided", "less", "greater", "equivalence", "minimal.effect"),
   mu = 0.5,
   alpha = 0.05,
+  scale = c("probability", "difference", "logodds", "odds"),
   test_method = c("t", "logit", "perm"),
   R = 10000,
   p_method = NULL,
@@ -45,9 +46,28 @@
 representing the hypothesized relative effect (default = 0.5, i.e., stochastic equality).
 \item For "equivalence" or "minimal.effect": two values representing the lower and upper bounds
 for the relative effect. Values must be between 0 and 1.
-}}
+}
+
+Note: \code{mu} is always specified on the probability scale regardless of the \code{scale} argument.
+The \code{scale} argument only affects how results are reported; it does not change the hypothesis
+being tested.}
 
 \item{alpha}{alpha level (default = 0.05)}
+
+\item{scale}{a character string specifying the scale for the reported estimate,
+standard error, confidence interval, and null value. The test itself always operates
+on the probability scale internally; this argument only transforms the output.
+
+\describe{
+\item{"probability"}{(default): \eqn{p = P(X > Y) + 0.5 \cdot P(X = Y)}, range \eqn{[0, 1]},
+null at stochastic equality = 0.5}
+\item{"difference"}{\eqn{P(X > Y) - P(X < Y) = 2p - 1}, range \eqn{[-1, 1]},
+null = 0}
+\item{"logodds"}{\eqn{\log[p / (1 - p)]}, range \eqn{(-\infty, \infty)},
+null = 0}
+\item{"odds"}{\eqn{p / (1 - p)}, range \eqn{(0, \infty)},
+null = 1}
+}}
 
 \item{test_method}{a character string specifying the test method to use:
 \itemize{
@@ -102,7 +122,7 @@ A list with class \code{"htest"} containing the following components:
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#maturing}{\figure{lifecycle-maturing.svg}{options: alt='[Maturing]'}}}{\strong{[Maturing]}}
 
-This is a generic function that performs a generalized asymptotic Brunner-Munzel test in a fashion similar to \link{t.test}.
+This is a generic function that performs a generalized Brunner-Munzel test in a fashion similar to \link{t.test}.
 }
 \details{
 This function is made to provide a test of stochastic equality between two samples (paired or independent), and is referred to as the Brunner-Munzel test.
@@ -128,7 +148,11 @@ that are guaranteed to stay within \verb{[0, 1]}. This method is recommended whe
 relative effect is close to 0 or 1.
 \item "perm": A studentized permutation test following Neubert & Brunner (2007). This method
 is highly recommended when sample sizes are small (< 15 per group) as it provides better
-control of Type I error rates in these situations.
+control of Type I error rates in these situations. Note: when exact permutations are
+enumerated with small or heavily tied samples, the exact p-value method (\code{b/R}) may
+return p = 0 if no permuted test statistic is as extreme as the observed value. The
+\code{plusone} method (\code{(b+1)/(R+1)}) avoids this artifact and can be selected via
+\code{p_method = "plusone"}.
 }
 }
 
@@ -196,6 +220,17 @@ the permuted test statistics at 0.5 (the value implied by exchangeability), whil
 test statistic is centered at the hypothesized null value. This approach is valid because
 the studentized permutation distribution converges to the same limit regardless of the
 centering, following the asymptotic theory of Janssen (1997) and Neubert & Brunner (2007).
+
+Because the equivalence bounds are specified directly on the relative effect
+scale (i.e., as probabilities between 0 and 1), this avoids the difficulty
+noted by Arboretti et al. (2021, point IU.7) that arises when margins must
+be expressed in terms of rank transformations.
+
+These are uncalibrated (naive) procedures. For the IU direction
+(\code{"equivalence"}), the procedure can be conservative when sample sizes are
+small or when the equivalence bounds are close to 0.5. For the UI direction
+(\code{"minimal.effect"}), the conservatism is less pronounced. See Arboretti
+et al. (2021) for a detailed discussion of calibration
 }
 }
 \examples{
@@ -225,8 +260,17 @@ brunner_munzel(mpg ~ am, data = mtcars,
                mu = c(0.35, 0.65),
                test_method = "perm")
 
+# Report on the difference scale: P(X>Y) - P(X<Y)
+brunner_munzel(mpg ~ am, data = mtcars, scale = "difference")
+
+# Report as odds
+brunner_munzel(mpg ~ am, data = mtcars, scale = "odds")
+
 }
 \references{
+Arboretti, R., Pesarin, F. & Salmaso, L. (2021). A unified approach to permutation testing for equivalence.
+Stat Methods Appl 30, 1033-1052. doi: 10.1007/s10260-020-00548-0
+
 Brunner, E., Munzel, U. (2000). The Nonparametric Behrens-Fisher Problem: Asymptotic Theory and a Small Sample Approximation. Biometrical Journal 42, 17 -25.
 
 Neubert, K., Brunner, E., (2006). A Studentized Permutation Test for the Nonparametric Behrens-Fisher Problem. Computational Statistics and Data Analysis.
@@ -242,8 +286,11 @@ Janssen, A. (1997). Studentized permutation tests for non-i.i.d. hypotheses and 
 Phipson, B., & Smyth, G. K. (2010). Permutation P-values should never be zero: calculating exact P-values when permutations are randomly drawn. Statistical Applications in Genetics and Molecular Biology, 9(1), Article 39.
 }
 \seealso{
+\code{\link[=trans_rank_prob]{trans_rank_prob()}} for standalone transformation of probability-scale effect sizes.
+
 Other Robust tests: 
 \code{\link{boot_log_TOST}()},
+\code{\link{boot_ses_test}()},
 \code{\link{boot_t_TOST}()},
 \code{\link{boot_t_test}()},
 \code{\link{hodges_lehmann}()},

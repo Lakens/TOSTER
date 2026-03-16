@@ -8,6 +8,7 @@ output:
 editor_options: 
   chunk_output_type: console
 bibliography: references.bib
+link-citations: true
 vignette: >
   %\VignetteIndexEntry{Correlations}
   %\VignetteEncoding{UTF-8}
@@ -45,7 +46,7 @@ z_cor_test(mtcars$mpg,
 
 # Advantages of z_cor_test
 
-The main advantage of `z_cor_test` over the standard `cor.test` is its ability to perform equivalence testing (TOST) or any hypothesis test where the null hypothesis isn't zero. This makes it particularly useful for research questions focused on demonstrating practical equivalence or testing against specific correlation thresholds.
+The main advantage of `z_cor_test` over the standard `cor.test` is its ability to perform equivalence testing (TOST) or any hypothesis test where the null hypothesis isn't zero. This makes it particularly useful for research questions focused on demonstrating practical equivalence or testing against specific correlation thresholds. The main disadvantage is that it relies on the Fisher's z transformation, which can be less accurate when assumptions are violated or when outliers are present. In such cases, the bootstrapped methods may provide more reliable results.
 
 ```{r}
 # Equivalence test with null boundary of 0.4
@@ -206,35 +207,5 @@ When choosing which correlation method to use in TOSTER:
    - Carefully select meaningful boundaries (null values) based on your research context
    - Consider what effect size would be practically insignificant in your field
 
-# Advanced Usage
-
-## Custom Bootstrap Methods
-
-The bootstrapped functions in TOSTER allow customization of the bootstrap procedure:
-
-```{r, eval=FALSE}
-# Customizing the bootstrap procedure
-boot_cor_test(
-  x = mtcars$mpg,
-  y = mtcars$qsec,
-  method = "pearson",
-  R = 2000,  # Increasing number of bootstrap samples
-  alpha = 0.01,  # Using 99% confidence interval
-  alternative = "t"  # Two-sided test
-)
-```
-
-## Working with Missing Data
-
-By default, the correlation functions in TOSTER use pairwise complete observations:
-
-```{r, eval=FALSE}
-# Example with missing data
-x_with_na <- c(mtcars$mpg, NA, NA)
-y_with_na <- c(mtcars$qsec, 10, NA)
-
-# Default behavior handles NAs with pairwise deletion
-z_cor_test(x_with_na, y_with_na)
-```
 
 # References

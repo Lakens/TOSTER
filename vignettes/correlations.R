@@ -106,22 +106,3 @@ boot_compare_cor(
   method = "win" # Winsorized correlation
 )
 
-## ----eval=FALSE---------------------------------------------------------------
-#  # Customizing the bootstrap procedure
-#  boot_cor_test(
-#    x = mtcars$mpg,
-#    y = mtcars$qsec,
-#    method = "pearson",
-#    R = 2000,  # Increasing number of bootstrap samples
-#    alpha = 0.01,  # Using 99% confidence interval
-#    alternative = "t"  # Two-sided test
-#  )
-
-## ----eval=FALSE---------------------------------------------------------------
-#  # Example with missing data
-#  x_with_na <- c(mtcars$mpg, NA, NA)
-#  y_with_na <- c(mtcars$qsec, 10, NA)
-#  
-#  # Default behavior handles NAs with pairwise deletion
-#  z_cor_test(x_with_na, y_with_na)
-

@@ -9,13 +9,20 @@ test_that("simple_htest: t-test & wilcox", {
   expect_equal(t.test(1:10, y = c(7:20, 200))$p.value,
                simple_htest(1:10, y = c(7:20, 200))$p.value)
 
+  # Note: simple_htest now returns 3 estimates (two group means + difference)
+  # and updated estimate labels, so describe_htest/df_htest output will differ
+  # from base t.test. Verify they still work without error:
   testy1 = describe_htest(simple_htest(1:10, y = c(7:20, 200)))
   testy2 = describe_htest(t.test(1:10, y = c(7:20, 200)))
-  expect_equal(testy1,testy2)
+  expect_type(testy1, "character")
+  expect_type(testy2, "character")
 
   testy1 = df_htest(simple_htest(1:10, y = c(7:20, 200)))
   testy2 = df_htest(t.test(1:10, y = c(7:20, 200)))
-  expect_equal(testy1,testy2)
+  expect_s3_class(testy1, "data.frame")
+  expect_s3_class(testy2, "data.frame")
+  # p-values should still match
+  expect_equal(testy1$p.value, testy2$p.value)
 
   testy1 = describe_htest(as_htest(t_TOST(1:10, y = c(7:20, 200), eqb = 3)))
   testy1 = describe_htest(as_htest(t_TOST(1:10, y = c(7:20, 200), eqb = 3,
@@ -27,15 +34,20 @@ test_that("simple_htest: t-test & wilcox", {
   expect_equal(wilcox.test(1:10, y = c(7:20, 200))$p.value,
                simple_htest(1:10, y = c(7:20, 200), test = "w")$p.value)
 
+  # Note: simple_htest now relabels Wilcoxon estimates, so output will differ
+  # from base wilcox.test. Verify they still work and p-values match:
   testy1 = describe_htest(simple_htest(1:10, y = c(7:20, 200), test = "w"))
   testy2 = describe_htest(wilcox.test(1:10, y = c(7:20, 200),
                                       conf.int = TRUE))
-  expect_equal(testy1,testy2)
+  expect_type(testy1, "character")
+  expect_type(testy2, "character")
 
   testy1 = df_htest(simple_htest(1:10, y = c(7:20, 200), test = "w"))
   testy2 = df_htest(wilcox.test(1:10, y = c(7:20, 200),
                                       conf.int = TRUE))
-  expect_equal(testy1,testy2)
+  expect_s3_class(testy1, "data.frame")
+  expect_s3_class(testy2, "data.frame")
+  expect_equal(testy1$p.value, testy2$p.value)
 
   testy1 = describe_htest(as_htest(wilcox_TOST(1:10, y = c(7:20, 200), eqb = 3)))
   testy1 = describe_htest(as_htest(wilcox_TOST(1:10, y = c(7:20, 200), eqb = 3,
@@ -112,6 +124,69 @@ test_that("simple_htest: t-test & wilcox", {
                NULL)
   expect_equal(df_htest(testy2, test_statistics = FALSE)$t,
                NULL)
+})
+
+test_that("simple_htest always returns a numeric estimate", {
+  # Regression test: wilcox.test equivalence/MET were missing $estimate
+  # because the one-sided wilcox.test calls don't use conf.int = TRUE
+
+  alternatives <- c("two.sided", "less", "greater", "equivalence", "minimal.effect")
+  tests <- c("t.test", "wilcox.test")
+
+  # Two-sample
+  for (tst in tests) {
+    for (alt in alternatives) {
+      mu_val <- if (alt %in% c("equivalence", "minimal.effect")) 3 else 0
+      res <- simple_htest(1:10, y = c(7:20), test = tst,
+                          alternative = alt, mu = mu_val)
+      expect_true(is.numeric(res$estimate),
+                  info = paste("two-sample", tst, alt, "estimate should be numeric"))
+      expect_true(length(res$estimate) >= 1,
+                  info = paste("two-sample", tst, alt, "estimate should have length >= 1"))
+    }
+  }
+
+  # Paired
+  data(sleep)
+  x_sleep <- sleep$extra[sleep$group == 1]
+  y_sleep <- sleep$extra[sleep$group == 2]
+
+  for (tst in tests) {
+    for (alt in alternatives) {
+      mu_val <- if (alt %in% c("equivalence", "minimal.effect")) 2 else 0
+      res <- simple_htest(x_sleep, y_sleep, test = tst, paired = TRUE,
+                          alternative = alt, mu = mu_val)
+      expect_true(is.numeric(res$estimate),
+                  info = paste("paired", tst, alt, "estimate should be numeric"))
+      expect_true(length(res$estimate) >= 1,
+                  info = paste("paired", tst, alt, "estimate should have length >= 1"))
+    }
+  }
+
+  # One-sample
+  for (tst in tests) {
+    for (alt in alternatives) {
+      mu_val <- if (alt %in% c("equivalence", "minimal.effect")) 3 else 0
+      res <- simple_htest(1:20, test = tst,
+                          alternative = alt, mu = mu_val)
+      expect_true(is.numeric(res$estimate),
+                  info = paste("one-sample", tst, alt, "estimate should be numeric"))
+      expect_true(length(res$estimate) >= 1,
+                  info = paste("one-sample", tst, alt, "estimate should have length >= 1"))
+    }
+  }
+
+  # Verify wilcox equivalence estimate matches the two-sided estimate
+  res_eq <- simple_htest(1:10, y = c(7:20), test = "wilcox.test",
+                         alternative = "equivalence", mu = 3)
+  res_2s <- simple_htest(1:10, y = c(7:20), test = "wilcox.test",
+                         alternative = "two.sided", mu = 0)
+  expect_equal(as.numeric(res_eq$estimate), as.numeric(res_2s$estimate))
+
+  # Same for MET
+  res_met <- simple_htest(1:10, y = c(7:20), test = "wilcox.test",
+                          alternative = "minimal.effect", mu = 3)
+  expect_equal(as.numeric(res_met$estimate), as.numeric(res_2s$estimate))
 })
 
 test_that("brunner_munzel",{

@@ -12,7 +12,7 @@
 
 <meta name="author" content="Aaron R. Caldwell" />
 
-<meta name="date" content="2026-01-23" />
+<meta name="date" content="2026-03-13" />
 
 <title>Standardized Mean Differences</title>
 
@@ -365,7 +365,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <h1 class="title toc-ignore">Standardized Mean Differences</h1>
 <h3 class="subtitle">The calculation of Cohen’s d type effect sizes</h3>
 <h4 class="author">Aaron R. Caldwell</h4>
-<h4 class="date">2026-01-23</h4>
+<h4 class="date">2026-03-13</h4>
 
 
 <div id="TOC">
@@ -410,6 +410,20 @@ SMDs</a></li>
 <li><a href="#visualize" id="toc-visualize">Visualize</a></li>
 </ul></li>
 </ul></li>
+<li><a href="#robust-standardized-mean-differences-with-trimming" id="toc-robust-standardized-mean-differences-with-trimming">Robust
+Standardized Mean Differences with Trimming</a>
+<ul>
+<li><a href="#motivation" id="toc-motivation">Motivation</a></li>
+<li><a href="#how-trimming-works" id="toc-how-trimming-works">How
+Trimming Works</a></li>
+<li><a href="#usage-examples" id="toc-usage-examples">Usage
+Examples</a></li>
+<li><a href="#choosing-a-trimming-proportion" id="toc-choosing-a-trimming-proportion">Choosing a Trimming
+Proportion</a></li>
+<li><a href="#worked-example-with-contaminated-data" id="toc-worked-example-with-contaminated-data">Worked Example with
+Contaminated Data</a></li>
+<li><a href="#limitations" id="toc-limitations">Limitations</a></li>
+</ul></li>
 <li><a href="#references" id="toc-references">References</a></li>
 </ul>
 </div>
@@ -418,12 +432,12 @@ SMDs</a></li>
 helpful in interpreting data and are essential for meta-analysis. In
 psychology, effect sizes are very often reported as an SMD rather than
 raw units (though either is fine: see <span class="citation">Caldwell
-and Vigotsky (2020)</span>). In most papers the SMD is reported as
-Cohen’s d<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>. The simplest form involves reporting the
-mean difference (or mean in the case of a one-sample test) divided by
-the standard deviation.</p>
+and Vigotsky (<a href="#ref-Caldwell2020">2020</a>)</span>). In most
+papers the SMD is reported as Cohen’s d<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>. The simplest form
+involves reporting the mean difference (or mean in the case of a
+one-sample test) divided by the standard deviation.</p>
 <p><span class="math display">\[
-Cohen&#39;s \space d = \frac{Mean}{SD}
+Cohen&#39;s \space d = \frac{Mean}{SD} = SMD
 \]</span></p>
 <p>However, two major problems arise: bias and the calculation of the
 denominator. First, the Cohen’s d calculation is biased (meaning the
@@ -436,37 +450,38 @@ involves the noncentral <em>t</em> distribution. This requires
 calculating a non-centrality parameter (lambda: <span class="math inline">\(\lambda\)</span>), degrees of freedom (<span class="math inline">\(df\)</span>), or even the standard error (sigma:
 <span class="math inline">\(\sigma\)</span>) for the SMD. None of these
 are easy to determine and these calculations are hotly debated in the
-statistics literature <span class="citation">(Cousineau and
-Goulet-Pelletier 2021)</span>.</p>
+statistics literature <span class="citation">(<a href="#ref-Cousineau2021">Cousineau and Goulet-Pelletier
+2021</a>)</span>.</p>
 <p>In this package we originally opted to make the default SMD
-confidence intervals as the formulation outlined by <span class="citation">Goulet-Pelletier and Cousineau (2018)</span>. We found
-that that these calculations were simple to implement and provided
-fairly accurate coverage for the confidence intervals for any type of
-SMD (independent, paired, or one sample). However, even the authors have
-outlined some issues with the method in a newer publication <span class="citation">(Cousineau and Goulet-Pelletier 2021)</span>. Other
-packages, such as <code>MOTE</code> <span class="citation">(Buchanan et
-al. 2019)</span> or <code>effectsize</code> <span class="citation">(Ben-Shachar, Lüdecke, and Makowski 2020)</span>, use a
-simpler formulation of the noncentral t-distribution (nct). The default
-option in the package is the nct type of confidence intervals. We have
-created an argument for all TOST functions (<code>tsum_TOST</code> and
-<code>t_TOST</code>) named <code>smd_ci</code> which allow the user to
-specify “goulet” (for the <span class="citation">Cousineau and
-Goulet-Pelletier (2021)</span> method), “nct” (this will approximately
-match the results of <span class="citation">Buchanan et al.
-(2019)</span> and <span class="citation">Ben-Shachar, Lüdecke, and
-Makowski (2020)</span>), “t” (central t method), or “z” (normal method).
-We would recommend using “nct” as the default for any analysis but as
-<span class="citation">Viechtbauer (2007)</span> points out the
+confidence intervals as the formulation outlined by <span class="citation">Goulet-Pelletier and Cousineau (<a href="#ref-Goulet_2018">2018</a>)</span>. We found that that these
+calculations were simple to implement and provided fairly accurate
+coverage for the confidence intervals for any type of SMD (independent,
+paired, or one sample). However, even the authors have outlined some
+issues with the method in a newer publication <span class="citation">(<a href="#ref-Cousineau2021">Cousineau and Goulet-Pelletier
+2021</a>)</span>. Other packages, such as <code>MOTE</code> <span class="citation">(<a href="#ref-MOTE">Buchanan et al. 2019</a>)</span>
+or <code>effectsize</code> <span class="citation">(<a href="#ref-effectsize">Ben-Shachar, Lüdecke, and Makowski
+2020</a>)</span>, use a simpler formulation of the noncentral
+t-distribution (nct). The default option in the package is the nct type
+of confidence intervals. We have created an argument for all TOST
+functions (<code>tsum_TOST</code> and <code>t_TOST</code>) named
+<code>smd_ci</code> which allow the user to specify “goulet” (for the
+<span class="citation">Cousineau and Goulet-Pelletier (<a href="#ref-Cousineau2021">2021</a>)</span> method), “nct” (this will
+approximately match the results of <span class="citation">Buchanan et
+al. (<a href="#ref-MOTE">2019</a>)</span> and <span class="citation">Ben-Shachar, Lüdecke, and Makowski (<a href="#ref-effectsize">2020</a>)</span>), “t” (central t method), or “z”
+(normal method). We would recommend using “nct” as the default for any
+analysis but as <span class="citation">Viechtbauer (<a href="#ref-viechtbauer2007approximate">2007</a>)</span> points out the
 approximate methods usually suffice. It is important to remember that
 all of these methods are only <em>approximations</em> of confidence
 intervals (of varying degrees of quality) and therefore should be
 interpreted with caution.</p>
-<p>It is my belief that SMDs provide another interesting description of
-the sample, and have very limited inferential utility (though exceptions
-apply). You may disagree, and if you are basing your inferences on the
-SMD, and the associated confidence intervals, we recommend you go with a
-bootstrapping approach (see <code>boot_t_TOST</code>) <span class="citation">(Kirby and Gerlanc 2013)</span> as it is a more robust
-option.</p>
+<p>It is my belief that SMDs provide another interesting quantitive
+effect size description, but have dubious and limited inferential
+utility<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a>.
+You may disagree, and if you are basing your inferences on the SMD, and
+the associated confidence intervals, we recommend you go with a
+bootstrapping approach <span class="citation">(see
+<code>boot_smd_calc</code> <a href="#ref-Kirby2013">Kirby and Gerlanc
+2013</a>)</span> as it is a more robust option.</p>
 <p>In this section we will detail on the calculations that are involved
 in calculating the SMD, their associated degrees of freedom,
 non-centrality parameter, and variance. If these SMDs are being reported
@@ -481,12 +496,12 @@ as the following:</p>
 J = \frac{\Gamma(\frac{df}{2})}{\sqrt{\frac{df}{2}} \cdot
 \Gamma(\frac{df-1}{2})}
 \]</span></p>
-<p>The correction factor<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a> is calculated in R as the following:</p>
+<p>The correction factor<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a> is calculated in R as the following:</p>
 <pre><code>J &lt;- exp ( lgamma(df/2) - log(sqrt(df/2)) - lgamma((df-1)/2) )</code></pre>
-<p>Hedges g (bias corrected Cohen’s d) can then be calculated by
-multiplying d by J</p>
+<p>Hedges g (bias corrected SMD) can then be calculated by multiplying
+the SMD by J</p>
 <p><span class="math display">\[
-g = d \cdot J
+g = SMD \cdot J
 \]</span> When the bias correction is not applied, J is equal to 1.</p>
 </div>
 <div id="independent-samples" class="section level1">
@@ -513,7 +528,7 @@ d_{av} = \frac {\bar{x}_1 - \bar{x}_2} {s_{av}}
 \]</span></p>
 <p>Note: the x with the bar above it (pronounced as “x-bar”) refers the
 the means of group 1 and 2 respectively.</p>
-<p>The degrees of freedom for Cohen’s d(av), derived from <span class="citation">Delacre et al. (2021)</span>, is the following:</p>
+<p>The degrees of freedom for Cohen’s d(av), derived from <span class="citation">Delacre et al. (<a href="#ref-delacre2021">2021</a>)</span>, is the following:</p>
 <p><span class="math display">\[
 df = \frac{(n_1-1)(n_2-1)(s_1^2+s_2^2)^2}{(n_2-1) \cdot s_1^4+(n_1-1)
 \cdot s_2^4}
@@ -521,8 +536,8 @@ df = \frac{(n_1-1)(n_2-1)(s_1^2+s_2^2)^2}{(n_2-1) \cdot s_1^4+(n_1-1)
 <p>The non-centrality parameter (<span class="math inline">\(\lambda\)</span>) is calculated as the
 following:</p>
 <ol style="list-style-type: decimal">
-<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
-(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier (<a href="#ref-Cousineau2021">2021</a>)</span> method
+(<code>smd_ci = &quot;goulet&quot;</code>):</li>
 </ol>
 <p><span class="math display">\[
 \lambda =  d_{av} \times \sqrt{\frac{n_1 \cdot
@@ -536,7 +551,7 @@ n_2(\sigma^2_1+\sigma^2_2)}{2 \cdot (n_2 \cdot \sigma^2_1+n_1 \cdot
 \lambda = \frac{2 \cdot (n_2 \cdot \sigma_1^2 + n_1 \cdot \sigma_2^2)}
 {n_1 \cdot n_2 \cdot (\sigma_1^2 + \sigma_2^2)}
 \]</span> The standard error (<span class="math inline">\(\sigma\)</span>) of Cohen’s d(av) is calculated as
-the following from <span class="citation">Bonett (2009)</span><a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a>:</p>
+the following from <span class="citation">Bonett (<a href="#ref-bonett2009meta">2009</a>)</span><a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a>:</p>
 <p><span class="math display">\[
 \sigma_{SMD} = \sqrt{d^2 \cdot (\frac{s_1^4}{n_1-1}+\frac{s_2^4}{n_2-1})
 \div 8 \cdot s_{av}^4 + (\frac{s_1^2}{n_1-1}+\frac{s_2^2}{n_2-1}) \div
@@ -561,8 +576,8 @@ df = n_1 + n_2 - 2
 <p>The non-centrality parameter (<span class="math inline">\(\lambda\)</span>) is calculated as the
 following:</p>
 <ol style="list-style-type: decimal">
-<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
-(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier (<a href="#ref-Cousineau2021">2021</a>)</span> method
+(<code>smd_ci = &quot;goulet&quot;</code>):</li>
 </ol>
 <p><span class="math display">\[
 \lambda = d \cdot \sqrt \frac{\tilde n}{2}
@@ -582,8 +597,8 @@ following:</p>
 <p>The standard error (<span class="math inline">\(\sigma\)</span>) of
 Cohen’s d is calculated as the following:</p>
 <ol style="list-style-type: decimal">
-<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
-(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier (<a href="#ref-Cousineau2021">2021</a>)</span> method
+(<code>smd_ci = &quot;goulet&quot;</code>):</li>
 </ol>
 <p><span class="math display">\[
 \sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{2}{\tilde n} (1+d^2
@@ -591,8 +606,8 @@ Cohen’s d is calculated as the following:</p>
 \]</span></p>
 <ol start="2" style="list-style-type: decimal">
 <li>Under all other methods (nct, t, or z) it is calculated using the
-“unbiased” estimate from <span class="citation">Viechtbauer
-(2007)</span> (table 1; equation 26)<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a>:</li>
+“unbiased” estimate from <span class="citation">Viechtbauer (<a href="#ref-viechtbauer2007approximate">2007</a>)</span> (table 1;
+equation 26)<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a>:</li>
 </ol>
 <p><span class="math display">\[
 \sigma_{SMD} = \sqrt{\frac{1}{n_1} + \frac{1}{n_2} + (1 - \frac{df-2}{df
@@ -618,8 +633,8 @@ df = n_c - 1
 <p>The non-centrality parameter (<span class="math inline">\(\lambda\)</span>) is calculated as the
 following:</p>
 <ol style="list-style-type: decimal">
-<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
-(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier (<a href="#ref-Cousineau2021">2021</a>)</span> method
+(<code>smd_ci = &quot;goulet&quot;</code>):</li>
 </ol>
 <p><span class="math display">\[
 \lambda = d \cdot \sqrt \frac{\tilde n}{2}
@@ -639,15 +654,15 @@ following:</p>
 <p>The standard error (<span class="math inline">\(\sigma\)</span>) of
 Glass’s delta is calculated as the following:</p>
 <ol style="list-style-type: decimal">
-<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
-(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier (<a href="#ref-Cousineau2021">2021</a>)</span> method
+(<code>smd_ci = &quot;goulet&quot;</code>):</li>
 </ol>
 <p><span class="math display">\[
 \sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{2}{\tilde n} (1+d^2
 \cdot \frac{\tilde n}{2}) -\frac{d^2}{J}}
 \]</span></p>
 <ol start="2" style="list-style-type: decimal">
-<li>Under all other methods<a href="#fn5" class="footnote-ref" id="fnref5"><sup>5</sup></a> (nct, t, or z) derived from <span class="citation">Bonett (2008)</span>:</li>
+<li>Under all other methods<a href="#fn6" class="footnote-ref" id="fnref6"><sup>6</sup></a> (nct, t, or z) derived from <span class="citation">Bonett (<a href="#ref-bonett2008">2008</a>)</span>:</li>
 </ol>
 <p><span class="math display">\[
 \sigma_{SMD} = \sqrt{\frac{s_e^2 \div s_c^2}{n_e-1}+ \frac{1}{n_c-1}+
@@ -683,8 +698,8 @@ d_{z} = \frac {\bar{x}_1 - \bar{x}_2} {s_{diff}}
 \]</span></p>
 <p>The degrees of freedom for Cohen’s d(z) is the following:</p>
 <ol style="list-style-type: decimal">
-<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
-(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier (<a href="#ref-Cousineau2021">2021</a>)</span> method
+(<code>smd_ci = &quot;goulet&quot;</code>):</li>
 </ol>
 <p><span class="math display">\[
 df = 2 \cdot (N_{pairs}-1)
@@ -698,8 +713,8 @@ df = N - 1
 <p>The non-centrality parameter (<span class="math inline">\(\lambda\)</span>) is calculated as the
 following:</p>
 <ol style="list-style-type: decimal">
-<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
-(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier (<a href="#ref-Cousineau2021">2021</a>)</span> method
+(<code>smd_ci = &quot;goulet&quot;</code>):</li>
 </ol>
 <p><span class="math display">\[
 \lambda = d_{z} \cdot \sqrt \frac{N_{pairs}}{2 \cdot (1-r_{12})}
@@ -713,8 +728,8 @@ following:</p>
 <p>The standard error (<span class="math inline">\(\sigma\)</span>) of
 Cohen’s d(z) is calculated as the following:</p>
 <ol style="list-style-type: decimal">
-<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
-(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier (<a href="#ref-Cousineau2021">2021</a>)</span> method
+(<code>smd_ci = &quot;goulet&quot;</code>):</li>
 </ol>
 <p><span class="math display">\[
 \sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{2 \cdot (1-r_{12})}{n}
@@ -723,8 +738,8 @@ Cohen’s d(z) is calculated as the following:</p>
 \]</span></p>
 <ol start="2" style="list-style-type: decimal">
 <li>Under all other methods (nct, t, or z) it calculated using the
-“unbiased” estimate from <span class="citation">Viechtbauer
-(2007)</span> (table 1; equation 26)<a href="#fn6" class="footnote-ref" id="fnref6"><sup>6</sup></a>:</li>
+“unbiased” estimate from <span class="citation">Viechtbauer (<a href="#ref-viechtbauer2007approximate">2007</a>)</span> (table 1;
+equation 26)<a href="#fn7" class="footnote-ref" id="fnref7"><sup>7</sup></a>:</li>
 </ol>
 <p><span class="math display">\[
 \sigma_{SMD} = \sqrt{\frac{1}{N} + (1 - \frac{df-2}{df \cdot J^2}) \cdot
@@ -734,9 +749,9 @@ d_z^2}
 <div id="cohens-drm-correlation-corrected" class="section level2">
 <h2>Cohen’s d(rm): Correlation Corrected</h2>
 <p>For this calculation, the same values for the same calculations above
-is adjusted for the correlation between measures. As <span class="citation">Goulet-Pelletier and Cousineau (2018)</span> mention,
-this is useful for when effect sizes are being compared for studies that
-involve between and within subjects designs.</p>
+is adjusted for the correlation between measures. As <span class="citation">Goulet-Pelletier and Cousineau (<a href="#ref-Goulet_2018">2018</a>)</span> mention, this is useful for
+when effect sizes are being compared for studies that involve between
+and within subjects designs.</p>
 <p>First, the standard deviation of the difference scores are
 calculated</p>
 <p><span class="math display">\[
@@ -744,15 +759,15 @@ s_{diff} =  \sqrt{sd_1^2 + sd_2^2 - 2 \cdot r_{12} \cdot sd_1 \cdot
 sd_2}
 \]</span></p>
 <p>The SMD, Cohen’s d(rm), is then calculated with a small change to the
-denominator<a href="#fn7" class="footnote-ref" id="fnref7"><sup>7</sup></a>:</p>
+denominator<a href="#fn8" class="footnote-ref" id="fnref8"><sup>8</sup></a>:</p>
 <p><span class="math display">\[
 d_{rm} = \frac {\bar{x}_1 - \bar{x}_2}{s_{diff}} \cdot \sqrt {2 \cdot
 (1-r_{12})}
 \]</span></p>
 <p>The degrees of freedom for Cohen’s d(rm) is the following:</p>
 <ol style="list-style-type: decimal">
-<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
-(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier (<a href="#ref-Cousineau2021">2021</a>)</span> method
+(<code>smd_ci = &quot;goulet&quot;</code>):</li>
 </ol>
 <p><span class="math display">\[
 df = 2 \cdot (N_{pairs}-1)
@@ -766,8 +781,8 @@ df = N - 1
 <p>The non-centrality parameter (<span class="math inline">\(\lambda\)</span>) is calculated as the
 following:</p>
 <ol style="list-style-type: decimal">
-<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
-(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier (<a href="#ref-Cousineau2021">2021</a>)</span> method
+(<code>smd_ci = &quot;goulet&quot;</code>):</li>
 </ol>
 <p><span class="math display">\[
 \lambda = d_{rm} \cdot \sqrt \frac{N_{pairs}}{2 \cdot (1-r_{12})}
@@ -800,8 +815,8 @@ d = \frac {\bar{x}_1 - \bar{x}_2} {s_{c}}
 \]</span></p>
 <p>The degrees of freedom for Glass’s delta is the following:</p>
 <ol style="list-style-type: decimal">
-<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
-(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier (<a href="#ref-Cousineau2021">2021</a>)</span> method
+(<code>smd_ci = &quot;goulet&quot;</code>):</li>
 </ol>
 <p><span class="math display">\[
 df = 2 \cdot N - 1
@@ -815,8 +830,8 @@ df = N - 1
 <p>The non-centrality parameter (<span class="math inline">\(\lambda\)</span>) is calculated as the
 following:</p>
 <ol style="list-style-type: decimal">
-<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
-(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier (<a href="#ref-Cousineau2021">2021</a>)</span> method
+(<code>smd_ci = &quot;goulet&quot;</code>):</li>
 </ol>
 <p><span class="math display">\[
 \lambda = d \cdot \sqrt{\frac{N}{2 \cdot (1 - r_{12})}}
@@ -828,7 +843,7 @@ following:</p>
 \lambda = \frac{1}{N}
 \]</span></p>
 <p>The standard error (<span class="math inline">\(\sigma\)</span>) of
-Glass’s delta is calculated as the following derived<a href="#fn8" class="footnote-ref" id="fnref8"><sup>8</sup></a> from <span class="citation">Bonett (2008)</span>:</p>
+Glass’s delta is calculated as the following derived<a href="#fn9" class="footnote-ref" id="fnref9"><sup>9</sup></a> from <span class="citation">Bonett (<a href="#ref-bonett2008">2008</a>)</span>:</p>
 <p><span class="math display">\[
 \sigma_{SMD} =     \sqrt{\frac{s_{diff}^2}{s_c^2 \cdot df} +
 \frac{d^2}{2 \cdot df}}
@@ -861,8 +876,8 @@ following:</p>
 <p>The standard error (<span class="math inline">\(\sigma\)</span>) of
 Cohen’s d is calculated as the following:</p>
 <ol style="list-style-type: decimal">
-<li>Under the <span class="citation">Cousineau and Goulet-Pelletier
-(2021)</span> method (<code>smd_ci = &quot;goulet&quot;</code>):</li>
+<li>Under the <span class="citation">Cousineau and Goulet-Pelletier (<a href="#ref-Cousineau2021">2021</a>)</span> method
+(<code>smd_ci = &quot;goulet&quot;</code>):</li>
 </ol>
 <p><span class="math display">\[
 \sigma_{SMD} = \sqrt{\frac{df}{df-2} \cdot \frac{1}{N} (1+d^2 \cdot N)
@@ -878,26 +893,26 @@ Cohen’s d is calculated as the following:</p>
 <div id="confidence-intervals" class="section level1">
 <h1>Confidence Intervals</h1>
 <p>For the SMDs calculated in this package we use the non-central
-<em>t</em> method, those outlined by <span class="citation">Goulet-Pelletier and Cousineau (2018)</span>, and
-approximate methods using the <em>t</em> and normal distributions. These
-calculations are only approximations and newer formulations may provide
-better coverage <span class="citation">(e.g., Cousineau and
-Goulet-Pelletier 2021)</span>. In any case, if the calculation of
+<em>t</em> method, those outlined by <span class="citation">Goulet-Pelletier and Cousineau (<a href="#ref-Goulet_2018">2018</a>)</span>, and approximate methods using
+the <em>t</em> and normal distributions. These calculations are only
+approximations and newer formulations may provide better coverage <span class="citation">(e.g., <a href="#ref-Cousineau2021">Cousineau and
+Goulet-Pelletier 2021</a>)</span>. In any case, if the calculation of
 confidence intervals for SMDs is of the utmost importance then I would
 strongly recommend using bootstrapping techniques rather than any of
-these approximations whenever possible <span class="citation">(Kirby and
-Gerlanc 2013)</span>.</p>
+these approximations whenever possible <span class="citation">(<a href="#ref-Kirby2013">Kirby and Gerlanc 2013</a>)</span>, and these
+method are available in the <code>boot_smd_calc</code> function.</p>
 <p>The calculations of the confidence intervals for the
 <code>goulet</code> and <code>nct</code> methods involve a two step
 process: 1) using the noncentral <em>t</em>-distribution to calculate
 the lower and upper bounds of <span class="math inline">\(\lambda\)</span>, and 2) transforming this back to
 the effect size estimate. These noncentrality methods are not without
-their detractors <span class="citation">(Spanos 2021)</span>. The normal
-and <em>t</em> methods are much simpler and less computationally
-intensive, but may have varying levels of accuracy <span class="citation">(see Viechtbauer 2007 for more details)</span>.</p>
+their detractors <span class="citation">(<a href="#ref-spanos2021">Spanos 2021</a>)</span>. The normal and
+<em>t</em> methods are much simpler and less computationally intensive,
+but may have varying levels of accuracy <span class="citation">(see <a href="#ref-viechtbauer2007approximate">Viechtbauer 2007</a> for more
+details)</span>.</p>
 <div id="cousineau2021-method-smd_ci-goulet" class="section level2">
-<h2><span class="citation">Cousineau and Goulet-Pelletier (2021)</span>
-Method (smd_ci = “goulet”)</h2>
+<h2><span class="citation">Cousineau and Goulet-Pelletier (<a href="#ref-Cousineau2021">2021</a>)</span> Method (smd_ci =
+“goulet”)</h2>
 <p>Calculate confidence intervals around <span class="math inline">\(\lambda\)</span>.</p>
 <p><span class="math display">\[
 t_L = t_{(1/2-(1-\alpha)/2,\space df, \space \lambda)} \\
@@ -913,8 +928,9 @@ d_U = \frac{t_U}{\lambda} \cdot d
 <h2>The non-central t-method (smd_ci = “nct”)</h2>
 <p>This method is commonly reported in the literature and in other R
 packages (e.g., <code>effectsize</code>). However, it is not without
-criticism <span class="citation">(Spanos 2021; Viechtbauer
-2007)</span>.</p>
+criticism <span class="citation">(<a href="#ref-spanos2021">Spanos
+2021</a>; <a href="#ref-viechtbauer2007approximate">Viechtbauer
+2007</a>)</span>.</p>
 <p>In thise method, you calculate the non-centrality parameters
 necessary to form confidence intervals wherein the observed t-statistic
 (<span class="math inline">\(t_{obs}\)</span>)is utilized.</p>
@@ -931,8 +947,8 @@ d_U = t_U \cdot \sqrt{\lambda} \cdot J
 <div id="central-t-method" class="section level2">
 <h2>Central t-method</h2>
 <p>This is less commonly used though it might perform alright in some
-scenarios, and as <span class="citation">Bonett (2008)</span> and <span class="citation">Viechtbauer (2007)</span> report it might perform
-adequately under with an adequately large sample size.</p>
+scenarios, and as <span class="citation">Bonett (<a href="#ref-bonett2008">2008</a>)</span> and <span class="citation">Viechtbauer (<a href="#ref-viechtbauer2007approximate">2007</a>)</span> report it might
+perform adequately under with an adequately large sample size.</p>
 <p>The limits of the t-distribution at the given alpha-level and degrees
 of freedom (<code>qt(1-alpha,df)</code>) are multiplied by the standard
 error of the calculated SMD.</p>
@@ -943,8 +959,7 @@ CI = SMD \space \pm \space t_{(1-\alpha,df)} \cdot \sigma_{SMD}
 <div id="normal-method" class="section level2">
 <h2>Normal method</h2>
 <p>This method will often be the most liberal estimate for the
-confidence interval. But as <span class="citation">Bonett (2008)</span>
-and <span class="citation">Viechtbauer (2007)</span> report, it might
+confidence interval. But as <span class="citation">Bonett (<a href="#ref-bonett2008">2008</a>)</span> and <span class="citation">Viechtbauer (<a href="#ref-viechtbauer2007approximate">2007</a>)</span> report, it might
 perform adequately under with an adequately large sample size. The use
 of the normal distribution can be justified by the fact that SMDs are
 asympototically normal.</p>
@@ -960,7 +975,7 @@ CI = SMD \space \pm \space z_{(1-\alpha)} \cdot \sigma_{SMD}
 <h1>Just Estimate the SMD</h1>
 <p>It was requested that a function be provided that only calculates the
 SMD. Therefore, I created the <code>smd_calc</code> and
-<code>boot_smd_calc</code> functions<a href="#fn9" class="footnote-ref" id="fnref9"><sup>9</sup></a>. The interface is almost the same as
+<code>boot_smd_calc</code> functions<a href="#fn10" class="footnote-ref" id="fnref10"><sup>10</sup></a>. The interface is almost the same as
 <code>t_TOST</code> but you don’t set an equivalence bound.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># For paired tests, use separate vectors</span></span>
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">smd_calc</span>(<span class="at">x =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">1</span>],</span>
@@ -968,19 +983,70 @@ SMD. Therefore, I created the <code>smd_calc</code> and
 <span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>         <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
 <span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>         <span class="at">smd_ci =</span> <span class="st">&quot;nct&quot;</span>,</span>
 <span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>         <span class="at">bias_correction =</span> F)</span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt;               estimate        SE  lower.ci   upper.ci conf.level</span></span>
-<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt; Cohen&#39;s d(z) -1.284558 0.6831444 -2.118017 -0.4146278       0.95</span></span>
-<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a></span>
-<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co"># Setting bootstrap replications low to</span></span>
-<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="do">## reduce compiling time of vignette</span></span>
-<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="fu">boot_smd_calc</span>(<span class="at">x =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">1</span>],</span>
-<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>              <span class="at">y =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">2</span>],</span>
-<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>         <span class="at">R =</span> <span class="dv">199</span>,</span>
-<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>         <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a>         <span class="at">boot_ci =</span> <span class="st">&quot;stud&quot;</span>,</span>
-<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a>         <span class="at">bias_correction =</span> F)</span>
-<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="co">#&gt;               estimate      bias        SE lower.ci upper.ci conf.level boot_ci</span></span>
-<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a><span class="co">#&gt; Cohen&#39;s d(z) -1.284558 0.0775762 0.6971686 -1.78504 2.125079       0.95    stud</span></span></code></pre></div>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt;  Paired Sample Standardized Mean Difference (SMD; Cohen&#39;s</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co">#&gt;  d[z]=(x-y)/SD_z)</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="co">#&gt; data:  sleep$extra[sleep$group == 1] and sleep$extra[sleep$group == 2]</span></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: none</span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="co">#&gt;  -2.1180165 -0.4146278</span></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="co">#&gt; SMD (d[z]) </span></span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="co">#&gt;  -1.284558</span></span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a><span class="co"># Setting bootstrap replications low to</span></span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a><span class="do">## reduce compiling time of vignette</span></span>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a><span class="fu">boot_smd_calc</span>(<span class="at">x =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">1</span>],</span>
+<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a>              <span class="at">y =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">2</span>],</span>
+<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a>         <span class="at">R =</span> <span class="dv">199</span>,</span>
+<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a>         <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a>         <span class="at">boot_ci =</span> <span class="st">&quot;stud&quot;</span>,</span>
+<span id="cb2-27"><a href="#cb2-27" tabindex="-1"></a>         <span class="at">bias_correction =</span> F)</span>
+<span id="cb2-28"><a href="#cb2-28" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-29"><a href="#cb2-29" tabindex="-1"></a><span class="co">#&gt;  Paired Sample bootstrapped Standardized Mean Difference (SMD; Cohen&#39;s</span></span>
+<span id="cb2-30"><a href="#cb2-30" tabindex="-1"></a><span class="co">#&gt;  d[z]=(x-y)/SD_z)</span></span>
+<span id="cb2-31"><a href="#cb2-31" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-32"><a href="#cb2-32" tabindex="-1"></a><span class="co">#&gt; data:  sleep$extra[sleep$group == 1] and sleep$extra[sleep$group == 2]</span></span>
+<span id="cb2-33"><a href="#cb2-33" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb2-34"><a href="#cb2-34" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: none</span></span>
+<span id="cb2-35"><a href="#cb2-35" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span id="cb2-36"><a href="#cb2-36" tabindex="-1"></a><span class="co">#&gt;  -1.649409  1.941999</span></span>
+<span id="cb2-37"><a href="#cb2-37" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
+<span id="cb2-38"><a href="#cb2-38" tabindex="-1"></a><span class="co">#&gt; SMD (d[z]) </span></span>
+<span id="cb2-39"><a href="#cb2-39" tabindex="-1"></a><span class="co">#&gt;  -1.284558</span></span></code></pre></div>
+<p>If you have a hypothesis that is specifically about the SMD then you
+can use boot_smd_calc to directly test it by using the
+<code>null.value</code> and <code>alternative</code> value arguments.
+For example, you might have a hypothesis of equivalence regarding the
+SMD, and therefore you could set <code>null.value = c(-0.5,0.5)</code>
+if you hypothesis that the SMD is between 0.5 and -0.5 and
+<code>alternative = &quot;equivalent&quot;</code> to directly test this
+hypothesis.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">boot_smd_calc</span>(<span class="at">x =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">1</span>],</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>              <span class="at">y =</span> sleep<span class="sc">$</span>extra[sleep<span class="sc">$</span>group <span class="sc">==</span> <span class="dv">2</span>],</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>         <span class="at">R =</span> <span class="dv">199</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>         <span class="at">paired =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>         <span class="at">boot_ci =</span> <span class="st">&quot;stud&quot;</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>         <span class="at">bias_correction =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>         <span class="at">null.value =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.5</span>,<span class="fl">0.5</span>), </span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>         <span class="at">alternative =</span> <span class="st">&quot;equ&quot;</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt;  Paired Sample bootstrapped Standardized Mean Difference (SMD; Hedges&#39;s</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt;  g[z]=(x-y)/SD_z)</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co">#&gt; data:  sleep$extra[sleep$group == 1] and sleep$extra[sleep$group == 2]</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#&gt; z-observed = -2.5211, p-value = 0.7588</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: equivalence</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#&gt; null values:</span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="co">#&gt; lower bound upper bound </span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt;        -0.5         0.5 </span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#&gt; 90 percent confidence interval:</span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt;  -1.454918  1.209422</span></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="co">#&gt; SMD (g[z]) </span></span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="co">#&gt;  -1.173925</span></span></code></pre></div>
 </div>
 <div id="plotting-smds" class="section level1">
 <h1>Plotting SMDs</h1>
@@ -998,13 +1064,13 @@ needed if you want to plot the <code>z</code> (normal) or <code>t</code>
 (<code>type = &quot;c&quot;</code>), consonance density
 (<code>type = &quot;cd&quot;</code>), or both (the default option;
 (<code>type = c(&quot;c&quot;,&quot;cd&quot;)</code>))</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">plot_smd</span>(<span class="at">d =</span> .<span class="dv">43</span>,</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>         <span class="at">df =</span> <span class="dv">58</span>,</span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>         <span class="at">sigma =</span> .<span class="dv">33</span>,</span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>         <span class="at">smd_label =</span> <span class="st">&quot;Cohen&#39;s d&quot;</span>,</span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>         <span class="at">smd_ci =</span> <span class="st">&quot;z&quot;</span></span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>         )</span></code></pre></div>
-<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">plot_smd</span>(<span class="at">d =</span> .<span class="dv">43</span>,</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>         <span class="at">df =</span> <span class="dv">58</span>,</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>         <span class="at">sigma =</span> .<span class="dv">33</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>         <span class="at">smd_label =</span> <span class="st">&quot;Cohen&#39;s d&quot;</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>         <span class="at">smd_ci =</span> <span class="st">&quot;z&quot;</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>         )</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
 </div>
 <div id="comparing-smds" class="section level1">
 <h1>Comparing SMDs</h1>
@@ -1024,20 +1090,20 @@ assuming no publication bias or differences in protocol).</p>
 <p>We can see from the results below that, if the null hypothesis were
 true, we would only expect to see a discrepancy in SMDs between studies,
 at least this large, ~1% of the time.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">compare_smd</span>(<span class="at">smd1 =</span> <span class="fl">0.95</span>,</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>            <span class="at">n1 =</span> <span class="dv">25</span>,</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>            <span class="at">smd2 =</span> <span class="fl">0.23</span>,</span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>            <span class="at">n2 =</span> <span class="dv">50</span>,</span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>            <span class="at">paired =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt;  Difference in Cohen&#39;s dz (paired)</span></span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; data:  Summary Statistics</span></span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; z = 2.5685, p-value = 0.01021</span></span>
-<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: true difference in SMDs is not equal to 0</span></span>
-<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
-<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt; difference in SMDs </span></span>
-<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt;               0.72</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">compare_smd</span>(<span class="at">smd1 =</span> <span class="fl">0.95</span>,</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>            <span class="at">n1 =</span> <span class="dv">25</span>,</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>            <span class="at">smd2 =</span> <span class="fl">0.23</span>,</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>            <span class="at">n2 =</span> <span class="dv">50</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>            <span class="at">paired =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co">#&gt;  Difference in Cohen&#39;s dz (paired)</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co">#&gt; data:  Summary Statistics</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co">#&gt; z = 2.5685, p-value = 0.01021</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: true difference in SMDs is not equal to 0</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co">#&gt; difference in SMDs </span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co">#&gt;               0.72</span></span></code></pre></div>
 <div id="raw-data" class="section level2">
 <h2>Raw Data</h2>
 <p>The above results are only based on an approximating the differences
@@ -1045,28 +1111,28 @@ between the SMDs. If the raw data is available, then the optimal
 solution is the bootstrap the results. This can be accomplished with the
 <code>boot_compare_smd</code> function.</p>
 <p>For this example, we will simulate some data.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">4522</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>diff_study1 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">25</span>,.<span class="dv">95</span>)</span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>diff_study2 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">50</span>)</span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>boot_test <span class="ot">=</span> <span class="fu">boot_compare_smd</span>(<span class="at">x1 =</span> diff_study1,</span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>                             <span class="at">x2 =</span> diff_study2,</span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>                             <span class="at">paired =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a></span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>boot_test</span>
-<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co">#&gt;  Bootstrapped Differences in SMDs (paired)</span></span>
-<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co">#&gt; data:  Bootstrapped</span></span>
-<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co">#&gt; z (observed) = 2.887, p-value = 0.006003</span></span>
-<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: true difference in SMDs is not equal to 0</span></span>
-<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
-<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="co">#&gt;  0.3161207 1.4831351</span></span>
-<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
-<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="co">#&gt; difference in SMDs </span></span>
-<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a><span class="co">#&gt;          0.8058872</span></span>
-<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a></span>
-<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a><span class="co"># Table of bootstrapped CIs</span></span>
-<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(boot_test<span class="sc">$</span>df_ci, <span class="at">digits =</span> <span class="dv">4</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">4522</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>diff_study1 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">25</span>,.<span class="dv">95</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>diff_study2 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">50</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>boot_test <span class="ot">=</span> <span class="fu">boot_compare_smd</span>(<span class="at">x1 =</span> diff_study1,</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>                             <span class="at">x2 =</span> diff_study2,</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>                             <span class="at">paired =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>boot_test</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co">#&gt;  Bootstrapped Differences in SMDs (paired)</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co">#&gt; data:  Bootstrapped</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt; z (observed) = 2.887, p-value = 0.006003</span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: true difference in SMDs is not equal to 0</span></span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co">#&gt;  0.3161207 1.4831351</span></span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co">#&gt; difference in SMDs </span></span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="co">#&gt;          0.8058872</span></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a></span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a><span class="co"># Table of bootstrapped CIs</span></span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(boot_test<span class="sc">$</span>df_ci, <span class="at">digits =</span> <span class="dv">4</span>)</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -1101,40 +1167,287 @@ solution is the bootstrap the results. This can be accomplished with the
 <h3>Visualize</h3>
 <p>The results of the bootstrapping are stored in the results. So we can
 even visualize the differences in SMDs.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a></span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>list_res <span class="ot">=</span> boot_test<span class="sc">$</span>boot_res</span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>df1 <span class="ot">=</span> <span class="fu">data.frame</span>(<span class="at">study =</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="st">&quot;original&quot;</span>,<span class="fu">length</span>(list_res<span class="sc">$</span>smd1)),</span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>                           <span class="fu">rep</span>(<span class="st">&quot;replication&quot;</span>,<span class="fu">length</span>(list_res<span class="sc">$</span>smd2))),</span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>                 <span class="at">smd =</span> <span class="fu">c</span>(list_res<span class="sc">$</span>smd1,list_res<span class="sc">$</span>smd2))</span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="fu">ggplot</span>(df1,</span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>            <span class="fu">aes</span>(<span class="at">fill =</span> study, <span class="at">color =</span>smd, <span class="at">x =</span> smd))<span class="sc">+</span> </span>
-<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a> <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">y=</span>..density..), <span class="at">alpha=</span><span class="fl">0.5</span>, </span>
-<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>                <span class="at">position=</span><span class="st">&quot;identity&quot;</span>)<span class="sc">+</span></span>
-<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a> <span class="fu">geom_density</span>(<span class="at">alpha=</span>.<span class="dv">2</span>) <span class="sc">+</span></span>
-<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">&quot;&quot;</span>, <span class="at">x =</span> <span class="st">&quot;SMD (bootstrapped estimates)&quot;</span>) <span class="sc">+</span></span>
-<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>  <span class="fu">theme_classic</span>()</span>
-<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="co">#&gt; `stat_bin()` using `bins = 30`. Pick</span></span>
-<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co">#&gt; better value `binwidth`.</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>list_res <span class="ot">=</span> boot_test<span class="sc">$</span>boot_res</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>df1 <span class="ot">=</span> <span class="fu">data.frame</span>(<span class="at">study =</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="st">&quot;original&quot;</span>,<span class="fu">length</span>(list_res<span class="sc">$</span>smd1)),</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>                           <span class="fu">rep</span>(<span class="st">&quot;replication&quot;</span>,<span class="fu">length</span>(list_res<span class="sc">$</span>smd2))),</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>                 <span class="at">smd =</span> <span class="fu">c</span>(list_res<span class="sc">$</span>smd1,list_res<span class="sc">$</span>smd2))</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="fu">ggplot</span>(df1,</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>            <span class="fu">aes</span>(<span class="at">fill =</span> study, <span class="at">color =</span>smd, <span class="at">x =</span> smd))<span class="sc">+</span> </span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a> <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">y=</span>..density..), <span class="at">alpha=</span><span class="fl">0.5</span>, </span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>                <span class="at">position=</span><span class="st">&quot;identity&quot;</span>)<span class="sc">+</span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a> <span class="fu">geom_density</span>(<span class="at">alpha=</span>.<span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">&quot;&quot;</span>, <span class="at">x =</span> <span class="st">&quot;SMD (bootstrapped estimates)&quot;</span>) <span class="sc">+</span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a>  <span class="fu">theme_classic</span>()</span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="co">#&gt; `stat_bin()` using `bins = 30`. Pick better value</span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="co">#&gt; `binwidth`.</span></span></code></pre></div>
 <p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a></span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>df2 <span class="ot">=</span> <span class="fu">data.frame</span>(<span class="at">diff =</span> list_res<span class="sc">$</span>d_diff)</span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="fu">ggplot</span>(df2,</span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>            <span class="fu">aes</span>(<span class="at">x =</span> diff))<span class="sc">+</span> </span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a> <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">y=</span>..density..), <span class="at">alpha=</span><span class="fl">0.5</span>, </span>
-<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>                <span class="at">position=</span><span class="st">&quot;identity&quot;</span>)<span class="sc">+</span></span>
-<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a> <span class="fu">geom_density</span>(<span class="at">alpha=</span>.<span class="dv">2</span>) <span class="sc">+</span></span>
-<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">&quot;&quot;</span>, <span class="at">x =</span> <span class="st">&quot;Difference in SMDs (bootstrapped estimates)&quot;</span>) <span class="sc">+</span></span>
-<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>  <span class="fu">theme_classic</span>()</span>
-<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co">#&gt; `stat_bin()` using `bins = 30`. Pick</span></span>
-<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co">#&gt; better value `binwidth`.</span></span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>df2 <span class="ot">=</span> <span class="fu">data.frame</span>(<span class="at">diff =</span> list_res<span class="sc">$</span>d_diff)</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="fu">ggplot</span>(df2,</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>            <span class="fu">aes</span>(<span class="at">x =</span> diff))<span class="sc">+</span> </span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a> <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">y=</span>..density..), <span class="at">alpha=</span><span class="fl">0.5</span>, </span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>                <span class="at">position=</span><span class="st">&quot;identity&quot;</span>)<span class="sc">+</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a> <span class="fu">geom_density</span>(<span class="at">alpha=</span>.<span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">&quot;&quot;</span>, <span class="at">x =</span> <span class="st">&quot;Difference in SMDs (bootstrapped estimates)&quot;</span>) <span class="sc">+</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>  <span class="fu">theme_classic</span>()</span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co">#&gt; `stat_bin()` using `bins = 30`. Pick better value</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="co">#&gt; `binwidth`.</span></span></code></pre></div>
 <p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
 </div>
+</div>
+</div>
+<div id="robust-standardized-mean-differences-with-trimming" class="section level1">
+<h1>Robust Standardized Mean Differences with Trimming</h1>
+<div id="motivation" class="section level2">
+<h2>Motivation</h2>
+<p>The standard SMD relies on the ordinary mean and standard deviation,
+which are sensitive to outliers and heavy-tailed distributions. When
+distributions are non-normal:</p>
+<ul>
+<li>Heavy tails inflate the standard deviation, making the SMD appear
+smaller than the true distributional separation warrants.</li>
+<li>Outliers can distort the mean difference, pulling the numerator in
+unpredictable directions.</li>
+</ul>
+<p><span class="citation">Algina, Keselman, and Penfield (<a href="#ref-Algina_Keselman_Penfield_2005">2005</a>)</span> proposed a
+robust alternative that uses <strong>trimmed means</strong> for location
+and <strong>Winsorized variances</strong> for scale, with a rescaling
+constant to maintain comparability with Cohen’s <span class="math inline">\(\delta\)</span> under normality.</p>
+</div>
+<div id="how-trimming-works" class="section level2">
+<h2>How Trimming Works</h2>
+<p><strong>Trimmed mean.</strong> Given an ordered sample <span class="math inline">\(x_{(1)} \leq x_{(2)} \leq \cdots \leq
+x_{(n)}\)</span> and a trimming proportion <span class="math inline">\(\gamma\)</span> (the <code>tr</code> argument),
+let <span class="math inline">\(g = \lfloor \gamma \cdot n
+\rfloor\)</span> observations be removed from each tail. The trimmed
+mean is:</p>
+<p><span class="math display">\[
+\bar{X}_t = \frac{1}{n - 2g} \sum_{i=g+1}^{n-g} x_{(i)}
+\]</span></p>
+<p>This reduces the influence of extreme values on the location
+estimate.</p>
+<p><strong>Winsorized variance.</strong> Rather than discarding the
+trimmed observations, Winsorization replaces them with the nearest
+remaining value. Define the Winsorized sample <span class="math inline">\(w_i\)</span> as:</p>
+<p><span class="math display">\[
+w_i = \begin{cases}
+x_{(g+1)} &amp; \text{if } x_i \leq x_{(g+1)} \\
+x_i &amp; \text{if } x_{(g+1)} &lt; x_i &lt; x_{(n-g)} \\
+x_{(n-g)} &amp; \text{if } x_i \geq x_{(n-g)}
+\end{cases}
+\]</span></p>
+<p>The Winsorized variance is then computed as the ordinary sample
+variance of the Winsorized values:</p>
+<p><span class="math display">\[
+S_W^2 = \frac{1}{n-1} \sum_{i=1}^{n} (w_i - \bar{w})^2
+\]</span></p>
+<p>This provides a robust scale estimate that down-weights the influence
+of extreme observations.</p>
+<p><strong>Rescaling constant.</strong> To ensure the robust SMD equals
+Cohen’s <span class="math inline">\(\delta\)</span> under normality, a
+rescaling constant <span class="math inline">\(c(\gamma)\)</span> is
+applied <span class="citation">(<a href="#ref-Algina_Keselman_Penfield_2005">Algina, Keselman, and Penfield
+2005</a>)</span>. Let <span class="math inline">\(a = \Phi^{-1}(1 -
+\gamma)\)</span> where <span class="math inline">\(\Phi^{-1}\)</span> is
+the standard normal quantile function and <span class="math inline">\(\phi\)</span> is the standard normal density.
+Then:</p>
+<p><span class="math display">\[
+c(\gamma) = \sqrt{1 - 2\gamma + 2\gamma a^2 - 2a\,\phi(a)}
+\]</span></p>
+<p>When <span class="math inline">\(\gamma = 0\)</span>, <span class="math inline">\(c(0) = 1\)</span> and the formula reduces to the
+ordinary Cohen’s <span class="math inline">\(d\)</span>. For <span class="math inline">\(\gamma = 0.2\)</span> (20% trimming), <span class="math inline">\(c(0.2) \approx 0.642\)</span>.</p>
+<p><strong>Robust SMD.</strong> The robust effect size for two
+independent samples is then:</p>
+<p><span class="math display">\[
+d_R = c(\gamma) \cdot \frac{\bar{X}_{t2} - \bar{X}_{t1}}{S_W}
+\]</span></p>
+<p>where <span class="math inline">\(S_W\)</span> is based on a pooled,
+averaged, or single-group Winsorized standard deviation (depending on
+the <code>denom</code> argument), following the same denominator options
+as the standard SMD.</p>
+<p><strong>Effective sample size.</strong> Trimming reduces the
+effective sample size to <span class="math inline">\(h = n -
+2g\)</span>, which replaces <span class="math inline">\(n\)</span> in
+all degrees-of-freedom calculations. For example, in the two-sample
+pooled case with equal trimming, <span class="math inline">\(df = h_1 +
+h_2 - 2\)</span>.</p>
+</div>
+<div id="usage-examples" class="section level2">
+<h2>Usage Examples</h2>
+<p>All trimming functionality is controlled by the <code>tr</code>
+parameter, which defaults to 0 (no trimming):</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">8484</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>group1 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">40</span>, <span class="at">mean =</span> <span class="dv">100</span>, <span class="at">sd =</span> <span class="dv">15</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>group2 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">40</span>, <span class="at">mean =</span> <span class="dv">110</span>, <span class="at">sd =</span> <span class="dv">15</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co"># Standard Cohen&#39;s d</span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="fu">smd_calc</span>(<span class="at">x =</span> group1, <span class="at">y =</span> group2, <span class="at">bias_correction =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co">#&gt;  Two Sample Standardized Mean Difference (SMD; Cohen&#39;s</span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt;  d[av]=(x-y)/SD_avg)</span></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co">#&gt; data:  group1 and group2</span></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: none</span></span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="co">#&gt;  -1.2513096 -0.3380927</span></span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="co">#&gt; SMD (d[av]) </span></span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a><span class="co">#&gt;  -0.7971844</span></span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a></span>
+<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a><span class="co"># Robust version with 20% trimming (Algina et al., 2005)</span></span>
+<span id="cb9-21"><a href="#cb9-21" tabindex="-1"></a><span class="fu">smd_calc</span>(<span class="at">x =</span> group1, <span class="at">y =</span> group2, <span class="at">bias_correction =</span> <span class="cn">FALSE</span>, <span class="at">tr =</span> <span class="fl">0.2</span>)</span>
+<span id="cb9-22"><a href="#cb9-22" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-23"><a href="#cb9-23" tabindex="-1"></a><span class="co">#&gt;  Two Sample Standardized Mean Difference (SMD; Cohen&#39;s</span></span>
+<span id="cb9-24"><a href="#cb9-24" tabindex="-1"></a><span class="co">#&gt;  d[av]=(x-y)/SD_avg, 20% trimmed)</span></span>
+<span id="cb9-25"><a href="#cb9-25" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-26"><a href="#cb9-26" tabindex="-1"></a><span class="co">#&gt; data:  group1 and group2</span></span>
+<span id="cb9-27"><a href="#cb9-27" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-28"><a href="#cb9-28" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: none</span></span>
+<span id="cb9-29"><a href="#cb9-29" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span id="cb9-30"><a href="#cb9-30" tabindex="-1"></a><span class="co">#&gt;  -1.2375852 -0.4333599</span></span>
+<span id="cb9-31"><a href="#cb9-31" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
+<span id="cb9-32"><a href="#cb9-32" tabindex="-1"></a><span class="co">#&gt; SMD (d[av], 20% trimmed) </span></span>
+<span id="cb9-33"><a href="#cb9-33" tabindex="-1"></a><span class="co">#&gt;                -0.839284</span></span>
+<span id="cb9-34"><a href="#cb9-34" tabindex="-1"></a></span>
+<span id="cb9-35"><a href="#cb9-35" tabindex="-1"></a><span class="co"># Robust Hedges&#39; g with 10% trimming</span></span>
+<span id="cb9-36"><a href="#cb9-36" tabindex="-1"></a><span class="fu">smd_calc</span>(<span class="at">x =</span> group1, <span class="at">y =</span> group2, <span class="at">bias_correction =</span> <span class="cn">TRUE</span>, <span class="at">tr =</span> <span class="fl">0.1</span>)</span>
+<span id="cb9-37"><a href="#cb9-37" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-38"><a href="#cb9-38" tabindex="-1"></a><span class="co">#&gt;  Two Sample Standardized Mean Difference (SMD; Hedges&#39;s</span></span>
+<span id="cb9-39"><a href="#cb9-39" tabindex="-1"></a><span class="co">#&gt;  g[av]=(x-y)/SD_avg, 10% trimmed)</span></span>
+<span id="cb9-40"><a href="#cb9-40" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-41"><a href="#cb9-41" tabindex="-1"></a><span class="co">#&gt; data:  group1 and group2</span></span>
+<span id="cb9-42"><a href="#cb9-42" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-43"><a href="#cb9-43" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: none</span></span>
+<span id="cb9-44"><a href="#cb9-44" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span id="cb9-45"><a href="#cb9-45" tabindex="-1"></a><span class="co">#&gt;  -1.1585132 -0.3166612</span></span>
+<span id="cb9-46"><a href="#cb9-46" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
+<span id="cb9-47"><a href="#cb9-47" tabindex="-1"></a><span class="co">#&gt; SMD (g[av], 10% trimmed) </span></span>
+<span id="cb9-48"><a href="#cb9-48" tabindex="-1"></a><span class="co">#&gt;               -0.7405285</span></span></code></pre></div>
+<p>Bootstrap confidence intervals can also be computed with
+trimming:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">boot_smd_calc</span>(<span class="at">x =</span> group1, <span class="at">y =</span> group2, <span class="at">tr =</span> <span class="fl">0.2</span>, <span class="at">R =</span> <span class="dv">999</span>, <span class="at">boot_ci =</span> <span class="st">&quot;perc&quot;</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="co">#&gt;  Two Sample bootstrapped Standardized Mean Difference (SMD; Hedges&#39;s</span></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="co">#&gt;  g[av]=(x-y)/SD_avg, 20% trimmed)</span></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="co">#&gt; data:  group1 and group2</span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: none</span></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="co">#&gt;  -1.3211342 -0.3052718</span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="co">#&gt; SMD (g[av], 20% trimmed) </span></span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="co">#&gt;               -0.8252612</span></span></code></pre></div>
+</div>
+<div id="choosing-a-trimming-proportion" class="section level2">
+<h2>Choosing a Trimming Proportion</h2>
+<ul>
+<li><code>tr = 0.2</code> (20% trimming) is the most common
+recommendation in the robust statistics literature and is the default
+used by Algina et al.</li>
+<li><code>tr = 0.1</code> offers a compromise between robustness and
+efficiency.</li>
+<li><code>tr = 0</code> recovers the standard (non-robust) SMD.</li>
+<li>Higher values provide more protection against outliers but lose more
+information from the tails.</li>
+</ul>
+</div>
+<div id="worked-example-with-contaminated-data" class="section level2">
+<h2>Worked Example with Contaminated Data</h2>
+<p>To illustrate the benefit of trimming, consider data from a
+contaminated normal distribution where 10% of observations come from a
+distribution with much larger variance:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">7171</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">50</span></span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co"># Clean data from known populations</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>x_clean <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>y_clean <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, <span class="at">mean =</span> <span class="fl">0.5</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="co"># Contaminated version: replace 10% with outliers</span></span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a>n_contam <span class="ot">&lt;-</span> <span class="fu">ceiling</span>(<span class="fl">0.1</span> <span class="sc">*</span> n)</span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a>x_contam <span class="ot">&lt;-</span> <span class="fu">c</span>(x_clean[<span class="dv">1</span><span class="sc">:</span>(n <span class="sc">-</span> n_contam)], <span class="fu">rnorm</span>(n_contam, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">10</span>))</span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a>y_contam <span class="ot">&lt;-</span> <span class="fu">c</span>(y_clean[<span class="dv">1</span><span class="sc">:</span>(n <span class="sc">-</span> n_contam)], <span class="fu">rnorm</span>(n_contam, <span class="at">mean =</span> <span class="fl">0.5</span>, <span class="at">sd =</span> <span class="dv">10</span>))</span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a></span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a><span class="co"># Standard Cohen&#39;s d: attenuated by inflated SD</span></span>
+<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a><span class="fu">smd_calc</span>(<span class="at">x =</span> x_contam, <span class="at">y =</span> y_contam, <span class="at">bias_correction =</span> <span class="cn">FALSE</span>, <span class="at">smd_ci =</span> <span class="st">&quot;z&quot;</span>)</span>
+<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a><span class="co">#&gt;  Two Sample Standardized Mean Difference (SMD; Cohen&#39;s</span></span>
+<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a><span class="co">#&gt;  d[av]=(x-y)/SD_avg)</span></span>
+<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-19"><a href="#cb11-19" tabindex="-1"></a><span class="co">#&gt; data:  x_contam and y_contam</span></span>
+<span id="cb11-20"><a href="#cb11-20" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-21"><a href="#cb11-21" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: none</span></span>
+<span id="cb11-22"><a href="#cb11-22" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span id="cb11-23"><a href="#cb11-23" tabindex="-1"></a><span class="co">#&gt;  -0.6777352  0.1182594</span></span>
+<span id="cb11-24"><a href="#cb11-24" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
+<span id="cb11-25"><a href="#cb11-25" tabindex="-1"></a><span class="co">#&gt; SMD (d[av]) </span></span>
+<span id="cb11-26"><a href="#cb11-26" tabindex="-1"></a><span class="co">#&gt;  -0.2797379</span></span>
+<span id="cb11-27"><a href="#cb11-27" tabindex="-1"></a></span>
+<span id="cb11-28"><a href="#cb11-28" tabindex="-1"></a><span class="co"># Trimmed version: closer to the true separation</span></span>
+<span id="cb11-29"><a href="#cb11-29" tabindex="-1"></a><span class="fu">smd_calc</span>(<span class="at">x =</span> x_contam, <span class="at">y =</span> y_contam, <span class="at">bias_correction =</span> <span class="cn">FALSE</span>, <span class="at">tr =</span> <span class="fl">0.2</span>, <span class="at">smd_ci =</span> <span class="st">&quot;z&quot;</span>)</span>
+<span id="cb11-30"><a href="#cb11-30" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-31"><a href="#cb11-31" tabindex="-1"></a><span class="co">#&gt;  Two Sample Standardized Mean Difference (SMD; Cohen&#39;s</span></span>
+<span id="cb11-32"><a href="#cb11-32" tabindex="-1"></a><span class="co">#&gt;  d[av]=(x-y)/SD_avg, 20% trimmed)</span></span>
+<span id="cb11-33"><a href="#cb11-33" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-34"><a href="#cb11-34" tabindex="-1"></a><span class="co">#&gt; data:  x_contam and y_contam</span></span>
+<span id="cb11-35"><a href="#cb11-35" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-36"><a href="#cb11-36" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: none</span></span>
+<span id="cb11-37"><a href="#cb11-37" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span id="cb11-38"><a href="#cb11-38" tabindex="-1"></a><span class="co">#&gt;  -0.4386941  0.2234265</span></span>
+<span id="cb11-39"><a href="#cb11-39" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
+<span id="cb11-40"><a href="#cb11-40" tabindex="-1"></a><span class="co">#&gt; SMD (d[av], 20% trimmed) </span></span>
+<span id="cb11-41"><a href="#cb11-41" tabindex="-1"></a><span class="co">#&gt;               -0.1076338</span></span>
+<span id="cb11-42"><a href="#cb11-42" tabindex="-1"></a></span>
+<span id="cb11-43"><a href="#cb11-43" tabindex="-1"></a><span class="co"># For reference: Cohen&#39;s d on the clean data</span></span>
+<span id="cb11-44"><a href="#cb11-44" tabindex="-1"></a><span class="fu">smd_calc</span>(<span class="at">x =</span> x_clean, <span class="at">y =</span> y_clean, <span class="at">bias_correction =</span> <span class="cn">FALSE</span>, <span class="at">smd_ci =</span> <span class="st">&quot;z&quot;</span>)</span>
+<span id="cb11-45"><a href="#cb11-45" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-46"><a href="#cb11-46" tabindex="-1"></a><span class="co">#&gt;  Two Sample Standardized Mean Difference (SMD; Cohen&#39;s</span></span>
+<span id="cb11-47"><a href="#cb11-47" tabindex="-1"></a><span class="co">#&gt;  d[av]=(x-y)/SD_avg)</span></span>
+<span id="cb11-48"><a href="#cb11-48" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-49"><a href="#cb11-49" tabindex="-1"></a><span class="co">#&gt; data:  x_clean and y_clean</span></span>
+<span id="cb11-50"><a href="#cb11-50" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-51"><a href="#cb11-51" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: none</span></span>
+<span id="cb11-52"><a href="#cb11-52" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
+<span id="cb11-53"><a href="#cb11-53" tabindex="-1"></a><span class="co">#&gt;  -0.5792533  0.2143381</span></span>
+<span id="cb11-54"><a href="#cb11-54" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
+<span id="cb11-55"><a href="#cb11-55" tabindex="-1"></a><span class="co">#&gt; SMD (d[av]) </span></span>
+<span id="cb11-56"><a href="#cb11-56" tabindex="-1"></a><span class="co">#&gt;  -0.1824576</span></span></code></pre></div>
+<p>The trimmed SMD is more resistant to the contaminating observations
+and provides an estimate closer to what we would obtain from the clean
+data.</p>
+</div>
+<div id="limitations" class="section level2">
+<h2>Limitations</h2>
+<ul>
+<li>The <code>denom = &quot;rm&quot;</code> option (repeated measures correction)
+is not currently supported with trimming.</li>
+<li>The <code>smd_ci = &quot;goulet&quot;</code> CI method is not supported with
+trimming.</li>
+<li>The noncentral-t CI with trimming may still have some coverage
+issues for very heavy-tailed distributions; the percentile or BCa
+bootstrap (via <code>boot_smd_calc</code>) is recommended in such cases,
+following Algina et al.’s findings.</li>
+</ul>
 </div>
 </div>
 <div id="references" class="section level1 unnumbered">
 <h1 class="unnumbered">References</h1>
 <div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="ref-Algina_Keselman_Penfield_2005" class="csl-entry">
+Algina, James, H. J. Keselman, and Randall D. Penfield. 2005. <span>“An
+Alternative to Cohen’s Standardized Mean Difference Effect Size: A
+Robust Parameter and Confidence Interval in the Two Independent Groups
+Case.”</span> <em>Psychological Methods</em> 10 (3): 317–28. <a href="https://doi.org/10.1037/1082-989x.10.3.317">https://doi.org/10.1037/1082-989x.10.3.317</a>.
+</div>
+<div id="ref-Baguley_2009" class="csl-entry">
+Baguley, Thom. 2009. <span>“Standardized or Simple Effect Size: What
+Should Be Reported?”</span> <em>British Journal of Psychology</em> 100
+(3): 603–17. <a href="https://doi.org/10.1348/000712608x377117">https://doi.org/10.1348/000712608x377117</a>.
+</div>
 <div id="ref-effectsize" class="csl-entry">
 Ben-Shachar, Mattan S., Daniel Lüdecke, and Dominique Makowski. 2020.
 <span>“<span class="nocase">e</span>ffectsize: Estimation of Effect Size
@@ -1195,6 +1508,11 @@ Lakens, Daniël. 2013. <span>“Calculating and Reporting Effect Sizes to
 Facilitate Cumulative Science: A Practical Primer for t-Tests and
 ANOVAs.”</span> <em>Frontiers in Psychology</em> 4: 863.
 </div>
+<div id="ref-Senn_2011" class="csl-entry">
+Senn, Stephen. 2011. <span>“U Is for Unease: Reasons for Mistrusting
+Overlap Measures for Reporting Clinical Trials.”</span> <em>Statistics
+in Biopharmaceutical Research</em> 3 (2): 302–9. <a href="https://doi.org/10.1198/sbr.2010.10024">https://doi.org/10.1198/sbr.2010.10024</a>.
+</div>
 <div id="ref-spanos2021" class="csl-entry">
 Spanos, Aris. 2021. <span>“Revisiting Noncentrality-Based Confidence
 Intervals, Error Probabilities and Estimation-Based Effect
@@ -1215,30 +1533,29 @@ Statistics</em> 32 (1): 39–60.
 since many times researchers are not reporting Jacob Cohen’s original
 formulation. Therefore it is more accurate descriptor to label any SMD
 as SMD<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
-<li id="fn2"><p>This calculation was derived from the supplementary
-material of <span class="citation">Cousineau and Goulet-Pelletier
-(2021)</span>.<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
-<li id="fn3"><p>This changed from the original formulation, I believe
-the current version is a better estimate<a href="#fnref3" class="footnote-back">↩︎</a></p></li>
-<li id="fn4"><p>This assumes degrees of freedom of N-2<a href="#fnref4" class="footnote-back">↩︎</a></p></li>
-<li id="fn5"><p>Originally, I used an estimate of the standard error
+<li id="fn2"><p>see <span class="citation">Senn (<a href="#ref-Senn_2011">2011</a>)</span> and <span class="citation">Baguley (<a href="#ref-Baguley_2009">2009</a>)</span>;
+though many may disagree<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
+<li id="fn3"><p>This calculation was derived from the supplementary
+material of <span class="citation">Cousineau and Goulet-Pelletier (<a href="#ref-Cousineau2021">2021</a>)</span>.<a href="#fnref3" class="footnote-back">↩︎</a></p></li>
+<li id="fn4"><p>This changed from the original formulation, I believe
+the current version is a better estimate<a href="#fnref4" class="footnote-back">↩︎</a></p></li>
+<li id="fn5"><p>This assumes degrees of freedom of N-2<a href="#fnref5" class="footnote-back">↩︎</a></p></li>
+<li id="fn6"><p>Originally, I used an estimate of the standard error
 from Morris and DeShon. However, it was pointed out by colleague that
 this wasn’t very accurate. We now use what is used in the metafor R
 package for the “SMD1H” which is the use of one sample SD as the
-denominator under the assumption of heterogeneous variances<a href="#fnref5" class="footnote-back">↩︎</a></p></li>
-<li id="fn6"><p>This assumes degrees of freedom of N-1<a href="#fnref6" class="footnote-back">↩︎</a></p></li>
-<li id="fn7"><p>This is incorrectly stated in the article by <span class="citation">Goulet-Pelletier and Cousineau (2018)</span>; the
-correct notation is provided by <span class="citation">Lakens
-(2013)</span><a href="#fnref7" class="footnote-back">↩︎</a></p></li>
-<li id="fn8"><p>Originally, <span class="citation">Borenstein et al.
-(2021)</span> was utilized for this SE calculation. However, upon
-finding the estimate from <span class="citation">Bonett (2008)</span>,
+denominator under the assumption of heterogeneous variances<a href="#fnref6" class="footnote-back">↩︎</a></p></li>
+<li id="fn7"><p>This assumes degrees of freedom of N-1<a href="#fnref7" class="footnote-back">↩︎</a></p></li>
+<li id="fn8"><p>This is incorrectly stated in the article by <span class="citation">Goulet-Pelletier and Cousineau (<a href="#ref-Goulet_2018">2018</a>)</span>; the correct notation is
+provided by <span class="citation">Lakens (<a href="#ref-lakens2013">2013</a>)</span><a href="#fnref8" class="footnote-back">↩︎</a></p></li>
+<li id="fn9"><p>Originally, <span class="citation">Borenstein et al. (<a href="#ref-borenstein">2021</a>)</span> was utilized for this SE
+calculation. However, upon finding the estimate from <span class="citation">Bonett (<a href="#ref-bonett2008">2008</a>)</span>,
 which is utilized in the <code>metafor</code> R package for heterogenous
-variance estimates, we have opted to use this estimate instead.<a href="#fnref8" class="footnote-back">↩︎</a></p></li>
-<li id="fn9"><p>The results differ greatly because the bootstrap CI
+variance estimates, we have opted to use this estimate instead.<a href="#fnref9" class="footnote-back">↩︎</a></p></li>
+<li id="fn10"><p>The results differ greatly because the bootstrap CI
 method, studentized, is more conservative than the parametric method.
 This difference is more apparent with extremely small samples like that
-in the <code>sleep</code> dataset.<a href="#fnref9" class="footnote-back">↩︎</a></p></li>
+in the <code>sleep</code> dataset.<a href="#fnref10" class="footnote-back">↩︎</a></p></li>
 </ol>
 </div>
 

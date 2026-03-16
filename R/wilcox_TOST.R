@@ -16,6 +16,13 @@
 #' correlation. Options also include "cstat" for concordance probability, or
 #' "odds" for Wilcoxon-Mann-Whitney odds (otherwise known as Agresti's
 #' generalized odds ratio). Note that `ses` only determines which effect size is calculated and does not affect the equivalence bounds (`eqb`).
+#' @param se_method a character string specifying the method for computing standard errors and
+#'   confidence intervals for the effect size:
+#'     - "score": (default) Uses a score-type approach with test-inversion CIs. For two-sample
+#'       designs, uses the Fay-Malinovsky approach. For paired/one-sample, uses a Wilson score
+#'       approach. Produces CIs coherent with the Wilcoxon-Mann-Whitney / signed-rank test.
+#'     - "agresti": Uses the Agresti/Lehmann placement-based variance estimation.
+#'     - "fisher": Uses the legacy Fisher z-transformation method.
 #' @details
 #' For details on the calculations in this function see `vignette("robustTOST")`. For details on the Wilcoxon-Mann-Whitney tests see [stats::wilcox.test].
 #'
@@ -62,7 +69,8 @@ wilcox_TOST <- function(x, ...,
                         low_eqbound,
                         high_eqbound,
                         ses = "rb",
-                        alpha = 0.05){
+                        alpha = 0.05,
+                        se_method = c("score", "agresti", "fisher")){
   UseMethod("wilcox_TOST")
 }
 
@@ -82,9 +90,12 @@ wilcox_TOST.default = function(x,
                           ses = c("rb","odds", "logodds", "cstat"),
                           alpha = 0.05,
                           mu = 0,
+                          se_method = c("score", "agresti", "fisher"),
                           ...) {
 
   ses = match.arg(ses)
+  se_method = match.arg(se_method)
+
   if(is.null(y)){
     sample_type = "One Sample"
   } else if(paired == TRUE) {
@@ -169,7 +180,7 @@ wilcox_TOST.default = function(x,
     mu = mu,
     alpha = alpha * 2,
     ses = ses,
-    se_method = "fisher",
+    se_method = se_method,
     output = "data.frame"
   )
 

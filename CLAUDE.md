@@ -8,6 +8,12 @@ Implements the two one-sided tests (TOST) procedure to test equivalence for t-te
 
 Primary citation: Lakens (2017) <doi:10.1177/1948550617697177>
 
+## Workflow
+
+**Always work directly in the local repository** — edit files in place, run tests, and commit from the main checkout. Do NOT create git worktrees or separate working directories. This keeps the workflow simple and changes immediately visible in the user's IDE/editor.
+
+**Non-production files**: If separate R scripts, markdown files, or other working files are needed during development but are not intended for the package itself (e.g., scratch analyses, exploratory scripts, notes), place them in the `junk/` folder. This keeps the package source tree clean.
+
 ## Development Commands
 
 ```r
@@ -18,6 +24,20 @@ devtools::document()     # Generate documentation from roxygen2
 ```
 
 ## Code Style
+
+### R Script Section Headings
+Place the section title after a `#` (or `##` for sub-sections) followed by at least four trailing dashes (`-`), equal signs (`=`), or hashtags (`#`). Do NOT place lines of `#` signs before and after section headings.
+
+```r
+# Good
+# Load data --------
+## Clean variables ----
+
+# Bad
+######################
+# Load data
+######################
+```
 
 ### Naming Conventions
 - **Main functions**: `snake_case` (e.g., `t_TOST`, `boot_t_TOST`, `brunner_munzel`, `wilcox_TOST`)

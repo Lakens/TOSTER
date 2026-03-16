@@ -25,11 +25,33 @@
 #'   or shift (for independent samples) is to be estimated (default = 0).
 #' @param se_method a character string specifying the method for computing standard errors and
 #'   confidence intervals:
-#'     - "agresti": (default) Uses the Agresti/Lehmann placement-based variance estimation with
+#'     - "score": (default) Uses a score-type approach where confidence intervals are
+#'       constructed by test inversion (finding the values of the concordance
+#'       probability where the score statistic equals the critical value), then
+#'       transformed to the requested effect size scale. This method has
+#'       better small-sample coverage than the Wald-based methods and
+#'       produces confidence intervals that are coherent with the corresponding
+#'       rank-based test. Available for all designs.
+#'       For two-sample independent designs, uses the Fay-Malinovsky approach
+#'       based on the proportional odds model (see Fay and Malinovsky, 2018).
+#'       For paired/one-sample designs, uses a Wilson score approach based on
+#'       the independent-signs model for the signed-rank statistic, producing
+#'       p-values that match `wilcox.test(..., paired = TRUE, exact = FALSE)`
+#'       at the standard null of 0.5.
+#'     - "agresti": Uses the Agresti/Lehmann placement-based variance estimation with
 #'       confidence intervals computed on the log-odds scale and back-transformed. This method
-#'       has better asymptotic properties and faster convergence to normality.
+#'       has better asymptotic properties and faster convergence to normality. Available for
+#'       all designs (one-sample, paired, and two-sample independent).
+#'       However, this method can produce degenerate intervals at the boundaries
+#'       (when all pairwise comparisons favor one group),
+#'       in which case a Haldane-type shrinkage correction is applied to enable interval construction.
 #'     - "fisher": Uses the legacy Fisher z-transformation method for confidence intervals.
 #'       This method is retained for backward compatibility.
+#' @param correct logical; whether to apply a continuity correction to the
+#'   test statistic and confidence interval. When `se_method = "score"`,
+#'   setting `correct = TRUE` produces p-values that match
+#'   `wilcox.test(..., exact = FALSE, correct = TRUE)`.
+#'   Default is `FALSE`. Only used with `se_method = "score"`.
 #' @param output a character string specifying the output format:
 #'     - "htest": (default) Returns an object of class "htest" compatible with standard R output.
 #'     - "data.frame": Returns a data frame with effect size estimates and confidence intervals.
@@ -74,7 +96,7 @@
 #'
 #' ## Standard Error Methods
 #'
-#' Two methods are available for computing standard errors and confidence intervals:
+#' Three methods are available for computing standard errors and confidence intervals:
 #'
 #'   - **Agresti method** (`se_method = "agresti"`): This method computes the variance of the
 #'     concordance probability \eqn{\hat{p} = \Pr(X > Y)} using the Lehmann/Agresti placement-based
@@ -101,28 +123,64 @@
 #'     requested effect size scale. This ensures that intervals respect the natural bounds of each
 #'     measure (e.g., \eqn{[0, 1]} for cstat, \eqn{[-1, 1]} for rb).
 #'
+#'   - **Score method** (`se_method = "score"`): Uses a score-type approach where the variance
+#'     is evaluated at the candidate parameter value, not the estimate. Confidence intervals are
+#'     constructed via test inversion: finding the values of \eqn{\phi} (concordance probability)
+#'     where the score statistic equals the critical value. This method has better small-sample
+#'     coverage than Wald-type methods and guarantees CI/p-value coherence for equivalence testing.
+#'
+#'     For **two-sample independent** designs, uses the Fay-Malinovsky V_LAPH variance function
+#'     from the proportional odds model. The reported SE is descriptive (from V_LAPH at
+#'     \eqn{\hat{\phi}}), and the CI comes from root-finding.
+#'
+#'     For **paired/one-sample** designs, uses a Wilson score approach based on the independent
+#'     signs model. Under this model, each pair's sign is Bernoulli(\eqn{\pi}) independent of rank,
+#'     giving \eqn{T^+} known mean \eqn{\pi S} and variance \eqn{\pi(1-\pi)Q}, where
+#'     \eqn{S = N(N+1)/2} and \eqn{Q = \sum r_i^2}. The CI has a closed-form Wilson-score
+#'     solution (no root-finding needed). At \eqn{\pi_0 = 0.5}, the score test reproduces the
+#'     Wilcoxon signed-rank z exactly.
+#'
+#'     The reported standard error is descriptive, but the confidence interval is **not** computed
+#'     as estimate ± z × SE. Instead, it comes from test inversion.
+#'
+#'     When `correct = TRUE`, a continuity correction is applied that makes p-values match
+#'     `wilcox.test(..., exact = FALSE, correct = TRUE)`.
+#'
 #'   - **Fisher method** (`se_method = "fisher"`): This legacy method uses Fisher's z-transformation
 #'     (arctanh) for the rank-biserial correlation. Confidence intervals for other effect sizes
 #'     are obtained by simple transformation of the rank-biserial CI bounds.
 #'
-#' ## Continuity Correction for Boundary Cases
+#' ## Boundary Case Handling (Complete Separation)
 #'
-#' When there is complete separation between groups (i.e., all observations in one group exceed all
-#' observations in the other), the concordance probability \eqn{\hat{p}} equals exactly 0 or 1.
-#' This leads to undefined odds (0 or \eqn{\infty}) and log-odds (\eqn{-\infty} or \eqn{\infty}).
+#' When there is complete separation between groups (i.e., all pairwise comparisons favor
+#' one group), the concordance probability \eqn{\hat{p}} equals exactly 0 or 1.
+#' This leads to undefined odds and log-odds, and a degenerate (zero) placement-based
+#' variance.
 #'
-#' In this case, a continuity correction is applied (for `se_method = "agresti"` only):
-#'   - **Two-sample**: \eqn{\hat{p}} is corrected to \eqn{0.5 / (n_1 \cdot n_2)} or
-#'     \eqn{1 - 0.5 / (n_1 \cdot n_2)}, where \eqn{n_1 \cdot n_2} is the total number of pairwise
-#'     comparisons.
-#'   - **Paired/one-sample**: \eqn{\hat{p}} is corrected to \eqn{0.5 / S} or \eqn{1 - 0.5 / S},
-#'     where \eqn{S = N(N+1)/2} is the maximum possible Wilcoxon signed-rank statistic and \eqn{N}
-#'     is the number of non-zero differences.
+#' For `se_method = "agresti"`, a Haldane-type shrinkage correction is applied:
+#' \deqn{\tilde{p} = \frac{C + 0.5}{N_{\mathrm{pairs}} + 1}}
+#' where \eqn{C} is the concordance count and \eqn{N_{\mathrm{pairs}}} is the total
+#' number of pairwise comparisons (\eqn{n_1 n_2} for two-sample designs, or
+#' \eqn{N(N+1)/2} for paired/one-sample designs where \eqn{N} is the number of
+#' non-zero differences). This corresponds to the posterior mean under a Jeffreys
+#' Beta(0.5, 0.5) prior and shrinks the estimate toward 0.5, with stronger shrinkage
+#' for smaller samples.
 #'
-#' A message is printed when this correction is applied. Point estimates and hypothesis tests
-#' should be interpreted as approximate in these cases. For bootstrap inference with complete
-#' separation, see [boot_ses_calc()], which will detect this condition and stop with an
-#' informative error.
+#' The Agresti placement variance is then evaluated at the corrected estimate. A message
+#' is printed when this correction is applied. For more reliable inference at boundaries,
+#' consider `se_method = "score"` for score-type intervals that handle
+#' boundaries naturally without correction.
+#'
+#' For `se_method = "score"`, no correction is needed. The score-type
+#' CI is constructed via test inversion, where the variance function is
+#' evaluated at candidate parameter values in the interior of (0, 1). When
+#' \eqn{\hat{p} = 1}, the upper CI bound is trivially 1 and the lower bound is found
+#' by the score inversion. No modification of the point estimate is required.
+#' This applies to both two-sample (via root-finding) and paired/one-sample
+#' (via the closed-form Wilson quadratic) designs.
+#'
+#' For two-sample designs using the Agresti method, a score-type CI is automatically
+#' used as a fallback at boundaries for better interval coverage.
 #'
 #' ## Hypothesis Testing
 #'
@@ -210,11 +268,22 @@
 #' # Example 6: Using Fisher method for backward compatibility
 #' ses_calc(x = group1, y = group2, ses = "rb", se_method = "fisher")
 #'
+#' # Example 7: Using score method for WMW-compatible CIs (two-sample only)
+#' ses_calc(x = group1, y = group2, ses = "cstat", se_method = "score")
+#'
+#' # Example 8: Score method with continuity correction (matches wilcox.test)
+#' ses_calc(x = group1, y = group2, ses = "cstat", se_method = "score",
+#'          correct = TRUE, alternative = "two.sided", null.value = 0.5)
+#'
 #' @references
 #' Agresti, A. (1980). Generalized odds ratios for ordinal data. *Biometrics*, 36, 59-67.
 #'
 #' Bamber, D. (1975). The area above the ordinal dominance graph and the area below the receiver
 #' operating characteristic graph. *Journal of Mathematical Psychology*, 12, 387-415.
+#'
+#' Fay, M.P. and Malinovsky, Y. (2018). Confidence Intervals of the Mann-Whitney Parameter
+#' that are Compatible with the Wilcoxon-Mann-Whitney Test. *Statistics in Medicine*,
+#' 37, 3991-4006. \doi{10.1002/sim.7890}
 #'
 #' Kerby, D. S. (2014). The simple difference formula: An approach to teaching nonparametric
 #' correlation. *Comprehensive Psychology*, 3, 11-IT.
@@ -229,12 +298,14 @@
 #' @export ses_calc
 
 
+# TODO: add xname and yname arguments to allow user-specified group labels
 #ses_calc <- setClass("ses_calc")
 ses_calc <- function(x, ...,
                      paired = FALSE,
                      ses = "rb",
                      alpha = 0.05,
-                     se_method = c("agresti", "fisher"),
+                     se_method = c("score", "agresti", "fisher"),
+                     correct = FALSE,
                      output = c("htest", "data.frame"),
                      null.value = NULL,
                      alternative = c("none", "two.sided", "less", "greater",
@@ -254,7 +325,8 @@ ses_calc.default = function(x,
                           ses = c("rb","odds","logodds","cstat"),
                           alpha = 0.05,
                           mu = 0,
-                          se_method = c("agresti", "fisher"),
+                          se_method = c("score", "agresti", "fisher"),
+                          correct = FALSE,
                           output = c("htest", "data.frame"),
                           null.value = NULL,
                           alternative = c("none", "two.sided", "less", "greater",
@@ -265,6 +337,18 @@ ses_calc.default = function(x,
   se_method = match.arg(se_method)
   output = match.arg(output)
   alternative = match.arg(alternative)
+
+  if(!is.numeric(alpha) || alpha <=0 || alpha >=1){
+    stop("alpha must be a numeric value between 0 and 1")
+  }
+
+  # Determine design type
+  is_two_sample <- !is.null(y) && !paired
+
+  # Continuity correction only used with score method
+  if (correct && se_method != "score") {
+    message("Continuity correction (correct = TRUE) is only used with se_method = 'score'. Ignoring.")
+  }
 
   # Track whether user provided null.value (for messaging about log-odds transformation)
   null.value_original <- null.value
@@ -310,12 +394,15 @@ ses_calc.default = function(x,
   if (!is.null(y)) {
     dname <- paste(deparse(substitute(x)), "and",
                    deparse(substitute(y)))
+    # Use simple generic names for default method since variable names
+    # may be expressions (e.g., 1:10, c(7:20, 200)) which look messy.
+    # Formula method will overwrite these with actual factor level names.
+    XNAME <- "X"
+    YNAME <- "Y"
   } else {
     dname <- deparse(substitute(x))
-  }
-
-  if(!is.numeric(alpha) || alpha <=0 || alpha >=1){
-    stop("The alpha must be a numeric value between 0 and 1")
+    XNAME <- "X"
+    YNAME <- NULL
   }
 
   # Handle NA removal
@@ -338,15 +425,14 @@ ses_calc.default = function(x,
   }
 
   # Compute point estimate using existing function
-  # Note: rbs_calc for paired/one-sample expects x and y swapped
-  # For one-sample: rbs() sets y=rep(0,n), paired=TRUE, then swaps to x=zeros, y=original
-  # For paired: we pass y as first arg, x as second (see rbs() lines 92-100)
+  # Note: rbs_calc for paired computes z = x - y - mu and uses signed ranks.
+  # We pass x, y in the natural order so that the estimate represents P(X - Y > 0).
   if (is.null(y)) {
-    # One-sample: match rbs() convention - zeros first, then data
-    r_rbs <- rbs_calc(x = rep(0, length(x)), y = x, mu = mu, paired = TRUE)
+    # One-sample: compare x to mu (zeros represent the reference)
+    r_rbs <- rbs_calc(x = x, y = rep(0, length(x)), mu = mu, paired = TRUE)
   } else if (paired) {
-    # Paired: match rbs() convention - swap x and y
-    r_rbs <- rbs_calc(x = y, y = x, mu = mu, paired = TRUE)
+    # Paired: natural order, P(X - Y > 0)
+    r_rbs <- rbs_calc(x = x, y = y, mu = mu, paired = TRUE)
   } else {
     # Two-sample: no swap
     r_rbs <- rbs_calc(x = x, y = y, mu = mu, paired = FALSE)
@@ -359,36 +445,206 @@ ses_calc.default = function(x,
 
   # Compute SE and CI based on method
   if (se_method == "agresti") {
-    # New Agresti/Lehmann method
-    est_results <- ses_compute_agresti(x = x, y = y, paired = paired, mu = mu)
+    # Agresti/Lehmann method with Haldane boundary correction
+    est_results <- ses_compute_agresti(x = x, y = y, paired = paired, mu = mu,
+                                        use_score_fallback = TRUE,
+                                        conf.level = conf.level)
 
     if (is.null(est_results)) {
       stop("Unable to compute effect size - check that data has sufficient non-zero differences")
     }
 
-    # Message if continuity correction was applied
+    # Message if boundary correction was applied
     if (est_results$boundary_corrected) {
-      message(
-        "Complete separation detected (p = 0 or 1). ",
-        "A continuity correction of 0.5/(number of pairs) was applied. ",
-        "Point estimates and hypothesis tests are approximate."
+      msg <- paste0(
+        "Complete separation detected (all pairwise comparisons favor one group). ",
+        "A Haldane-type shrinkage correction was applied to enable confidence ",
+        "interval construction on the log-odds scale."
       )
+
+      # If two-sample and score CI fallback was used, note that
+      if (est_results$boundary_used_score_ci) {
+        msg <- paste0(msg, " Score-type CIs used for better boundary behavior.")
+      } else if (!paired && !is.null(y)) {
+        msg <- paste0(msg, " For more reliable inference at boundaries, consider ",
+                      "se_method = 'score' for score-type intervals.")
+      } else {
+        msg <- paste0(msg, " For more reliable inference at boundaries, consider ",
+                      "boot_ses_calc() for bootstrap-based p-values and intervals.")
+      }
+
+      message(msg)
     }
 
-    ci_results <- ses_ci_logodds(est_results, conf.level = conf.level)
+    # If score CI fallback was used, use those CIs; otherwise use standard log-odds CIs
+    if (est_results$boundary_used_score_ci && !is.null(est_results$score_ci_cstat)) {
+      # Transform score CI bounds to all scales
+      ci_cstat <- est_results$score_ci_cstat
+      ci_rb <- 2 * ci_cstat - 1
+      ci_odds <- ci_cstat / (1 - ci_cstat)
+      ci_logodds <- log(ci_cstat / (1 - ci_cstat))
 
-    # Extract results for requested effect size
+      ci_val <- switch(ses,
+                       "rb" = ci_rb,
+                       "cstat" = ci_cstat,
+                       "odds" = ci_odds,
+                       "logodds" = ci_logodds)
+    } else {
+      ci_results <- ses_ci_logodds(est_results, conf.level = conf.level)
+
+      ci_val <- switch(ses,
+                       "rb" = ci_results$ci_rb,
+                       "cstat" = ci_results$ci_cstat,
+                       "odds" = ci_results$ci_odds,
+                       "logodds" = ci_results$ci_logodds)
+    }
+
+    # Extract SE for requested effect size
     se_val <- switch(ses,
                      "rb" = est_results$se_rb,
                      "cstat" = est_results$se_cstat,
                      "odds" = est_results$se_odds,
                      "logodds" = est_results$se_logodds)
 
-    ci_val <- switch(ses,
-                     "rb" = ci_results$ci_rb,
-                     "cstat" = ci_results$ci_cstat,
-                     "odds" = ci_results$ci_odds,
-                     "logodds" = ci_results$ci_logodds)
+  } else if (se_method == "score") {
+
+    if (is_two_sample) {
+      # Fay-Malinovsky score-type method (two-sample)
+
+      # Compute tie factor
+      tf <- wmw_tie_factor(x - mu, y)
+
+      # Handle degenerate case: all values in both groups identical
+      if (tf == 0) {
+        warning("All values in both groups are identical. ",
+                "Effect size is undefined (phi = 0.5 with zero variance).")
+        se_val <- NA
+        ci_val <- c(0, 1)
+        # p_hat is already 0.5 from rbs_calc
+      } else {
+        # Compute CI on cstat scale via test inversion
+        ci_cstat <- score_ci_wmw(phi_hat = p_hat, tf = tf, n1 = n1, n2 = n2,
+                                  conf.level = conf.level, correct = correct)
+
+        # Compute descriptive SE from V_LAPH evaluated at phi_hat
+        # Use boundary-safe phi for SE computation
+        p_hat_safe <- pmin(pmax(p_hat, 1e-10), 1 - 1e-10)
+        se_cstat <- sqrt(v_laph(p_hat_safe, tf, n1, n2))
+
+        # Delta method SEs for other scales (descriptive only; CIs come from
+        # transforming the cstat CI bounds, not from SE +/- z)
+        se_rb <- 2 * se_cstat
+        se_odds <- se_cstat / (1 - p_hat_safe)^2
+        se_logodds <- se_cstat / (p_hat_safe * (1 - p_hat_safe))
+
+        # Transform CI bounds to all scales
+        ci_rb <- 2 * ci_cstat - 1
+        ci_odds <- ci_cstat / (1 - ci_cstat)
+        ci_logodds <- log(ci_cstat / (1 - ci_cstat))
+
+        # Extract for requested scale
+        se_val <- switch(ses,
+                         "rb" = se_rb,
+                         "cstat" = se_cstat,
+                         "odds" = se_odds,
+                         "logodds" = se_logodds)
+
+        ci_val <- switch(ses,
+                         "rb" = ci_rb,
+                         "cstat" = ci_cstat,
+                         "odds" = ci_odds,
+                         "logodds" = ci_logodds)
+      }
+
+      # Create est_results for consistency (used in hypothesis testing)
+      est_results <- list(
+        cstat = p_hat,
+        rb = r_rbs,
+        odds = alpha_hat,
+        logodds = eta_hat,
+        se_cstat = if(exists("se_cstat")) se_cstat else NA,
+        se_rb = if(exists("se_rb")) se_rb else NA,
+        se_odds = if(exists("se_odds")) se_odds else NA,
+        se_logodds = if(exists("se_logodds")) se_logodds else NA,
+        paired = FALSE,
+        n1 = n1,
+        n2 = n2,
+        boundary_corrected = FALSE,
+        tf = tf
+      )
+
+    } else {
+      # Wilson score-type method (paired/one-sample)
+
+      # Get paired rank information
+      # Use original x, y order so that d = x - y - mu and
+      # p_hat = P(X - Y > 0), matching the label convention.
+      if (is.null(y)) {
+        pri <- paired_rank_info(x, mu = mu)
+      } else {
+        pri <- paired_rank_info(x, y, mu = mu)
+      }
+
+      n_eff <- pri$n_eff
+      S_paired <- pri$S
+      Q_paired <- pri$Q
+      p_hat_pri <- pri$p_hat
+
+      # Handle degenerate case
+      if (n_eff < 1 || Q_paired == 0) {
+        warning("Insufficient non-zero differences for score-type inference.")
+        se_val <- NA
+        ci_val <- c(0, 1)
+      } else {
+        # Compute CI on cstat scale via Wilson-score inversion
+        ci_cstat <- score_ci_paired(p_hat = p_hat_pri, n_eff = n_eff,
+                                     Q = Q_paired, conf.level = conf.level,
+                                     correct = correct)
+
+        # Compute descriptive SEs
+        se_list <- score_se_paired(p_hat_pri, n_eff, Q_paired)
+        se_cstat <- se_list$se_cstat
+        se_rb <- se_list$se_rb
+        se_odds <- se_list$se_odds
+        se_logodds <- se_list$se_logodds
+
+        # Transform CI bounds to all scales
+        ci_rb <- 2 * ci_cstat - 1
+        ci_odds <- ci_cstat / (1 - ci_cstat)
+        ci_logodds <- log(ci_cstat / (1 - ci_cstat))
+
+        # Extract for requested scale
+        se_val <- switch(ses,
+                         "rb" = se_rb,
+                         "cstat" = se_cstat,
+                         "odds" = se_odds,
+                         "logodds" = se_logodds)
+
+        ci_val <- switch(ses,
+                         "rb" = ci_rb,
+                         "cstat" = ci_cstat,
+                         "odds" = ci_odds,
+                         "logodds" = ci_logodds)
+      }
+
+      # Create est_results for consistency (used in hypothesis testing)
+      est_results <- list(
+        cstat = p_hat,
+        rb = r_rbs,
+        odds = alpha_hat,
+        logodds = eta_hat,
+        se_cstat = if(exists("se_cstat")) se_cstat else NA,
+        se_rb = if(exists("se_rb")) se_rb else NA,
+        se_odds = if(exists("se_odds")) se_odds else NA,
+        se_logodds = if(exists("se_logodds")) se_logodds else NA,
+        paired = TRUE,
+        n1 = n_eff,
+        n2 = NULL,
+        boundary_corrected = FALSE,
+        # Store paired rank info for hypothesis testing
+        paired_rank_info = pri
+      )
+    }
 
   } else {
     # Legacy Fisher method
@@ -406,20 +662,56 @@ ses_calc.default = function(x,
                      "cstat" = ci_results_fisher$ci_cstat,
                      "odds" = ci_results_fisher$ci_odds,
                      "logodds" = ci_results_fisher$ci_logodds)
+
+    # Create est_results for consistency
+    est_results <- list(
+      cstat = p_hat,
+      rb = r_rbs,
+      odds = alpha_hat,
+      logodds = eta_hat,
+      se_cstat = ci_results_fisher$se_cstat,
+      se_rb = ci_results_fisher$se_rb,
+      se_odds = ci_results_fisher$se_odds,
+      se_logodds = ci_results_fisher$se_logodds,
+      paired = paired || is.null(y),
+      boundary_corrected = FALSE
+    )
   }
 
   # Get point estimate for requested effect size
-  est_val <- switch(ses,
-                    "rb" = r_rbs,
-                    "cstat" = p_hat,
-                    "odds" = alpha_hat,
-                    "logodds" = eta_hat)
+  # For Agresti method with boundary correction, use the corrected estimates
+  if (se_method == "agresti" && est_results$boundary_corrected) {
+    est_val <- switch(ses,
+                      "rb" = est_results$rb,
+                      "cstat" = est_results$cstat,
+                      "odds" = est_results$odds,
+                      "logodds" = est_results$logodds)
+  } else {
+    est_val <- switch(ses,
+                      "rb" = r_rbs,
+                      "cstat" = p_hat,
+                      "odds" = alpha_hat,
+                      "logodds" = eta_hat)
+  }
 
-  ses_name <- switch(ses,
-                     "rb" = "Rank-Biserial Correlation",
-                     "odds" = "WMW Odds",
-                     "logodds" = "WMW Log-Odds",
-                     "cstat" = "Concordance")
+  # Map ses type to scale for label construction --------
+  ses_scale <- switch(ses,
+    "cstat"   = "probability",
+    "rb"      = "difference",
+    "logodds" = "logodds",
+    "odds"    = "odds"
+  )
+
+  ses_name <- prob_notation_label(ses_scale, XNAME, YNAME, paired,
+                                  paired_style = "difference")
+
+  # Human-readable name for method string --------
+  method_name <- switch(ses,
+    "rb"      = "Rank-Biserial Correlation",
+    "cstat"   = "Concordance",
+    "odds"    = "WMW Odds",
+    "logodds" = "WMW Log-Odds"
+  )
 
   # Build output
   if (output == "data.frame") {
@@ -430,7 +722,7 @@ ses_calc.default = function(x,
       upper.ci = ci_val[2],
       conf.level = conf.level,
       se_method = se_method,
-      row.names = ses_name
+      row.names = method_name
     )
     return(effsize)
 
@@ -439,13 +731,27 @@ ses_calc.default = function(x,
 
     # Method string: "<Sample Type> <Estimate Name> <test|estimate with CI>"
     method_suffix <- if (alternative != "none") "test" else "estimate with CI"
-    method_desc <- paste0(sample_type, " ", ses_name, " ", method_suffix)
+    method_desc <- paste0(sample_type, " ", method_name, " ", method_suffix)
 
     # Note: SE/CI methodology details
     if (se_method == "agresti") {
-      note_text <- "SE: Agresti/Lehmann placement; CI: log-odds back-transform"
+      if (exists("est_results") && isTRUE(est_results$boundary_used_score_ci)) {
+        note_text <- "SE: Agresti/Lehmann placement (Haldane-corrected); CI: score-type test inversion (boundary fallback)"
+      } else {
+        note_text <- "SE: Agresti/Lehmann placement; CI: log-odds back-transform"
+      }
       if (alternative != "none") {
         note_text <- paste0(note_text, "; hypothesis test conducted on log-odds scale")
+      }
+    } else if (se_method == "score") {
+      if (is_two_sample) {
+        note_text <- "SE: Fay-Malinovsky V_LAPH; CI: score-type test inversion"
+      } else {
+        note_text <- "SE: Wilson score variance; CI: Wilson score interval"
+      }
+      if (correct) note_text <- paste0(note_text, " with continuity correction")
+      if (alternative != "none") {
+        note_text <- paste0(note_text, "; score-type hypothesis test on cstat scale")
       }
     } else {
       note_text <- "SE: Fisher z-transform"
@@ -585,6 +891,109 @@ ses_calc.default = function(x,
       rval$null.value <- null_val
     }
 
+    # Score method hypothesis testing
+    if (alternative != "none" && se_method == "score") {
+
+      if (is_two_sample) {
+        # Two-sample: use Fay-Malinovsky score test
+        tf <- est_results$tf
+
+        if (alternative %in% c("equivalence", "minimal.effect")) {
+          phi_low <- to_cstat(low_bound, ses)
+          phi_high <- to_cstat(high_bound, ses)
+
+          res_low <- score_pvalue_wmw(p_hat, phi_low, tf, n1, n2,
+                                       alternative = "greater", correct = correct)
+          res_high <- score_pvalue_wmw(p_hat, phi_high, tf, n1, n2,
+                                        alternative = "less", correct = correct)
+
+          if (alternative == "equivalence") {
+            p_val <- max(res_low$p.value, res_high$p.value)
+            z_stat <- if (abs(res_low$z.statistic) < abs(res_high$z.statistic)) {
+              res_low$z.statistic
+            } else {
+              res_high$z.statistic
+            }
+          } else {
+            p_val <- min(res_low$p.value, res_high$p.value)
+            z_stat <- if (abs(res_low$z.statistic) < abs(res_high$z.statistic)) {
+              res_low$z.statistic
+            } else {
+              res_high$z.statistic
+            }
+          }
+
+          null_val <- c(low_bound, high_bound)
+          names(null_val) <- c("lower bound", "upper bound")
+
+        } else {
+          phi_null <- to_cstat(null.value, ses)
+
+          res <- score_pvalue_wmw(p_hat, phi_null, tf, n1, n2,
+                                   alternative = alternative, correct = correct)
+
+          z_stat <- res$z.statistic
+          p_val <- res$p.value
+
+          null_val <- null.value
+          names(null_val) <- ses_name
+        }
+
+      } else {
+        # Paired/one-sample: use Wilson score test
+        pri <- est_results$paired_rank_info
+        p_hat_pri <- pri$p_hat
+        n_eff <- pri$n_eff
+        Q_paired <- pri$Q
+
+        if (alternative %in% c("equivalence", "minimal.effect")) {
+          phi_low <- to_cstat(low_bound, ses)
+          phi_high <- to_cstat(high_bound, ses)
+
+          res_low <- score_pvalue_paired(p_hat_pri, phi_low, n_eff, Q_paired,
+                                          alternative = "greater", correct = correct)
+          res_high <- score_pvalue_paired(p_hat_pri, phi_high, n_eff, Q_paired,
+                                           alternative = "less", correct = correct)
+
+          if (alternative == "equivalence") {
+            p_val <- max(res_low$p.value, res_high$p.value)
+            z_stat <- if (abs(res_low$z.statistic) < abs(res_high$z.statistic)) {
+              res_low$z.statistic
+            } else {
+              res_high$z.statistic
+            }
+          } else {
+            p_val <- min(res_low$p.value, res_high$p.value)
+            z_stat <- if (abs(res_low$z.statistic) < abs(res_high$z.statistic)) {
+              res_low$z.statistic
+            } else {
+              res_high$z.statistic
+            }
+          }
+
+          null_val <- c(low_bound, high_bound)
+          names(null_val) <- c("lower bound", "upper bound")
+
+        } else {
+          phi_null <- to_cstat(null.value, ses)
+
+          res <- score_pvalue_paired(p_hat_pri, phi_null, n_eff, Q_paired,
+                                      alternative = alternative, correct = correct)
+
+          z_stat <- res$z.statistic
+          p_val <- res$p.value
+
+          null_val <- null.value
+          names(null_val) <- ses_name
+        }
+      }
+
+      names(z_stat) <- "z"
+      rval$statistic <- z_stat
+      rval$p.value <- p_val
+      rval$null.value <- null_val
+    }
+
     class(rval) <- "htest"
     return(rval)
   }
@@ -628,10 +1037,33 @@ ses_calc.formula = function(formula,
   DATA <- setNames(split(mf[[response]], g), c("x", "y"))
   y <- do.call("ses_calc", c(DATA, list(...)))
 
-
-  # Update data.name for htest output
-
+  # Update data.name and relabel estimate with actual group names
   if (inherits(y, "htest")) {
+    y$data.name <- DNAME
+
+    # Reconstruct label with actual factor level names
+    XNAME <- levels(g)[1]
+    YNAME <- levels(g)[2]
+    dots <- list(...)
+    ses <- if (!is.null(dots$ses)) match.arg(dots$ses,
+      c("rb", "odds", "logodds", "cstat")) else "rb"
+
+    ses_scale <- switch(ses,
+      "cstat"   = "probability",
+      "rb"      = "difference",
+      "logodds" = "logodds",
+      "odds"    = "odds"
+    )
+
+    names(y$estimate) <- prob_notation_label(ses_scale, XNAME, YNAME,
+                                             paired = isTRUE(dots$paired),
+                                             paired_style = "difference")
+
+    # Also update null.value names if they used ses_name
+    if (!is.null(y$null.value) && length(y$null.value) == 1) {
+      names(y$null.value) <- names(y$estimate)
+    }
+  } else if (is.data.frame(y)) {
     y$data.name <- DNAME
   }
 

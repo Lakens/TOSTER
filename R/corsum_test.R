@@ -4,7 +4,7 @@
 #'
 #' Test for association between paired samples using only the correlation coefficient and sample size.
 #' Supports Pearson's product moment correlation, Kendall's \eqn{\tau} (tau), or Spearman's \eqn{\rho} (rho).
-#' This is the updated version of the `TOSTr` function.
+#' This is the updated version of the `TOSTr` function. This test is only an approximation and should be used with extreme care.
 #'
 #' @param r correlation coefficient (the estimated value)
 #' @param n sample size (number of pairs)
@@ -12,8 +12,10 @@
 #' @inheritParams z_cor_test
 #'
 #' @details
-#' This function uses Fisher's z transformation for the correlations,
-#' but uses Fieller's correction of the standard error for Kendall's \eqn{\tau} or Spearman's \eqn{\rho}.
+#' This function uses Fisher's z transformation for the correlations.
+#' For Spearman's \eqn{\rho}, the Bonett-Wright \eqn{\rho}-dependent SE formula
+#' \eqn{\sqrt{(1 + r^2/2) / (n - 3)}} is used rather than the fixed 1.06 constant.
+#' For Kendall's \eqn{\tau}, Fieller's correction is applied.
 #'
 #' Unlike `z_cor_test`, which requires raw data, this function only needs the correlation value
 #' and sample size. This is particularly useful when:
@@ -42,8 +44,10 @@
 #' * **p.value**: the p-value of the test.
 #' * **parameter**: the sample size with name "N".
 #' * **conf.int**: a confidence interval for the correlation appropriate to the specified alternative hypothesis.
-#' * **estimate**: the estimated correlation coefficient, with name "cor", "tau", or "rho" corresponding to the method employed.
-#' * **stderr**: the standard error of the test statistic.
+#' * **estimate**: the estimated correlation coefficient, with name "r", "tau", or "rho" corresponding to the method employed.
+#' * **stderr**: a named vector with `z.se` (standard error on the Fisher z scale, used for inference)
+#'   and `cor.se` (delta method SE on the correlation scale, for descriptive purposes).
+#'   Note that `cor.se` underestimates true sampling variability as |r| approaches 1.
 #' * **null.value**: the value(s) of the correlation coefficient under the null hypothesis.
 #' * **alternative**: character string indicating the alternative hypothesis.
 #' * **method**: a character string indicating how the correlation was measured.
@@ -77,6 +81,9 @@
 #' Goertzen, J. R., & Cribbie, R. A. (2010). Detecting a lack of association: An equivalence
 #' testing approach. British Journal of Mathematical and Statistical Psychology, 63(3), 527-537.
 #' https://doi.org/10.1348/000711009X475853, formula page 531.
+#'
+#' Bonett, D. G., & Wright, T. A. (2000). Sample size requirements for estimating
+#' Pearson, Kendall and Spearman correlations. Psychometrika, 65(1), 23-28.
 #'
 #' @family Correlations
 #' @export
@@ -143,20 +150,20 @@ corsum_test = function(r,
     # Pearson # Fisher
     method <- "Pearson's product-moment correlation"
     names(NVAL) = rep("correlation",length(NVAL))
-    rfinal = c(cor = r_xy)
+    rfinal = c(r = r_xy)
     z.se <- 1 / sqrt(n_obs - 3)
     cint = cor_to_ci(cor = r_xy, n = n_obs, ci = ci,
                      method = "pearson")
   }
   if (method == "spearman") {
     method <- "Spearman's rank correlation rho"
-    #  # Fieller adjusted
+    # Bonett-Wright
     rfinal = c(rho = r_xy)
     names(NVAL) = rep("rho",length(NVAL))
-    z.se <- (1.06 / (n_obs - 3)) ^ 0.5
+    z.se <- sqrt((1 + r_xy^2 / 2) / (n_obs - 3))
     cint = cor_to_ci(cor = r_xy, n = n_obs, ci = ci,
                      method = "spearman",
-                     correction = "fieller")
+                     correction = "bw")
   }
   if (method == "kendall") {
     method <- "Kendall's rank correlation tau"
@@ -169,6 +176,13 @@ corsum_test = function(r,
                      method = "kendall",
                      correction = "fieller")
   }
+
+  # append SE label to method name --------
+  method <- paste(method, "with approximate SE")
+
+  # delta method SE on correlation scale --------
+  cor.se <- (1 - r_xy^2) * z.se
+
   if(alternative %in% c("equivalence", "minimal.effect")){
     if(alternative == "equivalence"){
       zlo = z_xy-min(znull)
@@ -214,7 +228,7 @@ corsum_test = function(r,
                parameter = N,
                conf.int = cint,
                estimate = rfinal,
-               stderr = c(z.se = z.se),
+               stderr = c(z.se = z.se, cor.se = cor.se),
                null.value = NVAL,
                alternative = alternative,
                method = method,

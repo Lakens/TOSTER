@@ -3,14 +3,14 @@
 # need hush function to run print through examples
 
 hush = function(code) {
-  sink("NUL") # use /dev/null in UNIX
+  sink(nullfile())
   tmp = code
   sink()
   return(tmp)
 }
 
 test_that("Run examples for one sample", {
-
+  skip_on_cran()
   set.seed(31653464)
 
   samp1 = rnorm(33)
@@ -136,7 +136,7 @@ test_that("Run examples for one sample", {
 
 
 test_that("Run examples for two sample", {
-
+  skip_on_cran()
   set.seed(76584441)
 
   samp1 = rnorm(25)
@@ -247,7 +247,7 @@ test_that("Run examples for two sample", {
 
 
 test_that("Run examples for paired samples", {
-
+  skip_on_cran()
   set.seed(921387)
 
   samp1 = rnorm(25)
@@ -309,4 +309,33 @@ test_that("Run examples for paired samples", {
                tolerance = .1)
 
 })
+
+# boot_t_TOST CI/p-value agreement tests -----
+
+for (ci_method in c("perc", "basic", "bca", "stud")) {
+  test_that(paste0("boot_t_TOST: CI/p-value agreement for ", ci_method), {
+    skip_on_cran()
+
+    set.seed(42)
+    x <- rnorm(30, mean = 0.3)
+    y <- rnorm(30)
+
+    hush = function(code) {
+      sink(nullfile())
+      tmp = code
+      sink()
+      return(tmp)
+    }
+
+    res <- hush(boot_t_TOST(x = x, y = y, eqb = 2,
+                             boot_ci = ci_method, R = 1999))
+    # Check two-sided on 90% CI (TOST uses 1-2*alpha = 90%)
+    # 90% CI excludes null iff two-sided p < 2*alpha = 0.10
+    ci <- c(res$effsize$lower.ci[1], res$effsize$upper.ci[1])
+    ci_excludes_null <- ci[1] > 0 || ci[2] < 0
+    p_rejects <- res$TOST$p.value[1] < 0.10
+    expect_equal(ci_excludes_null, p_rejects,
+                 label = paste(ci_method, "CI/p agreement two.sided"))
+  })
+}
 

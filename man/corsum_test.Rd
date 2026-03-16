@@ -48,8 +48,10 @@ A list with class "htest" containing the following components:
 \item \strong{p.value}: the p-value of the test.
 \item \strong{parameter}: the sample size with name "N".
 \item \strong{conf.int}: a confidence interval for the correlation appropriate to the specified alternative hypothesis.
-\item \strong{estimate}: the estimated correlation coefficient, with name "cor", "tau", or "rho" corresponding to the method employed.
-\item \strong{stderr}: the standard error of the test statistic.
+\item \strong{estimate}: the estimated correlation coefficient, with name "r", "tau", or "rho" corresponding to the method employed.
+\item \strong{stderr}: a named vector with \code{z.se} (standard error on the Fisher z scale, used for inference)
+and \code{cor.se} (delta method SE on the correlation scale, for descriptive purposes).
+Note that \code{cor.se} underestimates true sampling variability as |r| approaches 1.
 \item \strong{null.value}: the value(s) of the correlation coefficient under the null hypothesis.
 \item \strong{alternative}: character string indicating the alternative hypothesis.
 \item \strong{method}: a character string indicating how the correlation was measured.
@@ -62,11 +64,13 @@ A list with class "htest" containing the following components:
 
 Test for association between paired samples using only the correlation coefficient and sample size.
 Supports Pearson's product moment correlation, Kendall's \eqn{\tau} (tau), or Spearman's \eqn{\rho} (rho).
-This is the updated version of the \code{TOSTr} function.
+This is the updated version of the \code{TOSTr} function. This test is only an approximation and should be used with extreme care.
 }
 \details{
-This function uses Fisher's z transformation for the correlations,
-but uses Fieller's correction of the standard error for Kendall's \eqn{\tau} or Spearman's \eqn{\rho}.
+This function uses Fisher's z transformation for the correlations.
+For Spearman's \eqn{\rho}, the Bonett-Wright \eqn{\rho}-dependent SE formula
+\eqn{\sqrt{(1 + r^2/2) / (n - 3)}} is used rather than the fixed 1.06 constant.
+For Kendall's \eqn{\tau}, Fieller's correction is applied.
 
 Unlike \code{z_cor_test}, which requires raw data, this function only needs the correlation value
 and sample size. This is particularly useful when:
@@ -119,6 +123,9 @@ corsum_test(r = 0.1, n = 60, method = "pearson",
 Goertzen, J. R., & Cribbie, R. A. (2010). Detecting a lack of association: An equivalence
 testing approach. British Journal of Mathematical and Statistical Psychology, 63(3), 527-537.
 https://doi.org/10.1348/000711009X475853, formula page 531.
+
+Bonett, D. G., & Wright, T. A. (2000). Sample size requirements for estimating
+Pearson, Kendall and Spearman correlations. Psychometrika, 65(1), 23-28.
 }
 \seealso{
 Other Correlations: 

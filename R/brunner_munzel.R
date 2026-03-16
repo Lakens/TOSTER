@@ -2,7 +2,7 @@
 #' @description
 #' `r lifecycle::badge("maturing")`
 #'
-#' This is a generic function that performs a generalized asymptotic Brunner-Munzel test in a fashion similar to [t.test].
+#' This is a generic function that performs a generalized Brunner-Munzel test in a fashion similar to [t.test].
 #' @param paired a logical indicating whether you want a paired test.
 #' @param mu a number or vector specifying the null hypothesis value(s):
 #'
@@ -10,6 +10,25 @@
 #'     representing the hypothesized relative effect (default = 0.5, i.e., stochastic equality).
 #'   * For "equivalence" or "minimal.effect": two values representing the lower and upper bounds
 #'     for the relative effect. Values must be between 0 and 1.
+#'
+#'   Note: `mu` is always specified on the probability scale regardless of the `scale` argument.
+#'   The `scale` argument only affects how results are reported; it does not change the hypothesis
+#'   being tested.
+#'
+#' @param scale a character string specifying the scale for the reported estimate,
+#'   standard error, confidence interval, and null value. The test itself always operates
+#'   on the probability scale internally; this argument only transforms the output.
+#'
+#'   \describe{
+#'     \item{"probability"}{(default): \eqn{p = P(X > Y) + 0.5 \cdot P(X = Y)}, range \eqn{[0, 1]},
+#'       null at stochastic equality = 0.5}
+#'     \item{"difference"}{\eqn{P(X > Y) - P(X < Y) = 2p - 1}, range \eqn{[-1, 1]},
+#'       null = 0}
+#'     \item{"logodds"}{\eqn{\log[p / (1 - p)]}, range \eqn{(-\infty, \infty)},
+#'       null = 0}
+#'     \item{"odds"}{\eqn{p / (1 - p)}, range \eqn{(0, \infty)},
+#'       null = 1}
+#'   }
 #'
 #' @param test_method a character string specifying the test method to use:
 #'
@@ -68,7 +87,11 @@
 #'
 #' * "perm": A studentized permutation test following Neubert & Brunner (2007). This method
 #'   is highly recommended when sample sizes are small (< 15 per group) as it provides better
-#'   control of Type I error rates in these situations.
+#'   control of Type I error rates in these situations. Note: when exact permutations are
+#'   enumerated with small or heavily tied samples, the exact p-value method (`b/R`) may
+#'   return p = 0 if no permuted test statistic is as extreme as the observed value. The
+#'   `plusone` method (`(b+1)/(R+1)`) avoids this artifact and can be selected via
+#'   `p_method = "plusone"`.
 #'
 #' ## Hypothesis Testing
 #'
@@ -130,6 +153,17 @@
 #' the studentized permutation distribution converges to the same limit regardless of the
 #' centering, following the asymptotic theory of Janssen (1997) and Neubert & Brunner (2007).
 #'
+#' Because the equivalence bounds are specified directly on the relative effect
+#' scale (i.e., as probabilities between 0 and 1), this avoids the difficulty
+#' noted by Arboretti et al. (2021, point IU.7) that arises when margins must
+#' be expressed in terms of rank transformations.
+#'
+#' These are uncalibrated (naive) procedures. For the IU direction
+#' (`"equivalence"`), the procedure can be conservative when sample sizes are
+#' small or when the equivalence bounds are close to 0.5. For the UI direction
+#' (`"minimal.effect"`), the conservatism is less pronounced. See Arboretti
+#' et al. (2021) for a detailed discussion of calibration
+#'
 #' @return A list with class `"htest"` containing the following components:
 #'
 #'   - "statistic": the value of the test statistic.
@@ -170,7 +204,17 @@
 #'                mu = c(0.35, 0.65),
 #'                test_method = "perm")
 #'
+#' # Report on the difference scale: P(X>Y) - P(X<Y)
+#' brunner_munzel(mpg ~ am, data = mtcars, scale = "difference")
+#'
+#' # Report as odds
+#' brunner_munzel(mpg ~ am, data = mtcars, scale = "odds")
+#'
+#' @seealso [trans_rank_prob()] for standalone transformation of probability-scale effect sizes.
 #' @references
+#' Arboretti, R., Pesarin, F. & Salmaso, L. (2021). A unified approach to permutation testing for equivalence.
+#' Stat Methods Appl 30, 1033-1052. doi: 10.1007/s10260-020-00548-0
+#'
 #' Brunner, E., Munzel, U. (2000). The Nonparametric Behrens-Fisher Problem: Asymptotic Theory and a Small Sample Approximation. Biometrical Journal 42, 17 -25.
 #'
 #' Neubert, K., Brunner, E., (2006). A Studentized Permutation Test for the Nonparametric Behrens-Fisher Problem. Computational Statistics and Data Analysis.
@@ -235,6 +279,7 @@ bm_compute_perm_pval <- function(b, R, p_method) {
   }
 }
 
+# TODO: add xname and yname arguments to allow user-specified group labels
 #brunner_munzel <- setClass("brunner_munzel")
 brunner_munzel <- function(x,
                            ...,
@@ -246,6 +291,8 @@ brunner_munzel <- function(x,
                                            "minimal.effect"),
                            mu = 0.5,
                            alpha = 0.05,
+                           scale = c("probability", "difference",
+                                     "logodds", "odds"),
                            test_method = c("t", "logit", "perm"),
                            R = 10000,
                            p_method = NULL,
@@ -271,6 +318,8 @@ brunner_munzel.default = function(x,
                                                   "minimal.effect"),
                                   mu = 0.5,
                                   alpha = 0.05,
+                                  scale = c("probability", "difference",
+                                            "logodds", "odds"),
                                   test_method = c("t", "logit", "perm"),
                                   R = 10000,
                                   p_method = NULL,
@@ -303,6 +352,7 @@ brunner_munzel.default = function(x,
 
   alternative = match.arg(alternative)
   test_method = match.arg(test_method)
+  scale = match.arg(scale)
   # p_method validation deferred until we know if exact or randomization
 
   # Validate mu based on alternative
@@ -341,6 +391,7 @@ brunner_munzel.default = function(x,
     # Formula method will overwrite these with actual factor level names
     XNAME <- "X"
     YNAME <- "Y"
+    default_names <- TRUE
     if(paired) {
       if(length(x) != length(y))
         stop("'x' and 'y' must have the same length")
@@ -376,6 +427,8 @@ brunner_munzel.default = function(x,
 
   # Initialize n_perm_actual (will be set if test_method == "perm")
   n_perm_actual <- NULL
+  # Flag for CI clamping message (emitted at most once)
+  clamped_ci <- FALSE
 
   # Paired -----
   if(paired){
@@ -479,14 +532,16 @@ brunner_munzel.default = function(x,
         test_stat_low <- sqrt(n) * (pd - low_eqbound) / sqrt(v)
         test_stat_high <- sqrt(n) * (pd - high_eqbound) / sqrt(v)
 
-        # One-sided p-values
+        # One-sided p-values using count-based logic routed through bm_compute_perm_pval
         # For lower bound test: H0: p <= low vs H1: p > low
         # Large test_stat_low supports H1, so p-value = P(T >= t_obs)
-        p_greater_low <- mean(Tperm >= test_stat_low)
-
+        b_greater_low <- sum(Tperm >= test_stat_low)
         # For upper bound test: H0: p >= high vs H1: p < high
         # Small (negative) test_stat_high supports H1, so p-value = P(T <= t_obs)
-        p_less_high <- mean(Tperm <= test_stat_high)
+        b_less_high <- sum(Tperm <= test_stat_high)
+
+        p_greater_low <- bm_compute_perm_pval(b_greater_low, n_perm_actual, p_method)
+        p_less_high <- bm_compute_perm_pval(b_less_high, n_perm_actual, p_method)
 
         if(alternative == "equivalence") {
           # Both conditions must be met: p > low AND p < high
@@ -514,7 +569,9 @@ brunner_munzel.default = function(x,
 
         # Confidence interval quantiles from permutation distribution
         # Use actual number of permutations for indexing
-        pq1 <- sort(Tperm)[(floor((1-alpha)*n_perm_actual)+1)]
+        sorted_Tperm <- sort(Tperm)
+        idx_pq1 <- min(n_perm_actual, max(1, floor((1-alpha)*n_perm_actual)+1))
+        pq1 <- sorted_Tperm[idx_pq1]
 
         pd.lower <- pd - pq1*sqrt(v/n)
         pd.upper <- pd + pq1*sqrt(v/n)
@@ -524,14 +581,26 @@ brunner_munzel.default = function(x,
         # Observed test statistic centered at mu
         test_stat <- sqrt(n) * (pd - mu) / sqrt(v)
 
-        p1perm <- mean(Tperm <= test_stat)
-        pq1 <- sort(Tperm)[(floor((1-alpha/2)*n_perm_actual)+1)]
-        pq2 <- sort(Tperm)[(floor((1-alpha)*n_perm_actual)+1)]
+        # Count extreme values for p-value calculation
+        b_less <- sum(Tperm <= test_stat)
+        b_greater <- sum(Tperm >= test_stat)
+        b_two_sided <- sum(abs(Tperm) >= abs(test_stat))
+
+        sorted_Tperm <- sort(Tperm)
+        idx_pq1 <- min(n_perm_actual, max(1, floor((1-alpha/2)*n_perm_actual)+1))
+        idx_pq2 <- min(n_perm_actual, max(1, floor((1-alpha)*n_perm_actual)+1))
+        pq1 <- sorted_Tperm[idx_pq1]
+        pq2 <- sorted_Tperm[idx_pq2]
+
+        # Compute p-values using selected method
+        p_less <- bm_compute_perm_pval(b_less, n_perm_actual, p_method)
+        p_greater <- bm_compute_perm_pval(b_greater, n_perm_actual, p_method)
+        p_two_sided <- bm_compute_perm_pval(b_two_sided, n_perm_actual, p_method)
 
         p.value = switch(alternative,
-                         "two.sided" = min(2*p1perm, 2*(1-p1perm)),
-                         "less" = p1perm,
-                         "greater" = 1-p1perm)
+                         "two.sided" = p_two_sided,
+                         "less" = p_less,
+                         "greater" = p_greater)
 
         pd.lower = switch(alternative,
                           "two.sided" = pd - pq1*sqrt(v/n),
@@ -544,17 +613,34 @@ brunner_munzel.default = function(x,
                           "greater" = 1)
       }
 
+      # Warn if exact permutation p-value is 0 (potential artifact)
+      if (p_method == "exact" && p.value == 0) {
+        warning("Exact permutation p-value is 0. This may be an artifact of the discrete ",
+                "permutation distribution with heavily tied or degenerate data. Consider using ",
+                "p_method = 'plusone' for a more conservative estimate.")
+      }
+
       # Clamp bounds to [0, 1]
+      if (pd.lower < 0 || pd.upper > 1) clamped_ci <- TRUE
       pd.lower <- ifelse(pd.lower < 0, 0, pd.lower)
       pd.upper <- ifelse(pd.upper > 1, 1, pd.upper)
 
     } else if(test_method == "logit") {
       # Logit transformation method for paired samples
-      METHOD = "Exact paired Brunner-Munzel test (logit)"
+      METHOD = "paired Brunner-Munzel test (logit)"
+
+      # Clamp pd locally for logit transformation only
+      pd_logit_use <- pd
+      if (pd == 0 || pd == 1) {
+        warning("Logit method is unreliable when the estimated relative effect is exactly 0 or 1. ",
+                "Consider using test_method = 't' instead.")
+        message("Note: Estimated relative effect was clamped away from 0/1 for logit transformation.")
+        pd_logit_use <- ifelse(pd == 0, 0.0001, 0.9999)
+      }
 
       # Logit transformation for range-preserving CIs
-      pd_logit <- log(pd / (1 - pd))
-      se_logit <- sqrt(v/n) / (pd * (1 - pd))
+      pd_logit <- log(pd_logit_use / (1 - pd_logit_use))
+      se_logit <- sqrt(v/n) / (pd_logit_use * (1 - pd_logit_use))
 
       if(alternative %in% c("equivalence", "minimal.effect")) {
         # Test statistics for each bound on logit scale
@@ -618,13 +704,14 @@ brunner_munzel.default = function(x,
         pd.upper <- exp(ci_logit_upper) / (1 + exp(ci_logit_upper))
       }
 
-      # Handle edge cases
+      # Handle edge cases (paired logit)
+      if (is.nan(pd.lower) || pd.lower < 0 || is.nan(pd.upper) || pd.upper > 1) clamped_ci <- TRUE
       pd.lower <- ifelse(is.nan(pd.lower) | pd.lower < 0, 0, pd.lower)
       pd.upper <- ifelse(is.nan(pd.upper) | pd.upper > 1, 1, pd.upper)
 
     } else {
       # Asymptotic (t-distribution) approach
-      METHOD = "Exact paired Brunner-Munzel test"
+      METHOD = "Paired Brunner-Munzel test"
 
       if(alternative %in% c("equivalence", "minimal.effect")) {
         # Test statistics for each bound
@@ -679,25 +766,31 @@ brunner_munzel.default = function(x,
                           "less" = pd + qt(1-alpha, df.sw)*sqrt(v/n),
                           "greater" = 1)
       }
+
+      # Clamp CI bounds to [0, 1] for paired t-approx
+      if (pd.lower < 0 || pd.upper > 1) clamped_ci <- TRUE
+      pd.lower <- ifelse(pd.lower < 0, 0, pd.lower)
+      pd.upper <- ifelse(pd.upper > 1, 1, pd.upper)
     }
 
   } else {
 
     # Two-sample ------
+    n.x <- as.double(length(x))
+    n.y <- as.double(length(y))
+    if (n.x < 3 || n.y < 3) {
+      stop("Brunner-Munzel test requires at least 3 observations per group.")
+    }
     rxy <- rank(c(x, y))
     rx <- rank(x)
     ry <- rank(y)
-    n.x <- as.double(length(x))
-    n.y <- as.double(length(y))
     N = n.x + n.y
 
     pl2 <- 1/n.y*(rxy[1:n.x]-rx)
     pl1 <- 1/n.x*(rxy[(n.x+1):N]-ry)
     pd <- mean(pl2)
-    pd1 <- (pd == 1)
-    pd0 <- (pd == 0)
-    pd[pd1] <- 0.9999
-    pd[pd0] <- 0.0001
+    # Store raw pd for estimate output; clamping is applied only in logit path
+    pd_raw <- pd
     s1 <- var(pl2)/n.x
     s2 <- var(pl1)/n.y
 
@@ -788,8 +881,9 @@ brunner_munzel.default = function(x,
         }
 
         # CI quantiles for 1-2*alpha level
-        c1 <- 0.5*(Tperm[1, floor((1-alpha)*R_actual)] +
-                     Tperm[1, ceiling((1-alpha)*R_actual)])
+        idx1 <- max(1, floor((1-alpha)*R_actual))
+        idx2 <- min(R_actual, ceiling((1-alpha)*R_actual))
+        c1 <- 0.5*(Tperm[1, idx1] + Tperm[1, idx2])
 
         pd.lower <- pd - sqrt(V/N)*c1
         pd.upper <- pd + sqrt(V/N)*c1
@@ -808,11 +902,19 @@ brunner_munzel.default = function(x,
         b_two_sided <- sum(abs(Tperm[1,]) >= abs(test_stat))
 
         if(alternative == "two.sided"){
-          c1<-0.5*(Tperm[1,floor((1-alpha/2)*R_actual)]+Tperm[1,ceiling((1-alpha/2)*R_actual)])
-          c2<-0.5*(Tperm[1,floor(alpha/2*R_actual)]+Tperm[1,ceiling(alpha/2*R_actual)])
+          idx_c1 <- max(1, floor((1-alpha/2)*R_actual))
+          idx_c1b <- min(R_actual, ceiling((1-alpha/2)*R_actual))
+          idx_c2 <- max(1, floor(alpha/2*R_actual))
+          idx_c2b <- min(R_actual, ceiling(alpha/2*R_actual))
+          c1<-0.5*(Tperm[1, idx_c1]+Tperm[1, idx_c1b])
+          c2<-0.5*(Tperm[1, idx_c2]+Tperm[1, idx_c2b])
         } else {
-          c1<-0.5*(Tperm[1, floor((1-alpha)*R_actual)]+Tperm[1, ceiling((1-alpha)*R_actual)])
-          c2<-0.5*(Tperm[1, floor(alpha*R_actual)]+Tperm[1, ceiling(alpha*R_actual)])
+          idx_c1 <- max(1, floor((1-alpha)*R_actual))
+          idx_c1b <- min(R_actual, ceiling((1-alpha)*R_actual))
+          idx_c2 <- max(1, floor(alpha*R_actual))
+          idx_c2b <- min(R_actual, ceiling(alpha*R_actual))
+          c1<-0.5*(Tperm[1, idx_c1]+Tperm[1, idx_c1b])
+          c2<-0.5*(Tperm[1, idx_c2]+Tperm[1, idx_c2b])
         }
 
         lower_ci = pd - sqrt(V/N)*c1
@@ -839,6 +941,14 @@ brunner_munzel.default = function(x,
                           "greater" = 1)
       }
 
+      # Warn if exact permutation p-value is 0 (potential artifact)
+      if (p_method == "exact" && p.value == 0) {
+        warning("Exact permutation p-value is 0. This may be an artifact of the discrete ",
+                "permutation distribution with heavily tied or degenerate data. Consider using ",
+                "p_method = 'plusone' for a more conservative estimate.")
+      }
+
+      if (pd.lower < 0 || pd.upper > 1) clamped_ci <- TRUE
       pd.lower = ifelse(pd.lower < 0, 0, pd.lower)
       pd.upper = ifelse(pd.upper > 1, 1, pd.upper)
 
@@ -847,9 +957,18 @@ brunner_munzel.default = function(x,
       ## logit transformation ----
       METHOD = "Two-sample Brunner-Munzel test (logit)"
 
+      # Clamp pd locally for logit transformation only
+      pd_logit_use <- pd
+      if (pd == 0 || pd == 1) {
+        warning("Logit method is unreliable when the estimated relative effect is exactly 0 or 1. ",
+                "Consider using test_method = 't' instead.")
+        message("Note: Estimated relative effect was clamped away from 0/1 for logit transformation.")
+        pd_logit_use <- ifelse(pd == 0, 0.0001, 0.9999)
+      }
+
       # Logit transformation for range-preserving CIs
-      pd_logit <- log(pd / (1 - pd))
-      se_logit <- sqrt(V/N) / (pd * (1 - pd))
+      pd_logit <- log(pd_logit_use / (1 - pd_logit_use))
+      se_logit <- sqrt(V/N) / (pd_logit_use * (1 - pd_logit_use))
 
       if(alternative %in% c("equivalence", "minimal.effect")) {
         # Test statistics for each bound on logit scale
@@ -913,7 +1032,8 @@ brunner_munzel.default = function(x,
         pd.upper <- exp(ci_logit_upper) / (1 + exp(ci_logit_upper))
       }
 
-      # Handle edge cases
+      # Handle edge cases (unpaired logit)
+      if (is.nan(pd.lower) || pd.lower < 0 || is.nan(pd.upper) || pd.upper > 1) clamped_ci <- TRUE
       pd.lower <- ifelse(is.nan(pd.lower) | pd.lower < 0, 0, pd.lower)
       pd.upper <- ifelse(is.nan(pd.upper) | pd.upper > 1, 1, pd.upper)
 
@@ -952,6 +1072,7 @@ brunner_munzel.default = function(x,
         # 1-2*alpha CI for TOST
         pd.lower <- pd - qt(1-alpha, df=df.sw)/sqrt(N)*sqrt(V)
         pd.upper <- pd + qt(1-alpha, df=df.sw)/sqrt(N)*sqrt(V)
+        if (pd.lower < 0 || pd.upper > 1) clamped_ci <- TRUE
         pd.lower = ifelse(pd.lower < 0, 0, pd.lower)
         pd.upper = ifelse(pd.upper > 1, 1, pd.upper)
 
@@ -969,22 +1090,51 @@ brunner_munzel.default = function(x,
                           "two.sided" = pd - qt(1-alpha/2, df=df.sw)/sqrt(N)*sqrt(V),
                           "less" = 0,
                           "greater" = pd - qt(1-alpha, df=df.sw)/sqrt(N)*sqrt(V))
+        if (pd.lower < 0) clamped_ci <- TRUE
         pd.lower = ifelse(pd.lower < 0, 0, pd.lower)
 
         pd.upper = switch(alternative,
                           "two.sided" = pd + qt(1-alpha/2, df=df.sw)/sqrt(N)*sqrt(V),
                           "less" = pd + qt(1-alpha, df=df.sw)/sqrt(N)*sqrt(V),
                           "greater" = 1)
+        if (pd.upper > 1) clamped_ci <- TRUE
         pd.upper = ifelse(pd.upper > 1, 1, pd.upper)
       }
     }
   }
 
+  # Emit clamping message at most once
+  if (clamped_ci) {
+    message("Note: Confidence interval bounds were clamped to the [0, 1] range.")
+  }
+
+  # Rescale output to requested scale --------
+  transformed <- trans_rank_prob(
+    estimate = pd,
+    se = std_err,
+    ci = c(pd.lower, pd.upper),
+    null = mu,
+    from = "probability",
+    to = scale
+  )
+
+  pd       <- transformed$estimate
+  std_err  <- transformed$se
+  pd.lower <- transformed$ci[1]
+  pd.upper <- transformed$ci[2]
+  mu       <- transformed$null
+
   # Prepare output
   if(alternative %in% c("equivalence", "minimal.effect")) {
     names(mu) <- c("lower bound", "upper bound")
   } else {
-    names(mu) <- "relative effect"
+    null_label <- switch(scale,
+      "probability" = "relative effect",
+      "difference"  = "relative effect (difference)",
+      "logodds"     = "relative effect (logodds)",
+      "odds"        = "relative effect (odds)"
+    )
+    names(mu) <- null_label
   }
 
   if(test_method == "perm"){
@@ -1001,9 +1151,9 @@ brunner_munzel.default = function(x,
   cint = c(pd.lower, pd.upper)
   attr(cint, "conf.level") = conf.level
   estimate = pd
-  # Use actual group names in estimate label
-  # XNAME and YNAME are set from input variable names or overwritten by formula method
-  names(estimate) = paste0("P(", XNAME, ">", YNAME, ") + .5*P(", XNAME, "=", YNAME, ")")
+
+  # Build estimate label --------
+  names(estimate) <- prob_notation_label(scale, XNAME, YNAME, paired)
 
   rval <- list(statistic = test_stat,
                parameter = param,
@@ -1058,11 +1208,17 @@ brunner_munzel.formula = function(formula,
   DATA <- setNames(split(mf[[response]], g), c("x", "y"))
   y <- do.call("brunner_munzel", c(DATA, list(...)))
   y$data.name <- DNAME
-  # Update estimate label with actual factor level names
-  # First level becomes "x" (XNAME), second level becomes "y" (YNAME)
+
+  # Reconstruct label with actual factor level names
   XNAME <- levels(g)[1]
   YNAME <- levels(g)[2]
-  names(y$estimate) <- paste0("P(", XNAME, ">", YNAME, ") + .5*P(", XNAME, "=", YNAME, ")")
+  dots <- list(...)
+  scale <- if (!is.null(dots$scale)) match.arg(dots$scale,
+    c("probability", "difference", "logodds", "odds")) else "probability"
+
+  names(y$estimate) <- prob_notation_label(scale, XNAME, YNAME,
+                                           paired = isTRUE(dots$paired))
+
   y
 
 }

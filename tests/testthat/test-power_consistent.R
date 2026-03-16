@@ -4,7 +4,7 @@
 
 test_that("power functions are internally consistent", {
   hush = function(code) {
-    sink("NUL") # use /dev/null in UNIX
+    sink(nullfile())
     tmp = code
     sink()
     return(tmp)

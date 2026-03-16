@@ -2,9 +2,8 @@
 #' @description
 #' `r lifecycle::badge('maturing')`
 #'
-#' Calculates standardized mean differences (SMDs) with bootstrap confidence intervals.
-#' This function provides more robust confidence intervals for Cohen's d, Hedges' g,
-#' and other SMD measures through resampling methods.
+#' Calculates standardized mean differences (SMDs) with bootstrap confidence intervals,
+#' with optional hypothesis testing.
 #'
 #' @section Purpose:
 #' Use this function when:
@@ -14,10 +13,44 @@
 #'   * Sample sizes are small or standard error approximations may be unreliable
 #'   * You prefer resampling-based confidence intervals over parametric approximations
 #'   * You need to quantify uncertainty in SMD estimates more accurately
+#'   * You want to test hypotheses about effect size magnitudes using bootstrap methods
 #'
 #' @inheritParams boot_t_TOST
 #' @param mu null value to adjust the calculation. If non-zero, the function calculates x-y-mu (default = 0).
 #' @param ... further arguments to be passed to or from methods.
+#' @param output a character string specifying the output format:
+#'     - "htest": (default) Returns an object of class "htest" compatible with standard R output.
+#'     - "data.frame": Returns a data frame for backward compatibility.
+#' @param null.value a number or vector specifying the null hypothesis value(s) on the SMD scale:
+#'     - For standard alternatives: a single value (default = 0)
+#'     - For equivalence/minimal.effect: two values representing the lower and upper bounds
+#' @param alternative a character string specifying the alternative hypothesis:
+#'     - "none": (default) No hypothesis test is performed; only effect size and CI are returned.
+#'     - "two.sided": Test whether SMD differs from null.value
+#'     - "less": Test whether SMD is less than null.value
+#'     - "greater": Test whether SMD is greater than null.value
+#'     - "equivalence": Test whether SMD is between specified bounds
+#'     - "minimal.effect": Test whether SMD is outside specified bounds
+#' @param denom a character string specifying the denominator for standardization:
+#'     - "auto": (default) Uses the standard denominator based on design and other arguments
+#'       (glass, rm_correction, var.equal).
+#'     - "z": SD of differences (Cohen's d_z). Valid for paired and one-sample designs.
+#'     - "rm": Repeated-measures corrected (Cohen's d_rm). Valid for paired designs only.
+#'     - "pooled": Pooled SD (Cohen's d_s). Valid for independent samples only.
+#'     - "avg": Root-mean-square SD (Cohen's d_av). Valid for independent samples only.
+#'     - "glass1": First group's (x) SD (Glass's delta). Valid for paired and independent designs.
+#'     - "glass2": Second group's (y) SD (Glass's delta). Valid for paired and independent designs.
+#'
+#'     When set to any value other than "auto", this overrides the glass, rm_correction,
+#'     and var.equal arguments. The bias_correction argument is not affected.
+#' @param tr a numeric value specifying the proportion of observations to trim from each
+#'     tail when computing trimmed means and Winsorized variances (default = 0, no trimming).
+#'     Must be in the range \[0, 0.5). Common choices are 0.1 (10\% trimming) and 0.2
+#'     (20\% trimming). When tr > 0, the effect size uses trimmed means for the numerator
+#'     and the rescaled Winsorized standard deviation for the denominator, following
+#'     Algina, Keselman, and Penfield (2005). The rescaling ensures the robust effect
+#'     size equals Cohen's delta when data are normally distributed.
+#'     Note: tr > 0 is not compatible with denom = "rm".
 #'
 #' @details
 #' This function calculates bootstrapped confidence intervals for standardized mean differences.
@@ -31,10 +64,24 @@
 #'   * Calculate the SMD and its standard error for each bootstrap sample
 #'   * Calculate confidence intervals using the specified method
 #'
-#' Three bootstrap confidence interval methods are available:
-#'   - **Studentized bootstrap ("stud")**: Accounts for the variability in standard error estimates. Usually provides the most accurate coverage probability and is set as the default.
-#'   - **Basic bootstrap ("basic")**: Uses the empirical distribution of bootstrap estimates. Simple approach that works well for symmetric distributions.
-#'   - **Percentile bootstrap ("perc")**: Uses percentiles of the bootstrap distribution directly. More robust to skewness in the bootstrap distribution.
+#' Four bootstrap confidence interval methods are available via the `boot_ci` argument:
+#'   - **Studentized bootstrap ("stud")**: Uses the bootstrap distribution of pivotal
+#'     t-statistics to account for variability in standard error estimates. Usually
+#'     provides the most accurate coverage probability and is set as the default.
+#'   - **Basic bootstrap ("basic")**: Reflects the bootstrap distribution of estimates
+#'     around the observed value. Simple approach that works well for symmetric distributions.
+#'   - **Percentile bootstrap ("perc")**: Uses percentiles of the bootstrap distribution directly.
+#'     More robust to skewness in the bootstrap distribution.
+#'   - **Bias-corrected and accelerated ("bca")**: Corrects for both bias and skewness in the
+#'     bootstrap distribution using jackknife-based acceleration. Most accurate when the
+#'     bootstrap distribution is skewed, but computationally more expensive.
+#'
+#' When hypothesis testing is requested (i.e., `alternative` is not `"none"`),
+#' the p-value is computed using the method that matches the selected `boot_ci`,
+#' ensuring that p < alpha if and only if the corresponding confidence interval
+#' excludes the null value (CI inversion principle). Previously, all bootstrap
+#' CI methods used the studentized (pivot) p-value, which could produce p-values
+#' inconsistent with non-studentized CIs.
 #'
 #' The function supports various SMD variants:
 #'   * Classic standardized mean difference (bias_correction = FALSE)
@@ -47,16 +94,42 @@
 #'   * Two-sample independent design: Standardizes the difference between two group means
 #'   * Paired samples design: Standardizes the mean difference between paired observations
 #'
+#' The `denom` parameter provides a direct way to select the standardization denominator.
+#' When `denom` is not "auto", it takes precedence over the `glass`, `rm_correction`, and
+#' `var.equal` arguments, which are overridden as needed. A message is emitted if any
+#' explicitly provided arguments are overridden. The `bias_correction` argument is always
+#' respected regardless of `denom`.
+#'
 #' For detailed information on calculation methods, see `vignette("SMD_calcs")`.
 #'
-#' @return A data frame containing the following information:
-#'   * estimate: The SMD calculated from the original data
-#'   * bias: Estimated bias (difference between original estimate and median of bootstrap estimates)
-#'   * SE: Standard error estimated from the bootstrap distribution
-#'   * lower.ci: Lower bound of the bootstrap confidence interval
-#'   * upper.ci: Upper bound of the bootstrap confidence interval
-#'   * conf.level: Confidence level (1-alpha)
-#'   * boot_ci: The bootstrap confidence interval method used
+#' @references
+#' Algina, J., Keselman, H. J., & Penfield, R. D. (2005). An alternative to Cohen's
+#'   standardized mean difference effect size: A robust parameter and confidence interval
+#'   in the two independent groups case. \emph{Psychological Methods}, \emph{10}(3), 317-328.
+#'
+#' @return
+#' If `output = "htest"` (default), returns a list with class `"htest"` containing:
+#'   - estimate: The SMD estimate (Cohen's d, Hedges' g, or Glass's delta)
+#'   - stderr: Standard error estimated from the bootstrap distribution
+#'   - conf.int: Bootstrap confidence interval with conf.level attribute
+#'   - alternative: A character string describing the alternative hypothesis
+#'   - method: A character string indicating what type of test was performed
+#'   - note: A character string describing the bootstrap CI method used
+#'   - boot: The bootstrap distribution of SMD estimates
+#'   - data.name: A character string giving the name(s) of the data
+#'   - call: The matched call
+#'   - statistic: z-statistic (only if alternative != "none")
+#'   - p.value: Bootstrap p-value (only if alternative != "none")
+#'   - null.value: The specified hypothesized value(s) (only if alternative != "none")
+#'
+#' If `output = "data.frame"`, returns a data frame containing:
+#'   - estimate: The SMD calculated from the original data
+#'   - bias: Estimated bias (difference between original estimate and median of bootstrap estimates)
+#'   - SE: Standard error estimated from the bootstrap distribution
+#'   - lower.ci: Lower bound of the bootstrap confidence interval
+#'   - upper.ci: Upper bound of the bootstrap confidence interval
+#'   - conf.level: Confidence level (1-alpha)
+#'   - boot_ci: The bootstrap confidence interval method used
 #'
 #' @examples
 #' # Example 1: Independent groups comparison with studentized bootstrap CI
@@ -100,12 +173,30 @@
 #'                       boot_ci = "stud",
 #'                       R = 999)
 #'
+#' # Example 5: Two-sided hypothesis test
+#' result <- boot_smd_calc(x = group1, y = group2,
+#'                       alternative = "two.sided",
+#'                       null.value = 0,
+#'                       R = 999)
+#'
+#' # Example 6: Equivalence test with bootstrap
+#' result <- boot_smd_calc(x = group1, y = group2,
+#'                       alternative = "equivalence",
+#'                       null.value = c(-0.5, 0.5),
+#'                       R = 999)
+#'
+#' # Example 7: Legacy data.frame output
+#' result <- boot_smd_calc(x = group1, y = group2,
+#'                       output = "data.frame",
+#'                       R = 999)
+#'
 #' @family effect sizes
 #' @name boot_smd_calc
 #' @export boot_smd_calc
 
 # Bootstrap -------
 
+# TODO: add xname and yname arguments to allow user-specified group labels
 #smd_calc <- setClass("smd_calc")
 boot_smd_calc <- function(x, ...,
                           paired = FALSE,
@@ -114,8 +205,15 @@ boot_smd_calc <- function(x, ...,
                           bias_correction = TRUE,
                           rm_correction = FALSE,
                           glass = NULL,
-                          boot_ci = c("stud","basic","perc"),
-                          R = 1999){
+                          denom = c("auto", "z", "rm", "pooled", "avg",
+                                    "glass1", "glass2"),
+                          boot_ci = c("stud","basic","perc","bca"),
+                          R = 1999,
+                          output = c("htest", "data.frame"),
+                          null.value = 0,
+                          alternative = c("none", "two.sided", "less", "greater",
+                                          "equivalence", "minimal.effect"),
+                          tr = 0){
   UseMethod("boot_smd_calc")
 }
 
@@ -133,10 +231,104 @@ boot_smd_calc.default = function(x,
                                  bias_correction = TRUE,
                                  rm_correction = FALSE,
                                  glass = NULL,
-                                 boot_ci = c("stud","basic","perc"),
+                                 denom = c("auto", "z", "rm", "pooled", "avg",
+                                           "glass1", "glass2"),
+                                 boot_ci = c("stud","basic","perc","bca"),
                                  R = 1999,
+                                 output = c("htest", "data.frame"),
+                                 null.value = 0,
+                                 alternative = c("none", "two.sided", "less", "greater",
+                                                 "equivalence", "minimal.effect"),
+                                 tr = 0,
                                  ...) {
+  denom = match.arg(denom)
   boot_ci = match.arg(boot_ci)
+  output = match.arg(output)
+  alternative = match.arg(alternative)
+
+  # Validate tr
+  if (!is.numeric(tr) || length(tr) != 1 || tr < 0 || tr >= 0.5) {
+    stop("'tr' must be a single numeric value in [0, 0.5)")
+  }
+
+  # Capture explicit-pass status before any modifications
+  var.equal_explicit <- !missing(var.equal)
+  rm_correction_explicit <- !missing(rm_correction)
+  glass_explicit <- !missing(glass)
+
+  if((denom == "auto" & (!is.null(glass))) || denom == "glass1" || denom == "glass2" ){
+    if(rm_correction){
+    origin_author_text = "bias-corrected Glass's"
+    } else{
+      origin_author_text = "Glass's"
+    }
+  } else {
+    if(bias_correction){
+      origin_author_text = "Hedges's"
+    } else{
+      origin_author_text = "Cohen's"
+    }
+  }
+
+  # Determine sample_type early for denom resolution
+  if(is.null(y)){
+    sample_type = "One Sample"
+  } else if(paired == TRUE) {
+    sample_type = "Paired Sample"
+  } else {
+    sample_type = "Two Sample"
+  }
+
+  # Resolve denom ONCE - messages emitted here, not in loop
+  resolved <- resolve_denom(
+    denom = denom,
+    sample_type = sample_type,
+    var.equal = var.equal,
+    rm_correction = rm_correction,
+    glass = if (glass_explicit) glass else NULL,
+    var.equal_explicit = var.equal_explicit,
+    rm_correction_explicit = rm_correction_explicit,
+    glass_explicit = glass_explicit
+  )
+
+  for (msg in resolved$messages) message(msg)
+
+  # Apply resolved values for all subsequent smd_calc calls
+  var.equal <- resolved$var.equal
+  rm_correction <- resolved$rm_correction
+  glass <- resolved$glass
+
+  # tr > 0 with rm denom
+  if (tr > 0 && isTRUE(rm_correction)) {
+    stop("The repeated measures denominator (denom = 'rm') is not currently supported with trimming (tr > 0). ",
+         "Consider using denom = 'z' for paired designs with trimming.")
+  }
+
+  # Handle equivalence/minimal.effect bounds
+  if (alternative %in% c("equivalence", "minimal.effect")) {
+    if (length(null.value) != 2) {
+      stop("For equivalence or minimal.effect testing, null.value must be a vector of two values (lower and upper bounds)")
+    }
+    low_bound <- min(null.value)
+    high_bound <- max(null.value)
+    conf.level <- 1 - alpha * 2
+  } else {
+    if (length(null.value) > 1) {
+      warning("null.value has length > 1; only the first element will be used")
+      null.value <- null.value[1]
+    }
+    low_bound <- null.value
+    high_bound <- null.value
+    conf.level <- 1 - alpha
+  }
+
+  # Get data name
+  if (!is.null(y)) {
+    dname <- paste(deparse(substitute(x)), "and", deparse(substitute(y)))
+  } else {
+    dname <- deparse(substitute(x))
+  }
+
   if(paired == TRUE && !missing(y)){
     i1 <- x
     i2 <- y
@@ -151,7 +343,9 @@ boot_smd_calc.default = function(x,
                        bias_correction = bias_correction,
                        rm_correction = rm_correction,
                        glass = glass,
-                       smd_ci = "z")
+                       tr = tr,
+                       smd_ci = "z",
+                       output = "data.frame")
 
     boots = c()
     boots_se = c()
@@ -167,7 +361,9 @@ boot_smd_calc.default = function(x,
                           bias_correction = bias_correction,
                           rm_correction = rm_correction,
                           glass = glass,
-                          smd_ci = "z")
+                          tr = tr,
+                          smd_ci = "z",
+                          output = "data.frame")
       boots = c(boots, res_boot$estimate)
       boots_se = c(boots_se, res_boot$SE)
     }
@@ -190,7 +386,9 @@ boot_smd_calc.default = function(x,
                        bias_correction = bias_correction,
                        rm_correction = rm_correction,
                        glass = glass,
-                       smd_ci = "z")
+                       tr = tr,
+                       smd_ci = "z",
+                       output = "data.frame")
 
     boots = c()
     boots_se = c()
@@ -210,7 +408,9 @@ boot_smd_calc.default = function(x,
                           bias_correction = bias_correction,
                           rm_correction = rm_correction,
                           glass = glass,
-                          smd_ci = "z")
+                          tr = tr,
+                          smd_ci = "z",
+                          output = "data.frame")
       boots = c(boots, res_boot$estimate)
       boots_se = c(boots_se, res_boot$SE)
     }
@@ -227,7 +427,9 @@ boot_smd_calc.default = function(x,
                        bias_correction = bias_correction,
                        rm_correction = rm_correction,
                        glass = glass,
-                       smd_ci = "z")
+                       tr = tr,
+                       smd_ci = "z",
+                       output = "data.frame")
 
     boots = c()
     boots_se = c()
@@ -243,33 +445,262 @@ boot_smd_calc.default = function(x,
                           bias_correction = bias_correction,
                           rm_correction = rm_correction,
                           glass = glass,
-                          smd_ci = "z")
+                          tr = tr,
+                          smd_ci = "z",
+                          output = "data.frame")
       boots = c(boots, res_boot$estimate)
       boots_se = c(boots_se, res_boot$SE)
     }
 
   }
 
+  # Jackknife for BCa (if needed)
+  if (boot_ci == "bca") {
+    if (paired == TRUE && !missing(y)) {
+      # Paired: delete one pair at a time
+      n_jack <- nrow(data)
+      jack_est <- numeric(n_jack)
+      for (j in seq_len(n_jack)) {
+        res_jack <- smd_calc(x = data$x[-j],
+                             y = data$y[-j],
+                             paired = paired,
+                             var.equal = var.equal,
+                             alpha = alpha,
+                             mu = mu,
+                             bias_correction = bias_correction,
+                             rm_correction = rm_correction,
+                             glass = glass,
+                             tr = tr,
+                             smd_ci = "z",
+                             output = "data.frame")
+        jack_est[j] <- res_jack$estimate
+      }
+    } else if (!missing(y)) {
+      # Two-sample: pooled jackknife (delete one from combined)
+      n1 <- length(i1)
+      n2 <- length(i2)
+      n_total <- n1 + n2
+      jack_est <- numeric(n_total)
+      for (j in seq_len(n1)) {
+        res_jack <- smd_calc(x = i1[-j],
+                             y = i2,
+                             paired = paired,
+                             var.equal = var.equal,
+                             alpha = alpha,
+                             mu = mu,
+                             bias_correction = bias_correction,
+                             rm_correction = rm_correction,
+                             glass = glass,
+                             tr = tr,
+                             smd_ci = "z",
+                             output = "data.frame")
+        jack_est[j] <- res_jack$estimate
+      }
+      for (j in seq_len(n2)) {
+        res_jack <- smd_calc(x = i1,
+                             y = i2[-j],
+                             paired = paired,
+                             var.equal = var.equal,
+                             alpha = alpha,
+                             mu = mu,
+                             bias_correction = bias_correction,
+                             rm_correction = rm_correction,
+                             glass = glass,
+                             tr = tr,
+                             smd_ci = "z",
+                             output = "data.frame")
+        jack_est[n1 + j] <- res_jack$estimate
+      }
+    } else {
+      # One-sample: delete one observation at a time
+      n_jack <- length(x1)
+      jack_est <- numeric(n_jack)
+      for (j in seq_len(n_jack)) {
+        res_jack <- smd_calc(x = x1[-j],
+                             paired = paired,
+                             var.equal = var.equal,
+                             alpha = alpha,
+                             mu = mu,
+                             bias_correction = bias_correction,
+                             rm_correction = rm_correction,
+                             glass = glass,
+                             tr = tr,
+                             smd_ci = "z",
+                             output = "data.frame")
+        jack_est[j] <- res_jack$estimate
+      }
+    }
+  }
+
+  ci_alpha <- if(alternative %in% c("equivalence", "minimal.effect")) alpha * 2 else alpha
   ci = switch(boot_ci,
               "stud" = stud(boots_est = boots, boots_se = boots_se,
                             se0=raw_smd$SE[1L], t0 = raw_smd$estimate[1L],
-                            alpha),
-              "perc" = perc(boots, alpha),
-              "basic" = basic(boots, t0 = raw_smd$estimate[1L], alpha=alpha))
+                            alpha = ci_alpha),
+              "perc" = perc(boots, ci_alpha),
+              "basic" = basic(boots, t0 = raw_smd$estimate[1L],
+                              alpha = ci_alpha),
+              "bca" = bca_ci(boots_est = boots, t0 = raw_smd$estimate[1L],
+                             jack_est = jack_est, alpha = ci_alpha))
 
-  effsize = data.frame(
-    estimate = raw_smd$estimate,
-    bias = raw_smd$estimate - median(boots, na.rm=TRUE),
-    SE = sd(boots),
-    lower.ci = ci[1],
-    upper.ci = ci[2],
-    conf.level = c((1-alpha)),
-    boot_ci = boot_ci,
-    row.names = row.names(raw_smd)
-  )
+  # Derive int_denom from resolved state (mirrors smd_calc logic)
+  int_denom <- if (!is.null(glass) && glass %in% c("glass1", "glass2")) {
+    glass
+  } else if (sample_type != "Two Sample") {
+    if (isTRUE(rm_correction)) "rm" else "z"
+  } else {
+    "d"
+  }
 
+  # Derive denom_tag for estimate label subscript --------
+  denom_tag <- if (int_denom == "d") {
+    if (var.equal) "s" else "av"
+  } else if (int_denom %in% c("z", "rm")) {
+    int_denom
+  } else if (int_denom == "glass1") {
+    "x"
+  } else if (int_denom == "glass2") {
+    "y"
+  } else {
+    NULL
+  }
 
-  return(effsize = effsize)
+  # Determine SMD label --------
+  smd_type_letter <- if (bias_correction) "g" else "d"
+  trim_note <- if (tr > 0) paste0(", ", tr * 100, "% trimmed") else ""
+  smd_label <- paste0("SMD (", smd_type_letter, "[", denom_tag, "]", trim_note, ")")
+
+  # Bootstrap SE (for reporting in stderr field)
+  boot_se <- sd(boots, na.rm = TRUE)
+
+  # Studentized bootstrap pivot: centered at observed estimate, scaled by bootstrap SE
+  # Analogous to TSTAT in boot_t_test
+  TSTAT <- (boots - raw_smd$estimate[1L]) / boots_se
+
+  # Pre-compute BCa parameters for p-value use
+  z0 <- NULL; acc <- NULL
+  if (boot_ci == "bca") {
+    bca_par <- bca_params(boots, raw_smd$estimate[1L], jack_est)
+    z0 <- bca_par$z0; acc <- bca_par$acc
+  }
+
+  # Compute p-value (method-consistent with CI)
+  if (alternative != "none") {
+    est_val <- raw_smd$estimate[1L]
+    se_obs <- raw_smd$SE[1L]
+
+    if (alternative %in% c("two.sided", "greater", "less")) {
+      boot.pval <- boot_pvalue(bvec = boots, est = est_val, null = null.value,
+                               alternative = alternative, boot_ci = boot_ci,
+                               tvec = TSTAT, se_obs = se_obs,
+                               z0 = z0, acc = acc, nboot = R)
+    } else if (alternative == "equivalence") {
+      p_l <- boot_pvalue(bvec = boots, est = est_val, null = low_bound,
+                         alternative = "greater", boot_ci = boot_ci,
+                         tvec = TSTAT, se_obs = se_obs,
+                         z0 = z0, acc = acc, nboot = R)
+      p_u <- boot_pvalue(bvec = boots, est = est_val, null = high_bound,
+                         alternative = "less", boot_ci = boot_ci,
+                         tvec = TSTAT, se_obs = se_obs,
+                         z0 = z0, acc = acc, nboot = R)
+      boot.pval <- max(p_l, p_u)
+    } else if (alternative == "minimal.effect") {
+      p_l <- boot_pvalue(bvec = boots, est = est_val, null = high_bound,
+                         alternative = "greater", boot_ci = boot_ci,
+                         tvec = TSTAT, se_obs = se_obs,
+                         z0 = z0, acc = acc, nboot = R)
+      p_u <- boot_pvalue(bvec = boots, est = est_val, null = low_bound,
+                         alternative = "less", boot_ci = boot_ci,
+                         tvec = TSTAT, se_obs = se_obs,
+                         z0 = z0, acc = acc, nboot = R)
+      boot.pval <- min(p_l, p_u)
+    }
+
+    # Report z-observed (analogous to t-observed in boot_t_test)
+    if (alternative %in% c("equivalence", "minimal.effect")) {
+      z_obs_l <- (est_val - low_bound) / se_obs
+      z_obs_u <- (est_val - high_bound) / se_obs
+      if (alternative == "equivalence") {
+        z_stat <- if (p_l >= p_u) z_obs_l else z_obs_u
+      } else {
+        z_stat <- if (p_l <= p_u) z_obs_l else z_obs_u
+      }
+    } else {
+      z_stat <- (est_val - null.value) / se_obs
+    }
+  }
+
+  # Build output
+  if (output == "data.frame") {
+    effsize = data.frame(
+      estimate = raw_smd$estimate,
+      bias = raw_smd$estimate - median(boots, na.rm=TRUE),
+      SE = sd(boots),
+      lower.ci = ci[1],
+      upper.ci = ci[2],
+      conf.level = conf.level,
+      boot_ci = boot_ci,
+      row.names = row.names(raw_smd)
+    )
+    return(effsize)
+
+  } else {
+    # htest output
+    estimate <- raw_smd$estimate
+    names(estimate) <- smd_label
+
+    conf.int <- c(ci[1], ci[2])
+    attr(conf.int, "conf.level") <- conf.level
+
+    # Compute SMD notation label for method description
+    XNAME <- "x"
+    YNAME <- if (!is.null(y)) "y" else NULL
+    sd_label <- resolve_sd_label(denom, int_denom,
+                                 xname = XNAME,
+                                 yname = if (!is.null(y)) "y" else "x",
+                                 var.equal = var.equal)
+    notation <- smd_notation_label(xname = XNAME, yname = YNAME, denom_label = sd_label)
+
+    # Merge notation into the SMD label: "SMD (g[av]=(x-y)/SD_avg)"
+    smd_method_label <- paste0("bootstrapped Standardized Mean Difference (SMD; ", origin_author_text, " ", smd_type_letter, "[", denom_tag, "]=", notation, trim_note, ")")
+
+    #method_suffix <- if (alternative != "none") "test" else "estimate with CI"
+    # removed suffix to avoid redundancy with method description in htest output, which already indicates the test type and CI level
+    method_desc <- paste0(sample_type, " ", smd_method_label)
+
+    note_text <- paste0("Bootstrap CI: ", boot_ci)
+
+    rval <- list(
+      estimate = estimate,
+      stderr = boot_se,
+      conf.int = conf.int,
+      alternative = alternative,
+      method = method_desc,
+      note = note_text,
+      boot = boots,
+      data.name = dname,
+      call = match.call()
+    )
+
+    if (alternative != "none") {
+      names(z_stat) <- "z-observed"
+
+      if (alternative %in% c("equivalence", "minimal.effect")) {
+        null_val <- c(low_bound, high_bound)
+        names(null_val) <- c("lower bound", "upper bound")
+      } else {
+        null_val <- null.value
+        names(null_val) <- "SMD"
+      }
+
+      rval$statistic <- z_stat
+      rval$p.value <- boot.pval
+      rval$null.value <- null_val
+    }
+
+    class(rval) <- "htest"
+    return(rval)
+  }
 
 }
 
@@ -286,7 +717,7 @@ boot_smd_calc.formula = function(formula,
      || (length(formula) != 3L)
      || (length(attr(terms(formula[-2L]), "term.labels")) != 1L))
     stop("'formula' missing or incorrect")
-  
+
   # Check for paired argument in ... and warn user
   dots <- list(...)
   if("paired" %in% names(dots)){
@@ -294,7 +725,7 @@ boot_smd_calc.formula = function(formula,
       message("Using 'paired = TRUE' with the formula interface is not recommended. Please ensure your data is sorted appropriately to make the correct paired comparison.")
     }
   }
-  
+
   m <- match.call(expand.dots = FALSE)
   if(is.matrix(eval(m$data, parent.frame())))
     m$data <- as.data.frame(data)
@@ -310,7 +741,32 @@ boot_smd_calc.formula = function(formula,
     stop("grouping factor must have exactly 2 levels")
   DATA <- setNames(split(mf[[response]], g), c("x", "y"))
   y <- do.call("boot_smd_calc", c(DATA, list(...)))
-  #y$data.name <- DNAME
+
+  # Update data.name and relabel notation in method string for htest output
+  if (inherits(y, "htest")) {
+    y$data.name <- DNAME
+
+    # Replace generic "(x"/"(y" notation with actual group names
+    XNAME <- levels(g)[1]
+    YNAME <- levels(g)[2]
+    xq <- quote_if_numeric(XNAME)
+    yq <- quote_if_numeric(YNAME)
+    y$method <- gsub("=\\(x-y\\)", paste0("=(", xq, "-", yq, ")"), y$method)
+    y$method <- gsub("=\\(x\\)", paste0("=(", xq, ")"), y$method)
+    y$method <- gsub("/SD_x\\)", paste0("/SD_", xq, ")"), y$method)
+    y$method <- gsub("/SD_y\\)", paste0("/SD_", yq, ")"), y$method)
+
+    # Replace generic group names in estimate label and method string
+    # (Glass bracket notation: [x] -> [A], [y] -> [B])
+    est_name <- names(y$estimate)
+    est_name <- gsub("\\[x\\]", paste0("[", xq, "]"), est_name)
+    est_name <- gsub("\\[y\\]", paste0("[", yq, "]"), est_name)
+    names(y$estimate) <- est_name
+
+    y$method <- gsub("\\[x\\]", paste0("[", xq, "]"), y$method)
+    y$method <- gsub("\\[y\\]", paste0("[", yq, "]"), y$method)
+  }
+
   y
 
 }

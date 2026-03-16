@@ -6,7 +6,7 @@ test_that("Equivalence F-tests",{
   data('hawthorne')
   side_data = hawthorne
   hush = function(code) {
-    sink("NUL") # use /dev/null in UNIX
+    sink(nullfile())
     tmp = code
     sink()
     return(tmp)

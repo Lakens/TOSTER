@@ -3,7 +3,7 @@
 # need hush function to run print through examples
 
 hush = function(code) {
-  sink("NUL") # use /dev/null in UNIX
+  sink(nullfile())
   tmp = code
   sink()
   return(tmp)
@@ -12,7 +12,7 @@ hush = function(code) {
 test_that("Run examples for one sample", {
 
   hush = function(code) {
-    sink("NUL") # use /dev/null in UNIX
+    sink(nullfile())
     tmp = code
     sink()
     return(tmp)
@@ -41,11 +41,8 @@ test_that("Run examples for one sample", {
                  low_eqbound = -.5,
                  high_eqbound = .5)
   test1_smd = smd_calc(x = samp1,
-                       alpha = .1)
-  test1_smd_boot = boot_smd_calc(x = samp1,
                        alpha = .1,
-                       R = 99)
-  expect_equal(test1_smd$estimate, test1_smd_boot$estimate)
+                       output = "data.frame")
   expect_equal(test1_smd$estimate, test1$effsize$estimate[2])
   expect_equal(test1_smd$lower.ci, test1$effsize$lower.ci[2])
   expect_equal(test1_smd$upper.ci, test1$effsize$upper.ci[2])
@@ -270,11 +267,19 @@ test_that("Run examples for one sample", {
 
 })
 
+test_that("boot_smd_calc one sample matches smd_calc", {
+  skip_on_cran()
+  set.seed(3164964)
+  samp1 = rnorm(33)
+  test1_smd = smd_calc(x = samp1, alpha = .1, output = "data.frame")
+  test1_smd_boot = boot_smd_calc(x = samp1, alpha = .1, R = 99, output = "data.frame")
+  expect_equal(test1_smd$estimate, test1_smd_boot$estimate)
+})
 
 test_that("Run examples for two sample", {
 
   hush = function(code) {
-    sink("NUL") # use /dev/null in UNIX
+    sink(nullfile())
     tmp = code
     sink()
     return(tmp)
@@ -304,32 +309,8 @@ test_that("Run examples for two sample", {
 
   test1_smd = smd_calc(x = samp1,
                               y = samp2,
-                       alpha = .1)
-
-  test1_smd_boot_stud = boot_smd_calc(x = samp1,
-                       y = samp2,
                        alpha = .1,
-                       boot_ci = "stud",
-                       R = 99)
-  test1_smd_boot_basic = boot_smd_calc(x = samp1,
-                                      y = samp2,
-                                      alpha = .1,
-                                      boot_ci = "b",
-                                      R = 99)
-  expect_error(boot_smd_calc(x = samp1,
-                             y = samp2,
-                             alpha = .1,
-                             boot_ci = "n",
-                             R = 99))
-  test1_smd_boot_perc = boot_smd_calc(x = samp1,
-                                      y = samp2,
-                                      alpha = .1,
-                                      boot_ci = "p",
-                                      R = 99)
-  expect_equal(rep(test1_smd$estimate,3),
-               c(test1_smd_boot_stud$estimate,
-                 test1_smd_boot_basic$estimate,
-                 test1_smd_boot_perc$estimate))
+                       output = "data.frame")
 
   expect_error(smd_calc(x = samp1,
                         y = samp2,
@@ -555,39 +536,8 @@ test_that("Run examples for two sample", {
   test1_smd = smd_calc(formula = y ~ group,
                        data = df_samp,
                        var.equal = TRUE,
-                       bias_correction = FALSE)
-  test1_smd_boot_stud = boot_smd_calc(x = samp1,
-                                      y = samp2,
-                                      alpha = .1,
-                                      boot_ci = "stud",
-                                      R = 99,
-                                      var.equal = TRUE,
-                                      bias_correction = FALSE)
-  test1_smd_boot_basic = boot_smd_calc(x = samp1,
-                                       y = samp2,
-                                       alpha = .1,
-                                       boot_ci = "b",
-                                       R = 99,
-                                       var.equal = TRUE,
-                                       bias_correction = FALSE)
-  expect_error(boot_smd_calc(x = samp1,
-                             y = samp2,
-                             alpha = .1,
-                             boot_ci = "n",
-                             R = 99,
-                             var.equal = TRUE,
-                             bias_correction = FALSE))
-  test1_smd_boot_perc = boot_smd_calc(x = samp1,
-                                      y = samp2,
-                                      alpha = .1,
-                                      boot_ci = "p",
-                                      R = 99,
-                                      var.equal = TRUE,
-                                      bias_correction = FALSE)
-  expect_equal(rep(test1_smd$estimate,3),
-               c(test1_smd_boot_stud$estimate,
-                 test1_smd_boot_basic$estimate,
-                 test1_smd_boot_perc$estimate))
+                       bias_correction = FALSE,
+                       output = "data.frame")
   # test htest
   ash = as_htest(test1)
   test2 = suppressMessages( t_TOST(formula = y ~ group,
@@ -652,6 +602,33 @@ test_that("Run examples for two sample", {
 
 })
 
+test_that("boot_smd_calc two sample matches smd_calc", {
+  skip_on_cran()
+  set.seed(76584441)
+  samp1 = rnorm(25)
+  samp2 = rnorm(25)
+  test1_smd = smd_calc(x = samp1, y = samp2, var.equal = TRUE,
+                       bias_correction = FALSE, output = "data.frame")
+  test1_smd_boot_stud = boot_smd_calc(x = samp1, y = samp2, alpha = .1,
+                                      boot_ci = "stud", R = 99,
+                                      var.equal = TRUE, bias_correction = FALSE,
+                                      output = "data.frame")
+  test1_smd_boot_basic = boot_smd_calc(x = samp1, y = samp2, alpha = .1,
+                                       boot_ci = "basic", R = 99,
+                                       var.equal = TRUE, bias_correction = FALSE,
+                                       output = "data.frame")
+  expect_error(boot_smd_calc(x = samp1, y = samp2, alpha = .1,
+                             boot_ci = "n", R = 99,
+                             var.equal = TRUE, bias_correction = FALSE))
+  test1_smd_boot_perc = boot_smd_calc(x = samp1, y = samp2, alpha = .1,
+                                      boot_ci = "p", R = 99,
+                                      var.equal = TRUE, bias_correction = FALSE,
+                                      output = "data.frame")
+  expect_equal(rep(test1_smd$estimate, 3),
+               c(test1_smd_boot_stud$estimate,
+                 test1_smd_boot_basic$estimate,
+                 test1_smd_boot_perc$estimate))
+})
 
 test_that("Run examples for paired samples", {
 
@@ -676,37 +653,8 @@ test_that("Run examples for paired samples", {
   test1_smd = smd_calc(x = samp1,
                  y = samp2,
                  paired = TRUE,
-                 alpha = .1)
-  test1_smd_boot_stud = boot_smd_calc(x = samp1,
-                                      y = samp2,
-                                      paired = TRUE,
-                                      alpha = .1,
-                                      R = 99)
-  test1_smd_boot_basic = boot_smd_calc(x = samp1,
-                                       y = samp2,
-                                       paired = TRUE,
-                                       alpha = .1,
-                                       boot_ci = "b",
-                                       R = 99)
-  expect_error(boot_smd_calc(x = samp1,
-                             y = samp2,
-                             alpha = .1,
-                             boot_ci = "n",
-                             paired = TRUE,
-                             R = 99,
-                             var.equal = TRUE,
-                             bias_correction = FALSE))
-  test1_smd_boot_perc = boot_smd_calc(x = samp1,
-                                      y = samp2,
-                                      paired = TRUE,
-                                      alpha = .1,
-                                      boot_ci = "p",
-                                      R = 99)
-  expect_equal(rep(test1_smd$estimate,3),
-               c(test1_smd_boot_stud$estimate,
-                 test1_smd_boot_basic$estimate,
-                 test1_smd_boot_perc$estimate))
-
+                 alpha = .1,
+                 output = "data.frame")
   expect_equal(test1_smd$estimate, test1$effsize$estimate[2])
   expect_equal(test1_smd$lower.ci, test1$effsize$lower.ci[2])
   expect_equal(test1_smd$upper.ci, test1$effsize$upper.ci[2])
@@ -1011,6 +959,31 @@ test_that("Run examples for paired samples", {
   des = hush(describe(test4))
   p1 = plot(test4)
 
+})
+
+test_that("boot_smd_calc paired matches smd_calc", {
+  skip_on_cran()
+  set.seed(789461245)
+  samp1 = rnorm(25)
+  samp2 = rnorm(25)
+  test1_smd = smd_calc(x = samp1, y = samp2, paired = TRUE,
+                       alpha = .1, output = "data.frame")
+  test1_smd_boot_stud = boot_smd_calc(x = samp1, y = samp2, paired = TRUE,
+                                      alpha = .1, R = 99, output = "data.frame")
+  test1_smd_boot_basic = boot_smd_calc(x = samp1, y = samp2, paired = TRUE,
+                                       alpha = .1, boot_ci = "basic",
+                                       R = 99, output = "data.frame")
+  expect_error(boot_smd_calc(x = samp1, y = samp2, alpha = .1,
+                             boot_ci = "n", paired = TRUE,
+                             R = 99, var.equal = TRUE,
+                             bias_correction = FALSE))
+  test1_smd_boot_perc = boot_smd_calc(x = samp1, y = samp2, paired = TRUE,
+                                      alpha = .1, boot_ci = "p",
+                                      R = 99, output = "data.frame")
+  expect_equal(rep(test1_smd$estimate, 3),
+               c(test1_smd_boot_stud$estimate,
+                 test1_smd_boot_basic$estimate,
+                 test1_smd_boot_perc$estimate))
 })
 
 test_that("Run examples for plot_smd", {
@@ -1621,9 +1594,17 @@ test_that("Formula methods reject paired = TRUE", {
     "Using 'paired = TRUE' with the formula interface is not recommended"
   )
   
+  # sleep data has complete separation after zero-exclusion, so use
+
+  # custom data with mixed-sign differences for boot_ses_calc
+  set.seed(42)
+  df_mixed <- data.frame(
+    val = c(rnorm(10), rnorm(10, mean = 0.3)),
+    grp = factor(rep(c("A", "B"), each = 10))
+  )
   expect_message(
-    boot_ses_calc(extra ~ group, data = sleep, paired = TRUE, R = 10),
+    hush(boot_ses_calc(val ~ grp, data = df_mixed, paired = TRUE, R = 10)),
     "Using 'paired = TRUE' with the formula interface is not recommended"
   )
-  
+
 })

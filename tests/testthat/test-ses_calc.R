@@ -1,7 +1,7 @@
 # Tests for ses_calc, boot_ses_calc, and helper functions
 
 hush = function(code) {
-  sink("NUL") # use /dev/null in UNIX
+  sink(nullfile())
   tmp = code
   sink()
   return(tmp)
@@ -35,10 +35,12 @@ test_that("rbs_calc: one-sample with mu shift", {
   set.seed(8494)
   x <- rnorm(30, mean = 2)
 
-  # Large positive mean should give positive rb when compared to 0
-
+  # rbs_calc paired convention: z = (x - y) - mu
+  # When x=zeros, y=positive_data: z is negative, giving negative rho
+  # ses_calc swaps args (passes y,x) so end-user sees positive rb for positive mean
+  # Here we test the raw internal convention
   r <- TOSTER:::rbs_calc(x = rep(0, length(x)), y = x, mu = 0, paired = TRUE)
-  expect_true(r > 0)
+  expect_true(r < 0)
 })
 
 test_that("Transformation round-trips", {
@@ -153,9 +155,9 @@ test_that("ses_compute_agresti: boundary correction applied", {
   y <- c(1, 2, 3)
   res <- TOSTER:::ses_compute_agresti(x, y, paired = FALSE)
   expect_true(res$boundary_corrected)
-  # cstat should be near 1 but corrected
+  # cstat should be near 1 but corrected: 1 - 0.5/(n1*n2) = 1 - 0.5/9 ≈ 0.944
   expect_true(res$cstat < 1)
-  expect_true(res$cstat > 0.99)
+  expect_true(res$cstat > 0.9)
 })
 
 test_that("ses_ci_logodds returns valid CIs", {
@@ -438,6 +440,7 @@ test_that("ses_calc: fisher method hypothesis test", {
 # === boot_ses_calc tests ===
 
 test_that("boot_ses_calc: default output is htest with no hypothesis test", {
+  skip_on_cran()
   set.seed(200)
   x <- rnorm(15)
   y <- rnorm(15, mean = 0.5)
@@ -458,6 +461,7 @@ test_that("boot_ses_calc: default output is htest with no hypothesis test", {
 })
 
 test_that("boot_ses_calc: hypothesis test when alternative specified", {
+  skip_on_cran()
   set.seed(201)
   x <- rnorm(15)
   y <- rnorm(15, mean = 0.8)
@@ -476,6 +480,7 @@ test_that("boot_ses_calc: hypothesis test when alternative specified", {
 })
 
 test_that("boot_ses_calc: point estimates match ses_calc", {
+  skip_on_cran()
   set.seed(202)
   x <- rnorm(20)
   y <- rnorm(20, mean = 0.5)
@@ -489,6 +494,7 @@ test_that("boot_ses_calc: point estimates match ses_calc", {
 })
 
 test_that("boot_ses_calc: all bootstrap CI methods work", {
+  skip_on_cran()
   set.seed(203)
   x <- rnorm(15)
   y <- rnorm(15, mean = 0.5)
@@ -502,6 +508,7 @@ test_that("boot_ses_calc: all bootstrap CI methods work", {
 })
 
 test_that("boot_ses_calc: data.frame output", {
+  skip_on_cran()
   set.seed(204)
   x <- rnorm(15)
   y <- rnorm(15, mean = 0.5)
@@ -513,9 +520,10 @@ test_that("boot_ses_calc: data.frame output", {
 })
 
 test_that("boot_ses_calc: paired samples", {
+  skip_on_cran()
   set.seed(205)
   x <- rnorm(15)
-  y <- x + rnorm(15, mean = 0.5, sd = 0.3)
+  y <- x + rnorm(15, mean = 0.3, sd = 1)
 
   res <- hush(boot_ses_calc(x = x, y = y, paired = TRUE, R = 99))
   expect_s3_class(res, "htest")
@@ -523,6 +531,7 @@ test_that("boot_ses_calc: paired samples", {
 })
 
 test_that("boot_ses_calc: one-sample", {
+  skip_on_cran()
   set.seed(206)
   x <- rnorm(15, mean = 1)
 
@@ -532,6 +541,7 @@ test_that("boot_ses_calc: one-sample", {
 })
 
 test_that("boot_ses_calc: equivalence testing", {
+  skip_on_cran()
   set.seed(207)
   x <- rnorm(20)
   y <- rnorm(20, mean = 0.1)
@@ -547,6 +557,7 @@ test_that("boot_ses_calc: equivalence testing", {
 })
 
 test_that("boot_ses_calc: minimal effect testing", {
+  skip_on_cran()
   set.seed(208)
   x <- rnorm(20, mean = 2)
   y <- rnorm(20)
@@ -561,6 +572,7 @@ test_that("boot_ses_calc: minimal effect testing", {
 })
 
 test_that("boot_ses_calc: equivalence requires two bounds", {
+  skip_on_cran()
   set.seed(209)
   x <- rnorm(15)
   y <- rnorm(15)
@@ -573,6 +585,7 @@ test_that("boot_ses_calc: equivalence requires two bounds", {
 })
 
 test_that("boot_ses_calc: complete separation stops with error", {
+  skip_on_cran()
   x <- c(10, 11, 12)
   y <- c(1, 2, 3)
   expect_error(
@@ -582,6 +595,7 @@ test_that("boot_ses_calc: complete separation stops with error", {
 })
 
 test_that("boot_ses_calc: formula interface", {
+  skip_on_cran()
   set.seed(210)
   df <- data.frame(
     val = c(rnorm(15), rnorm(15, mean = 0.5)),
@@ -593,6 +607,7 @@ test_that("boot_ses_calc: formula interface", {
 })
 
 test_that("boot_ses_calc: formula with paired warns", {
+  skip_on_cran()
   set.seed(211)
   df <- data.frame(
     val = c(rnorm(15), rnorm(15, mean = 0.5)),
@@ -605,6 +620,7 @@ test_that("boot_ses_calc: formula with paired warns", {
 })
 
 test_that("boot_ses_calc: one-sided alternatives", {
+  skip_on_cran()
   set.seed(212)
   x <- rnorm(20, mean = 2)
   y <- rnorm(20)
@@ -618,6 +634,7 @@ test_that("boot_ses_calc: one-sided alternatives", {
 })
 
 test_that("boot_ses_calc: agresti vs fisher se_method", {
+  skip_on_cran()
   set.seed(213)
   x <- rnorm(20)
   y <- rnorm(20, mean = 0.5)
@@ -630,6 +647,7 @@ test_that("boot_ses_calc: agresti vs fisher se_method", {
 })
 
 test_that("boot_ses_calc: boot component included in htest output", {
+  skip_on_cran()
   set.seed(214)
   x <- rnorm(15)
   y <- rnorm(15, mean = 0.5)
@@ -638,3 +656,691 @@ test_that("boot_ses_calc: boot component included in htest output", {
   expect_true(!is.null(res$boot))
   expect_equal(length(res$boot), 99)
 })
+
+
+# === Score method tests ===
+
+test_that("score method matches wilcox.test p-values", {
+  set.seed(300)
+  x <- rnorm(20)
+  y <- rnorm(25, mean = 0.5)
+
+  # With continuity correction
+  toster_p <- ses_calc(x, y, ses = "cstat", se_method = "score", correct = TRUE,
+                       alternative = "two.sided", null.value = 0.5)$p.value
+  wt_p <- wilcox.test(x, y, exact = FALSE, correct = TRUE)$p.value
+  expect_equal(toster_p, wt_p, tolerance = 1e-6)
+
+  # Without continuity correction
+  toster_p_nocorr <- ses_calc(x, y, ses = "cstat", se_method = "score", correct = FALSE,
+                              alternative = "two.sided", null.value = 0.5)$p.value
+  wt_p_nocorr <- wilcox.test(x, y, exact = FALSE, correct = FALSE)$p.value
+  expect_equal(toster_p_nocorr, wt_p_nocorr, tolerance = 1e-6)
+})
+
+test_that("score method matches wilcox.test with ties", {
+  # Ordinal data with ties
+  x_ord <- c(1, 1, 2, 2, 3, 3, 3, 4)
+  y_ord <- c(2, 3, 3, 3, 4, 4, 5, 5, 5)
+
+  toster_p <- ses_calc(x_ord, y_ord, ses = "cstat", se_method = "score", correct = TRUE,
+                       alternative = "two.sided", null.value = 0.5)$p.value
+  wt_p <- wilcox.test(x_ord, y_ord, exact = FALSE, correct = TRUE)$p.value
+  expect_equal(toster_p, wt_p, tolerance = 1e-6)
+})
+
+test_that("score method CI transforms correctly across scales", {
+  set.seed(301)
+  x <- rnorm(20)
+  y <- rnorm(20, mean = 0.5)
+
+  res_cstat <- ses_calc(x, y, ses = "cstat", se_method = "score", correct = FALSE)
+  res_rb <- ses_calc(x, y, ses = "rb", se_method = "score", correct = FALSE)
+
+  # rb CI = 2 * cstat CI - 1
+  expect_equal(as.numeric(res_rb$conf.int),
+               2 * as.numeric(res_cstat$conf.int) - 1,
+               tolerance = 1e-10)
+
+  # Estimate relationship
+  expect_equal(unname(res_rb$estimate),
+               2 * unname(res_cstat$estimate) - 1,
+               tolerance = 1e-10)
+})
+
+test_that("score method works for paired data", {
+  set.seed(302)
+  x <- rnorm(15)
+  y <- rnorm(15)
+
+  res <- ses_calc(x, y, paired = TRUE, ses = "cstat", se_method = "score")
+  expect_s3_class(res, "htest")
+  expect_true(res$estimate > 0 && res$estimate < 1)
+  expect_true(res$conf.int[1] < res$conf.int[2])
+})
+
+test_that("score method works for one-sample data", {
+  set.seed(303)
+  x <- rnorm(15, mean = 1)
+
+  res <- ses_calc(x, ses = "cstat", se_method = "score")
+  expect_s3_class(res, "htest")
+  expect_true(res$estimate > 0 && res$estimate < 1)
+  expect_true(res$conf.int[1] < res$conf.int[2])
+})
+
+test_that("score method handles boundaries naturally", {
+  # Complete separation: all x < y
+  x_sep <- 1:5
+  y_sep <- 6:10
+
+  res <- ses_calc(x_sep, y_sep, ses = "cstat", se_method = "score", correct = FALSE)
+
+  # Estimate should be 0 (all x < y means Pr(X > Y) = 0)
+  expect_equal(unname(res$estimate), 0, tolerance = 1e-10)
+  # CI lower should be 0
+  expect_equal(res$conf.int[1], 0, tolerance = 1e-10)
+  # CI upper should be > 0 (found via test inversion)
+  expect_true(res$conf.int[2] > 0)
+})
+
+test_that("score method one-sided alternatives", {
+  set.seed(304)
+  x <- rnorm(25, mean = 2)  # Clearly larger
+  y <- rnorm(25)
+
+  res_greater <- ses_calc(x, y, ses = "cstat", se_method = "score",
+                          alternative = "greater", null.value = 0.5)
+  res_less <- ses_calc(x, y, ses = "cstat", se_method = "score",
+                       alternative = "less", null.value = 0.5)
+
+  # With x >> y, cstat should be high (near 1)
+  expect_true(unname(res_greater$estimate) > 0.7)
+  # p-value for greater should be small, for less should be large
+  expect_true(res_greater$p.value < 0.05)
+  expect_true(res_less$p.value > 0.5)
+})
+
+test_that("score method equivalence testing", {
+  set.seed(305)
+  x <- rnorm(40)
+  y <- rnorm(40, mean = 0.1)
+
+  res_eq <- ses_calc(x, y, ses = "cstat", se_method = "score",
+                     alternative = "equivalence",
+                     null.value = c(0.3, 0.7))
+  expect_true(!is.null(res_eq$p.value))
+  expect_equal(length(res_eq$null.value), 2)
+
+  res_met <- ses_calc(x, y, ses = "cstat", se_method = "score",
+                      alternative = "minimal.effect",
+                      null.value = c(0.3, 0.7))
+  expect_true(!is.null(res_met$p.value))
+})
+
+test_that("score method all effect size types", {
+  set.seed(306)
+  x <- rnorm(25)
+  y <- rnorm(25, mean = 0.5)
+
+  for (ses_type in c("rb", "cstat", "odds", "logodds")) {
+    res <- ses_calc(x, y, ses = ses_type, se_method = "score")
+    expect_s3_class(res, "htest")
+    expect_true(is.numeric(res$estimate))
+    expect_true(!is.na(res$stderr))
+  }
+})
+
+test_that("correct parameter ignored for non-score methods", {
+  set.seed(307)
+  x <- rnorm(20)
+  y <- rnorm(20)
+
+  # Should produce message about ignoring correct parameter
+  expect_message(
+    ses_calc(x, y, se_method = "agresti", correct = TRUE),
+    "only used with se_method = 'score'"
+  )
+})
+
+
+# === Haldane boundary correction tests ===
+
+test_that("Haldane boundary correction applies correct shrinkage", {
+  # Two-sample complete separation
+  x_sep <- 1:5
+  y_sep <- 6:10
+  N_pairs <- 25
+  expected_p <- (N_pairs + 0.5) / (N_pairs + 1)  # = 25.5/26 ≈ 0.9808
+
+  expect_message(
+    res <- ses_calc(x_sep, y_sep, ses = "cstat", se_method = "agresti"),
+    "Complete separation detected"
+  )
+
+  # Point estimate should be corrected (not raw 1.0)
+  # Note: x < y means cstat = Pr(X > Y) = 0, so correction gives (0 + 0.5)/26
+  expected_corrected <- 0.5 / (N_pairs + 1)  # ≈ 0.0192
+  expect_equal(unname(res$estimate), expected_corrected, tolerance = 1e-4)
+
+  # CI should not be trivially narrow
+  expect_true(res$conf.int[2] - res$conf.int[1] > 0.05)
+
+  # SE should be positive
+  expect_true(res$stderr > 0)
+})
+
+test_that("Haldane boundary correction for paired data", {
+  # Paired complete separation
+  x_paired <- c(1, 2, 3, 4, 5)
+  y_paired <- c(6, 7, 8, 9, 10)
+
+  expect_message(
+    res <- ses_calc(x_paired, y_paired, paired = TRUE, ses = "cstat", se_method = "agresti"),
+    "Complete separation detected"
+  )
+
+  # Should get corrected estimate (not exactly 0 or 1)
+  expect_true(res$estimate > 0)
+  expect_true(res$estimate < 1)
+  # SE should be positive
+  expect_true(res$stderr > 0)
+})
+
+test_that("Haldane correction negligible for non-boundary cases", {
+  set.seed(308)
+  x <- rnorm(50)
+  y <- rnorm(50, mean = 0.5)
+
+  res <- ses_calc(x, y, ses = "cstat", se_method = "agresti")
+
+  # Compute raw estimate for comparison
+  r_raw <- TOSTER:::rbs_calc(x, y, mu = 0, paired = FALSE)
+  p_raw <- (r_raw + 1) / 2
+
+  # Estimate should match raw (no boundary correction applied)
+  expect_equal(as.numeric(res$estimate), p_raw, tolerance = 1e-10)
+})
+
+test_that("Haldane correction message mentions score method for two-sample", {
+  x_sep <- 1:5
+  y_sep <- 6:10
+
+  expect_message(
+    ses_calc(x_sep, y_sep, ses = "cstat", se_method = "agresti"),
+    "[Ss]core"  # Case-insensitive match for "Score" or "score"
+  )
+})
+
+test_that("to_cstat transformations work correctly", {
+  # cstat pass-through
+  expect_equal(TOSTER:::to_cstat(0.7, "cstat"), 0.7)
+
+  # rb -> cstat
+  expect_equal(TOSTER:::to_cstat(0, "rb"), 0.5)
+  expect_equal(TOSTER:::to_cstat(1, "rb"), 1)
+  expect_equal(TOSTER:::to_cstat(-1, "rb"), 0)
+  expect_equal(TOSTER:::to_cstat(0.4, "rb"), 0.7)
+
+  # odds -> cstat
+  expect_equal(TOSTER:::to_cstat(1, "odds"), 0.5)
+  expect_equal(TOSTER:::to_cstat(2, "odds"), 2/3)
+
+  # logodds -> cstat
+  expect_equal(TOSTER:::to_cstat(0, "logodds"), 0.5)
+  expect_equal(TOSTER:::to_cstat(log(2), "logodds"), 2/3)
+})
+
+test_that("wmw_tie_factor returns correct values", {
+  # No ties
+  x <- c(1, 3, 5)
+  y <- c(2, 4, 6)
+  expect_equal(TOSTER:::wmw_tie_factor(x, y), 1)
+
+  # All identical
+  x_eq <- rep(5, 5)
+  y_eq <- rep(5, 5)
+  expect_equal(TOSTER:::wmw_tie_factor(x_eq, y_eq), 0)
+})
+
+test_that("v_laph returns valid variance values", {
+  # At phi = 0.5 (null), variance should be positive
+  v_null <- TOSTER:::v_laph(0.5, tf = 1, n1 = 20, n2 = 20)
+  expect_true(v_null > 0)
+
+  # At boundaries, variance should be 0
+  v_0 <- TOSTER:::v_laph(0, tf = 1, n1 = 20, n2 = 20)
+  expect_equal(v_0, 0)
+
+  v_1 <- TOSTER:::v_laph(1, tf = 1, n1 = 20, n2 = 20)
+  expect_equal(v_1, 0)
+
+  # With ties (tf < 1), variance should be smaller
+  v_ties <- TOSTER:::v_laph(0.5, tf = 0.8, n1 = 20, n2 = 20)
+  expect_true(v_ties < v_null)
+})
+
+test_that("score_ci_wmw returns valid intervals", {
+  ci <- TOSTER:::score_ci_wmw(phi_hat = 0.6, tf = 1, n1 = 20, n2 = 20,
+                               conf.level = 0.95, correct = FALSE)
+  expect_equal(length(ci), 2)
+  expect_true(ci[1] < ci[2])
+  expect_true(ci[1] >= 0)
+  expect_true(ci[2] <= 1)
+  expect_true(ci[1] < 0.6)
+  expect_true(ci[2] > 0.6)
+})
+
+test_that("score_pvalue_wmw returns valid p-values", {
+  res <- TOSTER:::score_pvalue_wmw(phi_hat = 0.6, phi_null = 0.5,
+                                    tf = 1, n1 = 20, n2 = 20,
+                                    alternative = "two.sided", correct = FALSE)
+  expect_true(res$p.value >= 0)
+  expect_true(res$p.value <= 1)
+  expect_true(is.numeric(res$z.statistic))
+})
+
+# ses_calc updated labels --------
+
+test_that("ses_calc two-sample labels use P(X>Y) notation", {
+  set.seed(123)
+  x <- rnorm(20)
+  y <- rnorm(20, mean = 1)
+
+  res_rb <- ses_calc(x, y, ses = "rb")
+  expect_true(grepl("P(X>Y) - P(X<Y)", names(res_rb$estimate), fixed = TRUE))
+
+  res_cstat <- ses_calc(x, y, ses = "cstat")
+  expect_true(grepl("P(X>Y) + .5*P(X=Y)", names(res_cstat$estimate), fixed = TRUE))
+
+  res_odds <- ses_calc(x, y, ses = "odds")
+  expect_true(grepl("odds(", names(res_odds$estimate), fixed = TRUE))
+  expect_true(grepl("X>Y", names(res_odds$estimate), fixed = TRUE))
+
+  res_lo <- ses_calc(x, y, ses = "logodds")
+  expect_true(grepl("logodds(", names(res_lo$estimate), fixed = TRUE))
+  expect_true(grepl("X>Y", names(res_lo$estimate), fixed = TRUE))
+})
+
+test_that("ses_calc paired labels use P(X - Y>0) notation", {
+  data(sleep)
+  res <- with(sleep, ses_calc(extra[group == 1], extra[group == 2],
+                              paired = TRUE, ses = "cstat"))
+  # Paired ses_calc: difference-score notation P(X - Y>0) + .5*P(X - Y=0)
+  lbl <- names(res$estimate)
+  expect_true(grepl("X - Y", lbl, fixed = TRUE))
+  expect_true(grepl(">0)", lbl, fixed = TRUE))
+})
+
+test_that("ses_calc one-sample labels use P(X>0) notation", {
+  x <- rnorm(20, mean = 1)
+  res <- ses_calc(x, ses = "cstat")
+  # One-sample: P(X>0) + .5*P(X=0) — X is not numeric so unquoted
+  expect_true(grepl("P(X>0)", names(res$estimate), fixed = TRUE))
+  expect_true(grepl(">0)", names(res$estimate), fixed = TRUE))
+})
+
+test_that("ses_calc method string retains human-readable name", {
+  set.seed(123)
+  x <- rnorm(20)
+  y <- rnorm(20, mean = 1)
+  res <- ses_calc(x, y, ses = "rb")
+  expect_true(grepl("Rank-Biserial Correlation", res$method))
+})
+
+test_that("ses_calc data.frame output uses human-readable row names", {
+  set.seed(123)
+  x <- rnorm(20)
+  y <- rnorm(20, mean = 1)
+  res <- ses_calc(x, y, ses = "rb", output = "data.frame")
+  expect_equal(rownames(res), "Rank-Biserial Correlation")
+})
+
+test_that("ses_calc numeric values unchanged by label update", {
+  set.seed(42)
+  x <- rnorm(30)
+  y <- rnorm(30, mean = 0.5)
+
+  res <- ses_calc(x, y, ses = "rb")
+  expect_true(is.numeric(res$estimate))
+  expect_true(is.finite(res$estimate))
+})
+
+test_that("ses_calc formula method labels use actual group names", {
+  res <- ses_calc(mpg ~ am, data = mtcars, ses = "rb")
+  # Formula method should use quoted factor level names
+  expect_true(grepl("'0'", names(res$estimate), fixed = TRUE))
+  expect_true(grepl("'1'", names(res$estimate), fixed = TRUE))
+})
+
+# === Zero differences handling tests ===
+
+test_that("rbs_calc: paired excludes zero differences", {
+  # With zeros included, rbs_calc should give the same result as without zeros
+  z_full <- c(1, 2, 3, 4, 5, 0, 0, 0, 0, 0)
+  z_nz <- c(1, 2, 3, 4, 5)
+
+  rb_full <- TOSTER:::rbs_calc(rep(0, length(z_full)), z_full, mu = 0, paired = TRUE)
+  rb_nz <- TOSTER:::rbs_calc(rep(0, length(z_nz)), z_nz, mu = 0, paired = TRUE)
+  expect_equal(rb_full, rb_nz)
+})
+
+test_that("rbs_calc: paired all zeros returns zero", {
+  z_all_zero <- c(0, 0, 0, 0, 0)
+  rb <- TOSTER:::rbs_calc(rep(0, 5), z_all_zero, mu = 0, paired = TRUE)
+  expect_equal(rb, 0)
+})
+
+test_that("ses_calc one-sample with zeros produces non-degenerate CI", {
+  z <- c(-5, -4, -3, -2, -1, 0, 0, 0, 1, 2)
+  result <- ses_calc(z)
+  ci <- result$conf.int
+  expect_true(ci[2] - ci[1] < 2,
+              info = "CI should not span the full [-1, 1] range; likely variance bug with zeros")
+})
+
+test_that("ses_calc one-sample p-value is consistent with wilcox.test when zeros present", {
+  z <- c(-5, -4, -3, -2, -1, 0, 0, 0, 1, 2)
+  wt <- suppressWarnings(wilcox.test(z))
+  sc <- ses_calc(z, alternative = "two.sided")
+  expect_true(
+    (wt$p.value < 0.10 && sc$p.value < 0.10) || (wt$p.value >= 0.10 && sc$p.value >= 0.10),
+    info = paste0("Directional disagreement: wilcox.test p=", round(wt$p.value, 4),
+                  " vs ses_calc p=", round(sc$p.value, 4))
+  )
+})
+
+test_that("ses_calc paired with zero differences produces non-degenerate CI", {
+  x <- c(10, 20, 30, 40, 50, 60, 60, 60, 70, 80)
+  y <- c(15, 24, 33, 42, 51, 60, 60, 60, 69, 78)
+  result <- ses_calc(x = x, y = y, paired = TRUE)
+  ci <- result$conf.int
+  expect_true(ci[2] - ci[1] < 2,
+              info = "Paired CI should not span the full range when zero differences exist")
+})
+
+test_that("ses_calc one-sample without zeros is unaffected by fix", {
+  z <- c(-5, -3, -1, 2, 4, 6, 8, 10)
+  result <- ses_calc(z, alternative = "two.sided")
+  expect_true(result$conf.int[1] > -1)
+  expect_true(result$conf.int[2] < 1)
+  expect_true(is.finite(result$p.value))
+})
+
+test_that("adding zeros to one-sample data does not inflate SE", {
+  z_no_zeros <- c(-5, -4, -3, -2, -1)
+  z_with_zeros <- c(-5, -4, -3, -2, -1, 0, 0, 0)
+  se_no_zeros <- suppressMessages(ses_calc(z_no_zeros)$stderr)
+  se_with_zeros <- suppressMessages(ses_calc(z_with_zeros)$stderr)
+  expect_true(se_with_zeros < se_no_zeros * 5,
+              info = "SE with zeros should not be dramatically larger than without")
+})
+
+# === Paired score method tests ===
+
+test_that("paired score p-value matches wilcox.test (sleep data, no cc)", {
+  data(sleep)
+  x <- sleep$extra[sleep$group == 2]
+  y <- sleep$extra[sleep$group == 1]
+
+  wt <- wilcox.test(x, y, paired = TRUE, exact = FALSE, correct = FALSE)
+  res <- ses_calc(x = x, y = y, paired = TRUE, ses = "cstat",
+                  se_method = "score", correct = FALSE,
+                  alternative = "two.sided", null.value = 0.5)
+  expect_equal(res$p.value, wt$p.value, tolerance = 1e-6)
+})
+
+test_that("paired score p-value matches wilcox.test (sleep data, with cc)", {
+  data(sleep)
+  x <- sleep$extra[sleep$group == 2]
+  y <- sleep$extra[sleep$group == 1]
+
+  wt_cc <- wilcox.test(x, y, paired = TRUE, exact = FALSE, correct = TRUE)
+  res_cc <- ses_calc(x = x, y = y, paired = TRUE, ses = "cstat",
+                     se_method = "score", correct = TRUE,
+                     alternative = "two.sided", null.value = 0.5)
+  expect_equal(res_cc$p.value, wt_cc$p.value, tolerance = 1e-6)
+})
+
+test_that("paired score one-sided p-value matches wilcox.test", {
+  data(sleep)
+  x <- sleep$extra[sleep$group == 2]
+  y <- sleep$extra[sleep$group == 1]
+
+  # Score paired cstat computes P(X - Y > 0), which matches wilcox.test direction.
+  # "greater" in wilcox.test tests x - y > 0 => maps to "greater" in ses_calc.
+  wt_g <- wilcox.test(x, y, paired = TRUE, exact = FALSE, correct = FALSE,
+                      alternative = "greater")
+  res_g <- ses_calc(x = x, y = y, paired = TRUE, ses = "cstat",
+                    se_method = "score", correct = FALSE,
+                    alternative = "greater", null.value = 0.5)
+  expect_equal(res_g$p.value, wt_g$p.value, tolerance = 1e-6)
+
+  wt_l <- wilcox.test(x, y, paired = TRUE, exact = FALSE, correct = FALSE,
+                      alternative = "less")
+  res_l <- ses_calc(x = x, y = y, paired = TRUE, ses = "cstat",
+                    se_method = "score", correct = FALSE,
+                    alternative = "less", null.value = 0.5)
+  expect_equal(res_l$p.value, wt_l$p.value, tolerance = 1e-6)
+})
+
+test_that("paired score p-value matches wilcox.test (data with ties)", {
+  x <- c(1, 2, 2, 3, 4, 5, 5, 6)
+  y <- c(2, 2, 3, 3, 3, 4, 5, 5)
+
+  wt <- wilcox.test(x, y, paired = TRUE, exact = FALSE, correct = FALSE)
+  res <- ses_calc(x = x, y = y, paired = TRUE, ses = "cstat",
+                  se_method = "score", correct = FALSE,
+                  alternative = "two.sided", null.value = 0.5)
+  expect_equal(res$p.value, wt$p.value, tolerance = 1e-6)
+
+  wt_cc <- wilcox.test(x, y, paired = TRUE, exact = FALSE, correct = TRUE)
+  res_cc <- ses_calc(x = x, y = y, paired = TRUE, ses = "cstat",
+                     se_method = "score", correct = TRUE,
+                     alternative = "two.sided", null.value = 0.5)
+  expect_equal(res_cc$p.value, wt_cc$p.value, tolerance = 1e-6)
+})
+
+test_that("paired score p-value matches wilcox.test (one-sample)", {
+  x <- c(1.5, 2.3, 3.1, 0.8, 4.2, 2.7, 3.9, 1.1, 5.0, 2.5)
+
+  wt <- wilcox.test(x, mu = 0, exact = FALSE, correct = FALSE)
+  res <- ses_calc(x = x, ses = "cstat", mu = 0,
+                  se_method = "score", correct = FALSE,
+                  alternative = "two.sided", null.value = 0.5)
+  expect_equal(res$p.value, wt$p.value, tolerance = 1e-6)
+
+  wt_cc <- wilcox.test(x, mu = 0, exact = FALSE, correct = TRUE)
+  res_cc <- ses_calc(x = x, ses = "cstat", mu = 0,
+                     se_method = "score", correct = TRUE,
+                     alternative = "two.sided", null.value = 0.5)
+  expect_equal(res_cc$p.value, wt_cc$p.value, tolerance = 1e-6)
+})
+
+test_that("paired score p-value matches wilcox.test (heavy ties)", {
+  set.seed(123)
+  x <- sample(1:5, 20, replace = TRUE)
+  y <- sample(1:5, 20, replace = TRUE)
+
+  wt <- wilcox.test(x, y, paired = TRUE, exact = FALSE, correct = FALSE)
+  res <- ses_calc(x = x, y = y, paired = TRUE, ses = "cstat",
+                  se_method = "score", correct = FALSE,
+                  alternative = "two.sided", null.value = 0.5)
+  expect_equal(res$p.value, wt$p.value, tolerance = 1e-6)
+
+  wt_cc <- wilcox.test(x, y, paired = TRUE, exact = FALSE, correct = TRUE)
+  res_cc <- ses_calc(x = x, y = y, paired = TRUE, ses = "cstat",
+                     se_method = "score", correct = TRUE,
+                     alternative = "two.sided", null.value = 0.5)
+  expect_equal(res_cc$p.value, wt_cc$p.value, tolerance = 1e-6)
+})
+
+test_that("paired score CI/p-value coherence", {
+  set.seed(123)
+  x <- sample(1:5, 20, replace = TRUE)
+  y <- sample(1:5, 20, replace = TRUE)
+
+  # Get 90% CI (alpha = 0.05 with equivalence -> conf.level = 1 - 2*0.05 = 0.90)
+  res <- ses_calc(x = x, y = y, paired = TRUE, ses = "cstat",
+                  se_method = "score", alpha = 0.05,
+                  alternative = "equivalence",
+                  null.value = c(0.3, 0.7))
+
+  ci <- res$conf.int
+
+  # Test at lower bound: p for "greater" should be ~0.05
+  res_lo <- ses_calc(x = x, y = y, paired = TRUE, ses = "cstat",
+                     se_method = "score",
+                     alternative = "greater", null.value = ci[1])
+  expect_equal(res_lo$p.value, 0.05, tolerance = 1e-4)
+
+  # Test at upper bound: p for "less" should be ~0.05
+  res_hi <- ses_calc(x = x, y = y, paired = TRUE, ses = "cstat",
+                     se_method = "score",
+                     alternative = "less", null.value = ci[2])
+  expect_equal(res_hi$p.value, 0.05, tolerance = 1e-4)
+})
+
+test_that("paired score handles complete separation", {
+  # All x > y: P(X - Y > 0) = 1
+  x <- c(10, 11, 12, 13, 14)
+  y <- c(1, 2, 3, 4, 5)
+
+  # Should not error, CI should be sensible
+  res <- ses_calc(x = x, y = y, paired = TRUE, ses = "cstat",
+                  se_method = "score")
+  expect_equal(as.numeric(res$estimate), 1.0)
+  expect_true(res$conf.int[1] > 0.5)
+  expect_equal(res$conf.int[2], 1.0)
+
+  # All y > x: P(X - Y > 0) = 0 (since x < y here)
+  res2 <- ses_calc(x = y, y = x, paired = TRUE, ses = "cstat",
+                   se_method = "score")
+  expect_equal(as.numeric(res2$estimate), 0.0)
+  expect_equal(res2$conf.int[1], 0.0)
+  expect_true(res2$conf.int[2] < 0.5)
+
+  # rb scale for complete separation (all x > y)
+  res_rb <- ses_calc(x = x, y = y, paired = TRUE, ses = "rb",
+                     se_method = "score")
+  expect_true(res_rb$conf.int[1] > 0)
+  expect_equal(res_rb$conf.int[2], 1.0)
+})
+
+test_that("paired score effect size scale transformations are consistent", {
+  data(sleep)
+  x <- sleep$extra[sleep$group == 2]
+  y <- sleep$extra[sleep$group == 1]
+
+  res_c <- ses_calc(x = x, y = y, paired = TRUE, ses = "cstat",
+                    se_method = "score")
+  res_r <- ses_calc(x = x, y = y, paired = TRUE, ses = "rb",
+                    se_method = "score")
+  res_o <- ses_calc(x = x, y = y, paired = TRUE, ses = "odds",
+                    se_method = "score")
+  res_l <- ses_calc(x = x, y = y, paired = TRUE, ses = "logodds",
+                    se_method = "score")
+
+  # rb = 2*cstat - 1
+  expect_equal(as.numeric(res_r$conf.int),
+               2 * as.numeric(res_c$conf.int) - 1, tolerance = 1e-8)
+
+  # odds = cstat / (1 - cstat)
+  expect_equal(as.numeric(res_o$conf.int),
+               as.numeric(res_c$conf.int) / (1 - as.numeric(res_c$conf.int)),
+               tolerance = 1e-8)
+
+  # logodds = log(cstat / (1 - cstat))
+  expect_equal(as.numeric(res_l$conf.int),
+               log(as.numeric(res_c$conf.int) / (1 - as.numeric(res_c$conf.int))),
+               tolerance = 1e-8)
+})
+
+test_that("paired score equivalence test on rb scale", {
+  data(sleep)
+  x <- sleep$extra[sleep$group == 2]
+  y <- sleep$extra[sleep$group == 1]
+
+  # Equivalence on rb scale: bounds [-0.3, 0.3]
+  res_equiv_rb <- ses_calc(x = x, y = y, paired = TRUE, ses = "rb",
+                           se_method = "score",
+                           alternative = "equivalence",
+                           null.value = c(-0.3, 0.3))
+  expect_s3_class(res_equiv_rb, "htest")
+  expect_length(res_equiv_rb$null.value, 2)
+})
+
+test_that("paired score point estimates match agresti method (non-boundary)", {
+  # Both score and agresti now compute P(X - Y > 0) with the same direction.
+  set.seed(42)
+  x <- rnorm(20, mean = 0.5)
+  y <- rnorm(20, mean = 0)
+
+  res_score <- ses_calc(x = x, y = y, paired = TRUE, ses = "cstat",
+                        se_method = "score")
+  res_agresti <- ses_calc(x = x, y = y, paired = TRUE, ses = "cstat",
+                          se_method = "agresti")
+
+  # Point estimates should be identical (when no boundary correction)
+  expect_equal(as.numeric(res_score$estimate), as.numeric(res_agresti$estimate))
+
+  # CIs should overlap substantially
+  expect_true(res_score$conf.int[1] < res_agresti$conf.int[2])
+  expect_true(res_score$conf.int[2] > res_agresti$conf.int[1])
+})
+
+test_that("paired score note string distinguishes paired from two-sample", {
+  data(sleep)
+  x <- sleep$extra[sleep$group == 2]
+  y <- sleep$extra[sleep$group == 1]
+
+  res_paired <- ses_calc(x = x, y = y, paired = TRUE, ses = "cstat",
+                         se_method = "score")
+  expect_true(grepl("Wilson", res_paired$note))
+
+  res_two <- ses_calc(x = x, y = y, paired = FALSE, ses = "cstat",
+                      se_method = "score")
+  expect_true(grepl("Fay-Malinovsky", res_two$note))
+})
+
+test_that("paired score handles zero differences (dropped)", {
+  # Include pairs where x == y (should be dropped)
+  x <- c(1, 2, 3, 4, 5, 6, 7)
+  y <- c(2, 2, 4, 4, 3, 7, 5)
+  # Differences: -1, 0, -1, 0, 2, -1, 2
+  # Non-zero: -1, -1, 2, -1, 2  (N=5)
+
+  res <- ses_calc(x = x, y = y, paired = TRUE, ses = "cstat",
+                  se_method = "score")
+  expect_s3_class(res, "htest")
+  expect_true(is.finite(res$estimate))
+  expect_true(res$conf.int[1] < res$conf.int[2])
+
+  # Verify p-value matches wilcox.test with same data
+  wt <- wilcox.test(x, y, paired = TRUE, exact = FALSE, correct = FALSE)
+  res_test <- ses_calc(x = x, y = y, paired = TRUE, ses = "cstat",
+                       se_method = "score", correct = FALSE,
+                       alternative = "two.sided", null.value = 0.5)
+  expect_equal(res_test$p.value, wt$p.value, tolerance = 1e-6)
+})
+
+# boot_ses_calc CI/p-value agreement tests -----
+
+for (ci_method in c("perc", "basic", "bca", "stud")) {
+  test_that(paste0("boot_ses_calc: CI/p-value agreement for ", ci_method), {
+    skip_on_cran()
+
+    set.seed(42)
+    x <- c(1.2, 2.3, 3.1, 4.6, 5.2, 6.7, 7.0, 8.1, 2.5, 3.3)
+    y <- c(3.5, 4.8, 5.6, 6.9, 7.2, 8.5, 9.0, 10.1, 4.5, 5.3)
+
+    res <- boot_ses_calc(x = x, y = y, ses = "rb",
+                         alternative = "two.sided",
+                         null.value = 0,
+                         boot_ci = ci_method, R = 1999)
+    ci_excludes_null <- res$conf.int[1] > 0 || res$conf.int[2] < 0
+    p_rejects <- res$p.value < 0.05
+    expect_equal(ci_excludes_null, p_rejects,
+                 label = paste(ci_method, "CI/p agreement two.sided"))
+  })
+}

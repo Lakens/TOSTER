@@ -25,8 +25,9 @@
 #'   or shift (for independent samples) is to be estimated (default = 0).
 #' @param se_method a character string specifying the method for computing standard errors
 #'   within each bootstrap sample:
-#'     - "agresti": (default) Uses the Agresti/Lehmann placement-based variance estimation.
-#'       This method has better asymptotic properties.
+#'     - "agresti": (default) Uses the Agresti/Lehmann placement-based variance estimation
+#'       with the log-odds working scale, which has better asymptotic properties
+#'       (faster convergence to normality per Agresti, 1980).
 #'     - "fisher": Uses the legacy Fisher z-transformation method. Retained for backward
 #'       compatibility.
 #' @param output a character string specifying the output format:
@@ -54,7 +55,9 @@
 #'   - Calculate the raw effect size using the original data
 #'   - Create R bootstrap samples by resampling with replacement from the original data
 #'   - Calculate the effect size for each bootstrap sample
-#'   - Apply the Fisher z-transformation to stabilize variance for rank-biserial correlation values
+#'   - Transform bootstrap estimates to the working scale for CI construction:
+#'     the log-odds scale when `se_method = "agresti"` (default), or Fisher z
+#'     when `se_method = "fisher"`
 #'   - Calculate confidence intervals using the specified method
 #'   - Back-transform the confidence intervals to the original scale
 #'   - Convert to the requested effect size measure (if not rank-biserial)
@@ -72,21 +75,40 @@
 #'
 #' ## Bootstrap Confidence Interval Methods
 #'
-#' Three bootstrap confidence interval methods are available:
-#'   - **Basic bootstrap ("basic")**: Uses the empirical distribution of bootstrap estimates
-#'   - **Studentized bootstrap ("stud")**: Accounts for the variability in standard error estimates
+#' Four bootstrap confidence interval methods are available via the `boot_ci` argument:
+#'   - **Basic bootstrap ("basic")**: Reflects the bootstrap distribution of estimates
+#'     around the observed value
+#'   - **Studentized bootstrap ("stud")**: Uses the bootstrap distribution of pivotal
+#'     t-statistics to account for variability in standard error estimates. This is the
+#'     default and usually provides the most accurate coverage.
 #'   - **Percentile bootstrap ("perc")**: Uses percentiles of the bootstrap distribution directly
+#'   - **Bias-corrected and accelerated ("bca")**: Corrects for both bias and skewness in the
+#'     bootstrap distribution using jackknife-based acceleration
+#'
+#' All CI methods operate on a working scale that is better suited
+#' to symmetric bootstrap distributions: the log-odds scale when
+#' `se_method = "agresti"` (default), or the Fisher z scale when
+#' `se_method = "fisher"`. Confidence limits are then back-transformed to the
+#' requested effect size scale.
 #'
 #' ## Hypothesis Testing
 #'
-#' When an alternative other than "two.sided" is specified, or when null.value is not the
+#' When an alternative other than "none" is specified, or when null.value is not the
 #' default, the function performs bootstrap hypothesis testing. For equivalence and minimal
 #' effect testing, specify null.value as a vector of two values (lower and upper bounds).
 #'
+#' The p-value is computed using the method that matches the selected `boot_ci`,
+#' ensuring that p < alpha if and only if the corresponding confidence interval
+#' excludes the null value (CI inversion principle). Previously, all bootstrap
+#' CI methods used the studentized (pivot) p-value, which could produce p-values
+#' inconsistent with non-studentized CIs. The null value is converted to the
+#' working scale (log-odds or Fisher z) before computing the p-value, maintaining
+#' consistency with the CI construction.
+#'
 #' For different alternatives, the p-values are calculated as follows:
-#'   * "two.sided": Proportion of bootstrap statistics at least as extreme as the observed statistic
-#'   * "less": Proportion of bootstrap statistics less than or equal to the observed statistic
-#'   * "greater": Proportion of bootstrap statistics greater than or equal to the observed statistic
+#'   * "two.sided": Two-tailed p-value from the bootstrap distribution
+#'   * "less": One-sided p-value for the hypothesis that the true value is less than the null
+#'   * "greater": One-sided p-value for the hypothesis that the true value is greater than the null
 #'   * "equivalence": Maximum of two one-sided p-values (for lower and upper bounds)
 #'   * "minimal.effect": Minimum of two one-sided p-values (for lower and upper bounds)
 #'
@@ -99,6 +121,30 @@
 #' the bootstrapping process. The function will issue a warning if this occurs.
 #'
 #' For detailed information on calculation methods, see `vignette("robustTOST")`.
+#'
+#' ## Edge Cases
+#'
+#'   - **Complete separation**: When one group entirely dominates the other
+#'     (concordance probability = 0 or 1), the bootstrap distribution collapses
+#'     and CIs become degenerate. The function stops with an informative error
+#'     directing users to [ses_calc()] with `se_method = "agresti"` for
+#'     asymptotic inference. This condition is detected before resampling begins.
+#'   - **Near-complete separation**: When the observed rb is close to +/-1 but
+#'     not exactly at the boundary, the working-scale transformation (log-odds
+#'     or Fisher z) helps stabilize the bootstrap but coverage may still
+#'     degrade. The function issues a message when bootstrap replicates contain
+#'     infinite values after transformation, which is a symptom of this problem.
+#'   - **Why the bootstrap fails at boundaries**: The rank-biserial is bounded
+#'     on \[-1, 1\]. When the observed value is near a boundary, resampled
+#'     values pile up at the boundary, producing a distribution that is not
+#'     well-approximated by the symmetric bootstrap CI methods (basic,
+#'     percentile, studentized). The log-odds and Fisher z working scales
+#'     mitigate this by mapping \[-1, 1\] to the real line, but the mapping
+#'     itself becomes unstable as rb approaches +/-1.
+#'   - **Recommendation**: For data with complete or near-complete separation,
+#'     prefer the asymptotic Agresti/Lehmann interval from [ses_calc()], which
+#'     handles boundary behavior more gracefully through the placement-based
+#'     variance estimator.
 #'
 #' @return
 #' If `output = "htest"` (default), returns a list with class `"htest"` containing:
@@ -149,13 +195,14 @@
 #'                         R = 99)
 #'
 #' # Example 4: Paired samples
-#' data(sleep)
-#' with(sleep, boot_ses_calc(x = extra[group == 1],
-#'                           y = extra[group == 2],
-#'                           paired = TRUE,
-#'                           ses = "rb",
-#'                           alternative = "greater",
-#'                           R = 99))
+#' set.seed(42)
+#' pre  <- c(4.5, 5.2, 3.8, 6.1, 4.9, 5.7, 3.6, 5.0, 4.3, 6.5)
+#' post <- c(5.1, 4.9, 4.5, 5.8, 5.5, 5.2, 4.3, 5.4, 4.0, 6.2)
+#' boot_ses_calc(x = pre, y = post,
+#'               paired = TRUE,
+#'               ses = "rb",
+#'               alternative = "greater",
+#'               R = 99)
 #'
 #' # Example 5: Using formula notation
 #' data(mtcars)
@@ -184,7 +231,7 @@ boot_ses_calc <- function(x, ...,
                           ses = "rb",
                           alpha = 0.05,
                           mu = 0,
-                          boot_ci = c("basic","stud","perc"),
+                          boot_ci = c("bca", "stud", "basic", "perc"),
                           R = 1999,
                           se_method = c("agresti", "fisher"),
                           output = c("htest", "data.frame"),
@@ -204,7 +251,7 @@ boot_ses_calc.default = function(x,
                                  ses = c("rb","odds","logodds","cstat"),
                                  alpha = 0.05,
                                  mu = 0,
-                                 boot_ci = c("basic","stud", "perc"),
+                                 boot_ci = c("basic","stud", "perc","bca"),
                                  R = 1999,
                                  se_method = c("agresti", "fisher"),
                                  output = c("htest", "data.frame"),
@@ -217,6 +264,18 @@ boot_ses_calc.default = function(x,
   se_method = match.arg(se_method)
   output = match.arg(output)
   alternative = match.arg(alternative)
+
+  # Working-scale transformations
+  # Fisher z: atanh(rb), back-transform: tanh(z)
+  # Log-odds: log((1+rb)/(1-rb)) = 2*atanh(rb), back-transform: tanh(lo/2)
+  if (se_method == "fisher") {
+    to_working   <- function(rb) atanh(rb)
+    from_working <- function(w)  tanh(w)
+  } else {
+    # agresti: log-odds scale
+    to_working   <- function(rb) log((1 + rb) / (1 - rb))  # = 2 * atanh(rb)
+    from_working <- function(w)  (exp(w) - 1) / (exp(w) + 1)  # = tanh(w/2)
+  }
 
   # Set default null.value based on effect size type
   if (is.null(null.value)) {
@@ -264,8 +323,10 @@ boot_ses_calc.default = function(x,
       if (abs(rb) >= 1) {
         return(NA)
       }
-      se_z <- se_rb / (1 - rb^2)
-      return(se_z)
+      # Delta method: SE on log-odds scale
+      # d/d(rb) log((1+rb)/(1-rb)) = 2/(1-rb^2)
+      se_logodds <- 2 * se_rb / (1 - rb^2)
+      return(se_logodds)
     } else {
       if (paired || is.null(y_boot)) {
         n1 <- if(is.null(y_boot)) length(x_boot) else length(x_boot)
@@ -302,14 +363,14 @@ boot_ses_calc.default = function(x,
     if (se_method == "agresti") {
       est_results <- ses_compute_agresti(x = data$x, y = data$y, paired = TRUE, mu = mu)
       raw_rb <- est_results$rb
-      raw_SE <- est_results$se_rb / (1 - raw_rb^2)
+      raw_SE <- 2 * est_results$se_rb / (1 - raw_rb^2)  # SE on log-odds scale
     } else {
       maxw <- (nd^2 + nd) / 2
       raw_SE = sqrt((2 * nd^3 + 3 * nd^2 + nd) / 6) / maxw
     }
 
     # Check for complete separation (paired case)
-    p_init <- rb_to_cstat(rbs_calc(x = data$y, y = data$x, mu = mu, paired = TRUE))
+    p_init <- rb_to_cstat(rbs_calc(x = data$x, y = data$y, mu = mu, paired = TRUE))
     check_complete_separation(p_init)
 
     raw_ses = ses_calc(x = data$x,
@@ -333,7 +394,7 @@ boot_ses_calc.default = function(x,
                           alpha = alpha,
                           se_method = se_method,
                           output = "data.frame")
-      boots = c(boots, atanh(res_boot$estimate))
+      boots = c(boots, to_working(res_boot$estimate))
 
       rfSE <- compute_boot_se(data$x[sampler], data$y[sampler], paired = TRUE, se_method, mu)
       boots_se = c(boots_se, rfSE)
@@ -357,7 +418,7 @@ boot_ses_calc.default = function(x,
     if (se_method == "agresti") {
       est_results <- ses_compute_agresti(x = i1, y = i2, paired = FALSE, mu = mu)
       raw_rb <- est_results$rb
-      raw_SE <- est_results$se_rb / (1 - raw_rb^2)
+      raw_SE <- 2 * est_results$se_rb / (1 - raw_rb^2)  # SE on log-odds scale
     } else {
       raw_SE = sqrt((n1 + n2 + 1) / (3 * n1 * n2))
     }
@@ -386,7 +447,7 @@ boot_ses_calc.default = function(x,
                           alpha = alpha,
                           se_method = se_method,
                           output = "data.frame")
-      boots = c(boots, atanh(res_boot$estimate))
+      boots = c(boots, to_working(res_boot$estimate))
 
       rfSE <- compute_boot_se(x_boot$values, y_boot$values, paired = FALSE, se_method, mu)
       boots_se = c(boots_se, rfSE)
@@ -403,14 +464,14 @@ boot_ses_calc.default = function(x,
     d_nonzero <- d[d != 0]
     if (length(d_nonzero) > 0) {
       # Compute concordance probability from signed ranks
-      p_init <- rb_to_cstat(rbs_calc(x = rep(mu, length(x1)), y = x1, mu = 0, paired = TRUE))
+      p_init <- rb_to_cstat(rbs_calc(x = x1, y = rep(mu, length(x1)), mu = 0, paired = TRUE))
       check_complete_separation(p_init)
     }
 
     if (se_method == "agresti") {
       est_results <- ses_compute_agresti(x = x1, y = NULL, paired = FALSE, mu = mu)
       raw_rb <- est_results$rb
-      raw_SE <- est_results$se_rb / (1 - raw_rb^2)
+      raw_SE <- 2 * est_results$se_rb / (1 - raw_rb^2)  # SE on log-odds scale
     } else {
       maxw <- (nd^2 + nd) / 2
       raw_SE = sqrt((2 * nd^3 + 3 * nd^2 + nd) / 6) / maxw
@@ -437,7 +498,7 @@ boot_ses_calc.default = function(x,
                           alpha = alpha,
                           se_method = se_method,
                           output = "data.frame")
-      boots = c(boots, atanh(res_boot$estimate))
+      boots = c(boots, to_working(res_boot$estimate))
 
       rfSE <- compute_boot_se(x_boot, NULL, paired = FALSE, se_method, mu)
       boots_se = c(boots_se, rfSE)
@@ -448,18 +509,81 @@ boot_ses_calc.default = function(x,
     message("Bootstrapped results contain extreme results (i.e., no overlap), caution advised interpreting confidence intervals.")
   }
 
-  # Get CI on Fisher Z scale
-  zci = switch(boot_ci,
+  # Jackknife for BCa (if needed) — on working scale
+  if (boot_ci == "bca") {
+    if (paired == TRUE && !is.null(y)) {
+      # Paired: delete one pair at a time
+      n_jack <- nrow(data)
+      jack_est <- numeric(n_jack)
+      for (j in seq_len(n_jack)) {
+        res_jack <- ses_calc(x = data$x[-j],
+                             y = data$y[-j],
+                             paired = paired,
+                             ses = "rb",
+                             mu = mu,
+                             alpha = alpha,
+                             se_method = se_method,
+                             output = "data.frame")
+        jack_est[j] <- to_working(res_jack$estimate)
+      }
+    } else if (!is.null(y)) {
+      # Two-sample: pooled jackknife (delete one from combined)
+      n_total <- n1 + n2
+      jack_est <- numeric(n_total)
+      for (j in seq_len(n1)) {
+        res_jack <- ses_calc(x = i1[-j],
+                             y = i2,
+                             paired = paired,
+                             ses = "rb",
+                             mu = mu,
+                             alpha = alpha,
+                             se_method = se_method,
+                             output = "data.frame")
+        jack_est[j] <- to_working(res_jack$estimate)
+      }
+      for (j in seq_len(n2)) {
+        res_jack <- ses_calc(x = i1,
+                             y = i2[-j],
+                             paired = paired,
+                             ses = "rb",
+                             mu = mu,
+                             alpha = alpha,
+                             se_method = se_method,
+                             output = "data.frame")
+        jack_est[n1 + j] <- to_working(res_jack$estimate)
+      }
+    } else {
+      # One-sample: delete one observation at a time
+      n_jack <- length(x1)
+      jack_est <- numeric(n_jack)
+      for (j in seq_len(n_jack)) {
+        res_jack <- ses_calc(x = x1[-j],
+                             paired = paired,
+                             ses = "rb",
+                             mu = mu,
+                             alpha = alpha,
+                             se_method = se_method,
+                             output = "data.frame")
+        jack_est[j] <- to_working(res_jack$estimate)
+      }
+    }
+  }
+
+  # Get CI on working scale (log-odds for agresti, Fisher z for fisher)
+  ci_alpha <- if(alternative %in% c("equivalence", "minimal.effect")) alpha * 2 else alpha
+  wci = switch(boot_ci,
                "stud" = stud(boots_est = boots, boots_se = boots_se,
-                             se0=raw_SE, t0 = atanh(raw_ses$estimate[1L]),
-                             alpha = if(alternative %in% c("equivalence", "minimal.effect")) alpha * 2 else alpha),
-               "perc" = perc(boots, if(alternative %in% c("equivalence", "minimal.effect")) alpha * 2 else alpha),
-               "basic" = basic(boots, t0 = atanh(raw_ses$estimate),
-                               if(alternative %in% c("equivalence", "minimal.effect")) alpha * 2 else alpha))
+                             se0 = raw_SE, t0 = to_working(raw_ses$estimate[1L]),
+                             alpha = ci_alpha),
+               "perc" = perc(boots, ci_alpha),
+               "basic" = basic(boots, t0 = to_working(raw_ses$estimate),
+                               ci_alpha),
+               "bca" = bca_ci(boots_est = boots, t0 = to_working(raw_ses$estimate[1L]),
+                              jack_est = jack_est, alpha = ci_alpha))
 
   # Transform back to rb scale
-  rci = tanh(zci)
-  rboots = tanh(boots)
+  rci = from_working(wci)
+  rboots = from_working(boots)
 
   # Transform to requested effect size scale
   boots_transformed = switch(ses,
@@ -503,68 +627,84 @@ boot_ses_calc.default = function(x,
                      "logodds" = "WMW Log-Odds",
                      "cstat" = "Concordance")
 
-  # Bootstrap SE on the transformed scale
+  # Bootstrap SE on the transformed scale (for reporting in stderr field)
   boot_se = sd(boots_transformed, na.rm = TRUE)
 
-  # Compute p-value using bootstrap distribution (only when hypothesis test requested)
+  # Bootstrap pivot and p-value computation on working scale
+  obs_working <- to_working(raw_ses$estimate[1L])
+  TSTAT <- (boots - obs_working) / boots_se
+
+  # Pre-compute BCa parameters for p-value use
+  z0 <- NULL; acc <- NULL
+  if (boot_ci == "bca") {
+    bca_par <- bca_params(boots, obs_working, jack_est)
+    z0 <- bca_par$z0; acc <- bca_par$acc
+  }
+
+  # Compute p-value (method-consistent with CI) on working scale
   if (alternative != "none") {
-    # Center the bootstrap distribution at the null value
-    # For rb/logodds: null is 0; for cstat: null is 0.5; for odds: null is 1
-
-    if (alternative == "two.sided") {
-      # Two-sided test: proportion of bootstrap values at least as extreme as observed
-      # Centered at null
-      boot_centered <- boots_transformed - null.value
-      obs_centered <- est_val - null.value
-      boot.pval <- 2 * min(mean(boot_centered <= obs_centered),
-                           mean(boot_centered > obs_centered))
-    } else if (alternative == "less") {
-      # One-sided: proportion of bootstrap values less than or equal to observed
-      boot_centered <- boots_transformed - null.value
-      obs_centered <- est_val - null.value
-      boot.pval <- mean(boot_centered <= obs_centered)
-    } else if (alternative == "greater") {
-      # One-sided: proportion of bootstrap values greater than or equal to observed
-      boot_centered <- boots_transformed - null.value
-      obs_centered <- est_val - null.value
-      boot.pval <- mean(boot_centered >= obs_centered)
-    } else if (alternative == "equivalence") {
-      # Equivalence: max of two one-sided p-values
-      # Test 1: H0: effect <= low_bound vs H1: effect > low_bound
-      # Test 2: H0: effect >= high_bound vs H1: effect < high_bound
-      boot_centered_low <- boots_transformed - low_bound
-      boot_centered_high <- boots_transformed - high_bound
-      obs_centered_low <- est_val - low_bound
-      obs_centered_high <- est_val - high_bound
-
-      p_low <- mean(boot_centered_low >= obs_centered_low)  # greater than low bound
-      p_high <- mean(boot_centered_high <= obs_centered_high)  # less than high bound
-      boot.pval <- max(p_low, p_high)
-    } else if (alternative == "minimal.effect") {
-      # Minimal effect: min of two one-sided p-values
-      # Test 1: H0: effect >= low_bound vs H1: effect < low_bound
-      # Test 2: H0: effect <= high_bound vs H1: effect > high_bound
-      boot_centered_low <- boots_transformed - low_bound
-      boot_centered_high <- boots_transformed - high_bound
-      obs_centered_low <- est_val - low_bound
-      obs_centered_high <- est_val - high_bound
-
-      p_low <- mean(boot_centered_low <= obs_centered_low)  # less than low bound
-      p_high <- mean(boot_centered_high >= obs_centered_high)  # greater than high bound
-      boot.pval <- min(p_low, p_high)
+    # Convert null value(s) from user's ses scale to rb, then to working scale
+    null_to_rb <- function(val, ses_type) {
+      switch(ses_type,
+             "rb" = val,
+             "cstat" = cstat_to_rb(val),
+             "odds" = (val - 1) / (val + 1),
+             "logodds" = tanh(val / 2))
     }
 
-    # Compute z-statistic (for reference)
+    se_obs_working <- raw_SE  # already on working scale
+
+    if (alternative %in% c("two.sided", "greater", "less")) {
+      null_working <- to_working(null_to_rb(null.value, ses))
+      boot.pval <- boot_pvalue(bvec = boots, est = obs_working,
+                               null = null_working,
+                               alternative = alternative, boot_ci = boot_ci,
+                               tvec = TSTAT, se_obs = se_obs_working,
+                               z0 = z0, acc = acc, nboot = R)
+    } else if (alternative == "equivalence") {
+      null_working_l <- to_working(null_to_rb(low_bound, ses))
+      null_working_u <- to_working(null_to_rb(high_bound, ses))
+      p_l <- boot_pvalue(bvec = boots, est = obs_working,
+                         null = null_working_l,
+                         alternative = "greater", boot_ci = boot_ci,
+                         tvec = TSTAT, se_obs = se_obs_working,
+                         z0 = z0, acc = acc, nboot = R)
+      p_u <- boot_pvalue(bvec = boots, est = obs_working,
+                         null = null_working_u,
+                         alternative = "less", boot_ci = boot_ci,
+                         tvec = TSTAT, se_obs = se_obs_working,
+                         z0 = z0, acc = acc, nboot = R)
+      boot.pval <- max(p_l, p_u)
+    } else if (alternative == "minimal.effect") {
+      null_working_l <- to_working(null_to_rb(low_bound, ses))
+      null_working_u <- to_working(null_to_rb(high_bound, ses))
+      p_l <- boot_pvalue(bvec = boots, est = obs_working,
+                         null = null_working_u,
+                         alternative = "greater", boot_ci = boot_ci,
+                         tvec = TSTAT, se_obs = se_obs_working,
+                         z0 = z0, acc = acc, nboot = R)
+      p_u <- boot_pvalue(bvec = boots, est = obs_working,
+                         null = null_working_l,
+                         alternative = "less", boot_ci = boot_ci,
+                         tvec = TSTAT, se_obs = se_obs_working,
+                         z0 = z0, acc = acc, nboot = R)
+      boot.pval <- min(p_l, p_u)
+    }
+
+    # Report z-observed (analogous to t-observed in boot_t_test)
     if (alternative %in% c("equivalence", "minimal.effect")) {
-      z_low <- (est_val - low_bound) / boot_se
-      z_high <- (est_val - high_bound) / boot_se
+      null_working_l <- to_working(null_to_rb(low_bound, ses))
+      null_working_u <- to_working(null_to_rb(high_bound, ses))
+      z_obs_l <- (obs_working - null_working_l) / se_obs_working
+      z_obs_u <- (obs_working - null_working_u) / se_obs_working
       if (alternative == "equivalence") {
-        z_stat <- if (abs(z_low) < abs(z_high)) z_low else z_high
+        z_stat <- if (p_l >= p_u) z_obs_l else z_obs_u
       } else {
-        z_stat <- if (abs(z_low) < abs(z_high)) z_low else z_high
+        z_stat <- if (p_l <= p_u) z_obs_l else z_obs_u
       }
     } else {
-      z_stat <- (est_val - null.value) / boot_se
+      null_working <- to_working(null_to_rb(null.value, ses))
+      z_stat <- (obs_working - null_working) / se_obs_working
     }
   }
 
@@ -582,7 +722,7 @@ boot_ses_calc.default = function(x,
 
   # Note: bootstrap methodology details
   note_text <- paste0("Bootstrap CI: ", boot_ci,
-                      "; SE method: ", if (se_method == "agresti") "Agresti/Lehmann placement" else "Fisher z-transform")
+                      "; SE method: ", if (se_method == "agresti") "Agresti/Lehmann placement (log-odds scale)" else "Fisher z-transform")
 
   # Build output
   if (output == "data.frame") {
@@ -619,7 +759,7 @@ boot_ses_calc.default = function(x,
 
     # Add hypothesis test components only if requested
     if (alternative != "none") {
-      names(z_stat) <- "z"
+      names(z_stat) <- "z-observed"
 
       if (alternative %in% c("equivalence", "minimal.effect")) {
         null_val <- c(low_bound, high_bound)

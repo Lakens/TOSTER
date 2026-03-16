@@ -12,7 +12,7 @@
 
 <meta name="author" content="Aaron R. Caldwell" />
 
-<meta name="date" content="2025-08-07" />
+<meta name="date" content="2026-02-23" />
 
 <title>Correlations</title>
 
@@ -50,8 +50,9 @@ overflow: visible;
 }
 </style>
 <style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -62,7 +63,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
 { counter-reset: source-line 0; }
@@ -363,7 +364,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Correlations</h1>
 <h4 class="author">Aaron R. Caldwell</h4>
-<h4 class="date">2025-08-07</h4>
+<h4 class="date">2026-02-23</h4>
 
 
 <div id="TOC">
@@ -382,11 +383,6 @@ Approach</a></li>
 <li><a href="#bootstrapped-comparison" id="toc-bootstrapped-comparison">Bootstrapped Comparison</a></li>
 </ul></li>
 <li><a href="#practical-recommendations" id="toc-practical-recommendations">Practical Recommendations</a></li>
-<li><a href="#advanced-usage" id="toc-advanced-usage">Advanced Usage</a>
-<ul>
-<li><a href="#custom-bootstrap-methods" id="toc-custom-bootstrap-methods">Custom Bootstrap Methods</a></li>
-<li><a href="#working-with-missing-data" id="toc-working-with-missing-data">Working with Missing Data</a></li>
-</ul></li>
 <li><a href="#references" id="toc-references">References</a></li>
 </ul>
 </div>
@@ -395,8 +391,9 @@ Approach</a></li>
 analyzing correlations. These functions extend beyond traditional
 correlation tests by offering equivalence testing capabilities and
 robust correlation methods. The included functions are based on research
-by <span class="citation">Goertzen and Cribbie (2010)</span>
-(<code>z_cor_test</code> &amp; <code>compare_cor</code>), and <span class="citation">Wilcox (2011)</span> (<code>boot_cor_test</code>)<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>.</p>
+by <span class="citation">Goertzen and Cribbie (<a href="#ref-goertzen2010">2010</a>)</span> (<code>z_cor_test</code> &amp;
+<code>compare_cor</code>), and <span class="citation">Wilcox (<a href="#ref-wilcox2011introduction">2011</a>)</span>
+(<code>boot_cor_test</code>)<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>.</p>
 <div id="simple-correlation-test" class="section level1">
 <h1>Simple Correlation Test</h1>
 <p>Basic tests of association can be performed with the
@@ -422,7 +419,7 @@ typically very similar to those produced by <code>cor.test</code>.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># TOSTER&#39;s z-transformed correlation test</span></span>
 <span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">z_cor_test</span>(mtcars<span class="sc">$</span>mpg, mtcars<span class="sc">$</span>qsec)</span></code></pre></div>
 <pre><code>## 
-##  Pearson&#39;s product-moment correlation
+##  Pearson&#39;s product-moment correlation with approximate SE
 ## 
 ## data:  mtcars$mpg and mtcars$qsec
 ## z = 2.4023, N = 32, p-value = 0.01629
@@ -439,13 +436,13 @@ supports Spearman and Kendall correlation coefficients:</p>
 <span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
 <span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>           <span class="at">method =</span> <span class="st">&quot;spear&quot;</span>) <span class="co"># Short form accepted; &quot;spearman&quot; also works</span></span></code></pre></div>
 <pre><code>## 
-##  Spearman&#39;s rank correlation rho
+##  Spearman&#39;s rank correlation rho with approximate SE
 ## 
 ## data:  mtcars$mpg and mtcars$qsec
-## z = 2.6474, N = 32, p-value = 0.008111
+## z = 2.5882, N = 32, p-value = 0.009647
 ## alternative hypothesis: true rho is not equal to 0
 ## 95 percent confidence interval:
-##  0.1306771 0.7068501
+##  0.1222486 0.7111100
 ## sample estimates:
 ##       rho 
 ## 0.4669358</code></pre>
@@ -454,7 +451,7 @@ supports Spearman and Kendall correlation coefficients:</p>
 <span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
 <span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>           <span class="at">method =</span> <span class="st">&quot;kendall&quot;</span>)</span></code></pre></div>
 <pre><code>## 
-##  Kendall&#39;s rank correlation tau
+##  Kendall&#39;s rank correlation tau with approximate SE
 ## 
 ## data:  mtcars$mpg and mtcars$qsec
 ## z = 2.6134, N = 32, p-value = 0.008964
@@ -472,14 +469,17 @@ supports Spearman and Kendall correlation coefficients:</p>
 (TOST) or any hypothesis test where the null hypothesis isn’t zero. This
 makes it particularly useful for research questions focused on
 demonstrating practical equivalence or testing against specific
-correlation thresholds.</p>
+correlation thresholds. The main disadvantage is that it relies on the
+Fisher’s z transformation, which can be less accurate when assumptions
+are violated or when outliers are present. In such cases, the
+bootstrapped methods may provide more reliable results.</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># Equivalence test with null boundary of 0.4</span></span>
 <span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="fu">z_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
 <span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
 <span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>           <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>, <span class="co"># e for equivalence</span></span>
 <span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>           <span class="at">null =</span> .<span class="dv">4</span>)</span></code></pre></div>
 <pre><code>## 
-##  Pearson&#39;s product-moment correlation
+##  Pearson&#39;s product-moment correlation with approximate SE
 ## 
 ## data:  mtcars$mpg and mtcars$qsec
 ## z = 0.12088, N = 32, p-value = 0.5481
@@ -507,7 +507,7 @@ reviewing published literature or working with limited data access. The
 <span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>            <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>,</span>
 <span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>            <span class="at">null =</span> .<span class="dv">4</span>)</span></code></pre></div>
 <pre><code>## 
-##  Pearson&#39;s product-moment correlation
+##  Pearson&#39;s product-moment correlation with approximate SE
 ## 
 ## data:  x and y
 ## z = -3.0506, N = 105, p-value = 0.001142
@@ -537,16 +537,16 @@ violated.</p>
 <span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>           <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>,</span>
 <span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>           <span class="at">null =</span> .<span class="dv">4</span>)</span></code></pre></div>
 <pre><code>## 
-##  Bootstrapped Pearson&#39;s product-moment correlation
+##  Bootstrapped Pearson&#39;s product-moment correlation (BCa)
 ## 
 ## data:  mtcars$mpg and mtcars$qsec
-## N = 32, p-value = 0.6088
+## N = 32, p-value = 0.5183
 ## alternative hypothesis: equivalence
 ## null values:
 ## correlation correlation 
 ##         0.4        -0.4 
 ## 90 percent confidence interval:
-##  0.2512992 0.5930089
+##  0.2154567 0.5654231
 ## sample estimates:
 ##      cor 
 ## 0.418684</code></pre>
@@ -557,16 +557,16 @@ violated.</p>
 <span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a>           <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>,</span>
 <span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>           <span class="at">null =</span> .<span class="dv">4</span>)</span></code></pre></div>
 <pre><code>## 
-##  Bootstrapped Spearman&#39;s rank correlation rho
+##  Bootstrapped Spearman&#39;s rank correlation rho (BCa)
 ## 
 ## data:  mtcars$mpg and mtcars$qsec
-## N = 32, p-value = 0.6713
+## N = 32, p-value = 0.6765
 ## alternative hypothesis: equivalence
 ## null values:
 ##  rho  rho 
 ##  0.4 -0.4 
 ## 90 percent confidence interval:
-##  0.2676957 0.7365611
+##  0.1906086 0.6610353
 ## sample estimates:
 ##       rho 
 ## 0.4669358</code></pre>
@@ -577,16 +577,16 @@ violated.</p>
 <span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a>           <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>,</span>
 <span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a>           <span class="at">null =</span> .<span class="dv">4</span>)</span></code></pre></div>
 <pre><code>## 
-##  Bootstrapped Kendall&#39;s rank correlation tau
+##  Bootstrapped Kendall&#39;s rank correlation tau (BCa)
 ## 
 ## data:  mtcars$mpg and mtcars$qsec
-## N = 32, p-value = 0.2276
+## N = 32, p-value = 0.2033
 ## alternative hypothesis: equivalence
 ## null values:
 ##  tau  tau 
 ##  0.4 -0.4 
 ## 90 percent confidence interval:
-##  0.1442440 0.5090649
+##  0.1060556 0.4765220
 ## sample estimates:
 ##       tau 
 ## 0.3153652</code></pre>
@@ -603,16 +603,16 @@ violations of normality:</p>
 <span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a>           <span class="at">null =</span> .<span class="dv">4</span>,</span>
 <span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a>           <span class="at">tr =</span> .<span class="dv">1</span>) <span class="co"># Set trim amount (default is 0.2)</span></span></code></pre></div>
 <pre><code>## 
-##  Bootstrapped Winsorized correlation wincor
+##  Bootstrapped Winsorized correlation wincor (BCa)
 ## 
 ## data:  mtcars$mpg and mtcars$qsec
-## N = 32, p-value = 0.6878
+## N = 32, p-value = 0.6303
 ## alternative hypothesis: equivalence
 ## null values:
 ## wincor wincor 
 ##    0.4   -0.4 
 ## 90 percent confidence interval:
-##  0.2651060 0.7125775
+##  0.1688530 0.6361305
 ## sample estimates:
 ##   wincor 
 ## 0.464062</code></pre>
@@ -624,16 +624,16 @@ violations of normality:</p>
 <span id="cb21-6"><a href="#cb21-6" tabindex="-1"></a>           <span class="at">null =</span> .<span class="dv">4</span>,</span>
 <span id="cb21-7"><a href="#cb21-7" tabindex="-1"></a>           <span class="at">beta =</span> .<span class="dv">15</span>) <span class="co"># Beta parameter controlling resistance to outliers</span></span></code></pre></div>
 <pre><code>## 
-##  Bootstrapped percentage bend correlation pb
+##  Bootstrapped percentage bend correlation pb (BCa)
 ## 
 ## data:  mtcars$mpg and mtcars$qsec
-## N = 32, p-value = 0.6933
+## N = 32, p-value = 0.5973
 ## alternative hypothesis: equivalence
 ## null values:
 ##   pb   pb 
 ##  0.4 -0.4 
 ## 90 percent confidence interval:
-##  0.2509131 0.6634791
+##  0.1729634 0.6170026
 ## sample estimates:
 ##        pb 
 ## 0.4484488</code></pre>
@@ -700,7 +700,8 @@ generally recommended for most applications.</li>
 coefficients.</li>
 </ul>
 <p>While both methods are appropriate for general significance testing,
-they may have limited statistical power in some scenarios <span class="citation">(Counsell and Cribbie 2015)</span>.</p>
+they may have limited statistical power in some scenarios <span class="citation">(<a href="#ref-counsell2015equ">Counsell and Cribbie
+2015</a>)</span>.</p>
 </div>
 <div id="bootstrapped-comparison" class="section level2">
 <h2>Bootstrapped Comparison</h2>
@@ -770,34 +771,6 @@ research context</li>
 field</li>
 </ul></li>
 </ol>
-</div>
-<div id="advanced-usage" class="section level1">
-<h1>Advanced Usage</h1>
-<div id="custom-bootstrap-methods" class="section level2">
-<h2>Custom Bootstrap Methods</h2>
-<p>The bootstrapped functions in TOSTER allow customization of the
-bootstrap procedure:</p>
-<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" tabindex="-1"></a><span class="co"># Customizing the bootstrap procedure</span></span>
-<span id="cb29-2"><a href="#cb29-2" tabindex="-1"></a><span class="fu">boot_cor_test</span>(</span>
-<span id="cb29-3"><a href="#cb29-3" tabindex="-1"></a>  <span class="at">x =</span> mtcars<span class="sc">$</span>mpg,</span>
-<span id="cb29-4"><a href="#cb29-4" tabindex="-1"></a>  <span class="at">y =</span> mtcars<span class="sc">$</span>qsec,</span>
-<span id="cb29-5"><a href="#cb29-5" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">&quot;pearson&quot;</span>,</span>
-<span id="cb29-6"><a href="#cb29-6" tabindex="-1"></a>  <span class="at">R =</span> <span class="dv">2000</span>,  <span class="co"># Increasing number of bootstrap samples</span></span>
-<span id="cb29-7"><a href="#cb29-7" tabindex="-1"></a>  <span class="at">alpha =</span> <span class="fl">0.01</span>,  <span class="co"># Using 99% confidence interval</span></span>
-<span id="cb29-8"><a href="#cb29-8" tabindex="-1"></a>  <span class="at">alternative =</span> <span class="st">&quot;t&quot;</span>  <span class="co"># Two-sided test</span></span>
-<span id="cb29-9"><a href="#cb29-9" tabindex="-1"></a>)</span></code></pre></div>
-</div>
-<div id="working-with-missing-data" class="section level2">
-<h2>Working with Missing Data</h2>
-<p>By default, the correlation functions in TOSTER use pairwise complete
-observations:</p>
-<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a><span class="co"># Example with missing data</span></span>
-<span id="cb30-2"><a href="#cb30-2" tabindex="-1"></a>x_with_na <span class="ot">&lt;-</span> <span class="fu">c</span>(mtcars<span class="sc">$</span>mpg, <span class="cn">NA</span>, <span class="cn">NA</span>)</span>
-<span id="cb30-3"><a href="#cb30-3" tabindex="-1"></a>y_with_na <span class="ot">&lt;-</span> <span class="fu">c</span>(mtcars<span class="sc">$</span>qsec, <span class="dv">10</span>, <span class="cn">NA</span>)</span>
-<span id="cb30-4"><a href="#cb30-4" tabindex="-1"></a></span>
-<span id="cb30-5"><a href="#cb30-5" tabindex="-1"></a><span class="co"># Default behavior handles NAs with pairwise deletion</span></span>
-<span id="cb30-6"><a href="#cb30-6" tabindex="-1"></a><span class="fu">z_cor_test</span>(x_with_na, y_with_na)</span></code></pre></div>
-</div>
 </div>
 <div id="references" class="section level1 unnumbered">
 <h1 class="unnumbered">References</h1>

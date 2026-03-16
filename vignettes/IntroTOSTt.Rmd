@@ -3,6 +3,7 @@ title: "An Introduction to t_TOST"
 subtitle: "A new function for TOST with t-tests"
 author: "Aaron R. Caldwell"
 date: "`r Sys.Date()`"
+link-citations: true
 output:
   rmarkdown::html_vignette:
     toc: TRUE

@@ -7,6 +7,37 @@ NEWS
 
 ## New Features
 
+- New `trans_rank_prob()` function for transforming probability-scale effect sizes
+  between four scales: probability (concordance), difference (rank-biserial),
+  log-odds, and odds. Supports bidirectional transformation via `from` and `to`
+  arguments with delta-method standard errors and monotonic CI endpoint mapping.
+
+- `brunner_munzel()` gains a `scale` argument to report results on alternative
+  scales ("probability", "difference", "logodds", "odds") without changing the
+  underlying test. The default `scale = "probability"` preserves existing behavior.
+
+- `ses_calc()` estimate labels now use probability notation (e.g.,
+  `P(X>Y) - P(X<Y)` instead of `Rank-Biserial Correlation`). The `$method`
+  string and data frame row names retain human-readable names. Code that parses
+  `names(result$estimate)` may need updating.
+
+- `ses_calc()` paired sample labels use `P(Z>0)` notation (where Z = X - Y);
+  one-sample labels use `P(X>0)`.
+
+
+- Effect size calculators now support hypothesis testing and `htest` output:
+  - `ses_calc` and `boot_ses_calc` updated with `output`, `alternative`, and `null.value` arguments
+    - Default output is now `"htest"` class; use `output = "data.frame"` for legacy format
+    - Supports `"two.sided"`, `"less"`, `"greater"`, `"equivalence"`, and `"minimal.effect"` alternatives
+    - New Agresti/Lehmann placement-based SE method (`se_method = "agresti"`) with log-odds scale hypothesis testing
+    - Continuity correction for boundary cases (complete separation)
+  - `smd_calc` and `boot_smd_calc` updated with `output`, `alternative`, `null.value`, and `test_method` arguments
+    - Default output is now `"htest"` class; use `output = "data.frame"` for legacy format
+    - Supports the same alternative hypothesis options as `ses_calc`
+    - `test_method` argument (`"z"` or `"t"`) controls the reference distribution for `smd_calc`
+    - Degrees of freedom included in output when `test_method = "t"`
+    - Bootstrap p-values for `boot_smd_calc` computed from empirical distribution
+    - New `denom` argument for direct denominator selection (`"z"`, `"rm"`, `"pooled"`, `"avg"`, `"glass1"`, `"glass2"`), overriding `glass`, `rm_correction`, and `var.equal` as needed; informative messages on conflicts
 - Added `hodges_lehmann` function for robust location testing
   - Implements Hodges-Lehmann estimators (HL1 for one-sample/paired, HL2 for two-sample)
   - Supports exact permutation, randomization, and asymptotic (KDE-based) inference
@@ -19,8 +50,49 @@ NEWS
   - Handles null values (single or equivalence bounds) as reference lines
   - Automatically handles two-sample t-test estimates by computing mean difference
 
+- Added BCa (bias-corrected and accelerated) bootstrap confidence intervals as a new `boot_ci = "bca"` option for:
+  - `boot_t_test`, `boot_t_TOST`, `boot_log_TOST`, `boot_smd_calc`, `boot_ses_calc`, and `boot_cor_test`
+  - BCa intervals provide second-order accuracy by correcting for bias and skewness in the bootstrap distribution
+  - Acceleration factor computed via leave-one-out jackknife (pooled jackknife for two-sample designs)
+  - Informative errors for degenerate cases with suggestion to use `boot_ci = "perc"` as fallback
+
 ## Improvements
 
+- **Correlation SE improvements** for `z_cor_test()` and `corsum_test()`:
+  - Spearman's rho now uses the Bonett-Wright ρ-dependent SE formula
+    (`sqrt((1 + r^2/2) / (n - 3))`) instead of the fixed 1.06 constant,
+    providing better calibration across the full range of rho.
+  - `z_cor_test()` gains a `se_method` argument (`"analytic"` or `"jackknife"`)
+    for computing the standard error via leave-one-out resampling on the
+    Fisher z scale. The jackknife SE is used consistently for both the test
+    statistic and the confidence interval.
+  - Both functions now return `stderr` as a named vector with `z.se`
+    (Fisher z scale, used for inference) and `cor.se` (delta method SE on the
+    correlation scale, for descriptive purposes).
+  - The `method` string in the returned `htest` object now indicates the SE
+    type used (e.g., `"Pearson's product-moment correlation with approximate SE"`
+    or `"Spearman's rank correlation rho with jackknifed SE"`).
+
+- `simple_htest()`, `boot_t_test()`, `perm_t_test()`, and `hodges_lehmann()`
+  now produce more informative estimate labels that indicate the direction of
+  calculation (e.g., `"mean difference (treatment - control)"` when using the
+  formula interface).
+- For two-sample mean-based tests (`simple_htest` with t-test, `boot_t_test`,
+  `perm_t_test`), the mean difference is now appended as a third element of
+  `$estimate`, while preserving existing group means at positions 1-2
+  (backwards-compatible).
+- Paired test estimates are labeled to clarify the differencing operation,
+  e.g., `"mean of the differences (z = x - y)"`.
+- Wilcoxon/Mann-Whitney estimates in `simple_htest()` are labeled as
+  `"Hodges-Lehmann estimate"` with direction indicated.
+- `hodges_lehmann()` estimate labels updated for clarity: `"pseudomedian of x"`
+  for one-sample, `"Hodges-Lehmann estimate (x - y)"` for two-sample, and
+  `"Hodges-Lehmann estimate (z = x - y)"` for paired tests.
+- Trimmed mean labels in `boot_t_test()` and `perm_t_test()` now include the
+  trimming proportion, e.g., `"trimmed mean difference (x - y, tr = 0.1)"`.
+- A `$sample_size` element (named numeric vector) is now included in the
+  returned `htest` object for all four functions. For two-sample formula calls,
+  names reflect the actual factor levels.
 - **Permutation test terminology**: Clarified distinction between "Exact Permutation" (all permutations enumerated) and "Randomization" (permutations sampled with replacement) tests across `perm_t_test`, `hodges_lehmann`, and `brunner_munzel`
 - **p_method auto-selection**: Added intelligent default for `p_method` argument in permutation-based functions:
   - `NULL` (default): Automatically selects "exact" for exact permutation tests and "plusone" for randomization tests

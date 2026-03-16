@@ -16,7 +16,8 @@ boot_t_test(x, ...)
   alternative = c("two.sided", "less", "greater", "equivalence", "minimal.effect"),
   mu = 0,
   alpha = 0.05,
-  boot_ci = c("stud", "basic", "perc"),
+  tr = 0,
+  boot_ci = c("stud", "basic", "perc", "bca"),
   R = 1999,
   ...
 )
@@ -47,7 +48,12 @@ boot_t_test(x, ...)
 
 \item{alpha}{alpha level (default = 0.05)}
 
-\item{boot_ci}{method for bootstrap confidence interval calculation: "stud" (studentized, default), "basic" (basic bootstrap), or "perc" (percentile bootstrap).}
+\item{tr}{the fraction (0 to 0.5) of observations to be trimmed from
+each end before computing the mean and winsorized variance.
+Default is 0 (no trimming). When tr > 0, the function performs
+a bootstrapped Yuen's trimmed t-test.}
+
+\item{boot_ci}{method for bootstrap confidence interval calculation: "stud" (studentized, default), "basic" (basic bootstrap), "bca" (bias-corrected and accelerated), or "perc" (percentile bootstrap).}
 
 \item{R}{number of bootstrap replications (default = 1999).}
 
@@ -80,7 +86,8 @@ distribution, not from this statistic and the degrees of freedom).
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 
-Performs t-tests with bootstrapped p-values and confidence intervals. This function supports
+Performs t-tests with bootstrapped p-values and confidence intervals, with optional
+trimmed means (Yuen's approach) for robust inference. This function supports
 standard hypothesis testing alternatives as well as equivalence and minimal effect testing,
 all with the familiar \code{htest} output structure.
 }
@@ -97,19 +104,35 @@ The bootstrap procedure follows these steps:
 \item Compute the p-value by comparing the original test statistic to the bootstrap distribution
 \item Calculate confidence intervals using the specified bootstrap method
 }
+\subsection{Bootstrap Confidence Interval Methods}{
 
-Three bootstrap confidence interval methods are available:
+Four bootstrap confidence interval methods are available via the \code{boot_ci} argument:
 \itemize{
-\item \emph{Studentized bootstrap ("stud")}: Accounts for the variability in standard error estimates
-\item \emph{Basic bootstrap ("basic")}: Uses the empirical distribution of bootstrap estimates
-\item \emph{Percentile bootstrap ("perc")}: Uses percentiles of the bootstrap distribution directly
+\item \strong{Studentized bootstrap ("stud")}: Uses the bootstrap distribution of pivotal
+t-statistics to account for variability in standard error estimates. This is the
+default and usually provides the most accurate coverage.
+\item \strong{Basic bootstrap ("basic")}: Reflects the bootstrap distribution of estimates
+around the observed value.
+\item \strong{Percentile bootstrap ("perc")}: Uses percentiles of the bootstrap distribution directly.
+\item \strong{Bias-corrected and accelerated ("bca")}: Corrects for both bias and skewness in the
+bootstrap distribution using jackknife-based acceleration. Most accurate when the
+bootstrap distribution is skewed, but computationally more expensive.
 }
+}
+
+\subsection{Bootstrap P-values}{
+
+The p-value is computed using the method that matches the selected \code{boot_ci},
+ensuring that p < alpha if and only if the corresponding confidence interval
+excludes the null value (CI inversion principle). Previously, all bootstrap
+CI methods used the studentized (pivot) p-value, which could produce p-values
+inconsistent with non-studentized CIs.
 
 For different alternatives, the p-values are calculated as follows:
 \itemize{
-\item "two.sided": Proportion of bootstrap statistics at least as extreme as the observed statistic (in either direction), multiplied by 2
-\item "less": Proportion of bootstrap statistics less than or equal to the observed statistic
-\item "greater": Proportion of bootstrap statistics greater than or equal to the observed statistic
+\item "two.sided": Two-tailed p-value from the bootstrap distribution
+\item "less": One-sided p-value for the hypothesis that the true value is less than the null
+\item "greater": One-sided p-value for the hypothesis that the true value is greater than the null
 \item "equivalence": Maximum of two one-sided p-values (for lower and upper bounds)
 \item "minimal.effect": Minimum of two one-sided p-values (for lower and upper bounds)
 }
@@ -119,10 +142,18 @@ For paired samples, the test is of the difference scores (z),
 wherein \eqn{z = x - y}, and the test is of \eqn{\bar z} (mean of the difference scores).
 For one-sample tests, the test is of \eqn{\bar x} (mean of x).
 
+When \code{tr > 0}, the function uses Yuen's trimmed t-test approach: trimmed means
+are computed by removing the fraction \code{tr} of observations from each tail,
+and winsorized variances are used in place of standard variances. This provides
+robustness against outliers and heavy-tailed distributions. The bootstrap
+procedure recomputes trimmed means and winsorized standard errors for each
+bootstrap replicate.
+
 Unlike the \code{t_TOST} function, this function returns a standard \code{htest} object for
 compatibility with other R functions, while still providing the benefits of bootstrapping.
 
 For detailed information on calculation methods, see \code{vignette("robustTOST")}.
+}
 }
 \section{Purpose}{
 
@@ -173,13 +204,20 @@ boot_t_test(mpg ~ am, data = mtcars,
             mu = c(-3, 3),
             R = 999)
 
+# Example 6: Bootstrapped Yuen's trimmed t-test (10\% trimming)
+boot_t_test(extra ~ group, data = sleep, tr = 0.1, R = 999)
+
 }
 \references{
 Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC press.
+
+Yuen, K. K. (1974). The two-sample trimmed t for unequal population variances.
+Biometrika, 61(1), 165-170.
 }
 \seealso{
 Other Robust tests: 
 \code{\link{boot_log_TOST}()},
+\code{\link{boot_ses_test}()},
 \code{\link{boot_t_TOST}()},
 \code{\link{brunner_munzel}()},
 \code{\link{hodges_lehmann}()},

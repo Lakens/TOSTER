@@ -25,7 +25,7 @@
 #' @param alpha alpha level (default = 0.05).
 #' @param null the ratio value under the null hypothesis (default = 1).
 #' @param boot_ci method for bootstrap confidence interval calculation: "stud" (studentized, default),
-#'   "basic" (basic bootstrap), or "perc" (percentile bootstrap).
+#'   "basic" (basic bootstrap), "bca" (bias-corrected and accelerated), or "perc" (percentile bootstrap).
 #' @param R number of bootstrap replications (default = 1999).
 #' @param ... further arguments to be passed to or from methods.
 #'
@@ -42,10 +42,30 @@
 #' The bootstrap procedure follows these steps:
 #'   - Log-transform the data
 #'   - Perform resampling with replacement to generate bootstrap samples
-#'   - For each bootstrap sample, calculate test statistics and effect sizes
-#'   - Use the distribution of bootstrap results to compute p-values and confidence intervals
-#'   - Back-transform for the ratio of means
+#'   - For each bootstrap sample, calculate test statistics and effect sizes on the log scale
+#'   - Compute p-values and confidence intervals using the selected bootstrap method
+#'   - Back-transform confidence intervals for the ratio of means
 #'
+#' ## Bootstrap Confidence Interval Methods
+#'
+#' Four types of bootstrap confidence intervals are available via the `boot_ci` argument:
+#'   - **Studentized ("stud")**: Uses the bootstrap distribution of pivotal t-statistics
+#'     to account for variability in standard error estimates. This is the default.
+#'   - **Basic/Empirical ("basic")**: Reflects the bootstrap distribution of estimates
+#'     around the observed value.
+#'   - **Percentile ("perc")**: Uses percentiles of the bootstrap distribution directly.
+#'   - **Bias-corrected and accelerated ("bca")**: Corrects for both bias and skewness
+#'     in the bootstrap distribution using jackknife-based acceleration.
+#'
+#' ## Bootstrap P-values
+#'
+#' The p-value for each test (two-tailed and both one-sided) is computed using
+#' the method that matches the selected `boot_ci`, ensuring that p < alpha if and
+#' only if the corresponding confidence interval excludes the null value
+#' (CI inversion principle). Previously, all bootstrap CI methods used the
+#' studentized (pivot) p-value, which could produce p-values inconsistent with
+#' non-studentized CIs. All computations are performed on the log scale, then
+#' back-transformed.
 #'
 #' Note that all input data must be positive (ratio scale with a true zero) since log transformation
 #' is applied. The function will stop with an error if any negative values are detected.
@@ -121,7 +141,7 @@ boot_log_TOST.default <- function(x,
                                 eqb = 1.25,
                                 alpha = 0.05,
                                 null = 1,
-                                boot_ci = c("stud","basic", "perc"),
+                                boot_ci = c("stud","basic", "perc", "bca"),
                                 R = 1999, ...){
   hypothesis = match.arg(hypothesis)
   boot_ci = match.arg(boot_ci)
@@ -393,27 +413,102 @@ if(!paired){
   tstat = nullTOST$TOST$t[1]
   tstat_l = nullTOST$TOST$t[2]
   tstat_u = nullTOST$TOST$t[3]
-  #m_vec = append(m_vec, nullTOST$effsize$estimate[1])
-  #d_vec = append(d_vec, nullTOST$effsize$estimate[2])
-
-  boot.pval <- 2 * min(mean(TSTAT <= tstat), mean(TSTAT > tstat))
-
-  if(hypothesis == "EQU"){
-    p_l = mean(TSTAT > tstat_l)
-    p_u = mean(TSTAT < tstat_u)
-  } else{
-    p_l = mean(TSTAT < tstat_l)
-    p_u = mean(TSTAT > tstat_u)
-  }
 
   boot.se = sd(m_vec)
   d.se = sd(exp(m_vec))
+
+  # Jackknife for BCa (if needed)
+  if (boot_ci == "bca") {
+    if (is.null(y)) {
+      # Paired (already converted to differences on log scale)
+      n_jack <- nx
+      jack_est <- numeric(n_jack)
+      for (j in seq_len(n_jack)) {
+        res_jack <- log_pair(
+          x = x[-j],
+          hypothesis = hypothesis,
+          eqb = eqb,
+          alpha = alpha,
+          null = null
+        )
+        jack_est[j] <- res_jack$effsize$estimate[1]
+      }
+    } else {
+      # Two-sample: pooled jackknife (x and y are already log-transformed)
+      n_jack <- nx + ny
+      jack_est <- numeric(n_jack)
+      for (j in seq_len(nx)) {
+        res_jack <- log_TOST(x = exp(x[-j]),
+                             y = exp(y),
+                             hypothesis = hypothesis,
+                             paired = paired,
+                             var.equal = var.equal,
+                             eqb = eqb,
+                             alpha = alpha,
+                             null = null)
+        jack_est[j] <- res_jack$effsize$estimate[1]
+      }
+      for (j in seq_len(ny)) {
+        res_jack <- log_TOST(x = exp(x),
+                             y = exp(y[-j]),
+                             hypothesis = hypothesis,
+                             paired = paired,
+                             var.equal = var.equal,
+                             eqb = eqb,
+                             alpha = alpha,
+                             null = null)
+        jack_est[nx + j] <- res_jack$effsize$estimate[1]
+      }
+    }
+  }
+
+  # Pre-compute BCa parameters for p-value use
+  z0 <- NULL; acc <- NULL
+  if (boot_ci == "bca") {
+    bca_par <- bca_params(m_vec, nullTOST$effsize$estimate[1], jack_est)
+    z0 <- bca_par$z0; acc <- bca_par$acc
+  }
+
   boot.cint <- switch(boot_ci,
                       "stud" = stud(boots_est = m_vec, boots_se = se_vec,
                                     se0=nullTOST$effsize$SE[1], t0 = nullTOST$effsize$estimate[1],
-                                    alpha),
+                                    alpha*2),
                       "basic" = basic(m_vec, t0 = nullTOST$effsize$estimate[1], alpha*2),
-                      "perc" = perc(m_vec, alpha*2))
+                      "perc" = perc(m_vec, alpha*2),
+                      "bca" = bca_ci(boots_est = m_vec, t0 = nullTOST$effsize$estimate[1],
+                                     jack_est = jack_est, alpha = alpha*2))
+
+  # P-value computation (method-consistent with CI) on log scale
+  log_est <- nullTOST$effsize$estimate[1]
+  se_obs_log <- nullTOST$effsize$SE[1]
+  log_null_twosided <- log(null)
+  log_low <- nullTOST$eqb$low_eq[1]   # = log(low_eqbound)
+  log_high <- nullTOST$eqb$high_eq[1]  # = log(high_eqbound)
+
+  boot.pval <- boot_pvalue(bvec = m_vec, est = log_est, null = log_null_twosided,
+                           alternative = "two.sided", boot_ci = boot_ci,
+                           tvec = TSTAT, se_obs = se_obs_log,
+                           z0 = z0, acc = acc, nboot = R)
+
+  if(hypothesis == "EQU"){
+    p_l <- boot_pvalue(bvec = m_vec, est = log_est, null = log_low,
+                       alternative = "greater", boot_ci = boot_ci,
+                       tvec = TSTAT, se_obs = se_obs_log,
+                       z0 = z0, acc = acc, nboot = R)
+    p_u <- boot_pvalue(bvec = m_vec, est = log_est, null = log_high,
+                       alternative = "less", boot_ci = boot_ci,
+                       tvec = TSTAT, se_obs = se_obs_log,
+                       z0 = z0, acc = acc, nboot = R)
+  } else {
+    p_l <- boot_pvalue(bvec = m_vec, est = log_est, null = log_low,
+                       alternative = "less", boot_ci = boot_ci,
+                       tvec = TSTAT, se_obs = se_obs_log,
+                       z0 = z0, acc = acc, nboot = R)
+    p_u <- boot_pvalue(bvec = m_vec, est = log_est, null = log_high,
+                       alternative = "greater", boot_ci = boot_ci,
+                       tvec = TSTAT, se_obs = se_obs_log,
+                       z0 = z0, acc = acc, nboot = R)
+  }
   d.cint = exp(boot.cint)
   #d.cint <- switch(boot_ci,
   #                 "basic" = basic(d_vec, t0 = nullTOST$effsize$estimate[2], alpha*2),
@@ -520,7 +615,7 @@ boot_log_TOST.formula <- function (formula, data, subset, na.action, ...){
      || (length(formula) != 3L)
      || (length(attr(terms(formula[-2L]), "term.labels")) != 1L))
     stop("'formula' missing or incorrect")
-  
+
   # Check for paired argument in ... and warn user
   dots <- list(...)
   if("paired" %in% names(dots)){
@@ -528,7 +623,7 @@ boot_log_TOST.formula <- function (formula, data, subset, na.action, ...){
       message("Using 'paired = TRUE' with the formula interface is not recommended. Please ensure your data is sorted appropriately to make the correct paired comparison.")
     }
   }
-  
+
   m <- match.call(expand.dots = FALSE)
   if(is.matrix(eval(m$data, parent.frame())))
     m$data <- as.data.frame(data)

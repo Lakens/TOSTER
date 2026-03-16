@@ -11,7 +11,7 @@ boot_cor_test(
   method = c("pearson", "kendall", "spearman", "winsorized", "bendpercent"),
   alpha = 0.05,
   null = 0,
-  boot_ci = c("basic", "perc"),
+  boot_ci = c("bca", "stud", "basic", "perc"),
   R = 1999,
   ...
 )
@@ -54,8 +54,14 @@ or a vector of two values representing the lower and upper bounds
 
 \item{boot_ci}{type of bootstrap confidence interval:
 \itemize{
-\item "basic": basic/empirical bootstrap CI
-\item "perc": percentile bootstrap CI (default)
+\item "basic": basic/empirical bootstrap CI (default)
+\item "perc": percentile bootstrap CI
+\item "bca": bias-corrected and accelerated bootstrap CI. Provides second-order
+accuracy by correcting for bias and skewness, but requires additional
+computation via the jackknife (n extra evaluations of the statistic).
+\item "stud": studentized (bootstrap-t) CI. Uses pivot statistics on the Fisher z
+scale with analytical SEs. Only available for \code{method = "pearson"},
+\code{"kendall"}, or \code{"spearman"}.
 }}
 
 \item{R}{number of bootstrap replications (default = 1999).}
@@ -72,7 +78,7 @@ A list with class "htest" containing the following components:
 \item \strong{p.value}: the bootstrap p-value of the test.
 \item \strong{parameter}: the number of observations used in the test.
 \item \strong{conf.int}: a bootstrap confidence interval for the correlation coefficient.
-\item \strong{estimate}: the estimated correlation coefficient, with name "cor", "tau", "rho", "pb", or "wincor"
+\item \strong{estimate}: the estimated correlation coefficient, with name "r", "tau", "rho", "pb", or "wincor"
 corresponding to the method employed.
 \item \strong{stderr}: the bootstrap standard error of the correlation coefficient.
 \item \strong{null.value}: the value(s) of the correlation under the null hypothesis.
@@ -80,6 +86,7 @@ corresponding to the method employed.
 \item \strong{method}: a character string indicating which bootstrapped correlation was measured.
 \item \strong{data.name}: a character string giving the names of the data.
 \item \strong{boot_res}: vector of bootstrap correlation estimates.
+\item \strong{boot_ci}: character string indicating which bootstrap CI method was used.
 \item \strong{call}: the matched call.
 }
 }
@@ -92,7 +99,25 @@ This function supports standard, equivalence, and minimal effect testing with ro
 }
 \details{
 This function uses bootstrap methods to calculate correlation coefficients and their
-confidence intervals. P-values are calculated from a re-sampled null distribution.
+confidence intervals. P-values are computed by inverting the selected CI method,
+which guarantees that \code{p < alpha} if and only if the corresponding CI excludes the
+null value.
+
+\strong{P-value computation by CI method:}
+\itemize{
+\item \code{boot_ci = "perc"}: p-values are computed from the raw bootstrap distribution
+(proportion of replicates beyond the null). This is the original approach from
+Wilcox (2017).
+\item \code{boot_ci = "basic"}: p-values use the reflected bootstrap distribution
+(\code{2 * est - bvec}), which is the exact inversion of the basic CI.
+\item \code{boot_ci = "bca"}: p-values are derived from the BCa probability transformation,
+using the same bias correction and acceleration parameters as the BCa CI.
+\item \code{boot_ci = "stud"}: p-values are derived from the bootstrap pivot distribution
+on the Fisher z scale. Each replicate's pivot is \code{(z_star - z_obs) / se_star},
+where \code{se_star} is the analytical SE. This method is only available for
+Pearson, Kendall, and Spearman correlations, since robust methods lack
+analytical SEs on the Fisher z scale.
+}
 
 The bootstrap correlation methods in this package offer two robust correlations beyond
 the standard methods:

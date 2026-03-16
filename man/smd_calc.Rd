@@ -15,7 +15,14 @@ smd_calc(
   bias_correction = TRUE,
   rm_correction = FALSE,
   glass = NULL,
-  smd_ci = c("nct", "goulet", "t", "z")
+  denom = c("auto", "z", "rm", "pooled", "avg", "glass1", "glass2"),
+  smd_ci = c("nct", "goulet", "t", "z"),
+  output = c("htest", "data.frame"),
+  null.value = 0,
+  alternative = c("none", "two.sided", "less", "greater", "equivalence",
+    "minimal.effect"),
+  test_method = c("z", "t"),
+  tr = 0
 )
 
 \method{smd_calc}{default}(
@@ -28,7 +35,14 @@ smd_calc(
   bias_correction = TRUE,
   rm_correction = FALSE,
   glass = NULL,
+  denom = c("auto", "z", "rm", "pooled", "avg", "glass1", "glass2"),
   smd_ci = c("nct", "goulet", "t", "z"),
+  output = c("htest", "data.frame"),
+  null.value = 0,
+  alternative = c("none", "two.sided", "less", "greater", "equivalence",
+    "minimal.effect"),
+  test_method = c("z", "t"),
+  tr = 0,
   ...
 )
 
@@ -51,7 +65,50 @@ smd_calc(
 
 \item{glass}{An option to calculate Glass's delta as an alternative to Cohen's d type SMD. Default is NULL to not calculate Glass's delta, 'glass1' will use the first group's SD as the denominator whereas 'glass2' will use the 2nd group's SD.}
 
+\item{denom}{a character string specifying the denominator for standardization:
+- "auto": (default) Uses the standard denominator based on design and other arguments
+(glass, rm_correction, var.equal).
+- "z": SD of differences (Cohen's d_z). Valid for paired and one-sample designs.
+- "rm": Repeated-measures corrected (Cohen's d_rm). Valid for paired designs only.
+- "pooled": Pooled SD (Cohen's d_s). Valid for independent samples only.
+- "avg": Root-mean-square SD (Cohen's d_av). Valid for independent samples only.
+- "glass1": First group's (x) SD (Glass's delta). Valid for paired and independent designs.
+- "glass2": Second group's (y) SD (Glass's delta). Valid for paired and independent designs.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{When set to any value other than "auto", this overrides the glass, rm_correction,
+and var.equal arguments. The bias_correction argument is not affected.
+}\if{html}{\out{</div>}}}
+
 \item{smd_ci}{Method for calculating SMD confidence intervals. Methods include 'goulet', 'noncentral t' (nct), 'central t' (t), and 'normal method' (z).}
+
+\item{output}{a character string specifying the output format:
+- "htest": (default) Returns an object of class "htest" compatible with standard R output.
+- "data.frame": Returns a data frame for backward compatibility.}
+
+\item{null.value}{a number or vector specifying the null hypothesis value(s) on the SMD scale:
+- For standard alternatives: a single value (default = 0)
+- For equivalence/minimal.effect: two values representing the lower and upper bounds}
+
+\item{alternative}{a character string specifying the alternative hypothesis:
+- "none": (default) No hypothesis test is performed; only effect size and CI are returned.
+- "two.sided": Test whether SMD differs from null.value
+- "less": Test whether SMD is less than null.value
+- "greater": Test whether SMD is greater than null.value
+- "equivalence": Test whether SMD is between specified bounds
+- "minimal.effect": Test whether SMD is outside specified bounds}
+
+\item{test_method}{a character string specifying the method for hypothesis testing:
+- "z": Use z-statistic (normal distribution)
+- "t": Use t-statistic with degrees of freedom from the SMD calculation}
+
+\item{tr}{a numeric value specifying the proportion of observations to trim from each
+tail when computing trimmed means and Winsorized variances (default = 0, no trimming).
+Must be in the range [0, 0.5). Common choices are 0.1 (10\\% trimming) and 0.2
+(20\\% trimming). When tr > 0, the effect size uses trimmed means for the numerator
+and the rescaled Winsorized standard deviation for the denominator, following
+Algina, Keselman, and Penfield (2005). The rescaling ensures the robust effect
+size equals Cohen's delta when data are normally distributed.
+Note: tr > 0 is not compatible with denom = "rm" or smd_ci = "goulet".}
 
 \item{y}{an optional (non-empty) numeric vector of data values.}
 
@@ -66,9 +123,23 @@ smd_calc(
 \item{na.action}{a function which indicates what should happen when the data contain NAs. Defaults to getOption("na.action").}
 }
 \value{
-A data frame containing the following information:
+If \code{output = "htest"} (default), returns a list with class \code{"htest"} containing:
 \itemize{
-\item estimate: The standardized mean difference estimate (Cohen's d, Hedges' g, or Glass's delta)
+\item estimate: The SMD estimate (Cohen's d, Hedges' g, or Glass's delta)
+\item stderr: Standard error of the estimate
+\item conf.int: Confidence interval with conf.level attribute
+\item alternative: A character string describing the alternative hypothesis
+\item method: A character string indicating what type of test was performed
+\item data.name: A character string giving the name(s) of the data
+\item statistic: Test statistic (only if alternative != "none")
+\item parameter: Degrees of freedom (only if test_method = "t" and alternative != "none")
+\item p.value: P-value for the test (only if alternative != "none")
+\item null.value: The specified hypothesized value(s) (only if alternative != "none")
+}
+
+If \code{output = "data.frame"}, returns a data frame containing:
+\itemize{
+\item estimate: The SMD estimate
 \item SE: Standard error of the estimate
 \item lower.ci: Lower bound of the confidence interval
 \item upper.ci: Upper bound of the confidence interval
@@ -79,8 +150,7 @@ A data frame containing the following information:
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
 
 Calculates standardized mean difference (SMD) effect sizes and their confidence intervals
-from raw data. This function focuses solely on effect size estimation without performing
-hypothesis tests.
+from raw data, with optional hypothesis testing.
 }
 \details{
 This function calculates standardized mean differences (SMD) for various study designs:
@@ -106,8 +176,20 @@ Different confidence interval calculation methods are available:
 \item "z": Uses the normal distribution
 }
 
-Note that unlike the t_TOST and related functions, smd_calc only calculates effect sizes and
-their confidence intervals without performing hypothesis tests.
+The \code{denom} parameter provides a direct way to select the standardization denominator.
+When \code{denom} is not "auto", it takes precedence over the \code{glass}, \code{rm_correction}, and
+\code{var.equal} arguments, which are overridden as needed. A message is emitted if any
+explicitly provided arguments are overridden. The \code{bias_correction} argument is always
+respected regardless of \code{denom}.
+
+When \code{tr > 0}, the function computes a robust standardized mean difference
+using trimmed means and Winsorized variances. The trimmed mean removes a proportion
+\code{tr} of observations from each tail before computing the mean. The Winsorized
+variance replaces trimmed observations with the nearest remaining values before
+computing the variance. A rescaling constant ensures the robust effect size equals
+Cohen's delta under normality. This approach is recommended when distributions
+are heavy-tailed or contain outliers, as the robust effect size better reflects
+the separation between distributions than the standard Cohen's d (Algina et al., 2005).
 
 For detailed information on calculation methods, see \code{vignette("SMD_calcs")}.
 }
@@ -119,7 +201,7 @@ Use this function when:
 \item You want confidence intervals for your effect size estimates
 \item You need effect sizes for meta-analysis or reporting
 \item You want to compare effect sizes across different studies or measures
-\item You don't need the hypothesis testing components of the TOST functions
+\item You want to test hypotheses about effect size magnitudes (e.g., equivalence testing)
 }
 }
 
@@ -145,11 +227,43 @@ smd_calc(x = before, y = after, paired = TRUE, rm_correction = TRUE)
 # Example 4: Glass's delta (using only first group's SD)
 smd_calc(x = group1, y = group2, glass = "glass1")
 
+# Example 5: Two-sided test against null of 0
+smd_calc(x = group1, y = group2,
+         alternative = "two.sided", null.value = 0)
+
+# Example 6: Equivalence test (TOST)
+smd_calc(x = group1, y = group2,
+         alternative = "equivalence", null.value = c(-0.5, 0.5))
+
+# Example 7: Using t-distribution for test
+smd_calc(x = group1, y = group2,
+         alternative = "two.sided", null.value = 0,
+         test_method = "t", smd_ci = "t")
+
+# Example 8: Direct denominator selection
+smd_calc(x = group1, y = group2, denom = "pooled")
+smd_calc(x = group1, y = group2, denom = "avg")
+smd_calc(x = before, y = after, paired = TRUE, denom = "rm")
+smd_calc(x = group1, y = group2, denom = "glass1", bias_correction = TRUE)
+
+# Example 9: Legacy data.frame output
+smd_calc(x = group1, y = group2, output = "data.frame")
+
+}
+\references{
+Algina, J., Keselman, H. J., & Penfield, R. D. (2005). An alternative to Cohen's
+standardized mean difference effect size: A robust parameter and confidence interval
+in the two independent groups case. \emph{Psychological Methods}, \emph{10}(3), 317-328.
+
+Yuen, K. K., & Dixon, W. J. (1973). The approximate behaviour and performance of
+the two-sample trimmed t. \emph{Biometrika}, \emph{60}(2), 369-374.
 }
 \seealso{
 Other effect sizes: 
 \code{\link{boot_ses_calc}()},
 \code{\link{boot_smd_calc}()},
-\code{\link{ses_calc}()}
+\code{\link{rank_diff}()},
+\code{\link{ses_calc}()},
+\code{\link{trans_rank_prob}()}
 }
 \concept{effect sizes}

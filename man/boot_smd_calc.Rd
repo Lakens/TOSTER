@@ -15,8 +15,14 @@ boot_smd_calc(
   bias_correction = TRUE,
   rm_correction = FALSE,
   glass = NULL,
-  boot_ci = c("stud", "basic", "perc"),
-  R = 1999
+  denom = c("auto", "z", "rm", "pooled", "avg", "glass1", "glass2"),
+  boot_ci = c("stud", "basic", "perc", "bca"),
+  R = 1999,
+  output = c("htest", "data.frame"),
+  null.value = 0,
+  alternative = c("none", "two.sided", "less", "greater", "equivalence",
+    "minimal.effect"),
+  tr = 0
 )
 
 \method{boot_smd_calc}{default}(
@@ -29,8 +35,14 @@ boot_smd_calc(
   bias_correction = TRUE,
   rm_correction = FALSE,
   glass = NULL,
-  boot_ci = c("stud", "basic", "perc"),
+  denom = c("auto", "z", "rm", "pooled", "avg", "glass1", "glass2"),
+  boot_ci = c("stud", "basic", "perc", "bca"),
   R = 1999,
+  output = c("htest", "data.frame"),
+  null.value = 0,
+  alternative = c("none", "two.sided", "less", "greater", "equivalence",
+    "minimal.effect"),
+  tr = 0,
   ...
 )
 
@@ -53,9 +65,48 @@ boot_smd_calc(
 
 \item{glass}{Option to calculate Glass's delta instead of Cohen's d style SMD ('glass1' uses first group's SD, 'glass2' uses second group's SD).}
 
-\item{boot_ci}{method for bootstrap confidence interval calculation: "stud" (studentized, default), "basic" (basic bootstrap), or "perc" (percentile bootstrap).}
+\item{denom}{a character string specifying the denominator for standardization:
+- "auto": (default) Uses the standard denominator based on design and other arguments
+(glass, rm_correction, var.equal).
+- "z": SD of differences (Cohen's d_z). Valid for paired and one-sample designs.
+- "rm": Repeated-measures corrected (Cohen's d_rm). Valid for paired designs only.
+- "pooled": Pooled SD (Cohen's d_s). Valid for independent samples only.
+- "avg": Root-mean-square SD (Cohen's d_av). Valid for independent samples only.
+- "glass1": First group's (x) SD (Glass's delta). Valid for paired and independent designs.
+- "glass2": Second group's (y) SD (Glass's delta). Valid for paired and independent designs.
+
+\if{html}{\out{<div class="sourceCode">}}\preformatted{When set to any value other than "auto", this overrides the glass, rm_correction,
+and var.equal arguments. The bias_correction argument is not affected.
+}\if{html}{\out{</div>}}}
+
+\item{boot_ci}{method for bootstrap confidence interval calculation: "stud" (studentized, default), "basic" (basic bootstrap), "bca" (bias-corrected and accelerated), or "perc" (percentile bootstrap).}
 
 \item{R}{number of bootstrap replications (default = 1999).}
+
+\item{output}{a character string specifying the output format:
+- "htest": (default) Returns an object of class "htest" compatible with standard R output.
+- "data.frame": Returns a data frame for backward compatibility.}
+
+\item{null.value}{a number or vector specifying the null hypothesis value(s) on the SMD scale:
+- For standard alternatives: a single value (default = 0)
+- For equivalence/minimal.effect: two values representing the lower and upper bounds}
+
+\item{alternative}{a character string specifying the alternative hypothesis:
+- "none": (default) No hypothesis test is performed; only effect size and CI are returned.
+- "two.sided": Test whether SMD differs from null.value
+- "less": Test whether SMD is less than null.value
+- "greater": Test whether SMD is greater than null.value
+- "equivalence": Test whether SMD is between specified bounds
+- "minimal.effect": Test whether SMD is outside specified bounds}
+
+\item{tr}{a numeric value specifying the proportion of observations to trim from each
+tail when computing trimmed means and Winsorized variances (default = 0, no trimming).
+Must be in the range [0, 0.5). Common choices are 0.1 (10\\% trimming) and 0.2
+(20\\% trimming). When tr > 0, the effect size uses trimmed means for the numerator
+and the rescaled Winsorized standard deviation for the denominator, following
+Algina, Keselman, and Penfield (2005). The rescaling ensures the robust effect
+size equals Cohen's delta when data are normally distributed.
+Note: tr > 0 is not compatible with denom = "rm".}
 
 \item{y}{an optional (non-empty) numeric vector of data values.}
 
@@ -70,7 +121,23 @@ boot_smd_calc(
 \item{na.action}{a function indicating what should happen when the data contain NAs.}
 }
 \value{
-A data frame containing the following information:
+If \code{output = "htest"} (default), returns a list with class \code{"htest"} containing:
+\itemize{
+\item estimate: The SMD estimate (Cohen's d, Hedges' g, or Glass's delta)
+\item stderr: Standard error estimated from the bootstrap distribution
+\item conf.int: Bootstrap confidence interval with conf.level attribute
+\item alternative: A character string describing the alternative hypothesis
+\item method: A character string indicating what type of test was performed
+\item note: A character string describing the bootstrap CI method used
+\item boot: The bootstrap distribution of SMD estimates
+\item data.name: A character string giving the name(s) of the data
+\item call: The matched call
+\item statistic: z-statistic (only if alternative != "none")
+\item p.value: Bootstrap p-value (only if alternative != "none")
+\item null.value: The specified hypothesized value(s) (only if alternative != "none")
+}
+
+If \code{output = "data.frame"}, returns a data frame containing:
 \itemize{
 \item estimate: The SMD calculated from the original data
 \item bias: Estimated bias (difference between original estimate and median of bootstrap estimates)
@@ -84,9 +151,8 @@ A data frame containing the following information:
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#maturing}{\figure{lifecycle-maturing.svg}{options: alt='[Maturing]'}}}{\strong{[Maturing]}}
 
-Calculates standardized mean differences (SMDs) with bootstrap confidence intervals.
-This function provides more robust confidence intervals for Cohen's d, Hedges' g,
-and other SMD measures through resampling methods.
+Calculates standardized mean differences (SMDs) with bootstrap confidence intervals,
+with optional hypothesis testing.
 }
 \details{
 This function calculates bootstrapped confidence intervals for standardized mean differences.
@@ -102,12 +168,26 @@ The function implements the following bootstrap approach:
 \item Calculate confidence intervals using the specified method
 }
 
-Three bootstrap confidence interval methods are available:
+Four bootstrap confidence interval methods are available via the \code{boot_ci} argument:
 \itemize{
-\item \strong{Studentized bootstrap ("stud")}: Accounts for the variability in standard error estimates. Usually provides the most accurate coverage probability and is set as the default.
-\item \strong{Basic bootstrap ("basic")}: Uses the empirical distribution of bootstrap estimates. Simple approach that works well for symmetric distributions.
-\item \strong{Percentile bootstrap ("perc")}: Uses percentiles of the bootstrap distribution directly. More robust to skewness in the bootstrap distribution.
+\item \strong{Studentized bootstrap ("stud")}: Uses the bootstrap distribution of pivotal
+t-statistics to account for variability in standard error estimates. Usually
+provides the most accurate coverage probability and is set as the default.
+\item \strong{Basic bootstrap ("basic")}: Reflects the bootstrap distribution of estimates
+around the observed value. Simple approach that works well for symmetric distributions.
+\item \strong{Percentile bootstrap ("perc")}: Uses percentiles of the bootstrap distribution directly.
+More robust to skewness in the bootstrap distribution.
+\item \strong{Bias-corrected and accelerated ("bca")}: Corrects for both bias and skewness in the
+bootstrap distribution using jackknife-based acceleration. Most accurate when the
+bootstrap distribution is skewed, but computationally more expensive.
 }
+
+When hypothesis testing is requested (i.e., \code{alternative} is not \code{"none"}),
+the p-value is computed using the method that matches the selected \code{boot_ci},
+ensuring that p < alpha if and only if the corresponding confidence interval
+excludes the null value (CI inversion principle). Previously, all bootstrap
+CI methods used the studentized (pivot) p-value, which could produce p-values
+inconsistent with non-studentized CIs.
 
 The function supports various SMD variants:
 \itemize{
@@ -124,6 +204,12 @@ The function supports three study designs:
 \item Paired samples design: Standardizes the mean difference between paired observations
 }
 
+The \code{denom} parameter provides a direct way to select the standardization denominator.
+When \code{denom} is not "auto", it takes precedence over the \code{glass}, \code{rm_correction}, and
+\code{var.equal} arguments, which are overridden as needed. A message is emitted if any
+explicitly provided arguments are overridden. The \code{bias_correction} argument is always
+respected regardless of \code{denom}.
+
 For detailed information on calculation methods, see \code{vignette("SMD_calcs")}.
 }
 \section{Purpose}{
@@ -135,6 +221,7 @@ Use this function when:
 \item Sample sizes are small or standard error approximations may be unreliable
 \item You prefer resampling-based confidence intervals over parametric approximations
 \item You need to quantify uncertainty in SMD estimates more accurately
+\item You want to test hypotheses about effect size magnitudes using bootstrap methods
 }
 }
 
@@ -180,11 +267,35 @@ result <- boot_smd_calc(x = control,
                       boot_ci = "stud",
                       R = 999)
 
+# Example 5: Two-sided hypothesis test
+result <- boot_smd_calc(x = group1, y = group2,
+                      alternative = "two.sided",
+                      null.value = 0,
+                      R = 999)
+
+# Example 6: Equivalence test with bootstrap
+result <- boot_smd_calc(x = group1, y = group2,
+                      alternative = "equivalence",
+                      null.value = c(-0.5, 0.5),
+                      R = 999)
+
+# Example 7: Legacy data.frame output
+result <- boot_smd_calc(x = group1, y = group2,
+                      output = "data.frame",
+                      R = 999)
+
+}
+\references{
+Algina, J., Keselman, H. J., & Penfield, R. D. (2005). An alternative to Cohen's
+standardized mean difference effect size: A robust parameter and confidence interval
+in the two independent groups case. \emph{Psychological Methods}, \emph{10}(3), 317-328.
 }
 \seealso{
 Other effect sizes: 
 \code{\link{boot_ses_calc}()},
+\code{\link{rank_diff}()},
 \code{\link{ses_calc}()},
-\code{\link{smd_calc}()}
+\code{\link{smd_calc}()},
+\code{\link{trans_rank_prob}()}
 }
 \concept{effect sizes}

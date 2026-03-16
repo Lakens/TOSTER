@@ -54,7 +54,9 @@ has level 1-2*alpha (90\% when alpha = 0.05).}
 
 \item{R}{the number of permutations. Default is \code{NULL}, which uses the asymptotic test.
 If \code{R >= max_perms} (the maximum number of possible permutations), exact permutation
-is computed. Otherwise, Monte Carlo (permutation with replacement; i.e., randomization testing) sampling is used.}
+is computed. Otherwise, Monte Carlo (permutation with replacement; i.e., randomization
+testing) sampling is used. Note: permutation tests are not supported for
+\code{alternative = "equivalence"} or \code{alternative = "minimal.effect"} (see Details).}
 
 \item{scale}{the scale estimator for standardizing the test statistic in permutation
 tests. Options are:
@@ -131,7 +133,7 @@ This estimator is consistent with the location shift estimate returned by
 
 \subsection{Test Methods}{
 
-\strong{Asymptotic test (R = NULL):} Uses kernel density estimation to estimate the
+\strong{Asymptotic test (R = NULL):} Uses kernel density estimation (Fried & Dehling, 2011) to estimate the
 variance of the Hodges-Lehmann estimator (note: this generates confidence intervals that will differ from \code{\link[stats:wilcox.test]{stats::wilcox.test()}}). The test statistic follows an approximate
 normal distribution. This method may have issues with very heavy-tailed distributions,
 very skewed distributions, or small sample sizes (n < 30 per group). In these cases,
@@ -161,6 +163,36 @@ estimator (Fried & Dehling, 2011):
 where Z is the median-corrected combined sample.
 }
 
+\subsection{Permutation Tests with Non-Zero Null Values}{
+
+For standard alternatives (\code{two.sided}, \code{less}, \code{greater}) with \code{mu != 0},
+the permutation test uses an approximate approach: the observed test statistic
+is centered at \code{mu}, but the permutation distribution is generated under
+exchangeability (effectively \code{mu = 0}). Because the Hodges-Lehmann statistic
+divided by the S1/S2 scale estimator is not a true pivot, this comparison is
+approximate rather than exact. The approximation is generally adequate when
+\code{mu} is moderate relative to the scale of the data, but may lose accuracy for
+extreme null values. For the two-sample case, the scale estimator is
+recomputed for each permutation, which partially mitigates this issue.
+}
+
+\subsection{Equivalence and Minimal Effect Testing}{
+
+Equivalence and minimal effect tests are only available with the asymptotic
+method (\code{R = NULL}). Permutation tests are not supported for these
+alternatives because the scale estimators (S1, S2) from Fried & Dehling
+(2011) do not produce a pivotal test statistic for the Hodges-Lehmann
+estimator. Without pivotality, the permutation distribution generated under
+the exchangeability null is not a valid reference distribution for testing
+at the equivalence bounds, and the resulting p-values can be unreliable.
+This limitation compounds with the inherent conservatism of the naive
+intersection-union procedure, potentially yielding substantial power loss.
+
+The asymptotic method uses kernel density estimation to approximate the
+standard error, which provides a proper pivot and valid boundary-null
+inference.
+}
+
 \subsection{Alternatives}{
 
 The function supports five alternative hypotheses:
@@ -178,12 +210,11 @@ specified by \code{mu}
 \section{Purpose}{
 
 The Hodges-Lehmann estimator provides a robust alternative to the mean for testing
-location differences. It has a breakdown point of approximately 29.3\%, meaning it
-remains stable even when nearly 30\% of the data are outliers. This function offers:
+location differences. It is arguably a more stable option in the presence of outliers. This function offers:
 \itemize{
 \item Exact permutation tests for small samples
 \item Randomization tests (permutation with replacement) for larger samples
-\item Asymptotic tests using kernel density estimation
+\item Asymptotic tests using kernel density estimation of the scale parameter
 \item Support for equivalence and minimal effect testing
 \item An interface that mirrors \code{wilcox.test} and \code{perm_t_test}
 }
@@ -208,8 +239,8 @@ before <- c(5.1, 4.8, 6.2, 5.7, 6.0, 5.5, 4.9, 5.8)
 after <- c(5.6, 5.2, 6.7, 6.1, 6.5, 5.8, 5.3, 6.2)
 hodges_lehmann(before, after, paired = TRUE)
 
-# Equivalence test
-hodges_lehmann(x, y, alternative = "equivalence", mu = c(-1, 1), R = 999)
+# Equivalence test (asymptotic only)
+hodges_lehmann(x, y, alternative = "equivalence", mu = c(-1, 1))
 
 # Formula interface
 hodges_lehmann(extra ~ group, data = sleep)
@@ -232,6 +263,7 @@ calculating exact P-values when permutations are randomly drawn.
 \seealso{
 Other Robust tests: 
 \code{\link{boot_log_TOST}()},
+\code{\link{boot_ses_test}()},
 \code{\link{boot_t_TOST}()},
 \code{\link{boot_t_test}()},
 \code{\link{brunner_munzel}()},

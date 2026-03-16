@@ -97,6 +97,42 @@
 #' If the number of possible permutations is less than R, all exact permutations are computed
 #' and a message is printed to the console.
 #'
+#' ## Permutation Approach to Equivalence and Minimal Effect Testing
+#'
+#' When `alternative = "equivalence"` or `alternative = "minimal.effect"`, the
+#' function performs two one-sided permutation tests and combines them following
+#' the nonparametric combination (NPC) framework of Arboretti, Pesarin, and
+#' Salmaso (2021).
+#'
+#' The `"equivalence"` alternative implements the **intersection-union (IU)**
+#' approach: the null hypothesis is non-equivalence and the alternative is
+#' equivalence. Two one-sided p-values are computed and the global p-value is
+#' their maximum. The `"minimal.effect"` alternative implements the
+#' **union-intersection (UI)** approach: the null hypothesis is equivalence and
+#' the alternative is non-equivalence. The global p-value is the minimum of the
+#' two one-sided p-values. Both partial tests are evaluated against the same
+#' permutation distribution (i.e., the same set of permuted samples), which
+#' preserves the negative dependence between the two test statistics as required
+#' by the NPC theory.
+#'
+#' The permutation distribution is constructed under the exchangeability null
+#' (i.e., by permuting the unshifted data), while the observed test statistics
+#' are centered at the equivalence bounds. This differs from the shifted-data
+#' algorithm described in Arboretti et al. (2021), which permutes margin-shifted
+#' pooled samples. Under the default studentized permutation approach
+#' (`perm_se = TRUE`), the two methods are asymptotically equivalent
+#' (Janssen, 1997; Chung & Romano, 2013). The exchangeability-based approach
+#' avoids the computational cost of constructing and permuting two separate
+#' shifted datasets.
+#'
+#' Note that these are *uncalibrated* (naive) procedures in the terminology of
+#' Arboretti et al. (2021). For the IU direction (`"equivalence"`), the naive
+#' approach can be conservative when sample sizes or equivalence margins are
+#' small relative to the variability in the data. For the UI direction
+#' (`"minimal.effect"`), the impact of not calibrating is smaller because the
+#' calibrated critical value lies in the narrower interval
+#' \eqn{[\alpha/2, \alpha]} rather than \eqn{[\alpha, (1+\alpha)/2)}.
+#'
 #' @section Comparison with Other Packages:
 #' Results from `perm_t_test` may differ slightly from other permutation test implementations
 #' such as `MKinfer::perm.t.test` or `coin::oneway_test`. These differences arise from
@@ -161,6 +197,10 @@
 #'
 #'
 #' @references
+#'
+#' Arboretti, R., Pesarin, F. & Salmaso, L. (2021). A unified approach to permutation testing for equivalence.
+#' Stat Methods Appl 30, 1033-1052. doi: 10.1007/s10260-020-00548-0
+#'
 #' Efron, B., & Tibshirani, R. J. (1993). An Introduction to the Bootstrap. Chapman and Hall/CRC.
 #'
 #' Janssen, A. (1997). Studentized permutation tests for non-i.i.d. hypotheses and the
@@ -180,6 +220,7 @@
 #' @name perm_t_test
 #' @export perm_t_test
 
+# TODO: add xname and yname arguments to allow user-specified group labels
 perm_t_test <- function(x, ...) {
   UseMethod("perm_t_test")
 }
@@ -520,10 +561,14 @@ perm_t_test.default <- function(x,
       tstat <- (mx - mu) / stderr
     }
 
+    XNAME <- "x"
+    YNAME <- "y"
     estimate <- setNames(mx, if (paired) {
-      if (tr > 0) "trimmed mean of the differences" else "mean of the differences"
+      if (tr > 0) paste0("trimmed mean of the differences (z = ", XNAME, " - ", YNAME, ", tr = ", tr, ")")
+      else ttest_estimate_label(type = "t", xname = XNAME, yname = YNAME, paired = TRUE)
     } else {
-      if (tr > 0) "trimmed mean of x" else "mean of x"
+      if (tr > 0) paste0("trimmed mean of ", XNAME)
+      else ttest_estimate_label(type = "t", xname = XNAME, yname = NULL, paired = FALSE)
     })
 
     # Generate permutation distribution
@@ -649,12 +694,17 @@ perm_t_test.default <- function(x,
       tstat <- (diff_means - mu) / stderr
     }
 
+    XNAME <- "x"
+    YNAME <- "y"
     if (tr > 0) {
-      estimate <- c(mx, my)
-      names(estimate) <- c("trimmed mean of x", "trimmed mean of y")
+      estimate <- c(mx, my, mx - my)
+      names(estimate) <- c(paste0("trimmed mean of ", XNAME),
+                            paste0("trimmed mean of ", YNAME),
+                            paste0("trimmed mean difference (", XNAME, " - ", YNAME, ", tr = ", tr, ")"))
     } else {
-      estimate <- c(mx, my)
-      names(estimate) <- c("mean of x", "mean of y")
+      est_labels <- ttest_estimate_label(type = "t", xname = XNAME, yname = YNAME, paired = FALSE)
+      estimate <- c(mx, my, mx - my)
+      names(estimate) <- c(est_labels, paste0("mean difference (", XNAME, " - ", YNAME, ")"))
     }
 
     # Generate permutation distribution
@@ -786,6 +836,8 @@ perm_t_test.default <- function(x,
   }
 
   # Set up null value
+  # TODO: Consider updating null.value names to indicate direction
+  # (e.g., "difference in means (x - y)") for consistency with estimate labels
   if (alternative %in% c("equivalence", "minimal.effect")) {
     null.value <- mu
     names(null.value) <- rep("difference in means", 2)
@@ -846,6 +898,14 @@ perm_t_test.default <- function(x,
   names(tstat_report) <- "t-observed"
   names(df) <- "df"
 
+  # Compute sample_size
+  # Note: for paired, x <- x - y has already been done so y is NULL and nx is n_pairs
+  if (is.null(y)) {
+    sample_size <- c(n = nx)
+  } else {
+    sample_size <- c(nx = nx, ny = ny)
+  }
+
   # Build output
   rval <- list(
     statistic = tstat_report,
@@ -860,7 +920,8 @@ perm_t_test.default <- function(x,
     data.name = dname,
     call = match.call(),
     R = R,
-    R.used = R_used
+    R.used = R_used,
+    sample_size = sample_size
   )
 
   if (keep_perm) {
@@ -912,5 +973,38 @@ perm_t_test.formula <- function(formula, data, subset, na.action, ...) {
   DATA <- setNames(split(mf[[response]], g), c("x", "y"))
   y <- do.call("perm_t_test", c(DATA, list(...)))
   y$data.name <- DNAME
+
+  # Resolve actual group labels from factor levels
+  XNAME <- levels(g)[1]
+  YNAME <- levels(g)[2]
+  xq <- quote_if_numeric(XNAME)
+  yq <- quote_if_numeric(YNAME)
+
+  is_paired <- isTRUE(dots$paired)
+  tr_val <- if (!is.null(dots$tr)) dots$tr else 0
+
+  if (tr_val > 0) {
+    # Trimmed labels: substitute group names
+    nms <- names(y$estimate)
+    nms <- gsub("\\bof x\\b", paste0("of ", xq), nms)
+    nms <- gsub("\\bof y\\b", paste0("of ", yq), nms)
+    nms <- gsub("\\(x - y", paste0("(", xq, " - ", yq), nms)
+    nms <- gsub("\\(z = x - y", paste0("(z = ", xq, " - ", yq), nms)
+    names(y$estimate) <- nms
+  } else {
+    if (!is_paired && length(y$estimate) >= 2) {
+      est_labels <- ttest_estimate_label(type = "t", xname = XNAME, yname = YNAME, paired = FALSE)
+      diff_label <- paste0("mean difference (", xq, " - ", yq, ")")
+      names(y$estimate) <- c(est_labels, diff_label)
+    } else if (is_paired) {
+      names(y$estimate) <- ttest_estimate_label(type = "t", xname = XNAME, yname = YNAME, paired = TRUE)
+    }
+  }
+
+  # Relabel sample_size names
+  if (!is.null(y$sample_size) && length(y$sample_size) == 2) {
+    names(y$sample_size) <- levels(g)
+  }
+
   y
 }

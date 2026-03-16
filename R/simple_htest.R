@@ -99,6 +99,7 @@
 #' @export simple_htest
 
 
+# TODO: add xname and yname arguments to allow user-specified group labels
 #simple_htest <- setClass("simple_htest")
 simple_htest <- function(x, ...,
                          paired = FALSE,
@@ -138,7 +139,7 @@ simple_htest.default = function(x,
      when = "0.9.0",
      what = "simple_htest(test = 'brunner_munzel')",
      with = "brunner_munzel()",
-     details = "The Brunner-Munzel test has been removed from simple_htest(). Please use brunner_munzel() directly for full functionality including permutation tests and improved output labeling."
+     details = "The Brunner-Munzel test has been deprecated from simple_htest(). Please use brunner_munzel() directly for full functionality including permutation tests and improved output labeling."
    )
  }
 
@@ -150,6 +151,16 @@ simple_htest.default = function(x,
      mu = 0
      message(paste0("mu set to ", mu))
    }
+ }
+
+ # Compute sample sizes for output
+ if (is.null(y)) {
+   sample_size <- c(n = sum(!is.na(x)))
+ } else if (paired) {
+   complete <- complete.cases(x, y)
+   sample_size <- c(n = sum(complete))
+ } else {
+   sample_size <- c(nx = sum(!is.na(x)), ny = sum(!is.na(y)))
  }
 
  if(alternative %in% c("equivalence","minimal.effect")){
@@ -267,6 +278,7 @@ simple_htest.default = function(x,
 
      name_val = names(ci_test$null.value)
      rval$conf.int = ci_test$conf.int
+     rval$estimate = ci_test$estimate
      rval$alternative = alternative
      rval$null.value = c(lo_bound, hi_bound)
      names(rval$null.value) = rep(name_val,2)
@@ -361,6 +373,7 @@ simple_htest.default = function(x,
 
      name_val = names(ci_test$null.value)
      rval$conf.int = ci_test$conf.int
+     rval$estimate = ci_test$estimate
      rval$alternative = alternative
      rval$null.value = c(lo_bound, hi_bound)
      names(rval$null.value) = rep(name_val,2)
@@ -403,6 +416,43 @@ simple_htest.default = function(x,
 
  }
 
+  # Augment estimate labels and add mean difference for two-sample t-tests
+  XNAME <- "x"
+  YNAME <- if (!is.null(y)) "y" else NULL
+  if (test == "t.test") {
+    if (!is.null(y) && !paired) {
+      # Two-sample: relabel group means and append mean difference as third element
+      est_labels <- ttest_estimate_label(type = "t", xname = XNAME, yname = YNAME, paired = FALSE)
+      names(rval$estimate) <- est_labels
+      mdiff <- rval$estimate[1] - rval$estimate[2]
+      names(mdiff) <- paste0("mean difference (", XNAME, " - ", YNAME, ")")
+      rval$estimate <- c(rval$estimate, mdiff)
+    } else if (paired) {
+      # Paired: relabel to indicate differencing
+      names(rval$estimate) <- ttest_estimate_label(type = "t", xname = XNAME, yname = YNAME, paired = TRUE)
+    }
+    # One-sample: relabel
+    if (is.null(y) && !paired) {
+      names(rval$estimate) <- ttest_estimate_label(type = "t", xname = XNAME, yname = NULL, paired = FALSE)
+    }
+  }
+
+  if (test == "wilcox.test") {
+    if (is.null(y)) {
+      # One-sample
+      names(rval$estimate) <- ttest_estimate_label(type = "wilcoxon", xname = XNAME, yname = NULL, paired = FALSE)
+    } else if (paired) {
+      names(rval$estimate) <- ttest_estimate_label(type = "wilcoxon", xname = XNAME, yname = YNAME, paired = TRUE)
+    } else {
+      names(rval$estimate) <- ttest_estimate_label(type = "wilcoxon", xname = XNAME, yname = YNAME, paired = FALSE)
+    }
+  }
+
+  # TODO: Consider updating null.value names to indicate direction
+  # (e.g., "difference in means (x - y)") for consistency with estimate labels
+
+  rval$sample_size <- sample_size
+
   return(rval)
 
 }
@@ -420,7 +470,7 @@ simple_htest.formula = function(formula,
      || (length(formula) != 3L)
      || (length(attr(terms(formula[-2L]), "term.labels")) != 1L))
     stop("'formula' missing or incorrect")
-  
+
   # Check for paired argument in ... and warn user
   dots <- list(...)
   if("paired" %in% names(dots)){
@@ -428,7 +478,7 @@ simple_htest.formula = function(formula,
       message("Using 'paired = TRUE' with the formula interface is not recommended. Please ensure your data is sorted appropriately to make the correct paired comparison.")
     }
   }
-  
+
   m <- match.call(expand.dots = FALSE)
   if(is.matrix(eval(m$data, parent.frame())))
     m$data <- as.data.frame(data)
@@ -445,6 +495,34 @@ simple_htest.formula = function(formula,
   DATA <- setNames(split(mf[[response]], g), c("x", "y"))
   y <- do.call("simple_htest", c(DATA, list(...)))
   y$data.name <- DNAME
+
+  # Resolve actual group labels from factor levels
+  XNAME <- levels(g)[1]
+  YNAME <- levels(g)[2]
+
+  # Determine which test was used
+  dots <- list(...)
+  test_arg <- if (!is.null(dots$test)) match.arg(dots$test, c("t.test", "wilcox.test", "brunner_munzel")) else "t.test"
+  is_paired <- isTRUE(dots$paired)
+
+  if (test_arg == "t.test") {
+    est_labels <- ttest_estimate_label(type = "t", xname = XNAME, yname = YNAME, paired = is_paired)
+    if (!is_paired) {
+      # Two-sample: 3 elements (group means + difference)
+      diff_label <- paste0("mean difference (", quote_if_numeric(XNAME), " - ", quote_if_numeric(YNAME), ")")
+      names(y$estimate) <- c(est_labels, diff_label)
+    } else {
+      names(y$estimate) <- est_labels
+    }
+  } else if (test_arg == "wilcox.test") {
+    names(y$estimate) <- ttest_estimate_label(type = "wilcoxon", xname = XNAME, yname = YNAME, paired = is_paired)
+  }
+
+  # Relabel sample_size names
+  if (!is.null(y$sample_size) && length(y$sample_size) == 2) {
+    names(y$sample_size) <- levels(g)
+  }
+
   y
 
 }

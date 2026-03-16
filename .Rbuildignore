@@ -28,3 +28,4 @@ NUL
 ^codecov\.yml$
 ^CLAUDE\.md$
 ^references$
+^\.claude$

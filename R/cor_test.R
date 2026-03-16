@@ -23,10 +23,15 @@
 #'
 #'   You can specify just the initial letter.
 #' @param alpha alpha level (default = 0.05)
+#' @param se_method a character string indicating the method for computing the standard error.
+#'   One of "analytic" (default) or "jackknife". The jackknife SE is computed on the Fisher z scale
+#'   using leave-one-out resampling.
 #'
 #' @details
-#' This function uses Fisher's z transformation for the correlations, but uses Fieller's
-#' correction of the standard error for Spearman's \eqn{\rho} and Kendall's \eqn{\tau}.
+#' This function uses Fisher's z transformation for the correlations.
+#' For Spearman's \eqn{\rho}, the Bonett-Wright \eqn{\rho}-dependent SE formula
+#' \eqn{\sqrt{(1 + r^2/2) / (n - 3)}} is used rather than the fixed 1.06 constant.
+#' For Kendall's \eqn{\tau}, Fieller's correction is applied.
 #'
 #' The function supports both standard hypothesis testing and equivalence/minimal effect testing:
 #'
@@ -43,6 +48,11 @@
 #' * If a single value is provided for `null`, symmetric bounds ± value will be used
 #' * If two values are provided for `null`, they will be used as the lower and upper bounds
 #'
+#' When `se_method = "jackknife"`, the standard error is computed via leave-one-out
+#' resampling on the Fisher z scale, which can provide better calibration for small
+#' samples or non-standard correlation methods. The jackknife SE is used for both
+#' the test statistic and the confidence interval.
+#'
 #' See `vignette("correlations")` for more details.
 #'
 #' @return A list with class "htest" containing the following components:
@@ -51,8 +61,10 @@
 #' * **statistic**: the value of the test statistic with a name describing it.
 #' * **parameter**: the degrees of freedom or number of observations.
 #' * **conf.int**: a confidence interval for the measure of association appropriate to the specified alternative hypothesis.
-#' * **estimate**: the estimated measure of association, with name "cor", "tau", or "rho" corresponding to the method employed.
-#' * **stderr**: the standard error of the test statistic.
+#' * **estimate**: the estimated measure of association, with name "r", "tau", or "rho" corresponding to the method employed.
+#' * **stderr**: a named vector with `z.se` (standard error on the Fisher z scale, used for inference)
+#'   and `cor.se` (delta method SE on the correlation scale, for descriptive purposes).
+#'   Note that `cor.se` underestimates true sampling variability as |r| approaches 1.
 #' * **null.value**: the value of the association measure under the null hypothesis.
 #' * **alternative**: character string indicating the alternative hypothesis.
 #' * **method**: a character string indicating how the association was measured.
@@ -83,6 +95,9 @@
 #' testing approach. British Journal of Mathematical and Statistical Psychology, 63(3), 527-537.
 #' https://doi.org/10.1348/000711009X475853, formula page 531.
 #'
+#' Bonett, D. G., & Wright, T. A. (2000). Sample size requirements for estimating
+#' Pearson, Kendall and Spearman correlations. Psychometrika, 65(1), 23-28.
+#'
 #' @name z_cor_test
 #' @family Correlations
 #' @export z_cor_test
@@ -93,9 +108,11 @@ z_cor_test = function(x,
                                       "equivalence", "minimal.effect"),
                       method = c("pearson", "kendall", "spearman"),
                       alpha = 0.05,
-                      null = 0){
+                      null = 0,
+                      se_method = c("analytic", "jackknife")){
   alternative = match.arg(alternative)
   method = match.arg(method)
+  se_method = match.arg(se_method)
 
   #if(TOST && null <=0){
   #  stop("positive value for null must be supplied if using TOST.")
@@ -142,37 +159,56 @@ z_cor_test = function(x,
   DNAME <- paste(deparse(substitute(x)), "and", deparse(substitute(y)))
   NVAL = null
   znull = rho_to_z(null)
+  # capture raw method string before overwrite --------
+  method_raw <- method
   # get se ---
   if (method == "pearson") {
     # Pearson # Fisher
     method <- "Pearson's product-moment correlation"
     names(NVAL) = rep("correlation",length(NVAL))
-    rfinal = c(cor = r_xy)
+    rfinal = c(r = r_xy)
     z.se <- 1 / sqrt(n_obs - 3)
-    cint = cor_to_ci(cor = r_xy, n = n_obs, ci = ci,
-                    method = "pearson")
+    cor_correction <- "fieller"
   }
   if (method == "spearman") {
     method <- "Spearman's rank correlation rho"
-    #  # Fieller adjusted
+    # Bonett-Wright
     rfinal = c(rho = r_xy)
     names(NVAL) = rep("rho",length(NVAL))
-    z.se <- (1.06 / (n_obs - 3)) ^ 0.5
-    cint = cor_to_ci(cor = r_xy, n = n_obs, ci = ci,
-                    method = "spearman",
-                    correction = "fieller")
+    z.se <- sqrt((1 + r_xy^2 / 2) / (n_obs - 3))
+    cor_correction <- "bw"
   }
   if (method == "kendall") {
     method <- "Kendall's rank correlation tau"
-    # # Fieller adjusted
+    # Fieller adjusted
     rfinal = c(tau = r_xy)
     names(NVAL) = rep("tau",length(NVAL))
     z.se <- (0.437 / (n_obs - 4)) ^ 0.5
-
-    cint = cor_to_ci(cor = r_xy, n = n_obs, ci = ci,
-                    method = "kendall",
-                    correction = "fieller")
+    cor_correction <- "fieller"
   }
+
+  # jackknife SE --------
+  if (se_method == "jackknife") {
+    jk_cors <- vapply(seq_len(n_obs), function(i) {
+      rho_to_z(cor(x[-i], y[-i], method = method_raw))
+    }, numeric(1))
+    z.se <- sqrt(((n_obs - 1) / n_obs) * sum((jk_cors - mean(jk_cors))^2))
+  }
+
+  # append SE label to method name --------
+  se_label <- if (se_method == "jackknife") "with jackknifed SE" else "with approximate SE"
+  method <- paste(method, se_label)
+
+  # pass se to cor_to_ci only when jackknife --------
+  se_override <- if (se_method == "jackknife") z.se else NULL
+
+  cint = cor_to_ci(cor = r_xy, n = n_obs, ci = ci,
+                   method = method_raw,
+                   correction = cor_correction,
+                   se = se_override)
+
+  # delta method SE on correlation scale --------
+  cor.se <- (1 - r_xy^2) * z.se
 
   # get absolute value if TOST
   #z_test = ifelse(TOST, abs(z_xy), z_xy)
@@ -222,7 +258,7 @@ z_cor_test = function(x,
                parameter = N,
                conf.int = cint,
                estimate = rfinal,
-               stderr = c(z.se = z.se),
+               stderr = c(z.se = z.se, cor.se = cor.se),
                null.value = NVAL,
                alternative = alternative,
                method = method,

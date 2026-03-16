@@ -17,19 +17,22 @@ wilcox_TOST(formula = extra ~ group,
                       eqb = .5)
 
 # Odds
-
 wilcox_TOST(formula = extra ~ group,
                       data = sleep,
                       ses = "o",
                       eqb = .5)
 
 # Concordance
-
 wilcox_TOST(formula = extra ~ group,
                       data = sleep,
                       ses = "c",
                       eqb = .5)
 
+## -----------------------------------------------------------------------------
+simple_htest(formula = extra ~ group,
+                      data = sleep,
+                      test = "w", alternative = "e",
+                      mu = .5)
 
 ## -----------------------------------------------------------------------------
 # Default studentized test (t-approximation)
@@ -96,6 +99,42 @@ brunner_munzel(formula = extra ~ group,
                data = sleep,
                alternative = "greater",
                mu = 0.35)
+
+## -----------------------------------------------------------------------------
+data('sleep')
+
+# Asymptotic Hodges-Lehmann test
+hodges_lehmann(formula = extra ~ group,
+               data = sleep)
+
+## -----------------------------------------------------------------------------
+# Permutation test
+hodges_lehmann(formula = extra ~ group,
+               data = sleep,
+               R = 1999)
+
+## -----------------------------------------------------------------------------
+# Equivalence test: is the location shift within ±2 units?
+# Equivalence/minimal.effect alternatives use the asymptotic method only
+hodges_lehmann(formula = extra ~ group,
+               data = sleep,
+               alternative = "equivalence",
+               mu = 2)
+
+## -----------------------------------------------------------------------------
+# Paired Hodges-Lehmann test
+hodges_lehmann(x = sleep$extra[sleep$group == 1],
+               y = sleep$extra[sleep$group == 2],
+               paired = TRUE,
+               R = 1999)
+
+## -----------------------------------------------------------------------------
+# Minimal effect test: is the location shift outside ±0.5?
+# Minimal effect alternative uses the asymptotic method only
+hodges_lehmann(formula = extra ~ group,
+               data = sleep,
+               alternative = "minimal.effect",
+               mu = 0.5)
 
 ## -----------------------------------------------------------------------------
 data('sleep')
@@ -187,18 +226,33 @@ boot_log_TOST(
 )
 
 ## -----------------------------------------------------------------------------
-# For paired tests, use separate vectors
+# Rank-biserial correlation for paired data
 ses_calc(x = sleep$extra[sleep$group == 1],
          y = sleep$extra[sleep$group == 2],
          paired = TRUE,
-         ses = "r")
+         ses = "rb")
 
-# Setting bootstrap replications low to
-## reduce compiling time of vignette
-boot_ses_calc(x = sleep$extra[sleep$group == 1],
-              y = sleep$extra[sleep$group == 2],
+## -----------------------------------------------------------------------------
+# Two-sided test: does the rank-biserial differ from 0?
+ses_calc(x = sleep$extra[sleep$group == 1],
+         y = sleep$extra[sleep$group == 2],
          paired = TRUE,
-         R = 199,
-         boot_ci = "perc", # recommend percentile bootstrap for paired SES
-         ses = "r") 
+         ses = "rb",
+         alternative = "two.sided")
+
+## -----------------------------------------------------------------------------
+# Equivalence test: is the rank-biserial within [-0.3, 0.3]?
+ses_calc(x = sleep$extra[sleep$group == 1],
+         y = sleep$extra[sleep$group == 2],
+         paired = TRUE,
+         ses = "rb",
+         alternative = "equivalence",
+         null.value = c(-0.3, 0.3))
+
+## -----------------------------------------------------------------------------
+# Using the Agresti method (default) with WMW odds
+ses_calc(formula = extra ~ group,
+         data = sleep,
+         ses = "odds",
+         alternative = "two.sided")
 

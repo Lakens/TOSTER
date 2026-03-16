@@ -8,12 +8,11 @@
 #'
 #' @section Purpose:
 #' The Hodges-Lehmann estimator provides a robust alternative to the mean for testing
-#' location differences. It has a breakdown point of approximately 29.3%, meaning it
-#' remains stable even when nearly 30% of the data are outliers. This function offers:
+#' location differences. It is arguably a more stable option in the presence of outliers. This function offers:
 #'
 #'   * Exact permutation tests for small samples
 #'   * Randomization tests (permutation with replacement) for larger samples
-#'   * Asymptotic tests using kernel density estimation
+#'   * Asymptotic tests using kernel density estimation of the scale parameter
 #'   * Support for equivalence and minimal effect testing
 #'   * An interface that mirrors `wilcox.test` and `perm_t_test`
 #'
@@ -31,7 +30,9 @@
 #'   has level 1-2*alpha (90% when alpha = 0.05).
 #' @param R the number of permutations. Default is `NULL`, which uses the asymptotic test.
 #'   If `R >= max_perms` (the maximum number of possible permutations), exact permutation
-#'   is computed. Otherwise, Monte Carlo (permutation with replacement; i.e., randomization testing) sampling is used.
+#'   is computed. Otherwise, Monte Carlo (permutation with replacement; i.e., randomization
+#'   testing) sampling is used. Note: permutation tests are not supported for
+#'   `alternative = "equivalence"` or `alternative = "minimal.effect"` (see Details).
 #' @param scale the scale estimator for standardizing the test statistic in permutation
 #'   tests. Options are:
 #'   * `"S2"` (default): Median of absolute pairwise differences from the median-corrected
@@ -68,7 +69,7 @@
 #'
 #' ## Test Methods
 #'
-#' **Asymptotic test (R = NULL):** Uses kernel density estimation to estimate the
+#' **Asymptotic test (R = NULL):** Uses kernel density estimation (Fried & Dehling, 2011) to estimate the
 #' variance of the Hodges-Lehmann estimator (note: this generates confidence intervals that will differ from [stats::wilcox.test()]). The test statistic follows an approximate
 #' normal distribution. This method may have issues with very heavy-tailed distributions,
 #' very skewed distributions, or small sample sizes (n < 30 per group). In these cases,
@@ -95,6 +96,34 @@
 #' \deqn{S^{(2)}_{m,n} = \text{med}\{|Z_i - Z_j| : 1 \leq i < j \leq m+n\}}
 #'
 #' where Z is the median-corrected combined sample.
+#'
+#' ## Permutation Tests with Non-Zero Null Values
+#'
+#' For standard alternatives (`two.sided`, `less`, `greater`) with `mu != 0`,
+#' the permutation test uses an approximate approach: the observed test statistic
+#' is centered at `mu`, but the permutation distribution is generated under
+#' exchangeability (effectively `mu = 0`). Because the Hodges-Lehmann statistic
+#' divided by the S1/S2 scale estimator is not a true pivot, this comparison is
+#' approximate rather than exact. The approximation is generally adequate when
+#' `mu` is moderate relative to the scale of the data, but may lose accuracy for
+#' extreme null values. For the two-sample case, the scale estimator is
+#' recomputed for each permutation, which partially mitigates this issue.
+#'
+#' ## Equivalence and Minimal Effect Testing
+#'
+#' Equivalence and minimal effect tests are only available with the asymptotic
+#' method (`R = NULL`). Permutation tests are not supported for these
+#' alternatives because the scale estimators (S1, S2) from Fried & Dehling
+#' (2011) do not produce a pivotal test statistic for the Hodges-Lehmann
+#' estimator. Without pivotality, the permutation distribution generated under
+#' the exchangeability null is not a valid reference distribution for testing
+#' at the equivalence bounds, and the resulting p-values can be unreliable.
+#' This limitation compounds with the inherent conservatism of the naive
+#' intersection-union procedure, potentially yielding substantial power loss.
+#'
+#' The asymptotic method uses kernel density estimation to approximate the
+#' standard error, which provides a proper pivot and valid boundary-null
+#' inference.
 #'
 #' ## Alternatives
 #'
@@ -142,8 +171,8 @@
 #' after <- c(5.6, 5.2, 6.7, 6.1, 6.5, 5.8, 5.3, 6.2)
 #' hodges_lehmann(before, after, paired = TRUE)
 #'
-#' # Equivalence test
-#' hodges_lehmann(x, y, alternative = "equivalence", mu = c(-1, 1), R = 999)
+#' # Equivalence test (asymptotic only)
+#' hodges_lehmann(x, y, alternative = "equivalence", mu = c(-1, 1))
 #'
 #' # Formula interface
 #' hodges_lehmann(extra ~ group, data = sleep)
@@ -166,6 +195,7 @@
 #' @name hodges_lehmann
 #' @export hodges_lehmann
 
+# TODO: add xname and yname arguments to allow user-specified group labels
 hodges_lehmann <- function(x, ...) {
   UseMethod("hodges_lehmann")
 }
@@ -378,6 +408,22 @@ hodges_lehmann.default <- function(x,
     }
   }
 
+  # Permutation not supported for equivalence/minimal.effect
+  # The S1/S2 scale estimators do not produce a pivotal test statistic for the
+  # Hodges-Lehmann estimator, so the permutation distribution under
+  # exchangeability is not a valid reference distribution for boundary-null
+  # testing. The asymptotic test is recommended for these alternatives.
+  if (!is.null(R) && alternative %in% c("equivalence", "minimal.effect")) {
+    stop(
+      "Permutation tests (R != NULL) are not supported for equivalence or ",
+      "minimal.effect alternatives in hodges_lehmann(). The scale estimators ",
+      "(S1, S2) do not produce a pivotal statistic for the Hodges-Lehmann ",
+      "estimator, so the permutation reference distribution is not valid for ",
+      "boundary-null testing. Use the asymptotic test (R = NULL) instead.",
+      call. = FALSE
+    )
+  }
+
   # Data name extraction
   if (!is.null(y)) {
     dname <- paste(deparse(substitute(x)), "and", deparse(substitute(y)))
@@ -463,8 +509,14 @@ hodges_lehmann.default <- function(x,
   if (is.null(y)) {
 
     # Compute observed estimate
+    XNAME <- "x"
+    YNAME <- "y"
     estimate <- hl1_est(x)
-    names(estimate) <- if (paired) "pseudomedian of differences" else "pseudomedian"
+    names(estimate) <- if (paired) {
+      ttest_estimate_label(type = "wilcoxon", xname = XNAME, yname = YNAME, paired = TRUE)
+    } else {
+      ttest_estimate_label(type = "wilcoxon", xname = XNAME, yname = NULL, paired = FALSE)
+    }
 
     if (test_method == "asymptotic") {
       # ----- Asymptotic test -----
@@ -587,26 +639,6 @@ hodges_lehmann.default <- function(x,
         b <- sum(TSTAT >= obs_stat)
         pval <- hl_perm_pval(b, R.used, p_method)
         cint <- c(stats::quantile(EFF, 1 - ci_level, names = FALSE), Inf)
-      } else if (alternative == "equivalence") {
-        obs_stat_low <- (estimate - low_bound) / scale_est
-        obs_stat_high <- (estimate - high_bound) / scale_est
-        b_low <- sum(TSTAT >= obs_stat_low)
-        b_high <- sum(TSTAT <= obs_stat_high)
-        p_low <- hl_perm_pval(b_low, R.used, p_method)
-        p_high <- hl_perm_pval(b_high, R.used, p_method)
-        pval <- max(p_low, p_high)
-        cint <- stats::quantile(EFF, c(alpha, 1 - alpha), names = FALSE)
-        obs_stat <- if (p_low >= p_high) obs_stat_low else obs_stat_high
-      } else if (alternative == "minimal.effect") {
-        obs_stat_low <- (estimate - low_bound) / scale_est
-        obs_stat_high <- (estimate - high_bound) / scale_est
-        b_low <- sum(TSTAT <= obs_stat_low)
-        b_high <- sum(TSTAT >= obs_stat_high)
-        p_low <- hl_perm_pval(b_low, R.used, p_method)
-        p_high <- hl_perm_pval(b_high, R.used, p_method)
-        pval <- min(p_low, p_high)
-        cint <- stats::quantile(EFF, c(alpha, 1 - alpha), names = FALSE)
-        obs_stat <- if (p_low <= p_high) obs_stat_low else obs_stat_high
       }
 
       tstat_report <- obs_stat
@@ -620,8 +652,10 @@ hodges_lehmann.default <- function(x,
     n <- length(y)
 
     # Compute observed estimate
+    XNAME <- "x"
+    YNAME <- "y"
     estimate <- hl2_est(x, y)
-    names(estimate) <- "difference in location"
+    names(estimate) <- ttest_estimate_label(type = "wilcoxon", xname = XNAME, yname = YNAME, paired = FALSE)
 
     if (test_method == "asymptotic") {
       # ----- Asymptotic test -----
@@ -744,7 +778,10 @@ hodges_lehmann.default <- function(x,
         if (is.na(scale_perm) || scale_perm <= 0) scale_perm <- scale_est
 
         TSTAT[i] <- hl_perm / scale_perm
-        EFF[i] <- hl_perm
+        # Store effect on the estimate-centered scale (hl_perm is null-centered,
+        # so adding estimate back gives the permutation distribution centered
+        # around the observed estimate, consistent with the one-sample case)
+        EFF[i] <- hl_perm + estimate
       }
 
       # Observed test statistic
@@ -764,26 +801,6 @@ hodges_lehmann.default <- function(x,
         b <- sum(TSTAT >= obs_stat)
         pval <- hl_perm_pval(b, R.used, p_method)
         cint <- c(stats::quantile(EFF, 1 - ci_level, names = FALSE), Inf)
-      } else if (alternative == "equivalence") {
-        obs_stat_low <- (estimate - low_bound) / scale_est
-        obs_stat_high <- (estimate - high_bound) / scale_est
-        b_low <- sum(TSTAT >= obs_stat_low)
-        b_high <- sum(TSTAT <= obs_stat_high)
-        p_low <- hl_perm_pval(b_low, R.used, p_method)
-        p_high <- hl_perm_pval(b_high, R.used, p_method)
-        pval <- max(p_low, p_high)
-        cint <- stats::quantile(EFF, c(alpha, 1 - alpha), names = FALSE)
-        obs_stat <- if (p_low >= p_high) obs_stat_low else obs_stat_high
-      } else if (alternative == "minimal.effect") {
-        obs_stat_low <- (estimate - low_bound) / scale_est
-        obs_stat_high <- (estimate - high_bound) / scale_est
-        b_low <- sum(TSTAT <= obs_stat_low)
-        b_high <- sum(TSTAT >= obs_stat_high)
-        p_low <- hl_perm_pval(b_low, R.used, p_method)
-        p_high <- hl_perm_pval(b_high, R.used, p_method)
-        pval <- min(p_low, p_high)
-        cint <- stats::quantile(EFF, c(alpha, 1 - alpha), names = FALSE)
-        obs_stat <- if (p_low <= p_high) obs_stat_low else obs_stat_high
       }
 
       tstat_report <- obs_stat
@@ -795,6 +812,8 @@ hodges_lehmann.default <- function(x,
   # ==========================================================================
 
   # Null value
+  # TODO: Consider updating null.value names to indicate direction
+  # (e.g., "location (x - y)") for consistency with estimate labels
   if (alternative %in% c("equivalence", "minimal.effect")) {
     null.value <- mu
     names(null.value) <- rep("location", 2)
@@ -827,6 +846,17 @@ hodges_lehmann.default <- function(x,
 
   names(tstat_report) <- "Z"
 
+  # Compute sample_size
+  # Note: for paired, x <- x - y has already been done so y is NULL
+  # In hodges_lehmann, two-sample sizes are m and n (not nx/ny)
+  if (is.null(y)) {
+    # n is in scope from line ~440 (one-sample/paired)
+    sample_size <- c(n = n)
+  } else {
+    # m and n are in scope from lines ~447-448 (two-sample)
+    sample_size <- c(nx = m, ny = n)
+  }
+
   rval <- list(
     statistic = tstat_report,
     p.value = pval,
@@ -838,7 +868,8 @@ hodges_lehmann.default <- function(x,
     data.name = dname,
     call = match.call(),
     R = R,
-    R.used = R.used
+    R.used = R.used,
+    sample_size = sample_size
   )
 
   if (keep_perm && !is.null(TSTAT)) {
@@ -891,5 +922,18 @@ hodges_lehmann.formula <- function(formula, data, subset, na.action, ...) {
   DATA <- stats::setNames(split(mf[[response]], g), c("x", "y"))
   y <- do.call("hodges_lehmann", c(DATA, list(...)))
   y$data.name <- DNAME
+
+  # Resolve actual group labels from factor levels
+  XNAME <- levels(g)[1]
+  YNAME <- levels(g)[2]
+  is_paired <- isTRUE(dots$paired)
+
+  names(y$estimate) <- ttest_estimate_label(type = "wilcoxon", xname = XNAME, yname = YNAME, paired = is_paired)
+
+  # Relabel sample_size names
+  if (!is.null(y$sample_size) && length(y$sample_size) == 2) {
+    names(y$sample_size) <- levels(g)
+  }
+
   y
 }
