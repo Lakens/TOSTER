@@ -3,7 +3,7 @@
 # need hush function to run print through examples
 
 hush = function(code) {
-  sink("NUL") # use /dev/null in UNIX
+  sink(nullfile())
   tmp = code
   sink()
   return(tmp)
@@ -12,7 +12,7 @@ hush = function(code) {
 test_that("Run examples for one sample", {
 
   hush = function(code) {
-    sink("NUL") # use /dev/null in UNIX
+    sink(nullfile())
     tmp = code
     sink()
     return(tmp)
@@ -279,7 +279,7 @@ test_that("boot_smd_calc one sample matches smd_calc", {
 test_that("Run examples for two sample", {
 
   hush = function(code) {
-    sink("NUL") # use /dev/null in UNIX
+    sink(nullfile())
     tmp = code
     sink()
     return(tmp)

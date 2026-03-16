@@ -291,6 +291,12 @@ boot_pvalue <- function(bvec, est, null, alternative,
 }
 
 # Percentile p-value (Wilcox method) -----
+# Note on tie handling: the two-sided case uses the standard 0.5 continuity
+# correction for ties at the null (Wilcox, 2022). For one-sided tests, the
+# strict inequality convention (>= / <=) is used without tie correction,
+# following the standard percentile bootstrap p-value definition. This is a
+# deliberate methodological choice; see .pval_basic() for an alternative
+# that applies tie correction in the one-sided cases.
 .pval_perc <- function(bvec, null, alternative, nboot) {
   if (alternative == "two.sided") {
     phat <- (sum(bvec < null) + 0.5 * sum(bvec == null)) / nboot

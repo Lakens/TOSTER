@@ -1,5 +1,5 @@
 hush = function(code) {
-  sink("NUL") # use /dev/null in UNIX
+  sink(nullfile())
   tmp = code
   sink()
   return(tmp)

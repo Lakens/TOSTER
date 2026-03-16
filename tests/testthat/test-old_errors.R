@@ -1,7 +1,7 @@
 
 test_that("Errors for TOSTtwo functions",{
   hush = function(code) {
-    sink("NUL") # use /dev/null in UNIX
+    sink(nullfile())
     tmp = code
     sink()
     return(tmp)
@@ -52,7 +52,7 @@ test_that("Errors for TOSTtwo functions",{
 
 test_that("Errors for TOSTpaired functions",{
   hush = function(code) {
-    sink("NUL") # use /dev/null in UNIX
+    sink(nullfile())
     tmp = code
     sink()
     return(tmp)
@@ -111,7 +111,7 @@ test_that("Errors for TOSTpaired functions",{
 
 test_that("Errors for TOSTmeta",{
   hush = function(code) {
-    sink("NUL") # use /dev/null in UNIX
+    sink(nullfile())
     tmp = code
     sink()
     return(tmp)
@@ -149,7 +149,7 @@ test_that("Errors for TOSTmeta",{
 
 test_that("Errors for TOSTone",{
   hush = function(code) {
-    sink("NUL") # use /dev/null in UNIX
+    sink(nullfile())
     tmp = code
     sink()
     return(tmp)
@@ -216,7 +216,7 @@ test_that("Errors for TOSTone",{
 
 test_that("Errors for TOSTr",{
   hush = function(code) {
-    sink("NUL") # use /dev/null in UNIX
+    sink(nullfile())
     tmp = code
     sink()
     return(tmp)

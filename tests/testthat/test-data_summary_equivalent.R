@@ -7,7 +7,7 @@
 test_that("p-values for TOSTr are identical using dataTOSTr and TOSTr", {
 
   hush = function(code) {
-    sink("NUL") # use /dev/null in UNIX
+    sink(nullfile())
     tmp = code
     sink()
     return(tmp)

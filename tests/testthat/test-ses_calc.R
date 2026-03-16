@@ -1,7 +1,7 @@
 # Tests for ses_calc, boot_ses_calc, and helper functions
 
 hush = function(code) {
-  sink("NUL") # use /dev/null in UNIX
+  sink(nullfile())
   tmp = code
   sink()
   return(tmp)

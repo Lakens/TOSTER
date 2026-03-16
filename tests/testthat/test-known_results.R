@@ -3,7 +3,7 @@
 
 test_that("Test that one-sample t-test output is same as previous version", {
   hush = function(code) {
-    sink("NUL") # use /dev/null in UNIX
+    sink(nullfile())
     tmp = code
     sink()
     return(tmp)
@@ -33,7 +33,7 @@ test_that("Test that one-sample t-test output is same as previous version", {
 test_that("Test that raw one-sample t-test output is same as previous version", {
 
   hush = function(code) {
-    sink("NUL") # use /dev/null in UNIX
+    sink(nullfile())
     tmp = code
     sink()
     return(tmp)
@@ -62,7 +62,7 @@ test_that("Test that raw one-sample t-test output is same as previous version", 
 
 test_that("Test that two-sample t-test output is same as previous version", {
   hush = function(code) {
-    sink("NUL") # use /dev/null in UNIX
+    sink(nullfile())
     tmp = code
     sink()
     return(tmp)
@@ -96,7 +96,7 @@ test_that("Test that two-sample t-test output is same as previous version", {
 
 test_that("Test that raw two-sample t-test output is same as previous version", {
   hush = function(code) {
-    sink("NUL") # use /dev/null in UNIX
+    sink(nullfile())
     tmp = code
     sink()
     return(tmp)
@@ -129,7 +129,7 @@ test_that("Test that raw two-sample t-test output is same as previous version", 
 test_that("Test that paired two-sample t-test output is same as previous version", {
 
   hush = function(code) {
-    sink("NUL") # use /dev/null in UNIX
+    sink(nullfile())
     tmp = code
     sink()
     return(tmp)
@@ -157,7 +157,7 @@ test_that("Test that paired two-sample t-test output is same as previous version
 
 test_that("Test that raw paired two-sample t-test output is same as previous version", {
   hush = function(code) {
-    sink("NUL") # use /dev/null in UNIX
+    sink(nullfile())
     tmp = code
     sink()
     return(tmp)
@@ -185,7 +185,7 @@ test_that("Test that raw paired two-sample t-test output is same as previous ver
 
 test_that("Test that correlation test output is same as previous version", {
   hush = function(code) {
-    sink("NUL") # use /dev/null in UNIX
+    sink(nullfile())
     tmp = code
     sink()
     return(tmp)
@@ -211,7 +211,7 @@ test_that("Test that correlation test output is same as previous version", {
 
 test_that("Test that meta test output is same as previous version", {
   hush = function(code) {
-    sink("NUL") # use /dev/null in UNIX
+    sink(nullfile())
     tmp = code
     sink()
     return(tmp)
@@ -238,7 +238,7 @@ test_that("Test that meta test output is same as previous version", {
 
 test_that("Test that two proportions test output is same as previous version", {
   hush = function(code) {
-    sink("NUL") # use /dev/null in UNIX
+    sink(nullfile())
     tmp = code
     sink()
     return(tmp)

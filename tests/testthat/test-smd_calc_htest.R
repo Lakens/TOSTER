@@ -1,7 +1,7 @@
 # Tests for smd_calc and boot_smd_calc htest output and hypothesis testing
 
 hush = function(code) {
-  sink("NUL") # use /dev/null in UNIX
+  sink(nullfile())
   tmp = code
   sink()
   return(tmp)

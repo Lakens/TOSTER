@@ -3,7 +3,7 @@
 # need hush function to run print through examples
 
 hush = function(code) {
-  sink("NUL") # use /dev/null in UNIX
+  sink(nullfile())
   tmp = code
   sink()
   return(tmp)

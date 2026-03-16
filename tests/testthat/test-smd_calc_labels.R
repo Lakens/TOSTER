@@ -1,7 +1,7 @@
 # Tests for smd_calc label logic (estimate names, method strings, null.value names)
 
 hush = function(code) {
-  sink("NUL") # use /dev/null in UNIX
+  sink(nullfile())
   tmp = code
   sink()
   return(tmp)

@@ -1,7 +1,7 @@
 # Tests for denom parameter in smd_calc and boot_smd_calc
 
 hush = function(code) {
-  sink("NUL") # use /dev/null in UNIX
+  sink(nullfile())
   tmp = code
   sink()
   return(tmp)

@@ -122,6 +122,14 @@ bca_ci <- function(boots_est, t0, jack_est, alpha) {
 #' @keywords internal
 bca_params <- function(boots_est, t0, jack_est) {
   z0 <- qnorm(mean(boots_est < t0))
+  if (!is.finite(z0)) {
+    warning(
+      "BCa bias correction is infinite (all bootstrap estimates are on one ",
+      "side of the original estimate). BCa p-values may be unreliable. ",
+      "Consider using boot_ci = 'perc' instead.",
+      call. = FALSE
+    )
+  }
   L <- mean(jack_est) - jack_est
   denom <- 6 * sum(L^2)^(3/2)
   acc <- if (denom != 0) sum(L^3) / denom else 0

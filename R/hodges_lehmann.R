@@ -8,7 +8,7 @@
 #'
 #' @section Purpose:
 #' The Hodges-Lehmann estimator provides a robust alternative to the mean for testing
-#' location differences. It is arguably a more stable option in the presense of outliers. This function offers:
+#' location differences. It is arguably a more stable option in the presence of outliers. This function offers:
 #'
 #'   * Exact permutation tests for small samples
 #'   * Randomization tests (permutation with replacement) for larger samples

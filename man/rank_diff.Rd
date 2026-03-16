@@ -18,9 +18,9 @@ the returned data frame. Default is \code{c("x", "y")}.}
 \value{
 A data frame with two columns (named by \code{names}) containing
 the joint ranks for condition 1 and condition 2, respectively. The number
-of rows equals \code{length(x)}. Missing-value pairs (where either
-\code{x[i]} or \code{y[i]} is \code{NA}) are removed before ranking,
-and a message is printed if any pairs are dropped.
+of rows equals the number of complete pairs. Missing-value pairs (where
+either \code{x[i]} or \code{y[i]} is \code{NA}) are removed before
+ranking, and a message is printed if any pairs are dropped.
 }
 \description{
 \ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}

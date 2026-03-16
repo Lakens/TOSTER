@@ -6,7 +6,7 @@
 test_that("powerTOSTtwo.prop is functions",{
 
   hush = function(code) {
-    sink("NUL") # use /dev/null in UNIX
+    sink(nullfile())
     tmp = code
     sink()
     return(tmp)

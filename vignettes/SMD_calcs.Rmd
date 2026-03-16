@@ -73,7 +73,7 @@ It is important to remember that all of these methods are only *approximations*
 of confidence intervals (of varying degrees of quality)
 and therefore should be interpreted with caution.
 
-It is my belief that SMDs provide another interesting quantitive effect size description, 
+It is my belief that SMDs provide another interesting quantitative effect size description, 
 but have dubious and limited inferential utility^[see @Senn_2011 and @Baguley_2009; though many may disagree]. 
 You may disagree, and if you are basing your inferences on the SMD, and the
 associated confidence intervals, we recommend you go with a
