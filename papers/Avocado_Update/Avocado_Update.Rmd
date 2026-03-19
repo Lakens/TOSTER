@@ -4,8 +4,10 @@ title: |
 shorttitle: "Updated TOSTER R Package"
 author:
 - name: Aaron R. Caldwell
-  affil: a
-  email: arcaldwell49@gmail.com
+  affil: Department of Biostatistics, Fay W. Boozman College of Public Health, University of Arkansas for Medical Sciences Northwest
+  city: Springdale
+  state: AR
+  email: caldwellaaron@uams.edu
 type: PREPRINT
 output:
   papaja::apa6_docx: default
@@ -66,7 +68,7 @@ library(patchwork)
 Researchers often erroneously declare that no statistical effect exists based on a single "non-significant" p-value [@blandaltman95]. 
 In many of these cases, the data may corroborate the researcher's claim, but the interpretation of a null hypothesis significance test (NHST), wherein the lack of significance is considered evidence of "no effect", is nonetheless incorrect. 
 In order to statistically test for whether there is practically no effect, researchers could use equivalence testing. 
-Equivalence testing is used when the goal of a statistical test is to demonstrate that the difference between two conditions is too small to be meaningful. For example, if a researcher wanted to test whether a new drug was no worse than a standard drug, the null hypothesis would be that the new drug is worse than the standard drug by more than a meaningful amount, and the alternative hypothesis would be that the difference between the two drugs is small enough to be meaningless. A very simple equivalence testing approach is the use of “two one-sided tests” (TOST) [@schuirmann1987]. 
+Equivalence testing is used when the goal of a statistical test is to demonstrate that the difference between two conditions is too small to be meaningful. For example, if a researcher wanted to test whether a new drug was no worse than a standard drug, the null hypothesis would be that the new drug is worse than the standard drug by more than a meaningful amount, and the alternative hypothesis would be that the difference between the two drugs is small enough to be meaningless. A very simple equivalence testing approach is the use of "two one-sided tests" (TOST) [@schuirmann1987]. 
 
 The TOST procedure is a statistical test of whether a parameter (e.g., mean difference) is within a specified interval. The TOST procedure can be used to test the equivalence of two means, two proportions, two regression coefficients, and even two variances.
 An upper ($\Delta_U$) and lower ($\Delta_L$) equivalence bound is specified based on the smallest effect size of interest (SESOI).
@@ -94,7 +96,7 @@ In this manuscript, I will detail the updates to the TOSTER package, and give so
 
 # TOST with t-tests
 
-In an effort to make TOSTER more informative and easier to use, a new function `t_TOST` was created. This function operates very similarly to base R's `t.test` function, but performs 3 t-tests (one two-tailed and two one-tailed tests). In addition, this function has a generic method where two vectors can be supplied or a formula can be given (e.g.,`y ~ group`). This function also makes it easier to switch between types of t-tests. All three types (two sample, one sample, and paired samples) can be performed/calculated from the same function. Moreover, the output from this function is verbose, and should make the decisions derived from the function more informative and user-friendly. 
+In an effort to make TOSTER more informative and easier to use, the `t_TOST` function was created. This function operates very similarly to base R's `t.test` function, but performs 3 t-tests (one two-tailed and two one-tailed tests). In addition, this function has a generic method where two vectors can be supplied or a formula can be given (e.g.,`y ~ group`). This function also makes it easier to switch between types of t-tests. All three types (two sample, one sample, and paired samples) can be performed/calculated from the same function. Moreover, the output from this function is verbose, and should make the decisions derived from the function more informative and user-friendly. 
 
 Also, `t_TOST` is not limited to equivalence tests. Minimal effects testing (MET) is possible. MET is useful for situations where the hypothesis is about a minimal effect and the *null hypothesis is equivalence* (see Figure 1) [@mazzolari2022myths]. 
 
@@ -379,34 +381,158 @@ res_tsum = tsum_TOST(
 res_tsum
 ```
 
+# Simplified Hypothesis Testing
+
+The `t_TOST` function, and related `*_TOST` functions, are designed to be comprehensive — they run three tests (one two-tailed and two one-sided), compute standardized effect sizes, and produce verbose output. For researchers who want the full picture, this is ideal. However, for users who *only* want to test a single hypothesis of equivalence (or minimal effects), the output can feel unnecessarily heavy. The three-test structure may be confusing when the researcher only cares about one of those tests.
+
+To address this, I created the `simple_htest` function as a lighter interface. It returns a standard R `htest` object — the same class returned by `t.test()` and `wilcox.test()` — but with expanded `alternative` options that include `"equivalence"` and `"minimal.effect"`. This means researchers can perform equivalence testing with the same familiar interface they already use for standard hypothesis tests.
+
+Alongside `simple_htest`, I also developed a set of helper functions for working with any `htest` object. These helpers make it easy to convert results to data frames (`df_htest`), generate (almost) publication-ready text descriptions (`describe_htest`), create plots (`plot_htest_est`), and bridge between the verbose TOST output and the simpler `htest` ecosystem (`as_htest`). Importantly, these tools work not only with TOSTER functions but with any base R hypothesis test.
+
+## simple_htest
+
+The `simple_htest` function supports `t.test` and `wilcox.test` as the underlying test (via the `test` argument) and all five alternative hypotheses: `"two.sided"`, `"less"`, `"greater"`, `"equivalence"`, and `"minimal.effect"`. The `mu` parameter works like `t.test` for standard alternatives (a single null value), but for equivalence and minimal effect testing a single value creates symmetric bounds (i.e., `mu = 0.5` becomes bounds at -0.5 and 0.5), or two values can be given for asymmetric bounds.
+
+For instance, we can perform an equivalence test on the `sleep` data with symmetric bounds of $\pm$ 0.5:
+
+```{r}
+res_sh1 <- simple_htest(extra ~ group, data = sleep,
+                         alternative = "equivalence", mu = 0.5)
+res_sh1
+```
+
+Notice how the output is a single clean `htest` object — much more concise than the verbose `t_TOST` output shown previously.
+
+Similarly, a minimal effect test on paired data from the `bugs` dataset can be performed:
+
+```{r}
+res_sh2 <- simple_htest(x = bugs$LDHF, y = bugs$LDLF,
+                         paired = TRUE,
+                         alternative = "minimal.effect", mu = 1)
+res_sh2
+```
+
+The same interface works for non-parametric tests simply by changing the `test` argument:
+
+```{r}
+res_sh3 <- simple_htest(extra ~ group, data = sleep,
+                         test = "wilcox.test",
+                         alternative = "equivalence", mu = 0.5)
+res_sh3
+```
+
+## Converting TOST Results with as_htest
+
+Users who have already run `t_TOST` or `wilcox_TOST` and want to use the `htest` helper functions can convert their results with `as_htest`. This extracts the TOST-relevant test and packages it as a standard `htest` object.
+
+```{r}
+res1_htest <- as_htest(res1)
+res1_htest
+```
+
+## Describing Results with describe_htest
+
+For writing up results, `describe_htest` generates a formatted text string following typical scientific reporting conventions. It includes the significance decision, test statistic, p-value, estimate, confidence interval, and the hypothesis being tested. This works with any `htest` object — from base R or from TOSTER.
+
+```{r}
+describe_htest(simple_htest(extra ~ group, data = sleep))
+```
+
+This also works with standard R tests. Note the difference from the difference between the output below from `t.test` and `simple_htest` above. The differences, despite both descriptions coming from the same underlying statistical tests, are caused by differences in what output is produced by each function (i.e., `simple_htest` has slight differences in output from `t.test`).
+
+```{r}
+describe_htest(t.test(extra ~ group, data = sleep))
+```
+
+## Tabulating Results with df_htest
+
+When combining results from multiple tests (e.g., running equivalence tests across several outcomes), it is useful to have results in a data frame. The `df_htest` function converts any `htest` object into a single-row data frame with standardized column names. Multiple results can then be combined with `rbind`.
+
+```{r}
+rbind(
+  df_htest(res_sh1),
+  df_htest(res_sh2),
+  df_htest(res_sh3)
+)
+```
+
+## Plotting Results with plot_htest_est
+
+A visual summary of the estimate and confidence interval can be produced with `plot_htest_est`. For equivalence and minimal effect tests, the equivalence bounds are shown as dashed vertical lines, making it easy to see whether the confidence interval falls within (or outside) the bounds.
+
+```{r shplot1, fig.width=6, fig.height=3.5, fig.cap = "Estimate plot for an equivalence test via simple_htest."}
+plot_htest_est(res_sh1)
+```
+
+For standard tests, only a single null reference line (at zero) appears:
+
+```{r shplot2, fig.width=6, fig.height=3.5, fig.cap = "Estimate plot for a standard two-sided t-test."}
+plot_htest_est(t.test(extra ~ group, data = sleep))
+```
+
 \newpage
 
 # Robust Methods for Equivalence Testing
 
 In some cases, the use of t-test may be less than ideal. 
 Any serious violation to the assumptions of a t-test (e.g., normality or homoscedasticity) could greatly inflate the type 1 error rate of TOST. 
-Therefore, it may be useful to explore alternatives to the t-test for TOST that either do not have those assumptions or are robust to violating those assumptions.
+Therefore, it may be useful to explore alternatives to the t-test for TOST that either do not have those assumptions or are robust to violations of those assumptions.
 
-The TOSTER package currently provides 4 robust alternatives to the t-test for TOST.
-First, there is the `wilcox_TOST` function which uses the Wilcoxon-Mann-Whitney (WMW) type tests (i.e., `wilcox.test`) to perform TOST as a test of symmetry.
-Second, there is the `boot_t_TOST` function which uses the bootstrap method outlined by @efron93.
-Third, there is the `log_TOST` function which performs log-transformed t-tests, which is a parametric approach commonly used in pharmaceutical bioequivalence studies on ratio data [@he2022].
-Fourth, there is the `boot_log_TOST` function which uses the same bootstrap method outlined by @efron93 but on the log-transformed data, which is more robust than parametric log t-test [@he2022].
+The TOSTER package provides robust alternatives to the t-test organized into three categories.
+First, there are *rank-based tests* — the Brunner-Munzel test (`brunner_munzel`) for stochastic equality and the Wilcoxon-Mann-Whitney TOST (`wilcox_TOST`) for location shift — which target entirely different estimands than means or medians.
+Second, there are *resampling methods* — the bootstrap t-test (`boot_t_test`), permutation t-test (`perm_t_test`), and bootstrap TOST (`boot_t_TOST`) — which relax distributional assumptions while still testing hypotheses about means [@efron93].
+Third, there are *log-transformed methods* — `log_TOST` and `boot_log_TOST` — which are parametric and bootstrap approaches for ratio-scale data commonly used in pharmaceutical bioequivalence studies [@he2022].
+Where possible, the package now favors functions that return standard `htest` objects, which enforce a single hypothesis per test and integrate cleanly with the existing R ecosystem.
 
-In the following sections, I will briefly outline the available robust TOST functions within the TOSTER package.
+## Rank-Based Tests
 
-## Tests of Symmetry (rank based tests)
+Rank-based tests avoid distributional assumptions by operating on the ranks of the data rather than the raw values.
+An important consideration is that these tests are *not* tests of means or medians — they target completely different estimands.
+The choice between rank-based methods should therefore be driven by the estimand of interest: stochastic equality (i.e., the probability that a random observation from one group exceeds a random observation from another) for the Brunner-Munzel test, or pseudo-median of pairwise differences (under a location-shift assumption) for WMW tests.
 
-The WMW group of tests (e.g., Mann-Whitney U-test) provide a non-parametric test of differences between groups, or within samples, based on *ranks*. This provides a test of location shift, which is a fancy way of saying differences in the center of the distribution (i.e., in parametric tests the location is mean). Within the TOST framework, there are two separate tests of directional location shift to determine if the location shift is within (equivalence) or outside (minimal effect) the equivalence bounds. Many researchers mistakenly think these are tests of medians, but this is not the case (See @median_test for details). Using a WMW-based TOST is useful for testing whether the differences between groups/conditions is symmetric around the equivalence bounds^[Care should be taken when considering paired samples; a test on the rank transformed data [@kornbrot1990rank] or another robust test may be more prudent.]. For equivalence testing, the TOST would be testing whether there is asymmetry towards no effect with a null hypothesis of symmetry at the equivalence bound.
+### Brunner-Munzel Test
 
-In the TOSTER package, we accomplish this "test of symmetry" with the `wilcox_TOST` function. 
-This function operates in an extremely similar implementation to the `t_TOST` function. 
-The exact calculations utilized in this function can be explored via the documentation of the `wilcox.test` function.
-A standardized mean difference (SMD) is *not* calculated in this function since this would be an inappropriate measure of effect size alongside the non-parametric test statistics. 
-Instead, a standardized effect size (SES) is calculated for *all* types of comparisons (e.g., two sample, one sample, and paired samples). 
-The function can produce a rank-biserial correlation [@Kerby_2014], a WMW Odds [@wmwodds], or a "common language effect size" [@Kerby_2014] (Also known as the non-parametric probability of superiority, or concordance probability).^[There is no plotting capability at this time for the output of this function.]
+The Brunner-Munzel test [@brunner2000] provides a non-parametric test of stochastic equality.
+Rather than testing whether two groups differ in location, it directly estimates the relative effect $\hat{p} = P(X > Y) + 0.5 \cdot P(X = Y)$, which is the probability that a randomly chosen observation from one group exceeds a randomly chosen observation from the other.
+This estimand is interpretable without additional distributional assumptions, unlike the WMW test which requires a location-shift assumption to say anything about location differences.
+@karch2021 argues that the Brunner-Munzel test should be preferred over the Mann-Whitney U test as the default nonparametric procedure because it is valid under heteroscedasticity and provides a more interpretable effect size.
+
+The `brunner_munzel` function in TOSTER supports equivalence and minimal effect testing via the `alternative` argument, with bounds specified on the probability scale through the `mu` parameter.
+Results can be reported on different scales via the `scale` argument ("probability", "difference", "logodds", or "odds"), and three test methods are available via `test_method`: "t" (default, t-approximation), "logit" (range-preserving CIs), and "perm" (studentized permutation, recommended for small samples; @neubert2007).
+
+```{r}
+bm_test = brunner_munzel(formula = extra ~ group,
+                         data = sleep,
+                         alternative = "equivalence",
+                         mu = c(0.3, 0.7))
+print(bm_test)
+```
 
 \newpage
+
+### Wilcoxon-Mann-Whitney TOST
+
+The WMW group of tests (e.g., Mann-Whitney U-test) provide a non-parametric test of differences between groups, or within samples, based on *ranks*.
+Within the TOST framework, there are two separate tests of directional location shift to determine if the location shift is within (equivalence) or outside (minimal effect) the equivalence bounds^[Care should be taken when considering paired samples; a test on the rank transformed data [@kornbrot1990rank] or another robust test may be more prudent.].
+
+However, there are important caveats to the interpretation of WMW tests.
+Many researchers mistakenly believe these are tests of medians, but this is not the case.
+Without additional assumptions, the WMW test is a test of stochastic equality — identical to what the Brunner-Munzel test estimates.
+Only under a location-shift assumption (the two distributions have identical shapes, differing only in location) does the WMW test become a test of the Hodges-Lehmann pseudo-median of pairwise differences, and only with additional symmetry can it be interpreted as a test of median or mean differences.
+@median_test demonstrate several striking counterexamples: groups can have equal medians yet produce a significant WMW test (because distributions differ in shape), very different medians yet a non-significant WMW test (because neither group stochastically dominates the other), or even significance in the opposite direction from the median comparison.
+
+This interpretive difficulty is especially pronounced for equivalence testing.
+When performing TOST with Wilcoxon tests, the equivalence bounds are applied to the pseudo-median of pairwise differences (i.e., the Hodges-Lehmann estimator), which corresponds to the difference in means or medians only under the location shift assumption [@median_test].
+When distributions differ in shape, bounds on the pseudo-median do not guarantee that means or medians are within those bounds.
+For testing hypotheses about mean differences, `perm_t_test` or `boot_t_test` are more appropriate.
+For stochastic superiority, `brunner_munzel` provides a clearer framework.
+For testing effect sizes directly, `ses_calc` supports hypothesis testing on the standardized effect size such as the rank-biserial correlation.
+The `wilcox_TOST` function remains useful for situations where rank-based tests are specifically desired, such as with ordinal data or when consistency with prior analyses is needed.
+
+In the TOSTER package, `wilcox_TOST` operates similarly to `t_TOST`.
+A standardized mean difference (SMD) is *not* calculated since this would be an inappropriate measure of effect size alongside the non-parametric test statistics.
+Instead, a standardized effect size (SES) is calculated for *all* types of comparisons (e.g., two sample, one sample, and paired samples).
+The function can produce a rank-biserial correlation [@Kerby_2014], a WMW Odds [@wmwodds], or a "common language effect size" [@Kerby_2014] (also known as the non-parametric probability of superiority, or concordance probability)^[While `wilcox_TOST` does not have a dedicated plotting method, the result can be converted to an `htest` object with `as_htest`, or users can obtain an `htest` object directly via `simple_htest`. The `ses_calc` function also returns an `htest` object. Any of these `htest` objects can be plotted with `plot_htest_est`.].
 
 As an example, we can use the sleep data to make a non-parametric comparison of equivalence.
 
@@ -418,41 +544,63 @@ test1 = wilcox_TOST(formula = extra ~ group,
 print(test1)
 ```
 
-Based on these results, we would have conclude there is no significant difference but not equivalent differences either (i.e., inconclusive result).
+Based on these results, we would conclude there is no significant difference but not equivalent differences either (i.e., inconclusive result).
 
 \newpage
 
-## Bootstrap TOST
+## Resampling Methods
 
-The bootstrap refers to resampling with replacement and can be used for statistical estimation and inference. Bootstrapping techniques are very useful because they are considered somewhat robust to the violations of assumptions for a simple t-test and provide better estimations of SMDs [@Kirby2013]. Therefore, I added a bootstrapping function, `boot_t_TOST`, to the package to provide another robust alternative to the `t_TOST` function. 
+When the goal is to test hypotheses about means or mean differences while relaxing distributional assumptions, resampling methods provide a powerful set of tools.
+TOSTER provides two primary resampling approaches — bootstrap and permutation — each with distinct inferential logic.
 
-In this function we provide a percentile bootstrap solution outlined by @efron93 (see chapter 16, page 220). The bootstrapped p-values are derived from the "studentized" version of a test of mean differences [@efron93]. Overall, the results should be similar to the results of `t_TOST`. **However**, for paired samples, the Cohen's d(rm) effect size *cannot* be calculated by this function.
+The *bootstrap* [@efron93] resamples with replacement from the observed data to approximate the sampling distribution of the test statistic.
+Bootstrap confidence intervals can be constructed using several methods (studentized, basic, percentile, or bias-corrected and accelerated), and the p-value computation is tied to the CI method via the CI inversion principle. With the way the package now works for bootstraps methods, a p-value is significant at level $\alpha$ if and only if the corresponding $1 - 2\alpha$ confidence interval excludes the null value.
+This ensures consistency between reported CIs and p-values [@Thulin_2024].
 
-### Two Sample Algorithm
+The *permutation* approach shuffles group labels (for two-sample tests) or flips signs (for one-sample/paired tests) to construct the null distribution directly.
+When the number of possible permutations is small enough, exact p-values can be computed; otherwise, a randomized approximation is used with the "+1" correction to avoid zero p-values [@phipson2010].
+Studentized permutation tests [@janssen1997; @chung2013], which recompute the standard error for each permutation, provide valid inference even under heteroscedasticity *and* allow for accurate equivalence tests [@Arboretti_Pesarin_Salmaso_2020].
 
-The steps by which the bootstrapping occurs are fairly simple.
+Both `boot_t_test` and `perm_t_test` return standard `htest` objects and support `alternative = "equivalence"` and `alternative = "minimal.effect"` for equivalence and minimal effect testing respectively.
+Both also support Yuen's trimmed means via the `tr` parameter, providing additional robustness to outliers by trimming a specified fraction from each tail of the distribution before computing means and variances.
 
-1. Form B bootstrap data sets from x* and y* wherein x* is sampled with replacement from $\tilde x_1,\tilde x_2, ... \tilde x_n$ and y* is sampled with replacement from $\tilde y_1,\tilde y_2, ... \tilde y_n$
+### Bootstrap t-test
 
-2. t is then evaluated on each sample, but the mean of each sample (y or x) and the overall average (z) are subtracted from each (i.e., null distribution is formed)
+The `boot_t_test` function provides a bootstrap t-test that returns a standard `htest` object.
+The `boot_ci` argument controls the CI method ("stud", "basic", "perc", or "bca"), and as noted above, the p-value method follows the CI method to maintain consistency.
+Equivalence bounds are specified via the `mu` argument (two values for equivalence/minimal effect testing).
 
-$$
-t(z^{*b}) = \frac {(\bar x^*-\bar x - \bar z) - (\bar y^*-\bar y - \bar z)}{\sqrt {sd_y^*/n_y + sd_x^*/n_x}}
-$$
-
-3. An approximate p-value can then be calculated as the number of bootstrapped results greater than the observed t-statistic from the sample.
-
-$$
-p_{boot} = \frac {\#t(z^{*b}) \ge t_{sample}}{B}
-$$
-
-The same process is completed for the one sample case but with the one sample solution for the equation outlined by $t(z^{*b})$. The paired sample case in this bootstrap procedure is equivalent to the one sample solution because the test is based on the difference scores.
+```{r}
+set.seed(4522)
+boot_t_test(formula = extra ~ group,
+            data = sleep,
+            alternative = "equivalence",
+            mu = c(-0.5, 0.5),
+            R = 999)
+```
 
 \newpage
 
-### Example of Bootsrapping
+### Permutation t-test
 
-We can use the sleep data to see an example of the bootstrapped results. If you plot the bootstrap samples, it will show how the resampling via bootstrapping indicates the instability of Hedges' d(z). Just looking at the printed results you will notice some differences between confidence intervals from the bootstrapped result and the t-test.
+The `perm_t_test` function provides a permutation-based t-test.
+When `R = NULL`, the function attempts to enumerate all possible permutations for an exact test; otherwise, it draws `R` random permutations.
+By default, the test is studentized (`perm_se = TRUE`), meaning the standard error is recomputed for each permuted sample, which provides valid inference under heteroscedasticity [@janssen1997; @chung2013].
+For randomized permutations, the "+1" correction is applied by default to ensure proper type I error control [@phipson2010].
+
+```{r}
+set.seed(8812)
+perm_t_test(formula = extra ~ group,
+            data = sleep,
+            alternative = "equivalence",
+            mu = c(-0.5, 0.5),
+            R = 999)
+```
+
+### Bootstrap TOST
+
+For situations where both a two-tailed nil hypothesis test and an equivalence test are desired simultaneously, the `boot_t_TOST` function provides both in a single call, returning a `TOSTt` object.
+This function uses the same bootstrap methods as `boot_t_test` and additionally provides bootstrapped SMD estimates [@Kirby2013].
 
 ```{r}
 set.seed(891111)
@@ -461,14 +609,12 @@ test1 = boot_t_TOST(formula = extra ~ group,
                     paired = TRUE,
                     eqb = .5,
                     R = 999)
-
-
 print(test1)
 ```
 
 \newpage
 
-## Log TOST
+## Log-Transformed Methods
 
 The natural logarithmic (log) transformation is often utilized to stabilize the variance of a measure, and it often provides the best approximation of the normal distribution [@logtest]. However, another, less often reported, advantage of the log transformation is that the back transformation of the differences of the log-transformed data is a *ratio* [@logtest]. For example, if we had a two samples (x & y) with an geometric mean^[The mean of log-transformed data is the *geometric* not *arithmetic* mean. I highly recommend reading @logtest and @caldwell2019basic for more details] or 7 and 10.5, x and y respectively in the code below, we could represent the differences as ratio of y:x where y is 1.5 times greater than x. 
 
@@ -486,11 +632,13 @@ In pharmaceutical reserach, bioequivalence testing involves determining whether 
 
 In my personal experience as a physiologist, it is not uncommon that biological/physiological phenomenon present have longer right-tailed distributions, and are often adequately normalized with a natural log transformation. The additional advantage is the how equivalence bounds can, almost, be universally applied when making comparisons on the log scale. The FDA considers to drugs to be bioequivalent when the maximal concentration and AUC differences between drugs are less than 1.25. To put it another way, ratio between two means must be between 1.25 and 0.8 (i.e., 1/1.25) [@fda].
 
+An alternative to using the dedicated `log_TOST` function is to simply log-transform the data and analyze it with `t_TOST` (or any of the resampling methods described above). The differences on the log scale can then be interpreted as "sympercents" — symmetric percentage differences on the $100 \cdot \ln$ scale [@cole2000]. Sympercents have the attractive property that a difference of +10 sympercent and -10 sympercent are symmetric and of equal magnitude, unlike ordinary percentages where +10% and -10% are not. This approach provides more flexibility (e.g., one-sample tests become possible) at the cost of requiring the user to specify equivalence bounds on the log scale rather than as a ratio.
+
 Therefore, I have implemented two functions to allow for the comparison of data that is believed to be left skewed (long right tail), and is on a ratio scale^[Ratio scale means the outcome is measured on a numerical scale that has equal distances between adjacent values and true zero. ]. The first function is a parametric t-test on the log transformed scale while the second function is a bootstrapping test which is more robust than parametric version [@he2022].
 
 ### Example of Log TOST
 
-The `log_TOST` function is almost exactly the same as the `t_TOST` function. First, the primary differences is that it only accepts paired and two sample comparisons. One sample tests are not support (i.e., there is no ratio to calculate). Second, standardized mean differences are not calculated, but a ratio of means is instead reported [@lajeunesse2015bias]^[Also, referred to as a "response ratio" in ecology. Like an SMD, the response ratio can be utilized in meta-analysis.]. Third, the default equivalence bounds are by default set to the FDA standards (i.e., `eqb = 1.25`), but can be changed by the user^[Only one value needs to be supplied to eqb; the reciprocal value of eqb is taken as the other equivalence bound. For example, if `eqb  = 0.85` then the upper equivalence bound is 1/0.85 (~1.333)].
+The `log_TOST` function is almost exactly the same as the `t_TOST` function. First, the primary differences is that it only accepts paired and two sample comparisons. One sample tests are not support (i.e., there is no ratio to calculate). Second, standardized mean differences are not calculated, but a ratio of means is instead reported [@lajeunesse2015bias]^[Also, referred to as a "response ratio" in ecology. Like an SMD, the response ratio is often utilized in meta-analysis.]. Third, the default equivalence bounds are by default set to the FDA standards (i.e., `eqb = 1.25`), but can be changed by the user^[Only one value needs to be supplied to eqb; the reciprocal value of eqb is taken as the other equivalence bound. For example, if `eqb  = 0.85` then the upper equivalence bound is 1/0.85 (~1.333)].
 
 As an example we can use the `mtcars` data to compare the type of transmission (`am`) effects on the gas mileage (`mpg`). We can see from the data below there are significant, non-equivalent, differences in mpg between transmission types.
 
@@ -502,7 +650,7 @@ log_TOST(mpg ~ am, data = mtcars)
 
 ### Example of Bootstrap Log TOST
 
-The bootstrap version of `log_TOST`, `boot_log_TOST`, uses the same bootstrapping method detailed above (`boot_t_TOST`), but it uses the log-transformed values and produces the ratio of means as the effect size.
+The bootstrap version of `log_TOST`, `boot_log_TOST`, uses the same bootstrap methods as `boot_t_test`, but on the log-transformed values, producing the ratio of means as the effect size.
 
 ```{r, error=FALSE}
 boot_log_TOST(mpg ~ am, data = mtcars, R=999)
@@ -648,7 +796,7 @@ The above results are only based on an approximating the differences
 between the SMDs. If the raw data is available, then the optimal
 solution is the bootstrap. This can be accomplished with the
 `boot_compare_smd` function. The only drawback to this function is that TOST is 
-currently not avaiable, and users would instead have to run 2 one-sided tests
+currently not available, and users would instead have to run 2 one-sided tests
 manually using the `null` and `alternative` arguments. 
 
 For this example, we will simulate some data. As an alternative approach to TOST,
@@ -666,15 +814,14 @@ boot_test
 
 # Conclusions
 
-In this manuscript I have demonstrated most of the new functions and features within the TOSTER R package. 
-This constitutes a major update to the package over the past 2 years. 
+In this manuscript I have demonstrated most of the newest functions and features within the TOSTER R package. 
 I hope that updates to the package builds upon the original impact of the TOSTER package^[In my opinion, the impact of the @lakens_ori cannot be overstated considering it is cited by over 1000 other papers!], 
 and has been made TOST more accessible to the average researcher.
 In addition, I have added a number of other functions that offer robust alternatives to
 the t-test for performing TOST analyses.
 I would strongly recommend users of TOSTER to explore these functions, and, at the very least,
 compare the robust results to the t-test results to ensure that the conclusions do not change
-due to the chosen analysis^[If they do change, then it would be prudent to explore what features in the data might explain this discrepancy.].
+due to the chosen analysis. If your interpretation of the results substantially changes depending on the test, then it would be prudent to explore what features in the data, and the underlying data generating process, might explain this discrepancy.
 Lastly, to my knowledge, this is the first package to offer equivalence testing options for ANOVAs or for comparing SMDs between studies. 
 Overall, this package and its functions offer an easily accessible option for researchers to explore equivalence testing, and hopefully improve their statistical analyses.
 
@@ -682,11 +829,11 @@ Overall, this package and its functions offer an easily accessible option for re
 
 # Additional Information
 
-All analyses/code in this manuscript are from TOSTER v0.6.0:
+All analyses/code in this manuscript are from TOSTER v0.9.0:
 
 ```
 # Install the exact release with this code
-devtools::install_github("Lakens/TOSTER@v0.6.0")
+devtools::install_github("Lakens/TOSTER@v0.9.0")
 ```
 
 ## Acknowledgement(s) {-}
@@ -706,7 +853,7 @@ No funding was provided for this work.
 
 Daniel Lakens provided a review of many of the materials that have been incorporated
 into the update of TOSTER, and was the original author of this package.
-Without his help and encouragment, the TOSTER package and this update would not exist.
+Without his help and encouragement, the TOSTER package and this update would not exist.
 
 ## Nomenclature/Notation {-}
 

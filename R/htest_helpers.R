@@ -443,7 +443,7 @@ printable_pval = function(pval,
 #' @title Plot Estimate from 'htest' Object
 #'
 #' @description
-#' `r lifecycle::badge('stable')`
+#' `r lifecycle::badge('maturing')`
 #'
 #' Creates a simple point estimate plot with confidence interval from any 'htest' object
 #' that contains an estimate and confidence interval. This provides a visual representation
