@@ -4,9 +4,7 @@ title: |
 shorttitle: "Updated TOSTER R Package"
 author:
 - name: Aaron R. Caldwell
-  affil: Department of Biostatistics, Fay W. Boozman College of Public Health, University of Arkansas for Medical Sciences Northwest
-  city: Springdale
-  state: AR
+  affil: a
   email: caldwellaaron@uams.edu
 type: PREPRINT
 output:
@@ -19,12 +17,12 @@ abstract: |
   Equivalence testing is arguably under utilized by experimental
   researchers. Due to limited software support for such analyses, and
   little education on the topic in graduate programs, the utilization of 
-  equivalence testings still appares to be low.
+  equivalence testings still appears to be low.
   One option for equivalence testing is the use of two one-sided tests (TOST).
   The TOSTER R package and jamovi module, originally developed by 
   Daniel Lakens in 2017, was created to make TOST 
   more accessible to the average researcher. 
-  In the past two years, I have made significant changes to the TOSTER package
+  In recent years, I have made significant changes to the TOSTER package
   in order to increase its accessibility and provide more robust analysis 
   options for researchers. In this paper, I will detail the changes to the 
   package and highlight new analysis options that will make TOST easier for the 
@@ -45,7 +43,7 @@ header-includes: |
 affiliation:
 - num: a
   address: |
-    Natick, MA,  <https://orcid.org/0000-0002-4541-6283>
+    Department of Biostatistics, Fay W. Boozman College of Public Health, University of Arkansas for Medical Sciences Northwest, Springdale, AR  <https://orcid.org/0000-0002-4541-6283>
 ---
 
 ```{r setup, echo=FALSE}
