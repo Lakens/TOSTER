@@ -142,51 +142,14 @@ library(jmv)
 data('bugs')
 
 ## -----------------------------------------------------------------------------
-head(sleep,2)
-
-## -----------------------------------------------------------------------------
-# Formula Interface
-res1 = t_TOST(formula = extra ~ group, data = sleep, 
+res1 = t_TOST(formula = extra ~ group, data = sleep,
               eqb = .5, smd_ci = "t")
-# x & y Interface
-res1a = t_TOST(x = subset(sleep,group==1)$extra,
-               y = subset(sleep,group==2)$extra, eqb =.5)
 
 ## -----------------------------------------------------------------------------
 print(res1)
 
-## ----cdplot,fig.width=6, fig.height=5,fig.cap="Example of consonance density plot."----
+## ----cdplot,fig.width=6, fig.height=5,fig.cap="Consonance density plot for the independent-samples equivalence test."----
 plot(res1, type = "cd")
-
-## ----shadeplot,fig.width=6, fig.height=5, fig.cap = "Demonstrating the shading in plot method."----
-plot(res1, type = "cd",
-     ci_shades = c(.9,.95))
-
-## ----conplot,fig.width=6, fig.height=5, fig.cap = "Example of consonance plot."----
-plot(res1, type = "c",
-     ci_lines =  c(.9,.95))
-
-## -----------------------------------------------------------------------------
-res2 = t_TOST(formula = extra ~ group,
-              data = sleep,
-              paired = TRUE,
-              eqb = .5)
-res2
-
-## -----------------------------------------------------------------------------
-res3 = t_TOST(x = bugs$LDHF,
-              y = bugs$LDLF,
-              paired = TRUE,
-              eqb = 1)
-res3
-
-## -----------------------------------------------------------------------------
-res3a = t_TOST(x = bugs$LDHF,
-               y = bugs$LDLF,
-               paired = TRUE,
-               hypothesis = "MET",
-               eqb = 1)
-res3a
 
 ## -----------------------------------------------------------------------------
 res4 = t_TOST(x = bugs$LDHF,
@@ -205,11 +168,76 @@ res_tsum = tsum_TOST(
 res_tsum
 
 ## -----------------------------------------------------------------------------
+res_sh1 <- simple_htest(extra ~ group, data = sleep,
+                         alternative = "equivalence", mu = 0.5)
+res_sh1
+
+## -----------------------------------------------------------------------------
+describe_htest(simple_htest(extra ~ group, data = sleep))
+
+## ----shplot1, fig.width=6, fig.height=3.5, fig.cap = "Estimate plot for an equivalence test via simple_htest."----
+plot_htest_est(res_sh1)
+
+## -----------------------------------------------------------------------------
+smd_calc(formula = extra ~ group, 
+         data = sleep,
+         paired = FALSE, 
+         bias_correction = TRUE,
+         alternative = "equivalence", 
+         null.value = c(-0.5,0.5),
+         output = "htest")
+
+## -----------------------------------------------------------------------------
+X = rnorm(30)
+Y = rnorm(30)
+
+boot_cor_test(
+  x = X,
+  y = Y,
+  method = "pearson",
+  alternative = "equivalence",
+  null = 0.4)
+
+## -----------------------------------------------------------------------------
+compare_smd(smd1 = 0.95,
+            n1 = 25,
+            smd2 = 0.23,
+            n2 = 50,
+            paired = TRUE)
+
+## -----------------------------------------------------------------------------
+compare_smd(smd1 = 0.95, n1 = 25, smd2 = 0.23, n2 = 50,
+            paired = TRUE, TOST = TRUE, null = .25)
+
+## -----------------------------------------------------------------------------
+bm_test = brunner_munzel(formula = extra ~ group,
+                         data = sleep,
+                         alternative = "equivalence",
+                         mu = c(0.3, 0.7))
+print(bm_test)
+
+## -----------------------------------------------------------------------------
 test1 = wilcox_TOST(formula = extra ~ group,
                       data = sleep,
                       paired = FALSE,
                       eqb = .5)
 print(test1)
+
+## -----------------------------------------------------------------------------
+set.seed(4522)
+boot_t_test(formula = extra ~ group,
+            data = sleep,
+            alternative = "equivalence",
+            mu = c(-0.5, 0.5),
+            R = 999)
+
+## -----------------------------------------------------------------------------
+set.seed(8812)
+perm_t_test(formula = extra ~ group,
+            data = sleep,
+            alternative = "equivalence",
+            mu = c(-0.5, 0.5),
+            R = 999)
 
 ## -----------------------------------------------------------------------------
 set.seed(891111)
@@ -218,21 +246,12 @@ test1 = boot_t_TOST(formula = extra ~ group,
                     paired = TRUE,
                     eqb = .5,
                     R = 999)
-
-
 print(test1)
 
-## -----------------------------------------------------------------------------
-x = 7; y = 10.5
-log(y) - log(x)
-log(y/x)
-exp(log(y) - log(x))
-y/x
-
-## ---- error=FALSE-------------------------------------------------------------
+## ----error=FALSE--------------------------------------------------------------
 log_TOST(mpg ~ am, data = mtcars)
 
-## ---- error=FALSE-------------------------------------------------------------
+## ----error=FALSE--------------------------------------------------------------
 boot_log_TOST(mpg ~ am, data = mtcars, R=999)
 
 ## ----warning=FALSE, message=FALSE---------------------------------------------
@@ -245,29 +264,22 @@ anova(aovtest)
 equ_ftest(Fstat = 34.70228,  df1 = 5, df2 = 66,  eqb = 0.35)
 
 ## -----------------------------------------------------------------------------
-# Example using a purely within-subjects design 
+# Example using a purely within-subjects design
 # (Maxwell & Delaney, 2004, Chapter 12, Table 12.5, p. 578):
 library(afex)
 data(md_12.1)
-aovtest2 = aov_ez("id", "rt", md_12.1, within = c("angle", "noise"), 
+aovtest2 = aov_ez("id", "rt", md_12.1, within = c("angle", "noise"),
        anova_table=list(correction = "none", es = "none"))
 equ_anova(aovtest2,
           eqb = 0.35)
 
 ## -----------------------------------------------------------------------------
-compare_smd(smd1 = 0.95,
-            n1 = 25,
-            smd2 = 0.23,
-            n2 = 50,
-            paired = TRUE)
+power_t_TOST(delta = 0, sd = 1, eqb = 0.5,
+             alpha = 0.05, power = 0.8,
+             type = "two.sample")
 
 ## -----------------------------------------------------------------------------
-compare_smd(smd1 = 0.95, n1 = 25, smd2 = 0.23,n2 = 50,
-            paired = TRUE, TOST = TRUE, null = .25)
-
-## -----------------------------------------------------------------------------
-set.seed(4522)
-boot_test = boot_compare_smd(x1 = rnorm(25,.95), x2 = rnorm(50), 
-                             paired = TRUE, alpha = .1)
-boot_test
+power_z_cor(rho = 0, power = 0.8,
+            null = 0.3, alpha = 0.05,
+            alternative = "equivalence")
 
