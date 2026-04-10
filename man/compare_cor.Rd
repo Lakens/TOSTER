@@ -50,7 +50,7 @@ or a vector of two values representing the lower and upper bounds
 \value{
 A list with class "htest" containing the following components:
 \itemize{
-\item \strong{statistic}: z-score with name "z"
+\item \strong{statistic}: standardized z-score (i.e., the test statistic divided by its standard error) with name "z"
 \item \strong{p.value}: numeric scalar containing the p-value for the test under the null hypothesis
 \item \strong{estimate}: difference in correlation coefficients between studies
 \item \strong{null.value}: the specified hypothesized value(s) for the null hypothesis
@@ -92,6 +92,12 @@ the specified bounds, which can be set asymmetrically.
 \item For minimal effect testing ("minimal.effect"), it determines whether the difference falls
 outside the specified bounds.
 }
+
+\strong{Note on Fisher's z transformation of bounds:} When \code{method = "fisher"}, the \code{null} values
+(equivalence bounds) are specified on the \strong{correlation scale} and are internally converted to
+the Fisher z scale via \code{atanh()}. For example, \code{null = 0.4} is treated as r = 0.4, which maps
+to z = 0.4236. If you want bounds expressed directly in Fisher-z units, you should back-transform
+them to the correlation scale first using \code{tanh()} before passing them to this function.
 
 When performing equivalence or minimal effect testing:
 \itemize{

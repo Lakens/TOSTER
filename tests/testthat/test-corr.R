@@ -388,6 +388,29 @@ test_that("Run examples for boot_cor_test", {
 
 })
 
+test_that("compare_cor: z-statistic is standardized (issue #115)", {
+  result <- compare_cor(
+    r1 = 0.6, df1 = 18,
+    r2 = 0.8, df2 = 23,
+    null = 0.4,
+    method = "fisher",
+    alternative = "equivalence"
+  )
+
+  # Manually compute the expected standardized z
+  z1   <- atanh(0.6)
+  z2   <- atanh(0.8)
+  diff <- z1 - z2
+  SE   <- sqrt(1/17 + 1/22)
+  bound_z <- atanh(0.4)
+
+  expected_z <- (diff - (-bound_z)) / SE
+  expected_p <- 1 - pnorm(expected_z)
+
+  expect_equal(unname(result$statistic), expected_z, tolerance = 1e-6)
+  expect_equal(result$p.value, expected_p, tolerance = 1e-6)
+})
+
 test_that("Run examples for boot_compare_cor", {
   skip_on_cran()
 
