@@ -21,7 +21,7 @@ and the null hypothesis.}
 A \code{ggplot} object that can be further customized using ggplot2 functions.
 }
 \description{
-\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#stable}{\figure{lifecycle-stable.svg}{options: alt='[Stable]'}}}{\strong{[Stable]}}
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#maturing}{\figure{lifecycle-maturing.svg}{options: alt='[Maturing]'}}}{\strong{[Maturing]}}
 
 Creates a simple point estimate plot with confidence interval from any 'htest' object
 that contains an estimate and confidence interval. This provides a visual representation
