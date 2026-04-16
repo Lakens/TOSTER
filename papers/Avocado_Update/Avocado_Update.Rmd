@@ -357,26 +357,62 @@ With these caveats in mind, the following subsections describe the tools TOSTER 
 
 The `smd_calc` function computes standardized mean differences --- Cohen's $d$, Hedges' $g$ (bias-corrected), or Glass's $\Delta$ --- with confidence intervals and *optional* hypothesis testing (utilizing a z-test: $z  = (SMD - \mu)/SE$). It supports one-sample, paired, and two-sample designs, and can return either an `htest` object or a data frame. The SMD is already reported in `t_TOST` output, but `smd_calc` allows standalone computation and supports equivalence testing directly on the effect size. This may be useful as a complementary function when using `simple_htest` as the primary statistical testing function.
 
+When estimation rather than testing is the goal, `smd_calc` can be called with `alternative = "none"` (the default), which returns only the point estimate and confidence interval without performing a hypothesis test. This is the recommended usage when the primary objective is to report the magnitude of the effect.
+
 ```{r}
-smd_calc(formula = extra ~ group, 
+smd_calc(formula = extra ~ group,
          data = sleep,
-         paired = TRUE, 
+         paired = TRUE,
          bias_correction = TRUE,
          rm_correction = TRUE,
-         alternative = "equivalence", 
+         output = "htest")
+```
+
+When hypothesis testing on the SMD is desired, `smd_calc` supports equivalence and minimal-effect alternatives directly:
+
+```{r}
+smd_calc(formula = extra ~ group,
+         data = sleep,
+         paired = TRUE,
+         bias_correction = TRUE,
+         rm_correction = TRUE,
+         alternative = "equivalence",
          null.value = c(-0.5,0.5),
          output = "htest")
+```
+
+However, the parametric z-test used by `smd_calc` relies on distributional assumptions about the sampling distribution of the SMD that may not hold in practice. When a hypothesis test on the SMD is the goal, bootstrapping via `boot_smd_calc` is recommended because it provides more robust confidence intervals and p-values without requiring these assumptions.
+
+```{r}
+boot_smd_calc(formula = extra ~ group,
+              data = sleep,
+              paired = TRUE,
+              bias_correction = TRUE,
+              rm_correction = TRUE,
+              alternative = "equivalence",
+              null.value = c(-0.5,0.5))
 ```
 
 
 ## Equivalence Tests for Correlations
 
-Researchers sometimes need to test that a correlation is practically zero --- for example, when evaluating discriminant validity or confirming that a potential confounder is unrelated to an outcome. The `boot_cor_test` function supports provides robust support for testing equivalence on correlation coefficients. Bounds are specified via the `null` argument:
+Researchers sometimes need to test that a correlation is practically zero --- for example, when evaluating discriminant validity or confirming that a potential confounder is unrelated to an outcome. The `z_cor_test` function provides a parametric approach using the Fisher z-transformation. However, this is only an approximate method and is generally *not recommended* as the primary inferential tool for equivalence testing on correlations.
 
 ```{r}
 X = rnorm(30)
 Y = rnorm(30)
 
+z_cor_test(
+  x = X,
+  y = Y,
+  method = "pearson",
+  alternative = "equivalence",
+  null = 0.4)
+```
+
+Because the z-test relies on distributional approximations that can be inaccurate --- particularly with small samples or non-normal data --- bootstrapping via `boot_cor_test` is recommended for more robust inference. The `boot_cor_test` function supports all three major correlation methods (Pearson, Kendall, and Spearman) as well as robust alternatives (winsorized and percentage-bend correlations), and returns standard `htest` objects that integrate with the helper functions described above.
+
+```{r}
 boot_cor_test(
   x = X,
   y = Y,
@@ -385,9 +421,9 @@ boot_cor_test(
   null = 0.4)
 ```
 
-This extends the original TOSTER package's correlation coverage by supporting all three major correlation methods and returning standard `htest` objects that integrate with the helper functions described above. If summary statistics are only available, an approximate method is provided through `corsum_test`, which uses the Fisher z-transformation to compute confidence intervals and p-values.
+If only summary statistics are available, an approximate method is provided through `corsum_test`, which uses the Fisher z-transformation to compute confidence intervals and p-values.
 
-## Comparing SMDs Between Studies
+## Comparing Standardized Effects Between Studies
 
 When evaluating whether a replication study produced results consistent with the original, researchers need a way to formally compare effect sizes. The `compare_smd` function tests whether two SMD estimates --- from an original study and a replication, for example --- differ more than would be expected by sampling variability alone.
 
@@ -398,12 +434,23 @@ compare_smd(smd1 = 0.95,
             n1 = 25,
             smd2 = 0.23,
             n2 = 50,
-            paired = TRUE, 
+            paired = TRUE,
             null = .25,
             alternative = "equivalence")
 ```
 
 Based on these results, we would reject the null significance hypothesis (the SMDs differ significantly) but fail to reject the equivalence null hypothesis (we cannot conclude the SMDs are practically equivalent). When raw data are available, `boot_compare_smd` provides a bootstrap alternative (see the package vignettes for details).
+
+For comparing correlation coefficients between independent studies, the `compare_cor` function provides an analogous test. It uses either the Fisher z-transformation (default) or the Kraatz (Anderson-Hauck) method to compare two correlation coefficients.
+
+```{r}
+compare_cor(r1 = 0.45,
+            df1 = 48,
+            r2 = 0.25,
+            df2 = 78,
+            alternative = "equivalence",
+            null = 0.25)
+```
 
 \newpage
 
