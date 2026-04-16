@@ -152,8 +152,8 @@ See \code{vignette("correlations")} for more details.
 }
 \section{References}{
 
-Wilcox, R.R. (2009) Comparing Pearson Correlations: Dealing with Heteroscedasticity and Nonnormality.
-Communications in Statistics - Simulation and Computation, 38, 2220–2234.
+
+Wilcox, R. R. (1994). The Percentage Bend Correlation Coefficient. Psychometrika, 59(4), 601–616. https://doi.org/10.1007/bf02294395
 
 Wilcox, R.R. (2017) Introduction to Robust Estimation and Hypothesis Testing, 4th edition. Academic Press.
 }

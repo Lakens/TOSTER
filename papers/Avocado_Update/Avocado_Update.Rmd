@@ -396,34 +396,35 @@ boot_smd_calc(formula = extra ~ group,
 
 ## Equivalence Tests for Correlations
 
-Researchers sometimes need to test that a correlation is practically zero --- for example, when evaluating discriminant validity or confirming that a potential confounder is unrelated to an outcome. The `z_cor_test` function provides a parametric approach using the Fisher z-transformation. However, this is only an approximate method and is generally *not recommended* as the primary inferential tool for equivalence testing on correlations.
+Researchers sometimes need to test that a correlation is practically zero. The `z_cor_test` function provides a parametric approach using the Fisher z-transformation. However, this is only an approximate method and is generally *not recommended* as the primary inferential tool for equivalence testing on correlations.
 
 ```{r}
-X = rnorm(30)
-Y = rnorm(30)
 
 z_cor_test(
-  x = X,
-  y = Y,
+  x = bugs$LDLF,
+  y = bugs$LDHF,
   method = "pearson",
-  alternative = "equivalence",
-  null = 0.4)
+  alternative = "t")
 ```
 
-Because the z-test relies on distributional approximations that can be inaccurate --- particularly with small samples or non-normal data --- bootstrapping via `boot_cor_test` is recommended for more robust inference. The `boot_cor_test` function supports all three major correlation methods (Pearson, Kendall, and Spearman) as well as robust alternatives (winsorized and percentage-bend correlations), and returns standard `htest` objects that integrate with the helper functions described above.
+Because the z-test relies on distributional approximations that can be inaccurate --- particularly with small samples --- bootstrapping via `boot_cor_test` is recommended for more robust inference. The `boot_cor_test` function supports all three major correlation methods (Pearson, Kendall, and Spearman) as well as the Winsorized [@Wilcox_1993] and percentage bend [@Wilcox_1994] correlation coefficients as robust alternatives, and returns standard `htest` objects that integrate with the helper functions described above.
 
 ```{r}
-boot_cor_test(
-  x = X,
-  y = Y,
+res_boot_cor = boot_cor_test(
+  x = bugs$LDLF,
+  y = bugs$LDHF,
   method = "pearson",
   alternative = "equivalence",
   null = 0.4)
+
+print(res_boot_cor)
+
+describe_htest(res_boot_cor)
 ```
 
 If only summary statistics are available, an approximate method is provided through `corsum_test`, which uses the Fisher z-transformation to compute confidence intervals and p-values.
 
-## Comparing Standardized Effects Between Studies
+## Comparing Standardized Effect Sizes Between Studies
 
 When evaluating whether a replication study produced results consistent with the original, researchers need a way to formally compare effect sizes. The `compare_smd` function tests whether two SMD estimates --- from an original study and a replication, for example --- differ more than would be expected by sampling variability alone.
 
@@ -458,36 +459,17 @@ compare_cor(r1 = 0.45,
 
 # Robust Methods for Equivalence Testing
 
-In some cases, serious violations of t-test assumptions (normality, homoscedasticity) could inflate the type I error rate. TOSTER provides robust alternatives organized into three categories: rank-based tests, resampling methods, and log-transformed methods.
+When t-test assumptions (normality, homoscedasticity) are seriously violated, or when the mean difference is a poor summary of the effect (e.g., with heavy skew or ordinal psychometric scales) alternative approaches are worth considering. TOSTER organizes these into three categories: rank-based tests, resampling methods, and log-transformed methods.
 
 ## Rank-Based Tests
 
-Rank-based tests avoid distributional assumptions by operating on the ranks of the data rather than the raw values.
-These tests are *not* tests of means or medians [@median_test]; they target different estimands (i.e., the quantity a study is attempting to estimate). The choice between them should be driven by the estimand of interest.
-
-### Brunner-Munzel Test
-
-The Brunner-Munzel test [@brunner2000] estimates the relative effect $\hat{p} = P(X > Y) + 0.5 \cdot P(X = Y)$ --- the probability that a randomly chosen observation from one group exceeds a randomly chosen observation from the other. This estimand is interpretable without distributional assumptions, unlike the WMW test which requires a location-shift assumption to say anything about location differences. @karch2021 argues it should be preferred as the default non-parametric procedure because it is valid under heteroscedasticity and provides a more interpretable effect size.
-
-Stochastic superiority tests may be particularly well-suited to Likert-type scales which are ubiquitous in psychological research. For a single ordinal item, the spacing between response categories carries no guaranteed meaning, and a mean difference therefore has a strained interpretation. For example, what, concretely, does a 0.4-unit mean difference on a five-point scale communicate? The stochastic superiority estimand sidesteps this entirely. The probability that a randomly selected participant from one group outscores a randomly selected participant from the other is interpretable on its own terms, with no knowledge of the scale required. We are not suggesting that t-tests will *always* mislead in these contexts but it is a concern that should not be quickly dismissed either [@Liddell_Kruschke_2018]. Additionally, even if we assume traditional parametric methods are robust to the ordinal nature of the data, the preserved error rate is not the same as interpretive clarity. For researchers whose primary outcomes live on ordinal scales, the Brunner-Munzel test and its associated effect size --- as well as ordinal models more generally [@Burkner_Vuorre_2019] --- may offer a more natural and defensible default.
-
-The `brunner_munzel` function supports equivalence and minimal effect testing via `alternative`, with bounds on the probability scale via `mu`. Results can be reported on different scales (`"probability"`, `"difference"`, `"logodds"`, or `"odds"`), and three test methods are available: `"t"` (default), `"logit"` (range-preserving CIs), and `"perm"` (studentized permutation; @neubert2007).
-
-```{r}
-bm_test = brunner_munzel(formula = extra ~ group,
-                         data = sleep,
-                         alternative = "equivalence",
-                         mu = c(0.3, 0.7))
-print(bm_test)
-```
-
-\newpage
+Rank-based tests operate on the ranks of the data rather than the raw values, which is why they are typically described as non-parametric. It is worth emphasizing that this label applies to the test, not the data. The underlying observations may still come from any distribution, and rank-based methods should not be treated as automatic substitutes for a t-test when normality is in doubt. These tests are not tests of means or medians [@median_test; @karch2021]; they target different estimands (i.e., the quantity a study is attempting to estimate), and the choice between a rank-based test and a t-test should be driven by which estimand is of scientific interest.
 
 ### Wilcoxon-Mann-Whitney Tests
 
 The WMW group of tests provide non-parametric tests based on ranks. Within the TOST framework, two directional location-shift tests determine if the shift is within (equivalence) or outside (minimal effect) the equivalence bounds.
 
-However, there are important caveats. Many researchers mistakenly believe these are tests of medians, but without a location-shift assumption, the WMW test is a test of stochastic equality. As @Fay_Malinovsky_2018 demonstrate, the effect size can even be presented on the same scale as the Brunner-Munzel test. Only under a location-shift assumption does it become a test of central tendency through the Hodges-Lehmann estimator. @median_test demonstrate striking counterexamples: groups can have equal medians yet produce a significant WMW test, very different medians yet a non-significant WMW test, or even significance in the opposite direction from the median comparison.
+However, there are important caveats. Many researchers mistakenly believe these are tests of medians, but without a location-shift assumption, the WMW test is a test of stochastic equality. As @Fay_Malinovsky_2018 demonstrate, the effect size can even be presented as stochastic superiority/dominance. Only under a location-shift assumption does it become a test of central tendency through the Hodges-Lehmann estimator. @median_test demonstrate striking counterexamples: groups can have equal medians yet produce a significant WMW test, very different medians yet a non-significant WMW test, or even significance in the opposite direction from the median comparison.
 
 For equivalence testing, bounds are applied to the pseudo-median, which corresponds to the mean or median difference only under the location-shift assumption. For testing hypotheses about mean differences, `perm_t_test` or `boot_t_test` are more appropriate. For stochastic superiority, `brunner_munzel` provides a clearer framework. 
 
@@ -501,42 +483,52 @@ print(test1)
 
 Based on these results, we would conclude there is a significant difference and the results are also not equivalent. But again, the estimate we are testing is the pseudo-median, not the mean or median difference, so this conclusion may not be relevant to the research question at hand.
 
+### Brunner-Munzel Test
+
+The Brunner-Munzel test [@brunner2000] estimates the relative effect $\hat{p} = P(X > Y) + 0.5 \cdot P(X = Y)$, sometimes referred to as the probability of superiority --- the probability that a randomly chosen observation from one group exceeds a randomly chosen observation from the other, with ties split evenly. This estimand is interpretable without distributional assumptions, unlike the WMW test which requires a location-shift assumption to say anything about location differences. @karch2021 argues it should be preferred as the default non-parametric procedure because it is valid under heteroscedasticity and provides an interpretable effect size.
+
+Stochastic superiority tests may be particularly well-suited to Likert-type scales which are ubiquitous in psychological research. For a single ordinal item, the spacing between response categories carries no guaranteed meaning, and a mean difference therefore has a strained interpretation. For example, what, concretely, does a 0.4-unit mean difference on a five-point scale communicate? The stochastic superiority estimand sidesteps this entirely. The probability that a randomly selected participant from one group outscores a randomly selected participant from the other is interpretable on its own terms, with no knowledge of the scale required. We are not suggesting that t-tests will *always* mislead in these contexts but it is a concern that should not be quickly dismissed either [@Liddell_Kruschke_2018]. Additionally, even if we assume traditional parametric methods are robust to the ordinal nature of the data, the preserved error rate is not the same as interpretive clarity. For researchers whose primary outcomes live on ordinal scales, the Brunner-Munzel test and its associated effect size --- as well as ordinal models more generally [@Burkner_Vuorre_2019] --- may offer a more natural and defensible default.
+
+The `brunner_munzel` function supports equivalence and minimal effect testing via `alternative`, with bounds on the probability scale via `mu`. Results can be reported on different scales (`"probability"`, `"difference"`, `"logodds"`, or `"odds"`), and three test methods are available: `"t"` (default), `"logit"` (range-preserving CIs), and `"perm"` (studentized permutation; @neubert2007).
+
+```{r}
+bm_test = brunner_munzel(formula = extra ~ group,
+                         data = sleep,
+                         alternative = "equivalence",
+                         mu = c(0.3, 0.7))
+print(bm_test)
+```
+
+
 \newpage
 
 ## Resampling Methods
 
-When the goal is to test hypotheses about means while relaxing distributional assumptions, resampling methods provide powerful tools. TOSTER provides bootstrap and permutation approaches, each with distinct inferential logic.
+When the goal is to test hypotheses about means while relaxing distributional assumptions, resampling methods provide powerful tools. TOSTER implements both bootstrap and permutation approaches through `boot_t_test` and `perm_t_test`, each with distinct inferential logic but a shared motivation to retain the mean as the estimand while obtaining reference distributions empirically --- through resampling --- rather than relying on the normal-theory derivations (i.e., Student's t-test).
 
-The bootstrap [@efron93] resamples with replacement to approximate the sampling distribution. P-values are tied to the CI method via CI inversion, ensuring consistency between reported CIs and p-values [@Thulin_2024]. The permutation approach shuffles group labels (two-sample) or flips signs (one-sample/paired) to construct the null distribution directly. Studentized permutation tests [@janssen1997; @chung2013] provide valid inference under heteroscedasticity and allow accurate equivalence tests [@Arboretti_Pesarin_Salmaso_2020].
+Both approaches are natural extensions of the traditional t-test rather than alternatives to it. The test statistic itself is unchanged; what changes is how the null distribution is constructed. In the parametric t-test, the null distribution of the standardized mean difference is derived analytically under the assumption that the data are drawn from a population with a normal distribution (and, for Student's version, with equal variances). The bootstrap approximates the sampling distribution of the same statistic by resampling from the observed data with replacement, whereas the permutation approach constructs an exact or near-exact null distribution by shuffling group labels (two-sample) or flipping signs (one-sample and paired). In both cases, the researcher continues to ask the same question about means; only the calibration of the reference distribution differs. This is important for researchers who may view resampling methods as a departure from familiar testing logic: the estimand, the null hypothesis, and the test statistic remain the same.
 
-Both `boot_t_test` and `perm_t_test` return standard `htest` objects and support TOST (both equivlance and minimal effect testing). Both also support trimmed means via the `tr` parameter for additional robustness to outliers.
+Because the reference distribution is generated from the data rather than assumed, distributional requirements are relaxed, though not eliminated. The bootstrap relies on asymptotic arguments and assumes that the empirical distribution is a reasonable stand-in for the population distribution; it performs well with moderate-to-large samples and skewed or heavy-tailed data, but can struggle with very small samples or extreme outliers. The permutation approach is exact under the null hypothesis of exchangeability, meaning group labels carry no information about outcomes. In its basic form this exactness requires identical distributions under the null, which implicitly assumes equal variances. The studentized permutation test [@janssen1997; @chung2013] addresses this limitation by permuting a scale-invariant statistic (essentially the Welch t-statistic), yielding asymptotically valid inference even under heteroscedasticity. @Arboretti_Pesarin_Salmaso_2020 extended this logic to the equivalence testing setting, showing that studentized permutation TOST maintains nominal Type I error rates when variances differ across groups. In short, these methods are assumption-lighter rather than assumption-free, and users should still consider whether independence and exchangeability are reasonable for their design.
+
+A common reflex when normality seems implausible is to switch to the WMW or other rank-based tests. However, these tests answer a different question. As discussed earlier in this manuscript, rank-based procedures test hypotheses about stochastic ordering or pseudo-medians rather than means, and under heteroscedasticity they can reject the null even when the groups have identical means. When the scientific question is genuinely about means --— as it often is in applied research where effect sizes and interventions are naturally expressed on the original scale —-- bootstrap and permutation t-tests should generally be preferred over rank-based methods for handling such violations of assumptions. The rank-based tests remain useful, but as answers to different questions, not as robust substitutes for tests of means.
+
+Choosing between the bootstrap and permutation approaches involves tradeoffs rather than a clear winner in most situations. The studentized permutation test has the strongest theoretical footing for two-sample mean comparisons under heteroscedasticity, and is particularly attractive for equivalence testing given the @Arboretti_Pesarin_Salmaso_2020 results. The bootstrap offers greater flexibility because it extends naturally to statistics beyond the mean difference, provides readily interpretable confidence intervals via CI inversion [@Thulin_2024], and ensures consistency between reported intervals and p-values. In small samples, permutation approaches tend to have better finite-sample calibration because the null distribution is constructed exactly (or nearly so) from the data at hand, whereas the bootstrap's asymptotic justification can produce liberal tests with very small sample sizes. When outliers are a concern, both methods accept the `tr` argument for trimmed means, which reduces the influence of extreme observations while preserving the mean-based interpretation. As a rough heuristic, researchers comparing two independent groups with suspected unequal variances may find the studentized permutation test most defensible, while those wanting a single framework that yields coherent intervals and p-values across a range of designs may prefer the bootstrap. Both are substantial improvements over ignoring assumption violations, and both return standard `htest` objects that integrate with the TOST framework for equivalence and minimal effect testing.
 
 ### Bootstrap t-test
+
+The bootstrap t-test in TOSTER defaults to the studentized bootstrap (`boot_ci = "stud"`) because this matches the original bootstrap t-test proposed by @efron93 (Chapter 16), which is the procedure `boot_t_TOST` implements. In this approach, the t-statistic itself is resampled rather than the raw mean difference, and confidence intervals are constructed from the bootstrap distribution of these pivotal quantities. Other CI methods (percentile, basic, and BCa) remain available via the `boot_ci` argument, but the studentized default preserves consistency with the canonical Efron and Tibshirani formulation. It also ensures that the reported p-value and confidence interval are derived from the same bootstrap distribution, so the two will always agree; previous versions of the package used the studentized p-value regardless of the selected CI method, which could produce disagreement between reported intervals and p-values.
 
 ```{r}
 set.seed(4522)
 boot_t_test(formula = extra ~ group,
             data = sleep,
+            paired = TRUE,
             alternative = "equivalence",
             mu = c(-0.5, 0.5),
             R = 999)
 ```
 
-### Permutation t-test
-
-When `R = NULL`, the function enumerates all possible permutations for an exact test; otherwise, it draws `R` random permutations with the "+1" correction [@phipson2010]. By default the test is studentized (`perm_se = TRUE`).
-
-```{r}
-set.seed(8812)
-perm_t_test(formula = extra ~ group,
-            data = sleep,
-            alternative = "equivalence",
-            mu = c(-0.5, 0.5),
-            R = 999)
-```
-
-### Bootstrap TOST
-
+The output follows the familiar `htest` format. The reported p-value is the larger of the two one-sided tests against the equivalence bounds, and the confidence interval is the studentized bootstrap CI for the mean difference. Because the p-value is tied to this interval via CI inversion, a researcher reporting both will find the two tell a consistent story. The interval will fall within the equivalence bounds if and only if the equivalence test rejects.
 For situations where both a nil hypothesis test and an equivalence test are desired simultaneously with bootstrapping, `boot_t_TOST` returns a `TOSTt` object with bootstrapped SMD estimates [@Kirby2013]:
 
 ```{r}
@@ -548,6 +540,24 @@ test1 = boot_t_TOST(formula = extra ~ group,
                     R = 999)
 print(test1)
 ```
+
+The bootstrapped SMDs are a useful feature in their own right. Analytic confidence intervals for standardized effect sizes rely on approximations, which assume normality and can behave poorly with small or skewed samples. Bootstrap intervals for SMDs sidestep these assumptions by resampling the full estimation pipeline, yielding intervals that inherit the robustness properties of the bootstrap itself.
+
+### Permutation t-test
+
+When `R = NULL`, the function enumerates all possible permutations for an exact test; otherwise, it draws R random permutations with the "+1" correction [@phipson2010]. By default the test is studentized (`perm_se = TRUE`), consistent with the recommendations discussed in the methods section above. The `perm_se = FALSE` option is available primarily to match the behavior of other permutation test packages that do not studentize by default.
+
+```{r}
+set.seed(8812)
+perm_t_test(formula = extra ~ group,
+            data = sleep,
+            paired = TRUE,
+            alternative = "equivalence",
+            mu = c(-0.5, 0.5),
+            R = 999)
+```
+
+Running the bootstrap and permutation equivalence tests on the same paired sleep data using matching equivalence bounds produces broadly similar conclusions, as would be expected. The two approaches can, however, diverge in small samples, under strong heteroscedasticity, or in the presence of influential outliers, which is where the choice between them becomes substantively important. Users interested in robustness to outliers can additionally supply the `tr` argument to either function to use trimmed means, preserving the mean-based interpretation while downweighting extreme observations.
 
 \newpage
 
@@ -657,7 +667,7 @@ For more complex designs --- crossover studies, replicate designs, group-sequent
 
 This paper has described the major updates to the TOSTER R package, expanding its scope from the original t-test and correlation equivalence tests to a comprehensive toolkit for frequentist equivalence testing. The update adds a unified t-test interface with minimal effect testing support, a simplified hypothesis testing interface that integrates with the standard R ecosystem, tools for standardized effect sizes and correlations, robust and resampling-based alternatives, ANOVA equivalence testing, and power analysis for sample size planning.
 
-Several limitations should be acknowledged. TOSTER is designed for standard research designs --- it does not handle many analysis scenarios such as those involving multilevel or mixed-effects models. For these settings, researchers should consider packages like "emmeans" or "marginaleffects", which can accommodate non-zero null hypotheses in more complex modeling frameworks. TOSTER also does not provide Bayesian equivalence testing; researchers interested in Bayes factors for the null should consult R packages such as "bayestestR".
+Several limitations should be acknowledged. TOSTER only covers a few standard research designs --- it does not handle many analysis scenarios such as those involving multilevel or mixed-effects models. For these settings, researchers should consider packages like "emmeans" or "marginaleffects", which can accommodate non-zero null hypotheses in more complex modeling frameworks. TOSTER also does not provide Bayesian equivalence testing; researchers interested in Bayesian methods for the null should consult other R packages such as "bayestestR".
 
 I hope that the updated package continues to build upon the original impact of @lakens_ori and makes equivalence testing more accessible to researchers across disciplines. At the very least, I would encourage users to compare results across methods (e.g., parametric vs. robust) to ensure that conclusions do not depend on the chosen analysis. If the interpretation substantially changes depending on the test, this suggests features of the data --- violations of assumptions, outliers, distributional shape --- that warrant further investigation.
 
@@ -683,6 +693,10 @@ I would like to thank everyone from the Lakens laboratory group for their input 
 
 The author of this manuscript is the author of the TOSTER package.
 Citations of this manuscript will benefit his citation count.
+
+# AI Use Disclosure
+
+During the preparation of the TOSTER package updates and this manuscript, the author used Claude Opus 4.5-4.7 (Anthropic) to assist with editing R code and drafting unit tests. For the manuscript text, Claude Opus was used only for targeted copy-editing — suggesting revisions to specific passages, catching typographical and grammatical errors, and identifying inconsistencies across sections. The manuscript was written by the author, and all AI-assisted output was reviewed, revised, and verified by the author, who takes full responsibility for the content of the package and the manuscript.
 
 ## Funding {-}
 
