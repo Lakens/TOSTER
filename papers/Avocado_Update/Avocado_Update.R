@@ -214,3 +214,133 @@ boot_smd_calc(formula = extra ~ group,
               alternative = "equivalence",
               null.value = c(-0.5,0.5))
 
+## -----------------------------------------------------------------------------
+z_cor_test(
+  x = bugs$LDLF,
+  y = bugs$LDHF,
+  method = "pearson",
+  alternative = "t")
+
+## -----------------------------------------------------------------------------
+res_boot_cor = boot_cor_test(
+  x = bugs$LDLF,
+  y = bugs$LDHF,
+  method = "pearson",
+  alternative = "equivalence",
+  null = 0.4)
+
+print(res_boot_cor)
+
+describe_htest(res_boot_cor)
+
+## -----------------------------------------------------------------------------
+compare_smd(smd1 = 0.95,
+            n1 = 25,
+            smd2 = 0.23,
+            n2 = 50,
+            paired = TRUE,
+            null = .25,
+            alternative = "equivalence")
+
+## -----------------------------------------------------------------------------
+compare_cor(r1 = 0.45,
+            df1 = 48,
+            r2 = 0.25,
+            df2 = 78,
+            alternative = "equivalence",
+            null = 0.25)
+
+## -----------------------------------------------------------------------------
+test1 = wilcox_TOST(formula = extra ~ group,
+                      data = sleep,
+                      paired = TRUE,
+                      eqb = .5)
+print(test1)
+
+## -----------------------------------------------------------------------------
+# symmetry plot for sleep paired differences
+d_sleep <- sleep$extra[sleep$group == 2] - sleep$extra[sleep$group == 1]
+m <- median(d_sleep)
+sorted <- sort(d_sleep)
+upper <- sorted[sorted > m] - m
+lower <- m - sorted[sorted < m]
+k <- min(length(upper), length(lower))
+sp_df <- data.frame(lower = sort(lower)[1:k], upper = sort(upper)[1:k])
+
+ggplot(sp_df, aes(x = lower, y = upper)) +
+  geom_point(size = 2) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed") +
+  coord_equal() +
+  labs(x = "Distance below median",
+       y = "Distance above median") +
+  theme_minimal()
+
+## -----------------------------------------------------------------------------
+bm_test = brunner_munzel(formula = extra ~ group,
+                         data = sleep,
+                         alternative = "equivalence",
+                         mu = c(0.3, 0.7))
+print(bm_test)
+
+## -----------------------------------------------------------------------------
+set.seed(4522)
+boot_t_test(formula = extra ~ group,
+            data = sleep,
+            paired = TRUE,
+            alternative = "equivalence",
+            mu = c(-0.5, 0.5),
+            R = 999)
+
+## -----------------------------------------------------------------------------
+set.seed(891111)
+test1 = boot_t_TOST(formula = extra ~ group,
+                    data = sleep,
+                    paired = TRUE,
+                    eqb = .5,
+                    R = 999)
+print(test1)
+
+## -----------------------------------------------------------------------------
+set.seed(8812)
+perm_t_test(formula = extra ~ group,
+            data = sleep,
+            paired = TRUE,
+            alternative = "equivalence",
+            mu = c(-0.5, 0.5),
+            R = 999)
+
+## ----error=FALSE--------------------------------------------------------------
+log_TOST(mpg ~ am, data = mtcars)
+
+## ----error=FALSE--------------------------------------------------------------
+boot_log_TOST(mpg ~ am, data = mtcars, R=999)
+
+## ----warning=FALSE, message=FALSE---------------------------------------------
+data("InsectSprays")
+aovtest = aov(count ~ spray, data = InsectSprays)
+anova(aovtest)
+
+
+## -----------------------------------------------------------------------------
+equ_ftest(Fstat = 34.70228,  df1 = 5, df2 = 66,  eqb = 0.35)
+
+## -----------------------------------------------------------------------------
+# Example using a purely within-subjects design
+# (Maxwell & Delaney, 2004, Chapter 12, Table 12.5, p. 578):
+library(afex)
+data(md_12.1)
+aovtest2 = aov_ez("id", "rt", md_12.1, within = c("angle", "noise"),
+       anova_table=list(correction = "none", es = "none"))
+equ_anova(aovtest2,
+          eqb = 0.35)
+
+## -----------------------------------------------------------------------------
+power_t_TOST(delta = 0, sd = 1, eqb = 0.5,
+             alpha = 0.05, power = 0.8,
+             type = "two.sample")
+
+## -----------------------------------------------------------------------------
+power_z_cor(rho = 0, power = 0.8,
+            null = 0.3, alpha = 0.05,
+            alternative = "equivalence")
+

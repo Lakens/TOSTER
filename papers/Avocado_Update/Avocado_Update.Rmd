@@ -8,9 +8,9 @@ author:
   email: caldwellaaron@uams.edu
 type: PREPRINT
 output:
-  papaja::apa6_docx: default
   rticles::tf_article:
     extra_dependencies: ["float"]
+  papaja::apa6_docx: default
 bibliography: interactcadsample.bib
 #appendix: appendix.tex
 abstract: |
@@ -35,6 +35,7 @@ header-includes: |
   \usepackage{hyperref}
   \usepackage[utf8]{inputenc}
   \def\tightlist{}
+  \providecommand{\pandocbounded}[1]{#1}
   \hypersetup{
     colorlinks=true,
     citecolor = cyan,
@@ -464,6 +465,10 @@ compare_cor(r1 = 0.45,
             null = 0.25)
 ```
 
+When raw data are available for both studies, `boot_compare_cor` provides a bootstrap alternative that avoids the distributional approximations underlying the Fisher z and Kraatz methods.
+
+The comparison functions `compare_smd` and `compare_cor` inherit the assumptions of the underlying effect size estimates they combine. Because both studies contribute to the comparison, violations in either study propagate into the test. When raw data are available, the bootstrap alternatives (`boot_compare_smd` and `boot_compare_cor`) are preferred because they avoid the Fisher z and related parametric approximations, which can be inaccurate particularly when effect sizes are large or sample sizes are modest. When only summary statistics are available, readers should report the diagnostic context of the original and replication studies where possible.
+
 \newpage
 
 **A note on argument names for equivalence bounds.** The equivalence bound argument is named differently across TOSTER functions for historical and compatibility reasons: `eqb` in `t_TOST`, `wilcox_TOST`, `equ_ftest`, and `equ_anova`; `mu` in `simple_htest`, `brunner_munzel`, `boot_t_test`, and `perm_t_test` (for compatibility with base R's `t.test`); and `null` in `compare_smd` and `z_cor_test`. Despite the different names, the interpretation is the same: the bound(s) defining the region of practical equivalence.
@@ -493,6 +498,34 @@ print(test1)
 ```
 
 Based on these results, we would conclude there is a significant difference and the results are also not equivalent. But again, the estimate we are testing is the pseudo-median, not the mean or median difference, so this conclusion may not be relevant to the research question at hand.
+
+#### Checking Assumptions
+
+The WMW tests assume independent observations and exchangeability under the null, the latter meaning that group labels carry no information about outcomes if there is no effect. For the interpretations discussed above to be clean, two additional assumptions matter. The location-shift assumption — that the two group distributions differ only in location, not shape — is what allows WMW results to be interpreted as a test of the median difference via the Hodges-Lehmann estimator. Violations are best diagnosed by overlaying the empirical cumulative density functions  of the two groups; under location shift, the curves are horizontal translations of each other, whereas crossing curves or varying horizontal gaps indicate violation. For the paired and one-sample signed-rank variants used in `wilcox_TOST` or `simple_htest`, the signed-rank procedure additionally requires that the difference distribution is symmetric around the null value for the pseudo-median to coincide with the mean or median difference. Asymmetry is readily checked with a symmetry plot of the paired differences (@fig-symmplot). As with the location-shift case, visible departures suggest that the test's output — the pseudo-median and associated p-value — does not map cleanly onto a hypothesis about central tendency.
+
+
+```{r }
+#| label: fig-symmplot
+#| echo: false
+#| fig.cap: "Symmetry plot of the paired differences from the sleep dataset, pairing each observation's distance above the median with the corresponding distance below. Under symmetry, points fall along the 45-degree reference line (dashed); systematic departures — points consistently above or below the line — indicate asymmetry. The signed-rank variant of WMW requires this symmetry for the pseudo-median to coincide with the mean or median of the differences."
+# symmetry plot for sleep paired differences
+d_sleep <- sleep$extra[sleep$group == 2] - sleep$extra[sleep$group == 1]
+m <- median(d_sleep)
+sorted <- sort(d_sleep)
+upper <- sorted[sorted > m] - m
+lower <- m - sorted[sorted < m]
+k <- min(length(upper), length(lower))
+sp_df <- data.frame(lower = sort(lower)[1:k], upper = sort(upper)[1:k])
+
+ggplot(sp_df, aes(x = lower, y = upper)) +
+  geom_point(size = 2) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed") +
+  coord_equal() +
+  labs(x = "Distance below median",
+       y = "Distance above median") +
+  theme_minimal()
+```
+
 
 ### Brunner-Munzel Test
 
