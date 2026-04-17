@@ -597,6 +597,10 @@ print(test1)
 
 The bootstrapped SMDs are a useful feature in their own right. Analytic confidence intervals for standardized effect sizes rely on approximations, which assume normality and can behave poorly with small or skewed samples. Bootstrap intervals for SMDs sidestep these assumptions by resampling the full estimation pipeline, yielding intervals that inherit the robustness properties of the bootstrap itself.
 
+#### Checking Assumptions
+
+The bootstrap t-test makes fewer distributional assumptions than its parametric counterpart but is not assumption-free. It requires independent observations and assumes the empirical distribution is a reasonable stand-in for the population distribution. The latter is an assumption that holds better in moderate-to-large samples than in small ones. The studentized bootstrap is reasonably robust to skewness and heavy tails, but remains sensitive to outliers and other high-influence observations, which can be drawn repeatedly across replicates and disproportionately shape the bootstrap distribution. Useful visual checks include the distribution of the data (histograms, boxplots) to identify extreme values, the bootstrap distribution itself to flag problematic skewness or gaps, and the jackknife-after-bootstrap plot to identify individual observations that dominate the bootstrap variability. The `tr` argument for trimmed means provides a straightforward robustness option when outliers are a concern. Diagnostic workflows for all three designs are demonstrated in the online supplement. As with the parametric t-test, these checks reflect assumptions that are relaxed relative to normal-theory inference but not eliminated.
+
 ### Permutation t-test
 
 When `R = NULL`, the function enumerates all possible permutations for an exact test; otherwise, it draws R random permutations with the "+1" correction [@phipson2010]. By default the test is studentized (`perm_se = TRUE`), consistent with the recommendations discussed in the methods section above. The `perm_se = FALSE` option is available primarily to match the behavior of other permutation test packages that do not studentize by default.
@@ -612,6 +616,10 @@ perm_t_test(formula = extra ~ group,
 ```
 
 Running the bootstrap and permutation equivalence tests on the same paired sleep data using matching equivalence bounds produces broadly similar conclusions, as would be expected. The two approaches can, however, diverge in small samples, under strong heteroscedasticity, or in the presence of influential outliers, which is where the choice between them becomes substantively important. Users interested in robustness to outliers can additionally supply the `tr` argument to either function to use trimmed means, preserving the mean-based interpretation while downweighting extreme observations.
+
+#### Checking Assumptions
+
+The permutation t-test carries different assumptions depending on design. For the two-sample case, the studentized version is valid under exchangeability of observations across groups under the null and provides asymptotic validity even when variances differ between groups. For paired and one-sample designs, the sign-flip procedure additionally requires that the distribution of differences (or one-sample observations) is symmetric around the null value; asymmetry makes the test approximate rather than exact, though studentization provides some asymptotic protection. Symmetry is a commonly overlooked assumption for paired permutation tests and is easily checked with a symmetry plot of the differences, as demonstrated for the WMW signed-rank case above. For two-sample designs, overlaid empirical cumulative density functions and separate density plots help assess whether group shapes are comparable enough for exchangeability under the null to be credible. Diagnostic workflows for all three designs are demonstrated in the online supplement. As with the bootstrap, these checks reflect assumptions that are relaxed relative to parametric inference but not eliminated.
 
 \newpage
 
@@ -641,6 +649,10 @@ boot_log_TOST(mpg ~ am, data = mtcars, R=999)
 
 From this analysis, we would conclude there is a significant effect that is not practically equivalent.
 
+### Checking Assumptions
+
+The log-transformed methods inherit the assumptions of the underlying test applied to the transformed data. The `log_TOST` function carries forward the t-test assumptions, and `boot_log_TOST` carries forward the bootstrap t-test assumptions. What changes is where those assumptions need to hold. Normality, symmetry, and homogeneity of variance should be assessed on the log scale rather than the original scale, since that is where inference takes place. The same visual diagnostics apply just computed on log-transformed data. This points to a broader practical use of log transformation. When the symmetry assumption of the sign-flip permutation test is violated because paired differences are right-skewed on the original scale, the differences of logs are often approximately symmetric, and `perm_t_test` on log-transformed values becomes a reasonable option. In such cases the equivalence bounds should be specified on the log scale and interpreted as log ratios (or sympercents). As with the parametric and bootstrap t-tests, assumptions are relaxed by the transformation but not eliminated --— they are simply moved to a different scale.
+
 \newpage
 
 # Equivalence Testing with ANOVAs
@@ -648,6 +660,8 @@ From this analysis, we would conclude there is a significant effect that is not 
 Many researchers use ANOVA as an omnibus test before inspecting pairwise comparisons, particularly in factorial designs. As @Campbell_2021 note, the lack of a significant ANOVA result does not indicate that a factor has no effect. Equivalence testing for ANOVAs addresses this directly by asking: can we reject the hypothesis that the partial $\eta^2$ exceeds a specified bound?
 
 The equivalence test uses the non-central *F* distribution. The non-centrality parameter is computed from the equivalence bound and the degrees of freedom, and the *p*-value is obtained from the cumulative distribution function of the non-central *F*-value. I have extended the approach of @Campbell_2021 --- who proposed equivalence testing for one-way ANOVAs --- to accommodate multi-factor and factorial designs by generalizing the non-centrality parameter calculation. The full derivation is described in the package documentation; here we demonstrate usage.
+
+The equivalence test inherits the standard ANOVA assumptions which should be checked on the fitted model itself rather than on the equivalence output. The `performance::check_model()` function provides a comprehensive visual diagnostic suite for most linear model objects in R on a single call; the online supplement demonstrates its use.
 
 ## Example with Summary Statistics
 

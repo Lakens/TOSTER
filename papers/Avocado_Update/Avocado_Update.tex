@@ -790,13 +790,13 @@ requiring these assumptions.
 ##  g[rm]=('1'-'2')/SD_rm)
 ## 
 ## data:  extra by group
-## z-observed = -0.78495, p-value = 0.8954
+## z-observed = -0.78495, p-value = 0.906
 ## alternative hypothesis: equivalence
 ## null values:
 ## lower bound upper bound 
 ##        -0.5         0.5 
 ## 90 percent confidence interval:
-##  -1.3435525 -0.4387292
+##  -1.3479445 -0.4457752
 ## sample estimates:
 ## SMD (g[rm]) 
 ##  -0.7513666
@@ -879,13 +879,13 @@ objects that integrate with the helper functions described above.
 ##  Bootstrapped Pearson's product-moment correlation (BCa)
 ## 
 ## data:  bugs$LDLF and bugs$LDHF
-## N = 91, p-value = 0.9838
+## N = 91, p-value = 0.9808
 ## alternative hypothesis: equivalence
 ## null values:
 ## correlation correlation 
 ##         0.4        -0.4 
 ## 90 percent confidence interval:
-##  0.4443340 0.6923365
+##  0.4299380 0.6853442
 ## sample estimates:
 ##         r 
 ## 0.5767783
@@ -898,7 +898,7 @@ objects that integrate with the helper functions described above.
 \end{Shaded}
 
 \begin{verbatim}
-## [1] "The Bootstrapped Pearson's product-moment correlation (BCa) is not statistically significant (p = 0.984, r = 0.577, 90% C.I.[0.444, 0.692]) at a 0.05 alpha-level. The null hypothesis cannot be rejected. At the desired error rate, it cannot be stated that the true correlation is between 0.4 and -0.4."
+## [1] "The Bootstrapped Pearson's product-moment correlation (BCa) is not statistically significant (p = 0.981, r = 0.577, 90% C.I.[0.43, 0.685]) at a 0.05 alpha-level. The null hypothesis cannot be rejected. At the desired error rate, it cannot be stated that the true correlation is between 0.4 and -0.4."
 \end{verbatim}
 
 If only summary statistics are available, an approximate method is
@@ -1152,6 +1152,8 @@ The signed-rank variant of WMW requires this symmetry for the
 pseudo-median to coincide with the mean or median of the differences.}
 \end{figure}
 
+\newpage
+
 \subsubsection{Brunner-Munzel Test}\label{brunner-munzel-test}
 
 The Brunner-Munzel test \citep{brunner2000} estimates the relative
@@ -1219,6 +1221,27 @@ scale via \texttt{mu}. Results can be reported on different scales
 ## P('1'>'2') + .5*P('1'='2') 
 ##                      0.255
 \end{verbatim}
+
+\paragraph{Checking Assumptions}\label{checking-assumptions-4}
+
+The Brunner-Munzel test has unusually light assumption requirements. It
+requires independent observations within and between groups, and (for
+the t-approximation used by default) sample sizes sufficient for the
+asymptotic approximation to be reasonable. That's essentially it. Unlike
+WMW, there is no location-shift requirement for the test to be
+interpretable as a hypothesis about location, and unlike the
+proportional-odds framing of WMW as a score test from an ordinal
+regression model, no constant-odds-ratio assumption is needed. The
+relative effect is defined directly from the two marginal distributions
+and carries the same interpretation ----- the probability that a random
+observation from one group exceeds one from the other ----- regardless
+of whether the distributions are symmetric, skewed, unimodal, or shaped
+however they happen to be. Visual inspection of the group distributions
+remains useful for understanding the data and for choosing a reporting
+scale, but there is no distributional assumption that these checks are
+verifying. The studentized permutation variant
+(\texttt{method\ =\ "perm"}) is worth considering in small samples,
+where the t-approximation may be less trustworthy.
 
 \newpage
 
@@ -1408,6 +1431,28 @@ assumptions by resampling the full estimation pipeline, yielding
 intervals that inherit the robustness properties of the bootstrap
 itself.
 
+\paragraph{Checking Assumptions}\label{checking-assumptions-5}
+
+The bootstrap t-test makes fewer distributional assumptions than its
+parametric counterpart but is not assumption-free. It requires
+independent observations and assumes the empirical distribution is a
+reasonable stand-in for the population distribution. The latter is an
+assumption that holds better in moderate-to-large samples than in small
+ones. The studentized bootstrap is reasonably robust to skewness and
+heavy tails, but remains sensitive to outliers and other high-influence
+observations, which can be drawn repeatedly across replicates and
+disproportionately shape the bootstrap distribution. Useful visual
+checks include the distribution of the data (histograms, boxplots) to
+identify extreme values, the bootstrap distribution itself to flag
+problematic skewness or gaps, and the jackknife-after-bootstrap plot to
+identify individual observations that dominate the bootstrap
+variability. The \texttt{tr} argument for trimmed means provides a
+straightforward robustness option when outliers are a concern.
+Diagnostic workflows for all three designs are demonstrated in the
+online supplement. As with the parametric t-test, these checks reflect
+assumptions that are relaxed relative to normal-theory inference but not
+eliminated.
+
 \subsubsection{Permutation t-test}\label{permutation-t-test}
 
 When \texttt{R\ =\ NULL}, the function enumerates all possible
@@ -1457,6 +1502,26 @@ between them becomes substantively important. Users interested in
 robustness to outliers can additionally supply the \texttt{tr} argument
 to either function to use trimmed means, preserving the mean-based
 interpretation while downweighting extreme observations.
+
+\paragraph{Checking Assumptions}\label{checking-assumptions-6}
+
+The permutation t-test carries different assumptions depending on
+design. For the two-sample case, the studentized version is valid under
+exchangeability of observations across groups under the null and
+provides asymptotic validity even when variances differ between groups.
+For paired and one-sample designs, the sign-flip procedure additionally
+requires that the distribution of differences (or one-sample
+observations) is symmetric around the null value; asymmetry makes the
+test approximate rather than exact, though studentization provides some
+asymptotic protection. Symmetry is a commonly overlooked assumption for
+paired permutation tests and is easily checked with a symmetry plot of
+the differences, as demonstrated for the WMW signed-rank case above. For
+two-sample designs, overlaid empirical cumulative density functions and
+separate density plots help assess whether group shapes are comparable
+enough for exchangeability under the null to be credible. Diagnostic
+workflows for all three designs are demonstrated in the online
+supplement. As with the bootstrap, these checks reflect assumptions that
+are relaxed relative to parametric inference but not eliminated.
 
 \newpage
 
@@ -1558,6 +1623,26 @@ The bootstrap version uses the same bootstrap methods as
 From this analysis, we would conclude there is a significant effect that
 is not practically equivalent.
 
+\subsubsection{Checking Assumptions}\label{checking-assumptions-7}
+
+The log-transformed methods inherit the assumptions of the underlying
+test applied to the transformed data. The \texttt{log\_TOST} function
+carries forward the t-test assumptions, and \texttt{boot\_log\_TOST}
+carries forward the bootstrap t-test assumptions. What changes is where
+those assumptions need to hold. Normality, symmetry, and homogeneity of
+variance should be assessed on the log scale rather than the original
+scale, since that is where inference takes place. The same visual
+diagnostics apply just computed on log-transformed data. This points to
+a broader practical use of log transformation. When the symmetry
+assumption of the sign-flip permutation test is violated because paired
+differences are right-skewed on the original scale, the differences of
+logs are often approximately symmetric, and \texttt{perm\_t\_test} on
+log-transformed values becomes a reasonable option. In such cases the
+equivalence bounds should be specified on the log scale and interpreted
+as log ratios (or sympercents). As with the parametric and bootstrap
+t-tests, assumptions are relaxed by the transformation but not
+eliminated ----- they are simply moved to a different scale.
+
 \newpage
 
 \section{Equivalence Testing with
@@ -1579,6 +1664,13 @@ equivalence testing for one-way ANOVAs --- to accommodate multi-factor
 and factorial designs by generalizing the non-centrality parameter
 calculation. The full derivation is described in the package
 documentation; here we demonstrate usage.
+
+The equivalence test inherits the standard ANOVA assumptions which
+should be checked on the fitted model itself rather than on the
+equivalence output. The \texttt{performance::check\_model()} function
+provides a comprehensive visual diagnostic suite for most linear model
+objects in R on a single call; the online supplement demonstrates its
+use.
 
 \subsection{Example with Summary
 Statistics}\label{example-with-summary-statistics}
@@ -1801,7 +1893,8 @@ their input and suggestions.
 The author of this manuscript is the author of the TOSTER package.
 Citations of this manuscript will benefit his citation count.
 
-\section{AI Use Disclosure}\label{ai-use-disclosure}
+\subsection*{AI Use Disclosure}\label{ai-use-disclosure}
+\addcontentsline{toc}{subsection}{AI Use Disclosure}
 
 During the preparation of the TOSTER package updates and this
 manuscript, the author used Claude Opus 4.5-4.7 (Anthropic) to assist
