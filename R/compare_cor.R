@@ -39,13 +39,19 @@
 #' * For minimal effect testing ("minimal.effect"), it determines whether the difference falls
 #'   outside the specified bounds.
 #'
+#' **Note on Fisher's z transformation of bounds:** When `method = "fisher"`, the `null` values
+#' (equivalence bounds) are specified on the **correlation scale** and are internally converted to
+#' the Fisher z scale via `atanh()`. For example, `null = 0.4` is treated as r = 0.4, which maps
+#' to z = 0.4236. If you want bounds expressed directly in Fisher-z units, you should back-transform
+#' them to the correlation scale first using `tanh()` before passing them to this function.
+#'
 #' When performing equivalence or minimal effect testing:
 #' * If a single value is provided for `null`, symmetric bounds ±value will be used
 #' * If two values are provided for `null`, they will be used as the lower and upper bounds
 #'
 #' @return A list with class "htest" containing the following components:
 #'
-#' * **statistic**: z-score with name "z"
+#' * **statistic**: standardized z-score (i.e., the test statistic divided by its standard error) with name "z"
 #' * **p.value**: numeric scalar containing the p-value for the test under the null hypothesis
 #' * **estimate**: difference in correlation coefficients between studies
 #' * **null.value**: the specified hypothesized value(s) for the null hypothesis
@@ -138,10 +144,10 @@ compare_cor = function(r1,
         phi = p_from_z(zhi/z_se, alternative = 'less')
         if(phi >= plo){
           pval = phi
-          z = zhi
+          z = zhi / z_se
         } else {
           pval = plo
-          z = zlo
+          z = zlo / z_se
         }
       }
       if(alternative == "minimal.effect"){
@@ -151,10 +157,10 @@ compare_cor = function(r1,
         phi = p_from_z(zhi/z_se, alternative = 'greater')
         if(phi <= plo){
           pval = phi
-          z = zhi
+          z = zhi / z_se
         } else {
           pval = plo
-          z = zlo
+          z = zlo / z_se
         }
       }
     } else {
@@ -178,10 +184,10 @@ compare_cor = function(r1,
         phi = p_from_z(zhi/se, alternative = 'less')
         if(phi >= plo){
           pval = phi
-          z = zhi
+          z = zhi / se
         } else {
           pval = plo
-          z = zlo
+          z = zlo / se
         }
       }
       if(alternative == "minimal.effect"){
@@ -191,10 +197,10 @@ compare_cor = function(r1,
         phi = p_from_z(zhi/se, alternative = 'greater')
         if(phi <= plo){
           pval = phi
-          z = zhi
+          z = zhi / se
         } else {
           pval = plo
-          z = zlo
+          z = zlo / se
         }
       }
     } else{

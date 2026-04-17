@@ -177,6 +177,7 @@
 #'   bootstrap confidence intervals, [brunner_munzel()] with
 #'   `test_method = "perm"` for robust TOST on the probability scale.
 #' @name boot_ses_test
+#' @importFrom stats runif
 #' @export boot_ses_test
 
 boot_ses_test <- function(x, ...,

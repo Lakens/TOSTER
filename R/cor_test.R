@@ -148,15 +148,28 @@ z_cor_test = function(x,
       intmult = c(NA,1)
     }
   }
-  r_xy = cor(x,y,
-             method = method)
+  DNAME <- paste(deparse(substitute(x)), "and", deparse(substitute(y)))
   df = data.frame(x=x,
                   y=y)
   df = na.omit(df)
+  x = df$x
+  y = df$y
   n_obs = nrow(df)
+  # minimum sample size for SE formulas --------
+  # Pearson/Spearman SE use (n - 3); Kendall uses (n - 4).
+  min_n <- if (method == "kendall") 5 else 4
+  if (n_obs < min_n) {
+    stop("Not enough complete cases to compute the ",
+         method, " correlation standard error: ",
+         "found ", n_obs, " complete observation(s), ",
+         "need at least ", min_n, ". ",
+         "Check for missing values in x/y.",
+         call. = FALSE)
+  }
+  r_xy = cor(x,y,
+             method = method)
 
   z_xy = rho_to_z(r_xy)
-  DNAME <- paste(deparse(substitute(x)), "and", deparse(substitute(y)))
   NVAL = null
   znull = rho_to_z(null)
   # capture raw method string before overwrite --------
@@ -189,10 +202,23 @@ z_cor_test = function(x,
 
   # jackknife SE --------
   if (se_method == "jackknife") {
+    if (!is.finite(r_xy) || abs(r_xy) >= 1) {
+      stop("Jackknife SE cannot be computed when |r| = 1 ",
+           "(Fisher z-transform is infinite). ",
+           "Use se_method = 'analytic' instead.",
+           call. = FALSE)
+    }
     jk_cors <- vapply(seq_len(n_obs), function(i) {
       rho_to_z(cor(x[-i], y[-i], method = method_raw))
     }, numeric(1))
     z.se <- sqrt(((n_obs - 1) / n_obs) * sum((jk_cors - mean(jk_cors))^2))
+    if (!is.finite(z.se) || z.se <= 0) {
+      stop("Jackknife SE cannot be computed: result is non-finite or zero. ",
+           "This commonly occurs when |r| is numerically at or near 1 ",
+           "(e.g. strictly monotonic data under Spearman/Kendall). ",
+           "Use se_method = 'analytic' instead.",
+           call. = FALSE)
+    }
   }
 
   # append SE label to method name --------
