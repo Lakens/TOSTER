@@ -56,7 +56,9 @@ knitr::opts_chunk$set(
   warning = FALSE,
   message = FALSE,
   echo = TRUE,
-  fig.pos = "H"
+  fig.pos = "H",
+  fig.width = 6,
+  fig.height = 4
 )
 knitr::knit_hooks$set(purl = knitr::hook_purl)
 library(TOSTER)
@@ -507,6 +509,8 @@ The WMW tests assume independent observations and exchangeability under the null
 ```{r }
 #| label: symmplot
 #| echo: false
+#| fig.height: 5.5
+#| fig.width: 5.5
 #| fig.cap: "\\label{fig:symmplot}Symmetry plot of the paired differences from the sleep dataset, pairing each observation's distance above the median with the corresponding distance below. Under symmetry, points fall along the 45-degree reference line (dashed); systematic departures — points consistently above or below the line — indicate asymmetry. The signed-rank variant of WMW requires this symmetry for the pseudo-median to coincide with the mean or median of the differences."
 # symmetry plot for sleep paired differences
 d_sleep <- sleep$extra[sleep$group == 2] - sleep$extra[sleep$group == 1]
@@ -516,16 +520,18 @@ upper <- sorted[sorted > m] - m
 lower <- m - sorted[sorted < m]
 k <- min(length(upper), length(lower))
 sp_df <- data.frame(lower = sort(lower)[1:k], upper = sort(upper)[1:k])
+mx <- max(sp_df$lower, sp_df$upper)
 
 ggplot(sp_df, aes(x = lower, y = upper)) +
   geom_point(size = 2) +
   geom_abline(intercept = 0, slope = 1, linetype = "dashed") +
-  coord_equal() +
+  coord_equal(xlim = c(0, mx), ylim = c(0, mx)) +
   labs(x = "Distance below median",
        y = "Distance above median") +
   theme_minimal()
 ```
 
+\newpage
 
 ### Brunner-Munzel Test
 
@@ -542,6 +548,10 @@ bm_test = brunner_munzel(formula = extra ~ group,
                          mu = c(0.3, 0.7))
 print(bm_test)
 ```
+
+#### Checking Assumptions
+
+The Brunner-Munzel test has unusually light assumption requirements. It requires independent observations within and between groups, and (for the t-approximation used by default) sample sizes sufficient for the asymptotic approximation to be reasonable. That's essentially it. Unlike WMW, there is no location-shift requirement for the test to be interpretable as a hypothesis about location, and unlike the proportional-odds framing of WMW as a score test from an ordinal regression model, no constant-odds-ratio assumption is needed. The relative effect is defined directly from the two marginal distributions and carries the same interpretation --— the probability that a random observation from one group exceeds one from the other --— regardless of whether the distributions are symmetric, skewed, unimodal, or shaped however they happen to be. Visual inspection of the group distributions remains useful for understanding the data and for choosing a reporting scale, but there is no distributional assumption that these checks are verifying. The studentized permutation variant (`method = "perm"`) is worth considering in small samples, where the t-approximation may be less trustworthy.
 
 
 \newpage
@@ -738,7 +748,7 @@ I would like to thank everyone from the Lakens laboratory group for their input 
 The author of this manuscript is the author of the TOSTER package.
 Citations of this manuscript will benefit his citation count.
 
-# AI Use Disclosure
+## AI Use Disclosure {-}
 
 During the preparation of the TOSTER package updates and this manuscript, the author used Claude Opus 4.5-4.7 (Anthropic) to assist with editing R code and drafting unit tests. For the manuscript text, Claude Opus was used only for targeted copy-editing — suggesting revisions to specific passages, catching typographical and grammatical errors, and identifying inconsistencies across sections. The manuscript was written by the author, and all AI-assisted output was reviewed, revised, and verified by the author, who takes full responsibility for the content of the package and the manuscript.
 

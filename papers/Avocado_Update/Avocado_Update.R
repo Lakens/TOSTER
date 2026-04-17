@@ -3,7 +3,9 @@ knitr::opts_chunk$set(
   warning = FALSE,
   message = FALSE,
   echo = TRUE,
-  fig.pos = "H"
+  fig.pos = "H",
+  fig.width = 6,
+  fig.height = 4
 )
 knitr::knit_hooks$set(purl = knitr::hook_purl)
 library(TOSTER)
@@ -266,11 +268,12 @@ upper <- sorted[sorted > m] - m
 lower <- m - sorted[sorted < m]
 k <- min(length(upper), length(lower))
 sp_df <- data.frame(lower = sort(lower)[1:k], upper = sort(upper)[1:k])
+mx <- max(sp_df$lower, sp_df$upper)
 
 ggplot(sp_df, aes(x = lower, y = upper)) +
   geom_point(size = 2) +
   geom_abline(intercept = 0, slope = 1, linetype = "dashed") +
-  coord_equal() +
+  coord_equal(xlim = c(0, mx), ylim = c(0, mx)) +
   labs(x = "Distance below median",
        y = "Distance above median") +
   theme_minimal()
