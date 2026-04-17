@@ -280,6 +280,10 @@ res4
 
 The same interface handles paired designs by setting `paired = TRUE`. Standardized mean differences are reported automatically; Hedges's correction is applied by default but can be toggled with `bias_correction`, and Glass's delta can be requested via the `glass` argument. Setting equivalence bounds in SMD units (via `eqbound_type = "SMD"`) is possible but discouraged because the bound becomes dependent on sample variance (see the Standardized Effect Sizes section below).
 
+## Checking Assumptions 
+
+The parametric t-tests implemented in `t_TOST` assume independent observations, approximately normal residuals (or differences, in the paired and one-sample cases), and, for Student's form, equal variances between groups; Welch's correction relaxes the equal-variance assumption and is the default. The residual normality assumption matters most in small samples, where the central limit theorem provides limited protection. Visual diagnostics are generally more informative than formal tests: QQ plots of residuals or differences for normality, side-by-side boxplots or density overlays for variance comparison, and inspection of residual plots or boxplots for extreme or influential observations. A worked diagnostic workflow for each design is provided in the online supplement. When assumptions are seriously in doubt, the bootstrap and permutation alternatives discussed in later sections provide valid inference under relaxed --— though not eliminated —-- distributional requirements.
+
 \newpage
 
 ## Using Summary Statistics
@@ -302,7 +306,7 @@ res_tsum
 
 The `t_TOST` function is designed to be comprehensive in that it runs three tests, computes standardized effect sizes, and produces verbose output. This is useful for exploration or situations where researchers *always* want to pair a traditional nil significance test with an equivalence test. However, sometimes a researcher has a single specific hypothesis to test, or simply wants less verbose output (e.g., SMD calculation is not wanted). The `simple_htest` function provides a lighter interface for this purpose. It returns a standard R `htest` object --- the same class returned by `t.test()` and `wilcox.test()` --- but with expanded `alternative` options that include `"equivalence"` and `"minimal.effect"`. This means researchers can perform equivalence testing with the same familiar interface they already use for standard hypothesis tests^[In fact, users can mostly replace `t.test()` and `wilcox.test()` with `simple_htest` as it also allows for the standard alternative hypotheses of two-sided, greater, less. If you have a hypothesis that would traditionally utilize a t-test or Wilcoxon-Mann-Whitney (WMW) test, then you can jump right to using `simple_htest` in TOSTER].
 
-Alongside `simple_htest`, a set of helper functions makes it easy to work with any `htest` object: `as_htest` converts verbose TOST output to the simpler format, `describe_htest` generates formatted text for reporting, `df_htest` converts results to data frames for tabulation, and `plot_htest_est` produces estimate plots with equivalence bounds.
+Alongside `simple_htest`, a set of helper functions makes it easy to work with any `htest` object: `as_htest` converts verbose TOST output to the simpler format, `describe_htest` generates formatted text for reporting, `df_htest` converts results to data frames for tabulation, and `plot_htest_est` produces estimate plots with equivalence bounds. Checking assumptions would follow the same workflow as `t_TOST`, as both are using t-tests, as discussed in the online supplement.
 
 ## The simplified function
 
@@ -399,7 +403,6 @@ boot_smd_calc(formula = extra ~ group,
 Researchers sometimes need to test that a correlation is practically zero. The `z_cor_test` function provides a parametric approach using the Fisher z-transformation. However, this is only an approximate method and is generally *not recommended* as the primary inferential tool for equivalence testing on correlations.
 
 ```{r}
-
 z_cor_test(
   x = bugs$LDLF,
   y = bugs$LDHF,
@@ -423,6 +426,10 @@ describe_htest(res_boot_cor)
 ```
 
 If only summary statistics are available, an approximate method is provided through `corsum_test`, which uses the Fisher z-transformation to compute confidence intervals and p-values.
+
+### Checking Assumptions
+
+Correlation-based inference in `z_cor_test` and `boot_cor_test` assumes independent paired observations and, for Pearson's coefficient, a roughly linear relationship between variables with approximately symmetric marginal distributions; Spearman and Kendall relax the linearity requirement to monotonicity, making them appropriate when the relationship is non-linear but directionally consistent. The bootstrap version in `boot_cor_test` further relaxes distributional assumptions about the marginals but remains sensitive to observations that exert disproportionate influence on the estimate. Visual diagnostics are the primary tools: scatterplots with a loess smoother to assess linearity or monotonicity, marginal density plots or QQ plots to check distributional shape, and jackknife-after-bootstrap plots to identify individual observations driving bootstrap variability. A worked diagnostic workflow is provided in the online supplement.
 
 ## Comparing Standardized Effect Sizes Between Studies
 

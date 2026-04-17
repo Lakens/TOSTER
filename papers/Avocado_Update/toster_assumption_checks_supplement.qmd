@@ -1,0 +1,810 @@
+---
+title: "Diagnostic Checks for Equivalence Tests"
+subtitle: "Supplement to the 'Updated TOSTER' Manuscript"
+author: "Aaron R. Caldwell"
+format:
+  pdf:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    colorlinks: true
+    geometry:
+      - margin=1in
+execute:
+  warning: false
+  message: false
+  fig-width: 6
+  fig-height: 4
+---
+
+# Introduction
+
+Equivalence testing and its companion procedures are often described as robust or assumption-light, but the tests implemented in TOSTER rely on conditions that can fail in practice. This supplement provides diagnostic workflows for checking those assumptions, covering parametric t-tests, bootstrap and permutation resamples, parametric and bootstrap correlations, rank-based tests (Wilcoxon-Mann-Whitney and Brunner-Munzel), and a brief pointer to ANOVA-style designs.
+
+These diagnostics are intentionally not built into TOSTER itself. Keeping the package dependency-light is a deliberate design choice, and several of the most useful diagnostics (notably the jackknife-after-bootstrap, ECDF overlays, and Brant's test of proportional odds) require specialized packages or the `boot` package's internal data structures rather than TOSTER's `htest` output. Readers who want these checks should run them separately, as demonstrated below. For ANOVA-type designs, `performance::check_model()` provides a one-call suite of diagnostic plots that we recommend rather than re-implementing here.
+
+The examples use several datasets: `sleep` for the paired and one-sample cases, `ToothGrowth` for the two-sample and rank-based cases, and `mtcars` (columns `mpg` and `wt`) for the correlation section. For each, we show diagnostics on the observed data and, where instructive, compare with a deliberately problematic simulated case so readers can see what failing diagnostics look like.
+
+```{r setup}
+# setup --------
+library(TOSTER)
+library(boot)
+library(lawstat)
+library(ggplot2)
+library(dplyr)
+library(MASS)
+library(brant)
+library(performance)
+library(halfmoon)
+
+set.seed(42)
+```
+
+# Parametric t-Test Diagnostics
+
+The parametric t-test assumes independent observations, approximately normal residuals, and (for Student's form) equal variances across groups. The normality requirement is most critical at small `n`, where the central limit theorem offers little protection; by `n` in the mid-twenties per group the t distribution is already a reasonable approximation for moderately non-normal data. Welch's form relaxes the equal-variance assumption and is the default in most modern workflows. The diagnostics below apply regardless of whether the test is used for standard null/nil-hypothesis significance testing or for TOST equivalence testing; equivalence bounds do not alter the distributional assumptions of the test statistic.
+
+## Two-Sample Parametric t-Test
+
+We use the same `ToothGrowth` subset (dose of 1 mg, comparing `VC` with `OJ`) that later sections reuse.
+
+```{r}
+# two sample data --------
+tg <- ToothGrowth |> filter(dose == 1)
+tg_vc <- tg$len[tg$supp == "VC"]
+tg_oj <- tg$len[tg$supp == "OJ"]
+```
+
+### Residuals from the equivalent linear model
+
+The two-sample t-test is equivalent to a linear model with a single dichotomous predictor, so residuals from that fit are the right target for the normality check.
+
+```{r}
+# two sample residuals --------
+tg_fit <- lm(len ~ supp, data = tg)
+
+ggplot(data.frame(resid = resid(tg_fit)), aes(sample = resid)) +
+  stat_qq() + stat_qq_line() +
+  labs(title = "QQ plot of residuals (two-sample t-test)",
+       x = "Theoretical quantiles", y = "Residuals") +
+  theme_minimal()
+```
+
+### Shapiro-Wilk on residuals
+
+```{r}
+# shapiro residuals --------
+shapiro.test(resid(tg_fit))
+```
+
+Shapiro-Wilk is a useful supplement to the QQ plot but not a substitute. In very small samples it has low power and rarely rejects even for clearly non-normal data; in large samples it becomes over-sensitive and flags minor, inconsequential deviations. The visual check should drive the decision, with the formal test as a secondary input.
+
+### Variance homogeneity
+
+```{r}
+# levene two sample --------
+lawstat::levene.test(tg$len, tg$supp, location = "median")
+```
+
+The median-centered Brown-Forsythe variant is preferred over the classical mean-centered Levene test because it is itself robust to non-normality. A small p-value here argues against Student's t-test and for Welch's form; it does not invalidate the test in any deeper sense.
+
+### Cook's distance
+
+```{r, fig.height=4}
+# cooks d two sample --------
+cd_tg <- cooks.distance(tg_fit)
+plot(cd_tg, type = "h",
+     main = "Cook's distance (two-sample)",
+     ylab = "Cook's distance", xlab = "Observation index")
+abline(h = 4 / length(cd_tg), col = "red", lty = 2)
+```
+
+Cook's distance measures how much the fitted values change when an observation is removed, combining leverage and residual magnitude into a single number. In the balanced two-sample design used here, leverage is constant across observations, so Cook's D reduces to a monotone transformation of the standardized residual and adds little beyond a residual plot. It becomes more informative in unbalanced designs and in regression settings where leverage varies meaningfully (see the correlation section).
+
+The `4/n` cutoff plotted above is a common heuristic, not a formal threshold, and should be read as a flag for closer inspection rather than a test.
+
+A critical caveat: for `n` below roughly 10 per group, Cook's D cutoffs are essentially meaningless. With so few observations every point has substantial influence on the estimate and there is no stable reference distribution to judge unusualness against. At these sample sizes the diagnostic is best understood as a sanity check for gross data-entry errors rather than a formal outlier test.
+
+## Paired-Sample Parametric t-Test
+
+The paired t-test is equivalent to a one-sample t-test on the difference scores, so the relevant normality assumption applies to the differences themselves. With `lm(d ~ 1)`, residuals equal deviations from the mean, which is why the QQ plot is shown directly on `d_paired`.
+
+```{r}
+# paired data --------
+d_paired <- sleep$extra[sleep$group == 2] - sleep$extra[sleep$group == 1]
+```
+
+```{r, fig.height=4}
+# paired parametric diagnostics --------
+ggplot(data.frame(d = d_paired), aes(sample = d)) +
+  stat_qq() + stat_qq_line() +
+  labs(title = "QQ plot of paired differences",
+       x = "Theoretical quantiles", y = "Differences") +
+  theme_minimal()
+
+shapiro.test(d_paired)
+
+d_fit <- lm(d_paired ~ 1)
+cd_d <- cooks.distance(d_fit)
+plot(cd_d, type = "h",
+     main = "Cook's distance (paired differences)",
+     ylab = "Cook's distance", xlab = "Observation index")
+abline(h = 4 / length(cd_d), col = "red", lty = 2)
+```
+
+The same small-`n` caveat from the two-sample case applies with extra force here: paired designs often have sample sizes well below 20, in which case the Cook's D plot is best read as a flag for extreme values rather than a formal influence test.
+
+## One-Sample Parametric t-Test
+
+Applied to `x_one`, the diagnostics mirror the paired case.
+
+```{r}
+# one sample data --------
+x_one <- sleep$extra[sleep$group == 1]
+```
+
+```{r, fig.height=4}
+# one sample parametric diagnostics --------
+ggplot(data.frame(x = x_one), aes(sample = x)) +
+  stat_qq() + stat_qq_line() +
+  labs(title = "QQ plot of one-sample observations",
+       x = "Theoretical quantiles", y = "Observations") +
+  theme_minimal()
+
+shapiro.test(x_one)
+
+x_fit <- lm(x_one ~ 1)
+cd_x <- cooks.distance(x_fit)
+plot(cd_x, type = "h",
+     main = "Cook's distance (one-sample)",
+     ylab = "Cook's distance", xlab = "Observation index")
+abline(h = 4 / length(cd_x), col = "red", lty = 2)
+```
+
+## Note on Log Transformation
+
+When residual diagnostics reveal right-skewness, as is common for reaction times, concentrations, and count-like outcomes, a log transformation often resolves skewness, stabilizes variance, and reduces the leverage of the most extreme observations simultaneously. Where that combination holds, analyzing on the log scale is usually preferable to switching to a rank-based or resampling-based test, because it preserves a parametric model with familiar properties.
+
+The interpretive cost is that the mean of the logged data is the log of the geometric mean, not of the arithmetic mean. Back-transforming the estimate yields a geometric mean (and, for two-group comparisons, a ratio of geometric means), which is usually the appropriate summary on the original scale when the log has stabilized the distribution. For equivalence testing, bounds specified on the log scale correspond to ratio bounds on the original scale. The classical bioequivalence bounds of 80 to 125 percent correspond to $\pm \log(1.25) \approx \pm 0.223$ on the log scale; users should specify `eqb` on the log scale and interpret results as ratios of geometric means.
+
+Other transformations (square-root, Box-Cox) share similar motivations, but the clean geometric-mean interpretation is specific to the log.
+
+```{r}
+# log transform example --------
+set.seed(99)
+x_lognormal <- rlnorm(30, meanlog = 1, sdlog = 0.5)
+y_lognormal <- rlnorm(30, meanlog = 1.1, sdlog = 0.5)
+
+# On log scale: bounds interpreted as log ratios
+# log(1.25) ~ 0.223 corresponds to the 80-125% bioequivalence bounds
+log_bound <- log(1.25)
+
+TOSTER::t_TOST(x = log(x_lognormal),
+               y = log(y_lognormal),
+               eqb = log_bound,
+               hypothesis = "EQU")
+```
+
+# Bootstrap t-Test Diagnostics
+
+The bootstrap t-test is asymptotically valid under mild conditions — primarily that the empirical distribution is a reasonable stand-in for the population distribution and that observations are independent within groups. These conditions are difficult to verify directly, but several diagnostics help identify cases where the bootstrap approximation is unreliable: influential observations that dominate resampling, extreme skewness in the bootstrap distribution, and small-sample instability.
+
+## Two-Sample Bootstrap
+
+We reuse the `ToothGrowth` subset (`tg`) introduced in the parametric section, comparing supplement types (`VC` vs `OJ`) at the 1 mg dose.
+
+### Check 1: Group-wise distributional inspection
+
+The studentized two-sample bootstrap tolerates unequal variances but still assumes shapes are comparable beyond location and scale. Dramatic shape differences (e.g., one group skewed, the other symmetric) are a warning sign.
+
+```{r}
+# group distributions --------
+ggplot(tg, aes(x = len, fill = supp)) +
+  geom_density(alpha = 0.5) +
+  labs(title = "Distribution of tooth length by supplement type",
+       x = "Length", y = "Density") +
+  theme_minimal()
+
+# Sample size, mean, sd, skewness by group
+tg |>
+  group_by(supp) |>
+  summarise(n = n(),
+            mean = mean(len),
+            sd = sd(len),
+            skewness = mean((len - mean(len))^3) / sd(len)^3)
+```
+
+### Check 2: Outlier identification
+
+Outliers are particularly problematic for the bootstrap because resampling with replacement means an extreme observation can be drawn multiple times within a single bootstrap sample, distorting the replicate distribution.
+
+```{r}
+# outlier check --------
+boxplot(len ~ supp, data = tg,
+        main = "Boxplots by group (outliers flagged)",
+        ylab = "Length")
+```
+
+If outliers are present, either investigate them substantively or consider the trimmed-means option (`tr` argument in `boot_t_test`), which reduces their influence while preserving the mean-based interpretation.
+
+Cook's distance from the equivalent linear model (covered in the parametric section above) provides a complementary leverage-based assessment, while the jackknife-after-bootstrap described next is specifically diagnostic of bootstrap-distribution sensitivity. The two checks answer related but distinct questions: Cook's D asks how much an observation moves the point estimate under a parametric fit, whereas the jackknife-after-bootstrap asks how much removing an observation shifts the resampled sampling distribution itself.
+
+### Check 3: Bootstrap distribution and jackknife-after-bootstrap
+
+The jackknife-after-bootstrap assesses how sensitive the bootstrap distribution is to individual observations. An observation whose removal dramatically shifts the bootstrap distribution is a leverage point that undermines bootstrap inference. This diagnostic requires running the bootstrap through the `boot` package directly.
+
+```{r, fig.height=5}
+# jackknife after bootstrap --------
+# Define the statistic: Welch t-statistic for mean difference
+welch_t <- function(data, indices) {
+  d <- data[indices, ]
+  x <- d$len[d$supp == "VC"]
+  y <- d$len[d$supp == "OJ"]
+  t_num <- mean(x) - mean(y)
+  t_den <- sqrt(var(x)/length(x) + var(y)/length(y))
+  t_num / t_den
+}
+
+# Stratified bootstrap preserves group sizes
+boot_out <- boot(data = tg,
+                 statistic = welch_t,
+                 R = 2000,
+                 strata = as.factor(tg$supp))
+
+# Bootstrap distribution
+plot(boot_out)
+
+# Jackknife-after-bootstrap
+jack.after.boot(boot_out,
+                main = "Jackknife-after-bootstrap")
+```
+
+In the jackknife-after-bootstrap plot, each vertical strip shows how the bootstrap distribution shifts when a particular observation is removed. Strips that visibly differ from the others flag influential points. Mild fluctuations across strips are expected; dramatic shifts are cause for concern.
+
+### Check 4: Replication stability
+
+Run the bootstrap twice with different seeds and a reasonable `R`. If intervals or p-values differ meaningfully, `R` is too small.
+
+```{r}
+# replication stability --------
+set.seed(1)
+r1 <- boot_t_test(formula = len ~ supp, data = tg, R = 2000)
+set.seed(2)
+r2 <- boot_t_test(formula = len ~ supp, data = tg, R = 2000)
+
+data.frame(run = c("seed 1", "seed 2"),
+           p_value = c(r1$p.value, r2$p.value),
+           ci_low = c(r1$conf.int[1], r2$conf.int[1]),
+           ci_high = c(r1$conf.int[2], r2$conf.int[2]))
+```
+
+For inference-grade results with tail-sensitive quantities (e.g., small p-values, narrow equivalence bounds), `R` in the range of 5,000–10,000 is often safer than the 999 used in quick demonstrations.
+
+## Paired-Sample Bootstrap
+
+For paired data, the bootstrap resamples the difference scores (`d_paired`, defined in the parametric section). The same checks apply, but on the differences rather than on the raw groups.
+
+### Distribution and outliers
+
+```{r}
+# paired diagnostics --------
+par(mfrow = c(1, 2))
+hist(d_paired, breaks = 8, main = "Difference scores",
+     xlab = "Group 2 - Group 1")
+abline(v = mean(d_paired), col = "red", lwd = 2)
+boxplot(d_paired, main = "Boxplot of differences")
+par(mfrow = c(1, 1))
+```
+
+### Jackknife-after-bootstrap on differences
+
+```{r, fig.height=5}
+# paired jackknife --------
+paired_t <- function(data, indices) {
+  d <- data[indices]
+  mean(d) / (sd(d) / sqrt(length(d)))
+}
+
+boot_paired <- boot(data = d_paired,
+                    statistic = paired_t,
+                    R = 2000)
+
+plot(boot_paired)
+jack.after.boot(boot_paired,
+                main = "Jackknife-after-bootstrap (paired differences)")
+```
+
+## One-Sample Bootstrap
+
+The one-sample case uses the same machinery as the paired case, applied to the raw observations (`x_one`, defined in the parametric section) rather than differences.
+
+### Distribution, outliers, and jackknife
+
+```{r, fig.height=5}
+# one sample diagnostics --------
+par(mfrow = c(1, 2))
+hist(x_one, breaks = 6, main = "One-sample observations", xlab = "extra")
+abline(v = mean(x_one), col = "red", lwd = 2)
+boxplot(x_one, main = "Boxplot")
+par(mfrow = c(1, 1))
+
+one_t <- function(data, indices) {
+  d <- data[indices]
+  mean(d) / (sd(d) / sqrt(length(d)))
+}
+
+boot_one <- boot(data = x_one,
+                 statistic = one_t,
+                 R = 2000)
+
+plot(boot_one)
+jack.after.boot(boot_one, main = "Jackknife-after-bootstrap (one-sample)")
+```
+
+With `n = 10`, leave-one-out influence is expected to be visible — this is the nature of small-sample bootstrap and one of the reasons permutation-based inference is often preferred in this regime.
+
+# Permutation t-Test Diagnostics
+
+The permutation t-test has different assumptions depending on design. For two independent samples, the studentized permutation test requires exchangeability under the null and provides asymptotic validity under unequal variances. For paired and one-sample designs, the sign-flip permutation requires **symmetry** of the differences (or observations, in the one-sample case) around the hypothesized value. Symmetry is the key diagnostic target for paired and one-sample permutation tests and is often overlooked.
+
+## Two-Sample Permutation
+
+Using the same `ToothGrowth` subset:
+
+### Check 1: Shape comparability across groups
+
+```{r}
+# group shapes --------
+ggplot(tg, aes(sample = len, color = supp)) +
+  stat_qq() + stat_qq_line() +
+  facet_wrap(~ supp) +
+  labs(title = "QQ plots by group") +
+  theme_minimal()
+```
+
+Strong departures in shape (e.g., one group skewed, the other symmetric, or markedly different tail behavior) are a concern because the studentized permutation test handles scale differences but not dramatic shape differences.
+
+### Check 2: Variance comparison
+
+While the studentized version tolerates heteroscedasticity, it is still useful to know how different the variances are, both for interpretation and for deciding whether the studentized form is necessary.
+
+```{r}
+# variance comparison --------
+tg |>
+  group_by(supp) |>
+  summarise(n = n(), variance = var(len))
+
+# Levene's test from lawstat for robust variance comparison
+lawstat::levene.test(tg$len, tg$supp, location = "median")
+```
+
+The median-centered Levene test (Brown–Forsythe) is preferred over the classical version because it is itself robust to non-normality.
+
+## Paired-Sample Permutation
+
+This is the case where the symmetry assumption bites hardest. The sign-flip permutation test for paired data is exact under the null **only** if the difference distribution is symmetric around zero (or around the hypothesized mean difference). Asymmetry makes the test approximate rather than exact, though studentization provides asymptotic protection.
+
+Paired designs frequently produce asymmetric difference distributions — floor or ceiling effects, multiplicative treatment effects, or a subset of strong responders can all induce skew. Checking symmetry is therefore essential.
+
+### Check 1: Histogram with reference line
+
+```{r}
+# histogram symmetry --------
+ggplot(data.frame(d = d_paired), aes(x = d)) +
+  geom_histogram(bins = 8, fill = "grey70", color = "white") +
+  geom_vline(xintercept = mean(d_paired), color = "red", linewidth = 1) +
+  geom_vline(xintercept = median(d_paired), color = "blue",
+             linewidth = 1, linetype = "dashed") +
+  labs(title = "Differences with mean (red) and median (blue)",
+       x = "Difference", y = "Count") +
+  theme_minimal()
+```
+
+A visible gap between the mean and median, or a tail that is clearly longer on one side, flags asymmetry.
+
+### Check 2: Symmetry plot
+
+A symmetry plot pairs order statistics equidistant from the median: for each pair, plot the upper deviation against the lower deviation. Under symmetry, points fall along the 45-degree line.
+
+```{r}
+# symmetry plot --------
+symmetry_plot <- function(x) {
+  m <- median(x)
+  sorted <- sort(x)
+  n <- length(sorted)
+  upper <- sorted[sorted > m] - m
+  lower <- m - sorted[sorted < m]
+  k <- min(length(upper), length(lower))
+  upper <- sort(upper)[1:k]
+  lower <- sort(lower)[1:k]
+  data.frame(lower = lower, upper = upper)
+}
+
+sp <- symmetry_plot(d_paired)
+ggplot(sp, aes(x = lower, y = upper)) +
+  geom_point(size = 2) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed") +
+  coord_equal() +
+  labs(title = "Symmetry plot of paired differences",
+       x = "Distance below median",
+       y = "Distance above median") +
+  theme_minimal()
+```
+
+Points clustered near the 45-degree line support symmetry; systematic departure (all points above or below the line, or strong curvature) indicates asymmetry.
+
+### Check 3: QQ plot against normal
+
+Normality is stronger than symmetry, but a normal QQ plot is a familiar tool and distinguishes symmetry failure (systematic curvature) from heavy tails (fanning at the ends with points still roughly straight in the middle).
+
+```{r}
+# qq normal --------
+ggplot(data.frame(d = d_paired), aes(sample = d)) +
+  stat_qq() + stat_qq_line() +
+  labs(title = "Normal QQ plot of differences") +
+  theme_minimal()
+```
+
+### Check 4: Formal symmetry test via `lawstat`
+
+```{r}
+# formal symmetry test --------
+lawstat::symmetry.test(d_paired, option = "MGG")
+lawstat::symmetry.test(d_paired, option = "CM")
+```
+
+The Miao–Gel–Gastwirth ("MGG") and Cabilio–Masaro ("CM") tests provide formal assessment. With small samples these tests have limited power, so a non-significant result should not be taken as strong evidence of symmetry — the visual checks remain more informative. Conversely, a significant result with small `n` is worth taking seriously.
+
+### Check 5: Skewness with bootstrap confidence interval
+
+```{r}
+# skewness CI --------
+skew_stat <- function(x, i) {
+  xi <- x[i]
+  mean((xi - mean(xi))^3) / sd(xi)^3
+}
+skew_boot <- boot(d_paired, skew_stat, R = 2000)
+boot.ci(skew_boot, type = "perc")
+```
+
+A confidence interval for skewness that comfortably covers zero supports symmetry; an interval clearly on one side of zero indicates asymmetry.
+
+### What to do if symmetry fails
+
+If symmetry is implausible, options in rough order of preference are: (1) use the bootstrap instead, which does not require symmetry; (2) report the studentized permutation test with an explicit note that it is approximate rather than exact under the observed asymmetry; (3) consider whether the mean is the right estimand, and if a transformation (e.g., log) produces a symmetric difference distribution on a scientifically meaningful scale.
+
+## One-Sample Permutation
+
+The one-sample permutation test assumes the observations are symmetric around the hypothesized mean (often zero). Every diagnostic from the paired case applies, substituting the raw observations for the difference scores.
+
+```{r, fig.height=4}
+# one sample symmetry --------
+# Histogram
+ggplot(data.frame(x = x_one), aes(x = x)) +
+  geom_histogram(bins = 6, fill = "grey70", color = "white") +
+  geom_vline(xintercept = mean(x_one), color = "red", linewidth = 1) +
+  geom_vline(xintercept = median(x_one), color = "blue",
+             linewidth = 1, linetype = "dashed") +
+  labs(title = "One-sample observations",
+       x = "Value", y = "Count") +
+  theme_minimal()
+
+# Symmetry plot
+sp_one <- symmetry_plot(x_one)
+ggplot(sp_one, aes(x = lower, y = upper)) +
+  geom_point(size = 2) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed") +
+  coord_equal() +
+  labs(title = "Symmetry plot (one-sample)",
+       x = "Distance below median",
+       y = "Distance above median") +
+  theme_minimal()
+
+# Formal test
+lawstat::symmetry.test(x_one, option = "MGG")
+```
+
+# Correlation Diagnostics
+
+The three common correlation coefficients make different assumptions about the underlying data. Pearson assumes bivariate normality and a linear relationship between the two variables. Spearman assumes a monotonic relationship and is checkable by applying linear-regression diagnostics to the ranked data: once ranks are in place, the rank-rank scatter should look linear for Spearman to be interpretable as a measure of monotonic association. Kendall's tau shares Spearman's monotonicity requirement but counts concordant and discordant pairs rather than using rank differences, which makes it somewhat more robust to ties and outliers; it generally does not require additional diagnostics beyond those used for Spearman. The bootstrap correlation relaxes distributional assumptions but adds its own: the empirical joint distribution must be a reasonable stand-in for the population joint distribution, and no single observation should dominate the bootstrap variability.
+
+```{r}
+# correlation data --------
+cor_data <- mtcars[, c("mpg", "wt")]
+```
+
+## Pearson Correlation
+
+### Linearity and marginal distributions
+
+```{r, fig.height=3.5}
+# pearson scatter --------
+ggplot(cor_data, aes(x = wt, y = mpg)) +
+  geom_point() +
+  geom_smooth(method = "loess", se = FALSE) +
+  labs(title = "mpg vs wt with loess smoother",
+       x = "Weight (1000 lbs)", y = "Miles per gallon") +
+  theme_minimal()
+```
+
+The loess curve should look roughly linear for Pearson to be appropriate. Pronounced curvature suggests either a monotonic-but-nonlinear relationship (in which case Spearman or Kendall is preferable) or a genuinely nonmonotonic pattern (in which case no summary correlation is meaningful).
+
+```{r, fig.height=3.5}
+# pearson marginals --------
+par(mfrow = c(1, 2))
+qqnorm(cor_data$mpg, main = "QQ plot: mpg"); qqline(cor_data$mpg)
+qqnorm(cor_data$wt, main = "QQ plot: wt"); qqline(cor_data$wt)
+par(mfrow = c(1, 1))
+```
+
+Symmetric marginals are a reasonable proxy for bivariate normality in most applied settings. Marginal normality does not guarantee bivariate normality, but marked skew in either marginal is sufficient to reject it.
+
+### Influence via Cook's distance
+
+```{r, fig.height=4}
+# pearson cooks d --------
+pearson_fit <- lm(mpg ~ wt, data = cor_data)
+cd_pearson <- cooks.distance(pearson_fit)
+plot(cd_pearson, type = "h",
+     main = "Cook's distance (Pearson regression)",
+     ylab = "Cook's distance", xlab = "Observation index")
+abline(h = 4 / length(cd_pearson), col = "red", lty = 2)
+```
+
+Unlike the balanced two-sample t-test case, leverage varies meaningfully in regression, so Cook's D is genuinely informative here: observations with extreme `wt` values (high leverage) combined with large residuals will show up as candidates for driving the estimated correlation. A Pearson correlation that rests on one or two high-leverage points is fragile, and the bootstrap jackknife in the next subsection provides a complementary check.
+
+Fisher's z-transformation, $z = \tfrac{1}{2}\log\left((1+r)/(1-r)\right)$, is the standard route to parametric confidence intervals on Pearson `r`. It is sometimes treated as assumption-free but in fact still relies on bivariate normality; its coverage can degrade substantially when the bivariate distribution has heavy tails or strong skew.
+
+## Spearman Correlation
+
+Spearman's correlation applies Pearson's formula to ranks, so the relevant diagnostics operate on the ranked data.
+
+```{r, fig.height=3.5}
+# spearman ranks --------
+cor_data$mpg_rank <- rank(cor_data$mpg)
+cor_data$wt_rank <- rank(cor_data$wt)
+
+ggplot(cor_data, aes(x = wt_rank, y = mpg_rank)) +
+  geom_point() +
+  geom_smooth(method = "loess", se = FALSE) +
+  labs(title = "Ranked scatter: mpg_rank vs wt_rank",
+       x = "Rank of wt", y = "Rank of mpg") +
+  theme_minimal()
+```
+
+If the original relationship is monotonic, the rank-rank loess curve should look roughly linear. Ranks are uniform by construction, so marginal normality is not a concern; the diagnostic target is linearity of the rank-rank relationship.
+
+```{r, fig.height=3.5}
+# spearman residuals --------
+spearman_fit <- lm(mpg_rank ~ wt_rank, data = cor_data)
+
+ggplot(data.frame(resid = resid(spearman_fit)), aes(sample = resid)) +
+  stat_qq() + stat_qq_line() +
+  labs(title = "QQ plot of residuals (ranked regression)",
+       x = "Theoretical quantiles", y = "Residuals") +
+  theme_minimal()
+```
+
+```{r, fig.height=4}
+# spearman cooks d --------
+cd_spearman <- cooks.distance(spearman_fit)
+plot(cd_spearman, type = "h",
+     main = "Cook's distance (Spearman ranked regression)",
+     ylab = "Cook's distance", xlab = "Observation index")
+abline(h = 4 / length(cd_spearman), col = "red", lty = 2)
+```
+
+The interpretation mirrors the Pearson case: observations with high Cook's D in the ranked regression are candidates for driving the Spearman estimate. Because the regression is on ranks, extreme original-scale values are pulled toward the centre, so Cook's D in this context flags observations whose rank combination is unusual rather than whose raw value is extreme.
+
+## Kendall's Tau
+
+Kendall's tau uses the same monotonicity assumption as Spearman but is less sensitive to the magnitude of rank differences because it counts concordant and discordant pairs rather than computing correlation on ranks. This makes it generally more robust to outliers and better-behaved in the presence of ties. The ranked scatterplot from the Spearman subsection serves as the primary visual check for Kendall as well, and additional diagnostics are rarely needed.
+
+## Bootstrap Correlation Diagnostics
+
+The bootstrap correlation provides confidence intervals without appealing to bivariate normality or Fisher's z. Its own assumptions can be checked with the same toolkit used for the bootstrap t-test: the shape of the bootstrap distribution and the jackknife-after-bootstrap.
+
+```{r, fig.height=5}
+# bootstrap correlation --------
+cor_stat <- function(data, indices) {
+  d <- data[indices, ]
+  cor(d$mpg, d$wt)
+}
+
+boot_cor <- boot(data = cor_data, statistic = cor_stat, R = 2000)
+
+plot(boot_cor)
+jack.after.boot(boot_cor, main = "Jackknife-after-bootstrap (correlation)")
+```
+
+The bootstrap distribution should be reasonably symmetric. Near $r = \pm 1$, boundary effects make the distribution skewed and Fisher's z helps but does not fully solve the problem; interpret the intervals cautiously in that regime. In the jackknife-after-bootstrap plot, strips that visibly differ from the others flag observations that drive the bootstrap variability of the correlation estimate.
+
+# Rank-Based Tests: WMW and Brunner-Munzel
+
+The Wilcoxon-Mann-Whitney (WMW) test is commonly presented as a nonparametric test of medians, but that interpretation requires the **location shift assumption**: the two group distributions differ only in location, not in shape. When shapes differ (for example when one group has greater variance, or the groups have different skewness), WMW tests a hypothesis about stochastic ordering, $P(X < Y)$, rather than a difference in medians. Users who report WMW as a median test when shapes are clearly different are over-interpreting the result.
+
+**Brunner-Munzel** drops the location-shift requirement and directly tests the stochastic-superiority hypothesis $P(X < Y) + 0.5 \cdot P(X = Y) = 0.5$. The tradeoff is analogous to Welch's correction of Student's t-test: Brunner-Munzel gives up a cleaner location-difference interpretation in exchange for validity under unequal shapes and variances.
+
+The **proportional odds** assumption is a stronger condition used in ordinal regression: the log odds ratio between groups is constant across all cutpoints of the outcome. WMW can be derived as the score test from a proportional odds model, so when proportional odds holds, WMW has a clean odds-ratio interpretation in Harrell's framework. When it fails, WMW still provides a valid test of $P(X < Y)$ but its interpretation as an odds ratio breaks down.
+
+The diagnostics below cover (a) location shift, the condition under which the median-difference interpretation is licensed; (b) proportional odds, the condition under which the odds-ratio interpretation is licensed; and (c) the symmetry requirement for the one-sample and paired signed-rank tests.
+
+```{r}
+# rank test data --------
+rank_data <- ToothGrowth |> dplyr::filter(dose == 1)
+```
+
+## Location Shift Check (Two-Sample)
+
+The cleanest visual check for location shift is a pair of overlaid empirical CDFs (ECDFs). Under location shift, the two ECDFs are horizontal translations of each other: the horizontal distance between the curves is constant across the range of the outcome.
+
+```{r, fig.height=3.5}
+# location shift ecdf --------
+ggplot(rank_data, aes(x = len, color = supp)) +
+  halfmoon::geom_ecdf() +
+  labs(title = "Empirical CDFs by group",
+       subtitle = "Parallel (horizontally shifted) curves support location shift",
+       x = "Length", y = "Proportion <= x") +
+  theme_minimal()
+```
+
+`halfmoon::geom_ecdf()` is preferred over `ggplot2::stat_ecdf()` because it signals the diagnostic intent and supports weighted ECDFs if the workflow is later extended to more complex designs.
+
+```{r, fig.height=3.5}
+# density overlay --------
+ggplot(rank_data, aes(x = len, fill = supp)) +
+  geom_density(alpha = 0.5) +
+  labs(title = "Density overlay by group",
+       x = "Length", y = "Density") +
+  theme_minimal()
+```
+
+If the ECDFs cross, or if the horizontal gap between them varies substantially across the range, location shift is violated. In that case the difference-in-medians interpretation of WMW should not be used; report stochastic superiority or switch to Brunner-Munzel.
+
+## Proportional Odds Check (Two-Sample)
+
+Two diagnostics are useful: a visual check of the empirical logit curves and a formal test via ordinal regression.
+
+### Visual: parallel empirical logit curves
+
+For each observed value of the outcome, compute the empirical cumulative proportion in each group at or below that value, and transform to logits: $\log(F_g(x)/(1 - F_g(x)))$ for each group $g$. Plotting the two logit curves on the same axes against the outcome value, proportional odds implies that the curves are vertically parallel, with constant vertical distance equal to the log odds ratio. Crossing curves, or non-constant gaps, indicate violation.
+
+We use a hand-rolled helper here rather than `halfmoon::geom_ecdf()` because that function returns ECDF values on the probability scale. The proportional-odds check requires the logit transformation of those values, where parallel becomes visually meaningful; on the probability scale the sigmoid shape of the ECDF obscures whether the gap is constant or varying.
+
+```{r, fig.height=4}
+# proportional odds visual --------
+po_logit_data <- function(data, outcome, group) {
+  vals <- sort(unique(data[[outcome]]))
+  groups <- unique(data[[group]])
+  out <- expand.grid(value = vals, group = groups, stringsAsFactors = FALSE)
+  out$logit <- NA_real_
+  for (i in seq_len(nrow(out))) {
+    g <- out$group[i]
+    v <- out$value[i]
+    sub <- data[data[[group]] == g, outcome, drop = TRUE]
+    p <- mean(sub <= v)
+    # Clamp to avoid infinities at the extremes
+    p <- pmin(pmax(p, 1 / (2 * length(sub))), 1 - 1 / (2 * length(sub)))
+    out$logit[i] <- log(p / (1 - p))
+  }
+  out
+}
+
+po_df <- po_logit_data(rank_data, "len", "supp")
+ggplot(po_df, aes(x = value, y = logit, color = group)) +
+  geom_line(linewidth = 1) +
+  geom_point() +
+  labs(title = "Empirical logit curves by group",
+       subtitle = "Parallel curves support proportional odds",
+       x = "Outcome value", y = "Empirical logit") +
+  theme_minimal()
+```
+
+With small samples the logit curves can look jagged even when proportional odds holds in the population. The visual is most informative when `n` is at least 30 per group; below that threshold it should be read as suggestive rather than conclusive.
+
+### Formal: Brant test via ordinal regression
+
+The Brant test formalizes the proportional-odds check by fitting an ordinal regression and testing whether the log-odds slopes are equal across cutpoints. For continuous outcomes the data must first be discretized, which we do here with quartile-based cuts.
+
+```{r}
+# brant test --------
+# Discretize the outcome into ordinal categories for polr
+rank_data$len_ord <- cut(rank_data$len,
+                         breaks = quantile(rank_data$len, probs = seq(0, 1, 0.25)),
+                         include.lowest = TRUE,
+                         ordered_result = TRUE)
+polr_fit <- MASS::polr(len_ord ~ supp, data = rank_data, Hess = TRUE)
+brant::brant(polr_fit)
+```
+
+The Brant test shares the usual caveats about power in small samples: a non-significant result with small `n` is weak evidence for proportional odds. The discretization of a continuous outcome is also somewhat arbitrary; different cutpoints can yield different conclusions. In practice the visual check and the formal test are complementary, and agreement between them is more informative than either alone.
+
+## Symmetry Check for Signed-Rank (One-Sample/Paired)
+
+The Wilcoxon signed-rank test assumes that the distribution of the one-sample values, or of the paired differences, is symmetric around the hypothesized value. This is the same assumption discussed in the permutation section for sign-flip tests. The full diagnostic suite from the paired permutation section (histogram with mean and median reference lines, symmetry plot, normal QQ plot, `lawstat::symmetry.test`, and the bootstrap confidence interval for skewness) applies directly to the signed-rank test. Rather than duplicate the code here, we refer readers to the "Paired-Sample Permutation" section above; the same checks, with the same interpretive thresholds, are the relevant diagnostics for the signed-rank test.
+
+## When to Use What
+
+- **Location shift plausible, proportional odds plausible, symmetric differences (for paired or one-sample):** WMW and the signed-rank test are interpretable as tests of the location parameter, with a clean odds-ratio interpretation.
+- **Location shift violated but independence and exchangeability hold:** Brunner-Munzel is the more defensible two-sample test. Report stochastic superiority rather than a difference in medians.
+- **Proportional odds violated:** WMW still provides a valid test of $P(X < Y)$ but the odds-ratio interpretation is not clean. Consider whether the mean, estimated via a bootstrap or permutation t-test, is a more interpretable estimand for the question at hand.
+
+# ANOVA Diagnostics
+
+For ANOVA-style designs (one-way, factorial, repeated-measures, mixed), the `performance` package's `check_model()` function provides a comprehensive diagnostic suite in a single call, covering linearity, homogeneity of variance, normality of residuals, influential observations, and where applicable collinearity. The function accepts `aov`, `lm`, `lmer`, `glm`, and several other model object classes, so the same workflow scales from a simple one-way ANOVA to a mixed model with random effects. For equivalence testing of ANOVA contrasts (for example via TOSTER's ANOVA support), diagnostics should be run on the underlying model fit rather than on the contrast output, because the distributional assumptions live at the model level.
+
+```{r, fig.height=7}
+# anova diagnostics --------
+aov_fit <- aov(len ~ supp * factor(dose), data = ToothGrowth)
+performance::check_model(aov_fit)
+```
+
+When `check_model()` flags a violation, the remedies are the usual ones: consider a transformation (log for right-skew, square-root for count-like variance scaling), use a robust variant such as Welch ANOVA or a mixed model with heteroscedastic residuals, or switch to a resampling-based test on the contrasts of interest.
+
+# Illustration: What Failing Diagnostics Look Like
+
+To show readers what problematic data looks like, we simulate a deliberately skewed paired difference distribution (exponential) and apply the same paired diagnostic suite.
+
+```{r, fig.height=4}
+# skewed example --------
+set.seed(2026)
+d_skewed <- rexp(20, rate = 1) - 1  # shifted exponential, right-skewed
+
+# Histogram
+ggplot(data.frame(d = d_skewed), aes(x = d)) +
+  geom_histogram(bins = 10, fill = "grey70", color = "white") +
+  geom_vline(xintercept = mean(d_skewed), color = "red", linewidth = 1) +
+  geom_vline(xintercept = median(d_skewed), color = "blue",
+             linewidth = 1, linetype = "dashed") +
+  labs(title = "Deliberately skewed differences",
+       x = "Difference", y = "Count") +
+  theme_minimal()
+
+# Symmetry plot
+sp_skew <- symmetry_plot(d_skewed)
+ggplot(sp_skew, aes(x = lower, y = upper)) +
+  geom_point(size = 2) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed") +
+  coord_equal() +
+  labs(title = "Symmetry plot (skewed example)",
+       x = "Distance below median",
+       y = "Distance above median") +
+  theme_minimal()
+
+# Formal test
+lawstat::symmetry.test(d_skewed, option = "MGG")
+```
+
+Note the visible mean–median gap, the points systematically above the 45-degree line in the symmetry plot, and (with adequate `n`) a significant symmetry test. In this situation, the sign-flip permutation test would be unreliable as an exact procedure, and the bootstrap would be the preferred resampling approach.
+
+# Summary
+
+The table below collects the diagnostics covered in this supplement. It is organized into two groups: tests of means (t-tests and their resampling variants, plus ANOVA), and tests of distributions and associations (rank-based tests and correlations).
+
+**Tests of means**
+
+| Design / Test | Key assumption(s) | Primary diagnostics |
+|---------------|-------------------|---------------------|
+| Two-sample parametric t-test | Independent observations, normal residuals, equal variance (Student) or not (Welch) | QQ plot of residuals, Shapiro-Wilk, Brown-Forsythe, Cook's distance |
+| Paired / one-sample parametric t-test | Normality of differences (paired) or observations (one-sample) | QQ plot, Shapiro-Wilk, Cook's D from intercept-only lm |
+| Two-sample studentized bootstrap | Independence, stable empirical distribution, no severe outliers | Group densities, boxplots, Cook's D (leverage), jackknife-after-bootstrap, replication stability |
+| Paired / one-sample studentized bootstrap | Independence, stable empirical distribution | Histogram, boxplot, jackknife-after-bootstrap |
+| Two-sample studentized permutation | Exchangeability; comparable shape (scale allowed to differ) | QQ plots by group, Brown-Forsythe test for variance |
+| Paired sign-flip permutation | Symmetry of differences around null value | Histogram w/ mean-median, symmetry plot, normal QQ, `lawstat::symmetry.test`, bootstrap CI for skewness |
+| One-sample sign-flip permutation | Symmetry of observations around null value | Same as paired, on raw observations |
+| ANOVA (one-way, factorial, mixed) | Independence, normal residuals, homogeneous variance | `performance::check_model()` suite |
+
+**Tests of distributions and associations**
+
+| Test | Key assumption(s) | Primary diagnostics |
+|------|-------------------|---------------------|
+| Pearson correlation | Bivariate normality, linear relationship | Scatter with loess, marginal QQ plots, Cook's D from `lm` |
+| Spearman / Kendall correlation | Monotonic relationship | Ranked scatter with loess, QQ of residuals on ranked lm, Cook's D on ranked fit |
+| Bootstrap correlation | Stable empirical joint distribution, no single-observation dominance | Bootstrap distribution plot, jackknife-after-bootstrap |
+| Wilcoxon-Mann-Whitney | Location shift (for median interpretation); proportional odds (for odds-ratio interpretation) | Overlaid ECDFs, empirical logit curves, Brant test via `MASS::polr()` |
+| Brunner-Munzel | Independence, exchangeability (no location-shift required) | ECDF inspection as sanity check; no additional distributional assumptions |
+| Wilcoxon signed-rank (paired/one-sample) | Symmetry around null value | Same diagnostics as paired sign-flip permutation |
+
+Across all designs, replication stability (running resampling tests twice with different seeds) and sensitivity analysis (trying `tr > 0` for trimmed means, or comparing bootstrap, permutation, and parametric results) provide additional robustness checks. When diagnostics conflict, for example when paired differences appear mildly asymmetric, reporting both bootstrap and permutation results and noting any disagreement is more informative than defending a single choice.
+
+
