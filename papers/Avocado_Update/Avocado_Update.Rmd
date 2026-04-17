@@ -69,7 +69,7 @@ library(patchwork)
 
 # Introduction
 
-Researchers routinely interpret non-significant p-values as evidence that no effect exists --- a logical error that has been recognized for decades [@blandaltman95]. A non-significant result means only that the data are compatible with the null hypothesis; it does not mean the null hypothesis is true.
+Researchers routinely interpret non-significant p-values from a nil-hypothesis (i.e., null hypothesis that the mean difference equals zero) test as evidence that no effect exists --- a logical error that has been recognized for decades [@blandaltman95]. A non-significant result means only that the data are compatible with the null hypothesis; it does not mean the null hypothesis is true.
 
 Equivalence testing provides a principled framework for evaluating whether an effect is small enough to be considered negligible. The two one-sided tests (TOST) procedure is the most widely used approach [@schuirmann1987]. Researchers specify an upper ($\Delta_U$) and lower ($\Delta_L$) equivalence bound based on the smallest effect size of interest (SESOI). Two one-sided tests then evaluate whether the observed effect falls within those bounds. If both tests reject at a pre-specified alpha level, the effect can be considered practically equivalent to zero [@lakens_ori].
 
@@ -318,12 +318,24 @@ The `simple_htest` function supports `t.test` and `wilcox.test` as the underlyin
 ```{r}
 res_sh1 <- simple_htest(extra ~ group, 
                         data = sleep,
+                        paired = TRUE,
                         alternative = "equivalence", 
                         mu = 0.5)
 res_sh1
 ```
 
-Notice how the output is a single clean `htest` object. This is much more concise than the verbose `t_TOST` output shown previously on purpose. If you want to perform additional tests --- such as a complementary nil significance tests --- then that has to be done separately. However, there are some methods (described below) that make this `htest` format easy to deal with.
+Additionally, tests other that TOST can be applied with this function. The traditional nil-hypothesis tests, non-inferiority, or even superiority-by-a-margin hypotheses can all be tested with this function. For example, let's say we want to test that a treatment group in the sleep data was just non-inferior to the other treatment rather than equivalent. This can be accomplished by just setting the direction with the `alternative` argument and the margin of non-inferiority by the `mu` argument.
+
+```{r}
+res_sh2 <- simple_htest(extra ~ group, 
+                        data = sleep,
+                        paired = TRUE,
+                        alternative = "greater", 
+                        mu = -0.5)
+res_sh2
+```
+
+Notice how the output, in either hypothesis test above, is a single clean `htest` object. This is much more concise than the verbose `t_TOST` output shown previously on purpose. If you want to perform additional tests --- such as a complementary nil significance tests --- then that has to be done separately. However, there are some methods (described below) that make this `htest` format easy to deal with when reporting statistical test results.
 
 ## Describing and Tabulating Results
 

@@ -727,7 +727,7 @@ The Wilcoxon signed-rank test assumes that the distribution of the one-sample va
 
 - **Location shift plausible, proportional odds plausible, symmetric differences (for paired or one-sample):** WMW and the signed-rank test are interpretable as tests of the location parameter, with a clean odds-ratio interpretation.
 - **Location shift violated but independence and exchangeability hold:** Brunner-Munzel is the more defensible two-sample test. Report stochastic superiority rather than a difference in medians.
-- **Proportional odds violated:** WMW still provides a valid test of $P(X < Y)$ but the odds-ratio interpretation is not clean. Consider whether the mean, estimated via a bootstrap or permutation t-test, is a more interpretable estimand for the question at hand.
+- **Proportional odds violated:** WMW still provides a valid test of $P(X < Y)$ but the odds-ratio interpretation is not clean. Consider whether the mean, estimated via a bootstrap or permutation t-test, is a more interpretable estimand for the question at hand. Alternatively, the Brunner-Munzel test should still be a valid test and estimate as well.
 
 # ANOVA Diagnostics
 
