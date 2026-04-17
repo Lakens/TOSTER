@@ -398,6 +398,10 @@ boot_smd_calc(formula = extra ~ group,
 ```
 
 
+### Checking Assumptions
+
+The SMD functions inherit the assumptions of the underlying t-test: independent observations, approximately normal residuals or differences, and, for two-sample designs, comparable variances across groups. Visual diagnostics from the t-test discussion above apply directly. Two considerations are specific to standardized effect sizes, however. First, outliers and skew affect both the numerator (mean difference) and the denominator (standard deviation) of the SMD, which can amplify their influence on the estimate; the `tr` trimmed-means argument available in the `boot_smd_calc` function is particularly worth considering when the raw data show extreme values. Second, the parametric z-test in `smd_calc` relies on an approximation to the sampling distribution of the SMD that can be very inaccurate in small samples, which is the primary motivation for preferring `boot_smd_calc` when hypothesis testing is the goal.
+
 ## Equivalence Tests for Correlations
 
 Researchers sometimes need to test that a correlation is practically zero. The `z_cor_test` function provides a parametric approach using the Fisher z-transformation. However, this is only an approximate method and is generally *not recommended* as the primary inferential tool for equivalence testing on correlations.
