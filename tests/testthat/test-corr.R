@@ -914,3 +914,121 @@ test_that("boot_cor_test: stud results similar to z_cor_test for large n Pearson
   # p-values should be in the same ballpark
   expect_equal(boot_res$p.value, z_res$p.value, tolerance = 0.1)
 })
+
+# z_cor_test missing data handling -----
+
+test_that("z_cor_test handles missing data correctly", {
+
+  set.seed(54321)
+  x <- c(1.1, 2.3, 3.0, NA, 5.2, 6.1, 7.8, 8.0, 9.4, 10.7)
+  y <- c(2.2, 3.8, NA, 7.9, 10.5, 11.6, 14.3, 15.1, 17.9, 21.0)
+
+  # Should not error with NAs present
+  for (m in c("pearson", "spearman", "kendall")) {
+    res <- z_cor_test(x, y, method = m)
+    expect_true(is.finite(res$p.value),
+                label = paste("finite p with NAs for", m))
+    expect_true(is.finite(unname(res$estimate)),
+                label = paste("finite estimate with NAs for", m))
+    # N should reflect complete cases only (8 of 10)
+    expect_equal(unname(res$parameter), 8,
+                 label = paste("N reflects complete cases for", m))
+  }
+
+  # Results should match manually removing NAs
+  complete <- complete.cases(x, y)
+  x_clean <- x[complete]
+  y_clean <- y[complete]
+
+  res_na <- z_cor_test(x, y, method = "pearson")
+  res_clean <- z_cor_test(x_clean, y_clean, method = "pearson")
+
+  expect_equal(res_na$p.value, res_clean$p.value)
+  expect_equal(unname(res_na$estimate), unname(res_clean$estimate))
+  expect_equal(unname(res_na$statistic), unname(res_clean$statistic))
+
+  # Jackknife SE should also work with NAs
+  res_jk <- z_cor_test(x, y, method = "pearson", se_method = "jackknife")
+  expect_true(is.finite(res_jk$p.value),
+              label = "jackknife with NAs gives finite p")
+  expect_equal(unname(res_jk$parameter), 8)
+
+  # Equivalence test with NAs
+  res_eq <- z_cor_test(x, y, method = "pearson",
+                       alternative = "equivalence", null = 0.99)
+  expect_true(is.finite(res_eq$p.value),
+              label = "equivalence with NAs gives finite p")
+})
+
+test_that("z_cor_test errors when |r| = 1 with jackknife SE", {
+  # Perfect positive correlation: atanh(1) = Inf -> jackknife SE becomes NaN
+  x <- 1:10
+  y <- 2 * (1:10)
+
+  # Analytic path still works (returns Inf z / p ~ 0)
+  expect_silent(z_cor_test(x, y, method = "pearson"))
+
+  # Jackknife should error with a clear message
+  expect_error(
+    z_cor_test(x, y, method = "pearson", se_method = "jackknife"),
+    regexp = "Jackknife SE cannot be computed"
+  )
+
+  # Perfect negative correlation also triggers the guard
+  expect_error(
+    z_cor_test(x, -y, method = "pearson", se_method = "jackknife"),
+    regexp = "Jackknife SE cannot be computed"
+  )
+
+  # Spearman/Kendall on strictly monotonic data also yield |r| = 1
+  expect_error(
+    z_cor_test(x, y, method = "spearman", se_method = "jackknife"),
+    regexp = "Jackknife SE cannot be computed"
+  )
+  expect_error(
+    z_cor_test(x, y, method = "kendall", se_method = "jackknife"),
+    regexp = "Jackknife SE cannot be computed"
+  )
+})
+
+test_that("z_cor_test errors when too few complete cases for SE formula", {
+  # Pearson/Spearman require n >= 4; Kendall requires n >= 5.
+
+  # --- Raw sample too small ---
+  x3 <- c(1.1, 2.3, 4.7)
+  y3 <- c(0.5, 1.9, 3.2)
+  expect_error(
+    z_cor_test(x3, y3, method = "pearson"),
+    regexp = "Not enough complete cases"
+  )
+  expect_error(
+    z_cor_test(x3, y3, method = "spearman"),
+    regexp = "Not enough complete cases"
+  )
+
+  # n = 4 is below Kendall's threshold but OK for Pearson/Spearman
+  x4 <- c(1.1, 2.3, 4.7, 6.8)
+  y4 <- c(0.5, 1.9, 3.2, 5.1)
+  expect_error(
+    z_cor_test(x4, y4, method = "kendall"),
+    regexp = "Not enough complete cases"
+  )
+  expect_silent(z_cor_test(x4, y4, method = "pearson"))
+  expect_silent(z_cor_test(x4, y4, method = "spearman"))
+
+  # --- NAs reducing complete cases below threshold ---
+  # 10 obs but only 3 complete -> fails Pearson/Spearman
+  xn <- c(1.1, 2.3, 4.7, NA, NA, NA, NA, NA, NA, NA)
+  yn <- c(0.5, 1.9, 3.2, NA, NA, NA, NA, NA, NA, NA)
+  expect_error(
+    z_cor_test(xn, yn, method = "pearson"),
+    regexp = "Not enough complete cases"
+  )
+
+  # Error message mentions method and observed N
+  err <- tryCatch(z_cor_test(x3, y3, method = "kendall"),
+                  error = function(e) conditionMessage(e))
+  expect_match(err, "kendall")
+  expect_match(err, "3 complete observation")
+  expect_match(err, "at least 5")
+})

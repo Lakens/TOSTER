@@ -128,7 +128,19 @@
       "Bash(ls:*)",
       "Bash(\"C:/Program Files/R/R-4.5.1/bin/Rscript.exe\" -e \"git diff HEAD -- tests/testthat/test-smd_calc_htest.R\")",
       "Bash(\"C:/Program Files/R/R-4.5.1/bin/Rscript.exe\" junk/diag_bca.R)",
-      "Bash(git -C /Users/aaroncaldwell/Documents/GitHub/TOSTER check-ignore vignettes/robustTOST.html)"
+      "Bash(git -C /Users/aaroncaldwell/Documents/GitHub/TOSTER check-ignore vignettes/robustTOST.html)",
+      "Bash(\"/c/Program Files/R/R-4.5.3/bin/Rscript.exe\" -e \"devtools::load_all\\(\\); testthat::test_file\\('tests/testthat/test-corr.R', reporter = 'summary'\\)\")",
+      "Bash('/c/Program Files/R/R-4.5.3/bin/Rscript.exe' -e ':*)",
+      "Bash(\"/c/Program Files/R/R-4.5.3/bin/Rscript.exe\" -e \"cat\\('hello\\\\n'\\)\")",
+      "Bash(\"/c/Program Files/R/R-4.5.3/bin/Rscript.exe\" -e \"devtools::load_all\\(\\); cat\\('loaded\\\\n'\\)\")",
+      "Bash(\"/c/Program Files/R/R-4.5.3/bin/Rscript.exe\" -e \"devtools::load_all\\(\\); x <- c\\(1,2,3,NA,5\\); y <- c\\(2,4,NA,8,10\\); cat\\(cor\\(x,y,use='complete.obs'\\),'\\\\n'\\)\")",
+      "Bash(\"/c/Program Files/R/R-4.5.3/bin/Rscript.exe\" -e \"devtools::load_all\\(\\); x <- c\\(1,2,3,NA,5,6,7,8,9,10\\); y <- c\\(2,4,NA,8,10,12,14,16,18,20\\); res <- z_cor_test\\(x,y,method='pearson'\\); print\\(res\\)\")",
+      "Bash(\"/c/Program Files/R/R-4.5.3/bin/Rscript.exe\" -e \"devtools::load_all\\(\\); testthat::test_file\\('tests/testthat/test-corr.R', reporter = 'progress'\\)\")",
+      "Bash('/c/Program Files/R/R-4.5.3/bin/Rscript.exe' -e ' *)",
+      "Bash(\"/c/Program Files/R/R-4.5.3/bin/Rscript.exe\" -e \"cat\\('atanh\\(1\\) =', atanh\\(1\\), '\\\\n'\\); cat\\('atanh\\(-1\\) =', atanh\\(-1\\), '\\\\n'\\)\")",
+      "Bash(\"/c/Program Files/R/R-4.5.3/bin/Rscript.exe\" -e \"x <- 1:10; y <- 2*\\(1:10\\); cat\\('cor=', cor\\(x,y\\), '\\\\n'\\); jk <- sapply\\(1:10, function\\(i\\) atanh\\(cor\\(x[-i], y[-i]\\)\\)\\); cat\\('all Inf:', all\\(is.infinite\\(jk\\)\\), '\\\\n'\\); cat\\('mean-jk[1]:', mean\\(jk\\)-jk[1], '\\\\n'\\)\")",
+      "Bash(\"/c/Program Files/R/R-4.5.3/bin/Rscript.exe\" -e \"x <- 1:10; y <- 2*\\(1:10\\); cat\\('pearson:', cor\\(x,y,method='pearson'\\), '\\\\n'\\); cat\\('spearman:', cor\\(x,y,method='spearman'\\), '\\\\n'\\); cat\\('kendall:', cor\\(x,y,method='kendall'\\), '\\\\n'\\); cat\\('identical to 1:', cor\\(x,y,method='spearman'\\)==1, cor\\(x,y,method='kendall'\\)==1, '\\\\n'\\)\")",
+      "Bash('/c/Program Files/R/R-4.5.3/bin/Rscript.exe' -e 'devtools::load_all\\(\\); x <- 1:10; y <- 2*\\(1:10\\); res <- z_cor_test\\(x, y, method='\\\\''spearman'\\\\'', se_method='\\\\''jackknife'\\\\''\\); cat\\('\\\\''z.se='\\\\'', res$stderr['\\\\''z.se'\\\\''], '\\\\''\\\\nestimate='\\\\'', res$estimate, '\\\\''\\\\np='\\\\'', res$p.value, '\\\\''\\\\n'\\\\''\\)')"
     ]
   }
 }
