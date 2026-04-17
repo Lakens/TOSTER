@@ -790,13 +790,13 @@ requiring these assumptions.
 ##  g[rm]=('1'-'2')/SD_rm)
 ## 
 ## data:  extra by group
-## z-observed = -0.78495, p-value = 0.908
+## z-observed = -0.78495, p-value = 0.8874
 ## alternative hypothesis: equivalence
 ## null values:
 ## lower bound upper bound 
 ##        -0.5         0.5 
 ## 90 percent confidence interval:
-##  -1.269159 -0.449214
+##  -1.3739319 -0.4362495
 ## sample estimates:
 ## SMD (g[rm]) 
 ##  -0.7513666
@@ -879,13 +879,13 @@ objects that integrate with the helper functions described above.
 ##  Bootstrapped Pearson's product-moment correlation (BCa)
 ## 
 ## data:  bugs$LDLF and bugs$LDHF
-## N = 91, p-value = 0.9827
+## N = 91, p-value = 0.9834
 ## alternative hypothesis: equivalence
 ## null values:
 ## correlation correlation 
 ##         0.4        -0.4 
 ## 90 percent confidence interval:
-##  0.4398575 0.6899351
+##  0.4456997 0.6881875
 ## sample estimates:
 ##         r 
 ## 0.5767783
@@ -898,7 +898,7 @@ objects that integrate with the helper functions described above.
 \end{Shaded}
 
 \begin{verbatim}
-## [1] "The Bootstrapped Pearson's product-moment correlation (BCa) is not statistically significant (p = 0.983, r = 0.577, 90% C.I.[0.44, 0.69]) at a 0.05 alpha-level. The null hypothesis cannot be rejected. At the desired error rate, it cannot be stated that the true correlation is between 0.4 and -0.4."
+## [1] "The Bootstrapped Pearson's product-moment correlation (BCa) is not statistically significant (p = 0.983, r = 0.577, 90% C.I.[0.446, 0.688]) at a 0.05 alpha-level. The null hypothesis cannot be rejected. At the desired error rate, it cannot be stated that the true correlation is between 0.4 and -0.4."
 \end{verbatim}
 
 If only summary statistics are available, an approximate method is
@@ -1135,21 +1135,21 @@ signed-rank variants used in \texttt{wilcox\_TOST} or
 that the difference distribution is symmetric around the null value for
 the pseudo-median to coincide with the mean or median difference.
 Asymmetry is readily checked with a symmetry plot of the paired
-differences (\citet{fig-symmplot}). As with the location-shift case,
-visible departures suggest that the test's output --- the pseudo-median
-and associated p-value --- does not map cleanly onto a hypothesis about
-central tendency.
+differences (Figure \ref{fig:symmplot}). As with the location-shift
+case, visible departures suggest that the test's output --- the
+pseudo-median and associated p-value --- does not map cleanly onto a
+hypothesis about central tendency.
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio]{Avocado_Update_files/Avocado_Update_files/figure-latex/fig-symmplot-1.pdf}}
-\caption{Symmetry plot of the paired differences from the sleep dataset,
-pairing each observation's distance above the median with the
-corresponding distance below. Under symmetry, points fall along the
-45-degree reference line (dashed); systematic departures --- points
-consistently above or below the line --- indicate asymmetry. The
-signed-rank variant of WMW requires this symmetry for the pseudo-median
-to coincide with the mean or median of the differences.}
+\pandocbounded{\includegraphics[keepaspectratio]{Avocado_Update_files/Avocado_Update_files/figure-latex/symmplot-1.pdf}}
+\caption{\label{fig:symmplot}Symmetry plot of the paired differences
+from the sleep dataset, pairing each observation's distance above the
+median with the corresponding distance below. Under symmetry, points
+fall along the 45-degree reference line (dashed); systematic departures
+--- points consistently above or below the line --- indicate asymmetry.
+The signed-rank variant of WMW requires this symmetry for the
+pseudo-median to coincide with the mean or median of the differences.}
 \end{figure}
 
 \subsubsection{Brunner-Munzel Test}\label{brunner-munzel-test}
