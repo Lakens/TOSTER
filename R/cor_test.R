@@ -155,6 +155,17 @@ z_cor_test = function(x,
   x = df$x
   y = df$y
   n_obs = nrow(df)
+  # minimum sample size for SE formulas --------
+  # Pearson/Spearman SE use (n - 3); Kendall uses (n - 4).
+  min_n <- if (method == "kendall") 5 else 4
+  if (n_obs < min_n) {
+    stop("Not enough complete cases to compute the ",
+         method, " correlation standard error: ",
+         "found ", n_obs, " complete observation(s), ",
+         "need at least ", min_n, ". ",
+         "Check for missing values in x/y.",
+         call. = FALSE)
+  }
   r_xy = cor(x,y,
              method = method)
 

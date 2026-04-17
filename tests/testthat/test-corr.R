@@ -990,3 +990,45 @@ test_that("z_cor_test errors when |r| = 1 with jackknife SE", {
     regexp = "Jackknife SE cannot be computed"
   )
 })
+
+test_that("z_cor_test errors when too few complete cases for SE formula", {
+  # Pearson/Spearman require n >= 4; Kendall requires n >= 5.
+
+  # --- Raw sample too small ---
+  x3 <- c(1.1, 2.3, 4.7)
+  y3 <- c(0.5, 1.9, 3.2)
+  expect_error(
+    z_cor_test(x3, y3, method = "pearson"),
+    regexp = "Not enough complete cases"
+  )
+  expect_error(
+    z_cor_test(x3, y3, method = "spearman"),
+    regexp = "Not enough complete cases"
+  )
+
+  # n = 4 is below Kendall's threshold but OK for Pearson/Spearman
+  x4 <- c(1.1, 2.3, 4.7, 6.8)
+  y4 <- c(0.5, 1.9, 3.2, 5.1)
+  expect_error(
+    z_cor_test(x4, y4, method = "kendall"),
+    regexp = "Not enough complete cases"
+  )
+  expect_silent(z_cor_test(x4, y4, method = "pearson"))
+  expect_silent(z_cor_test(x4, y4, method = "spearman"))
+
+  # --- NAs reducing complete cases below threshold ---
+  # 10 obs but only 3 complete -> fails Pearson/Spearman
+  xn <- c(1.1, 2.3, 4.7, NA, NA, NA, NA, NA, NA, NA)
+  yn <- c(0.5, 1.9, 3.2, NA, NA, NA, NA, NA, NA, NA)
+  expect_error(
+    z_cor_test(xn, yn, method = "pearson"),
+    regexp = "Not enough complete cases"
+  )
+
+  # Error message mentions method and observed N
+  err <- tryCatch(z_cor_test(x3, y3, method = "kendall"),
+                  error = function(e) conditionMessage(e))
+  expect_match(err, "kendall")
+  expect_match(err, "3 complete observation")
+  expect_match(err, "at least 5")
+})
