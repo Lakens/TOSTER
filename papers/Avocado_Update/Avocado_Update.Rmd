@@ -79,7 +79,7 @@ However, the original package had a number of limitations. It offered a function
 
 This paper provides a tutorial-style introduction to the updated TOSTER package, organized around its major capabilities: (1) a unified t-test interface (`t_TOST`) that pairs a standard significance test with an equivalence test and supports minimal effect testing, (2) a simplified hypothesis testing interface (`simple_htest`) that returns standard `htest` objects, (3) tools for computing and testing standardized effect sizes --- including standardized mean differences, rank-based effect sizes, and correlations, (4) robust and resampling-based alternatives including the Brunner-Munzel test, bootstrap and permutation t-tests, and log-transformed methods, (5) equivalence testing for ANOVAs, and (6) power analysis and sample size planning. Each section motivates when and why a researcher would use the tool before demonstrating how.
 
-TOSTER occupies a specific niche in the R ecosystem in that it is a frequentist toolkit for equivalence testing of standard designs. Researchers interested in Bayesian approaches to evidence for the null have excellent options (e.g., `bayestestR`). For equivalence-style contrasts in more complex models --- mixed models, marginal means --- the `emmeans` and `marginaleffects` packages can accommodate non-zero null hypotheses. TOSTER fills the space of accessible, self-contained equivalence testing for common, albeit simple, research designs. For a broader introduction to the methodology, see @lakens_ori, @lakens2018equivalence, @lakens2020improving, and @mazzolari2022myths. TOSTER is also available as a [jamovi](https://www.jamovi.org/) module for researchers who prefer a graphical interface although it has limited capabilities compared to the R package.
+TOSTER occupies a specific niche in the R ecosystem in that it is a frequentist toolkit for equivalence testing of standard designs. Researchers interested in Bayesian approaches to evidence for the null have excellent options (e.g., `bayestestR`). For equivalence-style contrasts in more complex models --- mixed models, marginal means --- the `emmeans` and `marginaleffects` packages can accommodate non-zero null hypotheses. TOSTER fills the space of accessible, self-contained equivalence testing for common, albeit simple, research designs. For a broader introduction to the methodology, see @lakens_ori, @lakens2018equivalence, @lakens2020improving, @mazzolari2022myths, and @Tomek_Caldwell_Eisner_2026. TOSTER is also available as a [jamovi](https://www.jamovi.org/) module for researchers who prefer a graphical interface although it has limited capabilities compared to the R package.
 
 # Setting Equivalence Bounds
 
@@ -89,11 +89,17 @@ If a researcher has an equivalence hypothesis, they should be able to articulate
 
 Using "default" bounds on the standardized mean difference (SMD; also known as Cohen's d) based on Cohen's benchmarks (e.g., SMD = 0.2, 0.5, 0.8 to imply small, medium, or large effects, respectively) without domain-specific justification is strongly discouraged. Cohen himself stated that these conventions were "recommended for use only when no better basis for estimating the index is available" (p. 25, as cited in @panzarella2021) and reportedly came to regret having proposed them at all [@funder2019]. These benchmarks were never intended as universal thresholds; applied uncritically, they can produce equivalence bounds that are too wide, too narrow, and likely entirely disconnected from the substantive research question.
 
-If a researcher cannot specify meaningful bounds, this itself is informative --- it suggests the equivalence hypothesis is not well enough developed to test such a hypothesis. In such cases, it may be more productive to focus on effect estimation and description rather than leaping to hypothesis tests [@scheel_hypothesis]. Throughout the examples in this paper, equivalence bounds, and the data sets themselves, are chosen for illustrative purposes; readers should not treat them as direct recommendations for their own research.
+If a researcher cannot specify meaningful bounds, this itself is informative as it suggests the equivalence hypothesis is not well enough developed to test such a hypothesis. In such cases, it may be more productive to focus on effect estimation and description rather than leaping to hypothesis tests [@scheel_hypothesis]. Throughout the examples in this paper, equivalence bounds, and the data sets themselves, are chosen for illustrative purposes; readers should not treat them as direct recommendations for their own research.
 
 # TOST with t-tests
 
-The `t_TOST` function provides a unified interface for equivalence and minimal effect testing with t-tests. It runs a standard nil significance test ($H_0: $) alongside the equivalence (or minimal effect) test, because in practice researchers may want both: "Is there a significant effect?" and "Can I rule out a meaningful effect?" The function handles independent, paired, and one-sample designs through the `paired` argument and accepts data via either a formula interface or raw vectors, making it a direct analog to base R's `t.test`. Additionally, the output includes an SMD calculation alongside the unstandarized mean difference with appropriate, albeit approximate, confidence intervals. For researchers who only want to test a single hypothesis at a time, the `simple_htest` function (described in the next section) provides a lighter alternative.
+The t-test is the standard tool for comparing means. Its construction is simple: we estimate a mean (one-sample), the mean of the paired differences (paired samples), or the difference in means between two groups, and then divide that estimate by its standard error. The resulting t-statistic is compared against a t-distribution to obtain p-values and confidence intervals. Written generally, the statistic takes the form $t = (\hat{\mu} - \mu_0)/SE_{\hat{\mu}}$, where $\hat{\mu}$ is the estimate and $\mu_0$ is the value being tested against.
+
+What matters for equivalence testing is that $\mu_0$ is a choice rather than a fixed feature of the test. A traditional nil hypothesis test fixes $\mu_0 = 0$ and asks whether the mean, or mean difference, is exactly zero. TOST changes none of the underlying machinery; it changes only what is substituted for $\mu_0$. Two one-sided tests are performed --- one against the lower bound ($\mu_0 = \Delta_L$) and one against the upper bound ($\mu_0 = \Delta_U$) --- and equivalence is concluded only if both reject. Because each test is one-sided at $\alpha$, the interval estimate corresponding to the procedure is a $1-2\alpha$ (typically 90%) confidence interval, which is what TOSTER reports and plots.
+
+Throughout, the estimand for a t-test --- the quantity being estimated --- is the mean, or mean difference, on the original scale of measurement.^[This describes the default analysis, not an inviolable property of the test. Several choices substitute a different estimand: trimming (the `tr` argument in the resampling functions, `tr = 0` by default) targets the trimmed mean, which coincides with the mean only under symmetry; the log-transformed methods target a ratio of geometric means; and in applied settings, decisions about how intercurrent events --- post-randomization events such as dropout or treatment discontinuation --- and missing data are handled determine which population summary is being estimated at all. The estimand is worth choosing deliberately rather than inheriting from whichever test happens to be run [@Lundberg_Johnson_Stewart_2021].] This is worth stating plainly because several of the alternatives described later in this paper --- the rank-based tests in particular --- estimate different quantities entirely, and are not interchangeable substitutes when the hypothesis concerns means.
+
+The `t_TOST` function in TOSTER provides a unified interface for equivalence and minimal effect testing with t-tests. It runs a standard nil significance test alongside the equivalence (or minimal effect) test, because in practice researchers may want both: "Is there a significant effect?" and "Can I rule out a meaningful effect?" The function handles independent, paired, and one-sample designs through the `paired` argument and accepts data via either a formula interface or raw vectors, making it a direct analog to base R's `t.test`. Additionally, the output includes an SMD calculation alongside the unstandarized mean difference with appropriate, albeit approximate, confidence intervals. For researchers who only want to test a single hypothesis at a time, the `simple_htest` function (described in the next section) provides a lighter alternative.
 
 Minimal effect testing (MET) is also supported. MET is useful when the hypothesis is that an effect *exceeds* a meaningful threshold --- the null hypothesis is equivalence, and rejection implies a practically meaningful effect (see Figure 1) [@mazzolari2022myths].
 
@@ -238,16 +244,28 @@ data('bugs')
 For the first example, we use the `sleep` data with equivalence bounds (set by the `eqb` argument) of $\pm$ 0.5 units. The `smd_ci` argument can also be set to use one of four possible calculations for the SMD confidence interval. In the example below, I have opted to go with the normal approximation for computational ease; such approximations tend provide adequate coverage [@Viechtbauer_2007]. The formula interface works almost identically to `t.test`:
 
 ```{r}
-res1 = t_TOST(formula = extra ~ group, # difference in "group" of outcome "extra"
-              data = sleep, # data
-              eqb = .5, # equivalence bound
-              smd_ci = "z") # sets type of SMD confidence interval calculation
+res1 = t_TOST(
+  # difference in "group" of outcome "extra"
+  formula = extra ~ group,
+  # data
+  data = sleep,
+  # equivalence bound
+  eqb = .5,
+  # sets type of SMD confidence interval
+  smd_ci = "z"
+)
 ```
 
 The `print` method provides a verbose summary including the two-tailed test, both one-sided equivalence tests, and the standardized mean difference (Hedges' $g$ by default):
 
 ```{r}
 print(res1)
+```
+
+A greater description of the results can be accomplished with `describe` method.
+
+```{r, results = "asis"}
+cat(describe(res1))
 ```
 
 \newpage
@@ -274,10 +292,14 @@ Other plot types are available: `type = "c"` produces a consonance plot showing 
 When the equivalence bounds are not symmetric around the null, two values can be supplied to `eqb`. This is common when the research question implies asymmetric consequences. Similarly, we may want to test the mean itself rather than a mean difference. This harkens back to the original use of the t-test by Gosset at Guinness Brewery, where the concern was whether a single sample mean fell within acceptable limits. Here we test whether the mean of LDHF falls within the bounds of 5.5 and 8.5 around a hypothesized value of 7.5:
 
 ```{r}
-res4 = t_TOST(x = bugs$LDHF, # simple sample, vector from which to estimate mean
-              mu = 7.5, # set nil significance test to 7.5
-              eqb = c(5.5,8.5) # set TOST bounds to 5.5 and 8.5
-              )
+res4 = t_TOST(
+  # single sample, vector from which to estimate mean
+  x = bugs$LDHF,
+  # set nil significance test to 7.5
+  mu = 7.5,
+  # set TOST bounds to 5.5 and 8.5
+  eqb = c(5.5, 8.5)
+)
 res4
 ```
 
@@ -295,10 +317,17 @@ When only summary statistics are available (e.g., from a published article), the
 
 ```{r}
 res_tsum = tsum_TOST(
-  m1 = mean(bugs$LDHF, na.rm=TRUE), 
-  sd1 = sd(bugs$LDHF, na.rm=TRUE),
+  # sample mean
+  m1 = mean(bugs$LDHF, na.rm = TRUE),
+  # sample standard deviation
+  sd1 = sd(bugs$LDHF, na.rm = TRUE),
+  # sample size
   n1 = length(na.omit(bugs$LDHF)),
-  hypothesis = "EQU", smd_ci = "t", 
+  # equivalence rather than minimal effects test
+  hypothesis = "EQU",
+  # sets type of SMD confidence interval
+  smd_ci = "t",
+  # equivalence bounds
   eqb = c(5.5, 8.5)
 )
 
@@ -316,22 +345,30 @@ Alongside `simple_htest`, a set of helper functions makes it easy to work with a
 The `simple_htest` function supports `t.test` and `wilcox.test` as the underlying test (via the `test` argument) and all five alternative hypotheses: `"two.sided"`, `"less"`, `"greater"`, `"equivalence"`, and `"minimal.effect"`. The `mu` parameter specifies equivalence bounds --- a single value creates symmetric bounds (e.g., if 1 is provided at `mu` with `alternative = "equivalence"` then the equivalence region will be [-1,1]), or two values can be given for asymmetric bounds.
 
 ```{r}
-res_sh1 <- simple_htest(extra ~ group, 
-                        data = sleep,
-                        paired = TRUE,
-                        alternative = "equivalence", 
-                        mu = 0.5)
+res_sh1 = simple_htest(
+  extra ~ group,
+  data = sleep,
+  paired = TRUE,
+  # equivalence hypothesis
+  alternative = "equivalence",
+  # symmetric bounds of -0.5 and 0.5
+  mu = 0.5
+)
 res_sh1
 ```
 
 Additionally, tests other that TOST can be applied with this function. The traditional nil-hypothesis tests, non-inferiority, or even superiority-by-a-margin hypotheses can all be tested with this function. For example, let's say we want to test that a treatment group in the sleep data was just non-inferior to the other treatment rather than equivalent. This can be accomplished by just setting the direction with the `alternative` argument and the margin of non-inferiority by the `mu` argument.
 
 ```{r}
-res_sh2 <- simple_htest(extra ~ group, 
-                        data = sleep,
-                        paired = TRUE,
-                        alternative = "greater", 
-                        mu = -0.5)
+res_sh2 = simple_htest(
+  extra ~ group,
+  data = sleep,
+  paired = TRUE,
+  # non-inferiority rather than equivalence
+  alternative = "greater",
+  # margin of non-inferiority
+  mu = -0.5
+)
 res_sh2
 ```
 
@@ -341,8 +378,8 @@ Notice how the output, in either hypothesis test above, is a single clean `htest
 
 For writing up results, `describe_htest` generates a formatted text string following typical scientific reporting conventions:
 
-```{r}
-describe_htest(res_sh1)
+```{r, results = "asis"}
+cat(describe_htest(res_sh1))
 ```
 
 
@@ -358,9 +395,9 @@ plot_htest_est(res_sh1)
 
 # Standardized Effect Sizes
 
-This section provides a unified treatment of the standardized effect size tools in TOSTER --- standardized mean differences (SMDs), correlation coefficients, and tools for comparing both between studies. Before demonstrating these tools, it is worth discussing the limitations of standardized effect sizes, because these limitations are especially important for equivalence testing.
+This section provides a unified treatment of the standardized effect size tools in TOSTER and I cover standardized mean differences (SMDs), correlation coefficients, and tools for comparing both between studies. Before demonstrating these tools, it is worth discussing the limitations of standardized effect sizes, because these limitations are especially important for equivalence testing.
 
-## Problems with Standardized Effect Sizes
+## A Brief Warning on Standardized Effect Sizes
 
 Standardized effect sizes --- Cohen's $d$, correlation coefficients, standardized regression coefficients --- are appealing because they allow comparison across studies and scales, are required by many journals, and serve as the primary currency of meta-analysis. However, they have well-documented problems that are especially relevant to equivalence testing.
 
@@ -379,37 +416,55 @@ The `smd_calc` function computes standardized mean differences --- Cohen's $d$, 
 When estimation rather than testing is the goal, `smd_calc` can be called with `alternative = "none"` (the default), which returns only the point estimate and confidence interval without performing a hypothesis test. This is the recommended usage when the primary objective is to report the magnitude of the effect.
 
 ```{r}
-smd_calc(formula = extra ~ group,
-         data = sleep,
-         paired = TRUE,
-         bias_correction = TRUE,
-         rm_correction = TRUE,
-         output = "htest")
+smd_calc(
+  formula = extra ~ group,
+  data = sleep,
+  paired = TRUE,
+  # apply Hedges' correction
+  bias_correction = TRUE,
+  # apply the repeated measures correction
+  rm_correction = TRUE,
+  # return an htest object rather than a data frame
+  output = "htest"
+)
 ```
 
 When hypothesis testing on the SMD is desired, `smd_calc` supports equivalence and minimal-effect alternatives directly:
 
 ```{r}
-smd_calc(formula = extra ~ group,
-         data = sleep,
-         paired = TRUE,
-         bias_correction = TRUE,
-         rm_correction = TRUE,
-         alternative = "equivalence",
-         null.value = c(-0.5,0.5),
-         output = "htest")
+smd_calc(
+  formula = extra ~ group,
+  data = sleep,
+  paired = TRUE,
+  # apply Hedges' correction
+  bias_correction = TRUE,
+  # apply the repeated measures correction
+  rm_correction = TRUE,
+  # equivalence hypothesis
+  alternative = "equivalence",
+  # equivalence bounds on the SMD
+  null.value = c(-0.5, 0.5),
+  # return an htest object rather than a data frame
+  output = "htest"
+)
 ```
 
 However, the parametric z-test used by `smd_calc` relies on distributional assumptions about the sampling distribution of the SMD that may not hold in practice. When a hypothesis test on the SMD is the goal, bootstrapping via `boot_smd_calc` is recommended because it provides more robust confidence intervals and p-values.
 
 ```{r}
-boot_smd_calc(formula = extra ~ group,
-              data = sleep,
-              paired = TRUE,
-              bias_correction = TRUE,
-              rm_correction = TRUE,
-              alternative = "equivalence",
-              null.value = c(-0.5,0.5))
+boot_smd_calc(
+  formula = extra ~ group,
+  data = sleep,
+  paired = TRUE,
+  # apply Hedges' correction
+  bias_correction = TRUE,
+  # apply the repeated measures correction
+  rm_correction = TRUE,
+  # equivalence hypothesis
+  alternative = "equivalence",
+  # equivalence bounds on the SMD
+  null.value = c(-0.5, 0.5)
+)
 ```
 
 
@@ -425,8 +480,11 @@ Researchers sometimes need to test that a correlation is practically zero. The `
 z_cor_test(
   x = bugs$LDLF,
   y = bugs$LDHF,
+  # type of correlation coefficient
   method = "pearson",
-  alternative = "t")
+  # two-sided nil hypothesis test
+  alternative = "t"
+)
 ```
 
 Because the z-test relies on distributional approximations that can be inaccurate --- particularly with small samples --- bootstrapping via `boot_cor_test` is recommended for more robust inference. The `boot_cor_test` function supports all three major correlation methods (Pearson, Kendall, and Spearman) as well as the Winsorized [@Wilcox_1993] and percentage bend [@Wilcox_1994] correlation coefficients as robust alternatives, and returns standard `htest` objects that integrate with the helper functions described above.
@@ -435,13 +493,19 @@ Because the z-test relies on distributional approximations that can be inaccurat
 res_boot_cor = boot_cor_test(
   x = bugs$LDLF,
   y = bugs$LDHF,
+  # type of correlation coefficient
   method = "pearson",
+  # equivalence hypothesis
   alternative = "equivalence",
-  null = 0.4)
+  # equivalence bounds of -0.4 and 0.4
+  null = 0.4
+)
 
 print(res_boot_cor)
+```
 
-describe_htest(res_boot_cor)
+```{r, results = "asis"}
+cat(describe_htest(res_boot_cor))
 ```
 
 If only summary statistics are available, an approximate method is provided through `corsum_test`, which uses the Fisher z-transformation to compute confidence intervals and p-values.
@@ -454,29 +518,59 @@ Correlation-based inference in `z_cor_test` and `boot_cor_test` assumes independ
 
 When evaluating whether a replication study produced results consistent with the original, researchers need a way to formally compare effect sizes. The `compare_smd` function tests whether two SMD estimates --- from an original study and a replication, for example --- differ more than would be expected by sampling variability alone.
 
-Consider an original study reporting Cohen's $d_z$ = 0.95 with 25 participants and a replication with $d$ = 0.23 and 50 participants. Are these estimates compatible?
+Consider an original study reporting Cohen's $d_z$ = 0.95 with 25 participants and a replication with $d$ = 0.23 and 50 participants. Are these estimates compatible? Let's say that we deter
 
 ```{r}
-compare_smd(smd1 = 0.95,
-            n1 = 25,
-            smd2 = 0.23,
-            n2 = 50,
-            paired = TRUE,
-            null = .25,
-            alternative = "equivalence")
+# Significance test
+compare_smd(
+  # SMD and sample size of the original study
+  smd1 = 0.95,
+  n1 = 25,
+  # SMD and sample size of the replication
+  smd2 = 0.23,
+  n2 = 50,
+  # both estimates come from paired designs
+  paired = TRUE,
+  # nil hypothesis test
+  null = 0,
+  # significance hypothesis
+  alternative = "two.sided"
+)
+
+# Equivalence test
+compare_smd(
+  # SMD and sample size of the original study
+  smd1 = 0.95,
+  n1 = 25,
+  # SMD and sample size of the replication
+  smd2 = 0.23,
+  n2 = 50,
+  # both estimates come from paired designs
+  paired = TRUE,
+  # equivalence bounds on the difference in SMDs
+  null = .25,
+  # equivalence hypothesis
+  alternative = "equivalence"
+)
 ```
 
-Based on these results, we would reject the null significance hypothesis (the SMDs differ significantly) but fail to reject the equivalence null hypothesis (we cannot conclude the SMDs are practically equivalent). When raw data are available, `boot_compare_smd` provides a bootstrap alternative (see the package vignettes for details).
+Based on these results, we would reject the null significance hypothesis (conclude the SMDs differ) but fail to reject the equivalence null hypothesis (we cannot conclude the SMDs are practically equivalent). When raw data are available, `boot_compare_smd` provides a bootstrap alternative (see the package vignettes for details).
 
 For comparing correlation coefficients between independent studies, the `compare_cor` function provides an analogous test. It uses either the Fisher z-transformation (default) or the Kraatz (Anderson-Hauck) method to compare two correlation coefficients.
 
 ```{r}
-compare_cor(r1 = 0.45,
-            df1 = 48,
-            r2 = 0.25,
-            df2 = 78,
-            alternative = "equivalence",
-            null = 0.25)
+compare_cor(
+  # correlation and degrees of freedom of the first study
+  r1 = 0.45,
+  df1 = 48,
+  # correlation and degrees of freedom of the second study
+  r2 = 0.25,
+  df2 = 78,
+  # equivalence hypothesis
+  alternative = "equivalence",
+  # equivalence bounds on the difference in correlations
+  null = 0.25
+)
 ```
 
 When raw data are available for both studies, `boot_compare_cor` provides a bootstrap alternative that avoids the distributional approximations underlying the Fisher z and Kraatz methods.
@@ -484,8 +578,6 @@ When raw data are available for both studies, `boot_compare_cor` provides a boot
 The comparison functions `compare_smd` and `compare_cor` inherit the assumptions of the underlying effect size estimates they combine. Because both studies contribute to the comparison, violations in either study propagate into the test. When raw data are available, the bootstrap alternatives (`boot_compare_smd` and `boot_compare_cor`) are preferred because they avoid the Fisher z and related asymptotic approximations, which can be inaccurate particularly when effect sizes are large or sample sizes are modest. When only summary statistics are available, readers should report the diagnostic context of the original and replication studies where possible.
 
 \newpage
-
-**A note on argument names for equivalence bounds.** The equivalence bound argument is named differently across TOSTER functions for historical and compatibility reasons: `eqb` in `t_TOST`, `wilcox_TOST`, `equ_ftest`, and `equ_anova`; `mu` in `simple_htest`, `brunner_munzel`, `boot_t_test`, and `perm_t_test` (for compatibility with base R's `t.test`); and `null` in `compare_smd` and `z_cor_test`. Despite the different names, the interpretation is the same: the bound(s) defining the region of practical equivalence.
 
 # Robust Methods for Equivalence Testing
 
@@ -504,10 +596,13 @@ However, there are important caveats. Many researchers mistakenly believe these 
 For equivalence testing, bounds are applied to the pseudo-median, which corresponds to the mean or median difference only under the location-shift assumption. For testing hypotheses about mean differences, `perm_t_test` or `boot_t_test` are more appropriate. For stochastic superiority, `brunner_munzel` provides a clearer framework. 
 
 ```{r}
-test1 = wilcox_TOST(formula = extra ~ group,
-                      data = sleep,
-                      paired = TRUE,
-                      eqb = .5)
+test1 = wilcox_TOST(
+  formula = extra ~ group,
+  data = sleep,
+  paired = TRUE,
+  # equivalence bounds on the pseudo-median
+  eqb = .5
+)
 print(test1)
 ```
 
@@ -554,10 +649,14 @@ Stochastic superiority tests may be particularly well-suited to Likert-type scal
 The `brunner_munzel` function supports equivalence and minimal effect testing via `alternative`, with bounds on the probability scale via `mu`. Results can be reported on different scales (`"probability"`, `"difference"`, `"logodds"`, or `"odds"`), and three test methods are available: `"t"` (default), `"logit"` (range-preserving CIs), and `"perm"` (studentized permutation; @neubert2007).
 
 ```{r}
-bm_test = brunner_munzel(formula = extra ~ group,
-                         data = sleep,
-                         alternative = "equivalence",
-                         mu = c(0.3, 0.7))
+bm_test = brunner_munzel(
+  formula = extra ~ group,
+  data = sleep,
+  # equivalence hypothesis
+  alternative = "equivalence",
+  # equivalence bounds on the probability scale
+  mu = c(0.3, 0.7)
+)
 print(bm_test)
 ```
 
@@ -572,26 +671,31 @@ The Brunner-Munzel test has unusually light assumption requirements. It requires
 
 When the goal is to test hypotheses about means while relaxing distributional assumptions, resampling methods provide powerful tools. TOSTER implements both bootstrap and permutation approaches through `boot_t_test` and `perm_t_test`, each with distinct inferential logic but a shared motivation to retain the mean as the estimand while obtaining reference distributions empirically --- through resampling --- rather than relying on the normal-theory derivations (i.e., Student's t-test).
 
-Both approaches are natural extensions of the classic t-test rather than alternatives to it. The test statistic itself is unchanged; what changes is how the null distribution is constructed. In the conventional t-test, the null distribution of the standardized mean difference is derived analytically under the assumption that the data are drawn from a normal distribution, with equal variances assumed in Student's t-test and unequal variances accommodated in Welch's t-test. The bootstrap approximates the sampling distribution of the same statistic by resampling from the observed data with replacement, whereas the permutation approach constructs an exact or near-exact null distribution by shuffling group labels (two-sample) or flipping signs (one-sample and paired). In both cases, the researcher continues to ask the same question about means; only the calibration of the reference distribution differs. This is important for researchers who may view resampling methods as a departure from familiar testing logic: the estimand, the null hypothesis, and the test statistic remain the same.
+Both approaches are natural extensions of the classic t-test. The test statistic itself is unchanged; what changes is how the null distribution is constructed. In the conventional t-test, the null distribution of the standardized mean difference is derived analytically under the assumption that the data are drawn from a normal distribution, with equal variances assumed in Student's t-test and unequal variances accommodated in Welch's t-test. The bootstrap approximates the sampling distribution of the same statistic by resampling from the observed data with replacement, whereas the permutation approach constructs an exact or near-exact null distribution by shuffling group labels (two-sample) or flipping signs (one-sample and paired). In both cases, the researcher continues to ask the same question about means; only the calibration of the reference distribution differs. This is important for researchers who may view resampling methods as a departure from familiar testing logic because the estimand, the null hypothesis, and the test statistic remain the same.
 
 Because the reference distribution is generated from the data rather than assumed, distributional requirements are relaxed, though not eliminated. The bootstrap relies on asymptotic arguments and assumes that the empirical distribution is a reasonable stand-in for the population distribution; it performs well with moderate-to-large samples and skewed or heavy-tailed data, but can struggle with very small samples or extreme outliers. The permutation approach is exact under the null hypothesis of exchangeability, meaning group labels carry no information about outcomes. In its basic form this exactness requires identical distributions under the null, which implicitly assumes equal variances. The studentized permutation test [@janssen1997; @chung2013] addresses this limitation by permuting a scale-invariant statistic (essentially the Welch t-statistic), yielding asymptotically valid inference even under heteroscedasticity. @Arboretti_Pesarin_Salmaso_2020 extended this logic to the equivalence testing setting, showing that studentized permutation TOST maintains nominal Type I error rates when variances differ across groups. In short, these methods are assumption-lighter rather than assumption-free, and users should still consider whether independence and exchangeability are reasonable for their design.
 
 A common reflex when normality seems implausible is to switch to the WMW or other rank-based tests. However, these tests answer a different question. As discussed earlier in this manuscript, rank-based procedures test hypotheses about stochastic ordering or pseudo-medians rather than means, and under heteroscedasticity they can reject the null even when the groups have identical means. When the scientific question is genuinely about means --— as it often is in applied research where effect sizes and interventions are naturally expressed on the original scale —-- bootstrap and permutation t-tests should generally be preferred over rank-based methods for handling such violations of assumptions. The rank-based tests remain useful, but as answers to different questions, not as robust substitutes for tests of means.
 
-Choosing between the bootstrap and permutation approaches involves tradeoffs rather than a clear winner in most situations. The studentized permutation test has the strongest theoretical footing for two-sample mean comparisons under heteroscedasticity, and is particularly attractive for equivalence testing given the @Arboretti_Pesarin_Salmaso_2020 results. The bootstrap offers greater flexibility because it extends naturally to statistics beyond the mean difference, provides readily interpretable confidence intervals via CI inversion [@Thulin_2024], and ensures consistency between reported intervals and p-values. In small samples, permutation approaches tend to have better finite-sample calibration because the null distribution is constructed exactly (or nearly so) from the data at hand, whereas the bootstrap's asymptotic justification can produce liberal tests with very small sample sizes. When outliers are a concern, both methods accept the `tr` argument for trimmed means, which reduces the influence of extreme observations while preserving the mean-based interpretation. As a rough heuristic, researchers comparing two independent groups with suspected unequal variances may find the studentized permutation test most defensible, while those wanting a single framework that yields coherent intervals and p-values across a range of designs may prefer the bootstrap. Both are substantial improvements over ignoring assumption violations, and both return standard `htest` objects that integrate with the TOST framework for equivalence and minimal effect testing.
+Choosing between the bootstrap and permutation approaches involves tradeoffs rather than a clear winner in most situations. The studentized permutation test has the strongest theoretical footing for two-sample mean comparisons under heteroscedasticity, and is particularly attractive for equivalence testing given the @Arboretti_Pesarin_Salmaso_2020 results. The bootstrap offers greater flexibility because it extends naturally to statistics beyond the mean difference, provides readily interpretable confidence intervals via CI inversion [@Thulin_2024], and ensures consistency between reported intervals and p-values. In small samples, permutation approaches tend to have better finite-sample calibration because the null distribution is constructed exactly (or nearly so) from the data at hand, whereas the bootstrap's asymptotic justification can produce liberal tests with very small sample sizes. When outliers are a concern, both methods accept the `tr` argument for trimmed means, which reduces the influence of extreme observations while preserving a location-based interpretation on the original scale. As a rough heuristic, researchers comparing two independent groups with suspected unequal variances may find the studentized permutation test most defensible, while those wanting a single framework that yields coherent intervals and p-values across a range of designs may prefer the bootstrap. Both are substantial improvements over ignoring assumption violations of the t-test, and both return standard `htest` objects that integrate with the TOST framework for equivalence and minimal effect testing.
 
 ### Bootstrap t-test
 
-The bootstrap t-test in TOSTER defaults to the studentized bootstrap (`boot_ci = "stud"`) because this matches the original bootstrap t-test proposed by @efron93 (Chapter 16), which is the procedure `boot_t_TOST` implements. In this approach, the t-statistic itself is resampled rather than the raw mean difference, and confidence intervals are constructed from the bootstrap distribution of these pivotal quantities. Other CI methods (percentile, basic, and BCa) remain available via the `boot_ci` argument, but the studentized default preserves consistency with the canonical Efron and Tibshirani formulation. It also ensures that the reported p-value and confidence interval are derived from the same bootstrap distribution, so the two will always agree; previous versions of the package used the studentized p-value regardless of the selected CI method, which could produce disagreement between reported intervals and p-values.
+The bootstrap t-test in TOSTER defaults to the studentized bootstrap (`boot_ci = "stud"`) because this matches the original bootstrap t-test proposed by @efron93 (Chapter 16), which is the procedure `boot_t_TOST` implements. In this approach, the t-statistic itself is resampled rather than the raw mean difference, and confidence intervals are constructed from the bootstrap distribution of these pivotal quantities. Other CI methods (percentile, basic, and BCa) remain available via the `boot_ci` argument, but the studentized default preserves consistency with the canonical  @efron93 formulation. It also ensures that the reported p-value and confidence interval are derived from the same bootstrap distribution, so the two will always agree; previous versions of the package used the studentized p-value regardless of the selected CI method, which could produce disagreement between reported intervals and p-values.
 
 ```{r}
 set.seed(4522)
-boot_t_test(formula = extra ~ group,
-            data = sleep,
-            paired = TRUE,
-            alternative = "equivalence",
-            mu = c(-0.5, 0.5),
-            R = 999)
+boot_t_test(
+  formula = extra ~ group,
+  data = sleep,
+  paired = TRUE,
+  # equivalence hypothesis
+  alternative = "equivalence",
+  # equivalence bounds
+  mu = c(-0.5, 0.5),
+  # number of bootstrap resamples
+  R = 999
+)
 ```
 
 The output follows the familiar `htest` format. The reported p-value is the larger of the two one-sided tests against the equivalence bounds, and the confidence interval is the studentized bootstrap CI for the mean difference. Because the p-value is tied to this interval via CI inversion, a researcher reporting both will find the two tell a consistent story. The interval will fall within the equivalence bounds if and only if the equivalence test rejects.
@@ -599,11 +703,15 @@ For situations where both a nil hypothesis test and an equivalence test are desi
 
 ```{r}
 set.seed(891111)
-test1 = boot_t_TOST(formula = extra ~ group,
-                    data = sleep,
-                    paired = TRUE,
-                    eqb = .5,
-                    R = 999)
+test1 = boot_t_TOST(
+  formula = extra ~ group,
+  data = sleep,
+  paired = TRUE,
+  # equivalence bounds
+  eqb = .5,
+  # number of bootstrap resamples
+  R = 999
+)
 print(test1)
 ```
 
@@ -615,19 +723,24 @@ The bootstrap t-test makes fewer distributional assumptions than its conventiona
 
 ### Permutation t-test
 
-When `R = NULL`, the function enumerates all possible permutations for an exact test; otherwise, it draws R random permutations with the "+1" correction [@phipson2010]. By default the test is studentized (`perm_se = TRUE`), consistent with the recommendations discussed in the methods section above. The `perm_se = FALSE` option is available primarily to match the behavior of other permutation test packages that do not studentize by default.
+When `R = NULL`, the function enumerates all possible permutations for an exact test; otherwise, it draws R random permutations with the "+1" correction [@phipson2010]. By default the test is studentized (`perm_se = TRUE`), consistent with the recommendations discussed in the methods section above. The `perm_se = FALSE` option is available primarily to match the behavior of other R packages that provide permutation tests that do not studentize by default.
 
 ```{r}
 set.seed(8812)
-perm_t_test(formula = extra ~ group,
-            data = sleep,
-            paired = TRUE,
-            alternative = "equivalence",
-            mu = c(-0.5, 0.5),
-            R = 999)
+perm_t_test(
+  formula = extra ~ group,
+  data = sleep,
+  paired = TRUE,
+  # equivalence hypothesis
+  alternative = "equivalence",
+  # equivalence bounds
+  mu = c(-0.5, 0.5),
+  # number of random permutations
+  R = 999
+)
 ```
 
-Running the bootstrap and permutation equivalence tests on the same paired sleep data using matching equivalence bounds produces broadly similar conclusions, as would be expected. The two approaches can, however, diverge in small samples, under strong heteroscedasticity, or in the presence of influential outliers, which is where the choice between them becomes substantively important. Users interested in robustness to outliers can additionally supply the `tr` argument to either function to use trimmed means, preserving the mean-based interpretation while downweighting extreme observations.
+Running the bootstrap and permutation equivalence tests on the same paired sleep data using matching equivalence bounds produces broadly similar conclusions, as would be expected. The two approaches can, however, diverge in small samples, under strong heteroscedasticity, or in the presence of influential outliers, which is where the choice between them becomes substantively important. Users interested in robustness to outliers can additionally supply the `tr` argument to either function to use trimmed means, which downweight extreme observations while preserving a location-based interpretation on the original scale.
 
 #### Checking Assumptions
 
@@ -663,7 +776,7 @@ From this analysis, we would conclude there is a significant effect that is not 
 
 ### Checking Assumptions
 
-The log-transformed methods inherit the assumptions of the underlying test applied to the transformed data. The `log_TOST` function carries forward the t-test assumptions, and `boot_log_TOST` carries forward the bootstrap t-test assumptions. What changes is where those assumptions need to hold. Normality, symmetry, and homogeneity of variance should be assessed on the log scale rather than the original scale, since that is where inference takes place. The same visual diagnostics apply just computed on log-transformed data. This points to a broader practical use of log transformation. When the symmetry assumption of the sign-flip permutation test is violated because paired differences are right-skewed on the original scale, the differences of logs are often approximately symmetric, and `perm_t_test` on log-transformed values becomes a reasonable option. In such cases the equivalence bounds should be specified on the log scale and interpreted as log ratios (or sympercents). As with Student's t-test or the bootstrap t-test, assumptions are relaxed by the transformation but not eliminated --— they are simply moved to a different scale.
+The log-transformed methods inherit the assumptions of the underlying test applied to the transformed data. The `log_TOST` function carries forward the t-test assumptions, and `boot_log_TOST` carries forward the bootstrap t-test assumptions. What changes is where those assumptions need to hold. Normality, symmetry, and homogeneity of variance should be assessed on the log scale rather than the original scale, since that is where inference takes place. The same visual diagnostics apply just computed on log-transformed data. This points to a broader practical use of log transformation. When the symmetry assumption of the sign-flip permutation test is violated because paired differences are right-skewed on the original scale, the differences of logs are often approximately symmetric, and `perm_t_test` on log-transformed values becomes a reasonable option. In such cases the equivalence bounds should be specified on the log scale and interpreted as log ratios (or sympercents). 
 
 \newpage
 
@@ -687,7 +800,14 @@ anova(aovtest)
 ```
 
 ```{r}
-equ_ftest(Fstat = 34.70228,  df1 = 5, df2 = 66,  eqb = 0.35)
+equ_ftest(
+  # F statistic and degrees of freedom from the ANOVA table
+  Fstat = 34.70228,
+  df1 = 5,
+  df2 = 66,
+  # equivalence bound on partial eta-squared
+  eqb = 0.35
+)
 ```
 
 Based on these results, there is a significant effect of "spray" and the differences are *not* statistically equivalent --- we reject the traditional null hypothesis but fail to reject the equivalence null hypothesis.
@@ -703,10 +823,18 @@ The `equ_anova` function accepts objects from `stats::aov`, `car::Anova`, and `a
 # (Maxwell & Delaney, 2004, Chapter 12, Table 12.5, p. 578):
 library(afex)
 data(md_12.1)
-aovtest2 = aov_ez("id", "rt", md_12.1, within = c("angle", "noise"),
-       anova_table=list(correction = "none", es = "none"))
-equ_anova(aovtest2,
-          eqb = 0.35)
+aovtest2 = aov_ez(
+  # participant identifier
+  "id",
+  # dependent variable
+  "rt",
+  # data
+  md_12.1,
+  # within-subjects factors
+  within = c("angle", "noise"),
+  anova_table = list(correction = "none", es = "none")
+)
+equ_anova(aovtest2, eqb = 0.35)
 ```
 
 \newpage
@@ -722,9 +850,18 @@ The `power_t_TOST` function computes exact power for TOST with one-sample, two-s
 For example, to determine the sample size needed to achieve 80% power to detect equivalence within bounds of $\pm$ 0.5 (assuming the true difference is zero and $SD$ = 1):
 
 ```{r}
-power_t_TOST(delta = 0, sd = 1, eqb = 0.5,
-             alpha = 0.05, power = 0.8,
-             type = "two.sample")
+power_t_TOST(
+  # true mean difference
+  delta = 0,
+  # assumed standard deviation
+  sd = 1,
+  # equivalence bounds
+  eqb = 0.5,
+  alpha = 0.05,
+  # leaving n unspecified solves for the n giving 80% power
+  power = 0.8,
+  type = "two.sample"
+)
 ```
 
 ## Power for Correlations
@@ -732,14 +869,22 @@ power_t_TOST(delta = 0, sd = 1, eqb = 0.5,
 The `power_z_cor` function provides power analysis for equivalence tests on Pearson correlations using Fisher's z-transformation:
 
 ```{r}
-power_z_cor(rho = 0, power = 0.8,
-            null = 0.3, alpha = 0.05,
-            alternative = "equivalence")
+power_z_cor(
+  # true correlation
+  rho = 0,
+  # leaving n unspecified solves for the n giving 80% power
+  power = 0.8,
+  # equivalence bounds of -0.3 and 0.3
+  null = 0.3,
+  alpha = 0.05,
+  # equivalence hypothesis
+  alternative = "equivalence"
+)
 ```
 
 ## Extensions: PowerTOST and Superpower
 
-For more complex designs --- crossover studies, replicate designs, group-sequential equivalence trials --- the PowerTOST package [@PowerTOST] provides extensive functionality beyond what TOSTER offers. For factorial designs where equivalence contrasts are tested via estimated marginal means, simulation-based power analysis via the Superpower package is recommended [@Lakens_Caldwell_2021]. Both packages complement TOSTER's built-in power tools for common research designs. 
+For more complex designs --- crossover studies, replicate designs, group-sequential equivalence trials --- the PowerTOST package [@PowerTOST] provides extensive functionality beyond what TOSTER offers. For factorial designs where equivalence contrasts are tested via estimated marginal means, simulation-based power analysis via the Superpower package is recommended [@Lakens_Caldwell_2021]. Both packages complement TOSTER's built-in power tools for common research designs. In some situations, customized simulations may be required to accurately determine power for an equivalence test.
 
 \newpage
 
@@ -776,7 +921,7 @@ Citations of this manuscript will benefit his citation count.
 
 ## AI Use Disclosure {-}
 
-During the preparation of the TOSTER package updates and this manuscript, the author used Claude Opus 4.5-4.7 (Anthropic) to assist with editing R code and drafting unit tests. For the manuscript text, Claude Opus was used only for targeted copy-editing — suggesting revisions to specific passages, catching typographical and grammatical errors, and identifying inconsistencies across sections. The manuscript was written by the author, and all AI-assisted output was reviewed, revised, and verified by the author, who takes full responsibility for the content of the package and the manuscript.
+During the preparation of the TOSTER package updates and this manuscript, the author used Claude Opus 4.5-4.8 (Anthropic) to assist with editing R code and drafting unit tests. For the manuscript text, Claude Opus was used only for targeted copy-editing — suggesting revisions to specific passages, catching typographical and grammatical errors, and identifying inconsistencies across sections. The manuscript was written by the author, and all AI-assisted output was reviewed, revised, and verified by the author, who takes full responsibility for the content of the package and the manuscript.
 
 ## Funding {-}
 

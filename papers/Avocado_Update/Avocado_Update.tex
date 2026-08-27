@@ -188,10 +188,11 @@ packages can accommodate non-zero null hypotheses. TOSTER fills the
 space of accessible, self-contained equivalence testing for common,
 albeit simple, research designs. For a broader introduction to the
 methodology, see \citet{lakens_ori}, \citet{lakens2018equivalence},
-\citet{lakens2020improving}, and \citet{mazzolari2022myths}. TOSTER is
-also available as a \href{https://www.jamovi.org/}{jamovi} module for
-researchers who prefer a graphical interface although it has limited
-capabilities compared to the R package.
+\citet{lakens2020improving}, \citet{mazzolari2022myths}, and
+\citet{Tomek_Caldwell_Eisner_2026}. TOSTER is also available as a
+\href{https://www.jamovi.org/}{jamovi} module for researchers who prefer
+a graphical interface although it has limited capabilities compared to
+the R package.
 
 \section{Setting Equivalence Bounds}\label{setting-equivalence-bounds}
 
@@ -232,11 +233,11 @@ bounds that are too wide, too narrow, and likely entirely disconnected
 from the substantive research question.
 
 If a researcher cannot specify meaningful bounds, this itself is
-informative --- it suggests the equivalence hypothesis is not well
-enough developed to test such a hypothesis. In such cases, it may be
-more productive to focus on effect estimation and description rather
-than leaping to hypothesis tests \citep{scheel_hypothesis}. Throughout
-the examples in this paper, equivalence bounds, and the data sets
+informative as it suggests the equivalence hypothesis is not well enough
+developed to test such a hypothesis. In such cases, it may be more
+productive to focus on effect estimation and description rather than
+leaping to hypothesis tests \citep{scheel_hypothesis}. Throughout the
+examples in this paper, equivalence bounds, and the data sets
 themselves, are chosen for illustrative purposes; readers should not
 treat them as direct recommendations for their own research.
 
@@ -244,9 +245,9 @@ treat them as direct recommendations for their own research.
 
 The \texttt{t\_TOST} function provides a unified interface for
 equivalence and minimal effect testing with t-tests. It runs a standard
-nil significance test (\$H\_0: \$) alongside the equivalence (or minimal
-effect) test, because in practice researchers may want both: ``Is there
-a significant effect?'' and ``Can I rule out a meaningful effect?'' The
+nil significance test alongside the equivalence (or minimal effect)
+test, because in practice researchers may want both: ``Is there a
+significant effect?'' and ``Can I rule out a meaningful effect?'' The
 function handles independent, paired, and one-sample designs through the
 \texttt{paired} argument and accepts data via either a formula interface
 or raw vectors, making it a direct analog to base R's \texttt{t.test}.
@@ -263,7 +264,7 @@ meaningful effect (see Figure 1) \citep{mazzolari2022myths}.
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio]{Avocado_Update_files/Avocado_Update_files/figure-latex/hypplot-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Types of hypotheses tests supported by two one-sided tests (TOST) procedures.}]{Avocado_Update_files/Avocado_Update_files/figure-latex/hypplot-1.pdf}}
 \caption{Types of hypotheses tests supported by two one-sided tests
 (TOST) procedures.}
 \end{figure}
@@ -295,10 +296,16 @@ to \texttt{t.test}:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{res1 }\OtherTok{=} \FunctionTok{t\_TOST}\NormalTok{(}\AttributeTok{formula =}\NormalTok{ extra }\SpecialCharTok{\textasciitilde{}}\NormalTok{ group, }\CommentTok{\# difference in "group" of outcome "extra"}
-              \AttributeTok{data =}\NormalTok{ sleep, }\CommentTok{\# data}
-              \AttributeTok{eqb =}\NormalTok{ .}\DecValTok{5}\NormalTok{, }\CommentTok{\# equivalence bound}
-              \AttributeTok{smd\_ci =} \StringTok{"z"}\NormalTok{) }\CommentTok{\# sets type of SMD confidence interval calculation}
+\NormalTok{res1 }\OtherTok{=} \FunctionTok{t\_TOST}\NormalTok{(}
+  \CommentTok{\# difference in "group" of outcome "extra"}
+  \AttributeTok{formula =}\NormalTok{ extra }\SpecialCharTok{\textasciitilde{}}\NormalTok{ group,}
+  \CommentTok{\# data}
+  \AttributeTok{data =}\NormalTok{ sleep,}
+  \CommentTok{\# equivalence bound}
+  \AttributeTok{eqb =}\NormalTok{ .}\DecValTok{5}\NormalTok{,}
+  \CommentTok{\# sets type of SMD confidence interval}
+  \AttributeTok{smd\_ci =} \StringTok{"z"}
+\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -334,6 +341,25 @@ mean difference (Hedges' \(g\) by default):
 ## Note: SMD confidence intervals are an approximation. See vignette("SMD_calcs").
 \end{verbatim}
 
+A greater description of the results can be accomplished with
+\texttt{describe} method.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\FunctionTok{describe}\NormalTok{(res1))}
+\end{Highlighting}
+\end{Shaded}
+
+Using the Welch Two Sample t-test, a null hypothesis significance test
+(NHST), and a equivalence test, via two one-sided tests (TOST), were
+performed with an alpha-level of 0.05. These tested the null hypotheses
+that true mean difference is equal to 0 (NHST), and true mean difference
+is more extreme than -0.5 and 0.5 (TOST). Both the equivalence test (p =
+0.89), and the NHST (p = 0.079) were not significant (mean difference =
+-1.58 90\% C.I.{[}-3.05, -0.107{]}; Hedges's g(av) = -0.796 90\%
+C.I.{[}-1.6, 0.009{]}). Therefore, the results are inconclusive: neither
+null hypothesis can be rejected.
+
 \newpage
 
 The default visualization provided by the generic \texttt{plot} method
@@ -350,7 +376,7 @@ plot.
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio]{Avocado_Update_files/Avocado_Update_files/figure-latex/genericplot-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Results of the independent-samples equivalence test visualized with the default plot method. The top panel displays the raw mean difference with its 90\% confidence interval, and the bottom panel displays the standardized effect size (Hedges's gav) with its 90\% confidence interval. In both panels, the dashed vertical lines indicate the equivalence bounds (raw: -0.5 to 0.5; standardized: approximately -0.3 to 0.3), and the point estimate is marked by a filled circle. A 90\% confidence interval is used because it corresponds to the two one-sided tests (TOST) procedure at an alpha level of 0.05.}]{Avocado_Update_files/Avocado_Update_files/figure-latex/genericplot-1.pdf}}
 \caption{Results of the independent-samples equivalence test visualized
 with the default plot method. The top panel displays the raw mean
 difference with its 90\% confidence interval, and the bottom panel
@@ -375,7 +401,7 @@ confidence intervals, and equivalence bounds simultaneously:
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio]{Avocado_Update_files/Avocado_Update_files/figure-latex/cdplot-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Consonance density plot for the independent-samples equivalence test. The top panel displays the standardized effect size (Hedges's gav) and the bottom panel displays the raw mean difference. In each panel, the consonance density curve represents the distribution of confidence intervals across all levels, with color-coded regions corresponding to the 68\%, 90\%, 95\%, and 99.9\% confidence intervals. The point estimate is marked by a filled circle along the x-axis. The dashed vertical lines indicate the equivalence bounds (standardized: -0.26 to 0.26; raw: -0.5 to 0.5). This visualization conveys the full range of effect sizes compatible with the data at varying confidence levels, rather than relying on a single confidence interval. Wider, less certain intervals (e.g., 99.9\%) extend further from the point estimate, while narrower intervals (e.g., 68\%) cluster near it.}]{Avocado_Update_files/Avocado_Update_files/figure-latex/cdplot-1.pdf}}
 \caption{Consonance density plot for the independent-samples equivalence
 test. The top panel displays the standardized effect size (Hedges's
 g\textsubscript{av}) and the bottom panel displays the raw mean
@@ -412,10 +438,14 @@ Here we test whether the mean of LDHF falls within the bounds of 5.5 and
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{res4 }\OtherTok{=} \FunctionTok{t\_TOST}\NormalTok{(}\AttributeTok{x =}\NormalTok{ bugs}\SpecialCharTok{$}\NormalTok{LDHF, }\CommentTok{\# simple sample, vector from which to estimate mean}
-              \AttributeTok{mu =} \FloatTok{7.5}\NormalTok{, }\CommentTok{\# set nil significance test to 7.5}
-              \AttributeTok{eqb =} \FunctionTok{c}\NormalTok{(}\FloatTok{5.5}\NormalTok{,}\FloatTok{8.5}\NormalTok{) }\CommentTok{\# set TOST bounds to 5.5 and 8.5}
-\NormalTok{              )}
+\NormalTok{res4 }\OtherTok{=} \FunctionTok{t\_TOST}\NormalTok{(}
+  \CommentTok{\# single sample, vector from which to estimate mean}
+  \AttributeTok{x =}\NormalTok{ bugs}\SpecialCharTok{$}\NormalTok{LDHF,}
+  \CommentTok{\# set nil significance test to 7.5}
+  \AttributeTok{mu =} \FloatTok{7.5}\NormalTok{,}
+  \CommentTok{\# set TOST bounds to 5.5 and 8.5}
+  \AttributeTok{eqb =} \FunctionTok{c}\NormalTok{(}\FloatTok{5.5}\NormalTok{, }\FloatTok{8.5}\NormalTok{)}
+\NormalTok{)}
 \NormalTok{res4}
 \end{Highlighting}
 \end{Shaded}
@@ -483,10 +513,17 @@ designs) the correlation between measures\footnote{The
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{res\_tsum }\OtherTok{=} \FunctionTok{tsum\_TOST}\NormalTok{(}
-  \AttributeTok{m1 =} \FunctionTok{mean}\NormalTok{(bugs}\SpecialCharTok{$}\NormalTok{LDHF, }\AttributeTok{na.rm=}\ConstantTok{TRUE}\NormalTok{), }
-  \AttributeTok{sd1 =} \FunctionTok{sd}\NormalTok{(bugs}\SpecialCharTok{$}\NormalTok{LDHF, }\AttributeTok{na.rm=}\ConstantTok{TRUE}\NormalTok{),}
+  \CommentTok{\# sample mean}
+  \AttributeTok{m1 =} \FunctionTok{mean}\NormalTok{(bugs}\SpecialCharTok{$}\NormalTok{LDHF, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
+  \CommentTok{\# sample standard deviation}
+  \AttributeTok{sd1 =} \FunctionTok{sd}\NormalTok{(bugs}\SpecialCharTok{$}\NormalTok{LDHF, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
+  \CommentTok{\# sample size}
   \AttributeTok{n1 =} \FunctionTok{length}\NormalTok{(}\FunctionTok{na.omit}\NormalTok{(bugs}\SpecialCharTok{$}\NormalTok{LDHF)),}
-  \AttributeTok{hypothesis =} \StringTok{"EQU"}\NormalTok{, }\AttributeTok{smd\_ci =} \StringTok{"t"}\NormalTok{, }
+  \CommentTok{\# equivalence rather than minimal effects test}
+  \AttributeTok{hypothesis =} \StringTok{"EQU"}\NormalTok{,}
+  \CommentTok{\# sets type of SMD confidence interval}
+  \AttributeTok{smd\_ci =} \StringTok{"t"}\NormalTok{,}
+  \CommentTok{\# equivalence bounds}
   \AttributeTok{eqb =} \FunctionTok{c}\NormalTok{(}\FloatTok{5.5}\NormalTok{, }\FloatTok{8.5}\NormalTok{)}
 \NormalTok{)}
 
@@ -563,11 +600,15 @@ given for asymmetric bounds.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{res\_sh1 }\OtherTok{\textless{}{-}} \FunctionTok{simple\_htest}\NormalTok{(extra }\SpecialCharTok{\textasciitilde{}}\NormalTok{ group, }
-                        \AttributeTok{data =}\NormalTok{ sleep,}
-                        \AttributeTok{paired =} \ConstantTok{TRUE}\NormalTok{,}
-                        \AttributeTok{alternative =} \StringTok{"equivalence"}\NormalTok{, }
-                        \AttributeTok{mu =} \FloatTok{0.5}\NormalTok{)}
+\NormalTok{res\_sh1 }\OtherTok{=} \FunctionTok{simple\_htest}\NormalTok{(}
+\NormalTok{  extra }\SpecialCharTok{\textasciitilde{}}\NormalTok{ group,}
+  \AttributeTok{data =}\NormalTok{ sleep,}
+  \AttributeTok{paired =} \ConstantTok{TRUE}\NormalTok{,}
+  \CommentTok{\# equivalence hypothesis}
+  \AttributeTok{alternative =} \StringTok{"equivalence"}\NormalTok{,}
+  \CommentTok{\# symmetric bounds of {-}0.5 and 0.5}
+  \AttributeTok{mu =} \FloatTok{0.5}
+\NormalTok{)}
 \NormalTok{res\_sh1}
 \end{Highlighting}
 \end{Shaded}
@@ -600,11 +641,15 @@ the \texttt{mu} argument.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{res\_sh2 }\OtherTok{\textless{}{-}} \FunctionTok{simple\_htest}\NormalTok{(extra }\SpecialCharTok{\textasciitilde{}}\NormalTok{ group, }
-                        \AttributeTok{data =}\NormalTok{ sleep,}
-                        \AttributeTok{paired =} \ConstantTok{TRUE}\NormalTok{,}
-                        \AttributeTok{alternative =} \StringTok{"greater"}\NormalTok{, }
-                        \AttributeTok{mu =} \SpecialCharTok{{-}}\FloatTok{0.5}\NormalTok{)}
+\NormalTok{res\_sh2 }\OtherTok{=} \FunctionTok{simple\_htest}\NormalTok{(}
+\NormalTok{  extra }\SpecialCharTok{\textasciitilde{}}\NormalTok{ group,}
+  \AttributeTok{data =}\NormalTok{ sleep,}
+  \AttributeTok{paired =} \ConstantTok{TRUE}\NormalTok{,}
+  \CommentTok{\# non{-}inferiority rather than equivalence}
+  \AttributeTok{alternative =} \StringTok{"greater"}\NormalTok{,}
+  \CommentTok{\# margin of non{-}inferiority}
+  \AttributeTok{mu =} \SpecialCharTok{{-}}\FloatTok{0.5}
+\NormalTok{)}
 \NormalTok{res\_sh2}
 \end{Highlighting}
 \end{Shaded}
@@ -639,13 +684,15 @@ text string following typical scientific reporting conventions:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{describe\_htest}\NormalTok{(res\_sh1)}
+\FunctionTok{cat}\NormalTok{(}\FunctionTok{describe\_htest}\NormalTok{(res\_sh1))}
 \end{Highlighting}
 \end{Shaded}
 
-\begin{verbatim}
-## [1] "The Paired t-test is not statistically significant (t(9) = -2.78, p = 0.989, mean of the differences (z = '1' - '2') = -1.58, 90% C.I.[-2.29, -0.867]) at a 0.05 alpha-level. The null hypothesis cannot be rejected. At the desired error rate, it cannot be stated that the true mean difference is between -0.5 and 0.5."
-\end{verbatim}
+The Paired t-test is not statistically significant (t(9) = -2.78, p =
+0.989, mean of the differences (z = `1' - `2') = -1.58, 90\%
+C.I.{[}-2.29, -0.867{]}) at a 0.05 alpha-level. The null hypothesis
+cannot be rejected. At the desired error rate, it cannot be stated that
+the true mean difference is between -0.5 and 0.5.
 
 \subsection{Plotting Results}\label{plotting-results}
 
@@ -661,7 +708,7 @@ tests, the equivalence bounds are shown as dashed vertical lines:
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio]{Avocado_Update_files/Avocado_Update_files/figure-latex/shplot1-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Estimate plot for an equivalence test via simple\_htest.}]{Avocado_Update_files/Avocado_Update_files/figure-latex/shplot1-1.pdf}}
 \caption{Estimate plot for an equivalence test via simple\_htest.}
 \end{figure}
 
@@ -670,14 +717,14 @@ tests, the equivalence bounds are shown as dashed vertical lines:
 \section{Standardized Effect Sizes}\label{standardized-effect-sizes}
 
 This section provides a unified treatment of the standardized effect
-size tools in TOSTER --- standardized mean differences (SMDs),
+size tools in TOSTER and I cover standardized mean differences (SMDs),
 correlation coefficients, and tools for comparing both between studies.
 Before demonstrating these tools, it is worth discussing the limitations
 of standardized effect sizes, because these limitations are especially
 important for equivalence testing.
 
-\subsection{Problems with Standardized Effect
-Sizes}\label{problems-with-standardized-effect-sizes}
+\subsection{A Brief Warning on Standardized Effect
+Sizes}\label{a-brief-warning-on-standardized-effect-sizes}
 
 Standardized effect sizes --- Cohen's \(d\), correlation coefficients,
 standardized regression coefficients --- are appealing because they
@@ -744,12 +791,17 @@ primary objective is to report the magnitude of the effect.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{smd\_calc}\NormalTok{(}\AttributeTok{formula =}\NormalTok{ extra }\SpecialCharTok{\textasciitilde{}}\NormalTok{ group,}
-         \AttributeTok{data =}\NormalTok{ sleep,}
-         \AttributeTok{paired =} \ConstantTok{TRUE}\NormalTok{,}
-         \AttributeTok{bias\_correction =} \ConstantTok{TRUE}\NormalTok{,}
-         \AttributeTok{rm\_correction =} \ConstantTok{TRUE}\NormalTok{,}
-         \AttributeTok{output =} \StringTok{"htest"}\NormalTok{)}
+\FunctionTok{smd\_calc}\NormalTok{(}
+  \AttributeTok{formula =}\NormalTok{ extra }\SpecialCharTok{\textasciitilde{}}\NormalTok{ group,}
+  \AttributeTok{data =}\NormalTok{ sleep,}
+  \AttributeTok{paired =} \ConstantTok{TRUE}\NormalTok{,}
+  \CommentTok{\# apply Hedges\textquotesingle{} correction}
+  \AttributeTok{bias\_correction =} \ConstantTok{TRUE}\NormalTok{,}
+  \CommentTok{\# apply the repeated measures correction}
+  \AttributeTok{rm\_correction =} \ConstantTok{TRUE}\NormalTok{,}
+  \CommentTok{\# return an htest object rather than a data frame}
+  \AttributeTok{output =} \StringTok{"htest"}
+\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -773,14 +825,21 @@ supports equivalence and minimal-effect alternatives directly:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{smd\_calc}\NormalTok{(}\AttributeTok{formula =}\NormalTok{ extra }\SpecialCharTok{\textasciitilde{}}\NormalTok{ group,}
-         \AttributeTok{data =}\NormalTok{ sleep,}
-         \AttributeTok{paired =} \ConstantTok{TRUE}\NormalTok{,}
-         \AttributeTok{bias\_correction =} \ConstantTok{TRUE}\NormalTok{,}
-         \AttributeTok{rm\_correction =} \ConstantTok{TRUE}\NormalTok{,}
-         \AttributeTok{alternative =} \StringTok{"equivalence"}\NormalTok{,}
-         \AttributeTok{null.value =} \FunctionTok{c}\NormalTok{(}\SpecialCharTok{{-}}\FloatTok{0.5}\NormalTok{,}\FloatTok{0.5}\NormalTok{),}
-         \AttributeTok{output =} \StringTok{"htest"}\NormalTok{)}
+\FunctionTok{smd\_calc}\NormalTok{(}
+  \AttributeTok{formula =}\NormalTok{ extra }\SpecialCharTok{\textasciitilde{}}\NormalTok{ group,}
+  \AttributeTok{data =}\NormalTok{ sleep,}
+  \AttributeTok{paired =} \ConstantTok{TRUE}\NormalTok{,}
+  \CommentTok{\# apply Hedges\textquotesingle{} correction}
+  \AttributeTok{bias\_correction =} \ConstantTok{TRUE}\NormalTok{,}
+  \CommentTok{\# apply the repeated measures correction}
+  \AttributeTok{rm\_correction =} \ConstantTok{TRUE}\NormalTok{,}
+  \CommentTok{\# equivalence hypothesis}
+  \AttributeTok{alternative =} \StringTok{"equivalence"}\NormalTok{,}
+  \CommentTok{\# equivalence bounds on the SMD}
+  \AttributeTok{null.value =} \FunctionTok{c}\NormalTok{(}\SpecialCharTok{{-}}\FloatTok{0.5}\NormalTok{, }\FloatTok{0.5}\NormalTok{),}
+  \CommentTok{\# return an htest object rather than a data frame}
+  \AttributeTok{output =} \StringTok{"htest"}
+\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -810,13 +869,19 @@ it provides more robust confidence intervals and p-values.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{boot\_smd\_calc}\NormalTok{(}\AttributeTok{formula =}\NormalTok{ extra }\SpecialCharTok{\textasciitilde{}}\NormalTok{ group,}
-              \AttributeTok{data =}\NormalTok{ sleep,}
-              \AttributeTok{paired =} \ConstantTok{TRUE}\NormalTok{,}
-              \AttributeTok{bias\_correction =} \ConstantTok{TRUE}\NormalTok{,}
-              \AttributeTok{rm\_correction =} \ConstantTok{TRUE}\NormalTok{,}
-              \AttributeTok{alternative =} \StringTok{"equivalence"}\NormalTok{,}
-              \AttributeTok{null.value =} \FunctionTok{c}\NormalTok{(}\SpecialCharTok{{-}}\FloatTok{0.5}\NormalTok{,}\FloatTok{0.5}\NormalTok{))}
+\FunctionTok{boot\_smd\_calc}\NormalTok{(}
+  \AttributeTok{formula =}\NormalTok{ extra }\SpecialCharTok{\textasciitilde{}}\NormalTok{ group,}
+  \AttributeTok{data =}\NormalTok{ sleep,}
+  \AttributeTok{paired =} \ConstantTok{TRUE}\NormalTok{,}
+  \CommentTok{\# apply Hedges\textquotesingle{} correction}
+  \AttributeTok{bias\_correction =} \ConstantTok{TRUE}\NormalTok{,}
+  \CommentTok{\# apply the repeated measures correction}
+  \AttributeTok{rm\_correction =} \ConstantTok{TRUE}\NormalTok{,}
+  \CommentTok{\# equivalence hypothesis}
+  \AttributeTok{alternative =} \StringTok{"equivalence"}\NormalTok{,}
+  \CommentTok{\# equivalence bounds on the SMD}
+  \AttributeTok{null.value =} \FunctionTok{c}\NormalTok{(}\SpecialCharTok{{-}}\FloatTok{0.5}\NormalTok{, }\FloatTok{0.5}\NormalTok{)}
+\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -826,13 +891,13 @@ it provides more robust confidence intervals and p-values.
 ##  g[rm]=('1'-'2')/SD_rm)
 ## 
 ## data:  extra by group
-## z-observed = -0.78495, p-value = 0.8934
+## z-observed = -0.78495, p-value = 0.8929
 ## alternative hypothesis: equivalence
 ## null values:
 ## lower bound upper bound 
 ##        -0.5         0.5 
 ## 90 percent confidence interval:
-##  -1.2978837 -0.4361528
+##  -1.3036182 -0.4428423
 ## sample estimates:
 ## SMD (g[rm]) 
 ##  -0.7513666
@@ -869,8 +934,11 @@ inferential tool for equivalence testing on correlations.
 \FunctionTok{z\_cor\_test}\NormalTok{(}
   \AttributeTok{x =}\NormalTok{ bugs}\SpecialCharTok{$}\NormalTok{LDLF,}
   \AttributeTok{y =}\NormalTok{ bugs}\SpecialCharTok{$}\NormalTok{LDHF,}
+  \CommentTok{\# type of correlation coefficient}
   \AttributeTok{method =} \StringTok{"pearson"}\NormalTok{,}
-  \AttributeTok{alternative =} \StringTok{"t"}\NormalTok{)}
+  \CommentTok{\# two{-}sided nil hypothesis test}
+  \AttributeTok{alternative =} \StringTok{"t"}
+\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -902,9 +970,13 @@ objects that integrate with the helper functions described above.
 \NormalTok{res\_boot\_cor }\OtherTok{=} \FunctionTok{boot\_cor\_test}\NormalTok{(}
   \AttributeTok{x =}\NormalTok{ bugs}\SpecialCharTok{$}\NormalTok{LDLF,}
   \AttributeTok{y =}\NormalTok{ bugs}\SpecialCharTok{$}\NormalTok{LDHF,}
+  \CommentTok{\# type of correlation coefficient}
   \AttributeTok{method =} \StringTok{"pearson"}\NormalTok{,}
+  \CommentTok{\# equivalence hypothesis}
   \AttributeTok{alternative =} \StringTok{"equivalence"}\NormalTok{,}
-  \AttributeTok{null =} \FloatTok{0.4}\NormalTok{)}
+  \CommentTok{\# equivalence bounds of {-}0.4 and 0.4}
+  \AttributeTok{null =} \FloatTok{0.4}
+\NormalTok{)}
 
 \FunctionTok{print}\NormalTok{(res\_boot\_cor)}
 \end{Highlighting}
@@ -915,13 +987,13 @@ objects that integrate with the helper functions described above.
 ##  Bootstrapped Pearson's product-moment correlation (BCa)
 ## 
 ## data:  bugs$LDLF and bugs$LDHF
-## N = 91, p-value = 0.9825
+## N = 91, p-value = 0.986
 ## alternative hypothesis: equivalence
 ## null values:
 ## correlation correlation 
 ##         0.4        -0.4 
 ## 90 percent confidence interval:
-##  0.4419166 0.6857747
+##  0.441331 0.690831
 ## sample estimates:
 ##         r 
 ## 0.5767783
@@ -929,13 +1001,15 @@ objects that integrate with the helper functions described above.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{describe\_htest}\NormalTok{(res\_boot\_cor)}
+\FunctionTok{cat}\NormalTok{(}\FunctionTok{describe\_htest}\NormalTok{(res\_boot\_cor))}
 \end{Highlighting}
 \end{Shaded}
 
-\begin{verbatim}
-## [1] "The Bootstrapped Pearson's product-moment correlation (BCa) is not statistically significant (p = 0.982, r = 0.577, 90% C.I.[0.442, 0.686]) at a 0.05 alpha-level. The null hypothesis cannot be rejected. At the desired error rate, it cannot be stated that the true correlation is between 0.4 and -0.4."
-\end{verbatim}
+The Bootstrapped Pearson's product-moment correlation (BCa) is not
+statistically significant (p = 0.986, r = 0.577, 90\% C.I.{[}0.441,
+0.691{]}) at a 0.05 alpha-level. The null hypothesis cannot be rejected.
+At the desired error rate, it cannot be stated that the true correlation
+is between 0.4 and -0.4.
 
 If only summary statistics are available, an approximate method is
 provided through \texttt{corsum\_test}, which uses the Fisher
@@ -970,17 +1044,57 @@ differ more than would be expected by sampling variability alone.
 
 Consider an original study reporting Cohen's \(d_z\) = 0.95 with 25
 participants and a replication with \(d\) = 0.23 and 50 participants.
-Are these estimates compatible?
+Are these estimates compatible? Let's say that we deter
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{compare\_smd}\NormalTok{(}\AttributeTok{smd1 =} \FloatTok{0.95}\NormalTok{,}
-            \AttributeTok{n1 =} \DecValTok{25}\NormalTok{,}
-            \AttributeTok{smd2 =} \FloatTok{0.23}\NormalTok{,}
-            \AttributeTok{n2 =} \DecValTok{50}\NormalTok{,}
-            \AttributeTok{paired =} \ConstantTok{TRUE}\NormalTok{,}
-            \AttributeTok{null =}\NormalTok{ .}\DecValTok{25}\NormalTok{,}
-            \AttributeTok{alternative =} \StringTok{"equivalence"}\NormalTok{)}
+\CommentTok{\# Significance test}
+\FunctionTok{compare\_smd}\NormalTok{(}
+  \CommentTok{\# SMD and sample size of the original study}
+  \AttributeTok{smd1 =} \FloatTok{0.95}\NormalTok{,}
+  \AttributeTok{n1 =} \DecValTok{25}\NormalTok{,}
+  \CommentTok{\# SMD and sample size of the replication}
+  \AttributeTok{smd2 =} \FloatTok{0.23}\NormalTok{,}
+  \AttributeTok{n2 =} \DecValTok{50}\NormalTok{,}
+  \CommentTok{\# both estimates come from paired designs}
+  \AttributeTok{paired =} \ConstantTok{TRUE}\NormalTok{,}
+  \CommentTok{\# nil hypothesis test}
+  \AttributeTok{null =} \DecValTok{0}\NormalTok{,}
+  \CommentTok{\# significance hypothesis}
+  \AttributeTok{alternative =} \StringTok{"two.sided"}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Difference in Cohen's dz (paired)
+## 
+## data:  Summary Statistics
+## z = 2.5685, p-value = 0.01021
+## alternative hypothesis: true difference in SMDs is not equal to 0
+## sample estimates:
+## difference in SMDs 
+##               0.72
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Equivalence test}
+\FunctionTok{compare\_smd}\NormalTok{(}
+  \CommentTok{\# SMD and sample size of the original study}
+  \AttributeTok{smd1 =} \FloatTok{0.95}\NormalTok{,}
+  \AttributeTok{n1 =} \DecValTok{25}\NormalTok{,}
+  \CommentTok{\# SMD and sample size of the replication}
+  \AttributeTok{smd2 =} \FloatTok{0.23}\NormalTok{,}
+  \AttributeTok{n2 =} \DecValTok{50}\NormalTok{,}
+  \CommentTok{\# both estimates come from paired designs}
+  \AttributeTok{paired =} \ConstantTok{TRUE}\NormalTok{,}
+  \CommentTok{\# equivalence bounds on the difference in SMDs}
+  \AttributeTok{null =}\NormalTok{ .}\DecValTok{25}\NormalTok{,}
+  \CommentTok{\# equivalence hypothesis}
+  \AttributeTok{alternative =} \StringTok{"equivalence"}
+\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1000,7 +1114,7 @@ Are these estimates compatible?
 \end{verbatim}
 
 Based on these results, we would reject the null significance hypothesis
-(the SMDs differ significantly) but fail to reject the equivalence null
+(conclude the SMDs differ) but fail to reject the equivalence null
 hypothesis (we cannot conclude the SMDs are practically equivalent).
 When raw data are available, \texttt{boot\_compare\_smd} provides a
 bootstrap alternative (see the package vignettes for details).
@@ -1012,12 +1126,18 @@ either the Fisher z-transformation (default) or the Kraatz
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{compare\_cor}\NormalTok{(}\AttributeTok{r1 =} \FloatTok{0.45}\NormalTok{,}
-            \AttributeTok{df1 =} \DecValTok{48}\NormalTok{,}
-            \AttributeTok{r2 =} \FloatTok{0.25}\NormalTok{,}
-            \AttributeTok{df2 =} \DecValTok{78}\NormalTok{,}
-            \AttributeTok{alternative =} \StringTok{"equivalence"}\NormalTok{,}
-            \AttributeTok{null =} \FloatTok{0.25}\NormalTok{)}
+\FunctionTok{compare\_cor}\NormalTok{(}
+  \CommentTok{\# correlation and degrees of freedom of the first study}
+  \AttributeTok{r1 =} \FloatTok{0.45}\NormalTok{,}
+  \AttributeTok{df1 =} \DecValTok{48}\NormalTok{,}
+  \CommentTok{\# correlation and degrees of freedom of the second study}
+  \AttributeTok{r2 =} \FloatTok{0.25}\NormalTok{,}
+  \AttributeTok{df2 =} \DecValTok{78}\NormalTok{,}
+  \CommentTok{\# equivalence hypothesis}
+  \AttributeTok{alternative =} \StringTok{"equivalence"}\NormalTok{,}
+  \CommentTok{\# equivalence bounds on the difference in correlations}
+  \AttributeTok{null =} \FloatTok{0.25}
+\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1054,17 +1174,6 @@ diagnostic context of the original and replication studies where
 possible.
 
 \newpage
-
-\textbf{A note on argument names for equivalence bounds.} The
-equivalence bound argument is named differently across TOSTER functions
-for historical and compatibility reasons: \texttt{eqb} in
-\texttt{t\_TOST}, \texttt{wilcox\_TOST}, \texttt{equ\_ftest}, and
-\texttt{equ\_anova}; \texttt{mu} in \texttt{simple\_htest},
-\texttt{brunner\_munzel}, \texttt{boot\_t\_test}, and
-\texttt{perm\_t\_test} (for compatibility with base R's
-\texttt{t.test}); and \texttt{null} in \texttt{compare\_smd} and
-\texttt{z\_cor\_test}. Despite the different names, the interpretation
-is the same: the bound(s) defining the region of practical equivalence.
 
 \section{Robust Methods for Equivalence
 Testing}\label{robust-methods-for-equivalence-testing}
@@ -1118,10 +1227,13 @@ provides a clearer framework.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{test1 }\OtherTok{=} \FunctionTok{wilcox\_TOST}\NormalTok{(}\AttributeTok{formula =}\NormalTok{ extra }\SpecialCharTok{\textasciitilde{}}\NormalTok{ group,}
-                      \AttributeTok{data =}\NormalTok{ sleep,}
-                      \AttributeTok{paired =} \ConstantTok{TRUE}\NormalTok{,}
-                      \AttributeTok{eqb =}\NormalTok{ .}\DecValTok{5}\NormalTok{)}
+\NormalTok{test1 }\OtherTok{=} \FunctionTok{wilcox\_TOST}\NormalTok{(}
+  \AttributeTok{formula =}\NormalTok{ extra }\SpecialCharTok{\textasciitilde{}}\NormalTok{ group,}
+  \AttributeTok{data =}\NormalTok{ sleep,}
+  \AttributeTok{paired =} \ConstantTok{TRUE}\NormalTok{,}
+  \CommentTok{\# equivalence bounds on the pseudo{-}median}
+  \AttributeTok{eqb =}\NormalTok{ .}\DecValTok{5}
+\NormalTok{)}
 \FunctionTok{print}\NormalTok{(test1)}
 \end{Highlighting}
 \end{Shaded}
@@ -1178,7 +1290,7 @@ hypothesis about central tendency.
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio]{Avocado_Update_files/Avocado_Update_files/figure-latex/symmplot-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Symmetry plot of the paired differences from the sleep dataset, pairing each observation's distance above the median with the corresponding distance below. Under symmetry, points fall along the 45-degree reference line (dashed); systematic departures --- points consistently above or below the line --- indicate asymmetry. The signed-rank variant of WMW requires this symmetry for the pseudo-median to coincide with the mean or median of the differences.}]{Avocado_Update_files/Avocado_Update_files/figure-latex/symmplot-1.pdf}}
 \caption{\label{fig:symmplot}Symmetry plot of the paired differences
 from the sleep dataset, pairing each observation's distance above the
 median with the corresponding distance below. Under symmetry, points
@@ -1233,10 +1345,14 @@ scale via \texttt{mu}. Results can be reported on different scales
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{bm\_test }\OtherTok{=} \FunctionTok{brunner\_munzel}\NormalTok{(}\AttributeTok{formula =}\NormalTok{ extra }\SpecialCharTok{\textasciitilde{}}\NormalTok{ group,}
-                         \AttributeTok{data =}\NormalTok{ sleep,}
-                         \AttributeTok{alternative =} \StringTok{"equivalence"}\NormalTok{,}
-                         \AttributeTok{mu =} \FunctionTok{c}\NormalTok{(}\FloatTok{0.3}\NormalTok{, }\FloatTok{0.7}\NormalTok{))}
+\NormalTok{bm\_test }\OtherTok{=} \FunctionTok{brunner\_munzel}\NormalTok{(}
+  \AttributeTok{formula =}\NormalTok{ extra }\SpecialCharTok{\textasciitilde{}}\NormalTok{ group,}
+  \AttributeTok{data =}\NormalTok{ sleep,}
+  \CommentTok{\# equivalence hypothesis}
+  \AttributeTok{alternative =} \StringTok{"equivalence"}\NormalTok{,}
+  \CommentTok{\# equivalence bounds on the probability scale}
+  \AttributeTok{mu =} \FunctionTok{c}\NormalTok{(}\FloatTok{0.3}\NormalTok{, }\FloatTok{0.7}\NormalTok{)}
+\NormalTok{)}
 \FunctionTok{print}\NormalTok{(bm\_test)}
 \end{Highlighting}
 \end{Shaded}
@@ -1292,22 +1408,22 @@ estimand while obtaining reference distributions empirically --- through
 resampling --- rather than relying on the normal-theory derivations
 (i.e., Student's t-test).
 
-Both approaches are natural extensions of the classic t-test rather than
-alternatives to it. The test statistic itself is unchanged; what changes
-is how the null distribution is constructed. In the conventional t-test,
-the null distribution of the standardized mean difference is derived
-analytically under the assumption that the data are drawn from a normal
-distribution, with equal variances assumed in Student's t-test and
-unequal variances accommodated in Welch's t-test. The bootstrap
-approximates the sampling distribution of the same statistic by
-resampling from the observed data with replacement, whereas the
-permutation approach constructs an exact or near-exact null distribution
-by shuffling group labels (two-sample) or flipping signs (one-sample and
-paired). In both cases, the researcher continues to ask the same
-question about means; only the calibration of the reference distribution
-differs. This is important for researchers who may view resampling
-methods as a departure from familiar testing logic: the estimand, the
-null hypothesis, and the test statistic remain the same.
+Both approaches are natural extensions of the classic t-test. The test
+statistic itself is unchanged; what changes is how the null distribution
+is constructed. In the conventional t-test, the null distribution of the
+standardized mean difference is derived analytically under the
+assumption that the data are drawn from a normal distribution, with
+equal variances assumed in Student's t-test and unequal variances
+accommodated in Welch's t-test. The bootstrap approximates the sampling
+distribution of the same statistic by resampling from the observed data
+with replacement, whereas the permutation approach constructs an exact
+or near-exact null distribution by shuffling group labels (two-sample)
+or flipping signs (one-sample and paired). In both cases, the researcher
+continues to ask the same question about means; only the calibration of
+the reference distribution differs. This is important for researchers
+who may view resampling methods as a departure from familiar testing
+logic because the estimand, the null hypothesis, and the test statistic
+remain the same.
 
 Because the reference distribution is generated from the data rather
 than assumed, distributional requirements are relaxed, though not
@@ -1364,9 +1480,9 @@ two independent groups with suspected unequal variances may find the
 studentized permutation test most defensible, while those wanting a
 single framework that yields coherent intervals and p-values across a
 range of designs may prefer the bootstrap. Both are substantial
-improvements over ignoring assumption violations, and both return
-standard \texttt{htest} objects that integrate with the TOST framework
-for equivalence and minimal effect testing.
+improvements over ignoring assumption violations of the t-test, and both
+return standard \texttt{htest} objects that integrate with the TOST
+framework for equivalence and minimal effect testing.
 
 \subsubsection{Bootstrap t-test}\label{bootstrap-t-test}
 
@@ -1378,7 +1494,7 @@ t-statistic itself is resampled rather than the raw mean difference, and
 confidence intervals are constructed from the bootstrap distribution of
 these pivotal quantities. Other CI methods (percentile, basic, and BCa)
 remain available via the \texttt{boot\_ci} argument, but the studentized
-default preserves consistency with the canonical Efron and Tibshirani
+default preserves consistency with the canonical \citet{efron93}
 formulation. It also ensures that the reported p-value and confidence
 interval are derived from the same bootstrap distribution, so the two
 will always agree; previous versions of the package used the studentized
@@ -1388,12 +1504,17 @@ disagreement between reported intervals and p-values.
 \begin{Shaded}
 \begin{Highlighting}[]
 \FunctionTok{set.seed}\NormalTok{(}\DecValTok{4522}\NormalTok{)}
-\FunctionTok{boot\_t\_test}\NormalTok{(}\AttributeTok{formula =}\NormalTok{ extra }\SpecialCharTok{\textasciitilde{}}\NormalTok{ group,}
-            \AttributeTok{data =}\NormalTok{ sleep,}
-            \AttributeTok{paired =} \ConstantTok{TRUE}\NormalTok{,}
-            \AttributeTok{alternative =} \StringTok{"equivalence"}\NormalTok{,}
-            \AttributeTok{mu =} \FunctionTok{c}\NormalTok{(}\SpecialCharTok{{-}}\FloatTok{0.5}\NormalTok{, }\FloatTok{0.5}\NormalTok{),}
-            \AttributeTok{R =} \DecValTok{999}\NormalTok{)}
+\FunctionTok{boot\_t\_test}\NormalTok{(}
+  \AttributeTok{formula =}\NormalTok{ extra }\SpecialCharTok{\textasciitilde{}}\NormalTok{ group,}
+  \AttributeTok{data =}\NormalTok{ sleep,}
+  \AttributeTok{paired =} \ConstantTok{TRUE}\NormalTok{,}
+  \CommentTok{\# equivalence hypothesis}
+  \AttributeTok{alternative =} \StringTok{"equivalence"}\NormalTok{,}
+  \CommentTok{\# equivalence bounds}
+  \AttributeTok{mu =} \FunctionTok{c}\NormalTok{(}\SpecialCharTok{{-}}\FloatTok{0.5}\NormalTok{, }\FloatTok{0.5}\NormalTok{),}
+  \CommentTok{\# number of bootstrap resamples}
+  \AttributeTok{R =} \DecValTok{999}
+\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1428,11 +1549,15 @@ object with bootstrapped SMD estimates \citep{Kirby2013}:
 \begin{Shaded}
 \begin{Highlighting}[]
 \FunctionTok{set.seed}\NormalTok{(}\DecValTok{891111}\NormalTok{)}
-\NormalTok{test1 }\OtherTok{=} \FunctionTok{boot\_t\_TOST}\NormalTok{(}\AttributeTok{formula =}\NormalTok{ extra }\SpecialCharTok{\textasciitilde{}}\NormalTok{ group,}
-                    \AttributeTok{data =}\NormalTok{ sleep,}
-                    \AttributeTok{paired =} \ConstantTok{TRUE}\NormalTok{,}
-                    \AttributeTok{eqb =}\NormalTok{ .}\DecValTok{5}\NormalTok{,}
-                    \AttributeTok{R =} \DecValTok{999}\NormalTok{)}
+\NormalTok{test1 }\OtherTok{=} \FunctionTok{boot\_t\_TOST}\NormalTok{(}
+  \AttributeTok{formula =}\NormalTok{ extra }\SpecialCharTok{\textasciitilde{}}\NormalTok{ group,}
+  \AttributeTok{data =}\NormalTok{ sleep,}
+  \AttributeTok{paired =} \ConstantTok{TRUE}\NormalTok{,}
+  \CommentTok{\# equivalence bounds}
+  \AttributeTok{eqb =}\NormalTok{ .}\DecValTok{5}\NormalTok{,}
+  \CommentTok{\# number of bootstrap resamples}
+  \AttributeTok{R =} \DecValTok{999}
+\NormalTok{)}
 \FunctionTok{print}\NormalTok{(test1)}
 \end{Highlighting}
 \end{Shaded}
@@ -1496,18 +1621,23 @@ permutations with the ``+1'' correction \citep{phipson2010}. By default
 the test is studentized (\texttt{perm\_se\ =\ TRUE}), consistent with
 the recommendations discussed in the methods section above. The
 \texttt{perm\_se\ =\ FALSE} option is available primarily to match the
-behavior of other permutation test packages that do not studentize by
-default.
+behavior of other R packages that provide permutation tests that do not
+studentize by default.
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \FunctionTok{set.seed}\NormalTok{(}\DecValTok{8812}\NormalTok{)}
-\FunctionTok{perm\_t\_test}\NormalTok{(}\AttributeTok{formula =}\NormalTok{ extra }\SpecialCharTok{\textasciitilde{}}\NormalTok{ group,}
-            \AttributeTok{data =}\NormalTok{ sleep,}
-            \AttributeTok{paired =} \ConstantTok{TRUE}\NormalTok{,}
-            \AttributeTok{alternative =} \StringTok{"equivalence"}\NormalTok{,}
-            \AttributeTok{mu =} \FunctionTok{c}\NormalTok{(}\SpecialCharTok{{-}}\FloatTok{0.5}\NormalTok{, }\FloatTok{0.5}\NormalTok{),}
-            \AttributeTok{R =} \DecValTok{999}\NormalTok{)}
+\FunctionTok{perm\_t\_test}\NormalTok{(}
+  \AttributeTok{formula =}\NormalTok{ extra }\SpecialCharTok{\textasciitilde{}}\NormalTok{ group,}
+  \AttributeTok{data =}\NormalTok{ sleep,}
+  \AttributeTok{paired =} \ConstantTok{TRUE}\NormalTok{,}
+  \CommentTok{\# equivalence hypothesis}
+  \AttributeTok{alternative =} \StringTok{"equivalence"}\NormalTok{,}
+  \CommentTok{\# equivalence bounds}
+  \AttributeTok{mu =} \FunctionTok{c}\NormalTok{(}\SpecialCharTok{{-}}\FloatTok{0.5}\NormalTok{, }\FloatTok{0.5}\NormalTok{),}
+  \CommentTok{\# number of random permutations}
+  \AttributeTok{R =} \DecValTok{999}
+\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1674,9 +1804,7 @@ differences are right-skewed on the original scale, the differences of
 logs are often approximately symmetric, and \texttt{perm\_t\_test} on
 log-transformed values becomes a reasonable option. In such cases the
 equivalence bounds should be specified on the log scale and interpreted
-as log ratios (or sympercents). As with Student's t-test or the
-bootstrap t-test, assumptions are relaxed by the transformation but not
-eliminated ----- they are simply moved to a different scale.
+as log ratios (or sympercents).
 
 \newpage
 
@@ -1734,7 +1862,14 @@ function, which accepts summary \emph{F}-test statistics directly:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{equ\_ftest}\NormalTok{(}\AttributeTok{Fstat =} \FloatTok{34.70228}\NormalTok{,  }\AttributeTok{df1 =} \DecValTok{5}\NormalTok{, }\AttributeTok{df2 =} \DecValTok{66}\NormalTok{,  }\AttributeTok{eqb =} \FloatTok{0.35}\NormalTok{)}
+\FunctionTok{equ\_ftest}\NormalTok{(}
+  \CommentTok{\# F statistic and degrees of freedom from the ANOVA table}
+  \AttributeTok{Fstat =} \FloatTok{34.70228}\NormalTok{,}
+  \AttributeTok{df1 =} \DecValTok{5}\NormalTok{,}
+  \AttributeTok{df2 =} \DecValTok{66}\NormalTok{,}
+  \CommentTok{\# equivalence bound on partial eta{-}squared}
+  \AttributeTok{eqb =} \FloatTok{0.35}
+\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1770,10 +1905,18 @@ avoiding the need to extract summary statistics manually:
 \CommentTok{\# (Maxwell \& Delaney, 2004, Chapter 12, Table 12.5, p. 578):}
 \FunctionTok{library}\NormalTok{(afex)}
 \FunctionTok{data}\NormalTok{(md\_12}\FloatTok{.1}\NormalTok{)}
-\NormalTok{aovtest2 }\OtherTok{=} \FunctionTok{aov\_ez}\NormalTok{(}\StringTok{"id"}\NormalTok{, }\StringTok{"rt"}\NormalTok{, md\_12}\FloatTok{.1}\NormalTok{, }\AttributeTok{within =} \FunctionTok{c}\NormalTok{(}\StringTok{"angle"}\NormalTok{, }\StringTok{"noise"}\NormalTok{),}
-       \AttributeTok{anova\_table=}\FunctionTok{list}\NormalTok{(}\AttributeTok{correction =} \StringTok{"none"}\NormalTok{, }\AttributeTok{es =} \StringTok{"none"}\NormalTok{))}
-\FunctionTok{equ\_anova}\NormalTok{(aovtest2,}
-          \AttributeTok{eqb =} \FloatTok{0.35}\NormalTok{)}
+\NormalTok{aovtest2 }\OtherTok{=} \FunctionTok{aov\_ez}\NormalTok{(}
+  \CommentTok{\# participant identifier}
+  \StringTok{"id"}\NormalTok{,}
+  \CommentTok{\# dependent variable}
+  \StringTok{"rt"}\NormalTok{,}
+  \CommentTok{\# data}
+\NormalTok{  md\_12}\FloatTok{.1}\NormalTok{,}
+  \CommentTok{\# within{-}subjects factors}
+  \AttributeTok{within =} \FunctionTok{c}\NormalTok{(}\StringTok{"angle"}\NormalTok{, }\StringTok{"noise"}\NormalTok{),}
+  \AttributeTok{anova\_table =} \FunctionTok{list}\NormalTok{(}\AttributeTok{correction =} \StringTok{"none"}\NormalTok{, }\AttributeTok{es =} \StringTok{"none"}\NormalTok{)}
+\NormalTok{)}
+\FunctionTok{equ\_anova}\NormalTok{(aovtest2, }\AttributeTok{eqb =} \FloatTok{0.35}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1811,9 +1954,18 @@ difference is zero and \(SD\) = 1):
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{power\_t\_TOST}\NormalTok{(}\AttributeTok{delta =} \DecValTok{0}\NormalTok{, }\AttributeTok{sd =} \DecValTok{1}\NormalTok{, }\AttributeTok{eqb =} \FloatTok{0.5}\NormalTok{,}
-             \AttributeTok{alpha =} \FloatTok{0.05}\NormalTok{, }\AttributeTok{power =} \FloatTok{0.8}\NormalTok{,}
-             \AttributeTok{type =} \StringTok{"two.sample"}\NormalTok{)}
+\FunctionTok{power\_t\_TOST}\NormalTok{(}
+  \CommentTok{\# true mean difference}
+  \AttributeTok{delta =} \DecValTok{0}\NormalTok{,}
+  \CommentTok{\# assumed standard deviation}
+  \AttributeTok{sd =} \DecValTok{1}\NormalTok{,}
+  \CommentTok{\# equivalence bounds}
+  \AttributeTok{eqb =} \FloatTok{0.5}\NormalTok{,}
+  \AttributeTok{alpha =} \FloatTok{0.05}\NormalTok{,}
+  \CommentTok{\# leaving n unspecified solves for the n giving 80\% power}
+  \AttributeTok{power =} \FloatTok{0.8}\NormalTok{,}
+  \AttributeTok{type =} \StringTok{"two.sample"}
+\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1840,9 +1992,17 @@ z-transformation:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{power\_z\_cor}\NormalTok{(}\AttributeTok{rho =} \DecValTok{0}\NormalTok{, }\AttributeTok{power =} \FloatTok{0.8}\NormalTok{,}
-            \AttributeTok{null =} \FloatTok{0.3}\NormalTok{, }\AttributeTok{alpha =} \FloatTok{0.05}\NormalTok{,}
-            \AttributeTok{alternative =} \StringTok{"equivalence"}\NormalTok{)}
+\FunctionTok{power\_z\_cor}\NormalTok{(}
+  \CommentTok{\# true correlation}
+  \AttributeTok{rho =} \DecValTok{0}\NormalTok{,}
+  \CommentTok{\# leaving n unspecified solves for the n giving 80\% power}
+  \AttributeTok{power =} \FloatTok{0.8}\NormalTok{,}
+  \CommentTok{\# equivalence bounds of {-}0.3 and 0.3}
+  \AttributeTok{null =} \FloatTok{0.3}\NormalTok{,}
+  \AttributeTok{alpha =} \FloatTok{0.05}\NormalTok{,}
+  \CommentTok{\# equivalence hypothesis}
+  \AttributeTok{alternative =} \StringTok{"equivalence"}
+\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1869,7 +2029,8 @@ offers. For factorial designs where equivalence contrasts are tested via
 estimated marginal means, simulation-based power analysis via the
 Superpower package is recommended \citep{Lakens_Caldwell_2021}. Both
 packages complement TOSTER's built-in power tools for common research
-designs.
+designs. In some situations, customized simulations may be required to
+accurately determine power for an equivalence test.
 
 \newpage
 
@@ -1933,7 +2094,7 @@ Citations of this manuscript will benefit his citation count.
 \addcontentsline{toc}{subsection}{AI Use Disclosure}
 
 During the preparation of the TOSTER package updates and this
-manuscript, the author used Claude Opus 4.5-4.7 (Anthropic) to assist
+manuscript, the author used Claude Opus 4.5-4.8 (Anthropic) to assist
 with editing R code and drafting unit tests. For the manuscript text,
 Claude Opus was used only for targeted copy-editing --- suggesting
 revisions to specific passages, catching typographical and grammatical

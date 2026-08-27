@@ -42,7 +42,7 @@ set.seed(42)
 
 # Parametric t-Test Diagnostics
 
-The parametric t-test assumes independent observations, approximately normal residuals, and (for Student's form) equal variances across groups. The normality requirement is most critical at small `n`, where the central limit theorem offers little protection; by `n` in the mid-twenties per group the t distribution is already a reasonable approximation for moderately non-normal data. Welch's form relaxes the equal-variance assumption and is the default in most modern workflows. The diagnostics below apply regardless of whether the test is used for standard null/nil-hypothesis significance testing or for TOST equivalence testing; equivalence bounds do not alter the distributional assumptions of the test statistic.
+The parametric t-test assumes independent observations, approximately normal residuals, and (for Student's form) equal variances across groups. The normality requirement is most critical at small `n`, where the central limit theorem offers little protection; by `n` in the mid-twenties per group the t distribution is already a reasonable approximation for moderately non-normal data. Welch's form relaxes the equal-variance assumption (for a two sample test) and is the default in most modern workflows. The diagnostics below apply regardless of whether the test is used for standard null/nil-hypothesis significance testing or for TOST equivalence testing; equivalence bounds do not alter the distributional assumptions of the test statistic.
 
 ## Two-Sample Parametric t-Test
 
@@ -165,7 +165,7 @@ abline(h = 4 / length(cd_x), col = "red", lty = 2)
 
 When residual diagnostics reveal right-skewness, as is common for reaction times, concentrations, and count-like outcomes, a log transformation often resolves skewness, stabilizes variance, and reduces the leverage of the most extreme observations simultaneously. Where that combination holds, analyzing on the log scale is usually preferable to switching to a rank-based or resampling-based test, because it preserves a parametric model with familiar properties.
 
-The interpretive cost is that the mean of the logged data is the log of the geometric mean, not of the arithmetic mean. Back-transforming the estimate yields a geometric mean (and, for two-group comparisons, a ratio of geometric means), which is usually the appropriate summary on the original scale when the log has stabilized the distribution. For equivalence testing, bounds specified on the log scale correspond to ratio bounds on the original scale. The classical bioequivalence bounds of 80 to 125 percent correspond to $\pm \log(1.25) \approx \pm 0.223$ on the log scale; users should specify `eqb` on the log scale and interpret results as ratios of geometric means.
+The interpretive cost is that the mean of the logged data is the log of the geometric mean, not of the arithmetic mean. Back-transforming the estimate yields a geometric mean (and, for two-group comparisons, a ratio of geometric means), which is arguably (and others will disagre with me here) the appropriate summary on the original scale when the log has stabilized the distribution. For equivalence testing, bounds specified on the log scale correspond to ratio bounds on the original scale. The classical bioequivalence bounds of 80 to 125 percent correspond to $\pm \log(1.25) \approx \pm 0.223$ on the log scale; users should specify `eqb` on the log scale and interpret results as ratios of geometric means.
 
 Other transformations (square-root, Box-Cox) share similar motivations, but the clean geometric-mean interpretation is specific to the log.
 
@@ -364,21 +364,6 @@ ggplot(tg, aes(sample = len, color = supp)) +
 
 Strong departures in shape (e.g., one group skewed, the other symmetric, or markedly different tail behavior) are a concern because the studentized permutation test handles scale differences but not dramatic shape differences.
 
-### Check 2: Variance comparison
-
-While the studentized version tolerates heteroscedasticity, it is still useful to know how different the variances are, both for interpretation and for deciding whether the studentized form is necessary.
-
-```{r}
-# variance comparison --------
-tg |>
-  group_by(supp) |>
-  summarise(n = n(), variance = var(len))
-
-# Levene's test from lawstat for robust variance comparison
-lawstat::levene.test(tg$len, tg$supp, location = "median")
-```
-
-The median-centered Levene test (Brown–Forsythe) is preferred over the classical version because it is itself robust to non-normality.
 
 ## Paired-Sample Permutation
 
@@ -453,7 +438,7 @@ lawstat::symmetry.test(d_paired, option = "MGG")
 lawstat::symmetry.test(d_paired, option = "CM")
 ```
 
-The Miao–Gel–Gastwirth ("MGG") and Cabilio–Masaro ("CM") tests provide formal assessment. With small samples these tests have limited power, so a non-significant result should not be taken as strong evidence of symmetry — the visual checks remain more informative. Conversely, a significant result with small `n` is worth taking seriously.
+The Miao–Gel–Gastwirth ("MGG") and Cabilio–Masaro ("CM") tests provide formal assessment. With small samples these tests have limited power, so a non-significant result should not be taken as strong evidence of symmetry — the visual checks remain more informative. Conversely, a significant result with small `n` is worth taking very seriously.
 
 ### Check 5: Skewness with bootstrap confidence interval
 
@@ -551,7 +536,7 @@ plot(cd_pearson, type = "h",
 abline(h = 4 / length(cd_pearson), col = "red", lty = 2)
 ```
 
-Unlike the balanced two-sample t-test case, leverage varies meaningfully in regression, so Cook's D is genuinely informative here: observations with extreme `wt` values (high leverage) combined with large residuals will show up as candidates for driving the estimated correlation. A Pearson correlation that rests on one or two high-leverage points is fragile, and the bootstrap jackknife in the next subsection provides a complementary check.
+Unlike the balanced two-sample t-test case, leverage varies meaningfully in regression, so observations with extreme `wt` values (high leverage) combined with large residuals will show up as candidates for driving the estimated correlation. A Pearson correlation that rests on one or two high-leverage points is fragile, and the bootstrap jackknife in the next subsection provides a complementary check.
 
 Fisher's z-transformation, $z = \tfrac{1}{2}\log\left((1+r)/(1-r)\right)$, is the standard route to parametric confidence intervals on Pearson `r`. It is sometimes treated as assumption-free but in fact still relies on bivariate normality; its coverage can degrade substantially when the bivariate distribution has heavy tails or strong skew.
 
@@ -623,7 +608,7 @@ The bootstrap distribution should be reasonably symmetric. Near $r = \pm 1$, bou
 
 The Wilcoxon-Mann-Whitney (WMW) test is commonly presented as a nonparametric test of medians, but that interpretation requires the **location shift assumption**: the two group distributions differ only in location, not in shape. When shapes differ (for example when one group has greater variance, or the groups have different skewness), WMW tests a hypothesis about stochastic ordering, $P(X < Y)$, rather than a difference in medians. Users who report WMW as a median test when shapes are clearly different are over-interpreting the result.
 
-**Brunner-Munzel** drops the location-shift requirement and directly tests the stochastic-superiority hypothesis $P(X < Y) + 0.5 \cdot P(X = Y) = 0.5$. The tradeoff is analogous to Welch's correction of Student's t-test: Brunner-Munzel gives up a cleaner location-difference interpretation in exchange for validity under unequal shapes and variances.
+**Brunner-Munzel** drops the location-shift requirement and directly tests the stochastic-superiority hypothesis $P(X < Y) + 0.5 \cdot P(X = Y) = 0.5$. The tradeoff is analogous to Welch's correction of Student's t-test: Brunner-Munzel gives up a  location-difference interpretation in exchange for validity under unequal shapes and variances.
 
 The **proportional odds** assumption is a stronger condition used in ordinal regression: the log odds ratio between groups is constant across all cutpoints of the outcome. WMW can be derived as the score test from a proportional odds model, so when proportional odds holds, WMW has a clean odds-ratio interpretation in Harrell's framework. When it fails, WMW still provides a valid test of $P(X < Y)$ but its interpretation as an odds ratio breaks down.
 
