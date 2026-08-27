@@ -130,11 +130,12 @@ robust statistics
 
 \section{Introduction}\label{introduction}
 
-Researchers routinely interpret non-significant p-values as evidence
-that no effect exists --- a logical error that has been recognized for
-decades \citep{blandaltman95}. A non-significant result means only that
-the data are compatible with the null hypothesis; it does not mean the
-null hypothesis is true.
+Researchers routinely interpret non-significant p-values from a
+nil-hypothesis (i.e., null hypothesis that the mean difference equals
+zero) test as evidence that no effect exists --- a logical error that
+has been recognized for decades \citep{blandaltman95}. A non-significant
+result means only that the data are compatible with the null hypothesis;
+it does not mean the null hypothesis is true.
 
 Equivalence testing provides a principled framework for evaluating
 whether an effect is small enough to be considered negligible. The two
@@ -564,6 +565,7 @@ given for asymmetric bounds.
 \begin{Highlighting}[]
 \NormalTok{res\_sh1 }\OtherTok{\textless{}{-}} \FunctionTok{simple\_htest}\NormalTok{(extra }\SpecialCharTok{\textasciitilde{}}\NormalTok{ group, }
                         \AttributeTok{data =}\NormalTok{ sleep,}
+                        \AttributeTok{paired =} \ConstantTok{TRUE}\NormalTok{,}
                         \AttributeTok{alternative =} \StringTok{"equivalence"}\NormalTok{, }
                         \AttributeTok{mu =} \FloatTok{0.5}\NormalTok{)}
 \NormalTok{res\_sh1}
@@ -572,29 +574,62 @@ given for asymmetric bounds.
 
 \begin{verbatim}
 ## 
-##  Welch Two Sample t-test
+##  Paired t-test
 ## 
 ## data:  extra by group
-## t = -1.2719, df = 17.776, p-value = 0.8901
+## t = -2.7766, df = 9, p-value = 0.9892
 ## alternative hypothesis: equivalence
 ## null values:
-## difference in means difference in means 
-##                -0.5                 0.5 
+## mean difference mean difference 
+##            -0.5             0.5 
 ## 90 percent confidence interval:
-##  -3.0533815 -0.1066185
+##  -2.2930053 -0.8669947
 ## sample estimates:
-##           mean of group '1'           mean of group '2' 
-##                        0.75                        2.33 
-## mean difference ('1' - '2') 
-##                       -1.58
+## mean of the differences (z = '1' - '2') 
+##                                   -1.58
 \end{verbatim}
 
-Notice how the output is a single clean \texttt{htest} object. This is
-much more concise than the verbose \texttt{t\_TOST} output shown
-previously on purpose. If you want to perform additional tests --- such
-as a complementary nil significance tests --- then that has to be done
-separately. However, there are some methods (described below) that make
-this \texttt{htest} format easy to deal with.
+Additionally, tests other that TOST can be applied with this function.
+The traditional nil-hypothesis tests, non-inferiority, or even
+superiority-by-a-margin hypotheses can all be tested with this function.
+For example, let's say we want to test that a treatment group in the
+sleep data was just non-inferior to the other treatment rather than
+equivalent. This can be accomplished by just setting the direction with
+the \texttt{alternative} argument and the margin of non-inferiority by
+the \texttt{mu} argument.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{res\_sh2 }\OtherTok{\textless{}{-}} \FunctionTok{simple\_htest}\NormalTok{(extra }\SpecialCharTok{\textasciitilde{}}\NormalTok{ group, }
+                        \AttributeTok{data =}\NormalTok{ sleep,}
+                        \AttributeTok{paired =} \ConstantTok{TRUE}\NormalTok{,}
+                        \AttributeTok{alternative =} \StringTok{"greater"}\NormalTok{, }
+                        \AttributeTok{mu =} \SpecialCharTok{{-}}\FloatTok{0.5}\NormalTok{)}
+\NormalTok{res\_sh2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+##  Paired t-test
+## 
+## data:  extra by group
+## t = -2.7766, df = 9, p-value = 0.9892
+## alternative hypothesis: true mean difference is greater than -0.5
+## 95 percent confidence interval:
+##  -2.293005       Inf
+## sample estimates:
+## mean of the differences (z = '1' - '2') 
+##                                   -1.58
+\end{verbatim}
+
+Notice how the output, in either hypothesis test above, is a single
+clean \texttt{htest} object. This is much more concise than the verbose
+\texttt{t\_TOST} output shown previously on purpose. If you want to
+perform additional tests --- such as a complementary nil significance
+tests --- then that has to be done separately. However, there are some
+methods (described below) that make this \texttt{htest} format easy to
+deal with when reporting statistical test results.
 
 \subsection{Describing and Tabulating
 Results}\label{describing-and-tabulating-results}
@@ -609,7 +644,7 @@ text string following typical scientific reporting conventions:
 \end{Shaded}
 
 \begin{verbatim}
-## [1] "The Welch Two Sample t-test is not statistically significant (t(17.776) = -1.27, p = 0.89, mean of group '1' = 0.75, mean of group '2' = 2.33, mean difference ('1' - '2') = -1.58, 90% C.I.[-3.05, -0.107]) at a 0.05 alpha-level. The null hypothesis cannot be rejected. At the desired error rate, it cannot be stated that the true difference in means is between -0.5 and 0.5."
+## [1] "The Paired t-test is not statistically significant (t(9) = -2.78, p = 0.989, mean of the differences (z = '1' - '2') = -1.58, 90% C.I.[-2.29, -0.867]) at a 0.05 alpha-level. The null hypothesis cannot be rejected. At the desired error rate, it cannot be stated that the true mean difference is between -0.5 and 0.5."
 \end{verbatim}
 
 \subsection{Plotting Results}\label{plotting-results}
@@ -691,13 +726,15 @@ Functions}\label{standardized-mean-difference-functions}
 The \texttt{smd\_calc} function computes standardized mean differences
 --- Cohen's \(d\), Hedges' \(g\) (bias-corrected), or Glass's \(\Delta\)
 --- with confidence intervals and \emph{optional} hypothesis testing
-(utilizing a z-test: \(z  = (SMD - \mu)/SE\)). It supports one-sample,
-paired, and two-sample designs, and can return either an \texttt{htest}
-object or a data frame. The SMD is already reported in \texttt{t\_TOST}
-output, but \texttt{smd\_calc} allows standalone computation and
-supports equivalence testing directly on the effect size. This may be
-useful as a complementary function when using \texttt{simple\_htest} as
-the primary statistical testing function.
+(utilizing a z-test: \(z = (d - \delta_0)/SE_d\), where \(d\) is the
+sample SMD estimate, \(\delta_0\) is the null value being tested, and
+\(SE_d\) is its standard error.). It supports one-sample, paired, and
+two-sample designs, and can return either an \texttt{htest} object or a
+data frame. The SMD is already reported in \texttt{t\_TOST} output, but
+\texttt{smd\_calc} allows standalone computation and supports
+equivalence testing directly on the effect size. This may be useful as a
+complementary function when using \texttt{simple\_htest} as the primary
+statistical testing function.
 
 When estimation rather than testing is the goal, \texttt{smd\_calc} can
 be called with \texttt{alternative\ =\ "none"} (the default), which
@@ -769,8 +806,7 @@ However, the parametric z-test used by \texttt{smd\_calc} relies on
 distributional assumptions about the sampling distribution of the SMD
 that may not hold in practice. When a hypothesis test on the SMD is the
 goal, bootstrapping via \texttt{boot\_smd\_calc} is recommended because
-it provides more robust confidence intervals and p-values without
-requiring these assumptions.
+it provides more robust confidence intervals and p-values.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -790,13 +826,13 @@ requiring these assumptions.
 ##  g[rm]=('1'-'2')/SD_rm)
 ## 
 ## data:  extra by group
-## z-observed = -0.78495, p-value = 0.906
+## z-observed = -0.78495, p-value = 0.8934
 ## alternative hypothesis: equivalence
 ## null values:
 ## lower bound upper bound 
 ##        -0.5         0.5 
 ## 90 percent confidence interval:
-##  -1.3479445 -0.4457752
+##  -1.2978837 -0.4361528
 ## sample estimates:
 ## SMD (g[rm]) 
 ##  -0.7513666
@@ -814,7 +850,7 @@ the denominator (standard deviation) of the SMD, which can amplify their
 influence on the estimate; the \texttt{tr} trimmed-means argument
 available in the \texttt{boot\_smd\_calc} function is particularly worth
 considering when the raw data show extreme values. Second, the
-parametric z-test in \texttt{smd\_calc} relies on an approximation to
+asymptotic z-test in \texttt{smd\_calc} relies on an approximation to
 the sampling distribution of the SMD that can be very inaccurate in
 small samples, which is the primary motivation for preferring
 \texttt{boot\_smd\_calc} when hypothesis testing is the goal.
@@ -823,7 +859,7 @@ small samples, which is the primary motivation for preferring
 Correlations}\label{equivalence-tests-for-correlations}
 
 Researchers sometimes need to test that a correlation is practically
-zero. The \texttt{z\_cor\_test} function provides a parametric approach
+zero. The \texttt{z\_cor\_test} function provides a asymptotic approach
 using the Fisher z-transformation. However, this is only an approximate
 method and is generally \emph{not recommended} as the primary
 inferential tool for equivalence testing on correlations.
@@ -879,13 +915,13 @@ objects that integrate with the helper functions described above.
 ##  Bootstrapped Pearson's product-moment correlation (BCa)
 ## 
 ## data:  bugs$LDLF and bugs$LDHF
-## N = 91, p-value = 0.9808
+## N = 91, p-value = 0.9825
 ## alternative hypothesis: equivalence
 ## null values:
 ## correlation correlation 
 ##         0.4        -0.4 
 ## 90 percent confidence interval:
-##  0.4299380 0.6853442
+##  0.4419166 0.6857747
 ## sample estimates:
 ##         r 
 ## 0.5767783
@@ -898,7 +934,7 @@ objects that integrate with the helper functions described above.
 \end{Shaded}
 
 \begin{verbatim}
-## [1] "The Bootstrapped Pearson's product-moment correlation (BCa) is not statistically significant (p = 0.981, r = 0.577, 90% C.I.[0.43, 0.685]) at a 0.05 alpha-level. The null hypothesis cannot be rejected. At the desired error rate, it cannot be stated that the true correlation is between 0.4 and -0.4."
+## [1] "The Bootstrapped Pearson's product-moment correlation (BCa) is not statistically significant (p = 0.982, r = 0.577, 90% C.I.[0.442, 0.686]) at a 0.05 alpha-level. The null hypothesis cannot be rejected. At the desired error rate, it cannot be stated that the true correlation is between 0.4 and -0.4."
 \end{verbatim}
 
 If only summary statistics are available, an approximate method is
@@ -1011,7 +1047,7 @@ combine. Because both studies contribute to the comparison, violations
 in either study propagate into the test. When raw data are available,
 the bootstrap alternatives (\texttt{boot\_compare\_smd} and
 \texttt{boot\_compare\_cor}) are preferred because they avoid the Fisher
-z and related parametric approximations, which can be inaccurate
+z and related asymptotic approximations, which can be inaccurate
 particularly when effect sizes are large or sample sizes are modest.
 When only summary statistics are available, readers should report the
 diagnostic context of the original and replication studies where
@@ -1256,22 +1292,22 @@ estimand while obtaining reference distributions empirically --- through
 resampling --- rather than relying on the normal-theory derivations
 (i.e., Student's t-test).
 
-Both approaches are natural extensions of the traditional t-test rather
-than alternatives to it. The test statistic itself is unchanged; what
-changes is how the null distribution is constructed. In the parametric
-t-test, the null distribution of the standardized mean difference is
-derived analytically under the assumption that the data are drawn from a
-population with a normal distribution (and, for Student's version, with
-equal variances). The bootstrap approximates the sampling distribution
-of the same statistic by resampling from the observed data with
-replacement, whereas the permutation approach constructs an exact or
-near-exact null distribution by shuffling group labels (two-sample) or
-flipping signs (one-sample and paired). In both cases, the researcher
-continues to ask the same question about means; only the calibration of
-the reference distribution differs. This is important for researchers
-who may view resampling methods as a departure from familiar testing
-logic: the estimand, the null hypothesis, and the test statistic remain
-the same.
+Both approaches are natural extensions of the classic t-test rather than
+alternatives to it. The test statistic itself is unchanged; what changes
+is how the null distribution is constructed. In the conventional t-test,
+the null distribution of the standardized mean difference is derived
+analytically under the assumption that the data are drawn from a normal
+distribution, with equal variances assumed in Student's t-test and
+unequal variances accommodated in Welch's t-test. The bootstrap
+approximates the sampling distribution of the same statistic by
+resampling from the observed data with replacement, whereas the
+permutation approach constructs an exact or near-exact null distribution
+by shuffling group labels (two-sample) or flipping signs (one-sample and
+paired). In both cases, the researcher continues to ask the same
+question about means; only the calibration of the reference distribution
+differs. This is important for researchers who may view resampling
+methods as a departure from familiar testing logic: the estimand, the
+null hypothesis, and the test statistic remain the same.
 
 Because the reference distribution is generated from the data rather
 than assumed, distributional requirements are relaxed, though not
@@ -1434,24 +1470,23 @@ itself.
 \paragraph{Checking Assumptions}\label{checking-assumptions-5}
 
 The bootstrap t-test makes fewer distributional assumptions than its
-parametric counterpart but is not assumption-free. It requires
-independent observations and assumes the empirical distribution is a
-reasonable stand-in for the population distribution. The latter is an
-assumption that holds better in moderate-to-large samples than in small
-ones. The studentized bootstrap is reasonably robust to skewness and
-heavy tails, but remains sensitive to outliers and other high-influence
-observations, which can be drawn repeatedly across replicates and
-disproportionately shape the bootstrap distribution. Useful visual
-checks include the distribution of the data (histograms, boxplots) to
-identify extreme values, the bootstrap distribution itself to flag
-problematic skewness or gaps, and the jackknife-after-bootstrap plot to
-identify individual observations that dominate the bootstrap
+conventional, analytic, counterpart but is not assumption-free. It
+requires independent observations and assumes the empirical distribution
+is a reasonable stand-in for the population distribution. The latter is
+an assumption that holds better in moderate-to-large samples than in
+small ones. The studentized bootstrap is reasonably robust to skewness
+and heavy tails, but remains sensitive to outliers and other
+high-influence observations, which can be drawn repeatedly across
+replicates and disproportionately shape the bootstrap distribution.
+Useful visual checks include the distribution of the data (histograms,
+boxplots) to identify extreme values, the bootstrap distribution itself
+to flag problematic skewness or gaps, and the jackknife-after-bootstrap
+plot to identify individual observations that dominate the bootstrap
 variability. The \texttt{tr} argument for trimmed means provides a
 straightforward robustness option when outliers are a concern.
 Diagnostic workflows for all three designs are demonstrated in the
-online supplement. As with the parametric t-test, these checks reflect
-assumptions that are relaxed relative to normal-theory inference but not
-eliminated.
+online supplement. As with the t-test, these checks reflect assumptions
+that are relaxed relative to normal-theory inference but not eliminated.
 
 \subsubsection{Permutation t-test}\label{permutation-t-test}
 
@@ -1521,7 +1556,7 @@ separate density plots help assess whether group shapes are comparable
 enough for exchangeability under the null to be credible. Diagnostic
 workflows for all three designs are demonstrated in the online
 supplement. As with the bootstrap, these checks reflect assumptions that
-are relaxed relative to parametric inference but not eliminated.
+are relaxed relative to Student's t-test but not eliminated.
 
 \newpage
 
@@ -1639,8 +1674,8 @@ differences are right-skewed on the original scale, the differences of
 logs are often approximately symmetric, and \texttt{perm\_t\_test} on
 log-transformed values becomes a reasonable option. In such cases the
 equivalence bounds should be specified on the log scale and interpreted
-as log ratios (or sympercents). As with the parametric and bootstrap
-t-tests, assumptions are relaxed by the transformation but not
+as log ratios (or sympercents). As with Student's t-test or the
+bootstrap t-test, assumptions are relaxed by the transformation but not
 eliminated ----- they are simply moved to a different scale.
 
 \newpage
@@ -1861,11 +1896,12 @@ null should consult other R packages such as ``bayestestR''.
 I hope that the updated package continues to build upon the original
 impact of \citet{lakens_ori} and makes equivalence testing more
 accessible to researchers across disciplines. At the very least, I would
-encourage users to compare results across methods (e.g., parametric
-vs.~robust) to ensure that conclusions do not depend on the chosen
-analysis. If the interpretation substantially changes depending on the
-test, this suggests features of the data --- violations of assumptions,
-outliers, distributional shape --- that warrant further investigation.
+encourage users to compare results across methods (e.g., Student's
+t-test vs.~permutation t-test vs.~bootstrap t-test) to ensure that
+conclusions do not entirely depend on the chosen analysis. If the
+interpretation substantially changes depending on the test, this
+suggests features of the data --- violations of assumptions, outliers,
+distributional shape --- that warrant further investigation.
 
 \newpage
 

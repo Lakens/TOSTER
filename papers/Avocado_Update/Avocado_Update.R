@@ -179,9 +179,18 @@ res_tsum
 ## -----------------------------------------------------------------------------
 res_sh1 <- simple_htest(extra ~ group, 
                         data = sleep,
+                        paired = TRUE,
                         alternative = "equivalence", 
                         mu = 0.5)
 res_sh1
+
+## -----------------------------------------------------------------------------
+res_sh2 <- simple_htest(extra ~ group, 
+                        data = sleep,
+                        paired = TRUE,
+                        alternative = "greater", 
+                        mu = -0.5)
+res_sh2
 
 ## -----------------------------------------------------------------------------
 describe_htest(res_sh1)
