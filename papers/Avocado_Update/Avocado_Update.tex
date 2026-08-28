@@ -243,7 +243,48 @@ treat them as direct recommendations for their own research.
 
 \section{TOST with t-tests}\label{tost-with-t-tests}
 
-The \texttt{t\_TOST} function provides a unified interface for
+The t-test is the standard tool for comparing means. Its construction is
+simple: we estimate a mean (one-sample), the mean of the paired
+differences (paired samples), or the difference in means between two
+groups, and then divide that estimate by its standard error. The
+resulting t-statistic is compared against a t-distribution to obtain
+p-values and confidence intervals. Written generally, the statistic
+takes the form \(t = (\hat{\mu} - \mu_0)/SE_{\hat{\mu}}\), where
+\(\hat{\mu}\) is the estimate and \(\mu_0\) is the value being tested
+against.
+
+What matters for equivalence testing is that \(\mu_0\) is a choice
+rather than a fixed feature of the test. A traditional nil hypothesis
+test fixes \(\mu_0 = 0\) and asks whether the mean, or mean difference,
+is exactly zero. TOST changes none of the underlying machinery; it
+changes only what is substituted for \(\mu_0\). Two one-sided tests are
+performed --- one against the lower bound (\(\mu_0 = \Delta_L\)) and one
+against the upper bound (\(\mu_0 = \Delta_U\)) --- and equivalence is
+concluded only if both reject. Because each test is one-sided at
+\(\alpha\), the interval estimate corresponding to the procedure is a
+\(1-2\alpha\) (typically 90\%) confidence interval, which is what TOSTER
+reports and plots.
+
+Throughout, the estimand for a t-test --- the quantity being estimated
+--- is the mean, or mean difference, on the original scale of
+measurement.\footnote{This describes the default analysis, not an
+  inviolable property of the test. Several choices substitute a
+  different estimand: trimming (the \texttt{tr} argument in the
+  resampling functions, \texttt{tr\ =\ 0} by default) targets the
+  trimmed mean, which coincides with the mean only under symmetry; the
+  log-transformed methods target a ratio of geometric means; and in
+  applied settings, decisions about how intercurrent events ---
+  post-randomization events such as dropout or treatment discontinuation
+  --- and missing data are handled determine which population summary is
+  being estimated at all. The estimand is worth choosing deliberately
+  rather than inheriting from whichever test happens to be run
+  \citep{Lundberg_Johnson_Stewart_2021}.} This is worth stating plainly
+because several of the alternatives described later in this paper ---
+the rank-based tests in particular --- estimate different quantities
+entirely, and are not interchangeable substitutes when the hypothesis
+concerns means.
+
+The \texttt{t\_TOST} function in TOSTER provides a unified interface for
 equivalence and minimal effect testing with t-tests. It runs a standard
 nil significance test alongside the equivalence (or minimal effect)
 test, because in practice researchers may want both: ``Is there a
@@ -891,13 +932,13 @@ it provides more robust confidence intervals and p-values.
 ##  g[rm]=('1'-'2')/SD_rm)
 ## 
 ## data:  extra by group
-## z-observed = -0.78495, p-value = 0.8929
+## z-observed = -0.78495, p-value = 0.902
 ## alternative hypothesis: equivalence
 ## null values:
 ## lower bound upper bound 
 ##        -0.5         0.5 
 ## 90 percent confidence interval:
-##  -1.3036182 -0.4428423
+##  -1.294641 -0.452306
 ## sample estimates:
 ## SMD (g[rm]) 
 ##  -0.7513666
@@ -987,13 +1028,13 @@ objects that integrate with the helper functions described above.
 ##  Bootstrapped Pearson's product-moment correlation (BCa)
 ## 
 ## data:  bugs$LDLF and bugs$LDHF
-## N = 91, p-value = 0.986
+## N = 91, p-value = 0.9742
 ## alternative hypothesis: equivalence
 ## null values:
 ## correlation correlation 
 ##         0.4        -0.4 
 ## 90 percent confidence interval:
-##  0.441331 0.690831
+##  0.4269002 0.6844031
 ## sample estimates:
 ##         r 
 ## 0.5767783
@@ -1006,8 +1047,8 @@ objects that integrate with the helper functions described above.
 \end{Shaded}
 
 The Bootstrapped Pearson's product-moment correlation (BCa) is not
-statistically significant (p = 0.986, r = 0.577, 90\% C.I.{[}0.441,
-0.691{]}) at a 0.05 alpha-level. The null hypothesis cannot be rejected.
+statistically significant (p = 0.974, r = 0.577, 90\% C.I.{[}0.427,
+0.684{]}) at a 0.05 alpha-level. The null hypothesis cannot be rejected.
 At the desired error rate, it cannot be stated that the true correlation
 is between 0.4 and -0.4.
 
@@ -1443,8 +1484,8 @@ asymptotically valid inference even under heteroscedasticity.
 equivalence testing setting, showing that studentized permutation TOST
 maintains nominal Type I error rates when variances differ across
 groups. In short, these methods are assumption-lighter rather than
-assumption-free, and users should still consider whether independence
-and exchangeability are reasonable for their design.
+assumption-free, and users should still consider whether these
+assumptions are reasonable for their design.
 
 A common reflex when normality seems implausible is to switch to the WMW
 or other rank-based tests. However, these tests answer a different
@@ -1474,15 +1515,16 @@ null distribution is constructed exactly (or nearly so) from the data at
 hand, whereas the bootstrap's asymptotic justification can produce
 liberal tests with very small sample sizes. When outliers are a concern,
 both methods accept the \texttt{tr} argument for trimmed means, which
-reduces the influence of extreme observations while preserving the
-mean-based interpretation. As a rough heuristic, researchers comparing
-two independent groups with suspected unequal variances may find the
-studentized permutation test most defensible, while those wanting a
-single framework that yields coherent intervals and p-values across a
-range of designs may prefer the bootstrap. Both are substantial
-improvements over ignoring assumption violations of the t-test, and both
-return standard \texttt{htest} objects that integrate with the TOST
-framework for equivalence and minimal effect testing.
+reduces the influence of extreme observations while preserving a
+location-based interpretation on the original scale. As a rough
+heuristic, researchers comparing two independent groups with suspected
+unequal variances may find the studentized permutation test most
+defensible, while those wanting a single framework that yields coherent
+intervals and p-values across a range of designs may prefer the
+bootstrap. Both are substantial improvements over ignoring assumption
+violations of the t-test, and both return standard \texttt{htest}
+objects that integrate with the TOST framework for equivalence and
+minimal effect testing.
 
 \subsubsection{Bootstrap t-test}\label{bootstrap-t-test}
 
@@ -1665,8 +1707,9 @@ however, diverge in small samples, under strong heteroscedasticity, or
 in the presence of influential outliers, which is where the choice
 between them becomes substantively important. Users interested in
 robustness to outliers can additionally supply the \texttt{tr} argument
-to either function to use trimmed means, preserving the mean-based
-interpretation while downweighting extreme observations.
+to either function to use trimmed means, which downweight extreme
+observations while preserving a location-based interpretation on the
+original scale.
 
 \paragraph{Checking Assumptions}\label{checking-assumptions-6}
 
@@ -1897,7 +1940,11 @@ Objects}\label{example-with-r-anova-objects}
 
 The \texttt{equ\_anova} function accepts objects from
 \texttt{stats::aov}, \texttt{car::Anova}, and \texttt{afex::aov\_car},
-avoiding the need to extract summary statistics manually:
+avoiding the need to extract summary statistics manually. In the example
+below, the traditional significance test p-value is located in the
+``p.null'' column while to right of that value is the estimated
+standardized effect size (pes which stands for partial eta-squared),
+equivalence bound (eqb), and equivalence test p-value (p.equ).
 
 \begin{Shaded}
 \begin{Highlighting}[]
