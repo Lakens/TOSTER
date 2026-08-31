@@ -518,7 +518,7 @@ Correlation-based inference in `z_cor_test` and `boot_cor_test` assumes independ
 
 When evaluating whether a replication study produced results consistent with the original, researchers need a way to formally compare effect sizes. The `compare_smd` function tests whether two SMD estimates --- from an original study and a replication, for example --- differ more than would be expected by sampling variability alone.
 
-Consider an original study reporting Cohen's $d_z$ = 0.95 with 25 participants and a replication with $d$ = 0.23 and 50 participants. Are these estimates compatible? Let's say that we deter
+Consider an original study reporting Cohen's $d_z$ = 0.95 with 25 participants and a replication with $d$ = 0.23 and 50 participants. Are these estimates compatible? Let's say we determine that equivalence between studies would be SMDs within 0.25 of each other. We can then perform a significance and equivalence test between the two study estimates.
 
 ```{r}
 # Significance test
