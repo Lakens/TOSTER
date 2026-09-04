@@ -134,9 +134,9 @@ Minor scope pushback: the McNabb & Murayama argument is framed around neuroscien
 - [ ] Intro: roadmap paragraph; flag the ANOVA generalisation as novel (also in the abstract).
 - [ ] Add function-selection table.
 - [ ] (Optional) Promote the estimand footnote to a short section.
-- [ ] Restructure WMW subsection: no-assumption / location-shift / what-gets-bounded.
-- [ ] One-line estimand statement at the head of each robust-method subsection.
-- [ ] (Optional) ECDF location-shift figure alongside the symmetry plot.
+- [x] Restructure WMW subsection: no-assumption / location-shift / what-gets-bounded. **Done** — three `####` subsections added; H₀ for stochastic equality now stated formally; `Checking Assumptions` split into labelled location-shift and symmetry parts.
+- [x] ECDF location-shift figure alongside the symmetry plot. **Done** — `fig:ecdfshift`, two panels (assumption holds / violated) with arrows marking the horizontal gap at the 10th/50th/90th percentiles. Knit-tested.
+- [ ] One-line estimand statement at the head of each robust-method subsection (WMW now has one; Brunner–Munzel, bootstrap/permutation, log-TOST still need theirs).
 - [ ] Brunner–Munzel: qualify "valid under heteroscedasticity" as a null/Type I error statement; name the nonparametric Behrens–Fisher problem.
 - [ ] ANOVA: define partial η²; distinguish from η²; explain the one-sided non-inferiority framing and why it is not a TOST; state what a rejection does and does not license.
 - [ ] ANOVA: bound-selection discussion; flag Δ = 0.35 as illustrative; add the f² conversion.

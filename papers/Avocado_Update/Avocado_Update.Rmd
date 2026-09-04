@@ -589,14 +589,29 @@ Rank-based tests operate on the ranks of the data rather than the raw values, wh
 
 ### Wilcoxon-Mann-Whitney Tests
 
-The WMW group of tests provide non-parametric tests based on ranks. Within the TOST framework, the WMW tests are comprised of two directional location-shift tests determine if the shift is within (equivalence) or outside (minimal effect) the equivalence bounds. There are many common misconceptions about the WMW tests that I will try to briefly address.
+The Wilcoxon-Mann-Whitney (WMW) family --- the rank-sum test for two independent groups and the signed-rank test for paired and one-sample designs --- provides non-parametric tests based on ranks. Within the TOST framework, TOSTER performs two directional tests to determine whether the effect lies within (equivalence) or outside (minimal effect) the equivalence bounds. What that effect is depends on an assumption that researchers often do not realize they are making, and there are persistent misconceptions worth addressing directly. The three subsections below separate what the WMW tests evaluate with no additional assumptions, what they evaluate under a location-shift assumption, and what `wilcox_TOST` actually places bounds on.
 
+#### Without a location-shift assumption: a test of stochastic equality
 
-First, many researchers mistakenly believe these are tests of medians, but without a location-shift assumption, the WMW test is a test of stochastic equality. As @Fay_Malinovsky_2018 demonstrate, the effect size can even be presented as stochastic superiority/dominance. 
+Many researchers believe the WMW tests are tests of medians. They are not. With no assumption beyond independence and exchangeability, the WMW test evaluates stochastic equality which has the null hypothesis that a randomly drawn observation from one group is equally likely to exceed, or to be exceeded by, a randomly drawn observation from the other,
 
-Second, only under a location-shift assumption does it become a test of central tendency through the Hodges-Lehmann estimator. @median_test demonstrate striking counterexamples: groups can have equal medians yet produce a significant WMW test, very different medians yet a non-significant WMW test, or even significance in the opposite direction from the median comparison.
+$$
+H_0: \space P(X > Y) + \frac{1}{2} \cdot P(X = Y) = 0.5
+$$
 
-For equivalence testing in the TOSTER package, the function `wilcox_TOST` applies the bounds to the pseudo-median, which corresponds to the mean or median difference only under the location-shift assumption. For testing hypotheses about mean differences, `perm_t_test` or `boot_t_test` are more appropriate. For stochastic superiority, `brunner_munzel` provides a clearer framework. 
+As @Fay_Malinovsky_2018 demonstrate, the effect size accompanying the test is therefore most naturally expressed as stochastic superiority (or dominance) rather than as a difference in central tendency. Nothing about this null hypothesis refers to a mean or a median.
+
+#### Under a location-shift assumption: a test of central tendency
+
+The location-shift assumption holds that the two distributions are identical in every respect except location. Under this assumption, and only under it, stochastic equality and equality of medians coincide, and the Hodges-Lehmann estimator can be read as an estimate of the median difference. This is the interpretation most readers have in mind when they reach for a WMW test.
+
+When the assumption fails, the two interpretations can come apart dramatically. @median_test demonstrate striking counterexamples: groups can have equal medians yet produce a significant WMW test, very different medians yet a non-significant WMW test, or even significance in the direction opposite the median comparison. Critically, nothing in the test output signals that the assumption has failed --- the p-value and the Hodges-Lehmann estimate are reported the same way either way. The diagnostic described below is therefore not optional if a central-tendency interpretation is intended.
+
+#### What `wilcox_TOST` places bounds on
+
+In TOSTER, `wilcox_TOST` applies the equivalence bounds to the pseudo-median, which corresponds to the mean or median difference only under the location-shift assumption. This has a direct practical consequence for setting bounds: if you are not prepared to assert location shift, the pseudo-median is your estimand, and the smallest effect size of interest must be justified on that scale rather than imported from reasoning about mean differences.
+
+If the hypothesis genuinely concerns means, `perm_t_test` or `boot_t_test` are the more appropriate tools. If it concerns stochastic superiority, `brunner_munzel` provides a clearer framework and a directly interpretable effect size.
 
 ```{r}
 test1 = wilcox_TOST(
@@ -613,7 +628,65 @@ Based on these results, we would conclude there is a significant difference and 
 
 #### Checking Assumptions
 
-The WMW tests assume independent observations and exchangeability under the null, the latter meaning that group labels carry no information about outcomes if there is no effect. For the interpretations discussed above to be clean, two additional assumptions matter. The location-shift assumption — that the two group distributions differ only in location, not shape — is what allows WMW results to be interpreted as a test of the median difference via the Hodges-Lehmann estimator. Violations are best diagnosed by overlaying the empirical cumulative density functions  of the two groups; under location shift, the curves are horizontal translations of each other, whereas crossing curves or varying horizontal gaps indicate violation. For the paired and one-sample signed-rank variants used in `wilcox_TOST` or `simple_htest`, the signed-rank procedure additionally requires that the difference distribution is symmetric around the null value for the pseudo-median to coincide with the mean or median difference. Asymmetry is readily checked with a symmetry plot of the paired differences (Figure \ref{fig:symmplot}). As with the location-shift case, visible departures suggest that the test's output — the pseudo-median and associated p-value — does not map cleanly onto a hypothesis about central tendency.
+The WMW tests assume independent observations and exchangeability under the null, the latter meaning that group labels carry no information about outcomes if there is no effect. Those two assumptions are all that the stochastic-equality interpretation requires. The two assumptions below determine whether the stronger central-tendency interpretation is available, and each has a straightforward visual diagnostic.
+
+The location-shift assumption --- that the two group distributions differ only in location, not in shape or spread --- is what allows WMW results to be interpreted as a test of the median difference via the Hodges-Lehmann estimator. It is best diagnosed by overlaying the empirical cumulative distribution functions (ECDFs) of the two groups. Under location shift, the curves are horizontal translations of one another, so the horizontal distance between them is constant across the range of the data (Figure \ref{fig:ecdfshift}A). Departures appear as a gap that widens, narrows, or reverses sign, and in the clearest cases as curves that cross (Figure \ref{fig:ecdfshift}B). In panel B, the two groups there differ in both location and spread, so there is no single number that describes "the shift," and the Hodges-Lehmann estimate that `wilcox_TOST` reports does not correspond to a difference in medians.
+
+For the signed-rank variants used by `wilcox_TOST` and `simple_htest`, the difference distribution must additionally be symmetric about the null value for the pseudo-median to coincide with the mean or median difference. Asymmetry is readily checked with a symmetry plot of the paired differences (Figure \ref{fig:symmplot}). As with the location-shift case, visible departures suggest that the test's output --- the pseudo-median and associated p-value --- does not map cleanly onto a hypothesis about central tendency.
+
+```{r }
+#| label: ecdfshift
+#| echo: false
+#| fig.height: 3.8
+#| fig.width: 6.5
+#| fig.cap: "\\label{fig:ecdfshift}Empirical cumulative distribution functions for two simulated groups, with double-headed arrows marking the horizontal distance between the curves at the 10th, 50th, and 90th percentiles. (A) The location-shift assumption holds: the distributions differ only in location, the arrows are of equal length, and the Hodges-Lehmann estimator can be read as a median difference. (B) The assumption is violated: the groups differ in spread as well as location, so the horizontal gap varies in magnitude and reverses sign across the distribution, and the curves cross. In panel B there is no single shift to estimate, and a central-tendency interpretation of the WMW test is not available."
+set.seed(19)
+n_ecdf <- 200
+
+ecdf_panel <- function(g1, g2, title, subtitle) {
+  df <- data.frame(
+    value = c(g1, g2),
+    Group = rep(c("Group 1", "Group 2"), c(length(g1), length(g2)))
+  )
+  probs <- c(0.1, 0.5, 0.9)
+  seg <- data.frame(
+    p = probs,
+    x1 = quantile(g1, probs, type = 7),
+    x2 = quantile(g2, probs, type = 7)
+  )
+  ggplot(df, aes(x = value, colour = Group, linetype = Group)) +
+    stat_ecdf(linewidth = 0.7) +
+    geom_segment(
+      data = seg, inherit.aes = FALSE,
+      aes(x = x1, xend = x2, y = p, yend = p),
+      arrow = arrow(length = unit(0.05, "in"), ends = "both"),
+      linewidth = 0.35, colour = "grey25"
+    ) +
+    scale_colour_grey(start = 0.1, end = 0.55) +
+    coord_cartesian(xlim = c(-7, 8)) +
+    labs(x = "Value", y = "Cumulative probability",
+         title = title, subtitle = subtitle) +
+    theme_minimal(base_size = 10) +
+    theme(legend.position = "bottom",
+          legend.title = element_blank(),
+          plot.title = element_text(size = 10, face = "bold"),
+          plot.subtitle = element_text(size = 8))
+}
+
+p_shift <- ecdf_panel(
+  rnorm(n_ecdf, 0, 1), rnorm(n_ecdf, 1.5, 1),
+  "A. Location shift holds",
+  "Horizontal gap is constant across the distribution"
+)
+p_viol <- ecdf_panel(
+  rnorm(n_ecdf, 0, 1), rnorm(n_ecdf, 0.5, 2.5),
+  "B. Location shift violated",
+  "Gap varies and reverses sign; curves cross"
+)
+
+p_shift + p_viol + plot_layout(guides = "collect") &
+  theme(legend.position = "bottom")
+```
 
 
 ```{r }
