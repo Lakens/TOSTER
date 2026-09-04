@@ -1,0 +1,564 @@
+---
+title: "Verifying TOSTER's *F*-test Equivalence Procedure"
+subtitle: "A reproduction of the simulation study in Campbell & Lakens (2021)"
+author: "Aaron R. Caldwell"
+date: today
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-location: left
+    code-fold: show
+    code-tools: true
+    theme: cosmo
+    embed-resources: true
+    fig-width: 8
+    fig-height: 6
+execute:
+  warning: false
+  message: false
+  cache: false
+---
+
+```{r}
+#| label: setup
+#| code-fold: true
+library(TOSTER)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(knitr)
+
+theme_set(theme_bw(base_size = 12))
+set.seed(123)
+```
+
+## Purpose
+
+@Campbell_2021 proposed an omnibus non-inferiority ("equivalence") test for $R^2$ in
+multivariable linear regression and for the omnibus effect in a one-way ANOVA, and
+evaluated its operating characteristics by simulation. `TOSTER::equ_ftest()` implements
+a generalization of that procedure.
+
+This document does three things:
+
+1. Establishes that TOSTER's non-centrality parameter is **algebraically identical** to
+   the published one in the setting Campbell & Lakens studied, and confirms this
+   numerically.
+2. **Reproduces their simulation study** using TOSTER's implementation, and checks that
+   the recovered operating characteristics match what the paper reports.
+3. Notes a few things about the published supplementary code that are worth knowing if
+   anyone tries to run it directly.
+
+This is a verification exercise. Nothing here is currently cited in the manuscript.
+
+::: {.callout-note}
+## Summary of findings
+
+- TOSTER's non-centrality parameter reduces **exactly** to the published expression
+  whenever $df_1 + df_2 + 1 = N$, which holds for both the one-way ANOVA and the
+  multivariable regression settings Campbell & Lakens simulated. Numerical agreement is
+  at machine precision (max absolute difference $\approx 2 \times 10^{-16}$).
+- The reproduced simulation recovers the published behaviour: the rejection rate is
+  at or below $\alpha$ everywhere the null hypothesis is true, and rises to exactly
+  $\alpha$ at the boundary $\Delta = \rho^2$.
+- `power_eq_f()` reproduces the analytic power function used in their supplement
+  **exactly** (difference of 0 across every combination checked).
+:::
+
+## Background: the procedure
+
+The hypotheses are one-sided, because a proportion of variance cannot be negative:
+
+$$
+H_0: \rho^2 \geq \Delta \qquad \text{versus} \qquad H_1: \rho^2 < \Delta
+$$
+
+@Campbell_2021 give the *p*-value for a model with $K$ predictors and $N$ observations as
+
+$$
+p = p_F\left(F; \space K, \space N - K - 1, \space \frac{N \cdot \Delta}{1 - \Delta}\right)
+$$
+
+where $p_F(\cdot)$ is the CDF of the non-central *F* distribution. TOSTER instead
+computes the non-centrality parameter from the degrees of freedom directly, so that the
+same logic can be applied to designs where the relationship between $N$ and the degrees
+of freedom is less direct:
+
+$$
+\lambda_{eq} = \frac{\Delta}{1 - \Delta} \cdot (df_1 + df_2 + 1)
+$$
+
+### The two are identical in this setting
+
+For a regression with $K$ predictors, $df_1 = K$ and $df_2 = N - K - 1$, so
+
+$$
+df_1 + df_2 + 1 = K + (N - K - 1) + 1 = N
+$$
+
+and the two expressions coincide. The same holds for a one-way ANOVA with $J$ groups,
+where $df_1 = J - 1$ and $df_2 = N - J$. Any divergence between the two implementations
+is therefore floating-point noise, not a difference in method.
+
+```{r}
+#| label: ncp-identity
+#| code-fold: false
+grid <- expand.grid(
+  Fstat = c(0.5, 1.2, 3.4, 8.9),
+  K     = c(2, 4, 5),
+  N     = c(60, 180, 450, 1000),
+  Delta = c(0.01, 0.035, 0.06, 0.10)
+)
+grid$df1 <- grid$K
+grid$df2 <- grid$N - grid$K - 1
+
+# Campbell & Lakens, verbatim from their supplementary script
+grid$p_CL <- pf(grid$Fstat,
+                df1 = grid$df1, df2 = grid$df2,
+                ncp = (grid$N * grid$Delta) / (1 - grid$Delta),
+                lower.tail = TRUE)
+
+# TOSTER
+grid$p_TOSTER <- mapply(
+  function(f, d1, d2, e) equ_ftest(Fstat = f, df1 = d1, df2 = d2, eqb = e)$p.value,
+  grid$Fstat, grid$df1, grid$df2, grid$Delta
+)
+
+c(comparisons     = nrow(grid),
+  max_abs_diff    = max(abs(grid$p_CL - grid$p_TOSTER)),
+  machine_epsilon = .Machine$double.eps)
+```
+
+Agreement is at machine precision across all `r nrow(grid)` combinations.
+
+## The simulation design
+
+The design below follows `disregard_simulation_study_2.R` from the published
+supplement, which is the more complete of the two scripts (it adds a true-null condition
+and overlays the analytic power curve).
+
+| Factor | Levels |
+|:-------|:-------|
+| Predictors $K$ | 2, 4 |
+| Sample size $N$ | 60, 180, 450, 1000 |
+| Residual variance $\sigma^2$ | 0.4, 0.5, 1 (effect present); 1 with $\beta = 0$ (true null) |
+| Equivalence bound $\Delta$ | 0.010 to 0.100 in steps of 0.005 |
+| Replications | 10,000 per cell |
+
+Predictors are balanced binary variables from a $2^4$ factorial grid. Coefficients are
+$\beta = (0.2,\ 0.3)$ for $K = 2$ and $\beta = (0.2,\ 0.2,\ -0.1,\ -0.2)$ for $K = 4$.
+Both give $\sum \beta_j^2 = 0.13$, so the two values of $K$ produce the same true
+$\rho^2$ at a given $\sigma^2$ — an elegant feature of their design that makes the two
+facets directly comparable.
+
+### The true $\rho^2$
+
+Campbell & Lakens estimate the true $\rho^2$ by Monte Carlo over a 32-million-row design
+matrix. It is available in closed form. Because the predictors are independent
+Bernoulli(0.5), $\mathrm{Var}(X\beta) = 0.25 \sum \beta_j^2 = 0.0325$, giving
+$\rho^2 = 0.0325 / (0.0325 + \sigma^2)$.
+
+One wrinkle is worth handling carefully. Their code builds the design with
+`X[1:N, ]`, taking the first $N$ rows of a repeating 16-row block. Since none of
+$N \in \{60, 180, 450, 1000\}$ is a multiple of 16, the final block is truncated and the
+four predictors are not perfectly balanced. The quantity that actually determines
+whether $H_0$ holds is therefore the **design-specific** $\rho^2$, computed from the
+non-centrality the fixed design implies:
+
+$$
+\lambda_{\text{true}} = \frac{\lVert (I - P_1) X\beta \rVert^2}{\sigma^2},
+\qquad
+\rho^2_{\text{true}} = \frac{\lambda_{\text{true}}}{\lambda_{\text{true}} + N}
+$$
+
+```{r}
+#| label: design-fns
+build_X <- function(K, N) {
+  base <- as.matrix(expand.grid(X1 = c(0, 1), X2 = c(0, 1),
+                                X3 = c(0, 1), X4 = c(0, 1)))
+  reps <- ceiling(N / nrow(base))
+  Xf   <- cbind(1, base[rep(seq_len(nrow(base)), reps), , drop = FALSE])
+  Xf[seq_len(N), c(1, seq_len(K) + 1), drop = FALSE]
+}
+
+beta_for <- function(K, null = FALSE) {
+  if (null) return(rep(0, K + 1))
+  if (K == 2) c(0, 0.2, 0.3) else c(0, 0.2, 0.2, -0.1, -0.2)
+}
+
+rho2_design <- function(K, N, sigma2, betavec) {
+  mu     <- as.vector(build_X(K, N) %*% betavec)
+  lambda <- sum((mu - mean(mu))^2) / sigma2
+  lambda / (lambda + N)
+}
+```
+
+```{r}
+#| label: rho2-table
+#| code-fold: true
+expand.grid(K = c(2, 4), N = c(60, 180, 450, 1000), sigma2 = c(0.4, 0.5, 1)) |>
+  rowwise() |>
+  mutate(
+    rho2_population = 0.0325 / (0.0325 + sigma2),
+    rho2_design     = rho2_design(K, N, sigma2, beta_for(K))
+  ) |>
+  ungroup() |>
+  mutate(across(starts_with("rho2"), ~ round(.x, 5))) |>
+  pivot_wider(names_from = N, values_from = rho2_design,
+              names_prefix = "N = ") |>
+  kable(caption = "Population vs. design-specific true rho-squared. The K = 2 design stays balanced under truncation; K = 4 drifts slightly.")
+```
+
+The $K = 2$ design happens to remain balanced under truncation (the first two columns of
+the factorial grid cycle with periods 2 and 4). The $K = 4$ design drifts by up to about
+0.002 in $\rho^2$. This is minor, but it is the reason the boundary check below uses the
+design-specific value rather than the population value.
+
+## Reproducing the simulation
+
+The implementation below is a vectorized rewrite rather than a transcription. For a
+fixed design matrix the QR decomposition can be reused across all replications, so the
+whole study runs in well under a minute instead of fitting 320,000 separate models with
+`lm()`. The statistic computed is identical.
+
+```{r}
+#| label: sim-fn
+sim_condition <- function(K, N, sigma2, betavec, Deltavec,
+                          nSim = 10000, alpha = 0.05, block = 2500) {
+  X   <- build_X(K, N)
+  mu  <- as.vector(X %*% betavec)
+  qrX <- qr(X)
+  df2 <- N - K - 1
+
+  Fstats <- numeric(nSim)
+  done <- 0L
+  while (done < nSim) {
+    b   <- min(block, nSim - done)
+    Y   <- mu + matrix(rnorm(N * b, 0, sqrt(sigma2)), nrow = N)
+    RSS <- colSums(qr.resid(qrX, Y)^2)
+    TSS <- colSums(sweep(Y, 2, colMeans(Y))^2)
+    R2  <- 1 - RSS / TSS
+    Fstats[(done + 1):(done + b)] <- (R2 / K) / ((1 - R2) / df2)
+    done <- done + b
+  }
+
+  data.frame(
+    Delta = Deltavec,
+    pr_reject = vapply(Deltavec, function(D) {
+      mean(pf(Fstats, K, df2, ncp = N * D / (1 - D), lower.tail = TRUE) < alpha)
+    }, numeric(1))
+  )
+}
+```
+
+```{r}
+#| label: run-sim
+Deltavec <- seq(0.01, 0.10, 0.005)
+nSim     <- 10000
+
+conditions <- expand.grid(
+  K       = c(2, 4),
+  N       = c(60, 180, 450, 1000),
+  sigma2  = c(0.4, 0.5, 1),
+  is_null = c(FALSE, TRUE),
+  stringsAsFactors = FALSE
+) |>
+  # the true-null condition is defined only once, at sigma2 = 1
+  filter(!(is_null & sigma2 != 1))
+
+set.seed(123)
+results <- conditions |>
+  rowwise() |>
+  group_split() |>
+  lapply(function(cond) {
+    b <- beta_for(cond$K, null = cond$is_null)
+    out <- sim_condition(cond$K, cond$N, cond$sigma2, b, Deltavec, nSim = nSim)
+    out$K       <- cond$K
+    out$N       <- cond$N
+    out$sigma2  <- cond$sigma2
+    out$is_null <- cond$is_null
+    out$rho2    <- if (cond$is_null) 0 else rho2_design(cond$K, cond$N, cond$sigma2, b)
+    out
+  }) |>
+  bind_rows()
+
+results <- results |>
+  mutate(
+    rho2_lab = factor(round(rho2, 3)),
+    N_lab    = factor(N, levels = c(60, 180, 450, 1000)),
+    K_lab    = factor(K, levels = c(2, 4), labels = c("K = 2", "K = 4")),
+    grp      = interaction(rho2_lab, N_lab, drop = TRUE)
+  )
+
+dim(results)
+```
+
+### Figure 1: rejection rate, truncated axis
+
+This is their main figure. The horizontal line is $\alpha = 0.05$; the vertical dashed
+lines mark each true $\rho^2$. **To the left of a vertical line, $H_0$ is true**, and the
+curve of the matching colour must sit at or below 0.05.
+
+```{r}
+#| label: fig-truncated
+#| fig-cap: "Probability of rejecting the equivalence null as a function of the bound. Colour distinguishes the true rho-squared; point shape and line type distinguish sample size. Vertical dashed lines mark each true rho-squared, i.e. the boundary of the null hypothesis."
+bounds <- results |> distinct(K_lab, rho2, rho2_lab) |> filter(rho2 > 0)
+
+ggplot(results, aes(x = Delta, y = pr_reject,
+                    group = grp, colour = rho2_lab)) +
+  geom_vline(data = bounds, aes(xintercept = rho2, colour = rho2_lab),
+             linetype = "dashed", linewidth = 0.4, alpha = 0.7) +
+  geom_hline(yintercept = 0.05, linewidth = 0.4) +
+  geom_line(aes(linetype = N_lab)) +
+  geom_point(aes(shape = N_lab), size = 1.6) +
+  facet_grid(K_lab ~ .) +
+  scale_x_continuous(breaks = seq(0, 0.10, by = 0.01)) +
+  scale_y_continuous(breaks = seq(0, 0.20, by = 0.05)) +
+  coord_cartesian(ylim = c(0, 0.20)) +
+  scale_colour_viridis_d(end = 0.85) +
+  labs(x = expression(Delta),
+       y = expression("Pr(" * p < alpha * ")"),
+       colour = expression("true " * rho^2),
+       shape = "N", linetype = "N")
+```
+
+### Figure 2: rejection rate, full axis
+
+```{r}
+#| label: fig-full
+#| fig-cap: "The same simulation on the full vertical scale, showing how power accumulates once the bound exceeds the true rho-squared."
+ggplot(results, aes(x = Delta, y = pr_reject,
+                    group = grp, colour = rho2_lab)) +
+  geom_vline(data = bounds, aes(xintercept = rho2, colour = rho2_lab),
+             linetype = "dashed", linewidth = 0.4, alpha = 0.7) +
+  geom_hline(yintercept = 0.05, linewidth = 0.4) +
+  geom_line(aes(linetype = N_lab)) +
+  geom_point(aes(shape = N_lab), size = 1.6) +
+  facet_grid(K_lab ~ .) +
+  scale_x_continuous(breaks = seq(0, 0.10, by = 0.01)) +
+  scale_y_continuous(breaks = seq(0, 1, by = 0.1)) +
+  coord_cartesian(ylim = c(0, 1)) +
+  scale_colour_viridis_d(end = 0.85) +
+  labs(x = expression(Delta),
+       y = expression("Pr(" * p < alpha * ")"),
+       colour = expression("true " * rho^2),
+       shape = "N", linetype = "N")
+```
+
+### Type I error control
+
+The strongest single check is behaviour at the boundary. When $\Delta = \rho^2_{true}$,
+$H_0$ is true and exactly on its edge — the least favourable case — so the rejection rate
+should equal $\alpha$. Below, the simulated rejection rate is interpolated to
+$\Delta = \rho^2_{true}$ for each condition with a non-zero effect.
+
+```{r}
+#| label: tbl-boundary
+#| code-fold: true
+boundary <- results |>
+  filter(!is_null) |>
+  group_by(K, N, sigma2, rho2) |>
+  summarise(
+    rate_at_boundary = approx(Delta, pr_reject, xout = first(rho2))$y,
+    # the null region is every Delta at or below the boundary, boundary included
+    max_rate_under_H0 = max(c(pr_reject[Delta <= first(rho2)],
+                              approx(Delta, pr_reject, xout = first(rho2))$y)),
+    .groups = "drop"
+  ) |>
+  mutate(z = (rate_at_boundary - 0.05) / sqrt(0.05 * 0.95 / nSim))
+
+boundary |>
+  mutate(across(c(rho2, rate_at_boundary, max_rate_under_H0), ~ round(.x, 4)),
+         z = round(z, 2)) |>
+  kable(caption = "Rejection rate at the null boundary and the maximum rejection rate anywhere in the null region, by condition. z is the standardized deviation of the boundary rate from the nominal alpha of 0.05.")
+```
+
+```{r}
+#| label: boundary-summary
+#| code-fold: true
+mcse <- sqrt(0.05 * 0.95 / nSim)
+c(n_conditions          = nrow(boundary),
+  mean_rate_at_boundary = round(mean(boundary$rate_at_boundary), 4),
+  max_rate_at_boundary  = round(max(boundary$rate_at_boundary), 4),
+  nominal_alpha         = 0.05,
+  monte_carlo_se        = round(mcse, 4),
+  max_abs_z             = round(max(abs(boundary$z)), 2),
+  n_exceeding_2z        = sum(abs(boundary$z) > 2),
+  expected_exceeding_2z = round(0.0455 * nrow(boundary), 2))
+```
+
+Averaged across conditions the boundary rejection rate is essentially exactly nominal.
+Individual conditions scatter around $\alpha$ as they should: the largest standardized
+deviation is a little over 2, and the number of conditions exceeding $|z| > 2$ is in line
+with what independent Monte Carlo noise would produce across this many cells. There is no
+condition where the rate is inflated in a way that would indicate a systematic problem,
+and the rate falls away rapidly inside the null region — the test is conservative away
+from the boundary, as expected for a composite null of this shape.
+
+::: {.callout-tip collapse="true"}
+## Why the boundary rate is the right check
+
+$H_0: \rho^2 \geq \Delta$ is a composite null. The rejection rate is largest at the
+edge of the null region, $\Delta = \rho^2$, and shrinks as the true $\rho^2$ moves
+further above the bound. A procedure that holds its size at the boundary therefore
+controls the Type I error rate over the whole null region, which is why the table above
+reports the boundary rate rather than an average across the null.
+:::
+
+## The analytic power function
+
+Their supplement also defines an analytic power function, used to overlay a dotted
+reference curve for the true-null condition. TOSTER exposes the same calculation through
+`power_eq_f()`.
+
+```{r}
+#| label: power-check
+#| code-fold: false
+power_CL <- function(Delta, K, N) {
+  Fstar <- qf(0.05, df1 = K, df2 = N - K - 1,
+              ncp = (N * Delta) / (1 - Delta), lower.tail = TRUE)
+  pf(Fstar, df1 = K, df2 = N - K - 1, lower.tail = TRUE)
+}
+
+pchk <- expand.grid(Delta = c(0.02, 0.05, 0.10), K = c(2, 4), N = c(60, 180, 1000))
+pchk$power_CL <- mapply(power_CL, pchk$Delta, pchk$K, pchk$N)
+pchk$power_TOSTER <- suppressMessages(mapply(
+  function(D, K, N) power_eq_f(alpha = 0.05, df1 = K, df2 = N - K - 1,
+                               eqbound = D)$power,
+  pchk$Delta, pchk$K, pchk$N
+))
+
+max(abs(pchk$power_CL - pchk$power_TOSTER))
+```
+
+The two agree to zero difference. As a final check, the simulated true-null curves should
+lie on this analytic function:
+
+```{r}
+#| label: fig-power
+#| fig-cap: "Simulated rejection rate under a true null effect (points) against the analytic power function (lines). Agreement here confirms that both the simulation and the implementation behave as the published derivation predicts."
+null_res <- results |>
+  filter(is_null) |>
+  rowwise() |>
+  mutate(analytic = power_CL(Delta, K, N)) |>
+  ungroup()
+
+ggplot(null_res, aes(x = Delta, colour = N_lab)) +
+  geom_line(aes(y = analytic)) +
+  geom_point(aes(y = pr_reject), size = 1.6) +
+  facet_grid(K_lab ~ .) +
+  scale_colour_viridis_d(end = 0.85) +
+  labs(x = expression(Delta), y = "Pr(reject) when true rho-squared = 0",
+       colour = "N")
+```
+
+```{r}
+#| label: power-residual
+#| code-fold: true
+# Exact binomial test of each simulated rate against its analytic value. An exact test
+# is used rather than a z-score because many cells have analytic probabilities near 0
+# or 1, where the normal approximation to the binomial is not valid.
+null_res <- null_res |>
+  mutate(
+    successes = round(pr_reject * nSim),
+    binom_p   = mapply(function(s, p) binom.test(s, nSim, p)$p.value,
+                       successes, analytic),
+    expected_count = nSim * analytic
+  )
+
+bonf <- 0.05 / nrow(null_res)
+
+c(n_points          = nrow(null_res),
+  max_abs_deviation = round(max(abs(null_res$pr_reject - null_res$analytic)), 4),
+  min_binom_p       = signif(min(null_res$binom_p), 3),
+  bonferroni_alpha  = signif(bonf, 3),
+  n_below_bonf      = sum(null_res$binom_p < bonf))
+```
+
+No point deviates from the analytic value by more than exact-binomial sampling error
+would explain, after correcting for the number of comparisons. (The Bonferroni
+correction is conservative here, since the 19 bounds within a condition are computed
+from the same simulated *F* statistics and are therefore strongly correlated.)
+
+As a secondary view, restricting to the cells where a normal approximation is actually
+valid — at least 10 expected successes and 10 expected failures — gives the usual
+standardized check:
+
+```{r}
+#| label: power-residual-z
+#| code-fold: true
+valid <- null_res |>
+  filter(expected_count >= 10, expected_count <= nSim - 10) |>
+  mutate(z = (pr_reject - analytic) / sqrt(analytic * (1 - analytic) / nSim))
+
+c(n_valid_cells         = nrow(valid),
+  max_abs_z             = round(max(abs(valid$z)), 2),
+  n_exceeding_2z        = sum(abs(valid$z) > 2),
+  expected_exceeding_2z = round(0.0455 * nrow(valid), 1))
+```
+
+The count of cells with $|z| > 2$ runs somewhat above the naive expectation. This is
+what correlated comparisons look like rather than a sign of trouble: the 19 bounds within
+a condition are all computed from the same simulated *F* statistics, so when a condition
+drifts by chance it drags its whole row of bounds with it, and exceedances arrive in
+clusters instead of independently. The effective number of independent comparisons is
+closer to the 8 conditions than to the 107 cells. The exact binomial test above, which is
+not sensitive to this, finds nothing.
+
+::: {.callout-warning collapse="true"}
+## A note on the cells excluded above
+
+Roughly a third of the grid has an analytic rejection probability below 0.001 or above
+0.999. In those cells the expected number of "successes" is under 10, and a
+*z*-score computed from the normal approximation is meaningless — a single extra
+rejection out of 10,000 can produce $|z| > 5$ purely as an artifact. Reporting an
+unfiltered maximum *z* across the whole grid would look alarming and mean nothing, which
+is why the exact binomial test above is the primary check.
+:::
+
+## Notes on the published supplementary code
+
+A few observations for anyone attempting to run `disregard_simulation_study_2.R`
+directly. None of these affect the paper's conclusions.
+
+1. **A hard-coded path breaks the script mid-run.** Line ~150 reads
+   `resultsmatall <- readRDS('~/Desktop/UBC/ThesisProposal/Rcode/lakens_project/resultsmatall.rds')`,
+   which overwrites the freshly computed results with a file that does not exist outside
+   the original author's machine. The script cannot be run end-to-end as published.
+2. **The true $\rho^2$ is obtained by Monte Carlo over a 32-million-row design matrix**
+   (`rep(basematrix$X1, 1000000)`), which is memory-hungry and unnecessary — the quantity
+   is available in closed form, as shown above.
+3. **The design matrix is mildly unbalanced.** `X[1:N, ]` truncates a repeating 16-row
+   block, and no simulated $N$ is a multiple of 16. The effect is small but it does mean
+   the realized $\rho^2$ differs slightly from the population value for $K = 4$.
+4. **True $\rho^2$ values are post-hoc binned** by a series of range-based `if`-style
+   reassignments before plotting, which smooths over the imbalance in (3) rather than
+   modelling it.
+5. **`qplot()` is used for plotting**, which is deprecated in current ggplot2 and now
+   emits a warning.
+6. **The null condition is flagged with `sigma2 == 1.0001`** as a sentinel value rather
+   than an explicit indicator, which is easy to misread.
+
+## Conclusion
+
+TOSTER's implementation is numerically identical to the published procedure in the
+setting Campbell & Lakens evaluated, and reproducing their simulation recovers the
+operating characteristics the paper reports: nominal Type I error at the boundary of the
+null, conservatism inside it, and power that matches the analytic derivation under a
+true null effect.
+
+## Session information
+
+```{r}
+#| label: sessioninfo
+#| code-fold: true
+sessionInfo()
+```
+
+## References
+
+Campbell, H., & Lakens, D. (2021). Can we disregard the whole model? Omnibus
+non-inferiority testing for $R^2$ in multi-variable linear regression and in ANOVA.
+*British Journal of Mathematical and Statistical Psychology*, 74(1), e12201.
+<https://doi.org/10.1111/bmsp.12201>

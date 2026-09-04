@@ -893,7 +893,7 @@ Many researchers use ANOVA as an omnibus test before inspecting pairwise compari
 
 ## Partial Eta-Squared and the Equivalence Hypothesis
 
-The effect size used throughout this section is partial eta-squared,
+The effect size used throughout this section is "partial eta-squared" ($\eta^2_p$),
 
 $$
 \eta^2_p = \frac{SS_{\text{effect}}}{SS_{\text{effect}} + SS_{\text{error}}}
@@ -907,7 +907,7 @@ $$
 H_0: \eta^2_p \geq \Delta \qquad \text{versus} \qquad H_1: \eta^2_p < \Delta
 $$
 
-Rejecting $H_0$ supports the claim that the effect in question explains less than $\Delta$ of the variance available to it. Two limits on that conclusion are worth stating plainly. First, it is a statement about an effect as a whole rather than about any particular contrast within it: an omnibus effect can be negligible while a specific pairwise comparison nested inside it is not, so equivalence at the level of the *F*-test does not license equivalence claims about individual group differences. Second, as with any equivalence test, failing to reject $H_0$ is not evidence that the effect is large --- it means only that the data remain compatible with an effect at or beyond the bound.
+Rejecting $H_0$ supports the claim that the effect in question explains less than $\Delta$ of the variance available to it. There are two limits on that conclusion worth consideration. First, it is a statement about an effect as a whole rather than about any particular contrast within it: an omnibus effect can be negligible while a specific pairwise comparison nested inside it is not, so equivalence at the level of the *F*-test does not license equivalence claims about individual group differences. Second, as with any equivalence test, failing to reject $H_0$ is not evidence that the effect is large and it means only that the data remain compatible with an effect at or beyond the bound.
 
 The test itself is computed from the cumulative distribution function of the non-central *F* distribution. @Campbell_2021 derived the *p*-value for a one-way ANOVA with $J$ groups and $N$ total observations as
 
@@ -927,7 +927,7 @@ The equivalence test inherits the standard ANOVA assumptions, which should be ch
 
 ## Choosing a Bound on Partial Eta-Squared
 
-Bounds on $\eta^2_p$ are harder to justify than bounds on the original measurement scale, and the difficulty is worth confronting before running the test.
+Bounds on $\eta^2_p$ are harder to justify than bounds on the original measurement scale (much like the SMD), and the difficulty is worth confronting before running the test.
 
 The first problem is that $\eta^2_p$ is not comparable across designs. Its denominator depends on which other effects appear in the model and, in within-subjects designs, on the error term against which the effect is tested. A partial eta-squared of 0.06 for a one-way between-subjects factor and a partial eta-squared of 0.06 for an interaction in a repeated-measures model are not estimates of the same quantity. A bound therefore cannot simply be borrowed from a published study unless that study used the same design and the same model.
 
