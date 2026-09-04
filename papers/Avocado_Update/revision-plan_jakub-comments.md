@@ -95,6 +95,8 @@ The section (~lines 784–840) is about five paragraphs for the paper's genuinel
 
 **Verdict: accept, with a correction to the premise. This is the big one.**
 
+> **Status (2026-09-04): deferred.** The manuscript now states that Campbell & Lakens validated their procedure by simulation, but says nothing about the validation status of the generalisation. The simulation work described below has *not* been done and is not currently planned for this revision. Revisit if a reviewer raises it.
+
 Correcting the premise: Campbell & Lakens (2021) *did* validate their method — the paper includes a simulation study of Type I error and power for the one-way ANOVA and multivariable regression R² cases, plus a comparison against a Bayesian alternative. So the published method is not unvalidated, and the manuscript should say so (one clause, currently absent, worth adding regardless).
 
 What is **not** validated is my generalisation. The λ_eq = [Δ/(1−Δ)]·(df₁ + df₂ + 1) substitution is what extends the method to factorial and within-subjects designs, and it reduces to the published formula only in the one-way case. Honest framing: the base method is validated, the extension is not. A reviewer is likely to find this too, so better to close it now.
@@ -132,17 +134,17 @@ Minor scope pushback: the McNabb & Murayama argument is framed around neuroscien
 
 **Manuscript (`Avocado_Update.Rmd`)**
 - [ ] Intro: roadmap paragraph; flag the ANOVA generalisation as novel (also in the abstract).
-- [ ] Add function-selection table.
-- [ ] (Optional) Promote the estimand footnote to a short section.
+- [x] Add function-selection table. **Done** — realized as Table \ref{tab:estimands} inside the new estimand subsection, keyed on estimand rather than on design. First table in the paper; verified it builds under `rticles::tf_article` (the `tf` template loads `longtable`/`booktabs` conditionally on the document containing a table).
+- [x] Promote the estimand footnote to a short section. **Done** — `# Setting Equivalence Bounds` now opens with a two-decision lead and splits into `## Choosing an Estimand` and `## Justifying the Bounds`. The long footnote in "TOST with t-tests" is gone; its content (trimming, log ratios, intercurrent events, Lundberg et al.) is absorbed into the new subsection, and the sentence that carried it now back-references.
 - [x] Restructure WMW subsection: no-assumption / location-shift / what-gets-bounded. **Done** — three `####` subsections added; H₀ for stochastic equality now stated formally; `Checking Assumptions` split into labelled location-shift and symmetry parts.
 - [x] ECDF location-shift figure alongside the symmetry plot. **Done** — `fig:ecdfshift`, two panels (assumption holds / violated) with arrows marking the horizontal gap at the 10th/50th/90th percentiles. Knit-tested.
 - [ ] One-line estimand statement at the head of each robust-method subsection (WMW now has one; Brunner–Munzel, bootstrap/permutation, log-TOST still need theirs).
 - [ ] Brunner–Munzel: qualify "valid under heteroscedasticity" as a null/Type I error statement; name the nonparametric Behrens–Fisher problem.
-- [ ] ANOVA: define partial η²; distinguish from η²; explain the one-sided non-inferiority framing and why it is not a TOST; state what a rejection does and does not license.
-- [ ] ANOVA: bound-selection discussion; flag Δ = 0.35 as illustrative; add the f² conversion.
-- [ ] ANOVA: both ncp formulas inline, plus the one-way reduction df₁ + df₂ + 1 = N.
-- [ ] ANOVA: note that Campbell & Lakens ran a validating simulation; reference the new simulation for the extension.
-- [ ] ANOVA: definition list for `equ_anova` output columns.
+- [x] ANOVA: define partial η²; distinguish from η²; explain the one-sided non-inferiority framing and why it is not a TOST; state what a rejection does and does not license.
+- [x] ANOVA: bound-selection discussion; flag Δ = 0.35 as illustrative; add the f² conversion.
+- [x] ANOVA: both ncp formulas inline, plus the one-way reduction df₁ + df₂ + 1 = N.
+- [x] ANOVA: note that Campbell & Lakens ran a validating simulation. **Done.** Per decision on 2026-09-04, the manuscript does *not* flag the factorial/within-subjects extension as separately unvalidated — see the note under comment #5 below.
+- [x] ANOVA: definition list for `equ_anova` output columns.
 - [ ] Conclusions: McNabb & Murayama with the balance condition, plus the Bloom et al. commentary.
 
 **Supplement / package**

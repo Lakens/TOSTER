@@ -77,17 +77,47 @@ The TOSTER R package^[All updates to the package can be found on the package's w
 
 However, the original package had a number of limitations. It offered a function-per-design interface (separate functions for each t-test type), lacked robust alternatives to parametric tests, provided no support for ANOVA equivalence testing, and had no tools for comparing effect sizes across studies. The package also did not integrate with standard R workflows and usually just printed results to the console rather than returning objects that could be manipulated or plotted.
 
-This paper provides a tutorial-style introduction to the updated TOSTER package, organized around its major capabilities: (1) a unified t-test interface (`t_TOST`) that pairs a standard significance test with an equivalence test and supports minimal effect testing, (2) a simplified hypothesis testing interface (`simple_htest`) that returns standard `htest` objects, (3) tools for computing and testing standardized effect sizes --- including standardized mean differences, rank-based effect sizes, and correlations, (4) robust and resampling-based alternatives including the Brunner-Munzel test, bootstrap and permutation t-tests, and log-transformed methods, (5) equivalence testing for ANOVAs, and (6) power analysis and sample size planning. Each section motivates when and why a researcher would use the tool before demonstrating how.
+This paper provides a tutorial-style introduction to the updated TOSTER package, organized around its major capabilities: (1) a unified t-test interface (`t_TOST`) that pairs a standard significance test with an equivalence test and supports minimal effect testing, (2) a simplified hypothesis testing interface (`simple_htest`) that returns standard `htest` objects, (3) tools for computing and testing standardized effect sizes --- including standardized mean differences (SMDs), rank-based effect sizes, and correlations, (4) robust and resampling-based alternatives including the Brunner-Munzel test, bootstrap and permutation t-tests, and log-transformed methods, (5) equivalence testing for ANOVAs, and (6) power analysis and sample size planning. Each section motivates when and why a researcher would use the tool before demonstrating how.
 
 TOSTER occupies a specific niche in the R ecosystem in that it is a frequentist toolkit for equivalence testing of standard designs. Researchers interested in Bayesian approaches to evidence for the null have excellent options (e.g., `bayestestR`). For equivalence-style contrasts in more complex models --- mixed models, marginal means --- the `emmeans` and `marginaleffects` packages can accommodate non-zero null hypotheses. TOSTER fills the space of accessible, self-contained equivalence testing for common, albeit simple, research designs. For a broader introduction to the methodology, see @lakens_ori, @lakens2018equivalence, @lakens2020improving, @mazzolari2022myths, and @Tomek_Caldwell_Eisner_2026. TOSTER is also available as a [jamovi](https://www.jamovi.org/) module for researchers who prefer a graphical interface although it has limited capabilities compared to the R package.
 
 # Setting Equivalence Bounds
 
+Two decisions precede any equivalence test: *what* quantity the hypothesis concerns, and *how much* of that quantity is too small to matter. The first is a choice of estimand, the second a choice of bounds. The two are not separable, because a bound is a magnitude on the scale of some particular quantity, and the same number can describe quite different hypotheses depending on what is being estimated.
+
+## Choosing an Estimand
+
+The estimand is the quantity a study is attempting to estimate [@Lundberg_Johnson_Stewart_2021]. In an ideal scenario, the hypothesis should determine the estimand, and estimand then narrows the set of appropriate tests. Inheriting an estimand from whichever procedure happens to be run is a reliable way to end up testing the wrong hypothesis.
+
+This matters more for equivalence testing than for nil-hypothesis testing. When two distributions are identical, the location-type quantities in Table \ref{tab:estimands} all take their null values at once --- the mean difference and the pseudo-median are both zero, and the probability of superiority is exactly 0.5 --- so a nil test is comparatively forgiving of an unexamined estimand. An equivalence bound makes the decision more consequential. It is a specific magnitude on a specific scale, and there is generally no way to translate a bound on one scale into a bound on another (at least without making very serious assumptions). Bounds of $\pm$ 0.5 placed on a mean difference, on a pseudo-median, and on the SMD describe three different hypotheses, only one of which is likely to be the intended one.
+
+Table \ref{tab:estimands} lists the estimands TOSTER can place bounds on and the functions that target each. Two entries deserve comment. The trimmed mean, available through the `tr` argument of the resampling functions (`tr = 0` by default), coincides with the mean only when the distribution is symmetric; setting `tr` therefore changes the estimand rather than merely making the same estimate more robust. The SMD is a rescaling of the mean difference by a sample-dependent quantity, which is why it warrants the separate caution given later in this paper.
+
+Table: \label{tab:estimands}Estimands supported by TOSTER, the scale on which equivalence bounds are specified for each, and the primary functions targeting them.
+
+| Estimand | Scale of the bound | Primary functions |
+|:---------------------------|:--------------------|:--------------------------|
+| Mean or mean difference | Original units | `t_TOST`, `tsum_TOST`, `simple_htest` |
+| Mean, with empirically calibrated reference distributions | Original units | `boot_t_TOST`, `boot_t_test`, `perm_t_test` |
+| Trimmed mean difference | Original units | `boot_t_TOST`, `perm_t_test` (via `tr`) |
+| Ratio of geometric means | Multiplicative ratio | `log_TOST`, `boot_log_TOST` |
+| Pseudo-median (Hodges-Lehmann) | Original units | `wilcox_TOST` |
+| Stochastic superiority | Probability (0 to 1) | `brunner_munzel` |
+| Standardized mean difference | Standard deviation units | `smd_calc`, `boot_smd_calc` |
+| Correlation | Correlation ($-1$ to 1) | `z_cor_test`, `boot_cor_test` |
+| Proportion of variance explained | Proportion (0 to 1) | `equ_anova`, `equ_ftest` |
+
+In applied settings the estimand is not fully pinned down by the choice of summary statistic either. Decisions about how intercurrent events --- post-randomization events such as dropout, treatment discontinuation, or the use of rescue medication --- and missing data are handled determine which population summary is being estimated at all. Two analyses that both report "the mean difference" may be estimating materially different things if they resolve these questions differently.
+
+The practical upshot is to settle the estimand first and then justify a bound on its scale, rather than selecting a test and adopting whatever quantity it happens to return. This ordering also makes the robust methods described later in this paper easier to navigate: they are not a menu of interchangeable fixes for assumption violations, but tests of different quantities, and only some of them remain answers to a hypothesis about means.
+
+## Justifying the Bounds
+
 Before applying any equivalence test, the researcher must specify the equivalence bounds which defines the range of effect sizes considered too small to be meaningful. There is no single correct method for choosing these bounds; the appropriate approach depends entirely on the research question and domain of research.
 
 If a researcher has an equivalence hypothesis, they should be able to articulate what magnitude of effect would be too small to matter in context. The SESOI must flow from the hypothesis formulated by theory and context not from a formula. However, there are several general strategies that have been evaluated [@delta2]. Anchor-based methods tie the bound to an externally meaningful criterion, such as a clinically meaningful difference or a "just-noticeable" difference [@sesoi]. Distribution-based methods define the bound as a fraction of the measurement error [@Jacobson_Truax_1991], though this approach is generally not recommended [@delta2]. Cost-benefit, also referred to as health economic methods [@delta2], reasoning sets the bound at the point where there is a net benefit relative to the cost of an intervention. Researchers can draw on existing literature or normative data to identify effect magnitudes that prior work suggests are negligible. When theory is sufficiently precise, however, the bound may require no external benchmark at all, and the hypothesis itself implies what magnitude of effect would be too small to matter.
 
-Using "default" bounds on the standardized mean difference (SMD; also known as Cohen's d) based on Cohen's benchmarks (e.g., SMD = 0.2, 0.5, 0.8 to imply small, medium, or large effects, respectively) without domain-specific justification is strongly discouraged. Cohen himself stated that these conventions were "recommended for use only when no better basis for estimating the index is available" (p. 25, as cited in @panzarella2021) and reportedly came to regret having proposed them at all [@funder2019]. These benchmarks were never intended as universal thresholds; applied uncritically, they can produce equivalence bounds that are too wide, too narrow, and likely entirely disconnected from the substantive research question.
+Using "default" bounds on the SMD (also known as Cohen's d) based on Cohen's benchmarks (e.g., SMD = 0.2, 0.5, 0.8 to imply small, medium, or large effects, respectively) without domain-specific justification is strongly discouraged. Cohen himself stated that these conventions were "recommended for use only when no better basis for estimating the index is available" (p. 25, as cited in @panzarella2021) and reportedly came to regret having proposed them at all [@funder2019]. These benchmarks were never intended as universal thresholds; applied uncritically, they can produce equivalence bounds that are too wide, too narrow, and likely entirely disconnected from the substantive research question.
 
 If a researcher cannot specify meaningful bounds, this itself is informative as it suggests the equivalence hypothesis is not well enough developed to test such a hypothesis. In such cases, it may be more productive to focus on effect estimation and description rather than leaping to hypothesis tests [@scheel_hypothesis]. Throughout the examples in this paper, equivalence bounds, and the data sets themselves, are chosen for illustrative purposes; readers should not treat them as direct recommendations for their own research.
 
@@ -97,7 +127,7 @@ The t-test is the standard tool for comparing means. Its construction is simple:
 
 What matters for equivalence testing is that $\mu_0$ is a choice rather than a fixed feature of the test. A traditional nil hypothesis test fixes $\mu_0 = 0$ and asks whether the mean, or mean difference, is exactly zero. TOST changes none of the underlying machinery; it changes only what is substituted for $\mu_0$. Two one-sided tests are performed --- one against the lower bound ($\mu_0 = \Delta_L$) and one against the upper bound ($\mu_0 = \Delta_U$) --- and equivalence is concluded only if both reject. Because each test is one-sided at $\alpha$, the interval estimate corresponding to the procedure is a $1-2\alpha$ (typically 90%) confidence interval, which is what TOSTER reports and plots.
 
-Throughout, the estimand for a t-test --- the quantity being estimated --- is the mean, or mean difference, on the original scale of measurement.^[This describes the default analysis, not an inviolable property of the test. Several choices substitute a different estimand: trimming (the `tr` argument in the resampling functions, `tr = 0` by default) targets the trimmed mean, which coincides with the mean only under symmetry; the log-transformed methods target a ratio of geometric means; and in applied settings, decisions about how intercurrent events --- post-randomization events such as dropout or treatment discontinuation --- and missing data are handled determine which population summary is being estimated at all. The estimand is worth choosing deliberately rather than inheriting from whichever test happens to be run [@Lundberg_Johnson_Stewart_2021].] This is worth stating plainly because several of the alternatives described later in this paper --- the rank-based tests in particular --- estimate different quantities entirely, and are not interchangeable substitutes when the hypothesis concerns means.
+Throughout, the estimand for a t-test is the mean, or mean difference, on the original scale of measurement. As discussed above, this is a default rather than an inviolable property of the test, and it is worth restating here because several of the alternatives described later in this paper --- the rank-based tests in particular --- estimate different quantities entirely, and are not interchangeable substitutes when the hypothesis concerns means.
 
 The `t_TOST` function in TOSTER provides a unified interface for equivalence and minimal effect testing with t-tests. It runs a standard nil significance test alongside the equivalence (or minimal effect) test, because in practice researchers may want both: "Is there a significant effect?" and "Can I rule out a meaningful effect?" The function handles independent, paired, and one-sample designs through the `paired` argument and accepts data via either a formula interface or raw vectors, making it a direct analog to base R's `t.test`. Additionally, the output includes an SMD calculation alongside the unstandarized mean difference with appropriate, albeit approximate, confidence intervals. For researchers who only want to test a single hypothesis at a time, the `simple_htest` function (described in the next section) provides a lighter alternative.
 
@@ -256,7 +286,7 @@ res1 = t_TOST(
 )
 ```
 
-The `print` method provides a verbose summary including the two-tailed test, both one-sided equivalence tests, and the standardized mean difference (Hedges' $g$ by default):
+The `print` method provides a verbose summary including the two-tailed test, both one-sided equivalence tests, and the SMD (Hedges' $g$ by default):
 
 ```{r}
 print(res1)
@@ -303,7 +333,7 @@ res4 = t_TOST(
 res4
 ```
 
-The same interface handles paired designs by setting `paired = TRUE`. Standardized mean differences are reported automatically; Hedges's correction is applied by default but can be toggled with `bias_correction`, and Glass's delta can be requested via the `glass` argument. Setting equivalence bounds in SMD units (via `eqbound_type = "SMD"`) is possible but discouraged because the bound becomes dependent on sample variance (see the Standardized Effect Sizes section below).
+The same interface handles paired designs by setting `paired = TRUE`. SMDs are reported automatically; Hedges's correction is applied by default but can be toggled with `bias_correction`, and Glass's delta can be requested via the `glass` argument. Setting equivalence bounds in SMD units (via `eqbound_type = "SMD"`) is possible but discouraged because the bound becomes dependent on sample variance (see the Standardized Effect Sizes section below).
 
 ## Checking Assumptions 
 
@@ -395,13 +425,13 @@ plot_htest_est(res_sh1)
 
 # Standardized Effect Sizes
 
-This section provides a unified treatment of the standardized effect size tools in TOSTER and I cover standardized mean differences (SMDs), correlation coefficients, and tools for comparing both between studies. Before demonstrating these tools, it is worth discussing the limitations of standardized effect sizes, because these limitations are especially important for equivalence testing.
+This section provides a unified treatment of the standardized effect size tools in TOSTER and I cover SMDs, correlation coefficients, and tools for comparing both between studies. Before demonstrating these tools, it is worth discussing the limitations of standardized effect sizes, because these limitations are especially important for equivalence testing.
 
 ## A Brief Warning on Standardized Effect Sizes
 
 Standardized effect sizes --- Cohen's $d$, correlation coefficients, standardized regression coefficients --- are appealing because they allow comparison across studies and scales, are required by many journals, and serve as the primary currency of meta-analysis. However, they have well-documented problems that are especially relevant to equivalence testing.
 
-Standardized mean differences are sensitive to the sample variance. The "same" real-world effect produces different $d$ values across populations and study designs. The ubiquitously reported Cohen's $d$ conflates the magnitude of the mean difference with the precision of measurement, which means that a narrow equivalence bound on $d$ may correspond to a very different raw-scale bound depending on the variability of the sample [@Caldwell2020; @baguley2009]. This makes it unclear what, substantively, is being declared "equivalent" --- are we claiming the means are close, or that the means are close *relative to the variance*? The choice of denominator (pooled SD, control SD, within-subject SD) further complicates that same dubious interpretation.
+SMDs are sensitive to the sample variance. The "same" real-world effect produces different $d$ values across populations and study designs. The ubiquitously reported Cohen's $d$ conflates the magnitude of the mean difference with the precision of measurement, which means that a narrow equivalence bound on $d$ may correspond to a very different raw-scale bound depending on the variability of the sample [@Caldwell2020; @baguley2009]. This makes it unclear what, substantively, is being declared "equivalent" --- are we claiming the means are close, or that the means are close *relative to the variance*? The choice of denominator (pooled SD, control SD, within-subject SD) further complicates that same dubious interpretation.
 
 Correlations have analogous issues. @tukey1969 noted that correlations are influenced by the range of both variables, so the "same" bivariate relationship produces different coefficients depending on sample selection. A correlation of 0.3 in a restricted-range sample may correspond to a much larger association in the full population. Standardized regression coefficients share these vulnerabilities. These depend on the variances of both the predictor and outcome, which makes them unstable across samples and difficult to interpret substantively [@greenland1991].
 
@@ -411,7 +441,7 @@ With these caveats in mind, the following subsections describe the tools TOSTER 
 
 ## Standardized Mean Difference Functions
 
-The `smd_calc` function computes standardized mean differences --- Cohen's $d$, Hedges' $g$ (bias-corrected), or Glass's $\Delta$ --- with confidence intervals and *optional* hypothesis testing (utilizing a z-test: $z = (d - \delta_0)/SE_d$, where $d$ is the sample SMD estimate, $\delta_0$ is the null value being tested, and $SE_d$ is its standard error.). It supports one-sample, paired, and two-sample designs, and can return either an `htest` object or a data frame. The SMD is already reported in `t_TOST` output, but `smd_calc` allows standalone computation and supports equivalence testing directly on the effect size. This may be useful as a complementary function when using `simple_htest` as the primary statistical testing function.
+The `smd_calc` function computes an SMD --- Cohen's $d$, Hedges' $g$ (bias-corrected), or Glass's $\Delta$ --- with confidence intervals and *optional* hypothesis testing (utilizing a z-test: $z = (d - \delta_0)/SE_d$, where $d$ is the sample SMD estimate, $\delta_0$ is the null value being tested, and $SE_d$ is its standard error.). It supports one-sample, paired, and two-sample designs, and can return either an `htest` object or a data frame. The SMD is already reported in `t_TOST` output, but `smd_calc` allows standalone computation and supports equivalence testing directly on the effect size. This may be useful as a complementary function when using `simple_htest` as the primary statistical testing function.
 
 When estimation rather than testing is the goal, `smd_calc` can be called with `alternative = "none"` (the default), which returns only the point estimate and confidence interval without performing a hypothesis test. This is the recommended usage when the primary objective is to report the magnitude of the effect.
 
@@ -718,7 +748,7 @@ ggplot(sp_df, aes(x = lower, y = upper)) +
 
 ### Brunner-Munzel Test
 
-The Brunner-Munzel test [@brunner2000] estimates the relative effect $\hat{p} = P(X > Y) + 0.5 \cdot P(X = Y)$, sometimes referred to as the probability of superiority --- the probability that a randomly chosen observation from one group exceeds a randomly chosen observation from the other, with ties split evenly. This estimand is interpretable without distributional assumptions, unlike the WMW test which requires a location-shift assumption to say anything about location differences. @karch2021 argues it should be preferred as the default non-parametric procedure because it is valid under heteroscedasticity and provides an interpretable effect size.
+The Brunner-Munzel test [@brunner2000] estimates the relative effect $\hat{p} = P(X > Y) + 0.5 \cdot P(X = Y)$, sometimes referred to as the probability of superiority --- the probability that a randomly chosen observation from one group exceeds a randomly chosen observation from the other, with ties split evenly. This estimand is interpretable without distributional assumptions, unlike the WMW test which requires a location-shift assumption to say anything about location differences. @karch2021 argues it should be preferred as the default non-parametric procedure. Its main advantage over WMW is that the null hypothesis of stochastic equality does not require the two distributions to be identical (i.e., the nonparametric Behrens–Fisher problem). WMW's Type I error rate can depart from nominal when the groups are stochastically equal but differ in variance or shape; the Brunner–Munzel test remains valid in that setting and provides a directly interpretable effect size.
 
 Stochastic superiority tests may be particularly well-suited to Likert-type scales which are ubiquitous in psychological research. For a single ordinal item, the spacing between response categories carries no guaranteed meaning, and a mean difference therefore has a strained interpretation. For example, what, concretely, does a 0.4-unit mean difference on a five-point scale communicate? The stochastic superiority estimand sidesteps this entirely. The probability that a randomly selected participant from one group outscores a randomly selected participant from the other is interpretable on its own terms, with no knowledge of the scale required. We are not suggesting that t-tests will *always* mislead in these contexts but it is a concern that should not be quickly dismissed either [@Liddell_Kruschke_2018]. Additionally, even if we assume traditional parametric methods are robust to the ordinal nature of the data, the preserved error rate is not the same as interpretive clarity. For researchers whose primary outcomes live on ordinal scales, the Brunner-Munzel test and its associated effect size --- as well as ordinal models more generally [@Burkner_Vuorre_2019] --- may offer a more natural and defensible default.
 
@@ -739,7 +769,7 @@ print(bm_test)
 
 #### Checking Assumptions
 
-The Brunner-Munzel test has unusually light assumption requirements. It requires independent observations within and between groups, and (for the t-approximation used by default) sample sizes sufficient for the asymptotic approximation to be reasonable. That's essentially it. Unlike WMW, there is no location-shift requirement for the test to be interpretable as a hypothesis about location, and unlike the proportional-odds framing of WMW as a score test from an ordinal regression model, no constant-odds-ratio assumption is needed. The relative effect is defined directly from the two marginal distributions and carries the same interpretation --— the probability that a random observation from one group exceeds one from the other --— regardless of whether the distributions are symmetric, skewed, unimodal, or shaped however they happen to be. Visual inspection of the group distributions remains useful for understanding the data and for choosing a reporting scale, but there is no distributional assumption that these checks are verifying. The studentized permutation variant (`method = "perm"`) is worth considering in small samples, where the t-approximation may be less trustworthy.
+The Brunner-Munzel test has unusually light assumption requirements. It requires independent observations within and between groups, and (for the t-approximation used by default) sample sizes sufficient for the asymptotic approximation to be reasonable. That's essentially it. Unlike WMW, there is no location-shift requirement for the test to be interpretable as a hypothesis about location, and unlike the proportional-odds framing of WMW as a score test from an ordinal regression model, no constant-odds-ratio assumption is needed. The relative effect is defined directly from the two marginal distributions and carries the same interpretation --— the probability that a random observation from one group exceeds one from the other --— regardless of whether the distributions are symmetric, skewed, unimodal, or shaped however they happen to be. Visual inspection of the group distributions remains useful for understanding the data and for choosing a reporting scale, but there is no distributional assumption that these checks are verifying. The studentized permutation variant (`method = "perm"`) is worth considering in small samples, where the t-approximation method may be less trustworthy.
 
 
 \newpage
@@ -748,9 +778,9 @@ The Brunner-Munzel test has unusually light assumption requirements. It requires
 
 When the goal is to test hypotheses about means while relaxing distributional assumptions, resampling methods provide powerful tools. TOSTER implements both bootstrap and permutation approaches through `boot_t_test` and `perm_t_test`, each with distinct inferential logic but a shared motivation to retain the mean as the estimand while obtaining reference distributions empirically --- through resampling --- rather than relying on the normal-theory derivations (i.e., Student's t-test).
 
-Both approaches are natural extensions of the classic t-test. The test statistic itself is unchanged; what changes is how the null distribution is constructed. In the conventional t-test, the null distribution of the standardized mean difference is derived analytically under the assumption that the data are drawn from a normal distribution, with equal variances assumed in Student's t-test and unequal variances accommodated in Welch's t-test. The bootstrap approximates the sampling distribution of the same statistic by resampling from the observed data with replacement, whereas the permutation approach constructs an exact or near-exact null distribution by shuffling group labels (two-sample) or flipping signs (one-sample and paired). In both cases, the researcher continues to ask the same question about means; only the calibration of the reference distribution differs. Researchers may find the resampling methods appealing because it follows a familiar testing logic because the estimand, the null hypothesis, and the test statistic remain the same.
+Both approaches are natural extensions of the classic t-test. The test statistic itself is unchanged; what changes is how the null distribution is handled. In the conventional t-test, the null distribution of the mean difference is derived analytically under the assumption that the data are drawn from a normal distribution, with equal variances assumed in Student's t-test and unequal variances accommodated in Welch's t-test. The bootstrap approximates the sampling distribution of the same statistic by resampling from the observed data with replacement, whereas the permutation approach constructs an exact or near-exact null distribution by shuffling group labels (two-sample) or flipping signs (one-sample and paired). In both cases, the researcher continues to ask the same question about means; only the calibration of the reference distribution differs. Researchers may find the resampling methods appealing because it follows a familiar testing logic because the estimand, the null hypothesis, and the test statistic remain the same.
 
-Because the reference distribution is generated from the data rather than assumed, distributional requirements are relaxed, though not eliminated. The bootstrap relies on asymptotic arguments and assumes that the empirical distribution is a reasonable stand-in for the population distribution; it performs well with moderate-to-large samples and skewed or heavy-tailed data, but can struggle with very small samples or extreme outliers. The permutation approach is exact under the null hypothesis of exchangeability, meaning group labels carry no information about outcomes. In its basic form this exactness requires identical distributions under the null, which implicitly assumes equal variances. The studentized permutation test [@janssen1997; @chung2013] addresses this limitation by permuting a scale-invariant statistic (essentially the Welch t-statistic), yielding asymptotically valid inference even under heteroscedasticity. @Arboretti_Pesarin_Salmaso_2020 extended this logic to the equivalence testing setting, showing that studentized permutation TOST maintains nominal Type I error rates when variances differ across groups. In short, these methods are assumption-lighter rather than assumption-free, and users should still consider whether these assumptions are reasonable for their design.
+Because the reference distribution is generated from the data rather than assumed, distributional requirements are relaxed, though not eliminated. The bootstrap relies on asymptotic arguments and assumes that the empirical distribution is a reasonable stand-in for the population distribution. It performs well with moderate-to-large samples and skewed or heavy-tailed data, but can struggle with very small samples or extreme outliers. The permutation approach is exact under the null hypothesis of exchangeability, meaning group labels carry no information about outcomes. In its basic form this exactness requires identical distributions under the null, which implicitly assumes equal variances. The studentized permutation test [@janssen1997; @chung2013] addresses this limitation by permuting a scale-invariant statistic (essentially the Welch t-statistic), yielding asymptotically valid inference even under heteroscedasticity. @Arboretti_Pesarin_Salmaso_2020 extended this logic to the equivalence testing setting, showing that studentized permutation TOST maintains nominal Type I error rates when variances differ across groups. In short, these methods are assumption-lighter rather than assumption-free, and users should still consider whether these assumptions are reasonable for their design.
 
 A common reflex when normality seems implausible is to switch to the WMW or other rank-based tests. However, these tests answer a different question. As discussed earlier in this manuscript, rank-based procedures test hypotheses about stochastic ordering or pseudo-medians rather than means, and under heteroscedasticity they can reject the null even when the groups have identical means. When the scientific question is genuinely about means --— as it often is in applied research where effect sizes and interventions are naturally expressed on the original scale —-- bootstrap and permutation t-tests should generally be preferred over rank-based methods for handling such violations of assumptions. The rank-based tests remain useful, but as answers to different questions, not as robust substitutes for tests of means.
 
@@ -859,11 +889,51 @@ The log-transformed methods inherit the assumptions of the underlying test appli
 
 # Equivalence Testing with ANOVAs
 
-Many researchers use ANOVA as an omnibus test before inspecting pairwise comparisons, particularly in factorial designs. As @Campbell_2021 note, the lack of a significant ANOVA result does not indicate that a factor has no effect. Equivalence testing for ANOVAs addresses this directly by asking: can we reject the hypothesis that the partial $\eta^2$ exceeds a specified bound?
+Many researchers use ANOVA as an omnibus test before inspecting pairwise comparisons, particularly in factorial designs. As @Campbell_2021 note, the lack of a significant ANOVA result does not indicate that a factor has no effect. Equivalence testing for ANOVAs addresses this directly by asking whether the variance attributable to a factor is small enough to be declared negligible.
 
-The equivalence test uses the non-central *F* distribution. The non-centrality parameter is computed from the equivalence bound and the degrees of freedom, and the *p*-value is obtained from the cumulative distribution function of the non-central *F*-value. I have extended the approach of @Campbell_2021 --- who proposed equivalence testing for one-way ANOVAs --- to accommodate multi-factor and factorial designs by generalizing the non-centrality parameter calculation. The full derivation is described in the [package documentation](https://aaroncaldwell.us/TOSTERpkg/articles/the_ftestTOSTER.html); here we demonstrate usage.
+## Partial Eta-Squared and the Equivalence Hypothesis
 
-The equivalence test inherits the standard ANOVA assumptions which should be checked on the fitted model itself rather than on the equivalence output. The `performance::check_model()` function provides a comprehensive visual diagnostic suite for most linear model objects in R on a single call; the online supplement demonstrates its use.
+The effect size used throughout this section is partial eta-squared,
+
+$$
+\eta^2_p = \frac{SS_{\text{effect}}}{SS_{\text{effect}} + SS_{\text{error}}}
+$$
+
+the proportion of variance attributable to an effect once the variance attributable to the other effects in the model has been removed. It is not the same quantity as $\eta^2$, which divides by the total sum of squares; the two coincide only in a one-way design. In within-subjects designs, $SS_{\text{error}}$ refers to the error term against which that particular effect is tested, so each effect in a factorial model carries its own denominator.
+
+Because $\eta^2_p$ cannot be negative, there is no lower bound to test against, and the procedure is therefore *not* a two one-sided tests procedure despite the framing used elsewhere in this paper. It is a single one-sided test, which @Campbell_2021 describe as an omnibus non-inferiority test:
+
+$$
+H_0: \eta^2_p \geq \Delta \qquad \text{versus} \qquad H_1: \eta^2_p < \Delta
+$$
+
+Rejecting $H_0$ supports the claim that the effect in question explains less than $\Delta$ of the variance available to it. Two limits on that conclusion are worth stating plainly. First, it is a statement about an effect as a whole rather than about any particular contrast within it: an omnibus effect can be negligible while a specific pairwise comparison nested inside it is not, so equivalence at the level of the *F*-test does not license equivalence claims about individual group differences. Second, as with any equivalence test, failing to reject $H_0$ is not evidence that the effect is large --- it means only that the data remain compatible with an effect at or beyond the bound.
+
+The test itself is computed from the cumulative distribution function of the non-central *F* distribution. @Campbell_2021 derived the *p*-value for a one-way ANOVA with $J$ groups and $N$ total observations as
+
+$$
+p = p_F \left( F; \space J-1, \space N-J, \space \frac{N \cdot \Delta}{1 - \Delta} \right)
+$$
+
+and evaluated the Type I error and power of the procedure by simulation. TOSTER generalizes the non-centrality parameter so that the same logic extends to multi-factor, factorial, and within-subjects designs,
+
+$$
+\lambda_{eq} = \frac{\Delta}{1 - \Delta} \cdot (df_1 + df_2 + 1), \qquad p_{eq} = p_F(F; \space df_1, \space df_2, \space \lambda_{eq})
+$$
+
+where $df_1$ and $df_2$ are the numerator and denominator degrees of freedom for the effect being tested. For a one-way design $df_1 + df_2 + 1 = (J-1) + (N-J) + 1 = N$, so the generalization reduces exactly to the expression given by @Campbell_2021. A fuller derivation is provided in the [package documentation](https://aaroncaldwell.us/TOSTERpkg/articles/the_ftestTOSTER.html).
+
+The equivalence test inherits the standard ANOVA assumptions, which should be checked on the fitted model itself rather than on the equivalence output. The `performance::check_model()` function provides a comprehensive visual diagnostic suite for most linear model objects in R in a single call; the online supplement demonstrates its use.
+
+## Choosing a Bound on Partial Eta-Squared
+
+Bounds on $\eta^2_p$ are harder to justify than bounds on the original measurement scale, and the difficulty is worth confronting before running the test.
+
+The first problem is that $\eta^2_p$ is not comparable across designs. Its denominator depends on which other effects appear in the model and, in within-subjects designs, on the error term against which the effect is tested. A partial eta-squared of 0.06 for a one-way between-subjects factor and a partial eta-squared of 0.06 for an interaction in a repeated-measures model are not estimates of the same quantity. A bound therefore cannot simply be borrowed from a published study unless that study used the same design and the same model.
+
+The second problem is that a proportion of variance has little direct substantive meaning. Unlike a mean difference expressed in the units of the outcome, there is rarely an anchor-based or cost-benefit argument that delivers a number on this scale directly. Researchers who find Cohen's $f$ more intuitive can move between the two with $f^2 = \eta^2_p / (1 - \eta^2_p)$, and the `power_eq_f` function can be used to determine the degrees of freedom required to achieve a given power for a specified bound, or the power attainable for a given design. The choosing-bounds section of the package's F-test vignette discusses the problem in more detail.
+
+The bound of $\Delta = 0.35$ used in both examples below is deliberately large. It was chosen so that the demonstrations produce interpretable output rather than because it represents a defensible threshold, and it should not be read as a default.
 
 ## Example with Summary Statistics
 
@@ -893,7 +963,15 @@ Based on these results, there is a significant effect of "spray" and the differe
 
 ## Example with R ANOVA Objects
 
-The `equ_anova` function accepts objects from `stats::aov`, `car::Anova`, and `afex::aov_car`, avoiding the need to extract summary statistics manually. In the example below, the traditional significance test p-value is located in the "p.null" column while to right of that value is the estimated standardized effect size (pes which stands for partial eta-squared), equivalence bound (eqb), and equivalence test p-value (p.equ).
+The `equ_anova` function accepts objects from `stats::aov`, `car::Anova`, and `afex::aov_car`, avoiding the need to extract summary statistics manually. It returns the familiar ANOVA table with the equivalence test appended:
+
+- `effect`, `df1`, `df2`, `F.value` --- the effect being tested and the components of the traditional *F*-test.
+- `p.null` --- the *p*-value for the traditional nil-hypothesis test.
+- `pes` --- the estimated partial eta-squared for that effect.
+- `eqbound` --- the equivalence bound that was applied.
+- `p.equ` --- the *p*-value for the equivalence test.
+
+Because each effect in a within-subjects design is tested against its own error term, each row carries its own $df_2$ and therefore its own denominator for `pes`. Note also that an equivalence test is reported for the intercept; this is rarely a hypothesis of interest and can generally be ignored.
 
 ```{r}
 # Example using a purely within-subjects design
