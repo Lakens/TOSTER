@@ -589,11 +589,14 @@ Rank-based tests operate on the ranks of the data rather than the raw values, wh
 
 ### Wilcoxon-Mann-Whitney Tests
 
-The WMW group of tests provide non-parametric tests based on ranks. Within the TOST framework, two directional location-shift tests determine if the shift is within (equivalence) or outside (minimal effect) the equivalence bounds.
+The WMW group of tests provide non-parametric tests based on ranks. Within the TOST framework, the WMW tests are comprised of two directional location-shift tests determine if the shift is within (equivalence) or outside (minimal effect) the equivalence bounds. There are many common misconceptions about the WMW tests that I will try to briefly address.
 
-However, there are important caveats. Many researchers mistakenly believe these are tests of medians, but without a location-shift assumption, the WMW test is a test of stochastic equality. As @Fay_Malinovsky_2018 demonstrate, the effect size can even be presented as stochastic superiority/dominance. Only under a location-shift assumption does it become a test of central tendency through the Hodges-Lehmann estimator. @median_test demonstrate striking counterexamples: groups can have equal medians yet produce a significant WMW test, very different medians yet a non-significant WMW test, or even significance in the opposite direction from the median comparison.
 
-For equivalence testing, bounds are applied to the pseudo-median, which corresponds to the mean or median difference only under the location-shift assumption. For testing hypotheses about mean differences, `perm_t_test` or `boot_t_test` are more appropriate. For stochastic superiority, `brunner_munzel` provides a clearer framework. 
+First, many researchers mistakenly believe these are tests of medians, but without a location-shift assumption, the WMW test is a test of stochastic equality. As @Fay_Malinovsky_2018 demonstrate, the effect size can even be presented as stochastic superiority/dominance. 
+
+Second, only under a location-shift assumption does it become a test of central tendency through the Hodges-Lehmann estimator. @median_test demonstrate striking counterexamples: groups can have equal medians yet produce a significant WMW test, very different medians yet a non-significant WMW test, or even significance in the opposite direction from the median comparison.
+
+For equivalence testing in the TOSTER package, the function `wilcox_TOST` applies the bounds to the pseudo-median, which corresponds to the mean or median difference only under the location-shift assumption. For testing hypotheses about mean differences, `perm_t_test` or `boot_t_test` are more appropriate. For stochastic superiority, `brunner_munzel` provides a clearer framework. 
 
 ```{r}
 test1 = wilcox_TOST(
