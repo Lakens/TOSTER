@@ -3,6 +3,7 @@ title: "Verifying TOSTER's *F*-test Equivalence Procedure"
 subtitle: "A reproduction of the simulation study in Campbell & Lakens (2021)"
 author: "Aaron R. Caldwell"
 date: today
+bibliography: interactcadsample.bib
 format:
   html:
     toc: true
