@@ -899,15 +899,15 @@ $$
 \eta^2_p = \frac{SS_{\text{effect}}}{SS_{\text{effect}} + SS_{\text{error}}}
 $$
 
-the proportion of variance attributable to an effect once the variance attributable to the other effects in the model has been removed. It is not the same quantity as $\eta^2$, which divides by the total sum of squares; the two coincide only in a one-way design. In within-subjects designs, $SS_{\text{error}}$ refers to the error term against which that particular effect is tested, so each effect in a factorial model carries its own denominator.
+the proportion of variance attributable to an effect once the variance attributable to the other effects in the model has been removed. It is not the same quantity as $\eta^2$, which divides by the total sum of squares and the two coincide only in a one-way design. In within-subjects designs, $SS_{\text{error}}$ refers to the error term against which that particular effect is tested, so each effect in a factorial model carries its own denominator.
 
-Because $\eta^2_p$ cannot be negative, there is no lower bound to test against, and the procedure is therefore *not* a two one-sided tests procedure despite the framing used elsewhere in this paper. It is a single one-sided test, which @Campbell_2021 describe as an omnibus non-inferiority test:
+Because $\eta^2_p$ cannot be negative, there is no lower bound to test against, and the procedure is therefore *not* a two one-sided tests procedure despite the framing used elsewhere in this paper. It is a single one-sided test, which @Campbell_2021 describe as an "omnibus non-inferiority test".
 
 $$
 H_0: \eta^2_p \geq \Delta \qquad \text{versus} \qquad H_1: \eta^2_p < \Delta
 $$
 
-Rejecting $H_0$ supports the claim that the effect in question explains less than $\Delta$ of the variance available to it. There are two limits on that conclusion worth consideration. First, it is a statement about an effect as a whole rather than about any particular contrast within it: an omnibus effect can be negligible while a specific pairwise comparison nested inside it is not, so equivalence at the level of the *F*-test does not license equivalence claims about individual group differences. Second, as with any equivalence test, failing to reject $H_0$ is not evidence that the effect is large and it means only that the data remain compatible with an effect at or beyond the bound.
+Rejecting $H_0$ supports the claim that the effect in question explains less than $\Delta$ of the variance available to it. There are two limits on that conclusion worth consideration. First, it is a statement about an effect as a whole rather than about any particular contrast within it. Therefore, an omnibus effect can be negligible while a specific pairwise comparison nested inside it is not, so equivalence at the level of the *F*-test does not license equivalence claims about individual group differences. Second, as with any equivalence test, failing to reject $H_0$ is not evidence that the effect is large and it means only that the data remain compatible with an effect at or beyond the bound.
 
 The test itself is computed from the cumulative distribution function of the non-central *F* distribution. @Campbell_2021 derived the *p*-value for a one-way ANOVA with $J$ groups and $N$ total observations as
 
@@ -927,7 +927,7 @@ The quantity $df_1 + df_2 + 1$ is the effective sample size of the error stratum
 
 The equivalence test inherits the standard ANOVA assumptions, which should be checked on the fitted model itself rather than on the equivalence output. The `performance::check_model()` function provides a comprehensive visual diagnostic suite for most linear model objects in R in a single call; the online supplement demonstrates its use.
 
-One limitation warrants specific mention. For within-subjects factors with more than two levels, `equ_anova` currently uses the uncorrected univariate degrees of freedom and does not apply Greenhouse-Geisser or Huynh-Feldt corrections, even when the fitted object was created with a correction requested. My simulations show that the equivalence test can become substantially anti-conservative when sphericity is badly violated. Sphericity should therefore be assessed on the fitted model, and results treated cautiously when it is in doubt; the supplement quantifies the size of the problem.
+However, TOSTER's current implementation is sensitivity to violations to the assumption of sphericity. For within-subjects factors with more than two levels, `equ_anova` currently uses the uncorrected univariate degrees of freedom and does not apply Greenhouse-Geisser or Huynh-Feldt corrections, even when the fitted object was created with a correction requested. My simulations show that the equivalence test can become substantially anti-conservative when sphericity is badly violated. Sphericity should therefore be assessed on the fitted model, and results treated cautiously when it is in doubt; the supplement quantifies the size of the problem.
 
 ## Choosing a Bound on Partial Eta-Squared
 
@@ -935,9 +935,9 @@ Bounds on $\eta^2_p$ are harder to justify than bounds on the original measureme
 
 The first problem is that $\eta^2_p$ is not comparable across designs. Its denominator depends on which other effects appear in the model and, in within-subjects designs, on the error term against which the effect is tested. A partial eta-squared of 0.06 for a one-way between-subjects factor and a partial eta-squared of 0.06 for an interaction in a repeated-measures model are not estimates of the same quantity. A bound therefore cannot simply be borrowed from a published study unless that study used the same design and the same model.
 
-This bites hardest in repeated-measures designs, where subject variance is excluded from the denominator entirely. A bound on partial eta-squared is consequently not a bound on the share of total variance in the data, and the gap between the two widens as the number of levels of the within-subjects factor falls. This is a property of partial eta-squared rather than of the equivalence test --- it applies equally to any partial eta-squared reported from such a design --- but it does mean that a bound reasoned about as "a negligible share of the variance I observe" will not be the bound the test applies. The supplement quantifies the discrepancy.
+This may be more of a problem for repeated-measures designs where subject variance is excluded from the denominator entirely. A bound on partial eta-squared is consequently not a bound on the share of total variance in the data, and the gap between the two widens as the number of levels of the within-subjects factor falls. The supplement quantifies the discrepancy.
 
-The second problem is that a proportion of variance has little direct substantive meaning. Unlike a mean difference expressed in the units of the outcome, there is rarely an anchor-based or cost-benefit argument that delivers a number on this scale directly. Researchers who find Cohen's $f$ more intuitive can move between the two with $f^2 = \eta^2_p / (1 - \eta^2_p)$, and the `power_eq_f` function can be used to determine the degrees of freedom required to achieve a given power for a specified bound, or the power attainable for a given design. The choosing-bounds section of the package's F-test vignette discusses the problem in more detail.
+The second problem is that a proportion of variance has little direct substantive meaning. Unlike a mean difference expressed in the units of the outcome, there is rarely an anchor-based or cost-benefit argument that delivers a number on this scale directly. Researchers who find Cohen's $f$ more intuitive can move between the two with $f^2 = \eta^2_p / (1 - \eta^2_p)$, and the `power_eq_f` function can be used to determine the degrees of freedom required to achieve a given power for a specified bound, or the power attainable for a given design. The choosing-bounds section of the package's F-test vignette discusses the problem in more detail. Additionally, I would recommend that, in most situations where an ANOVA is utilized for multi-group or even factorial designs, that equivalence testing is often best accomplished with specific contrasts (example below).
 
 The bound of $\Delta = 0.35$ used in both examples below is deliberately large. It was chosen so that the demonstrations produce interpretable output rather than because it represents a defensible threshold, and it should not be read as a default.
 
@@ -997,6 +997,49 @@ aovtest2 = aov_ez(
 )
 equ_anova(aovtest2, eqb = 0.35)
 ```
+
+\newpage
+
+## Example with Specific Contrasts
+
+The omnibus test asks whether a factor as a whole explains a negligible share of the variance available to it. That is often not the question a researcher actually has. More commonly the hypothesis concerns particular comparisons --- is this condition equivalent to that one? --- and, as noted above, an omnibus effect can be negligible while a specific comparison nested within it is not.
+
+Testing contrasts directly also sidesteps the bound-justification problem described earlier. A contrast is expressed in the units of the outcome, so the smallest effect size of interest can be argued for on the original measurement scale, where anchor-based and cost-benefit reasoning are available, rather than on the proportion-of-variance scale where they usually are not.
+
+TOSTER does not fit contrasts itself, but the `emmeans` package [@emmeans] accommodates non-zero null hypotheses directly and operates on the same fitted model objects. Returning to the `InsectSprays` ANOVA fitted above, suppose a difference of fewer than five insects is considered too small to matter:
+
+```{r}
+library(emmeans)
+# estimated marginal means from the ANOVA fit earlier
+emm = emmeans(aovtest, ~ spray)
+
+# two comparisons specified in advance as the hypotheses of interest
+sprays = contrast(
+  emm,
+  method = list(
+    "C vs D" = c(0, 0, 1, -1, 0, 0),
+    "C vs E" = c(0, 0, 1, 0, -1, 0)
+  )
+)
+
+test(
+  sprays,
+  # equivalence bound on the original scale (insect counts)
+  delta = 5,
+  side = "equivalence",
+  adjust = "none"
+)
+```
+
+Spray C is statistically equivalent to spray E (*p* = 0.014) but not to spray D (*p* = 0.090), even though the omnibus test treated "spray" as a single undifferentiated effect. The same conclusion can be read from the interval estimates, which for TOST are taken at $1-2\alpha$:
+
+```{r}
+confint(sprays, level = 0.90)
+```
+
+The 90% interval for C versus E lies entirely inside $\pm$ 5, whereas the interval for C versus D extends past the lower bound.
+
+Two notes on this workflow. First, whether to adjust for multiplicity is a substantive decision rather than an automatic one; no adjustment is applied above because the two contrasts were specified in advance as the hypotheses of interest. Bonferroni-type corrections remain valid for equivalence tests, though conservative, whereas procedures constructed for the family of nil hypotheses --- Tukey's HSD, for instance --- do not transfer to the TOST setting unchanged. Second, this approach reaches well beyond the ANOVA. Because `emmeans` works from fitted model objects, the same equivalence contrasts can be applied to mixed-effects models and other designs that fall outside TOSTER's scope.
 
 \newpage
 

@@ -155,6 +155,8 @@ See \code{vignette("correlations")} for more details.
 
 Wilcox, R. R. (1994). The Percentage Bend Correlation Coefficient. Psychometrika, 59(4), 601–616. https://doi.org/10.1007/bf02294395
 
+Wilcox, R. R. (1993). Some results on a Winsorized correlation coefficient. British Journal of Mathematical and Statistical Psychology, 46(2), 339–349. https://doi.org/10.1111/j.2044-8317.1993.tb01020.x
+
 Wilcox, R.R. (2017) Introduction to Robust Estimation and Hypothesis Testing, 4th edition. Academic Press.
 }
 

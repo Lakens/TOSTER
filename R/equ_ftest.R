@@ -37,6 +37,22 @@
 #'
 #' For details on the calculations in this function see `vignette("the_ftestTOSTER")`.
 #'
+#' ## Degrees of freedom and the non-centrality parameter
+#'
+#' The non-centrality parameter is computed as
+#' \eqn{\lambda = \frac{\Delta}{1 - \Delta} (df_1 + df_2 + 1)}. For a one-way ANOVA or a
+#' multivariable regression \eqn{df_1 + df_2 + 1 = N}, so this reduces exactly to the
+#' expression given by Campbell & Lakens (2021). More generally \eqn{df_1 + df_2 + 1} is
+#' the effective sample size of the error stratum in which the effect is tested, which
+#' allows the same logic to be applied to factorial, within-subjects, and mixed designs.
+#' Supply the `df1` and `df2` belonging to the effect of interest and its own error term;
+#' in a mixed design a between-subjects effect will yield \eqn{df_1 + df_2 + 1} equal to
+#' the number of subjects rather than the number of observations, which is correct.
+#'
+#' Note that `eqbound` is a bound on *partial* eta-squared. In within-subjects designs
+#' this excludes subject variance from the denominator and is therefore not a bound on the
+#' share of total variance in the data.
+#'
 #' @return
 #' Object of class "htest" containing the following components:
 #'
