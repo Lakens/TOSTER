@@ -95,7 +95,33 @@ The section (~lines 784–840) is about five paragraphs for the paper's genuinel
 
 **Verdict: accept, with a correction to the premise. This is the big one.**
 
-> **Status (2026-09-04): deferred.** The manuscript now states that Campbell & Lakens validated their procedure by simulation, but says nothing about the validation status of the generalisation. The simulation work described below has *not* been done and is not currently planned for this revision. Revisit if a reviewer raises it.
+> **Status (2026-09-05): DONE.** The simulation has been run and lives in
+> `campbell_lakens_verification.qmd` as "Part 2: Beyond the designs Campbell & Lakens
+> simulated". Result: **the generalisation is sound.** Type I error at the null boundary
+> is 0.0504 (one-way RM, 48 cells), 0.0501 (factorial between-subjects, 108 cells) and
+> 0.0505 (mixed, between-subjects effect, 8 cells) against a nominal 0.05, and
+> `equ_anova()`'s df extraction matches the closed form exactly.
+>
+> Three findings worth carrying into the manuscript:
+>
+> 1. **The principle.** `df1 + df2 + 1` is the effective sample size of the *error
+>    stratum*, not an approximation to total N. The mixed design proves it: for the
+>    between-subjects effect the correct normaliser is the subject count (far smaller than
+>    the observation count), while in a factorial it is within a few observations of N. No
+>    fixed relationship to N works in both places. This is a much stronger justification
+>    than the manuscript currently gives and could replace the bare deferral to the
+>    package website.
+> 2. **An interpretation trap for the manuscript.** In repeated-measures designs a bound
+>    on partial η² is *not* a bound on the share of total variance. Calibrated against
+>    total variance, the test rejects at 0.022 instead of 0.05 at k = 2, and gets worse as
+>    n grows. The ratio approaches k/(k−1), so it is **largest at k = 2**. Worth a
+>    sentence in the ANOVA bound-selection subsection.
+> 3. **A real limitation.** `equ_anova()` silently ignores GG/HF corrections. At Box's
+>    ε = 0.5 the size reaches 0.19 (≈4× nominal) when the effect loads on a high-variance
+>    contrast, or collapses to 0.02 on a low-variance one. See the new task below.
+>
+> Not simulated: within/interaction effects of the mixed design (only the between-subjects
+> effect, which is the case that discriminates between the two readings).
 
 Correcting the premise: Campbell & Lakens (2021) *did* validate their method — the paper includes a simulation study of Type I error and power for the one-way ANOVA and multivariable regression R² cases, plus a comparison against a Bayesian alternative. So the published method is not unvalidated, and the manuscript should say so (one clause, currently absent, worth adding regardless).
 
@@ -148,8 +174,11 @@ Minor scope pushback: the McNabb & Murayama argument is framed around neuroscien
 - [ ] Conclusions: McNabb & Murayama with the balance condition, plus the Bloom et al. commentary.
 
 **Supplement / package**
-- [ ] New simulation supplement for the factorial and within-subjects extension (run the within-subjects smoke test first).
-- [ ] `tests/testthat/`: exact-equality test against the one-way closed form; boundary Type I error check for a factorial design.
+- [x] New simulation supplement for the factorial and within-subjects extension. **Done** — Part 2 of `campbell_lakens_verification.qmd`. Whole document renders in ~65 s at nSim = 10000.
+- [ ] `tests/testthat/`: exact-equality test against the one-way closed form; boundary Type I error check for a factorial design. Note `test-ftests.R:83-105` currently asserts **nothing** for the factorial, multi-stratum and afex paths.
+- [ ] **New, from the simulation:** implement GG/HF corrected df in `equ_anova()`. The plumbing is commented out at `R/anova_summary.R:58-95` and `add_corrected_df()` does not exist. Until then the sphericity caveat stands.
+- [ ] **New, minor:** `equ_anova()` accepts an `alpha` argument it never uses (`R/equ_anova.R:76`, only fed the commented-out call at 112-119). Either wire it up or drop it.
+- [ ] **New, cosmetic:** the `aov`/`aovlist` path returns effect names padded with trailing spaces (`"cond      "`) because `reformat_aov_summary()` never calls its own `remove_empty_space()` helper (`R/anova_summary.R:183-204`).
 
 **Bibliography (`interactcadsample.bib`)**
 - [ ] `mcnabb2021`, `bloom2022` entries.

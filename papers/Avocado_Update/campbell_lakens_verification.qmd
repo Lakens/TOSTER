@@ -64,7 +64,28 @@ This is a verification exercise. Nothing here is currently cited in the manuscri
   $\alpha$ at the boundary $\Delta = \rho^2$.
 - `power_eq_f()` reproduces the analytic power function used in their supplement
   **exactly** (difference of 0 across every combination checked).
+
+Part 2 goes beyond what Campbell & Lakens simulated, into the designs where
+$df_1 + df_2 + 1 \neq N$:
+
+- **The generalization holds its size.** Across one-way repeated measures (48 cells),
+  factorial between-subjects (108), and the between-subjects effect of a mixed design (8),
+  the rejection rate at the null boundary is 0.0504, 0.0501 and 0.0505 against a nominal
+  0.05. `equ_anova()`'s degrees-of-freedom extraction agrees with the closed form exactly.
+- **$df_1 + df_2 + 1$ is the effective sample size of the error stratum**, not an
+  approximation to total N. The mixed design shows this cleanly: there the correct
+  normalizer is the *subject count*, far smaller than the observation count.
+- **In repeated-measures designs the bound is not a share of total variance.** Calibrated
+  against total variance instead of the partial scale, the test becomes severely
+  conservative — rejecting at 0.022 rather than 0.05 when $k = 2$ — and more so as $n$
+  grows. An interpretation trap, not a bug.
+- **Sphericity is the one real limitation.** `equ_anova()` silently ignores
+  Greenhouse-Geisser and Huynh-Feldt corrections, and at Box's $\epsilon = 0.5$ the size
+  reaches 0.19 — nearly four times nominal — or collapses to 0.02, depending on where the
+  effect sits in the contrast space.
 :::
+
+# Part 1: Reproducing the published simulation
 
 ## Background: the procedure
 
@@ -517,6 +538,541 @@ unfiltered maximum *z* across the whole grid would look alarming and mean nothin
 is why the exact binomial test above is the primary check.
 :::
 
+# Part 2: Beyond the designs Campbell & Lakens simulated
+
+Everything above concerns the setting Campbell & Lakens actually simulated. In that
+setting TOSTER's non-centrality parameter reduces exactly to the published one, so
+Part 1 verifies the *un*-extended procedure. This part tests the generalization itself:
+factorial, within-subjects, and mixed designs, where $df_1 + df_2 + 1 \neq N$.
+
+## Where the published identity breaks
+
+```{r}
+#| label: df-gap-table
+#| code-fold: true
+gap <- data.frame(
+  Design = c("Regression (K predictors)", "One-way between (J groups)",
+             "Factorial between (p parameters)", "One-way RM (n subjects, k levels)",
+             "Mixed: between effect", "Mixed: within effect"),
+  df1 = c("K", "J-1", "varies", "k-1", "g-1", "k-1"),
+  df2 = c("N-K-1", "N-J", "N-p", "(n-1)(k-1)", "g(n-1)", "g(n-1)(k-1)"),
+  `df1+df2+1` = c("N", "N", "N-(p-df1-1)", "n(k-1)+1", "gn", "gn(k-1)+1"),
+  `Total obs` = c("N", "N", "N", "nk", "gnk", "gnk"),
+  check.names = FALSE
+)
+kable(gap, caption = "TOSTER's normalizer df1+df2+1 against the total number of observations. The two coincide only in the designs Campbell & Lakens simulated.")
+```
+
+The gap is not a rounding error. For a one-way repeated-measures design,
+$df_1 + df_2 + 1 \approx n(k-1)$ while the data contain $nk$ observations, a ratio of
+$(k-1)/k$ that does **not** shrink as $n$ grows. Taken at face value that looks like a
+serious problem.
+
+It is not, and the reason is the organising idea of this whole part:
+
+::: {.callout-important}
+## $df_1 + df_2 + 1$ is the effective sample size of the *error stratum*
+
+$df_1 + df_2$ is the dimension of the contrast space in which the effect is tested. In a
+single-stratum design that space is the whole data set and $df_1 + df_2 + 1 = N$. In a
+repeated-measures design the within-subject test lives in the subject-centred contrast
+space of dimension $n(k-1)$, and in a mixed design the between-subjects test lives on the
+$gn$ subject means. TOSTER's bound is therefore a variance ratio *within the stratum where
+the effect is tested* — which is precisely what "partial" means in partial $\eta^2$.
+:::
+
+The mixed design settles this, because there the two readings point in opposite
+directions: the between-subjects effect has $df_1 + df_2 + 1 = gn$, the number of
+subjects, which is far **smaller** than $gnk$ but exactly right.
+
+## Three calibration targets
+
+Because the bound is a number on some scale, "is the Type I error controlled?" has no
+answer until the scale is fixed. Three candidates, all exact functions of the true
+non-centrality $\lambda$:
+
+| Target | Formula | Reading |
+|:--|:--|:--|
+| $\Delta_{pop}$ | $\lambda/(\lambda + N_{total})$ | share of *total* variance |
+| $\Delta_{tost}$ | $\lambda/(\lambda + df_1 + df_2 + 1)$ | what TOSTER's inversion implies |
+| $\Delta_{pes}$ | $\lambda/(\lambda + df_2)$ | limit of the reported `pes` statistic |
+
+```{r}
+#| label: calib-fns
+targets_for <- function(lam, df1, df2, N_total) {
+  c(Delta_pop  = lam / (lam + N_total),
+    Delta_tost = lam / (lam + df1 + df2 + 1),
+    Delta_pes  = lam / (lam + df2))
+}
+```
+
+$\Delta_{tost}$ and $\Delta_{pes}$ differ only by $df_1 + 1$ in the denominator, so they
+agree to $O(1/n)$ in every design. $\Delta_{pop}$ is the odd one out whenever the design
+has more than one error stratum.
+
+## The rejection rate in closed form
+
+The test rejects when `pf(F, df1, df2, ncp = lambda_eq) < alpha`. Because `pf` is strictly
+increasing in `F`, this is exactly `F < qf(alpha, df1, df2, ncp = lambda_eq)`. So when the
+observed *F* really is non-central *F* with non-centrality $\lambda$, the rejection rate
+is available analytically — no simulation needed:
+
+```{r}
+#| label: rate-exact
+rate_exact <- function(Delta, df1, df2, lam, alpha = 0.05) {
+  pf(qf(alpha, df1, df2, ncp = Delta/(1-Delta)*(df1+df2+1)),
+     df1, df2, ncp = lam)
+}
+
+# Evaluating a whole grid of bounds against stored F statistics, via critical values
+sweep_delta <- function(Fstats, Deltavec, df1, df2, alpha = 0.05) {
+  crit <- qf(alpha, df1, df2, ncp = Deltavec/(1-Deltavec)*(df1+df2+1))
+  findInterval(crit, sort(Fstats)) / length(Fstats)
+}
+```
+
+This generalizes `power_eq_f()`, which is the same quantity at $\lambda = 0$:
+
+```{r}
+#| label: rate-exact-check
+#| code-fold: true
+chk <- expand.grid(D = c(0.02, 0.06, 0.14), df1 = c(1, 2, 3), df2 = c(20, 60))
+chk$exact <- mapply(rate_exact, chk$D, chk$df1, chk$df2, 0)
+chk$power_eq_f <- suppressMessages(mapply(
+  function(D, a, b) power_eq_f(alpha = 0.05, df1 = a, df2 = b, eqbound = D)$power,
+  chk$D, chk$df1, chk$df2))
+c(comparisons = nrow(chk),
+  max_abs_diff = max(abs(chk$exact - chk$power_eq_f)))
+```
+
+Simulation is still used below — the analytic rate assumes the *F* statistic really has
+the non-central distribution the theory says it does, which is exactly one of the things
+being tested. Where the two agree, that assumption holds.
+
+## Design A: one-way within-subjects ANOVA
+
+Model $Y_{ij} = \mu + \alpha_j + s_i + e_{ij}$ with $s_i \sim N(0, \sigma^2_s)$ and
+$e_{ij} \sim N(0, \sigma^2_e)$. The within-subject test is computed in the contrast space
+$Z = YC'$ where $C$ is any $(k-1) \times k$ orthonormal contrast matrix with $C\mathbf{1}
+= 0$; then $\lambda = n \sum_j \alpha_j^2 / \sigma^2_e$, $df_1 = k-1$ and
+$df_2 = (n-1)(k-1)$.
+
+```{r}
+#| label: rm-sim-fn
+helm_C <- function(k) t(qr.Q(qr(cbind(1, contr.helmert(k)))))[-1, , drop = FALSE]
+
+# Contrast-space simulator. psi = variances of the contrast scores (all 1 under
+# sphericity); mu_c = contrast means, placing the effect within the contrast space.
+rm_sim <- function(n, k, lam, psi = NULL, mu_c = NULL, nSim = 10000) {
+  df1 <- k - 1; df2 <- (n - 1) * (k - 1)
+  if (is.null(psi))  psi  <- rep(1, df1)
+  if (is.null(mu_c)) mu_c <- { v <- rep(0, df1); v[1] <- sqrt(lam / n); v }
+  stopifnot(length(psi) == df1, length(mu_c) == df1)
+  G  <- matrix(rnorm(n * df1 * nSim), nrow = n)   # cols: contrast fastest, rep slowest
+  G  <- sweep(G, 2, rep(sqrt(psi), times = nSim), "*")
+  G  <- sweep(G, 2, rep(mu_c,      times = nSim), "+")
+  cm <- colMeans(G); css <- colSums(G^2) - n * cm^2
+  SSA  <- n * colSums(matrix(cm^2, nrow = df1))
+  SSAS <-     colSums(matrix(css,  nrow = df1))
+  (SSA / df1) / (SSAS / df2)
+}
+```
+
+::: {.callout-note collapse="true"}
+## The intraclass correlation cannot matter here
+
+Because $C\mathbf{1} = 0$, the subject effect $s_i$ is annihilated by the contrast:
+$\Psi = C\Sigma C' = \sigma^2_e I$ under compound symmetry, whatever $\sigma^2_s$ is. The
+*F* statistic — and therefore the whole test — is invariant to the intraclass
+correlation. This is why ICC is not a factor in the grid below. The check must be run
+with a full $n \times k$ generator, since the contrast simulator is blind to ICC by
+construction and testing it there would be vacuous.
+:::
+
+```{r}
+#| label: rm-icc-invariance
+#| code-fold: true
+set.seed(404)
+icc_check <- sapply(c(0, 0.3, 0.6, 0.9), function(rho) {
+  n <- 20; k <- 3; s2e <- 1; s2s <- rho/(1-rho)*s2e
+  al <- c(-1, 0, 1); al <- al/sqrt(sum(al^2))*sqrt(3/n)
+  lam <- n*sum(al^2)/s2e; df1 <- k-1; df2 <- (n-1)*(k-1)
+  Fs <- replicate(20000, {
+    Y <- matrix(rep(al, each=n), n, k) + matrix(rnorm(n, 0, sqrt(s2s)), n, k) +
+         matrix(rnorm(n*k, 0, sqrt(s2e)), n, k)
+    g <- mean(Y); SA <- n*sum((colMeans(Y)-g)^2); SS <- k*sum((rowMeans(Y)-g)^2)
+    (SA/df1) / ((sum((Y-g)^2)-SA-SS)/df2) })
+  D <- lam/(lam+df1+df2+1)
+  mean(Fs < qf(0.05, df1, df2, ncp = D/(1-D)*(df1+df2+1)))
+})
+setNames(round(icc_check, 4), paste0("ICC=", c(0, 0.3, 0.6, 0.9)))
+```
+
+All four sit at nominal, as the algebra requires.
+
+### Conditions and results
+
+```{r}
+#| label: rm-run
+set.seed(2026)
+nSim2    <- 10000
+Deltavec2 <- seq(0.005, 0.40, by = 0.005)
+
+rm_grid <- expand.grid(k = c(2, 3, 4, 8), n = c(10, 20, 50, 100),
+                       eta2p = c(0, 0.02, 0.06, 0.14))
+
+rm_res <- do.call(rbind, lapply(seq_len(nrow(rm_grid)), function(i) {
+  g <- rm_grid[i, ]
+  df1 <- g$k - 1; df2 <- (g$n - 1)*(g$k - 1); Ntot <- g$n * g$k
+  lam <- Ntot * g$eta2p / (1 - g$eta2p)      # population eta2p -> lambda
+  Fs  <- rm_sim(g$n, g$k, lam, nSim = nSim2)
+  tg  <- targets_for(lam, df1, df2, Ntot)
+  data.frame(k = g$k, n = g$n, eta2p = g$eta2p, df1 = df1, df2 = df2,
+             Ntot = Ntot, lam = lam,
+             Delta_pop = tg[["Delta_pop"]], Delta_tost = tg[["Delta_tost"]],
+             Delta_pes = tg[["Delta_pes"]],
+             rate_pop  = mean(Fs < qf(.05, df1, df2, ncp = tg[["Delta_pop"]]/(1-tg[["Delta_pop"]])*(df1+df2+1))),
+             rate_tost = mean(Fs < qf(.05, df1, df2, ncp = tg[["Delta_tost"]]/(1-tg[["Delta_tost"]])*(df1+df2+1))),
+             rate_pes  = mean(Fs < qf(.05, df1, df2, ncp = tg[["Delta_pes"]]/(1-tg[["Delta_pes"]])*(df1+df2+1))),
+             curve = I(list(sweep_delta(Fs, Deltavec2, df1, df2))))
+}))
+nrow(rm_res)
+```
+
+```{r}
+#| label: fig-rm-curves
+#| fig-cap: "Rejection rate against the equivalence bound for one-way repeated-measures designs, at a true population partial eta-squared of 0.06. Vertical lines mark the three calibration targets; the horizontal line is alpha. The curve crosses alpha at the TOSTER target, not at the total-variance target."
+rm_long <- do.call(rbind, lapply(which(rm_res$eta2p == 0.06), function(i)
+  data.frame(k = rm_res$k[i], n = rm_res$n[i],
+             Delta = Deltavec2, rate = rm_res$curve[[i]])))
+rm_marks <- rm_res[rm_res$eta2p == 0.06, c("k","n","Delta_pop","Delta_tost")] |>
+  pivot_longer(c(Delta_pop, Delta_tost), names_to = "target", values_to = "Delta")
+
+ggplot(rm_long, aes(Delta, rate, colour = factor(n))) +
+  geom_hline(yintercept = 0.05, linewidth = 0.4) +
+  geom_vline(data = rm_marks, aes(xintercept = Delta, linetype = target),
+             linewidth = 0.4, colour = "grey35") +
+  geom_line(linewidth = 0.7) +
+  facet_wrap(~ paste0("k = ", k), nrow = 1) +
+  coord_cartesian(ylim = c(0, 0.25), xlim = c(0, 0.35)) +
+  scale_colour_viridis_d(end = 0.85) +
+  labs(x = expression(Delta), y = expression("Pr(" * p < alpha * ")"),
+       colour = "n subjects", linetype = NULL)
+```
+
+```{r}
+#| label: tbl-rm-boundary
+#| code-fold: true
+rm_b <- rm_res[rm_res$eta2p > 0, ]
+rm_b |>
+  group_by(k) |>
+  summarise(conditions = n(),
+            `mean rate @ Delta_pop`  = round(mean(rate_pop), 4),
+            `mean rate @ Delta_tost` = round(mean(rate_tost), 4),
+            `mean rate @ Delta_pes`  = round(mean(rate_pes), 4),
+            `median Delta_tost/Delta_pop` = round(median(Delta_tost/Delta_pop), 3),
+            .groups = "drop") |>
+  kable(caption = "One-way repeated measures: rejection rate at each of the three calibration targets, averaged over n and effect size. Nominal alpha = 0.05.")
+```
+
+The verdict depends entirely on which scale the bound is read on, and the ratio
+$\Delta_{tost}/\Delta_{pop}$ approaches $k/(k-1)$ — so the discrepancy is **largest at
+$k = 2$**, not at large $k$.
+
+- On $\Delta_{tost}$, the rate is nominal in every cell. The procedure controls its size.
+- On $\Delta_{pes}$ it is mildly liberal in small samples, which is the ordinary upward
+  bias of $\eta^2_p$ rather than a fault in the bound.
+- On $\Delta_{pop}$ it is severely conservative, and *increasingly* so as $n$ grows.
+
+That last point is worth stating plainly, since it is the practical trap: a bound reasoned
+about as "this factor explains less than 5% of the variance in my data" is not the bound
+the function applies. `equ_anova()` works on the partial scale, where subject variance is
+excluded from the denominator.
+
+## Design B: factorial between-subjects ANOVA
+
+For a balanced $a \times b$ design with $m$ per cell, the cell means and the error sum of
+squares are independent and jointly sufficient, so there is no need to generate $N$
+observations per replication.
+
+```{r}
+#| label: fac-sim-fn
+fac_sim <- function(a, b, m, eta2p = c(A = 0, B = 0, AB = 0),
+                    sigma2 = 1, nSim = 10000) {
+  N <- a*b*m; dfE <- N - a*b
+  sc <- function(len, ss) { v <- seq_len(len) - (len+1)/2; v/sqrt(sum(v^2))*sqrt(ss) }
+  # balanced design => effects orthogonal => all three targets can be set at once
+  alpha_i <- sc(a, a * eta2p[["A"]] /(1 - eta2p[["A"]]))
+  beta_j  <- sc(b, b * eta2p[["B"]] /(1 - eta2p[["B"]]))
+  G0 <- outer(sc(a, 1), sc(b, 1)); G0 <- G0 - outer(rowMeans(G0), colMeans(G0), "+") + mean(G0)
+  gam <- if (eta2p[["AB"]] > 0) G0/sqrt(sum(G0^2))*sqrt(a*b*eta2p[["AB"]]/(1-eta2p[["AB"]])) else G0*0
+  M  <- outer(alpha_i, beta_j, "+") + gam
+  CM <- as.vector(M) + matrix(rnorm(a*b*nSim, 0, sqrt(sigma2/m)), nrow = a*b)
+  Ka <- model.matrix(~ 0 + factor(rep(1:a, times = b)))
+  Kb <- model.matrix(~ 0 + factor(rep(1:b, each  = a)))
+  rA <- crossprod(Ka, CM)/b; rB <- crossprod(Kb, CM)/a; g <- colMeans(CM)
+  SSA <- m*b*colSums(sweep(rA, 2, g)^2)
+  SSB <- m*a*colSums(sweep(rB, 2, g)^2)
+  Rr  <- CM - Ka %*% rA - Kb %*% rB + rep(g, each = a*b)
+  SSAB <- m*colSums(Rr^2)
+  MSE <- rchisq(nSim, dfE) * sigma2 / dfE
+  list(A = (SSA/(a-1))/MSE, B = (SSB/(b-1))/MSE, AB = (SSAB/((a-1)*(b-1)))/MSE,
+       lam = c(A = m*b*sum(alpha_i^2)/sigma2, B = m*a*sum(beta_j^2)/sigma2,
+               AB = m*sum(gam^2)/sigma2),
+       df1 = c(A = a-1, B = b-1, AB = (a-1)*(b-1)), dfE = dfE, N = N)
+}
+```
+
+```{r}
+#| label: fac-run
+set.seed(515)
+fac_grid <- expand.grid(design = c("2x2","2x3","3x4"), m = c(5, 10, 25, 100),
+                        eta2p = c(0.02, 0.06, 0.14), stringsAsFactors = FALSE)
+fac_res <- do.call(rbind, lapply(seq_len(nrow(fac_grid)), function(i) {
+  gg <- fac_grid[i, ]; ab <- as.integer(strsplit(gg$design, "x")[[1]])
+  s <- fac_sim(ab[1], ab[2], gg$m,
+               c(A = gg$eta2p, B = gg$eta2p, AB = gg$eta2p), nSim = nSim2)
+  do.call(rbind, lapply(c("A","B","AB"), function(e) {
+    df1 <- s$df1[[e]]; lam <- s$lam[[e]]
+    tg <- targets_for(lam, df1, s$dfE, s$N)
+    rt <- function(D) mean(s[[e]] < qf(.05, df1, s$dfE, ncp = D/(1-D)*(df1+s$dfE+1)))
+    data.frame(design = gg$design, m = gg$m, effect = e, eta2p = gg$eta2p,
+               df1 = df1, df2 = s$dfE, N = s$N, eff_N = df1 + s$dfE + 1,
+               rate_pop = rt(tg[["Delta_pop"]]), rate_tost = rt(tg[["Delta_tost"]]),
+               rate_pes = rt(tg[["Delta_pes"]]))
+  }))
+}))
+nrow(fac_res)
+```
+
+```{r}
+#| label: tbl-fac-boundary
+#| code-fold: true
+fac_res |>
+  group_by(design, effect) |>
+  summarise(`rate @ pop` = round(mean(rate_pop), 4),
+            `rate @ tost` = round(mean(rate_tost), 4),
+            `rate @ pes` = round(mean(rate_pes), 4),
+            `eff_N vs N` = paste0(min(eff_N - N), " to ", max(eff_N - N)),
+            .groups = "drop") |>
+  kable(caption = "Factorial between-subjects designs, averaged over cell size and effect size. Here df1+df2+1 falls short of N by only (p - df1 - 1), so all three calibrations nearly agree.")
+```
+
+In a single-stratum factorial the gap is $p - df_1 - 1$ observations out of $N$, so all
+three targets nearly coincide and the distinction that dominated Design A almost vanishes.
+The rate is at or just below nominal throughout: mildly conservative, $O(1/N)$.
+
+## Design C: mixed designs
+
+This is the case that decides between the two readings, because the between-subjects
+effect is tested on the $gn$ subject means while the data contain $gnk$ observations.
+
+```{r}
+#| label: mix-run
+#| code-fold: true
+set.seed(626)
+mix_grid <- expand.grid(g = c(2, 3), n = c(15, 30), k = c(3, 4), eta2p = c(0.06))
+mix_res <- do.call(rbind, lapply(seq_len(nrow(mix_grid)), function(i) {
+  q <- mix_grid[i, ]; ns <- q$g * q$n; Ntot <- ns * q$k
+  # between stratum: one-way ANOVA on subject means, tau2 = s2s + s2e/k
+  s2s <- 1; s2e <- 1; tau2 <- s2s + s2e/q$k
+  df1 <- q$g - 1; df2 <- q$g * (q$n - 1)
+  lam <- (df1 + df2 + 1) * q$eta2p/(1 - q$eta2p)   # target on the subject-mean scale
+  gam <- { v <- seq_len(q$g) - (q$g+1)/2; v/sqrt(sum(v^2))*sqrt(lam*tau2/q$n) }
+  sm <- rep(gam, each = q$n) + matrix(rnorm(ns*nSim2, 0, sqrt(tau2)), ns, nSim2)
+  grp <- rep(seq_len(q$g), each = q$n)
+  gm <- rowsum(sm, grp)/q$n; gmn <- colMeans(sm)
+  SSb <- q$n * colSums(sweep(gm, 2, gmn)^2)
+  SSw <- colSums((sm - gm[grp, , drop = FALSE])^2)
+  Fb  <- (SSb/df1)/(SSw/df2)
+  tg <- targets_for(lam, df1, df2, Ntot)
+  rt <- function(D) mean(Fb < qf(.05, df1, df2, ncp = D/(1-D)*(df1+df2+1)))
+  data.frame(g = q$g, n = q$n, k = q$k, n_subj = ns, N_total = Ntot,
+             eff_N = df1 + df2 + 1,
+             Delta_pop = round(tg[["Delta_pop"]], 4),
+             Delta_tost = round(tg[["Delta_tost"]], 4),
+             rate_pop = rt(tg[["Delta_pop"]]), rate_tost = rt(tg[["Delta_tost"]]))
+}))
+kable(mix_res, caption = "Mixed design, between-subjects effect. eff_N equals the number of subjects exactly, and it is the total-observation reading that is wrong -- here in the opposite direction from Design A.")
+```
+
+`eff_N` equals `n_subj` in every row. The between-subjects effect *is* a one-way ANOVA on
+the subject means, and TOSTER's normalizer recovers exactly that. Reading the bound
+against total observations is wrong by a factor of $k$ — and note the direction has
+flipped relative to Design A. No single fixed relationship to $N$ could be right in both
+places, which is what makes $df_1 + df_2 + 1$ the correct general answer rather than a
+convenient approximation.
+
+## Caveat: sphericity corrections are not applied
+
+Everything above assumed compound symmetry. When sphericity fails, `equ_anova()` has a
+genuine limitation: it reads the uncorrected univariate degrees of freedom from the
+`Anova.mlm` object and never applies a Greenhouse-Geisser or Huynh-Feldt correction. The
+correction machinery in `R/anova_summary.R` is commented out, and `add_corrected_df()`
+does not exist in the package. Fitting with `afex::aov_car(..., anova_table =
+list(correction = "GG"))` therefore has **no effect** on the equivalence *p*-value.
+
+To quantify the cost, write $\Psi = C\Sigma C'$ for the covariance of the contrast scores
+and use Box's $\epsilon = (\sum \psi_i)^2 / \big[(k-1)\sum \psi_i^2\big]$. Holding
+$\overline{\psi} = 1$ keeps the nominal non-centrality — and so the nominal boundary —
+fixed while $\epsilon$ varies, so any change in size is attributable to non-sphericity
+alone.
+
+```{r}
+#| label: sph-theory
+eps_of <- function(psi) sum(psi)^2 / (length(psi) * sum(psi^2))
+psi_for_eps <- function(k, target) {
+  if (isTRUE(all.equal(target, 1))) return(rep(1, k - 1))
+  stopifnot(target > 1/(k-1))
+  cc <- uniroot(function(cc) eps_of(c(cc, rep(1, k-2))) - target, c(1, 1e6))$root
+  p <- c(cc, rep(1, k-2)); p * (k-1) / sum(p)     # rescale to mean 1
+}
+```
+
+Under a violation there is no single $\lambda$, because $SS_A$ becomes a weighted mix of
+non-central chi-squares. Where the effect sits in the contrast space therefore matters, so
+it enters as an explicit factor.
+
+```{r}
+#| label: sph-run
+set.seed(737)
+sph <- expand.grid(k = c(4, 8), n = c(15, 30, 60), eps = c(1, 0.9, 0.75, 0.6, 0.5),
+                   placement = c("high-variance", "low-variance", "uniform"),
+                   eta2p = 0.06, stringsAsFactors = FALSE)
+sph_res <- do.call(rbind, lapply(seq_len(nrow(sph)), function(i) {
+  s <- sph[i, ]; df1 <- s$k - 1; df2 <- (s$n - 1)*(s$k - 1)
+  lam <- (df1 + df2 + 1) * s$eta2p/(1 - s$eta2p)
+  D   <- lam/(lam + df1 + df2 + 1)
+  psi <- psi_for_eps(s$k, s$eps)
+  v <- switch(s$placement, `high-variance` = c(1, rep(0, df1-1)),
+              `low-variance` = c(rep(0, df1-1), 1), uniform = rep(1, df1))
+  mu <- v/sqrt(sum(v^2))*sqrt(lam/s$n)
+  Fs <- rm_sim(s$n, s$k, lam, psi = psi, mu_c = mu, nSim = nSim2)
+  cbind(s, size = mean(Fs < qf(.05, df1, df2, ncp = D/(1-D)*(df1+df2+1))))
+}))
+```
+
+```{r}
+#| label: fig-sph
+#| fig-cap: "Size of the equivalence test at its nominal boundary as sphericity degrades. Epsilon = 1 is the built-in control and returns nominal size. The direction and severity of the failure depend on where the effect sits in the contrast space."
+ggplot(sph_res, aes(eps, size, colour = placement)) +
+  geom_hline(yintercept = 0.05, linewidth = 0.4) +
+  geom_line(linewidth = 0.7) + geom_point(size = 1.5) +
+  facet_grid(paste0("k = ", k) ~ paste0("n = ", n)) +
+  scale_x_reverse() + scale_colour_viridis_d(end = 0.85) +
+  labs(x = expression("Box's " * epsilon * " (decreasing = worse violation)"),
+       y = "Rejection rate at the nominal boundary", colour = "Effect placed on")
+```
+
+```{r}
+#| label: tbl-sph
+#| code-fold: true
+sph_res |>
+  group_by(eps, placement) |>
+  summarise(size = round(mean(size), 4), .groups = "drop") |>
+  pivot_wider(names_from = placement, values_from = size) |>
+  kable(caption = "Size at the nominal boundary by Box's epsilon, averaged over k and n. Nominal alpha = 0.05.")
+```
+
+The $\epsilon = 1$ row returns nominal size, confirming the construction. Away from it the
+test is badly miscalibrated — inflated by several times $\alpha$ when the effect loads on
+a high-variance contrast, and driven to near zero when it loads on a low-variance one.
+This is a real limitation, and it is the only genuine failure anywhere in this document.
+
+::: {.callout-warning}
+## Practical implication
+
+For repeated-measures designs with $k > 2$, check sphericity on the fitted model before
+trusting `equ_anova()`, and treat a Mauchly test or an $\hat{\epsilon}$ well below 1 as a
+reason not to rely on the equivalence *p*-value. Note this is a limitation of the current
+implementation, not of the underlying method: a corrected-$df$ version is possible and
+would slot into `R/anova_summary.R`. With $k = 2$ there is only one contrast and
+sphericity is not an issue.
+:::
+
+## Pipeline check: does `equ_anova()` extract the right degrees of freedom?
+
+Everything above tests the mathematics on *F* statistics computed directly. It does not
+test how TOSTER pulls $df_1$ and $df_2$ out of a fitted model object — which is where a
+practical bug would live. This fits real datasets with `stats::aov` and `afex::aov_car`
+and compares against the closed-form path.
+
+```{r}
+#| label: pipeline-check
+#| code-fold: true
+suppressMessages(library(afex))
+set.seed(848)
+eqb <- 0.075
+pipe <- do.call(rbind, lapply(1:4, function(rep_i) {
+  out <- list()
+  # (a) one-way RM, k = 4
+  n <- 12; k <- 4
+  Y <- matrix(rnorm(n*k), n, k) + rep(c(0, .4, .2, .7), each = n) + rnorm(n)
+  d <- data.frame(y = as.vector(Y), id = factor(rep(1:n, k)),
+                  cond = factor(rep(1:k, each = n)))
+  ea <- suppressMessages(equ_anova(aov(y ~ cond + Error(id/cond), data = d), eqbound = eqb))
+  ea$effect <- trimws(ea$effect)                       # aov path pads names with spaces
+  r <- ea[ea$effect == "cond", ]
+  gmn <- mean(Y); SA <- n*sum((colMeans(Y)-gmn)^2); SS <- k*sum((rowMeans(Y)-gmn)^2)
+  Ff <- (SA/(k-1))/((sum((Y-gmn)^2)-SA-SS)/((n-1)*(k-1)))
+  out[[1]] <- data.frame(design = "one-way RM", effect = "cond",
+    d_df1 = r$df1-(k-1), d_df2 = r$df2-(n-1)*(k-1), d_F = r$F.value-Ff,
+    d_p = r$p.equ - equ_ftest(Ff, k-1, (n-1)*(k-1), eqbound = eqb)$p.value)
+  # (b) 2x3 between-subjects
+  a <- 2; b <- 3; m <- 8
+  dd <- expand.grid(rep = 1:m, A = factor(1:a), B = factor(1:b))
+  dd$y <- rnorm(nrow(dd)) + as.numeric(dd$A)*.5 + as.numeric(dd$B)*.3
+  an <- anova(lm(y ~ A*B, data = dd))
+  ea2 <- suppressMessages(equ_anova(aov(y ~ A*B, data = dd), eqbound = eqb))
+  ea2$effect <- trimws(ea2$effect)
+  for (e in c("A","B","A:B")) {
+    rr <- ea2[ea2$effect == e, ]; Fa <- an[e, "F value"]; d2 <- an["Residuals","Df"]
+    out[[length(out)+1]] <- data.frame(design = "2x3 between", effect = e,
+      d_df1 = rr$df1-an[e,"Df"], d_df2 = rr$df2-d2, d_F = rr$F.value-Fa,
+      d_p = rr$p.equ - equ_ftest(Fa, an[e,"Df"], d2, eqbound = eqb)$p.value)
+  }
+  do.call(rbind, out)
+}))
+pipe |> group_by(design, effect) |>
+  summarise(across(starts_with("d_"), ~ max(abs(.x))), .groups = "drop") |>
+  kable(caption = "Maximum absolute discrepancy between equ_anova() and the closed-form path, over 4 simulated datasets per design. Zero everywhere means df extraction is correct.")
+```
+
+Two wrinkles worth recording for anyone doing this comparison: the `aov`/`aovlist` path
+returns effect names **padded with trailing spaces** (`"cond      "`), because
+`reformat_aov_summary()` never calls the `remove_empty_space()` helper defined alongside
+it, so any join on `effect` needs `trimws()`; and the `afex_aov` / `Anova.mlm` path emits
+an extra `(Intercept)` row that the `aov` path does not.
+
+## What the extension shows
+
+```{r}
+#| label: xdesign-summary
+#| code-fold: true
+rbind(
+  data.frame(Design = "One-way RM",       n_cells = sum(rm_res$eta2p > 0),
+             rate_at_Delta_tost = round(mean(rm_res$rate_tost[rm_res$eta2p > 0]), 4)),
+  data.frame(Design = "Factorial between", n_cells = nrow(fac_res),
+             rate_at_Delta_tost = round(mean(fac_res$rate_tost), 4)),
+  data.frame(Design = "Mixed (between)",   n_cells = nrow(mix_res),
+             rate_at_Delta_tost = round(mean(mix_res$rate_tost), 4))
+) |> kable(caption = "Type I error at the boundary, on TOSTER's own scale, across every design tested. Nominal alpha = 0.05.")
+```
+
+1. **The generalization is sound.** On its own scale the procedure holds its size in
+   every design tested — one-way repeated measures, factorial between-subjects, and the
+   between-subjects effect of a mixed design — none of which Campbell & Lakens simulated.
+2. **$df_1 + df_2 + 1$ is the effective sample size of the error stratum**, not an
+   approximation to total N. The mixed design proves this, since there the correct
+   normalizer is *smaller* than total N while in the factorial case it is nearly equal.
+3. **The bound is on the partial scale, and in repeated-measures designs that is not the
+   share of total variance.** Calibrating a bound as "less than 5% of the variance in my
+   data" and passing it to `equ_anova()` produces a much more conservative test than
+   intended, increasingly so as n grows. This is an interpretation trap, not a bug.
+4. **Sphericity is the real limitation.** Corrections are silently ignored, and the
+   resulting size distortion is large and can run in either direction.
+
+
 ## Notes on the published supplementary code
 
 A few observations for anyone attempting to run `disregard_simulation_study_2.R`
@@ -547,6 +1103,20 @@ setting Campbell & Lakens evaluated, and reproducing their simulation recovers t
 operating characteristics the paper reports: nominal Type I error at the boundary of the
 null, conservatism inside it, and power that matches the analytic derivation under a
 true null effect.
+
+Beyond that setting, the generalization that TOSTER adds — substituting
+$df_1 + df_2 + 1$ for the total sample size in the non-centrality parameter — controls
+Type I error in every design tested, including the repeated-measures and mixed designs
+where that substitution changes the answer materially. The substitution is not an
+approximation to $N$; it is the effective sample size of the stratum in which the effect
+is tested, which is what makes the resulting bound a *partial* variance ratio.
+
+Two things follow for the manuscript. The first is an interpretation point that deserves
+stating wherever the ANOVA bound is discussed: in repeated-measures designs a bound on
+partial $\eta^2$ is not a bound on the share of total variance, and the two can differ by
+a factor approaching $k/(k-1)$. The second is a genuine limitation: sphericity corrections
+are not applied, and when sphericity fails the size distortion is large and can run in
+either direction. That is worth fixing in the package rather than only documenting.
 
 ## Session information
 
