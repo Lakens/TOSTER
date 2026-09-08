@@ -356,6 +356,54 @@ test1 = wilcox_TOST(
 print(test1)
 
 ## -----------------------------------------------------------------------------
+set.seed(19)
+n_ecdf <- 200
+
+ecdf_panel <- function(g1, g2, title, subtitle) {
+  df <- data.frame(
+    value = c(g1, g2),
+    Group = rep(c("Group 1", "Group 2"), c(length(g1), length(g2)))
+  )
+  probs <- c(0.1, 0.5, 0.9)
+  seg <- data.frame(
+    p = probs,
+    x1 = quantile(g1, probs, type = 7),
+    x2 = quantile(g2, probs, type = 7)
+  )
+  ggplot(df, aes(x = value, colour = Group, linetype = Group)) +
+    stat_ecdf(linewidth = 0.7) +
+    geom_segment(
+      data = seg, inherit.aes = FALSE,
+      aes(x = x1, xend = x2, y = p, yend = p),
+      arrow = arrow(length = unit(0.05, "in"), ends = "both"),
+      linewidth = 0.35, colour = "grey25"
+    ) +
+    scale_colour_grey(start = 0.1, end = 0.55) +
+    coord_cartesian(xlim = c(-7, 8)) +
+    labs(x = "Value", y = "Cumulative probability",
+         title = title, subtitle = subtitle) +
+    theme_minimal(base_size = 10) +
+    theme(legend.position = "bottom",
+          legend.title = element_blank(),
+          plot.title = element_text(size = 10, face = "bold"),
+          plot.subtitle = element_text(size = 8))
+}
+
+p_shift <- ecdf_panel(
+  rnorm(n_ecdf, 0, 1), rnorm(n_ecdf, 1.5, 1),
+  "A. Location shift holds",
+  "Horizontal gap is constant across the distribution"
+)
+p_viol <- ecdf_panel(
+  rnorm(n_ecdf, 0, 1), rnorm(n_ecdf, 0.5, 2.5),
+  "B. Location shift violated",
+  "Gap varies and reverses sign; curves cross"
+)
+
+p_shift + p_viol + plot_layout(guides = "collect") &
+  theme(legend.position = "bottom")
+
+## -----------------------------------------------------------------------------
 # symmetry plot for sleep paired differences
 d_sleep <- sleep$extra[sleep$group == 2] - sleep$extra[sleep$group == 1]
 m <- median(d_sleep)
@@ -380,7 +428,8 @@ bm_test = brunner_munzel(
   data = sleep,
   # equivalence hypothesis
   alternative = "equivalence",
-  # equivalence bounds on the probability scale
+  # equivalence bounds 
+  # on the stochastic superiority scale
   mu = c(0.3, 0.7)
 )
 print(bm_test)
@@ -465,6 +514,31 @@ aovtest2 = aov_ez(
   anova_table = list(correction = "none", es = "none")
 )
 equ_anova(aovtest2, eqb = 0.35)
+
+## -----------------------------------------------------------------------------
+library(emmeans)
+# estimated marginal means from the ANOVA fit earlier
+emm = emmeans(aovtest, ~ spray)
+
+# two comparisons specified in advance as the hypotheses of interest
+sprays = contrast(
+  emm,
+  method = list(
+    "C vs D" = c(0, 0, 1, -1, 0, 0),
+    "C vs E" = c(0, 0, 1, 0, -1, 0)
+  )
+)
+
+test(
+  sprays,
+  # equivalence bound on the original scale (insect counts)
+  delta = 5,
+  side = "equivalence",
+  adjust = "none"
+)
+
+## -----------------------------------------------------------------------------
+confint(sprays, level = 0.90)
 
 ## -----------------------------------------------------------------------------
 power_t_TOST(
