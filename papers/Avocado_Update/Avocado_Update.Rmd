@@ -1002,11 +1002,9 @@ equ_anova(aovtest2, eqb = 0.35)
 
 ## Example with Specific Contrasts
 
-The omnibus test asks whether a factor as a whole explains a negligible share of the variance available to it. That is often not the question a researcher actually has. More commonly the hypothesis concerns particular comparisons --- is this condition equivalent to that one? --- and, as noted above, an omnibus effect can be negligible while a specific comparison nested within it is not.
+As mentioned previously, the ANOVA equivalence testing functions answer only a very broad, somewhat vague, question. The omnibus test asks whether a factor as a whole explains a negligible share of the variance available to it. That is often not the question a researcher actually has. More commonly the hypothesis concerns particular comparisons  (e.g., is this condition equivalent to that one?) and, as noted above, an omnibus effect can be negligible while a specific comparison nested within it is not. Testing contrasts directly also sidesteps the bound-justification problem described earlier. A contrast is expressed in the units of the outcome, so the smallest effect size of interest can be argued for on the original measurement scale, where anchor-based and cost-benefit reasoning are available, rather than on the proportion-of-variance scale where they usually are not.
 
-Testing contrasts directly also sidesteps the bound-justification problem described earlier. A contrast is expressed in the units of the outcome, so the smallest effect size of interest can be argued for on the original measurement scale, where anchor-based and cost-benefit reasoning are available, rather than on the proportion-of-variance scale where they usually are not.
-
-TOSTER does not fit contrasts itself, but the `emmeans` package [@emmeans] accommodates non-zero null hypotheses directly and operates on the same fitted model objects. Returning to the `InsectSprays` ANOVA fitted above, suppose a difference of fewer than five insects is considered too small to matter:
+TOSTER does not fit contrasts itself, but the "emmeans" package [@emmeans] accommodates non-zero null hypotheses directly and operates on the same fitted model objects^[This can also be accomplished with "marginaleffects" [@marginaleffects]]. Therefore, I wanted to briefly demonstrate how this could be accomplished. Using the the `InsectSprays` ANOVA fitted above, suppose a difference of fewer than five insects is considered too small to matter:
 
 ```{r}
 library(emmeans)
@@ -1039,7 +1037,7 @@ confint(sprays, level = 0.90)
 
 The 90% interval for C versus E lies entirely inside $\pm$ 5, whereas the interval for C versus D extends past the lower bound.
 
-Two notes on this additional non-TOSTER derived workflow. First, whether to adjust for multiplicity is a substantive decision rather than an automatic one; no adjustment is applied above because the two contrasts were specified in advance as the hypotheses of interest. Multiplicity corrections (e.g., Holm-Bonferroni) remain valid for equivalence tests. Second, this approach reaches well beyond the ANOVA. Because `emmeans` works from fitted model objects, the same equivalence contrasts can be applied to mixed-effects models and other designs that fall outside TOSTER's scope.
+Two notes on this additional non-TOSTER derived workflow. First, whether to adjust for multiplicity is a substantive decision rather than an automatic one; no adjustment is applied above because the two contrasts were specified in advance as the hypotheses of interest (in this case we could consider these independent tests). However, multiplicity corrections (e.g., Holm-Bonferroni) remain valid for equivalence tests, and are worthy of consideration. Second, this approach reaches well beyond the ANOVA. Because `emmeans` works from fitted model objects, the same equivalence contrasts can be applied to mixed-effects models and other designs that fall outside TOSTER's scope.
 
 \newpage
 
@@ -1096,7 +1094,7 @@ For more complex designs --- crossover studies, replicate designs, group-sequent
 
 This paper has described the major updates to the TOSTER R package, expanding its scope from the original t-test and correlation equivalence tests to a comprehensive toolkit for frequentist equivalence testing. The update adds a unified t-test interface with minimal effect testing support, a simplified hypothesis testing interface that integrates with the standard R ecosystem, tools for standardized effect sizes and correlations, robust and resampling-based alternatives, ANOVA equivalence testing, and power analysis for sample size planning.
 
-Several limitations should be acknowledged. TOSTER only covers a few standard research designs --- it does not handle many analysis scenarios such as those involving multilevel or mixed-effects models. For these settings, researchers should consider packages like "emmeans" [@emmeans] or "marginaleffects" [@marginaleffects], which can accommodate non-zero null hypotheses in more complex modeling frameworks. TOSTER also does not provide Bayesian equivalence testing; researchers interested in Bayesian methods for the null should consult other R packages such as "bayestestR" [@bayestestR].
+Several limitations should be acknowledged. TOSTER only covers a few standard research designs, and it does not handle many analysis scenarios such as those involving multilevel or mixed-effects models. For these settings, researchers should consider packages like "emmeans" [@emmeans] or "marginaleffects" [@marginaleffects], which can accommodate non-zero null hypotheses in more complex modeling frameworks. TOSTER also does not provide Bayesian equivalence testing; researchers interested in Bayesian methods for the null should consult other R packages such as "bayestestR" [@bayestestR].
 
 I hope that the updated package continues to build upon the original impact of @lakens_ori and makes equivalence testing more accessible to researchers across disciplines. At the very least, I would encourage users to compare results across methods (e.g., Student's t-test vs. permutation t-test vs. bootstrap t-test) to ensure that conclusions do not entirely depend on the chosen analysis. If the interpretation substantially changes depending on the test, this suggests features of the data --- violations of assumptions, outliers, distributional shape --- that warrant further investigation.
 
@@ -1116,7 +1114,7 @@ devtools::install_github("Lakens/TOSTER")
 
 ## Acknowledgement(s) {-}
 
-I would like to thank everyone from the Lakens laboratory group for their input and suggestions.
+I would like to thank everyone from the Lakens laboratory group for their input and suggestions. I must also thank David Eisner, Jakub Tomek, and James Selig for their feedback on drafts of this manuscript.
 
 ## Disclosure statement {-}
 
