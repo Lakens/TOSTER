@@ -171,10 +171,10 @@ to date.
 However, the original package had a number of limitations. It offered a
 function-per-design interface (separate functions for each t-test type),
 lacked robust alternatives, provided no support for ANOVA equivalence
-testing, and had no tools for comparing effect sizes across studies. The
-package also did not integrate with standard R workflows and usually
-just printed results to the console rather than returning objects that
-could be manipulated or plotted.
+testing, and had no tools for comparing effect sizes across studies.
+Also, the package did not integrate with standard R workflows and
+usually just printed results to the console rather than returning
+objects that could be manipulated or plotted.
 
 This paper provides a tutorial-style introduction to the updated TOSTER
 package, organized around its major capabilities: (1) a unified t-test
@@ -188,7 +188,7 @@ robust and resampling-based alternatives including the Brunner-Munzel
 test, bootstrap and permutation t-tests, and log-transformed methods,
 (5) equivalence testing for ANOVAs, and (6) power analysis and sample
 size planning. Each section motivates when and why a researcher would
-use the tool before demonstrating how.
+use TOSTER's functions before demonstrating how TOSTER actually works.
 
 TOSTER occupies a specific niche in the R ecosystem in that it is a
 frequentist toolkit for equivalence testing of standard designs.
@@ -222,9 +222,8 @@ estimated.
 The estimand is the quantity a study is attempting to estimate
 \citep{Lundberg_Johnson_Stewart_2021}. In an ideal scenario, the
 hypothesis should determine the estimand, and estimand then narrows the
-set of appropriate tests. Inheriting an estimand from whichever
-procedure happens to be run is a reliable way to end up testing the
-wrong hypothesis.
+set of appropriate tests. Not considering the estimand is a reliable way
+to end up testing the wrong hypothesis.
 
 This matters more for equivalence testing than for nil-hypothesis
 testing. When two distributions are identical, the location-type
@@ -1041,13 +1040,13 @@ it provides more robust confidence intervals and p-values.
 ##  g[rm]=('1'-'2')/SD_rm)
 ## 
 ## data:  extra by group
-## z-observed = -0.78495, p-value = 0.8909
+## z-observed = -0.78495, p-value = 0.8929
 ## alternative hypothesis: equivalence
 ## null values:
 ## lower bound upper bound 
 ##        -0.5         0.5 
 ## 90 percent confidence interval:
-##  -1.3178846 -0.4412369
+##  -1.3197634 -0.4477101
 ## sample estimates:
 ## SMD (g[rm]) 
 ##  -0.7513666
@@ -1137,13 +1136,13 @@ objects that integrate with the helper functions described above.
 ##  Bootstrapped Pearson's product-moment correlation (BCa)
 ## 
 ## data:  bugs$LDLF and bugs$LDHF
-## N = 91, p-value = 0.9826
+## N = 91, p-value = 0.9764
 ## alternative hypothesis: equivalence
 ## null values:
 ## correlation correlation 
 ##         0.4        -0.4 
 ## 90 percent confidence interval:
-##  0.4397482 0.6795889
+##  0.4311495 0.6809703
 ## sample estimates:
 ##         r 
 ## 0.5767783
@@ -1156,8 +1155,8 @@ objects that integrate with the helper functions described above.
 \end{Shaded}
 
 The Bootstrapped Pearson's product-moment correlation (BCa) is not
-statistically significant (p = 0.983, r = 0.577, 90\% C.I.{[}0.44,
-0.68{]}) at a 0.05 alpha-level. The null hypothesis cannot be rejected.
+statistically significant (p = 0.976, r = 0.577, 90\% C.I.{[}0.431,
+0.681{]}) at a 0.05 alpha-level. The null hypothesis cannot be rejected.
 At the desired error rate, it cannot be stated that the true correlation
 is between 0.4 and -0.4.
 
