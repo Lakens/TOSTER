@@ -194,18 +194,17 @@ TOSTER occupies a specific niche in the R ecosystem in that it is a
 frequentist toolkit for equivalence testing of standard designs.
 Researchers interested in Bayesian approaches to evidence for the null
 have excellent options (e.g., ``bayestestR'' by \citet{bayestestR}). For
-equivalence-style contrasts in more complex models --- mixed models,
-marginal means --- the ``emmeans'' \citep{emmeans} and
-``marginaleffects'' \citep{marginaleffects} packages can accommodate
-non-zero null hypotheses. TOSTER fills the space of accessible,
-self-contained equivalence testing for common, albeit simple, research
-designs. For a broader introduction to the methodology, see
-\citet{lakens_ori}, \citet{lakens2018equivalence},
-\citet{lakens2020improving}, \citet{mazzolari2022myths}, and
-\citet{Tomek_Caldwell_Eisner_2026}. TOSTER is also available as a
-\href{https://www.jamovi.org/}{jamovi} module for researchers who prefer
-a graphical interface although it has limited capabilities compared to
-the R package.
+equivalence-style contrasts in more complex models (e.g., mixed models)
+the ``emmeans'' \citep{emmeans} and ``marginaleffects''
+\citep{marginaleffects} packages can accommodate non-zero null
+hypotheses. TOSTER fills the space of accessible, self-contained
+equivalence testing for common, albeit simple, research designs. For a
+broader introduction to the methodology, see \citet{lakens_ori},
+\citet{lakens2018equivalence}, \citet{lakens2020improving},
+\citet{mazzolari2022myths}, and \citet{Tomek_Caldwell_Eisner_2026}.
+TOSTER is also available as a \href{https://www.jamovi.org/}{jamovi}
+module for researchers who prefer a graphical interface although it has
+limited capabilities compared to the R package.
 
 \section{Setting Equivalence Bounds}\label{setting-equivalence-bounds}
 
@@ -230,8 +229,8 @@ wrong hypothesis.
 This matters more for equivalence testing than for nil-hypothesis
 testing. When two distributions are identical, the location-type
 quantities in Table \ref{tab:estimands} all take their null values at
-once --- the mean difference and the pseudo-median are both zero, and
-the probability of superiority is exactly 0.5 --- so a nil test is
+once (the mean difference and the pseudo-median are both zero, and the
+probability of superiority is exactly 0.5) so a nil test is
 comparatively forgiving of an unexamined estimand. An equivalence bound
 makes the decision more consequential. It is a specific magnitude on a
 specific scale, and there is generally no way to translate a bound on
@@ -301,12 +300,11 @@ Proportion of variance explained & Proportion (0 to 1) &
 \end{longtable}
 
 In applied settings the estimand is not fully pinned down by the choice
-of summary statistic either. Decisions about how intercurrent events ---
-post-randomization events such as dropout, treatment discontinuation, or
-the use of other treatments --- and missing data are handled determine
-which population summary is being estimated at all. Two analyses that
-both report ``the mean difference'' may be estimating materially
-different things if they resolve these questions differently.
+of summary statistic either. Decisions about how intercurrent events
+(post-randomization events such as dropout) and missing data are handled
+determine which population summary is being estimated at all. Two
+analyses that both report ``the mean difference'' may be estimating
+materially different things if they resolve these questions differently.
 
 It is prudent to settle on the estimand first and then justify a bound
 on its scale, rather than the dubious process selecting a test from
@@ -391,7 +389,7 @@ Throughout, the estimand for a t-test is the mean, or mean difference,
 on the original scale of measurement. As discussed above, this is a
 default rather than an inviolable property of the test, and it is worth
 restating here because several of the alternatives described later in
-this paper --- the rank-based tests in particular --- estimate different
+this paper (the rank-based tests in particular) estimate different
 quantities entirely, and are not interchangeable substitutes when the
 hypothesis concerns means.
 
@@ -410,9 +408,10 @@ hypothesis at a time, the \texttt{simple\_htest} function (described in
 the next section) provides a lighter alternative.
 
 Minimal effect testing (MET) is also supported. MET is useful when the
-hypothesis is that an effect \emph{exceeds} a meaningful threshold ---
-the null hypothesis is equivalence, and rejection implies a practically
-meaningful effect (see Figure 1) \citep{mazzolari2022myths}.
+hypothesis is that an effect \emph{exceeds} a meaningful threshold. In
+the case of MET, the null hypothesis is equivalence, and rejection
+implies a practically meaningful effect (see Figure 1)
+\citep{mazzolari2022myths}.
 
 \begin{figure}
 \centering
@@ -716,8 +715,8 @@ test with an equivalence test. However, sometimes a researcher has a
 single specific hypothesis to test, or simply wants less verbose output
 (e.g., SMD calculation is not wanted). The \texttt{simple\_htest}
 function provides a lighter interface for this purpose. It returns a
-standard R \texttt{htest} object --- the same class returned by
-\texttt{t.test()} and \texttt{wilcox.test()} --- but with expanded
+standard R \texttt{htest} object (the same class returned by
+\texttt{t.test()} and \texttt{wilcox.test()}) but with expanded
 \texttt{alternative} options that include \texttt{"equivalence"} and
 \texttt{"minimal.effect"}. This means researchers can perform
 equivalence testing with the same familiar interface they already use
@@ -745,7 +744,7 @@ The \texttt{simple\_htest} function supports \texttt{t.test} and
 argument) and all five alternative hypotheses: \texttt{"two.sided"},
 \texttt{"less"}, \texttt{"greater"}, \texttt{"equivalence"}, and
 \texttt{"minimal.effect"}. The \texttt{mu} parameter specifies
-equivalence bounds --- a single value creates symmetric bounds (e.g., if
+equivalence bounds. This single value creates symmetric bounds (e.g., if
 1 is provided at \texttt{mu} with \texttt{alternative\ =\ "equivalence"}
 then the equivalence region will be {[}-1,1{]}), or two values can be
 given for asymmetric bounds.
@@ -823,8 +822,8 @@ the \texttt{mu} argument.
 Notice how the output, in either hypothesis test above, is a single
 clean \texttt{htest} object. This is much more concise than the verbose
 \texttt{t\_TOST} output shown previously on purpose. If you want to
-perform additional tests --- such as a complementary nil significance
-tests --- then that has to be done separately. However, there are some
+perform additional tests (such as a complementary nil significance
+tests) then that has to be done separately. However, there are some
 methods (described below) that make this \texttt{htest} format easy to
 deal with when reporting statistical test results.
 
@@ -892,10 +891,10 @@ of the mean difference with the precision of measurement, which means
 that a narrow equivalence bound on \(d\) may correspond to a very
 different raw-scale bound depending on the variability of the sample
 \citep{Caldwell2020, baguley2009}. This makes it unclear what,
-substantively, is being declared ``equivalent'' --- are we claiming the
+substantively, is being declared ``equivalent''. Are we claiming the
 means are close, or that the means are close \emph{relative to the
 variance}? The choice of denominator (pooled SD, control SD,
-within-subject SD) further complicates that same dubious interpretation.
+within-subject SD) further complicates matters.
 
 Correlations have analogous issues. \citet{tukey1969} noted that
 correlations are influenced by the range of both variables, so the
@@ -1042,13 +1041,13 @@ it provides more robust confidence intervals and p-values.
 ##  g[rm]=('1'-'2')/SD_rm)
 ## 
 ## data:  extra by group
-## z-observed = -0.78495, p-value = 0.9055
+## z-observed = -0.78495, p-value = 0.8909
 ## alternative hypothesis: equivalence
 ## null values:
 ## lower bound upper bound 
 ##        -0.5         0.5 
 ## 90 percent confidence interval:
-##  -1.3042420 -0.4513194
+##  -1.3178846 -0.4412369
 ## sample estimates:
 ## SMD (g[rm]) 
 ##  -0.7513666
@@ -1138,13 +1137,13 @@ objects that integrate with the helper functions described above.
 ##  Bootstrapped Pearson's product-moment correlation (BCa)
 ## 
 ## data:  bugs$LDLF and bugs$LDHF
-## N = 91, p-value = 0.9743
+## N = 91, p-value = 0.9826
 ## alternative hypothesis: equivalence
 ## null values:
 ## correlation correlation 
 ##         0.4        -0.4 
 ## 90 percent confidence interval:
-##  0.4376857 0.6893689
+##  0.4397482 0.6795889
 ## sample estimates:
 ##         r 
 ## 0.5767783
@@ -1157,8 +1156,8 @@ objects that integrate with the helper functions described above.
 \end{Shaded}
 
 The Bootstrapped Pearson's product-moment correlation (BCa) is not
-statistically significant (p = 0.974, r = 0.577, 90\% C.I.{[}0.438,
-0.689{]}) at a 0.05 alpha-level. The null hypothesis cannot be rejected.
+statistically significant (p = 0.983, r = 0.577, 90\% C.I.{[}0.44,
+0.68{]}) at a 0.05 alpha-level. The null hypothesis cannot be rejected.
 At the desired error rate, it cannot be stated that the true correlation
 is between 0.4 and -0.4.
 
@@ -1358,9 +1357,9 @@ estimand is of scientific interest.
 \subsubsection{Wilcoxon-Mann-Whitney
 Tests}\label{wilcoxon-mann-whitney-tests}
 
-The Wilcoxon-Mann-Whitney (WMW) family --- the rank-sum test for two
+The Wilcoxon-Mann-Whitney (WMW) family is the rank-sum test for two
 independent groups and the signed-rank test for paired and one-sample
-designs --- provides non-parametric tests based on ranks. Within the
+designs. It provides non-parametric tests based on ranks. Within the
 TOST framework, TOSTER performs two directional tests to determine
 whether the effect lies within (equivalence) or outside (minimal effect)
 the equivalence bounds. What that effect is depends on an assumption
@@ -1473,8 +1472,8 @@ the stochastic-equality interpretation requires. The two assumptions
 below determine whether the stronger central-tendency interpretation is
 available, and each has a straightforward visual diagnostic.
 
-The location-shift assumption --- that the two group distributions
-differ only in location, not in shape or spread --- is what allows WMW
+The location-shift assumption is that the two group distributions differ
+only in location, not in shape or spread. This is what allows WMW
 results to be interpreted as a test of the median difference via the
 Hodges-Lehmann estimator. It is best diagnosed by overlaying the
 empirical cumulative distribution functions (ECDFs) of the two groups.
@@ -1494,7 +1493,7 @@ symmetric about the null value for the pseudo-median to coincide with
 the mean or median difference. Asymmetry is readily checked with a
 symmetry plot of the paired differences (Figure \ref{fig:symmplot}). As
 with the location-shift case, visible departures suggest that the test's
-output --- the pseudo-median and associated p-value --- does not map
+output (i.e., the pseudo-median and associated p-value) does not map
 cleanly onto a hypothesis about central tendency.
 
 \begin{figure}
@@ -1531,7 +1530,8 @@ pseudo-median to coincide with the mean or median of the differences.}
 
 The Brunner-Munzel test \citep{brunner2000} estimates the relative
 effect \(\hat{p} = P(X > Y) + 0.5 \cdot P(X = Y)\), sometimes referred
-to as the probability of superiority --- the probability that a randomly
+to as the probability of superiority or stochastic superiority. As
+mentioned in the WMW section, this is the probability that a randomly
 chosen observation from one group exceeds a randomly chosen observation
 from the other, with ties split evenly. This estimand is interpretable
 without distributional assumptions, unlike the WMW test which requires a
@@ -1545,25 +1545,26 @@ stochastically equal but differ in variance or shape; the
 Brunner--Munzel test remains valid in that setting and provides a
 directly interpretable effect size.
 
-Stochastic superiority tests may be particularly well-suited to
-Likert-type scales which are ubiquitous in psychological research. For a
-single ordinal item, the spacing between response categories carries no
-guaranteed meaning, and a mean difference therefore has a strained
-interpretation. For example, what, concretely, does a 0.4-unit mean
-difference on a five-point scale communicate? The stochastic superiority
-estimand sidesteps this interpretation difficulty. The probability that
-a randomly selected participant from one group outscores a randomly
-selected participant from the other is interpretable on its own terms,
-with no knowledge of the scale required. We are not suggesting that
-t-tests will \emph{always} mislead in these contexts but it is a concern
-that should not be quickly dismissed either
-\citep{Liddell_Kruschke_2018}. Additionally, even if we assume
-traditional parametric methods are robust to the ordinal nature of the
-data, the preserved error rate is not the same as interpretive clarity.
-For researchers whose primary outcomes live on ordinal scales, the
-Brunner-Munzel test and its associated effect size --- as well as
-ordinal models more generally \citep{Burkner_Vuorre_2019} --- may offer
-a more natural and defensible default.
+Stochastic superiority tests, like the Brunner-Munzel test, may be
+particularly well-suited to Likert-type scales which are ubiquitous in
+psychological research. For a single ordinal item, the spacing between
+response categories carries no guaranteed meaning, and a mean difference
+therefore has a strained interpretation. For example, what, concretely,
+does a 0.4-unit mean difference on a five-point Likert-type scale
+communicate? The stochastic superiority estimand sidesteps this
+interpretation difficulty. The probability that a randomly selected
+participant from one group outscores a randomly selected participant
+from the other is interpretable on its own terms, with no knowledge of
+the scale required. We are not suggesting that using t-tests will
+\emph{always} mislead in these contexts but it is a concern that should
+not be quickly dismissed either \citep{Liddell_Kruschke_2018}.
+Additionally, even if we assume traditional parametric methods are
+robust to the ordinal nature of the data, the preserved error rate is
+not the same as interpretive clarity. For researchers whose primary
+outcomes live on ordinal scales, the Brunner-Munzel test and its
+associated effect size --- as well as ordinal models more generally
+\citep{Burkner_Vuorre_2019} --- may offer a more natural and defensible
+default.
 
 The \texttt{brunner\_munzel} function supports equivalence and minimal
 effect testing via \texttt{alternative}, with bounds on the probability
@@ -1635,9 +1636,8 @@ distributional assumptions, resampling methods provide powerful tools.
 TOSTER implements both bootstrap and permutation approaches through
 \texttt{boot\_t\_test} and \texttt{perm\_t\_test}, each with distinct
 inferential logic but a shared motivation to retain the mean as the
-estimand while obtaining reference distributions empirically --- through
-resampling --- rather than relying on the normal-theory derivations
-(i.e., Student's t-test).
+estimand while obtaining reference distributions empirically rather than
+relying on the normal-theory derivations (i.e., Student's t-test).
 
 Both approaches are natural extensions of the classic t-test. The test
 statistic itself is unchanged; what changes is how the null distribution
@@ -1938,12 +1938,13 @@ resampling methods. Differences on the log scale can then be interpreted
 as ``sympercents'' --- symmetric percentage differences on the
 \(100 \cdot \ln(x) - ln(y)\) scale \citep{cole2000} --- which are
 symmetric in a way that ordinary percentage differences are not because
-percentage changes are calculated from different bases, a 10\% loss and
-a 10\% gain do not cancel out, whereas +10 and -10 sympercents are
-exactly equal in magnitude.\footnote{A concrete illustration that I give
-  my students: if a stock falls 10\% on Tuesday and rises 10\% from
-  Tuesday on Wednesday, you still have a loss on of your original
-  investment. Sympercents do not have this asymmetry.}
+percentage changes are calculated from different bases. For example, a
+10\% loss and a 10\% gain do not cancel out, whereas +10 and -10
+sympercents are exactly equal in magnitude.\footnote{A concrete
+  illustration that I give my students: if a stock falls 10\% on Tuesday
+  and rises 10\% from Tuesday on Wednesday, you still have a loss on of
+  your original investment. Fortunately, sympercents do not have this
+  asymmetry.}
 
 \subsubsection{Log TOST}\label{log-tost}
 
@@ -2083,15 +2084,15 @@ two limits on that conclusion worth consideration. First, it is a
 statement about an effect as a whole rather than about any particular
 contrast within it. Therefore, an omnibus effect can be negligible while
 a specific pairwise comparison nested inside it is not, so equivalence
-at the level of the \emph{F}-test does not license equivalence claims
-about individual group differences. Second, as with any equivalence
-test, failing to reject \(H_0\) is not evidence that the effect is large
-and it means only that the data remain compatible with an effect at or
+at the level of the F-test does not license equivalence claims about
+individual group differences. Second, as with any equivalence test,
+failing to reject \(H_0\) is not evidence that the effect is large and
+it means only that the data remain compatible with an effect at or
 beyond the bound.
 
 The test itself is computed from the cumulative distribution function of
-the non-central \emph{F} distribution. \citet{Campbell_2021} derived the
-\emph{p}-value for a one-way ANOVA with \(J\) groups and \(N\) total
+the non-central F distribution. \citet{Campbell_2021} derived the
+p-value for a one-way ANOVA with \(J\) groups and \(N\) total
 observations as
 
 \[
@@ -2189,7 +2190,7 @@ threshold, and it should not be read as a default.
 Statistics}\label{example-with-summary-statistics}
 
 Using the \texttt{InsectSprays} data and the \texttt{equ\_ftest}
-function, which accepts summary \emph{F}-test statistics directly:
+function, which accepts summary F-test statistics directly:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -2236,7 +2237,7 @@ function, which accepts summary \emph{F}-test statistics directly:
 \end{verbatim}
 
 Based on these results, there is a significant effect of ``spray'' and
-the differences are \emph{not} statistically equivalent --- we reject
+the differences are \emph{not} statistically equivalent. We then reject
 the traditional null hypothesis but fail to reject the equivalence null
 hypothesis.
 
@@ -2254,17 +2255,16 @@ familiar ANOVA table with the equivalence test appended:
 \tightlist
 \item
   \texttt{effect}, \texttt{df1}, \texttt{df2}, \texttt{F.value} --- the
-  effect being tested and the components of the traditional
-  \emph{F}-test.
+  effect being tested and the components of the traditional F-test.
 \item
-  \texttt{p.null} --- the \emph{p}-value for the traditional
-  nil-hypothesis test.
+  \texttt{p.null} --- the p-value for the traditional nil-hypothesis
+  test.
 \item
   \texttt{pes} --- the estimated \(\eta^2_p\) for that effect.
 \item
   \texttt{eqbound} --- the equivalence bound that was applied.
 \item
-  \texttt{p.equ} --- the \emph{p}-value for the equivalence test.
+  \texttt{p.equ} --- the p-value for the equivalence test.
 \end{itemize}
 
 Because each effect in a within-subjects design is tested against its
@@ -2307,25 +2307,29 @@ can generally be ignored.
 \subsection{Example with Specific
 Contrasts}\label{example-with-specific-contrasts}
 
-The omnibus test asks whether a factor as a whole explains a negligible
-share of the variance available to it. That is often not the question a
-researcher actually has. More commonly the hypothesis concerns
-particular comparisons --- is this condition equivalent to that one? ---
-and, as noted above, an omnibus effect can be negligible while a
-specific comparison nested within it is not.
+As mentioned previously, the ANOVA equivalence testing functions answer
+only a very broad, somewhat vague, question. The omnibus test asks
+whether a factor as a whole explains a negligible share of the variance
+available to it. That is often not the question a researcher actually
+has. More commonly the hypothesis concerns particular comparisons (e.g.,
+is this condition equivalent to that one?) and, as noted above, an
+omnibus effect can be negligible while a specific comparison nested
+within it is not. Testing contrasts directly also sidesteps the
+bound-justification problem described earlier. A contrast is expressed
+in the units of the outcome, so the smallest effect size of interest can
+be argued for on the original measurement scale, where anchor-based and
+cost-benefit reasoning are available, rather than on the
+proportion-of-variance scale where they usually are not.
 
-Testing contrasts directly also sidesteps the bound-justification
-problem described earlier. A contrast is expressed in the units of the
-outcome, so the smallest effect size of interest can be argued for on
-the original measurement scale, where anchor-based and cost-benefit
-reasoning are available, rather than on the proportion-of-variance scale
-where they usually are not.
-
-TOSTER does not fit contrasts itself, but the \texttt{emmeans} package
+TOSTER does not fit contrasts itself, but the ``emmeans'' package
 \citep{emmeans} accommodates non-zero null hypotheses directly and
-operates on the same fitted model objects. Returning to the
-\texttt{InsectSprays} ANOVA fitted above, suppose a difference of fewer
-than five insects is considered too small to matter:
+operates on the same fitted model objects\footnote{This can also be
+  accomplished with ``marginaleffects'' \citep{marginaleffects}}.
+Therefore, I wanted to briefly demonstrate how this could be
+accomplished. Using the the \texttt{InsectSprays} ANOVA fitted above,
+suppose a difference of fewer than five insects is considered too small
+to matter and we have two specific hypotheses of equivalence regarding
+groups C, D, and E:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -2387,12 +2391,13 @@ the interval for C versus D extends past the lower bound.
 Two notes on this additional non-TOSTER derived workflow. First, whether
 to adjust for multiplicity is a substantive decision rather than an
 automatic one; no adjustment is applied above because the two contrasts
-were specified in advance as the hypotheses of interest. Multiplicity
-corrections (e.g., Holm-Bonferroni) remain valid for equivalence tests.
-Second, this approach reaches well beyond the ANOVA. Because
-\texttt{emmeans} works from fitted model objects, the same equivalence
-contrasts can be applied to mixed-effects models and other designs that
-fall outside TOSTER's scope.
+were specified in advance as the hypotheses of interest (in this case we
+could consider these independent tests). However, multiplicity
+corrections (e.g., Holm-Bonferroni) remain valid for equivalence tests,
+and are worthy of consideration. Second, this approach reaches well
+beyond the ANOVA. Because \texttt{emmeans} works from fitted model
+objects, the same equivalence contrasts can be applied to mixed-effects
+models and other designs that fall outside TOSTER's scope.
 
 \newpage
 
@@ -2488,8 +2493,8 @@ z-transformation:
 \subsection{Extensions: PowerTOST and
 Superpower}\label{extensions-powertost-and-superpower}
 
-For more complex designs --- crossover studies, replicate designs,
-group-sequential equivalence trials --- the PowerTOST package
+For more complex designs (e.g., crossover studies, corssover-replicate
+designs, group-sequential equivalence trials) the PowerTOST package
 \citep{PowerTOST} provides extensive functionality beyond what TOSTER
 offers. For factorial designs where equivalence contrasts are tested via
 estimated marginal means, simulation-based power analysis via the
@@ -2512,14 +2517,15 @@ correlations, robust and resampling-based alternatives, ANOVA
 equivalence testing, and power analysis for sample size planning.
 
 Several limitations should be acknowledged. TOSTER only covers a few
-standard research designs --- it does not handle many analysis scenarios
-such as those involving multilevel or mixed-effects models. For these
-settings, researchers should consider packages like ``emmeans''
-\citep{emmeans} or ``marginaleffects'' \citep{marginaleffects}, which
-can accommodate non-zero null hypotheses in more complex modeling
-frameworks. TOSTER also does not provide Bayesian equivalence testing;
-researchers interested in Bayesian methods for the null should consult
-other R packages such as ``bayestestR'' \citep{bayestestR}.
+standard research designs, and it does not handle many analysis
+scenarios such as those involving multilevel or mixed-effects models.
+For these settings, researchers should consider packages like
+``emmeans'' \citep{emmeans} or ``marginaleffects''
+\citep{marginaleffects}, which can accommodate non-zero null hypotheses
+in more complex modeling frameworks. TOSTER also does not provide
+Bayesian equivalence testing; researchers interested in Bayesian methods
+for the null should consult other R packages such as ``bayestestR''
+\citep{bayestestR}.
 
 I hope that the updated package continues to build upon the original
 impact of \citet{lakens_ori} and makes equivalence testing more
@@ -2549,7 +2555,8 @@ devtools::install_github("Lakens/TOSTER")
 \addcontentsline{toc}{subsection}{Acknowledgement(s)}
 
 I would like to thank everyone from the Lakens laboratory group for
-their input and suggestions.
+their input and suggestions. I must also thank David Eisner, Jakub
+Tomek, and James Selig for their feedback on drafts of this manuscript.
 
 \subsection*{Disclosure statement}\label{disclosure-statement}
 \addcontentsline{toc}{subsection}{Disclosure statement}
