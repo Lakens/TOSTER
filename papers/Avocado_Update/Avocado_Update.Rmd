@@ -1114,7 +1114,7 @@ devtools::install_github("Lakens/TOSTER")
 
 ## Acknowledgement(s) {-}
 
-I would like to thank everyone from the Lakens laboratory group for their input and suggestions. I must also thank David Eisner, Jakub Tomek, and James Selig for their feedback on drafts of this manuscript.
+I would like to thank everyone from the Lakens laboratory group for their input and suggestions. I must also thank David Eisner, Jakub Tomek, and James Selig for their feedback on drafts of this manuscript. 
 
 ## Disclosure statement {-}
 
