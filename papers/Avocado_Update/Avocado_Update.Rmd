@@ -315,8 +315,6 @@ plot(res1, type = "cd")
 
 Other plot types are available: `type = "c"` produces a consonance plot showing multiple confidence interval levels, and shading can be customized with the `ci_shades` argument.
 
-\newpage
-
 ## One-Sample t-test with Asymmetric Bounds
 
 When the equivalence bounds are not symmetric around the null, two values can be supplied to `eqb`. This is common when the research question implies asymmetric consequences. Similarly, we may want to test the mean itself rather than a mean difference. This harkens back to the original use of the t-test by Gosset at Guinness Brewery, where the concern was whether a single sample mean fell within acceptable limits. Here we test whether the mean of LDHF falls within the bounds of 5.5 and 8.5 around a hypothesized value of 7.5:
@@ -338,8 +336,6 @@ The same interface handles paired designs by setting `paired = TRUE`. SMDs are r
 ## Checking Assumptions 
 
 The parametric t-tests implemented in `t_TOST` assume independent observations, approximately normal residuals (or differences, in the paired and one-sample cases), and, for Student's form, equal variances between groups; Welch's correction relaxes the equal-variance assumption and is the default. The residual normality assumption matters most in small samples, where the central limit theorem provides limited protection. Visual diagnostics are generally more informative than formal tests: QQ plots of residuals or differences for normality, side-by-side boxplots or density overlays for variance comparison, and inspection of residual plots or boxplots for extreme or influential observations. A worked diagnostic workflow for each design is provided in the online supplement. When assumptions are seriously in doubt, the bootstrap and permutation alternatives discussed in later sections provide valid inference under relaxed --— though not eliminated —-- distributional requirements.
-
-\newpage
 
 ## Using Summary Statistics
 
@@ -931,10 +927,9 @@ However, TOSTER's current implementation is sensitive to violations to the assum
 
 ## Choosing a Bound on $\eta^2_p$
 
-Bounds on $\eta^2_p$ are harder to justify than bounds on the original measurement scale (much like the SMD), and the difficulty is worth confronting before running the test.
+In my opinion, the bounds on $\eta^2_p$ are harder to justify than bounds on the original measurement scale (much like the SMD), and the difficulty is worth confronting before running an equivalence ANOVA test.
 
 The first problem is that $\eta^2_p$ is not comparable across designs. Its denominator depends on which other effects appear in the model and, in within-subjects designs, on the error term against which the effect is tested. A $\eta^2_p$ of 0.06 for a one-way between-subjects factor and a $\eta^2_p$ of 0.06 for an interaction in a repeated-measures model are not estimates of the same quantity. A bound therefore cannot simply be borrowed from a published study unless that study used the same design and the same model.
-
 This may be more of a problem for repeated-measures designs where subject variance is excluded from the denominator entirely. A bound on $\eta^2_p$ is consequently not a bound on the share of total variance in the data, and the gap between the two widens as the number of levels of the within-subjects factor falls. The supplement quantifies the discrepancy.
 
 The second problem is that a proportion of variance has little direct substantive meaning. Unlike a mean difference expressed in the units of the outcome, there is rarely an anchor-based or cost-benefit argument that delivers a number on this scale directly. Researchers who find Cohen's $f$ more intuitive can move between the two with $f^2 = \eta^2_p / (1 - \eta^2_p)$, and the `power_eq_f` function can be used to determine the degrees of freedom required to achieve a given power for a specified bound, or the power attainable for a given design. The choosing-bounds section of the package's F-test vignette discusses the problem in more detail. Additionally, I would recommend that, in most situations where an ANOVA is utilized for multi-group or even factorial designs, that equivalence testing is often best accomplished with specific contrasts (example below).
@@ -964,8 +959,6 @@ equ_ftest(
 ```
 
 Based on these results, there is a significant effect of "spray" and the differences are not statistically equivalent. We then reject the traditional null hypothesis but fail to reject the equivalence null hypothesis.
-
-\newpage
 
 ## Example with R ANOVA Objects
 

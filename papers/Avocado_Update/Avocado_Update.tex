@@ -572,8 +572,6 @@ Other plot types are available: \texttt{type\ =\ "c"} produces a
 consonance plot showing multiple confidence interval levels, and shading
 can be customized with the \texttt{ci\_shades} argument.
 
-\newpage
-
 \subsection{One-Sample t-test with Asymmetric
 Bounds}\label{one-sample-t-test-with-asymmetric-bounds}
 
@@ -648,8 +646,6 @@ is provided in the online supplement. When assumptions are seriously in
 doubt, the bootstrap and permutation alternatives discussed in later
 sections provide valid inference under relaxed ----- though not
 eliminated ----- distributional requirements.
-
-\newpage
 
 \subsection{Using Summary Statistics}\label{using-summary-statistics}
 
@@ -1040,13 +1036,13 @@ it provides more robust confidence intervals and p-values.
 ##  g[rm]=('1'-'2')/SD_rm)
 ## 
 ## data:  extra by group
-## z-observed = -0.78495, p-value = 0.8854
+## z-observed = -0.78495, p-value = 0.9015
 ## alternative hypothesis: equivalence
 ## null values:
 ## lower bound upper bound 
 ##        -0.5         0.5 
 ## 90 percent confidence interval:
-##  -1.3662597 -0.4388902
+##  -1.3598061 -0.4484401
 ## sample estimates:
 ## SMD (g[rm]) 
 ##  -0.7513666
@@ -1136,13 +1132,13 @@ objects that integrate with the helper functions described above.
 ##  Bootstrapped Pearson's product-moment correlation (BCa)
 ## 
 ## data:  bugs$LDLF and bugs$LDHF
-## N = 91, p-value = 0.9796
+## N = 91, p-value = 0.9757
 ## alternative hypothesis: equivalence
 ## null values:
 ## correlation correlation 
 ##         0.4        -0.4 
 ## 90 percent confidence interval:
-##  0.4360427 0.6867022
+##  0.4371701 0.6905201
 ## sample estimates:
 ##         r 
 ## 0.5767783
@@ -1155,8 +1151,8 @@ objects that integrate with the helper functions described above.
 \end{Shaded}
 
 The Bootstrapped Pearson's product-moment correlation (BCa) is not
-statistically significant (p = 0.98, r = 0.577, 90\% C.I.{[}0.436,
-0.687{]}) at a 0.05 alpha-level. The null hypothesis cannot be rejected.
+statistically significant (p = 0.976, r = 0.577, 90\% C.I.{[}0.437,
+0.691{]}) at a 0.05 alpha-level. The null hypothesis cannot be rejected.
 At the desired error rate, it cannot be stated that the true correlation
 is between 0.4 and -0.4.
 
@@ -2145,9 +2141,10 @@ quantifies the size of the problem.
 \subsection{\texorpdfstring{Choosing a Bound on
 \(\eta^2_p\)}{Choosing a Bound on \textbackslash eta\^{}2\_p}}\label{choosing-a-bound-on-eta2_p}
 
-Bounds on \(\eta^2_p\) are harder to justify than bounds on the original
-measurement scale (much like the SMD), and the difficulty is worth
-confronting before running the test.
+In my opinion, the bounds on \(\eta^2_p\) are harder to justify than
+bounds on the original measurement scale (much like the SMD), and the
+difficulty is worth confronting before running an equivalence ANOVA
+test.
 
 The first problem is that \(\eta^2_p\) is not comparable across designs.
 Its denominator depends on which other effects appear in the model and,
@@ -2156,14 +2153,12 @@ is tested. A \(\eta^2_p\) of 0.06 for a one-way between-subjects factor
 and a \(\eta^2_p\) of 0.06 for an interaction in a repeated-measures
 model are not estimates of the same quantity. A bound therefore cannot
 simply be borrowed from a published study unless that study used the
-same design and the same model.
-
-This may be more of a problem for repeated-measures designs where
-subject variance is excluded from the denominator entirely. A bound on
-\(\eta^2_p\) is consequently not a bound on the share of total variance
-in the data, and the gap between the two widens as the number of levels
-of the within-subjects factor falls. The supplement quantifies the
-discrepancy.
+same design and the same model. This may be more of a problem for
+repeated-measures designs where subject variance is excluded from the
+denominator entirely. A bound on \(\eta^2_p\) is consequently not a
+bound on the share of total variance in the data, and the gap between
+the two widens as the number of levels of the within-subjects factor
+falls. The supplement quantifies the discrepancy.
 
 The second problem is that a proportion of variance has little direct
 substantive meaning. Unlike a mean difference expressed in the units of
@@ -2238,8 +2233,6 @@ Based on these results, there is a significant effect of ``spray'' and
 the differences are not statistically equivalent. We then reject the
 traditional null hypothesis but fail to reject the equivalence null
 hypothesis.
-
-\newpage
 
 \subsection{Example with R ANOVA
 Objects}\label{example-with-r-anova-objects}
