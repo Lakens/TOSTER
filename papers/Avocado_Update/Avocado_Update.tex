@@ -1036,13 +1036,13 @@ it provides more robust confidence intervals and p-values.
 ##  g[rm]=('1'-'2')/SD_rm)
 ## 
 ## data:  extra by group
-## z-observed = -0.78495, p-value = 0.9015
+## z-observed = -0.78495, p-value = 0.9035
 ## alternative hypothesis: equivalence
 ## null values:
 ## lower bound upper bound 
 ##        -0.5         0.5 
 ## 90 percent confidence interval:
-##  -1.3598061 -0.4484401
+##  -1.3541025 -0.4487012
 ## sample estimates:
 ## SMD (g[rm]) 
 ##  -0.7513666
@@ -1050,20 +1050,19 @@ it provides more robust confidence intervals and p-values.
 
 \subsubsection{Checking Assumptions}\label{checking-assumptions-1}
 
-The SMD functions inherit the assumptions of the underlying t-test:
-independent observations, approximately normal residuals or differences,
-and, for two-sample designs, comparable variances across groups. Visual
-diagnostics from the t-test discussion above apply directly. Two
-considerations are specific to standardized effect sizes, however.
-First, outliers and skew affect both the numerator (mean difference) and
-the denominator (standard deviation) of the SMD, which can amplify their
-influence on the estimate; the \texttt{tr} trimmed-means argument
-available in the \texttt{boot\_smd\_calc} function is particularly worth
-considering when the raw data show extreme values. Second, the
-asymptotic z-test in \texttt{smd\_calc} relies on an approximation to
-the sampling distribution of the SMD that can be very inaccurate in
-small samples, which is the primary motivation for preferring
-\texttt{boot\_smd\_calc} when hypothesis testing is the goal.
+The SMD functions inherit the assumptions of the underlying t-test and
+therefore the visual diagnostics from the t-test discussion above apply
+directly. However, two considerations are specific to standardized
+effect sizes. First, outliers and skew affect both the numerator (mean
+difference) and the denominator (standard deviation) of the SMD, which
+can amplify their influence on the estimate; the \texttt{tr}
+trimmed-means argument available in the \texttt{boot\_smd\_calc}
+function is particularly worth considering when the raw data show
+extreme values. Second, the asymptotic z-test in \texttt{smd\_calc}
+relies on an approximation to the sampling distribution of the SMD that
+can be very inaccurate in small samples, which is the primary motivation
+for preferring \texttt{boot\_smd\_calc} when hypothesis testing is the
+goal.
 
 \subsection{Equivalence Tests for
 Correlations}\label{equivalence-tests-for-correlations}
@@ -1132,13 +1131,13 @@ objects that integrate with the helper functions described above.
 ##  Bootstrapped Pearson's product-moment correlation (BCa)
 ## 
 ## data:  bugs$LDLF and bugs$LDHF
-## N = 91, p-value = 0.9757
+## N = 91, p-value = 0.9735
 ## alternative hypothesis: equivalence
 ## null values:
 ## correlation correlation 
 ##         0.4        -0.4 
 ## 90 percent confidence interval:
-##  0.4371701 0.6905201
+##  0.4394795 0.6857460
 ## sample estimates:
 ##         r 
 ## 0.5767783
@@ -1151,8 +1150,8 @@ objects that integrate with the helper functions described above.
 \end{Shaded}
 
 The Bootstrapped Pearson's product-moment correlation (BCa) is not
-statistically significant (p = 0.976, r = 0.577, 90\% C.I.{[}0.437,
-0.691{]}) at a 0.05 alpha-level. The null hypothesis cannot be rejected.
+statistically significant (p = 0.974, r = 0.577, 90\% C.I.{[}0.439,
+0.686{]}) at a 0.05 alpha-level. The null hypothesis cannot be rejected.
 At the desired error rate, it cannot be stated that the true correlation
 is between 0.4 and -0.4.
 
