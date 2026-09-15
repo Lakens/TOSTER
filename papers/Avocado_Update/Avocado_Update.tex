@@ -642,10 +642,11 @@ more informative than formal tests: QQ plots of residuals or differences
 for normality, side-by-side boxplots or density overlays for variance
 comparison, and inspection of residual plots or boxplots for extreme or
 influential observations. A worked diagnostic workflow for each design
-is provided in the online supplement. When assumptions are seriously in
-doubt, the bootstrap and permutation alternatives discussed in later
-sections provide valid inference under relaxed ----- though not
-eliminated ----- distributional requirements.
+is provided in the \href{https://doi.org/10.5281/zenodo.22776189}{online
+supplement}. When assumptions are seriously in doubt, the bootstrap and
+permutation alternatives discussed in later sections provide valid
+inference under relaxed ----- though not eliminated ----- distributional
+requirements.
 
 \subsection{Using Summary Statistics}\label{using-summary-statistics}
 
@@ -730,7 +731,8 @@ generates formatted text for reporting, \texttt{df\_htest} converts
 results to data frames for tabulation, and \texttt{plot\_htest\_est}
 produces estimate plots with equivalence bounds. Checking assumptions
 would follow the same workflow as \texttt{t\_TOST}, as both are using
-t-tests, as discussed in the online supplement.
+t-tests, as discussed in the
+\href{https://doi.org/10.5281/zenodo.22776189}{online supplement}.
 
 \subsection{The simplified function}\label{the-simplified-function}
 
@@ -1036,13 +1038,13 @@ it provides more robust confidence intervals and p-values.
 ##  g[rm]=('1'-'2')/SD_rm)
 ## 
 ## data:  extra by group
-## z-observed = -0.78495, p-value = 0.9035
+## z-observed = -0.78495, p-value = 0.909
 ## alternative hypothesis: equivalence
 ## null values:
 ## lower bound upper bound 
 ##        -0.5         0.5 
 ## 90 percent confidence interval:
-##  -1.3541025 -0.4487012
+##  -1.362647 -0.455117
 ## sample estimates:
 ## SMD (g[rm]) 
 ##  -0.7513666
@@ -1131,13 +1133,13 @@ objects that integrate with the helper functions described above.
 ##  Bootstrapped Pearson's product-moment correlation (BCa)
 ## 
 ## data:  bugs$LDLF and bugs$LDHF
-## N = 91, p-value = 0.9735
+## N = 91, p-value = 0.9785
 ## alternative hypothesis: equivalence
 ## null values:
 ## correlation correlation 
 ##         0.4        -0.4 
 ## 90 percent confidence interval:
-##  0.4394795 0.6857460
+##  0.4377090 0.6871122
 ## sample estimates:
 ##         r 
 ## 0.5767783
@@ -1150,8 +1152,8 @@ objects that integrate with the helper functions described above.
 \end{Shaded}
 
 The Bootstrapped Pearson's product-moment correlation (BCa) is not
-statistically significant (p = 0.974, r = 0.577, 90\% C.I.{[}0.439,
-0.686{]}) at a 0.05 alpha-level. The null hypothesis cannot be rejected.
+statistically significant (p = 0.979, r = 0.577, 90\% C.I.{[}0.438,
+0.687{]}) at a 0.05 alpha-level. The null hypothesis cannot be rejected.
 At the desired error rate, it cannot be stated that the true correlation
 is between 0.4 and -0.4.
 
@@ -1175,7 +1177,8 @@ loess smoother to assess linearity or monotonicity, marginal density
 plots or QQ plots to check distributional shape, and
 jackknife-after-bootstrap plots to identify individual observations
 driving bootstrap variability. A worked diagnostic workflow is provided
-in the online supplement.
+in the \href{https://doi.org/10.5281/zenodo.22776189}{online
+supplement}.
 
 \subsection{Comparing Standardized Effect Sizes Between
 Studies}\label{comparing-standardized-effect-sizes-between-studies}
@@ -1828,7 +1831,7 @@ identify individual observations that dominate the bootstrap
 variability. The \texttt{tr} argument for trimmed means provides a
 straightforward robustness option when outliers are a concern.
 Diagnostic workflows for all three designs are demonstrated in the
-online supplement.
+\href{https://doi.org/10.5281/zenodo.22776189}{online supplement}.
 
 \subsubsection{Permutation t-test}\label{permutation-t-test}
 
@@ -1905,9 +1908,10 @@ for the WMW signed-rank case above. For two-sample designs, overlaid
 empirical cumulative density functions and separate density plots help
 assess whether group shapes are comparable enough for exchangeability
 under the null to be credible. Diagnostic workflows for all three
-designs are demonstrated in the online supplement. As with the
-bootstrap, these checks reflect assumptions that are relaxed relative to
-Student's t-test but not eliminated.
+designs are demonstrated in the
+\href{https://doi.org/10.5281/zenodo.22776189}{online supplement}. As
+with the bootstrap, these checks reflect assumptions that are relaxed
+relative to Student's t-test but not eliminated.
 
 \newpage
 
@@ -2117,14 +2121,15 @@ factorial between-subjects, and mixed designs, and the equivalence test
 maintained its nominal Type I error rate at the boundary of the null
 hypothesis in each. Readers who want the simulation code, the full
 results, and a longer discussion of interpretation will find them in the
-online supplement.
+\href{https://doi.org/10.5281/zenodo.22776189}{online supplement}.
 
 The equivalence test inherits the standard ANOVA assumptions, which
 should be checked on the fitted model itself rather than on the
 equivalence output. The \texttt{performance::check\_model()} function
 provides a comprehensive visual diagnostic suite for most linear model
-objects in R in a single call; the online supplement demonstrates its
-use.
+objects in R in a single call; the
+\href{https://doi.org/10.5281/zenodo.22776189}{online supplement}
+demonstrates its use.
 
 However, TOSTER's current implementation is sensitive to violations to
 the assumption of sphericity. For within-subjects factors with more than
@@ -2540,6 +2545,14 @@ install.packages("TOSTER")
 # Install the development version from GitHub
 devtools::install_github("Lakens/TOSTER")
 \end{verbatim}
+
+The supplementary materials for this article are archived on Zenodo
+(\url{https://doi.org/10.5281/zenodo.22776189}). They include a
+verification of TOSTER against the results reported by
+\citet{Campbell_2021} and a set of assumption checks for the procedures
+described in this article. Each supplement is provided as a Quarto
+source file with its rendered output, and all analyses were conducted
+with TOSTER v0.9.0.
 
 \subsection*{Acknowledgement(s)}\label{acknowledgements}
 \addcontentsline{toc}{subsection}{Acknowledgement(s)}
