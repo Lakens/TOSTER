@@ -29,8 +29,19 @@
 #' * Medium effect: 0.06
 #' * Large effect: 0.14
 #'
-#' Note that this function is primarily validated for one-way ANOVA designs; use with
-#' caution for more complex designs.
+#' The calculation itself is not restricted to one-way designs: power is obtained from the
+#' same non-centrality parameter used by [equ_ftest], \eqn{\lambda = \frac{\Delta}{1 -
+#' \Delta} (df_1 + df_2 + 1)}, and simulation covering one-way within-subjects, factorial
+#' between-subjects, and mixed designs found the corresponding test held its nominal Type I
+#' error rate. Supply the `df1` and `df2` for the effect of interest and its own error
+#' term. Two cautions apply to more complex designs:
+#'
+#' * When solving for `df2`, the message translating the result into a total sample size
+#'   assumes a one-way between-subjects layout. In other designs `df2` should be converted
+#'   to a sample size using the structure of that design.
+#' * For within-subjects factors with more than two levels the calculation assumes
+#'   sphericity, and [equ_anova] does not apply Greenhouse-Geisser or Huynh-Feldt
+#'   corrections (see that function's documentation).
 #'
 #' @return
 #' An object of class "power.htest" containing the following components:
@@ -123,6 +134,11 @@ power_eq_f <- function(alpha = 0.05,
     # Find df2 that gives desired power
     f1 <- function(df2) calc_power(alpha, df1, df2, eqbound) - power
     df2 <- uniroot(f1, c(4, 1e5))$root
+    # TODO: this sample-size translation is one-way between-subjects only. df1+df2+1 is
+    # the effective sample size of the error stratum, which equals total N only in a
+    # single-stratum design - in a one-way repeated measures design it is n(k-1)+1, and
+    # for a between-subjects effect in a mixed design it is the number of subjects.
+    # Either qualify the message or take a `design` argument to translate correctly.
     message(paste("Required df2 =", round(df2, 2),
                   "(approximately", ceiling(df2 + df1 + 1),
                   "total observations for a one-way ANOVA with", df1 + 1, "groups)"))
@@ -143,7 +159,12 @@ power_eq_f <- function(alpha = 0.05,
     message(paste("Required df1 =", round(df1, 2)))
   }
 
-  # Warning message about validation
+  # TODO: this message is now out of date. The non-centrality parameter has since been
+  # validated by simulation for one-way within-subjects, factorial between-subjects, and
+  # mixed designs (nominal Type I error at the null boundary in all three). The remaining
+  # design-specific caveats are the df2 -> sample size translation above and the
+  # sphericity assumption for within-subjects factors with k > 2 levels. Reword to say
+  # that, or drop the message and rely on the documentation.
   message("Note: This function is primarily validated for one-way ANOVA; use with caution for more complex designs")
 
   # Return results

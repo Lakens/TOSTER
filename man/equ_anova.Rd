@@ -16,7 +16,9 @@ the smallest effect size considered meaningful or practically significant.}
 test (default is FALSE). When TRUE, the alternative hypothesis becomes that the effect
 is larger than the equivalence bound.}
 
-\item{alpha}{Alpha level used for the test (default = 0.05).}
+\item{alpha}{Alpha level used for the test (default = 0.05). Note that this argument
+is currently accepted but not used: the returned \code{p.equ} should be compared against
+the desired alpha level by the user.}
 }
 \value{
 Returns a data frame containing the ANOVA results with equivalence tests added.
@@ -58,6 +60,41 @@ For minimal effect tests (\code{MET = TRUE}), a significant result (p < alpha) i
 the effect is meaningfully different from zero (larger than the equivalence bound).
 
 For details on the calculations in this function see \code{vignette("the_ftestTOSTER")}.
+\subsection{Multi-factor and within-subjects designs}{
+
+Campbell & Lakens (2021) derived the test for one-way ANOVA and multivariable
+regression. This function generalizes it by computing the non-centrality parameter as
+\eqn{\lambda = \frac{\Delta}{1 - \Delta} (df_1 + df_2 + 1)}, which reduces exactly to
+the published expression whenever \eqn{df_1 + df_2 + 1 = N}. The quantity
+\eqn{df_1 + df_2 + 1} is the effective sample size of the error stratum in which an
+effect is tested, which is not in general the total number of observations; in a mixed
+design, for example, it recovers the number of subjects for a between-subjects effect.
+Simulation work covering one-way within-subjects, factorial between-subjects, and mixed
+designs found the test maintained its nominal Type I error rate at the boundary of the
+null hypothesis in each case.
+}
+
+\subsection{Interpreting bounds in within-subjects designs}{
+
+\code{eqbound} is a bound on \emph{partial} eta-squared, which excludes subject variance from its
+denominator. In repeated-measures designs it is therefore not a bound on the share of
+total variance in the data, and the gap between the two widens as the number of levels
+of the within-subjects factor falls. This is a property of partial eta-squared rather
+than of the equivalence test, but a bound chosen as "a negligible share of the variance
+I observe" will not be the bound the test applies.
+}
+
+\subsection{Limitation: sphericity corrections are not applied}{
+
+For within-subjects factors with more than two levels, this function uses the
+uncorrected univariate degrees of freedom and does \emph{not} apply Greenhouse-Geisser or
+Huynh-Feldt corrections, even when the object was fit with a correction requested (e.g.
+\code{afex::aov_car(..., anova_table = list(correction = "GG"))}). As a result both \code{p.null}
+and \code{p.equ} may differ from the corrected values reported by the fitting function. When
+sphericity is badly violated the equivalence test can become substantially
+anti-conservative. Assess sphericity on the fitted model and treat results with caution
+when it is in doubt.
+}
 }
 \examples{
 # One-way ANOVA

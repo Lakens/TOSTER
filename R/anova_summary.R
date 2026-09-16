@@ -36,6 +36,15 @@ anova_summary <- function(object){
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # this function is used for repeated and mixed anova
 repeated_anova_summary <- function(res.anova){
+  # TODO: apply Greenhouse-Geisser / Huynh-Feldt corrections. `$univariate.tests` below
+  # holds the sphericity-assumed df, so every downstream consumer (equ_anova, pes,
+  # p.null, p.equ) is uncorrected regardless of what the user requested when fitting.
+  # The corrections are available in `.summary$pval.adjustments` (GGe / HFe) and the
+  # extraction code is commented out immediately below, but `add_corrected_df()` is
+  # referenced there and does not exist anywhere in the package - it needs writing.
+  # Note the correction must scale df1 and df2 in BOTH the reference distribution and
+  # the non-centrality parameter lambda = f2 * (df1 + df2 + 1), since equ_ftest()
+  # derives lambda from the df themselves.
   .summary <- suppressWarnings(summary(res.anova))
   # Anova table converted into data frame
   #aov.table <- .summary$univariate.tests %>%
@@ -181,6 +190,9 @@ summary_aov <- function(res.anova){
 }
 
 reformat_aov_summary <- function(aov.summary){
+  # TODO: effect names come back padded with trailing whitespace (e.g. "cond      "),
+  # because the remove_empty_space() helper defined in summary_aov() is never called
+  # here. Harmless for printing but it breaks joins/subsetting on `effect`. Trim them.
   if(inherits(aov.summary, "listof")){
     aov.summary <- as.data.frame(aov.summary[[1]])
   } else {as.data.frame(aov.summary)}

@@ -56,8 +56,20 @@ Common equivalence bounds (we do not recommend their use for choosing equivalenc
 \item Large effect: 0.14
 }
 
-Note that this function is primarily validated for one-way ANOVA designs; use with
-caution for more complex designs.
+The calculation itself is not restricted to one-way designs: power is obtained from the
+same non-centrality parameter used by \link{equ_ftest}, \eqn{\lambda = \frac{\Delta}{1 -
+\Delta} (df_1 + df_2 + 1)}, and simulation covering one-way within-subjects, factorial
+between-subjects, and mixed designs found the corresponding test held its nominal Type I
+error rate. Supply the \code{df1} and \code{df2} for the effect of interest and its own error
+term. Two cautions apply to more complex designs:
+\itemize{
+\item When solving for \code{df2}, the message translating the result into a total sample size
+assumes a one-way between-subjects layout. In other designs \code{df2} should be converted
+to a sample size using the structure of that design.
+\item For within-subjects factors with more than two levels the calculation assumes
+sphericity, and \link{equ_anova} does not apply Greenhouse-Geisser or Huynh-Feldt
+corrections (see that function's documentation).
+}
 }
 \examples{
 # Example 1: Calculate power given degrees of freedom and equivalence bound

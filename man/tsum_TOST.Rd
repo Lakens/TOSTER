@@ -48,13 +48,13 @@ tsum_TOST(
 
 \item{var.equal}{a logical variable indicating whether to treat the two variances as being equal. If TRUE then the pooled variance is used to estimate the variance otherwise the Welch (or Satterthwaite) approximation to the degrees of freedom is used.}
 
-\item{eqb}{Equivalence bound. Can provide 1 value (symmetric bound, negative value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds.}
+\item{eqb}{Equivalence bound. Can provide 1 value (symmetric bound, negative value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds. Raw bounds are on the original scale of the mean (or mean difference) and are \emph{not} offsets from \code{mu}; bounds given with \code{eqbound_type = "SMD"} are standardized distances from \code{mu}.}
 
 \item{low_eqbound}{lower equivalence bounds (deprecated, use \code{eqb} instead).}
 
 \item{high_eqbound}{upper equivalence bounds (deprecated, use \code{eqb} instead).}
 
-\item{mu}{a number indicating the true value of the mean for the two-tailed test (or difference in means if you are performing a two sample test).}
+\item{mu}{a number indicating the true value of the mean for the two-tailed test (or difference in means if you are performing a two sample test). Default is 0. \code{mu} only sets the null value of the two-tailed test and the reference point of the standardized mean difference; the raw estimate, its confidence interval, and the raw equivalence bounds are all reported on the original scale.}
 
 \item{eqbound_type}{Type of equivalence bound. Can be 'SMD' for standardized mean difference (i.e., Cohen's d) or 'raw' for the mean difference. Default is 'raw'. Raw is strongly recommended as SMD bounds will produce biased results.}
 

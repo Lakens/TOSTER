@@ -109,6 +109,40 @@ NEWS
   - Equivalence tests: lower bound shows right tail, upper bound shows left tail
   - Minimal effect tests: lower bound shows left tail, upper bound shows right tail
 
+## Bug Fixes
+
+- **Consistent handling of `mu`** in `t_TOST()`, `tsum_TOST()`, and `boot_t_TOST()`:
+  - The raw estimate, its confidence interval, and the raw equivalence bounds
+    are now all reported on the original scale. Previously the raw estimate was
+    `estimate - mu` while the confidence interval and bounds were not shifted.
+    TOST p-values from `t_TOST()` and `tsum_TOST()` are unchanged.
+  - The SMD and its bounds are now consistently relative to `mu`
+    (e.g., `(x - y - mu) / SD`). Previously the two-sample SMD added `mu`, the
+    paired SMD ignored `mu`, and `tsum_TOST()` ignored `mu` for all designs.
+    Bounds given with `eqbound_type = "SMD"` are standardized distances from `mu`.
+  - `mu` is now stored in the returned `TOSTt` object. `print()` reports the
+    equivalence bounds and notes the scale of each row when `mu` is not zero, and
+    `describe()` uses the stored `mu` (previously always 0 for `tsum_TOST()`).
+  - The "Equivalence interval does not include zero" message now checks whether
+    the bounds contain `mu`.
+- `boot_t_TOST()`: the studentized bootstrap p-values used a bootstrap t-statistic
+  whose variance was centered incorrectly, which under-dispersed the reference
+  distribution whenever the (difference in) means was far from zero. The p-values
+  now use the same pivot as the studentized confidence interval, so they agree
+  with the interval and with `boot_t_test()`.
+  - Paired resamples are now drawn in the same order as `boot_t_test()`, so both
+    functions give identical p-values and confidence intervals for the same seed
+    (results for a given seed differ from earlier versions).
+  - The Welch two-sample bootstrap replicates now use the normal-approximation
+    SMD standard error, as the other designs already did.
+- `boot_t_test()` with `var.equal = TRUE`: the studentized confidence interval
+  used Welch standard errors for the bootstrap replicates while the observed
+  standard error and p-value used the pooled standard error. The replicates now
+  use the pooled standard error, so the interval and p-value agree.
+- `smd_calc()` and `boot_smd_calc()`: the one-sample SMD now uses `mean(x) - mu` correctly
+- jamovi one-sample TOST now passes the `mu` option to the analysis.
+- `plot.TOSTt(type = "tnull")`: fixed swapped internal labels for the CI limits.
+
 # TOSTER v0.8.7
 - Update documentation to make it clear what the "eqb" argument does within the `wilcox_TOST` function.
 

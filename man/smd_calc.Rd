@@ -112,7 +112,7 @@ Note: tr > 0 is not compatible with denom = "rm" or smd_ci = "goulet".}
 
 \item{y}{an optional (non-empty) numeric vector of data values.}
 
-\item{mu}{a number indicating the true value of the mean for the two-tailed test (or difference in means if you are performing a two sample test).}
+\item{mu}{a number indicating the true value of the mean for the two-tailed test (or difference in means if you are performing a two sample test). Default is 0. \code{mu} only sets the null value of the two-tailed test and the reference point of the standardized mean difference; the raw estimate, its confidence interval, and the raw equivalence bounds are all reported on the original scale.}
 
 \item{formula}{a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample test or a factor with two levels giving the corresponding groups. For paired tests, use the default method with x and y vectors instead of the formula method.}
 

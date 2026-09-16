@@ -191,8 +191,8 @@ norm.inter = function (t, alpha) {
 }
 
 
-# Function to test if an interval (defined by two numbers) does not contain zero
-test_interval_no_zero <- function(vec) {
+# Function to test if an interval (defined by two numbers) does not contain the null value (default zero)
+test_interval_no_zero <- function(vec, null = 0) {
   # Check if vector has exactly 2 elements
   if (length(vec) != 2) {
     stop("Input must be a vector of exactly 2 numbers")
@@ -202,7 +202,23 @@ test_interval_no_zero <- function(vec) {
   lower <- min(vec)
   upper <- max(vec)
 
-  # Check if zero is NOT in the interval [lower, upper]
-  return(!(0 >= lower && 0 <= upper))
+  # Check if the null value is NOT in the interval [lower, upper]
+  return(!(null >= lower && null <= upper))
+}
+
+# Message text when the equivalence interval does not contain the null value
+interval_no_null_text <- function(mu = 0) {
+  if (mu == 0) {
+    "Equivalence interval does not include zero."
+  } else {
+    paste0("Equivalence interval does not include mu (", mu, ").")
+  }
+}
+
+# Null value stored in a TOSTt object (older objects do not store mu)
+get_mu <- function(x) {
+  if (!is.null(x$mu)) return(x$mu)
+  if (!is.null(x$call$mu) && is.numeric(x$call$mu)) return(x$call$mu)
+  0
 }
 

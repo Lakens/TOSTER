@@ -21,7 +21,7 @@
 #' @param data an optional matrix or data frame (or similar: see model.frame) containing the variables in the formula formula. By default the variables are taken from environment(formula).
 #' @param paired a logical indicating whether you want a paired t-test. Cannot be used with the formula method; use x and y vectors instead for paired tests.
 #' @param var.equal a logical variable indicating whether to treat the two variances as being equal. If TRUE then the pooled variance is used to estimate the variance otherwise the Welch (or Satterthwaite) approximation to the degrees of freedom is used.
-#' @param eqb Equivalence bound. Can provide 1 value (symmetric bound, negative value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds.
+#' @param eqb Equivalence bound. Can provide 1 value (symmetric bound, negative value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds. Raw bounds are on the original scale of the mean (or mean difference) and are *not* offsets from `mu`; bounds given with `eqbound_type = "SMD"` are standardized distances from `mu`.
 #' @param low_eqbound lower equivalence bounds (deprecated, use `eqb` instead).
 #' @param high_eqbound upper equivalence bounds (deprecated, use `eqb` instead).
 #' @param hypothesis 'EQU' for equivalence (default), or 'MET' for minimal effects test.
@@ -29,7 +29,7 @@
 #' @param alpha alpha level (default = 0.05)
 #' @param bias_correction Apply Hedges' correction for bias (default is TRUE).
 #' @param rm_correction Repeated measures correction to make standardized mean difference Cohen's d(rm). This only applies to repeated/paired samples. Default is FALSE.
-#' @param mu a number indicating the true value of the mean for the two-tailed test (or difference in means if you are performing a two sample test).
+#' @param mu a number indicating the true value of the mean for the two-tailed test (or difference in means if you are performing a two sample test). Default is 0. `mu` only sets the null value of the two-tailed test and the reference point of the standardized mean difference; the raw estimate, its confidence interval, and the raw equivalence bounds are all reported on the original scale.
 #' @param glass An option to calculate Glass's delta as an alternative to Cohen's d type SMD. Default is NULL to not calculate Glass's delta, 'glass1' will use the first group's SD as the denominator whereas 'glass2' will use the 2nd group's SD.
 #' @param smd_ci Method for calculating SMD confidence intervals. Methods include 'goulet', 'noncentral t' (nct), 'central t' (t), and 'normal method' (z).
 #' @param subset an optional vector specifying a subset of observations to be used.
@@ -43,6 +43,11 @@
 #' For paired samples, the test is of the difference scores (z),
 #' wherein \eqn{z = x - y}, and the test is of \eqn{\bar{z}} (mean of the difference scores).
 #' For one-sample tests, the test is of \eqn{\bar{x}} (mean of x).
+#'
+#' When `mu` is not zero, the raw estimate, its confidence interval, and the raw
+#' equivalence bounds remain on the original scale (e.g., the estimate is \eqn{\bar{x}},
+#' not \eqn{\bar{x} - \mu}), while the standardized mean difference and its bounds
+#' are expressed relative to `mu` (e.g., \eqn{(\bar{x} - \mu)/s}).
 #'
 #' The output combines three statistical tests:
 #' 1. A traditional two-tailed t-test (null hypothesis: difference = `mu`)
@@ -72,6 +77,7 @@
 #' - **alpha**: Alpha level set for the analysis.
 #' - **method**: Type of t-test.
 #' - **decision**: List included text regarding the decisions for statistical inference.
+#' - **mu**: The null value used for the two-tailed test.
 #'
 #' @examples
 #' # Example 1: Basic Two-Sample Test
@@ -236,14 +242,13 @@ t_TOST.default = function(x,
     data <- data.frame(i1 = i1, i2 = i2)
     data <- na.omit(data)
     colnames(data) = c("i1", "i2")
-    data2 =  data
-    data2$diff = data2$i2 - data2$i1 - mu
 
     n <- nrow(data)
     i1 <- data$i1
     i2 <- data$i2
     m1 <- mean(i1)
-    m2 <- mean(i2)
+    # shift by mu so the SMD is of (x - y - mu)
+    m2 <- mean(i2) + mu
     sd1  <- sd(i1)
     sd2  <- sd(i2)
     r12 <- cor(i1, i2)
@@ -271,7 +276,8 @@ t_TOST.default = function(x,
     n2 = length(y1)
 
     m1 = mean(x1)
-    m2 = mean(y1)-mu
+    # shift by mu so the SMD is of (x - y - mu)
+    m2 = mean(y1)+mu
 
     sd1 = sd(x1)
     sd2 = sd(y1)
@@ -326,36 +332,22 @@ t_TOST.default = function(x,
 
   }
 
-  interval_no_zero = test_interval_no_zero(c(low_eqbound, high_eqbound))
-
-  if(interval_no_zero){
-    message("Equivalence interval does not include zero.")
-  }
-
+  # raw bounds are on the original scale; SMD bounds are relative to mu
   if (eqbound_type == 'SMD') {
     low_eqbound_d <- low_eqbound
     high_eqbound_d <- high_eqbound
-    low_eqbound  <- low_eqbound * cohen_res$d_denom
-    high_eqbound <- high_eqbound * cohen_res$d_denom
+    low_eqbound  <- mu + low_eqbound * cohen_res$d_denom
+    high_eqbound <- mu + high_eqbound * cohen_res$d_denom
   } else {
-    low_eqbound_d <- low_eqbound / cohen_res$d_denom
-    high_eqbound_d <- high_eqbound / cohen_res$d_denom
+    low_eqbound_d <- (low_eqbound - mu) / cohen_res$d_denom
+    high_eqbound_d <- (high_eqbound - mu) / cohen_res$d_denom
   }
 
-  if(hypothesis == "EQU"){
-    null_hyp = paste0(round(low_eqbound,2),
-                      " >= (Mean1 - Mean2) or (Mean1 - Mean2) >= ",
-                      round(high_eqbound,2))
-    alt_hyp = paste0(round(low_eqbound,2),
-                     " < (Mean1 - Mean2) < ",
-                     round(high_eqbound,2))
-  } else if(hypothesis == "MET"){
-    null_hyp = paste0(round(low_eqbound,2),
-                      " <= (Mean1 - Mean2)  <= ",
-                      round(high_eqbound,2))
-    alt_hyp = paste0(round(low_eqbound,2),
-                     " > (Mean1 - Mean2) or (Mean1 - Mean2)  > ",
-                     round(high_eqbound,2))
+  interval_no_zero = test_interval_no_zero(c(low_eqbound, high_eqbound),
+                                           null = mu)
+
+  if(interval_no_zero){
+    message(interval_no_null_text(mu))
   }
 
   low_ttest <- t.test(
@@ -419,7 +411,8 @@ t_TOST.default = function(x,
   )
 
   effsize = data.frame(
-    estimate = c(tresult$statistic * tresult$stderr,
+    # add mu back so the estimate is on the same scale as the CI and bounds
+    estimate = c(tresult$statistic * tresult$stderr + mu,
                  cohen_res$d),
     SE = c(tresult$stderr,cohen_res$d_sigma),
     lower.ci = c(tresult$conf.int[1], cohen_res$dlow),
@@ -491,6 +484,7 @@ t_TOST.default = function(x,
     effsize = effsize,
     smd = cohen_res,
     decision = decision,
+    mu = mu,
     data.name = dname,
     call = match.call()
   )

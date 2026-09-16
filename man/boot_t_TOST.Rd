@@ -43,7 +43,7 @@ boot_t_TOST(x, ...)
 
 \item{var.equal}{a logical variable indicating whether to treat the two variances as being equal. If TRUE then the pooled variance is used to estimate the variance otherwise the Welch (or Satterthwaite) approximation to the degrees of freedom is used.}
 
-\item{eqb}{Equivalence bound. Can provide 1 value (symmetric bound, negative value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds.}
+\item{eqb}{Equivalence bound. Can provide 1 value (symmetric bound, negative value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds. Raw bounds are on the original scale of the mean (or mean difference) and are \emph{not} offsets from \code{mu}; bounds given with \code{eqbound_type = "SMD"} are standardized distances from \code{mu}.}
 
 \item{low_eqbound}{lower equivalence bounds (deprecated, use \code{eqb} instead).}
 

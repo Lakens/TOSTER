@@ -63,11 +63,12 @@ test_that("simple_htest wilcox: estimate labels", {
   x_sleep <- sleep$extra[sleep$group == 1]
   y_sleep <- sleep$extra[sleep$group == 2]
   res_paired <- hush(simple_htest(x_sleep, y_sleep, test = "w",
-                                  paired = TRUE, mu = 0))
+                                  paired = TRUE, mu = 0, exact = FALSE))
   expect_equal(names(res_paired$estimate), "Hodges-Lehmann estimate (z = x - y)")
 
   # Two-sample
-  res_two <- hush(simple_htest(1:10, y = c(7:20), test = "w", mu = 0))
+  res_two <- hush(simple_htest(1:10, y = c(7:20), test = "w", mu = 0,
+                               exact = FALSE))
   expect_equal(names(res_two$estimate), "Hodges-Lehmann estimate (x - y)")
 })
 
@@ -81,7 +82,8 @@ test_that("simple_htest: formula interface substitutes group names with quoting"
   expect_true(grepl("'1' - '2'", nms[3]))
 
   # Wilcoxon formula
-  res_w <- hush(simple_htest(extra ~ group, data = sleep, test = "w", mu = 0))
+  res_w <- hush(simple_htest(extra ~ group, data = sleep, test = "w", mu = 0,
+                             exact = FALSE))
   expect_true(grepl("'1' - '2'", names(res_w$estimate)))
 })
 
@@ -137,7 +139,7 @@ test_that("simple_htest: equivalence/MET paths work with new estimate structure"
 
   # Equivalence wilcox two-sample
   res_eq_w <- hush(simple_htest(1:10, y = c(7:20), test = "w",
-                                alternative = "e", mu = 3))
+                                alternative = "e", mu = 3, exact = FALSE))
   expect_equal(names(res_eq_w$estimate), "Hodges-Lehmann estimate (x - y)")
 
   # MET t-test paired

@@ -39,43 +39,13 @@ dataTOSToneClass <- R6::R6Class(
         med <- stats::median(var)
         sd  <- stats::sd(var)
         se  <- sd/sqrt(n)
-        res <- t.test(var-mu)
-        t   <- unname(res$statistic)
-        pttest   <- unname(res$p.value)
-
 
         low_eqbound    <- self$options$low_eqbound
         high_eqbound   <- self$options$high_eqbound
         if (self$options$eqbound_type == 'SMD') {
           eqbound_type = "SMD"
-          pr_l_eqb = low_eqbound * sd
-          pr_h_eqb = high_eqbound * sd
         } else {
           eqbound_type = "raw"
-          pr_l_eqb = low_eqbound
-          pr_h_eqb = high_eqbound
-        }
-
-        if(self$options$hypothesis == "EQU"){
-          alt_low = "greater"
-          alt_high = "less"
-          test_hypothesis = "Hypothesis Tested: Equivalence"
-          null_hyp = paste0(round(pr_l_eqb,2),
-                            " >= (Mean - mu) or (Mean - mu) >= ",
-                            round(pr_h_eqb,2))
-          alt_hyp = paste0(round(pr_l_eqb,2),
-                           " < (Mean - mu) < ",
-                           round(pr_h_eqb,2))
-        } else if(self$options$hypothesis == "MET"){
-          alt_low = "less"
-          alt_high = "greater"
-          test_hypothesis = "Hypothesis Tested: Minimal Effect"
-          null_hyp = paste0(round(pr_l_eqb,2),
-                            " <= (Mean - mu)  <= ",
-                            round(pr_h_eqb,2))
-          alt_hyp = paste0(round(pr_l_eqb,2),
-                           " > (Mean - mu) or (Mean - mu)  > ",
-                           round(pr_h_eqb,2))
         }
 
         if(self$options$smd_type == 'g'){
@@ -89,13 +59,37 @@ dataTOSToneClass <- R6::R6Class(
                          high_eqbound = high_eqbound,
                          eqbound_type = eqbound_type,
                          alpha = alpha,
+                         mu = mu,
                          bias_correction = bias_c,
                          smd_ci = "goulet")
 
+        # raw bounds are on the original scale of the mean
+        pr_l_eqb = TOSTres$eqb$low_eq[1]
+        pr_h_eqb = TOSTres$eqb$high_eq[1]
+
+        if(self$options$hypothesis == "EQU"){
+          test_hypothesis = "Hypothesis Tested: Equivalence"
+          null_hyp = paste0(round(pr_l_eqb,2),
+                            " >= Mean or Mean >= ",
+                            round(pr_h_eqb,2))
+          alt_hyp = paste0(round(pr_l_eqb,2),
+                           " < Mean < ",
+                           round(pr_h_eqb,2))
+        } else if(self$options$hypothesis == "MET"){
+          test_hypothesis = "Hypothesis Tested: Minimal Effect"
+          null_hyp = paste0(round(pr_l_eqb,2),
+                            " <= Mean <= ",
+                            round(pr_h_eqb,2))
+          alt_hyp = paste0(round(pr_l_eqb,2),
+                           " > Mean or Mean > ",
+                           round(pr_h_eqb,2))
+        }
+
+        mu_text = ifelse(mu == 0, "zero", mu)
         if(grepl(TOSTres$decision$ttest, pattern="non")){
-          nhst_text = "&#10060 NHST: don't reject null significance hypothesis that the effect is equal to zero"
+          nhst_text = paste0("&#10060 NHST: don't reject null significance hypothesis that the effect is equal to ", mu_text)
         } else{
-          nhst_text = "&#9989 NHST: reject null significance hypothesis that the effect is equal to zero"
+          nhst_text = paste0("&#9989 NHST: reject null significance hypothesis that the effect is equal to ", mu_text)
 
         }
 
