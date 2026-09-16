@@ -142,15 +142,17 @@ p1 + p2 + plot_annotation(tag_levels = 'A')
 data('sleep')
 library(jmv)
 data('bugs')
+# keep participants with a recorded gender
+bugs_g = droplevels(subset(bugs, Gender %in% c("Female", "Male")))
 
 ## -----------------------------------------------------------------------------
 res1 = t_TOST(
-  # difference in "group" of outcome "extra"
-  formula = extra ~ group,
+  # difference in "Gender" of outcome "LDHF"
+  formula = LDHF ~ Gender,
   # data
-  data = sleep,
+  data = bugs_g,
   # equivalence bound
-  eqb = .5,
+  eqb = 1,
   # sets type of SMD confidence interval
   smd_ci = "z"
 )
@@ -161,10 +163,10 @@ print(res1)
 ## ----results = "asis"---------------------------------------------------------
 cat(describe(res1))
 
-## ----genericplot,fig.width=6, fig.height=5,fig.cap="Results of the independent-samples equivalence test visualized with the default plot method. The top panel displays the raw mean difference with its 90% confidence interval, and the bottom panel displays the standardized effect size (Hedges's g~av~) with its 90% confidence interval. In both panels, the dashed vertical lines indicate the equivalence bounds (raw: -0.5 to 0.5; standardized: approximately -0.3 to 0.3), and the point estimate is marked by a filled circle. A 90% confidence interval is used because it corresponds to the two one-sided tests (TOST) procedure at an alpha level of 0.05."----
+## ----genericplot,fig.width=6, fig.height=5,fig.cap="Results of the independent-samples equivalence test visualized with the default plot method. The top panel displays the raw mean difference with its 90% confidence interval, and the bottom panel displays the standardized effect size (Hedges's g~av~) with its 90% confidence interval. In both panels, the dashed vertical lines indicate the equivalence bounds (raw: -1 to 1; standardized: approximately -0.4 to 0.4), and the point estimate is marked by a filled circle. A 90% confidence interval is used because it corresponds to the two one-sided tests (TOST) procedure at an alpha level of 0.05."----
 plot(res1)
 
-## ----cdplot,fig.width=6, fig.height=5,fig.cap="Consonance density plot for the independent-samples equivalence test. The top panel displays the standardized effect size (Hedges's g~av~) and the bottom panel displays the raw mean difference. In each panel, the consonance density curve represents the distribution of confidence intervals across all levels, with color-coded regions corresponding to the 68%, 90%, 95%, and 99.9% confidence intervals. The point estimate is marked by a filled circle along the x-axis. The dashed vertical lines indicate the equivalence bounds (standardized: -0.26 to 0.26; raw: -0.5 to 0.5). This visualization conveys the full range of effect sizes compatible with the data at varying confidence levels, rather than relying on a single confidence interval. Wider, less certain intervals (e.g., 99.9%) extend further from the point estimate, while narrower intervals (e.g., 68%) cluster near it."----
+## ----cdplot,fig.width=6, fig.height=5,fig.cap="Consonance density plot for the independent-samples equivalence test. The top panel displays the standardized effect size (Hedges's g~av~) and the bottom panel displays the raw mean difference. In each panel, the consonance density curve represents the distribution of confidence intervals across all levels, with color-coded regions corresponding to the 68%, 90%, 95%, and 99.9% confidence intervals. The point estimate is marked by a filled circle along the x-axis. The dashed vertical lines indicate the equivalence bounds (standardized: approximately -0.4 to 0.4; raw: -1 to 1). This visualization conveys the full range of effect sizes compatible with the data at varying confidence levels, rather than relying on a single confidence interval. Wider, less certain intervals (e.g., 99.9%) extend further from the point estimate, while narrower intervals (e.g., 68%) cluster near it."----
 plot(res1, type = "cd")
 
 ## -----------------------------------------------------------------------------
@@ -424,8 +426,8 @@ ggplot(sp_df, aes(x = lower, y = upper)) +
 
 ## -----------------------------------------------------------------------------
 bm_test = brunner_munzel(
-  formula = extra ~ group,
-  data = sleep,
+  formula = LDHF ~ Gender,
+  data = bugs_g,
   # equivalence hypothesis
   alternative = "equivalence",
   # equivalence bounds 

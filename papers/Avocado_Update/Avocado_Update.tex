@@ -424,35 +424,45 @@ implies a practically meaningful effect (see Figure 1)
 \subsection{Independent Groups
 Example}\label{independent-groups-example}
 
-In these examples we will use the \texttt{sleep} data and the
-\texttt{bugs} data from the \texttt{jmv} R package.
+Throughout this manuscript, examples use two datasets. The \texttt{bugs}
+data from the \texttt{jmv} R package contains participants' ratings (on
+a 0--10 scale) of their desire to kill bugs that vary in how disgusting
+and frightening they are, and is used for the independent-groups and
+one-sample examples. The \texttt{sleep} data, which records the increase
+in hours of sleep for the same 10 patients under two drugs, is used for
+the paired examples in later sections. Because one participant in
+\texttt{bugs} has no recorded gender, I first restrict the data to
+participants who reported either female or male gender.
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \FunctionTok{data}\NormalTok{(}\StringTok{\textquotesingle{}sleep\textquotesingle{}}\NormalTok{)}
 \FunctionTok{library}\NormalTok{(jmv)}
 \FunctionTok{data}\NormalTok{(}\StringTok{\textquotesingle{}bugs\textquotesingle{}}\NormalTok{)}
+\CommentTok{\# keep participants with a recorded gender}
+\NormalTok{bugs\_g }\OtherTok{=} \FunctionTok{droplevels}\NormalTok{(}\FunctionTok{subset}\NormalTok{(bugs, Gender }\SpecialCharTok{\%in\%} \FunctionTok{c}\NormalTok{(}\StringTok{"Female"}\NormalTok{, }\StringTok{"Male"}\NormalTok{)))}
 \end{Highlighting}
 \end{Shaded}
 
-For the first example, we use the \texttt{sleep} data with equivalence
-bounds (set by the \texttt{eqb} argument) of \(\pm\) 0.5 units. The
-\texttt{smd\_ci} argument can also be set to use one of four possible
-calculations for the SMD confidence interval. In the example below, I
-have opted to go with the normal approximation for computational ease;
-such approximations tend provide adequate coverage
+For the first example, we compare female and male participants' ratings
+for the low disgust, high fear (\texttt{LDHF}) bug with equivalence
+bounds (set by the \texttt{eqb} argument) of \(\pm\) 1 point on the
+rating scale. The \texttt{smd\_ci} argument can also be set to use one
+of four possible calculations for the SMD confidence interval. In the
+example below, I have opted to go with the normal approximation for
+computational ease; such approximations tend provide adequate coverage
 \citep{Viechtbauer_2007}. The formula interface works almost identically
 to \texttt{t.test}:
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{res1 }\OtherTok{=} \FunctionTok{t\_TOST}\NormalTok{(}
-  \CommentTok{\# difference in "group" of outcome "extra"}
-  \AttributeTok{formula =}\NormalTok{ extra }\SpecialCharTok{\textasciitilde{}}\NormalTok{ group,}
+  \CommentTok{\# difference in "Gender" of outcome "LDHF"}
+  \AttributeTok{formula =}\NormalTok{ LDHF }\SpecialCharTok{\textasciitilde{}}\NormalTok{ Gender,}
   \CommentTok{\# data}
-  \AttributeTok{data =}\NormalTok{ sleep,}
+  \AttributeTok{data =}\NormalTok{ bugs\_g,}
   \CommentTok{\# equivalence bound}
-  \AttributeTok{eqb =}\NormalTok{ .}\DecValTok{5}\NormalTok{,}
+  \AttributeTok{eqb =} \DecValTok{1}\NormalTok{,}
   \CommentTok{\# sets type of SMD confidence interval}
   \AttributeTok{smd\_ci =} \StringTok{"z"}
 \NormalTok{)}
@@ -473,22 +483,23 @@ two-tailed test, both one-sided equivalence tests, and the SMD (Hedges'
 ## 
 ## Welch Two Sample t-test
 ## 
-## The equivalence test was non-significant, t(17.78) = -1.3, p = 0.89
-## The null hypothesis test was non-significant, t(17.78) = -1.86, p = 0.08
+## The equivalence test was non-significant, t(58.15) = -0.87, p = 0.2
+## The null hypothesis test was non-significant, t(58.15) = 0.921, p = 0.36
 ## NHST: don't reject null significance hypothesis that the effect is equal to zero 
 ## TOST: don't reject null equivalence hypothesis
 ## 
 ## TOST Results 
-##                 t    df p.value
-## t-test     -1.861 17.78   0.079
-## TOST Lower -1.272 17.78   0.890
-## TOST Upper -2.450 17.78   0.012
+##                  t    df p.value
+## t-test      0.9213 58.15   0.361
+## TOST Lower  2.7084 58.15   0.004
+## TOST Upper -0.8658 58.15   0.195
 ## 
 ## Effect Sizes 
-##                Estimate     SE               C.I. Conf. Level
-## Raw             -1.5800 0.8491 [-3.0534, -0.1066]         0.9
-## Hedges's g(av)  -0.7965 0.4900  [-1.6024, 0.0094]         0.9
+##                Estimate     SE              C.I. Conf. Level
+## Raw              0.5155 0.5596 [-0.4198, 1.4508]         0.9
+## Hedges's g(av)   0.2037 0.2270 [-0.1697, 0.5771]         0.9
 ## Note: SMD confidence intervals are an approximation. See vignette("SMD_calcs").
+## Equivalence Bounds: Raw [-1, 1]; Hedges's g(av) [-0.3989, 0.3989]
 \end{verbatim}
 
 A greater description of the results can be accomplished with
@@ -504,11 +515,11 @@ Using the Welch Two Sample t-test, a null hypothesis significance test
 (NHST), and a equivalence test, via two one-sided tests (TOST), were
 performed with an alpha-level of 0.05. These tested the null hypotheses
 that true mean difference is equal to 0 (NHST), and true mean difference
-is more extreme than -0.5 and 0.5 (TOST). Both the equivalence test (p =
-0.89), and the NHST (p = 0.079) were not significant (mean difference =
--1.58 90\% C.I.{[}-3.05, -0.107{]}; Hedges's g(av) = -0.796 90\%
-C.I.{[}-1.6, 0.009{]}). Therefore, the results are inconclusive: neither
-null hypothesis can be rejected.
+is more extreme than -1 and 1 (TOST). Both the equivalence test (p =
+0.195), and the NHST (p = 0.361) were not significant (mean difference =
+0.516 90\% C.I.{[}-0.42, 1.451{]}; Hedges's g(av) = 0.204 90\%
+C.I.{[}-0.17, 0.577{]}). Therefore, the results are inconclusive:
+neither null hypothesis can be rejected.
 
 \newpage
 
@@ -526,14 +537,14 @@ plot.
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Results of the independent-samples equivalence test visualized with the default plot method. The top panel displays the raw mean difference with its 90\% confidence interval, and the bottom panel displays the standardized effect size (Hedges's gav) with its 90\% confidence interval. In both panels, the dashed vertical lines indicate the equivalence bounds (raw: -0.5 to 0.5; standardized: approximately -0.3 to 0.3), and the point estimate is marked by a filled circle. A 90\% confidence interval is used because it corresponds to the two one-sided tests (TOST) procedure at an alpha level of 0.05.}]{Avocado_Update_files/Avocado_Update_files/figure-latex/genericplot-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Results of the independent-samples equivalence test visualized with the default plot method. The top panel displays the raw mean difference with its 90\% confidence interval, and the bottom panel displays the standardized effect size (Hedges's gav) with its 90\% confidence interval. In both panels, the dashed vertical lines indicate the equivalence bounds (raw: -1 to 1; standardized: approximately -0.4 to 0.4), and the point estimate is marked by a filled circle. A 90\% confidence interval is used because it corresponds to the two one-sided tests (TOST) procedure at an alpha level of 0.05.}]{Avocado_Update_files/Avocado_Update_files/figure-latex/genericplot-1.pdf}}
 \caption{Results of the independent-samples equivalence test visualized
 with the default plot method. The top panel displays the raw mean
 difference with its 90\% confidence interval, and the bottom panel
 displays the standardized effect size (Hedges's g\textsubscript{av})
 with its 90\% confidence interval. In both panels, the dashed vertical
-lines indicate the equivalence bounds (raw: -0.5 to 0.5; standardized:
-approximately -0.3 to 0.3), and the point estimate is marked by a filled
+lines indicate the equivalence bounds (raw: -1 to 1; standardized:
+approximately -0.4 to 0.4), and the point estimate is marked by a filled
 circle. A 90\% confidence interval is used because it corresponds to the
 two one-sided tests (TOST) procedure at an alpha level of 0.05.}
 \end{figure}
@@ -551,7 +562,7 @@ confidence intervals, and equivalence bounds simultaneously:
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Consonance density plot for the independent-samples equivalence test. The top panel displays the standardized effect size (Hedges's gav) and the bottom panel displays the raw mean difference. In each panel, the consonance density curve represents the distribution of confidence intervals across all levels, with color-coded regions corresponding to the 68\%, 90\%, 95\%, and 99.9\% confidence intervals. The point estimate is marked by a filled circle along the x-axis. The dashed vertical lines indicate the equivalence bounds (standardized: -0.26 to 0.26; raw: -0.5 to 0.5). This visualization conveys the full range of effect sizes compatible with the data at varying confidence levels, rather than relying on a single confidence interval. Wider, less certain intervals (e.g., 99.9\%) extend further from the point estimate, while narrower intervals (e.g., 68\%) cluster near it.}]{Avocado_Update_files/Avocado_Update_files/figure-latex/cdplot-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Consonance density plot for the independent-samples equivalence test. The top panel displays the standardized effect size (Hedges's gav) and the bottom panel displays the raw mean difference. In each panel, the consonance density curve represents the distribution of confidence intervals across all levels, with color-coded regions corresponding to the 68\%, 90\%, 95\%, and 99.9\% confidence intervals. The point estimate is marked by a filled circle along the x-axis. The dashed vertical lines indicate the equivalence bounds (standardized: approximately -0.4 to 0.4; raw: -1 to 1). This visualization conveys the full range of effect sizes compatible with the data at varying confidence levels, rather than relying on a single confidence interval. Wider, less certain intervals (e.g., 99.9\%) extend further from the point estimate, while narrower intervals (e.g., 68\%) cluster near it.}]{Avocado_Update_files/Avocado_Update_files/figure-latex/cdplot-1.pdf}}
 \caption{Consonance density plot for the independent-samples equivalence
 test. The top panel displays the standardized effect size (Hedges's
 g\textsubscript{av}) and the bottom panel displays the raw mean
@@ -560,12 +571,12 @@ distribution of confidence intervals across all levels, with color-coded
 regions corresponding to the 68\%, 90\%, 95\%, and 99.9\% confidence
 intervals. The point estimate is marked by a filled circle along the
 x-axis. The dashed vertical lines indicate the equivalence bounds
-(standardized: -0.26 to 0.26; raw: -0.5 to 0.5). This visualization
-conveys the full range of effect sizes compatible with the data at
-varying confidence levels, rather than relying on a single confidence
-interval. Wider, less certain intervals (e.g., 99.9\%) extend further
-from the point estimate, while narrower intervals (e.g., 68\%) cluster
-near it.}
+(standardized: approximately -0.4 to 0.4; raw: -1 to 1). This
+visualization conveys the full range of effect sizes compatible with the
+data at varying confidence levels, rather than relying on a single
+confidence interval. Wider, less certain intervals (e.g., 99.9\%) extend
+further from the point estimate, while narrower intervals (e.g., 68\%)
+cluster near it.}
 \end{figure}
 
 Other plot types are available: \texttt{type\ =\ "c"} produces a
@@ -581,8 +592,16 @@ question implies asymmetric consequences. Similarly, we may want to test
 the mean itself rather than a mean difference. This harkens back to the
 original use of the t-test by Gosset at Guinness Brewery, where the
 concern was whether a single sample mean fell within acceptable limits.
-Here we test whether the mean of LDHF falls within the bounds of 5.5 and
-8.5 around a hypothesized value of 7.5:
+Here we test whether the mean LDHF rating falls between 5.5 and 8.5,
+while the nil hypothesis test is performed against a hypothesized value
+of 7.5 (set with the \texttt{mu} argument). Note that the equivalence
+bounds are specified on the original scale of the data (i.e., they are
+values of the mean, not distances from \texttt{mu}), and the raw
+estimate and its confidence interval are reported on that same scale.
+The SMD, in contrast, is calculated relative to \texttt{mu} (i.e.,
+\((\bar{x} - \mu)/s\)), so its bounds are expressed as standardized
+distances from \texttt{mu}; the printed output notes this whenever
+\texttt{mu} is not zero:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -615,9 +634,12 @@ Here we test whether the mean of LDHF falls within the bounds of 5.5 and
 ## 
 ## Effect Sizes 
 ##            Estimate     SE              C.I. Conf. Level
-## Raw        -0.12088 0.2641   [6.9402, 7.818]         0.9
+## Raw         7.37912 0.2641   [6.9402, 7.818]         0.9
 ## Hedges's g -0.04758 0.1049 [-0.2185, 0.1236]         0.9
 ## Note: SMD confidence intervals are an approximation. See vignette("SMD_calcs").
+## Equivalence Bounds: Raw [5.5, 8.5]; Hedges's g [-0.7939, 0.397]
+## Note: raw estimate, confidence interval, and bounds are on the original
+## scale; the Hedges's g and its bounds are relative to mu = 7.5.
 \end{verbatim}
 
 The same interface handles paired designs by setting
@@ -698,6 +720,7 @@ designs) the correlation between measures\footnote{The
 ## Raw           7.379 0.2641  [6.9402, 7.818]         0.9
 ## Hedges's g    2.905 0.2395 [2.4289, 3.3804]         0.9
 ## Note: SMD confidence intervals are an approximation. See vignette("SMD_calcs").
+## Equivalence Bounds: Raw [5.5, 8.5]; Hedges's g [2.1832, 3.3741]
 \end{verbatim}
 
 \section{Simplified Hypothesis
@@ -1038,13 +1061,13 @@ it provides more robust confidence intervals and p-values.
 ##  g[rm]=('1'-'2')/SD_rm)
 ## 
 ## data:  extra by group
-## z-observed = -0.78495, p-value = 0.909
+## z-observed = -0.78495, p-value = 0.9005
 ## alternative hypothesis: equivalence
 ## null values:
 ## lower bound upper bound 
 ##        -0.5         0.5 
 ## 90 percent confidence interval:
-##  -1.362647 -0.455117
+##  -1.3215945 -0.4499223
 ## sample estimates:
 ## SMD (g[rm]) 
 ##  -0.7513666
@@ -1093,13 +1116,13 @@ for equivalence testing on correlations.
 ##  Pearson's product-moment correlation with approximate SE
 ## 
 ## data:  bugs$LDLF and bugs$LDHF
-## z = NA, N = 91, p-value = NA
+## z = 6.169, N = 91, p-value = 6.871e-10
 ## alternative hypothesis: true correlation is not equal to 0
 ## 95 percent confidence interval:
-##  NA NA
+##  0.4208204 0.6996192
 ## sample estimates:
-##  r 
-## NA
+##         r 
+## 0.5767783
 \end{verbatim}
 
 Because the z-test relies on distributional approximations that can be
@@ -1133,13 +1156,13 @@ objects that integrate with the helper functions described above.
 ##  Bootstrapped Pearson's product-moment correlation (BCa)
 ## 
 ## data:  bugs$LDLF and bugs$LDHF
-## N = 91, p-value = 0.9785
+## N = 91, p-value = 0.9809
 ## alternative hypothesis: equivalence
 ## null values:
 ## correlation correlation 
 ##         0.4        -0.4 
 ## 90 percent confidence interval:
-##  0.4377090 0.6871122
+##  0.4410134 0.6891551
 ## sample estimates:
 ##         r 
 ## 0.5767783
@@ -1152,8 +1175,8 @@ objects that integrate with the helper functions described above.
 \end{Shaded}
 
 The Bootstrapped Pearson's product-moment correlation (BCa) is not
-statistically significant (p = 0.979, r = 0.577, 90\% C.I.{[}0.438,
-0.687{]}) at a 0.05 alpha-level. The null hypothesis cannot be rejected.
+statistically significant (p = 0.981, r = 0.577, 90\% C.I.{[}0.441,
+0.689{]}) at a 0.05 alpha-level. The null hypothesis cannot be rejected.
 At the desired error rate, it cannot be stated that the true correlation
 is between 0.4 and -0.4.
 
@@ -1299,7 +1322,7 @@ either the Fisher z-transformation (default) or the Kraatz
 ##  Difference between two independent correlations (Fisher's z transform)
 ## 
 ## data:  Summary Statistics
-## z = -0.026125, p-value = 0.4439
+## z = -0.14114, p-value = 0.4439
 ## alternative hypothesis: equivalence
 ## null values:
 ## difference between correlations difference between correlations 
@@ -1568,13 +1591,16 @@ scale via \texttt{mu}. Results can be reported on different scales
 (\texttt{"probability"}, \texttt{"difference"}, \texttt{"logodds"}, or
 \texttt{"odds"}), and three test methods are available: \texttt{"t"}
 (default), \texttt{"logit"} (range-preserving CIs), and \texttt{"perm"}
-(studentized permutation; \citet{neubert2007}).
+(studentized permutation; \citet{neubert2007}). Below, the test is
+applied to the same female and male \texttt{LDHF} ratings used in the
+independent-groups t-test example, which, as bounded rating-scale
+responses, are a natural candidate for this estimand.
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{bm\_test }\OtherTok{=} \FunctionTok{brunner\_munzel}\NormalTok{(}
-  \AttributeTok{formula =}\NormalTok{ extra }\SpecialCharTok{\textasciitilde{}}\NormalTok{ group,}
-  \AttributeTok{data =}\NormalTok{ sleep,}
+  \AttributeTok{formula =}\NormalTok{ LDHF }\SpecialCharTok{\textasciitilde{}}\NormalTok{ Gender,}
+  \AttributeTok{data =}\NormalTok{ bugs\_g,}
   \CommentTok{\# equivalence hypothesis}
   \AttributeTok{alternative =} \StringTok{"equivalence"}\NormalTok{,}
   \CommentTok{\# equivalence bounds }
@@ -1589,17 +1615,17 @@ scale via \texttt{mu}. Results can be reported on different scales
 ## 
 ##  Two-sample Brunner-Munzel test
 ## 
-## data:  extra by group
-## t = -0.39392, df = 16.898, p-value = 0.6507
+## data:  LDHF by Gender
+## t = -1.9498, df = 71.988, p-value = 0.02755
 ## alternative hypothesis: equivalence
 ## null values:
 ## lower bound upper bound 
 ##         0.3         0.7 
 ## 90 percent confidence interval:
-##  0.0562039 0.4537961
+##  0.4748075 0.6823434
 ## sample estimates:
-## P('1'>'2') + .5*P('1'='2') 
-##                      0.255
+## P(Female>Male) + .5*P(Female=Male) 
+##                          0.5785755
 \end{verbatim}
 
 \paragraph{Checking Assumptions}\label{checking-assumptions-4}
@@ -1787,7 +1813,7 @@ returns a \texttt{TOSTt} object with bootstrapped SMD estimates:
 ## 
 ## Bootstrapped Paired t-test
 ## 
-## The equivalence test was non-significant, t(9) = -2.777, p = 1e+00
+## The equivalence test was non-significant, t(9) = -2.777, p = 9.99e-01
 ## The null hypothesis test was significant, t(9) = -4.062, p = 0e+00
 ## NHST: reject null significance hypothesis that the effect is equal to zero 
 ## TOST: don't reject null equivalence hypothesis
@@ -1795,14 +1821,15 @@ returns a \texttt{TOSTt} object with bootstrapped SMD estimates:
 ## TOST Results 
 ##                 t df p.value
 ## t-test     -4.062  9 < 0.001
-## TOST Lower -2.777  9       1
+## TOST Lower -2.777  9   0.999
 ## TOST Upper -5.348  9 < 0.001
 ## 
 ## Effect Sizes 
 ##               Estimate     SE               C.I. Conf. Level
-## Raw             -1.580 0.3509 [-2.9393, -1.0833]         0.9
-## Hedges's g(z)   -1.174 0.7990  [-1.3917, 1.1253]         0.9
+## Raw             -1.580 0.3699 [-2.8527, -1.0364]         0.9
+## Hedges's g(z)   -1.174 0.6491  [-1.3975, 0.9998]         0.9
 ## Note: studentized bootstrap ci method utilized.
+## Equivalence Bounds: Raw [-0.5, 0.5]; Hedges's g(z) [-0.4065, 0.4065]
 \end{verbatim}
 
 The bootstrapped SMDs are a useful feature in their own right. Analytic
@@ -2009,6 +2036,7 @@ The bootstrap version uses the same bootstrap methods as
 ## log(Means Ratio)  -0.3466 0.08621 [-0.4932, -0.1893]         0.9
 ## Means Ratio        0.7071 0.06116   [0.6106, 0.8275]         0.9
 ## Note: studentized bootstrap ci method utilized.
+## Equivalence Bounds: log(Means Ratio) [-0.2231, 0.2231]; Means Ratio [0.8, 1.25]
 \end{verbatim}
 
 From this analysis, we would conclude there is a significant effect that
