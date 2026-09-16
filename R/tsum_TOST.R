@@ -198,10 +198,11 @@ tsum_TOST <- function(m1,
 
   if(paired == TRUE && !missing(r12)){
 
+    # shift by mu so the SMD is of (x - y - mu)
     cohen_res = d_est_pair(
       n = n1,
       m1 = m1,
-      m2 = m2,
+      m2 = m2 + mu,
       sd1 = sd1,
       sd2 = sd2,
       r12 = r12,
@@ -213,11 +214,12 @@ tsum_TOST <- function(m1,
 
   } else if(sample_type == "Two Sample"){
 
+    # shift by mu so the SMD is of (x - y - mu)
     cohen_res = d_est_ind(
       n1 = n1,
       n2 = n2,
       m1 = m1,
-      m2 = m2,
+      m2 = m2 + mu,
       sd1 = sd1,
       sd2 = sd2,
       type = smd_type,
@@ -230,7 +232,7 @@ tsum_TOST <- function(m1,
   } else {
     cohen_res = d_est_one(
       n = n1,
-      mu = m1,
+      mu = m1 - mu,
       sd = sd1,
       type = smd_type,
       testValue = 0,
@@ -256,38 +258,22 @@ tsum_TOST <- function(m1,
 
   }
 
-  interval_no_zero = test_interval_no_zero(c(low_eqbound, high_eqbound))
-
-  if(interval_no_zero){
-    message("Equivalence interval does not include zero.")
-  }
-
+  # raw bounds are on the original scale; SMD bounds are relative to mu
   if (eqbound_type == 'SMD') {
     low_eqbound_d <- low_eqbound
     high_eqbound_d <- high_eqbound
-    low_eqbound  <- low_eqbound * cohen_res$d_denom
-    high_eqbound <- high_eqbound * cohen_res$d_denom
+    low_eqbound  <- mu + low_eqbound * cohen_res$d_denom
+    high_eqbound <- mu + high_eqbound * cohen_res$d_denom
   } else {
-    low_eqbound_d <- low_eqbound / cohen_res$d_denom
-    high_eqbound_d <- high_eqbound / cohen_res$d_denom
+    low_eqbound_d <- (low_eqbound - mu) / cohen_res$d_denom
+    high_eqbound_d <- (high_eqbound - mu) / cohen_res$d_denom
   }
 
-  if(hypothesis == "EQU"){
-    null_hyp = paste0(round(low_eqbound,2),
-                      " >= (Mean1 - Mean2) or (Mean1 - Mean2) >= ",
-                      round(high_eqbound,2))
-    alt_hyp = paste0(round(low_eqbound,2),
-                     " < (Mean1 - Mean2) < ",
-                     round(high_eqbound,2))
-  } else if(hypothesis == "MET"){
-    null_hyp = paste0(round(low_eqbound,2),
-                      " <= (Mean1 - Mean2)  <= ",
-                      round(high_eqbound,2))
-    alt_hyp = paste0(round(low_eqbound,2),
-                     " > (Mean1 - Mean2) or (Mean1 - Mean2)  > ",
-                     round(high_eqbound,2))
+  interval_no_zero = test_interval_no_zero(c(low_eqbound, high_eqbound),
+                                           null = mu)
 
-
+  if(interval_no_zero){
+    message(interval_no_null_text(mu))
   }
 
   low_ttest <- tsum_test(
@@ -356,7 +342,8 @@ tsum_TOST <- function(m1,
   )
 
   effsize = data.frame(
-    estimate = c(tresult$statistic * tresult$stderr,
+    # add mu back so the estimate is on the same scale as the CI and bounds
+    estimate = c(tresult$statistic * tresult$stderr + mu,
                  cohen_res$d),
     SE = c(tresult$stderr,cohen_res$d_sigma),
     lower.ci = c(tresult$conf.int[1], cohen_res$dlow),
@@ -422,7 +409,8 @@ tsum_TOST <- function(m1,
     hypothesis = test_hypothesis,
     effsize = effsize,
     smd = cohen_res,
-    decision = decision
+    decision = decision,
+    mu = mu
   )
 
   class(rval) = "TOSTt"

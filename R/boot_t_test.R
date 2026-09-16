@@ -474,7 +474,8 @@ boot_t_test.default <- function(x,
           dat_x = X[i,] + mx - mz
           dat_y = Y[i,] + my - mz
           m_vec[i] <- mean(dat_x, na.rm=TRUE) - mean(dat_y, na.rm=TRUE)
-          m_se_vec[i] <- sqrt(sd(dat_x, na.rm=TRUE)^2/length(na.omit(dat_x)) + sd(dat_y, na.rm=TRUE)^2/length(na.omit(dat_y)))
+          # pooled SE, matching the observed SE and TSTAT
+          m_se_vec[i] <- STDERR[i]
         }
       } else {
         # Trimmed path - equal variance

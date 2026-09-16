@@ -479,11 +479,12 @@ smd_calc.default = function(x,
       }
     }
 
+    # subtract mu so the SMD is of (x - mu)
     if (tr > 0) {
-      m1 = mean(x1, trim = tr) + mu
+      m1 = mean(x1, trim = tr) - mu
       sd1 = sqrt(winvar(x1, tr = tr))
     } else {
-      m1 = mean(x1) + mu
+      m1 = mean(x1) - mu
       sd1 = sd(x1)
     }
 

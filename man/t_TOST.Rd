@@ -55,7 +55,7 @@ t_TOST(
 
 \item{var.equal}{a logical variable indicating whether to treat the two variances as being equal. If TRUE then the pooled variance is used to estimate the variance otherwise the Welch (or Satterthwaite) approximation to the degrees of freedom is used.}
 
-\item{eqb}{Equivalence bound. Can provide 1 value (symmetric bound, negative value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds.}
+\item{eqb}{Equivalence bound. Can provide 1 value (symmetric bound, negative value is taken as the lower bound) or 2 specific values that represent the upper and lower equivalence bounds. Raw bounds are on the original scale of the mean (or mean difference) and are \emph{not} offsets from \code{mu}; bounds given with \code{eqbound_type = "SMD"} are standardized distances from \code{mu}.}
 
 \item{low_eqbound}{lower equivalence bounds (deprecated, use \code{eqb} instead).}
 
@@ -75,7 +75,7 @@ t_TOST(
 
 \item{y}{an optional (non-empty) numeric vector of data values.}
 
-\item{mu}{a number indicating the true value of the mean for the two-tailed test (or difference in means if you are performing a two sample test).}
+\item{mu}{a number indicating the true value of the mean for the two-tailed test (or difference in means if you are performing a two sample test). Default is 0. \code{mu} only sets the null value of the two-tailed test and the reference point of the standardized mean difference; the raw estimate, its confidence interval, and the raw equivalence bounds are all reported on the original scale.}
 
 \item{formula}{a formula of the form lhs ~ rhs where lhs is a numeric variable giving the data values and rhs either 1 for a one-sample test or a factor with two levels giving the corresponding groups. For paired tests, use the default method with x and y vectors instead of the formula method.}
 
@@ -99,6 +99,7 @@ An S3 object of class \code{"TOSTt"} is returned containing the following slots:
 \item \strong{alpha}: Alpha level set for the analysis.
 \item \strong{method}: Type of t-test.
 \item \strong{decision}: List included text regarding the decisions for statistical inference.
+\item \strong{mu}: The null value used for the two-tailed test.
 }
 }
 \description{
@@ -118,6 +119,11 @@ For two-sample tests, the test is of \eqn{\bar{x} - \bar{y}} (mean of x minus me
 For paired samples, the test is of the difference scores (z),
 wherein \eqn{z = x - y}, and the test is of \eqn{\bar{z}} (mean of the difference scores).
 For one-sample tests, the test is of \eqn{\bar{x}} (mean of x).
+
+When \code{mu} is not zero, the raw estimate, its confidence interval, and the raw
+equivalence bounds remain on the original scale (e.g., the estimate is \eqn{\bar{x}},
+not \eqn{\bar{x} - \mu}), while the standardized mean difference and its bounds
+are expressed relative to \code{mu} (e.g., \eqn{(\bar{x} - \mu)/s}).
 
 The output combines three statistical tests:
 \enumerate{

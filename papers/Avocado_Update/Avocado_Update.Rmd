@@ -263,24 +263,26 @@ p1 + p2 + plot_annotation(tag_levels = 'A')
 
 ## Independent Groups Example
 
-In these examples we will use the `sleep` data and the `bugs` data from the `jmv` R package.
+Throughout this manuscript, examples use two datasets. The `bugs` data from the `jmv` R package contains participants' ratings (on a 0--10 scale) of their desire to kill bugs that vary in how disgusting and frightening they are, and is used for the independent-groups and one-sample examples. The `sleep` data, which records the increase in hours of sleep for the same 10 patients under two drugs, is used for the paired examples in later sections. Because one participant in `bugs` has no recorded gender, I first restrict the data to participants who reported either female or male gender.
 
 ```{r}
 data('sleep')
 library(jmv)
 data('bugs')
+# keep participants with a recorded gender
+bugs_g = droplevels(subset(bugs, Gender %in% c("Female", "Male")))
 ```
 
-For the first example, we use the `sleep` data with equivalence bounds (set by the `eqb` argument) of $\pm$ 0.5 units. The `smd_ci` argument can also be set to use one of four possible calculations for the SMD confidence interval. In the example below, I have opted to go with the normal approximation for computational ease; such approximations tend provide adequate coverage [@Viechtbauer_2007]. The formula interface works almost identically to `t.test`:
+For the first example, we compare female and male participants' ratings for the low disgust, high fear (`LDHF`) bug with equivalence bounds (set by the `eqb` argument) of $\pm$ 1 point on the rating scale. The `smd_ci` argument can also be set to use one of four possible calculations for the SMD confidence interval. In the example below, I have opted to go with the normal approximation for computational ease; such approximations tend provide adequate coverage [@Viechtbauer_2007]. The formula interface works almost identically to `t.test`:
 
 ```{r}
 res1 = t_TOST(
-  # difference in "group" of outcome "extra"
-  formula = extra ~ group,
+  # difference in "Gender" of outcome "LDHF"
+  formula = LDHF ~ Gender,
   # data
-  data = sleep,
+  data = bugs_g,
   # equivalence bound
-  eqb = .5,
+  eqb = 1,
   # sets type of SMD confidence interval
   smd_ci = "z"
 )
@@ -303,13 +305,13 @@ cat(describe(res1))
 The default visualization provided by the generic `plot` method for `t_TOST`
 provides a simple visualization of both effect sizes and their respective confidence intervals alongside the equivalence bounds. Test information is also printed at the top of the plot.
 
-```{r genericplot,fig.width=6, fig.height=5,fig.cap="Results of the independent-samples equivalence test visualized with the default plot method. The top panel displays the raw mean difference with its 90% confidence interval, and the bottom panel displays the standardized effect size (Hedges's g~av~) with its 90% confidence interval. In both panels, the dashed vertical lines indicate the equivalence bounds (raw: -0.5 to 0.5; standardized: approximately -0.3 to 0.3), and the point estimate is marked by a filled circle. A 90% confidence interval is used because it corresponds to the two one-sided tests (TOST) procedure at an alpha level of 0.05."}
+```{r genericplot,fig.width=6, fig.height=5,fig.cap="Results of the independent-samples equivalence test visualized with the default plot method. The top panel displays the raw mean difference with its 90% confidence interval, and the bottom panel displays the standardized effect size (Hedges's g~av~) with its 90% confidence interval. In both panels, the dashed vertical lines indicate the equivalence bounds (raw: -1 to 1; standardized: approximately -0.4 to 0.4), and the point estimate is marked by a filled circle. A 90% confidence interval is used because it corresponds to the two one-sided tests (TOST) procedure at an alpha level of 0.05."}
 plot(res1)
 ```
 
 Also when the generic `plot` method has the `type` argument set to "cd" this produces a consonance density plot, inspired by the "concurve" R package [@rafi2020], that shows the estimate, confidence intervals, and equivalence bounds simultaneously:
 
-```{r cdplot,fig.width=6, fig.height=5,fig.cap="Consonance density plot for the independent-samples equivalence test. The top panel displays the standardized effect size (Hedges's g~av~) and the bottom panel displays the raw mean difference. In each panel, the consonance density curve represents the distribution of confidence intervals across all levels, with color-coded regions corresponding to the 68%, 90%, 95%, and 99.9% confidence intervals. The point estimate is marked by a filled circle along the x-axis. The dashed vertical lines indicate the equivalence bounds (standardized: -0.26 to 0.26; raw: -0.5 to 0.5). This visualization conveys the full range of effect sizes compatible with the data at varying confidence levels, rather than relying on a single confidence interval. Wider, less certain intervals (e.g., 99.9%) extend further from the point estimate, while narrower intervals (e.g., 68%) cluster near it."}
+```{r cdplot,fig.width=6, fig.height=5,fig.cap="Consonance density plot for the independent-samples equivalence test. The top panel displays the standardized effect size (Hedges's g~av~) and the bottom panel displays the raw mean difference. In each panel, the consonance density curve represents the distribution of confidence intervals across all levels, with color-coded regions corresponding to the 68%, 90%, 95%, and 99.9% confidence intervals. The point estimate is marked by a filled circle along the x-axis. The dashed vertical lines indicate the equivalence bounds (standardized: approximately -0.4 to 0.4; raw: -1 to 1). This visualization conveys the full range of effect sizes compatible with the data at varying confidence levels, rather than relying on a single confidence interval. Wider, less certain intervals (e.g., 99.9%) extend further from the point estimate, while narrower intervals (e.g., 68%) cluster near it."}
 plot(res1, type = "cd")
 ```
 
@@ -317,7 +319,7 @@ Other plot types are available: `type = "c"` produces a consonance plot showing 
 
 ## One-Sample t-test with Asymmetric Bounds
 
-When the equivalence bounds are not symmetric around the null, two values can be supplied to `eqb`. This is common when the research question implies asymmetric consequences. Similarly, we may want to test the mean itself rather than a mean difference. This harkens back to the original use of the t-test by Gosset at Guinness Brewery, where the concern was whether a single sample mean fell within acceptable limits. Here we test whether the mean of LDHF falls within the bounds of 5.5 and 8.5 around a hypothesized value of 7.5:
+When the equivalence bounds are not symmetric around the null, two values can be supplied to `eqb`. This is common when the research question implies asymmetric consequences. Similarly, we may want to test the mean itself rather than a mean difference. This harkens back to the original use of the t-test by Gosset at Guinness Brewery, where the concern was whether a single sample mean fell within acceptable limits. Here we test whether the mean LDHF rating falls between 5.5 and 8.5, while the nil hypothesis test is performed against a hypothesized value of 7.5 (set with the `mu` argument). Note that the equivalence bounds are specified on the original scale of the data (i.e., they are values of the mean, not distances from `mu`), and the raw estimate and its confidence interval are reported on that same scale. The SMD, in contrast, is calculated relative to `mu` (i.e., $(\bar{x} - \mu)/s$), so its bounds are expressed as standardized distances from `mu`; the printed output notes this whenever `mu` is not zero:
 
 ```{r}
 res4 = t_TOST(
@@ -748,12 +750,12 @@ The Brunner-Munzel test [@brunner2000] estimates the relative effect $\hat{p} = 
 
 Stochastic superiority tests, like the Brunner-Munzel test, may be particularly well-suited to Likert-type scales which are ubiquitous in psychological research. For a single ordinal item, the spacing between response categories carries no guaranteed meaning, and a mean difference therefore has a strained interpretation. For example, what, concretely, does a 0.4-unit mean difference on a five-point Likert-type scale communicate? The stochastic superiority estimand sidesteps this interpretation difficulty. The probability that a randomly selected participant from one group outscores a randomly selected participant from the other is interpretable on its own terms, with no knowledge of the scale required. We are not suggesting that using t-tests will always mislead in these contexts but it is a concern that should not be quickly dismissed either [@Liddell_Kruschke_2018]. Additionally, even if we assume traditional parametric methods are robust to the ordinal nature of the data, the preserved error rate is not the same as interpretive clarity. For researchers whose primary outcomes live on ordinal scales, the Brunner-Munzel test and its associated effect size --- as well as ordinal models more generally [@Burkner_Vuorre_2019] --- may offer a more natural and defensible default.
 
-The `brunner_munzel` function supports equivalence and minimal effect testing via `alternative`, with bounds on the probability scale via `mu`. Results can be reported on different scales (`"probability"`, `"difference"`, `"logodds"`, or `"odds"`), and three test methods are available: `"t"` (default), `"logit"` (range-preserving CIs), and `"perm"` (studentized permutation; @neubert2007).
+The `brunner_munzel` function supports equivalence and minimal effect testing via `alternative`, with bounds on the probability scale via `mu`. Results can be reported on different scales (`"probability"`, `"difference"`, `"logodds"`, or `"odds"`), and three test methods are available: `"t"` (default), `"logit"` (range-preserving CIs), and `"perm"` (studentized permutation; @neubert2007). Below, the test is applied to the same female and male `LDHF` ratings used in the independent-groups t-test example, which, as bounded rating-scale responses, are a natural candidate for this estimand.
 
 ```{r}
 bm_test = brunner_munzel(
-  formula = extra ~ group,
-  data = sleep,
+  formula = LDHF ~ Gender,
+  data = bugs_g,
   # equivalence hypothesis
   alternative = "equivalence",
   # equivalence bounds 

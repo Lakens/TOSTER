@@ -339,3 +339,60 @@ for (ci_method in c("perc", "basic", "bca", "stud")) {
   })
 }
 
+
+# boot_t_TOST vs boot_t_test -----
+# With the same seed both functions draw identical resamples, so p-values
+# and raw confidence intervals should match exactly for every design and
+# CI method.
+
+test_that("boot_t_TOST matches boot_t_test for all designs and CI methods", {
+  skip_on_cran()
+
+  set.seed(8421)
+  x1 <- rnorm(20, mean = 7.4, sd = 1.2)
+  x2 <- rnorm(22, mean = 5.6, sd = 1)
+  y2 <- rnorm(18, mean = 5, sd = 1.3)
+  xp <- rnorm(15, mean = 5.5, sd = 1)
+  yp <- xp - rnorm(15, mean = 0.4, sd = 0.6)
+
+  designs <- list(
+    one = list(args = list(x = x1), bounds = c(7, 8.5), mu = 7.5),
+    welch = list(args = list(x = x2, y = y2), bounds = c(0, 1.5), mu = 0.5),
+    pooled = list(args = list(x = x2, y = y2, var.equal = TRUE),
+                  bounds = c(0, 1.5), mu = 0.5),
+    paired = list(args = list(x = xp, y = yp, paired = TRUE),
+                  bounds = c(0, 1), mu = 0.3)
+  )
+
+  for (d in names(designs)) {
+    des <- designs[[d]]
+    for (ci in c("stud", "basic", "perc", "bca")) {
+      lab <- paste(d, ci)
+
+      set.seed(99)
+      res <- suppressMessages(do.call(boot_t_TOST, c(des$args, list(
+        eqb = des$bounds, mu = des$mu, R = 199, boot_ci = ci))))
+      set.seed(99)
+      eq <- do.call(boot_t_test, c(des$args, list(
+        mu = des$bounds, alternative = "equivalence", R = 199, boot_ci = ci)))
+      set.seed(99)
+      nhst <- do.call(boot_t_test, c(des$args, list(
+        mu = des$mu, R = 199, boot_ci = ci)))
+      set.seed(99)
+      lower <- do.call(boot_t_test, c(des$args, list(
+        mu = des$bounds[1], alternative = "greater", R = 199, boot_ci = ci)))
+      set.seed(99)
+      upper <- do.call(boot_t_test, c(des$args, list(
+        mu = des$bounds[2], alternative = "less", R = 199, boot_ci = ci)))
+
+      expect_equal(res$TOST$p.value[1], nhst$p.value, label = lab)
+      expect_equal(res$TOST$p.value[2], lower$p.value, label = lab)
+      expect_equal(res$TOST$p.value[3], upper$p.value, label = lab)
+      expect_equal(max(res$TOST$p.value[2:3]), eq$p.value, label = lab)
+      expect_equal(res$effsize$estimate[1], unname(nhst$estimate[length(nhst$estimate)]),
+                   label = lab)
+      expect_equal(c(res$effsize$lower.ci[1], res$effsize$upper.ci[1]),
+                   as.numeric(eq$conf.int), label = lab)
+    }
+  }
+})

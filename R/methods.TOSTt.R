@@ -104,6 +104,19 @@ print.TOSTt <- function(x,
   }else{
     cat("Note: SMD confidence intervals are an approximation. See vignette(\"SMD_calcs\").")
   }
+  # report bounds and, when mu is not zero, the scale of each row --------
+  cat("\n")
+  cat("Equivalence Bounds: ",
+      paste0(x$eqb$type, " [", round(x$eqb$low_eq, digits), ", ",
+             round(x$eqb$high_eq, digits), "]", collapse = "; "),
+      sep = "")
+  mu <- get_mu(x)
+  if (mu != 0) {
+    cat("\n")
+    cat(strwrap(paste0("Note: raw estimate, confidence interval, and bounds are on the original scale; ",
+                       "the ", x$eqb$type[2], " and its bounds are relative to mu = ", mu, ".")),
+        sep = "\n")
+  }
   }
   cat("\n")
 
@@ -677,8 +690,8 @@ plot.TOSTt <- function(x,
     points = data.frame(
       x_label = x_label,
       point = x$effsize$estimate[1],
-      ci_high = x$effsize$lower.ci[1],
-      ci_low = x$effsize$upper.ci[1],
+      ci_low = x$effsize$lower.ci[1],
+      ci_high = x$effsize$upper.ci[1],
       stringsAsFactors = FALSE
     )
 
@@ -841,9 +854,7 @@ describe_TOST = function(x,
   type_tost = ifelse(htest$alternative == "equivalence",
                      "equivalence",
                      "minimal effect")
-  nhst_null = ifelse(is.null(tosty$call$mu),
-                     0,
-                     tosty$call$mu)
+  nhst_null = get_mu(tosty)
   alt_nhst = paste0("true ",
                     names(htest$null.value[1]),
                     " is ",
