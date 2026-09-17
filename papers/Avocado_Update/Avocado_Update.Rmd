@@ -6,6 +6,7 @@ author:
 - name: Aaron R. Caldwell
   affil: a
   email: caldwellaaron@uams.edu
+thanks: true
 type: PREPRINT
 output:
   rticles::tf_article:
@@ -45,8 +46,9 @@ header-includes: |
     }
 affiliation:
 - num: a
+  email: caldwellaaron@uams.edu
   address: |
-    Department of Biostatistics, Fay W. Boozman College of Public Health, University of Arkansas for Medical Sciences Northwest, Springdale, AR  <https://orcid.org/0000-0002-4541-6283>
+    Department of Biostatistics, Fay W. Boozman College of Public Health, University of Arkansas for Medical Sciences Northwest, Springdale, AR,  <https://orcid.org/0000-0002-4541-6283>
 editor_options: 
   chunk_output_type: console
 ---
@@ -73,7 +75,7 @@ Researchers routinely interpret non-significant p-values from a nil-hypothesis (
 
 Equivalence testing provides a principled framework for evaluating whether an effect is small enough to be considered negligible. The two one-sided tests (TOST) procedure is the most widely used approach [@schuirmann1987]. Researchers specify an upper ($\Delta_U$) and lower ($\Delta_L$) equivalence bound based on the smallest effect size of interest (SESOI). Two one-sided tests then evaluate whether the observed effect falls within those bounds. If both tests reject at a pre-specified alpha level, the effect can be considered practically equivalent to zero [@lakens_ori].
 
-The TOSTER R package^[All updates to the package can be found on the package's website that I maintain  <https://aaroncaldwell.us/TOSTERpkg>] was originally developed by @lakens_ori to introduce experimental psychologists to the concept of equivalence testing and provide an accessible implementation in R. The package provided dedicated functions for independent, paired, and one-sample t-tests, as well as correlations and meta-analytic equivalence tests. It has been widely adopted, with over 1000 citations to date.
+The [TOSTER R package](https://aaroncaldwell.us/TOSTERpkg) was originally developed by @lakens_ori to introduce experimental psychologists to the concept of equivalence testing and provide an accessible implementation in R. The package provided dedicated functions for independent, paired, and one-sample t-tests, as well as correlations and meta-analytic equivalence tests. It has been widely adopted, with over 1000 citations to date.
 
 However, the original package had a number of limitations. It offered a function-per-design interface (separate functions for each t-test type), lacked robust alternatives, provided no support for ANOVA equivalence testing, and had no tools for comparing effect sizes across studies. Also, the package did not integrate with standard R workflows and usually just printed results to the console rather than returning objects that could be manipulated or plotted.
 

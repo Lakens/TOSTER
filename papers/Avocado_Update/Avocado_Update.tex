@@ -109,9 +109,11 @@
 \author{\name{Aaron R. Caldwell$^{a}$}
 \affil{$^{a}$Department of Biostatistics, Fay W. Boozman College of
 Public Health, University of Arkansas for Medical Sciences Northwest,
-Springdale, AR \url{https://orcid.org/0000-0002-4541-6283}}
+Springdale, AR, \url{https://orcid.org/0000-0002-4541-6283}}
 }
 
+\thanks{CONTACT Aaron R.
+Caldwell. Email: \href{mailto:caldwellaaron@uams.edu}{\nolinkurl{caldwellaaron@uams.edu}}}
 
 \maketitle
 
@@ -158,15 +160,13 @@ observed effect falls within those bounds. If both tests reject at a
 pre-specified alpha level, the effect can be considered practically
 equivalent to zero \citep{lakens_ori}.
 
-The TOSTER R package\footnote{All updates to the package can be found on
-  the package's website that I maintain
-  \url{https://aaroncaldwell.us/TOSTERpkg}} was originally developed by
-\citet{lakens_ori} to introduce experimental psychologists to the
-concept of equivalence testing and provide an accessible implementation
-in R. The package provided dedicated functions for independent, paired,
-and one-sample t-tests, as well as correlations and meta-analytic
-equivalence tests. It has been widely adopted, with over 1000 citations
-to date.
+The \href{https://aaroncaldwell.us/TOSTERpkg}{TOSTER R package} was
+originally developed by \citet{lakens_ori} to introduce experimental
+psychologists to the concept of equivalence testing and provide an
+accessible implementation in R. The package provided dedicated functions
+for independent, paired, and one-sample t-tests, as well as correlations
+and meta-analytic equivalence tests. It has been widely adopted, with
+over 1000 citations to date.
 
 However, the original package had a number of limitations. It offered a
 function-per-design interface (separate functions for each t-test type),
@@ -1061,13 +1061,13 @@ it provides more robust confidence intervals and p-values.
 ##  g[rm]=('1'-'2')/SD_rm)
 ## 
 ## data:  extra by group
-## z-observed = -0.78495, p-value = 0.9005
+## z-observed = -0.78495, p-value = 0.8954
 ## alternative hypothesis: equivalence
 ## null values:
 ## lower bound upper bound 
 ##        -0.5         0.5 
 ## 90 percent confidence interval:
-##  -1.3215945 -0.4499223
+##  -1.3018312 -0.4480945
 ## sample estimates:
 ## SMD (g[rm]) 
 ##  -0.7513666
@@ -1156,13 +1156,13 @@ objects that integrate with the helper functions described above.
 ##  Bootstrapped Pearson's product-moment correlation (BCa)
 ## 
 ## data:  bugs$LDLF and bugs$LDHF
-## N = 91, p-value = 0.9809
+## N = 91, p-value = 0.9787
 ## alternative hypothesis: equivalence
 ## null values:
 ## correlation correlation 
 ##         0.4        -0.4 
 ## 90 percent confidence interval:
-##  0.4410134 0.6891551
+##  0.4360295 0.6916337
 ## sample estimates:
 ##         r 
 ## 0.5767783
@@ -1175,8 +1175,8 @@ objects that integrate with the helper functions described above.
 \end{Shaded}
 
 The Bootstrapped Pearson's product-moment correlation (BCa) is not
-statistically significant (p = 0.981, r = 0.577, 90\% C.I.{[}0.441,
-0.689{]}) at a 0.05 alpha-level. The null hypothesis cannot be rejected.
+statistically significant (p = 0.979, r = 0.577, 90\% C.I.{[}0.436,
+0.692{]}) at a 0.05 alpha-level. The null hypothesis cannot be rejected.
 At the desired error rate, it cannot be stated that the true correlation
 is between 0.4 and -0.4.
 
