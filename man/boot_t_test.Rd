@@ -148,6 +148,26 @@ and winsorized variances are used in place of standard variances. This provides
 robustness against outliers and heavy-tailed distributions. The bootstrap
 procedure recomputes trimmed means and winsorized standard errors for each
 bootstrap replicate.
+}
+
+\subsection{Sharp and Weak Null Hypotheses}{
+
+The bootstrap resamples within each group, so it targets the \strong{weak null}
+hypothesis (Neyman) that the means (or trimmed means) are equal, while allowing
+the distributions to otherwise differ (e.g., in variance or shape). Its validity
+is asymptotic only: bootstrap tests and confidence intervals are never exact,
+even under the \strong{sharp null} (Fisher) of identical distributions, and their
+small-sample accuracy depends on the interval method (the studentized method is
+usually the most accurate).
+
+By contrast, the permutation test in \code{\link[=perm_t_test]{perm_t_test()}} is exact under the sharp
+null and, with its default studentized statistic, asymptotically valid for the
+weak null (Wu & Ding, 2020). For randomized experiments, particularly small ones,
+the permutation test is therefore a natural choice because it is justified by
+the randomization itself. When data are random samples from two populations
+(e.g., observational comparisons), the bootstrap, which directly mimics the
+sampling process, is an equally natural choice. Neither approach supports
+population inference from non-random (e.g., convenience) samples.
 
 Unlike the \code{t_TOST} function, this function returns a standard \code{htest} object for
 compatibility with other R functions, while still providing the benefits of bootstrapping.
@@ -213,6 +233,10 @@ Efron, B., & Tibshirani, R. J. (1994). An introduction to the bootstrap. CRC pre
 
 Yuen, K. K. (1974). The two-sample trimmed t for unequal population variances.
 Biometrika, 61(1), 165-170.
+
+Wu, J., & Ding, P. (2020). Randomization tests for weak null hypotheses in
+randomized experiments. Journal of the American Statistical Association,
+116(536), 1898-1913. doi: 10.1080/01621459.2020.1750415
 }
 \seealso{
 Other Robust tests: 

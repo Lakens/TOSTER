@@ -109,6 +109,21 @@
 #' extreme null values. For the two-sample case, the scale estimator is
 #' recomputed for each permutation, which partially mitigates this issue.
 #'
+#' ## Permutation Confidence Intervals
+#'
+#' For permutation tests, the confidence interval is obtained by inverting the
+#' same permutation test that produces the p-value:
+#' \eqn{\hat\theta - S \cdot q}, where \eqn{\hat\theta} is the Hodges-Lehmann
+#' estimate, \eqn{S} is the scale estimate from the original sample, and
+#' \eqn{q} is the order statistic of the permutation distribution at which the
+#' permutation p-value (with the same `p_method` counting rule) crosses
+#' `alpha`. The two-sided interval uses the same absolute-value rule as the
+#' two-sided p-value. As a result, the confidence interval and p-value always
+#' agree: a null value lies inside the interval if and only if its p-value
+#' exceeds `alpha`. If the number of permutations is too small for the test to
+#' ever reject at the requested `alpha`, the corresponding confidence limit is
+#' infinite.
+#'
 #' ## Equivalence and Minimal Effect Testing
 #'
 #' Equivalence and minimal effect tests are only available with the asymptotic
@@ -150,7 +165,9 @@
 #'   - `R`: the requested number of permutations (NULL for asymptotic).
 #'   - `R.used`: the actual number of permutations used.
 #'   - `perm.stat`: (if `keep_perm = TRUE`) the permutation distribution of test statistics.
-#'   - `perm.eff`: (if `keep_perm = TRUE`) the permutation distribution of effects.
+#'   - `perm.eff`: (if `keep_perm = TRUE`) the raw permutation distribution of effects
+#'     (permuted estimates shifted by the observed estimate). This is provided for
+#'     inspection only and is not used to construct the confidence interval.
 #'
 #' @examples
 #' # Two-sample test (asymptotic)
@@ -625,21 +642,22 @@ hodges_lehmann.default <- function(x,
       # Observed test statistic
       obs_stat <- (estimate - mu) / scale_est
 
-      # P-values
+      # P-values and CI (CI inverts the permutation test; see perm_crit())
       if (alternative == "two.sided") {
         b <- sum(abs(TSTAT) >= abs(obs_stat))
         pval <- hl_perm_pval(b, R.used, p_method)
-        cint <- stats::quantile(EFF, c((1 - ci_level) / 2, 1 - (1 - ci_level) / 2),
-                                names = FALSE)
+        crit <- perm_crit(TSTAT, alpha, p_method, "abs")
+        cint <- c(estimate - scale_est * crit, estimate + scale_est * crit)
       } else if (alternative == "less") {
         b <- sum(TSTAT <= obs_stat)
         pval <- hl_perm_pval(b, R.used, p_method)
-        cint <- c(-Inf, stats::quantile(EFF, ci_level, names = FALSE))
+        cint <- c(-Inf, estimate - scale_est * perm_crit(TSTAT, alpha, p_method, "lower"))
       } else if (alternative == "greater") {
         b <- sum(TSTAT >= obs_stat)
         pval <- hl_perm_pval(b, R.used, p_method)
-        cint <- c(stats::quantile(EFF, 1 - ci_level, names = FALSE), Inf)
+        cint <- c(estimate - scale_est * perm_crit(TSTAT, alpha, p_method, "upper"), Inf)
       }
+      cint <- unname(cint)
 
       tstat_report <- obs_stat
     }
@@ -787,21 +805,22 @@ hodges_lehmann.default <- function(x,
       # Observed test statistic
       obs_stat <- (estimate - mu) / scale_est
 
-      # P-values
+      # P-values and CI (CI inverts the permutation test; see perm_crit())
       if (alternative == "two.sided") {
         b <- sum(abs(TSTAT) >= abs(obs_stat))
         pval <- hl_perm_pval(b, R.used, p_method)
-        cint <- stats::quantile(EFF, c((1 - ci_level) / 2, 1 - (1 - ci_level) / 2),
-                                names = FALSE)
+        crit <- perm_crit(TSTAT, alpha, p_method, "abs")
+        cint <- c(estimate - scale_est * crit, estimate + scale_est * crit)
       } else if (alternative == "less") {
         b <- sum(TSTAT <= obs_stat)
         pval <- hl_perm_pval(b, R.used, p_method)
-        cint <- c(-Inf, stats::quantile(EFF, ci_level, names = FALSE))
+        cint <- c(-Inf, estimate - scale_est * perm_crit(TSTAT, alpha, p_method, "lower"))
       } else if (alternative == "greater") {
         b <- sum(TSTAT >= obs_stat)
         pval <- hl_perm_pval(b, R.used, p_method)
-        cint <- c(stats::quantile(EFF, 1 - ci_level, names = FALSE), Inf)
+        cint <- c(estimate - scale_est * perm_crit(TSTAT, alpha, p_method, "upper"), Inf)
       }
+      cint <- unname(cint)
 
       tstat_report <- obs_stat
     }

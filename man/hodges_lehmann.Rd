@@ -105,7 +105,9 @@ A list with class \code{"htest"} containing the following components:
 \item \code{R}: the requested number of permutations (NULL for asymptotic).
 \item \code{R.used}: the actual number of permutations used.
 \item \code{perm.stat}: (if \code{keep_perm = TRUE}) the permutation distribution of test statistics.
-\item \code{perm.eff}: (if \code{keep_perm = TRUE}) the permutation distribution of effects.
+\item \code{perm.eff}: (if \code{keep_perm = TRUE}) the raw permutation distribution of effects
+(permuted estimates shifted by the observed estimate). This is provided for
+inspection only and is not used to construct the confidence interval.
 }
 }
 \description{
@@ -174,6 +176,22 @@ approximate rather than exact. The approximation is generally adequate when
 \code{mu} is moderate relative to the scale of the data, but may lose accuracy for
 extreme null values. For the two-sample case, the scale estimator is
 recomputed for each permutation, which partially mitigates this issue.
+}
+
+\subsection{Permutation Confidence Intervals}{
+
+For permutation tests, the confidence interval is obtained by inverting the
+same permutation test that produces the p-value:
+\eqn{\hat\theta - S \cdot q}, where \eqn{\hat\theta} is the Hodges-Lehmann
+estimate, \eqn{S} is the scale estimate from the original sample, and
+\eqn{q} is the order statistic of the permutation distribution at which the
+permutation p-value (with the same \code{p_method} counting rule) crosses
+\code{alpha}. The two-sided interval uses the same absolute-value rule as the
+two-sided p-value. As a result, the confidence interval and p-value always
+agree: a null value lies inside the interval if and only if its p-value
+exceeds \code{alpha}. If the number of permutations is too small for the test to
+ever reject at the requested \code{alpha}, the corresponding confidence limit is
+infinite.
 }
 
 \subsection{Equivalence and Minimal Effect Testing}{

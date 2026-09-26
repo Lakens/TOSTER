@@ -136,7 +136,10 @@
 #'
 #' For equivalence: \eqn{p_{TOST} = \max(p_1, p_2)}
 #'
-#' For minimal effect: \eqn{p_{MET} = \min(1 - p_1, 1 - p_2)}
+#' For minimal effect: \eqn{p_{MET} = \min(1 - p_1, 1 - p_2)}. For
+#' `test_method = "perm"`, the minimal effect one-sided p-values are instead
+#' computed by counting the opposite tails of the permutation distribution
+#' directly (with the same `p_method` counting rule).
 #'
 #' ## Confidence Intervals for Equivalence Testing
 #'
@@ -144,6 +147,19 @@
 #' interval is computed at the \eqn{1 - 2\alpha} level (default: 90% CI when \eqn{\alpha = 0.05}).
 #' This follows the standard TOST procedure where the \eqn{(1 - 2\alpha) \times 100\%} CI
 #' corresponds to two one-sided tests at level \eqn{\alpha}.
+#'
+#' ## Permutation Confidence Intervals
+#'
+#' When `test_method = "perm"`, the confidence interval is obtained by
+#' inverting the same studentized permutation test that produces the p-value:
+#' \eqn{\hat{p} - SE \cdot q}, where \eqn{SE} is the standard error from the
+#' original sample and \eqn{q} is the order statistic of the permutation
+#' distribution at which the permutation p-value (with the same `p_method`
+#' counting rule) crosses \eqn{\alpha}. The two-sided interval uses the same
+#' absolute-value rule as the two-sided p-value. As a result, the confidence
+#' interval and p-value always agree, apart from the interval being clamped to
+#' `[0, 1]`. If the number of permutations is too small for the test to ever
+#' reject at the requested \eqn{\alpha}, the corresponding limit is set to 0 or 1.
 #'
 #' ## Permutation Tests with Non-0.5 Null Values
 #'
@@ -556,25 +572,24 @@ brunner_munzel.default = function(x,
           }
         } else { # minimal.effect
           # At least one condition must be met: p <= low OR p >= high
-          # p-value is the minimum of the two one-sided tests
-          p.value <- min(1 - p_greater_low, 1 - p_less_high)
+          # One-sided p-values count the opposite tails directly
+          p_less_low <- bm_compute_perm_pval(sum(Tperm <= test_stat_low),
+                                             n_perm_actual, p_method)
+          p_greater_high <- bm_compute_perm_pval(sum(Tperm >= test_stat_high),
+                                                 n_perm_actual, p_method)
+          p.value <- min(p_less_low, p_greater_high)
 
           # Determine which bound is "binding" for reporting
-          if((1 - p_greater_low) <= (1 - p_less_high)) {
+          if(p_less_low <= p_greater_high) {
             test_stat <- test_stat_low
           } else {
             test_stat <- test_stat_high
           }
         }
 
-        # Confidence interval quantiles from permutation distribution
-        # Use actual number of permutations for indexing
-        sorted_Tperm <- sort(Tperm)
-        idx_pq1 <- min(n_perm_actual, max(1, floor((1-alpha)*n_perm_actual)+1))
-        pq1 <- sorted_Tperm[idx_pq1]
-
-        pd.lower <- pd - pq1*sqrt(v/n)
-        pd.upper <- pd + pq1*sqrt(v/n)
+        # 1 - 2*alpha CI by inverting both one-sided permutation tests at alpha
+        pd.lower <- pd - std_err * perm_crit(Tperm, alpha, p_method, "upper")
+        pd.upper <- pd - std_err * perm_crit(Tperm, alpha, p_method, "lower")
 
       } else {
         # Standard alternatives (two.sided, less, greater)
@@ -586,12 +601,6 @@ brunner_munzel.default = function(x,
         b_greater <- sum(Tperm >= test_stat)
         b_two_sided <- sum(abs(Tperm) >= abs(test_stat))
 
-        sorted_Tperm <- sort(Tperm)
-        idx_pq1 <- min(n_perm_actual, max(1, floor((1-alpha/2)*n_perm_actual)+1))
-        idx_pq2 <- min(n_perm_actual, max(1, floor((1-alpha)*n_perm_actual)+1))
-        pq1 <- sorted_Tperm[idx_pq1]
-        pq2 <- sorted_Tperm[idx_pq2]
-
         # Compute p-values using selected method
         p_less <- bm_compute_perm_pval(b_less, n_perm_actual, p_method)
         p_greater <- bm_compute_perm_pval(b_greater, n_perm_actual, p_method)
@@ -602,14 +611,16 @@ brunner_munzel.default = function(x,
                          "less" = p_less,
                          "greater" = p_greater)
 
+        # CI inverts the same permutation test (see perm_crit())
+        crit_abs <- if (alternative == "two.sided") perm_crit(Tperm, alpha, p_method, "abs")
         pd.lower = switch(alternative,
-                          "two.sided" = pd - pq1*sqrt(v/n),
+                          "two.sided" = pd - std_err * crit_abs,
                           "less" = 0,
-                          "greater" = pd - pq2*sqrt(v/n))
+                          "greater" = pd - std_err * perm_crit(Tperm, alpha, p_method, "upper"))
 
         pd.upper = switch(alternative,
-                          "two.sided" = pd + pq1*sqrt(v/n),
-                          "less" = pd + pq2*sqrt(v/n),
+                          "two.sided" = pd + std_err * crit_abs,
+                          "less" = pd - std_err * perm_crit(Tperm, alpha, p_method, "lower"),
                           "greater" = 1)
       }
 
@@ -870,23 +881,23 @@ brunner_munzel.default = function(x,
           }
         } else { # minimal.effect
           # At least one condition must be met: p <= low OR p >= high
-          # p-value is the minimum of the two one-sided tests
-          p.value <- min(1 - p_greater_low, 1 - p_less_high)
+          # One-sided p-values count the opposite tails directly
+          p_less_low <- bm_compute_perm_pval(sum(Tperm[1,] <= test_stat_low),
+                                             R_actual, p_method)
+          p_greater_high <- bm_compute_perm_pval(sum(Tperm[1,] >= test_stat_high),
+                                                 R_actual, p_method)
+          p.value <- min(p_less_low, p_greater_high)
 
-          if((1 - p_greater_low) <= (1 - p_less_high)) {
+          if(p_less_low <= p_greater_high) {
             test_stat <- test_stat_low
           } else {
             test_stat <- test_stat_high
           }
         }
 
-        # CI quantiles for 1-2*alpha level
-        idx1 <- max(1, floor((1-alpha)*R_actual))
-        idx2 <- min(R_actual, ceiling((1-alpha)*R_actual))
-        c1 <- 0.5*(Tperm[1, idx1] + Tperm[1, idx2])
-
-        pd.lower <- pd - sqrt(V/N)*c1
-        pd.upper <- pd + sqrt(V/N)*c1
+        # 1 - 2*alpha CI by inverting both one-sided permutation tests at alpha
+        pd.lower <- pd - std_err * perm_crit(Tperm[1,], alpha, p_method, "upper")
+        pd.upper <- pd - std_err * perm_crit(Tperm[1,], alpha, p_method, "lower")
 
       } else {
         # Standard alternatives
@@ -901,24 +912,16 @@ brunner_munzel.default = function(x,
         # This matches the brunnermunzel package's approach
         b_two_sided <- sum(abs(Tperm[1,]) >= abs(test_stat))
 
+        # CI inverts the same permutation test (see perm_crit()); the
+        # two-sided interval uses the same |T| rule as the two-sided p-value
         if(alternative == "two.sided"){
-          idx_c1 <- max(1, floor((1-alpha/2)*R_actual))
-          idx_c1b <- min(R_actual, ceiling((1-alpha/2)*R_actual))
-          idx_c2 <- max(1, floor(alpha/2*R_actual))
-          idx_c2b <- min(R_actual, ceiling(alpha/2*R_actual))
-          c1<-0.5*(Tperm[1, idx_c1]+Tperm[1, idx_c1b])
-          c2<-0.5*(Tperm[1, idx_c2]+Tperm[1, idx_c2b])
+          crit_abs <- perm_crit(Tperm[1,], alpha, p_method, "abs")
+          lower_ci <- pd - std_err * crit_abs
+          upper_ci <- pd + std_err * crit_abs
         } else {
-          idx_c1 <- max(1, floor((1-alpha)*R_actual))
-          idx_c1b <- min(R_actual, ceiling((1-alpha)*R_actual))
-          idx_c2 <- max(1, floor(alpha*R_actual))
-          idx_c2b <- min(R_actual, ceiling(alpha*R_actual))
-          c1<-0.5*(Tperm[1, idx_c1]+Tperm[1, idx_c1b])
-          c2<-0.5*(Tperm[1, idx_c2]+Tperm[1, idx_c2b])
+          lower_ci <- pd - std_err * perm_crit(Tperm[1,], alpha, p_method, "upper")
+          upper_ci <- pd - std_err * perm_crit(Tperm[1,], alpha, p_method, "lower")
         }
-
-        lower_ci = pd - sqrt(V/N)*c1
-        upper_ci = pd - sqrt(V/N)*c2
 
         # Compute p-values using selected method
         p_less <- bm_compute_perm_pval(b_less, R_actual, p_method)

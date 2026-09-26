@@ -770,3 +770,196 @@ test_that("print method works without error", {
   # Should print without error
   expect_output(print(result))
 })
+
+
+# CI / p-value duality (#120) -----------------
+
+# Re-run the test at a new null value using the same permutations
+# (same seed for randomized R, identical enumeration for exact)
+perm_p_at <- function(args, mu, seed = 1) {
+  args$mu <- mu
+  set.seed(seed)
+  suppressMessages(do.call(perm_t_test, args))$p.value
+}
+
+# Check that mu just inside the CI gives p > alpha and just outside gives p <= alpha
+expect_ci_duality <- function(args, seed = 1) {
+  alpha <- if (is.null(args$alpha)) 0.05 else args$alpha
+  set.seed(seed)
+  res <- suppressMessages(do.call(perm_t_test, args))
+  ci <- res$conf.int
+  eps <- 1e-6 * res$stderr
+
+  if (is.finite(ci[1])) {
+    expect_gt(perm_p_at(args, ci[1] + eps, seed), alpha)
+    expect_lte(perm_p_at(args, ci[1] - eps, seed), alpha)
+  }
+  if (is.finite(ci[2])) {
+    expect_gt(perm_p_at(args, ci[2] - eps, seed), alpha)
+    expect_lte(perm_p_at(args, ci[2] + eps, seed), alpha)
+  }
+  invisible(res)
+}
+
+set.seed(2024)
+bf_x <- rnorm(8, mean = 1, sd = 4)
+bf_y <- rnorm(20, mean = 0, sd = 1)
+small_x <- rnorm(5, mean = 1, sd = 3)
+small_y <- rnorm(9, mean = 0, sd = 1)
+
+test_that("CI agrees with p-value: two-sample Welch (Behrens-Fisher), randomized", {
+  skip_on_cran()
+  for (alt in c("two.sided", "less", "greater")) {
+    for (sym in c(TRUE, FALSE)) {
+      expect_ci_duality(list(x = bf_x, y = bf_y, alternative = alt,
+                             symmetric = sym, R = 999))
+    }
+  }
+})
+
+test_that("CI agrees with p-value: two-sample exact enumeration, both p_methods", {
+  skip_on_cran()
+  for (pm in c("exact", "plusone")) {
+    for (alt in c("two.sided", "less", "greater")) {
+      expect_ci_duality(list(x = small_x, y = small_y, alternative = alt,
+                             p_method = pm))
+      expect_ci_duality(list(x = small_x, y = small_y, alternative = alt,
+                             symmetric = FALSE, p_method = pm))
+    }
+  }
+})
+
+test_that("CI agrees with p-value: var.equal, trimming, and perm_se = FALSE", {
+  skip_on_cran()
+  for (alt in c("two.sided", "less", "greater")) {
+    expect_ci_duality(list(x = bf_x, y = bf_y, alternative = alt,
+                           var.equal = TRUE, R = 499))
+    expect_ci_duality(list(x = bf_x, y = bf_y, alternative = alt,
+                           tr = 0.2, R = 499))
+    expect_ci_duality(list(x = bf_x, y = bf_y, alternative = alt,
+                           perm_se = FALSE, R = 499))
+    expect_ci_duality(list(x = bf_x, y = bf_y, alternative = alt,
+                           var.equal = TRUE, tr = 0.2, R = 499,
+                           p_method = "exact"))
+  }
+})
+
+test_that("CI agrees with p-value: one-sample and paired", {
+  skip_on_cran()
+  set.seed(7)
+  x1 <- rexp(10) - 0.3
+  for (alt in c("two.sided", "less", "greater")) {
+    for (sym in c(TRUE, FALSE)) {
+      # exact sign-flip enumeration (1024 permutations)
+      expect_ci_duality(list(x = x1, alternative = alt, symmetric = sym))
+      # randomized sign flips with trimming
+      expect_ci_duality(list(x = c(x1, x1 * 1.5), alternative = alt,
+                             symmetric = sym, tr = 0.1, R = 999))
+      # paired
+      expect_ci_duality(list(x = paired_x, y = paired_y, paired = TRUE,
+                             alternative = alt, symmetric = sym))
+    }
+  }
+})
+
+test_that("CI agrees with p-value for alpha other than 0.05", {
+  skip_on_cran()
+  expect_ci_duality(list(x = bf_x, y = bf_y, alpha = 0.1, R = 999))
+  expect_ci_duality(list(x = bf_x, y = bf_y, alpha = 0.01, R = 999,
+                         symmetric = FALSE))
+})
+
+test_that("equivalence and minimal effect decisions agree with the 1 - 2*alpha CI", {
+  skip_on_cran()
+  base <- list(x = bf_x, y = bf_y, R = 999)
+  set.seed(1)
+  ci <- suppressMessages(do.call(perm_t_test, c(base, list(
+    alternative = "equivalence", mu = c(-10, 10)))))$conf.int
+  expect_equal(attr(ci, "conf.level"), 0.90)
+  eps <- 1e-6
+
+  run <- function(alt, mu) {
+    set.seed(1)
+    suppressMessages(do.call(perm_t_test, c(base, list(
+      alternative = alt, mu = mu))))
+  }
+
+  # CI is identical regardless of the bounds
+  expect_equal(run("equivalence", c(-1, 1))$conf.int, ci)
+  expect_equal(run("minimal.effect", c(-1, 1))$conf.int, ci)
+
+  # Equivalence: significant iff CI lies within the bounds
+  expect_lte(run("equivalence", c(ci[1] - eps, ci[2] + eps))$p.value, 0.05)
+  expect_gt(run("equivalence", c(ci[1] + eps, ci[2] + eps))$p.value, 0.05)
+  expect_gt(run("equivalence", c(ci[1] - eps, ci[2] - eps))$p.value, 0.05)
+
+  # Minimal effect: significant iff CI lies entirely outside the bounds
+  expect_lte(run("minimal.effect", c(ci[2] + eps, ci[2] + 5))$p.value, 0.05)
+  expect_gt(run("minimal.effect", c(ci[2] - eps, ci[2] + 5))$p.value, 0.05)
+  expect_lte(run("minimal.effect", c(ci[1] - 5, ci[1] - eps))$p.value, 0.05)
+  expect_gt(run("minimal.effect", c(ci[1] - 5, ci[1] + eps))$p.value, 0.05)
+})
+
+test_that("symmetric two-sided CI is centered on the estimate", {
+  skip_on_cran()
+  set.seed(1)
+  res <- suppressMessages(perm_t_test(bf_x, bf_y, R = 999, symmetric = TRUE))
+  est <- unname(res$estimate[3])
+  expect_equal(est - res$conf.int[1], res$conf.int[2] - est)
+})
+
+test_that("CI is infinite when too few permutations to reject", {
+  # one-sample n = 4: 16 sign flips; with plusone the smallest one-sided
+  # p-value is 1/17 > 0.05 and the equal-tail p-value is at least 2/17
+  x4 <- c(1.2, 0.8, 2.1, 1.5)
+  res <- suppressMessages(perm_t_test(x4, symmetric = FALSE, p_method = "plusone"))
+  expect_equal(res$R.used, 16)
+  expect_equal(res$conf.int[1], -Inf)
+  expect_equal(res$conf.int[2], Inf)
+
+  res_less <- suppressMessages(perm_t_test(x4, alternative = "less",
+                                           p_method = "plusone"))
+  expect_equal(res_less$conf.int[2], Inf)
+
+  # with exact (b/R) counting, p = 0 is attainable, so the CI is finite
+  res_exact <- suppressMessages(perm_t_test(x4, symmetric = FALSE, p_method = "exact"))
+  expect_true(all(is.finite(res_exact$conf.int)))
+})
+
+test_that("perm_crit returns the order statistic matching the p-value rule", {
+  tstat <- c(-2, -1, 0, 1, 2, 3, 4, 5, 6, 7)
+  # exact: reject when b/10 <= 0.2, i.e. b <= 2
+  # upper: 3rd largest; lower: 3rd smallest; abs: 3rd largest of |T|
+  expect_equal(perm_crit(tstat, 0.2, "exact", "upper"), 5)
+  expect_equal(perm_crit(tstat, 0.2, "exact", "lower"), 0)
+  expect_equal(perm_crit(tstat, 0.2, "exact", "abs"), 5)
+  # plusone: reject when (b+1)/11 <= 0.2, i.e. b <= 1
+  expect_equal(perm_crit(tstat, 0.2, "plusone", "upper"), 6)
+  expect_equal(perm_crit(tstat, 0.2, "plusone", "lower"), -1)
+  # exact: b = 0 gives p = 0, so the extreme order statistic is the critical value
+  expect_equal(perm_crit(tstat, 0.05, "exact", "upper"), 7)
+  expect_equal(perm_crit(tstat, 0.05, "exact", "lower"), -2)
+  # plusone: (0+1)/11 > 0.05, so the test can never reject
+  expect_equal(perm_crit(tstat, 0.05, "plusone", "upper"), Inf)
+  expect_equal(perm_crit(tstat, 0.05, "plusone", "lower"), -Inf)
+  expect_equal(perm_crit(tstat, 0.05, "plusone", "abs"), Inf)
+})
+
+test_that("CI agrees with p-value under Behrens-Fisher (regression for #120)", {
+  skip_on_cran()
+  # Small group with large variance: the old percentile CI of raw permuted
+  # differences disagreed with the studentized p-value for these data
+  set.seed(1)
+  x <- rnorm(8, 0.9, 4)
+  y <- rnorm(30, 0, 1)
+  set.seed(1)
+  res <- suppressMessages(perm_t_test(x, y, R = 999))
+  old_ci <- quantile(res$perm.eff, c(0.025, 0.975), names = FALSE)
+
+  p_sig <- res$p.value <= 0.05
+  expect_false(p_sig)
+  # old interval excluded 0 despite p > 0.05
+  expect_true(old_ci[1] > 0 || old_ci[2] < 0)
+  # new interval agrees with the p-value
+  expect_equal(res$conf.int[1] > 0 || res$conf.int[2] < 0, p_sig)
+})

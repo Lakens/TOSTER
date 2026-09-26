@@ -202,7 +202,10 @@ The one-sided p-values are:
 
 For equivalence: \eqn{p_{TOST} = \max(p_1, p_2)}
 
-For minimal effect: \eqn{p_{MET} = \min(1 - p_1, 1 - p_2)}
+For minimal effect: \eqn{p_{MET} = \min(1 - p_1, 1 - p_2)}. For
+\code{test_method = "perm"}, the minimal effect one-sided p-values are instead
+computed by counting the opposite tails of the permutation distribution
+directly (with the same \code{p_method} counting rule).
 }
 
 \subsection{Confidence Intervals for Equivalence Testing}{
@@ -211,6 +214,20 @@ When \code{alternative = "equivalence"} or \code{alternative = "minimal.effect"}
 interval is computed at the \eqn{1 - 2\alpha} level (default: 90\% CI when \eqn{\alpha = 0.05}).
 This follows the standard TOST procedure where the \eqn{(1 - 2\alpha) \times 100\%} CI
 corresponds to two one-sided tests at level \eqn{\alpha}.
+}
+
+\subsection{Permutation Confidence Intervals}{
+
+When \code{test_method = "perm"}, the confidence interval is obtained by
+inverting the same studentized permutation test that produces the p-value:
+\eqn{\hat{p} - SE \cdot q}, where \eqn{SE} is the standard error from the
+original sample and \eqn{q} is the order statistic of the permutation
+distribution at which the permutation p-value (with the same \code{p_method}
+counting rule) crosses \eqn{\alpha}. The two-sided interval uses the same
+absolute-value rule as the two-sided p-value. As a result, the confidence
+interval and p-value always agree, apart from the interval being clamped to
+\verb{[0, 1]}. If the number of permutations is too small for the test to ever
+reject at the requested \eqn{\alpha}, the corresponding limit is set to 0 or 1.
 }
 
 \subsection{Permutation Tests with Non-0.5 Null Values}{

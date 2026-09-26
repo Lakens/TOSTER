@@ -68,9 +68,12 @@ equal-tail permutation p-value is computed. Only relevant for \code{alternative 
 \item{perm_se}{a logical variable indicating whether to recompute the standard error for each
 permutation (studentized permutation test). If \code{TRUE} (default), the standard error is
 recomputed for each permuted sample, following the studentized permutation approach of
-Janssen (1997) and Chung & Romano (2013), which is valid even under heteroscedasticity.
+Janssen (1997) and Chung & Romano (2013). This test is exact under the sharp null
+hypothesis and asymptotically valid for the weak null hypothesis of equal means, even
+under heteroscedasticity (see "Sharp and Weak Null Hypotheses" in Details).
 If \code{FALSE}, the standard error from the original sample is used for all permutations,
-which is computationally faster but assumes homoscedasticity.}
+which is computationally faster and still exact under the sharp null, but is not
+valid for the weak null when variances and group sizes differ.}
 
 \item{p_method}{the method for computing permutation p-values. Options are:
 * \code{NULL} (default): Automatically selects "exact" for exact permutation tests (when all
@@ -101,8 +104,8 @@ A list with class \code{"htest"} containing the following components:
 \item "parameter": the degrees of freedom for the t-statistic.
 \item "p.value": the permutation p-value for the test.
 \item "stderr": the standard error of the mean (difference).
-\item "conf.int": a permutation percentile confidence interval appropriate to the
-specified alternative hypothesis.
+\item "conf.int": a permutation confidence interval, obtained by inverting the
+permutation test, appropriate to the specified alternative hypothesis.
 \item "estimate": the estimated mean or difference in means (or trimmed means if tr > 0).
 \item "null.value": the specified hypothesized value(s) of the mean or mean difference.
 \item "alternative": a character string describing the alternative hypothesis.
@@ -112,7 +115,9 @@ specified alternative hypothesis.
 \item "R": the requested number of permutations.
 \item "R.used": the actual number of permutations used (may differ if exact permutations computed).
 \item "perm.stat": (if keep_perm = TRUE) the permutation distribution of the test statistic.
-\item "perm.eff": (if keep_perm = TRUE) the permutation distribution of the effect (mean differences).
+\item "perm.eff": (if keep_perm = TRUE) the raw permutation distribution of the effect
+(permuted mean differences shifted by the estimate). This is provided for
+inspection only and is not used to construct the confidence interval.
 }
 }
 \description{
@@ -134,8 +139,26 @@ The permutation procedure follows these steps:
 \item Generate R permutation samples by randomly reassigning observations to groups
 \item Calculate the test statistic for each permutation sample
 \item Compute the p-value by comparing the original test statistic to the permutation distribution
-\item Calculate confidence intervals using the percentile method
+\item Calculate confidence intervals by inverting the permutation test
 }
+\subsection{Confidence Intervals}{
+
+Confidence intervals are obtained by inverting the same (studentized)
+permutation test that produces the p-value. Because the permutation
+distribution \eqn{T^*} is generated from the unshifted data, it does not
+depend on the null value, and the interval has the closed form
+\eqn{\hat\theta - SE \cdot q}, where \eqn{\hat\theta} is the estimate,
+\eqn{SE} is the standard error from the original sample, and \eqn{q} is the
+order statistic of \eqn{T^*} at which the permutation p-value (using the same
+\code{p_method} counting rule and, for two-sided tests, the same \code{symmetric}
+setting) crosses \code{alpha}. As a result, the confidence interval and p-value
+always agree: a null value lies inside the interval if and only if its
+p-value exceeds \code{alpha}. When \code{perm_se = TRUE} this yields a studentized
+interval that remains valid under unequal variances. When \code{perm_se = FALSE}
+it reduces to a (reflected) percentile interval of the permuted differences.
+
+If the number of permutations is too small for the test to ever reject at
+the requested \code{alpha}, the corresponding confidence limit is infinite.
 
 For one-sample and paired tests, permutation is performed by randomly flipping the signs of
 the (centered) observations or difference scores.
@@ -143,9 +166,10 @@ the (centered) observations or difference scores.
 For two-sample tests, permutation is performed by randomly reassigning observations to the
 two groups. When \code{perm_se = TRUE} (default), the studentized permutation approach of
 Janssen (1997) and Chung & Romano (2013) is used, which recomputes the standard error for
-each permutation and is valid even under heteroscedasticity. When \code{perm_se = FALSE}, the
-standard error from the original sample is used for all permutations, which is faster but
-assumes equal variances.
+each permutation and remains asymptotically valid under heteroscedasticity. When
+\code{perm_se = FALSE}, the standard error from the original sample is used for all
+permutations, which is faster but assumes equal variances (see "Sharp and Weak Null
+Hypotheses" below).
 
 When \code{tr > 0}, the function uses Yuen's trimmed t-test approach:
 \itemize{
@@ -171,6 +195,8 @@ For one-sample tests, the test is of \eqn{\bar x} (mean of x).
 
 If the number of possible permutations is less than R, all exact permutations are computed
 and a message is printed to the console.
+}
+
 \subsection{Permutation Approach to Equivalence and Minimal Effect Testing}{
 
 When \code{alternative = "equivalence"} or \code{alternative = "minimal.effect"}, the
@@ -206,6 +232,53 @@ small relative to the variability in the data. For the UI direction
 (\code{"minimal.effect"}), the impact of not calibrating is smaller because the
 calibrated critical value lies in the narrower interval
 \eqn{[\alpha/2, \alpha]} rather than \eqn{[\alpha, (1+\alpha)/2)}.
+}
+
+\subsection{Sharp and Weak Null Hypotheses}{
+
+Two different null hypotheses are relevant when interpreting a permutation test:
+\itemize{
+\item The \strong{sharp null} (Fisher) states that there is no effect at all: the two
+groups have identical distributions (for one-sample and paired tests, the
+observations or difference scores are symmetric about zero). Under the sharp
+null the group labels (or signs) are exchangeable, so the permutation test is
+\strong{exact} at any sample size. This holds for any test statistic, including the
+studentized (Welch) statistic used by default, and for both \code{p_method} options.
+\item The \strong{weak null} (Neyman) states only that the means (or trimmed means) are
+equal, while the distributions may otherwise differ, for example in variance or
+shape. Under the weak null the observations are not exchangeable and no
+permutation test is exact. The studentized test (\code{perm_se = TRUE}) is
+asymptotically valid (Janssen, 1997; Chung & Romano, 2013), so it controls the
+Type I error rate for the weak null in large samples while remaining exact for
+the sharp null (Wu & Ding, 2020). The non-studentized test (\code{perm_se = FALSE})
+does not have this property and can have incorrect Type I error rates for the
+weak null even in large samples when group sizes and variances differ.
+}
+
+Because validity for the weak null is only asymptotic, the studentized test can
+be anti-conservative in very small samples with unequal variances, particularly
+when the smaller group has the larger variance, and it offers no protection
+against the small-sample problems of comparing means of differently skewed
+distributions. In such cases the Welch t-test or \code{\link[=boot_t_test]{boot_t_test()}} may perform
+comparably or better.
+
+Exactness under the sharp null applies to the test of no effect (\code{mu = 0}). For
+tests against a non-zero \code{mu}, for the equivalence and minimal effect tests, and
+for the confidence interval, the permutation distribution of the unshifted data is
+used as the reference distribution (see above), so these are approximate rather
+than exact, even under a constant-shift model.
+
+\strong{Choosing between permutation and bootstrap methods.} In a randomized experiment,
+the permutation distribution corresponds to the actual randomization distribution,
+so the test is justified by the design itself and is exact under the sharp null.
+This makes \code{perm_t_test()} a natural choice for randomized experiments, especially
+small ones. When data are instead random samples from two populations (e.g.,
+observational comparisons), the permutation test remains exact for the null of
+identical population distributions and asymptotically valid for the weak null,
+but this justification rests on an exchangeability assumption rather than the
+design; in that setting the bootstrap (\code{\link[=boot_t_test]{boot_t_test()}}), which targets the weak
+null directly, is an equally natural choice. Neither approach supports population
+inference from non-random (e.g., convenience) samples.
 }
 }
 \section{Purpose}{
@@ -285,6 +358,10 @@ Biometrika, 61(1), 165-170.
 Phipson, B., & Smyth, G. K. (2010). Permutation P-values should never be zero:
 calculating exact P-values when permutations are randomly drawn.
 Statistical Applications in Genetics and Molecular Biology, 9(1), Article 39.
+
+Wu, J., & Ding, P. (2020). Randomization tests for weak null hypotheses in
+randomized experiments. Journal of the American Statistical Association,
+116(536), 1898-1913. doi: 10.1080/01621459.2020.1750415
 }
 \seealso{
 Other Robust tests: 

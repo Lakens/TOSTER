@@ -108,6 +108,12 @@ NEWS
   - Now shows only one-sided rejection regions appropriate to the test type
   - Equivalence tests: lower bound shows right tail, upper bound shows left tail
   - Minimal effect tests: lower bound shows left tail, upper bound shows right tail
+- `perm_t_test()` and `boot_t_test()` documentation now describes the sharp
+  (Fisher) versus weak (Neyman) null hypotheses: the permutation test is exact
+  under the sharp null and, when studentized, asymptotically valid for the weak
+  null (Wu & Ding, 2020), while the bootstrap targets the weak null and is
+  asymptotic only. Guidance on randomized versus random-sampling designs and on
+  small-sample, unequal-variance behavior is included.
 
 ## Bug Fixes
 
@@ -139,6 +145,27 @@ NEWS
   used Welch standard errors for the bootstrap replicates while the observed
   standard error and p-value used the pooled standard error. The replicates now
   use the pooled standard error, so the interval and p-value agree.
+- `perm_t_test()`: the confidence interval was a percentile interval of the raw
+  (non-studentized) permuted differences, while the p-value came from the
+  studentized permutation test. Under unequal variances and group sizes the two
+  could disagree, and the percentile interval was also reflected in the wrong
+  direction for asymmetric permutation distributions (#120). The confidence
+  interval is now obtained by inverting the same permutation test (same
+  `p_method` counting rule and `symmetric` setting), so it always agrees with
+  the p-value. Confidence interval values will differ from earlier versions.
+- `hodges_lehmann()` permutation tests: the confidence interval was likewise a
+  percentile interval of the raw permuted estimates (shifted by the estimate)
+  rather than an inversion of the permutation test, so it could disagree with
+  the p-value. It now inverts the same test (same `p_method` counting rule and
+  absolute-value two-sided rule), matching the `perm_t_test()` fix (#120).
+- `brunner_munzel(test_method = "perm")`: the confidence interval now inverts
+  the same studentized permutation test as the p-value (#120). Previously the
+  two-sample two-sided interval was equal-tailed while the p-value used the
+  absolute-value rule, the equivalence/minimal effect interval mirrored the
+  upper quantile to both sides, the paired intervals assumed a symmetric
+  permutation distribution, and the order-statistic rules did not match the
+  `p_method` counting rule. The permutation minimal effect p-value now counts
+  the opposite tails directly instead of using `1 - p`.
 - `smd_calc()` and `boot_smd_calc()`: the one-sample SMD now uses `mean(x) - mu` correctly
 - jamovi one-sample TOST now passes the `mu` option to the analysis.
 - `plot.TOSTt(type = "tnull")`: fixed swapped internal labels for the CI limits.
