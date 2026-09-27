@@ -644,16 +644,16 @@ hodges_lehmann.default <- function(x,
 
       # P-values and CI (CI inverts the permutation test; see perm_crit())
       if (alternative == "two.sided") {
-        b <- sum(abs(TSTAT) >= abs(obs_stat))
+        b <- perm_count(TSTAT, obs_stat, "abs")
         pval <- hl_perm_pval(b, R.used, p_method)
         crit <- perm_crit(TSTAT, alpha, p_method, "abs")
         cint <- c(estimate - scale_est * crit, estimate + scale_est * crit)
       } else if (alternative == "less") {
-        b <- sum(TSTAT <= obs_stat)
+        b <- perm_count(TSTAT, obs_stat, "le")
         pval <- hl_perm_pval(b, R.used, p_method)
         cint <- c(-Inf, estimate - scale_est * perm_crit(TSTAT, alpha, p_method, "lower"))
       } else if (alternative == "greater") {
-        b <- sum(TSTAT >= obs_stat)
+        b <- perm_count(TSTAT, obs_stat, "ge")
         pval <- hl_perm_pval(b, R.used, p_method)
         cint <- c(estimate - scale_est * perm_crit(TSTAT, alpha, p_method, "upper"), Inf)
       }
@@ -807,16 +807,16 @@ hodges_lehmann.default <- function(x,
 
       # P-values and CI (CI inverts the permutation test; see perm_crit())
       if (alternative == "two.sided") {
-        b <- sum(abs(TSTAT) >= abs(obs_stat))
+        b <- perm_count(TSTAT, obs_stat, "abs")
         pval <- hl_perm_pval(b, R.used, p_method)
         crit <- perm_crit(TSTAT, alpha, p_method, "abs")
         cint <- c(estimate - scale_est * crit, estimate + scale_est * crit)
       } else if (alternative == "less") {
-        b <- sum(TSTAT <= obs_stat)
+        b <- perm_count(TSTAT, obs_stat, "le")
         pval <- hl_perm_pval(b, R.used, p_method)
         cint <- c(-Inf, estimate - scale_est * perm_crit(TSTAT, alpha, p_method, "lower"))
       } else if (alternative == "greater") {
-        b <- sum(TSTAT >= obs_stat)
+        b <- perm_count(TSTAT, obs_stat, "ge")
         pval <- hl_perm_pval(b, R.used, p_method)
         cint <- c(estimate - scale_est * perm_crit(TSTAT, alpha, p_method, "upper"), Inf)
       }

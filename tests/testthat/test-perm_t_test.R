@@ -930,19 +930,47 @@ test_that("perm_crit returns the order statistic matching the p-value rule", {
   tstat <- c(-2, -1, 0, 1, 2, 3, 4, 5, 6, 7)
   # exact: reject when b/10 <= 0.2, i.e. b <= 2
   # upper: 3rd largest; lower: 3rd smallest; abs: 3rd largest of |T|
-  expect_equal(perm_crit(tstat, 0.2, "exact", "upper"), 5)
-  expect_equal(perm_crit(tstat, 0.2, "exact", "lower"), 0)
-  expect_equal(perm_crit(tstat, 0.2, "exact", "abs"), 5)
+  # (critical values are widened by perm_tol() to match perm_count())
+  expect_equal(perm_crit(tstat, 0.2, "exact", "upper"), 5 + perm_tol(5))
+  expect_equal(perm_crit(tstat, 0.2, "exact", "lower"), 0 - perm_tol(0))
+  expect_equal(perm_crit(tstat, 0.2, "exact", "abs"), 5 + perm_tol(5))
   # plusone: reject when (b+1)/11 <= 0.2, i.e. b <= 1
-  expect_equal(perm_crit(tstat, 0.2, "plusone", "upper"), 6)
-  expect_equal(perm_crit(tstat, 0.2, "plusone", "lower"), -1)
+  expect_equal(perm_crit(tstat, 0.2, "plusone", "upper"), 6 + perm_tol(6))
+  expect_equal(perm_crit(tstat, 0.2, "plusone", "lower"), -1 - perm_tol(-1))
   # exact: b = 0 gives p = 0, so the extreme order statistic is the critical value
-  expect_equal(perm_crit(tstat, 0.05, "exact", "upper"), 7)
-  expect_equal(perm_crit(tstat, 0.05, "exact", "lower"), -2)
+  expect_equal(perm_crit(tstat, 0.05, "exact", "upper"), 7 + perm_tol(7))
+  expect_equal(perm_crit(tstat, 0.05, "exact", "lower"), -2 - perm_tol(-2))
   # plusone: (0+1)/11 > 0.05, so the test can never reject
   expect_equal(perm_crit(tstat, 0.05, "plusone", "upper"), Inf)
   expect_equal(perm_crit(tstat, 0.05, "plusone", "lower"), -Inf)
   expect_equal(perm_crit(tstat, 0.05, "plusone", "abs"), Inf)
+})
+
+# Floating point ties in permutation counts ----
+
+test_that("perm_count treats values within floating point error as ties", {
+  t_obs <- 0.1 + 0.2          # 0.30000000000000004
+  TSTAT <- c(-0.1, 0.3, 0.3, 2) # 0.3 is mathematically equal but slightly smaller
+  expect_false(all(TSTAT[2:3] >= t_obs))
+  expect_equal(perm_count(TSTAT, t_obs, "ge"), 3)
+  expect_equal(perm_count(TSTAT, t_obs, "le"), 3)
+  expect_equal(perm_count(TSTAT, -t_obs, "abs"), 3)
+  # genuinely different values are unaffected
+  expect_equal(perm_count(c(0.2999, 0.3001), 0.3, "ge"), 1)
+  expect_equal(perm_count(c(0.2999, 0.3001), 0.3, "le"), 1)
+})
+
+test_that("tied data: every mathematically tied permutation is counted", {
+  skip_on_cran()
+  # Ordinal data give many permutations whose statistics tie exactly in
+  # theory but differ in the last bits in floating point
+  x <- c(3, 5, 3, 3, 4)
+  y <- c(4, 3, 3, 2, 4)
+  res <- suppressMessages(perm_t_test(x, y, p_method = "exact"))
+  near <- abs(res$perm.stat - res$statistic) < 1e-9
+  expect_gt(sum(near), 1)
+  b_expected <- sum(abs(res$perm.stat) >= abs(res$statistic) - 1e-9)
+  expect_equal(res$p.value, b_expected / res$R.used)
 })
 
 test_that("CI agrees with p-value under Behrens-Fisher (regression for #120)", {

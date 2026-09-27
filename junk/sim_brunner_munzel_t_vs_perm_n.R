@@ -22,10 +22,12 @@ nsim <- as.integer(Sys.getenv("SIM_NSIM", 4000))  # replications per cell
 R_perm <- 999
 alpha <- 0.05
 n_cores <- max(1, parallel::detectCores() - 1)
-out_file <- "junk/sim_brunner_munzel_t_vs_perm_n_results.rds"
+out_file <- Sys.getenv("SIM_OUT", "junk/sim_brunner_munzel_t_vs_perm_n_results.rds")
 
 # Smaller group size; designs are balanced (n, n) and unbalanced (n, 2n), (2n, n)
 n_grid <- c(5, 7, 10, 15, 20, 25, 30, 40, 50)
+# optional subset, e.g. SIM_NMAX=10 to rerun only the small-n cells
+if (nzchar(Sys.getenv("SIM_NMAX"))) n_grid <- n_grid[n_grid <= as.numeric(Sys.getenv("SIM_NMAX"))]
 ratios <- list(`1:1` = c(1, 1), `1:2` = c(1, 2), `2:1` = c(2, 1))
 
 # Shift giving p = 0.5 for the skewed pair --------
@@ -76,6 +78,10 @@ one_rep <- function(gen, nx, ny, alpha, R_perm) {
 
 cells <- expand.grid(n = n_grid, ratio = names(ratios), dist = names(dists),
                      stringsAsFactors = FALSE)
+# optional subset of distributions, e.g. SIM_DISTS=identical_ordinal
+if (nzchar(Sys.getenv("SIM_DISTS"))) {
+  cells <- cells[cells$dist %in% strsplit(Sys.getenv("SIM_DISTS"), ",")[[1]], ]
+}
 
 cl <- parallel::makeCluster(n_cores)
 invisible(parallel::clusterEvalQ(cl, devtools::load_all(".", quiet = TRUE)))
@@ -115,7 +121,7 @@ summary_tab <- do.call(rbind, results)
 # Smallest n from which t stays in Bradley's stringent band --------
 # Bradley (1978) stringent criterion: 0.9 * alpha to 1.1 * alpha
 band <- c(0.9, 1.1) * alpha
-stable_n <- do.call(rbind, lapply(split(summary_tab, list(summary_tab$dist, summary_tab$ratio)),
+stable_n <- do.call(rbind, lapply(split(summary_tab, list(summary_tab$dist, summary_tab$ratio), drop = TRUE),
   function(d) {
     d <- d[order(d$n), ]
     inside <- d$t >= band[1] & d$t <= band[2]

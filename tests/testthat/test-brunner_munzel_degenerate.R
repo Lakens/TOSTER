@@ -100,16 +100,31 @@ test_that("n < 3 per group gives informative error", {
 
 # --- Fix 5: Permutation p = 0 warning ---
 
-test_that("exact permutation p = 0 emits a warning", {
+test_that("exact enumeration never gives p = 0 for zero-inflated data", {
   skip_on_cran()
-  # Zero-inflated data where no permutation is as extreme as observed
+  # With full enumeration the observed arrangement is one of the permutations,
+  # so b >= 1. Previously floating point differences between the observed and
+  # permuted statistics made every permutation look less extreme (p = 0).
+  # Here the single 1 lands in x in half of the permutations and in y in the
+  # other half, so all |T*| equal |T| (two-sided p = 1) and half of T* >= T.
+  x <- c(0, 0, 0, 0, 0, 1)
+  y <- c(0, 0, 0, 0, 0, 0)
+  expect_no_warning(
+    res <- suppressMessages(brunner_munzel(x, y, test_method = "perm"))
+  )
+  expect_equal(res$p.value, 1)
+  res_g <- suppressMessages(brunner_munzel(x, y, test_method = "perm",
+                                           alternative = "greater"))
+  expect_equal(res_g$p.value, 0.5)
+})
+
+test_that("exact p_method with sampled permutations can warn about p = 0", {
+  skip_on_cran()
+  # p = 0 is only possible when permutations are sampled and b/R is requested
+  set.seed(1)
   expect_warning(
-    hush2 <- suppressMessages(
-      brunner_munzel(
-        x = c(0, 0, 0, 0, 0, 1), y = c(0, 0, 0, 0, 0, 0),
-        test_method = "perm"
-      )
-    ),
+    suppressMessages(brunner_munzel(x = 1:10 + 20, y = 1:10, test_method = "perm",
+                                    R = 200, p_method = "exact")),
     "Exact permutation p-value is 0"
   )
 })

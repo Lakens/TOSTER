@@ -87,11 +87,12 @@
 #'
 #' * "perm": A studentized permutation test following Neubert & Brunner (2007). This method
 #'   is highly recommended when sample sizes are small (< 15 per group) as it provides better
-#'   control of Type I error rates in these situations. Note: when exact permutations are
-#'   enumerated with small or heavily tied samples, the exact p-value method (`b/R`) may
-#'   return p = 0 if no permuted test statistic is as extreme as the observed value. The
-#'   `plusone` method (`(b+1)/(R+1)`) avoids this artifact and can be selected via
-#'   `p_method = "plusone"`.
+#'   control of Type I error rates in these situations. Note: when permutations are
+#'   sampled (rather than fully enumerated) and `p_method = "exact"` (`b/R`) is requested,
+#'   the p-value can be 0 if no sampled permuted statistic is as extreme as the observed
+#'   value. The default `plusone` method (`(b+1)/(R+1)`) for sampled permutations avoids
+#'   this. With full enumeration the observed arrangement is always among the
+#'   permutations, so `b/R` is never 0.
 #'
 #' ## Hypothesis Testing
 #'
@@ -551,10 +552,10 @@ brunner_munzel.default = function(x,
         # One-sided p-values using count-based logic routed through bm_compute_perm_pval
         # For lower bound test: H0: p <= low vs H1: p > low
         # Large test_stat_low supports H1, so p-value = P(T >= t_obs)
-        b_greater_low <- sum(Tperm >= test_stat_low)
+        b_greater_low <- perm_count(Tperm, test_stat_low, "ge")
         # For upper bound test: H0: p >= high vs H1: p < high
         # Small (negative) test_stat_high supports H1, so p-value = P(T <= t_obs)
-        b_less_high <- sum(Tperm <= test_stat_high)
+        b_less_high <- perm_count(Tperm, test_stat_high, "le")
 
         p_greater_low <- bm_compute_perm_pval(b_greater_low, n_perm_actual, p_method)
         p_less_high <- bm_compute_perm_pval(b_less_high, n_perm_actual, p_method)
@@ -573,9 +574,9 @@ brunner_munzel.default = function(x,
         } else { # minimal.effect
           # At least one condition must be met: p <= low OR p >= high
           # One-sided p-values count the opposite tails directly
-          p_less_low <- bm_compute_perm_pval(sum(Tperm <= test_stat_low),
+          p_less_low <- bm_compute_perm_pval(perm_count(Tperm, test_stat_low, "le"),
                                              n_perm_actual, p_method)
-          p_greater_high <- bm_compute_perm_pval(sum(Tperm >= test_stat_high),
+          p_greater_high <- bm_compute_perm_pval(perm_count(Tperm, test_stat_high, "ge"),
                                                  n_perm_actual, p_method)
           p.value <- min(p_less_low, p_greater_high)
 
@@ -597,9 +598,9 @@ brunner_munzel.default = function(x,
         test_stat <- sqrt(n) * (pd - mu) / sqrt(v)
 
         # Count extreme values for p-value calculation
-        b_less <- sum(Tperm <= test_stat)
-        b_greater <- sum(Tperm >= test_stat)
-        b_two_sided <- sum(abs(Tperm) >= abs(test_stat))
+        b_less <- perm_count(Tperm, test_stat, "le")
+        b_greater <- perm_count(Tperm, test_stat, "ge")
+        b_two_sided <- perm_count(Tperm, test_stat, "abs")
 
         # Compute p-values using selected method
         p_less <- bm_compute_perm_pval(b_less, n_perm_actual, p_method)
@@ -859,8 +860,8 @@ brunner_munzel.default = function(x,
         # Count extreme values for p-value calculation
         # For lower bound test (H1: p > low): count permutations with T >= t_obs_low
         # For upper bound test (H1: p < high): count permutations with T <= t_obs_high
-        b_greater_low <- sum(Tperm[1,] >= test_stat_low)
-        b_less_high <- sum(Tperm[1,] <= test_stat_high)
+        b_greater_low <- perm_count(Tperm[1,], test_stat_low, "ge")
+        b_less_high <- perm_count(Tperm[1,], test_stat_high, "le")
 
         # One-sided p-values using selected method
         # p_greater_low = P(T >= t_obs | H0) for testing H1: p > low
@@ -882,9 +883,9 @@ brunner_munzel.default = function(x,
         } else { # minimal.effect
           # At least one condition must be met: p <= low OR p >= high
           # One-sided p-values count the opposite tails directly
-          p_less_low <- bm_compute_perm_pval(sum(Tperm[1,] <= test_stat_low),
+          p_less_low <- bm_compute_perm_pval(perm_count(Tperm[1,], test_stat_low, "le"),
                                              R_actual, p_method)
-          p_greater_high <- bm_compute_perm_pval(sum(Tperm[1,] >= test_stat_high),
+          p_greater_high <- bm_compute_perm_pval(perm_count(Tperm[1,], test_stat_high, "ge"),
                                                  R_actual, p_method)
           p.value <- min(p_less_low, p_greater_high)
 
@@ -905,12 +906,12 @@ brunner_munzel.default = function(x,
         test_stat <- sqrt(N) * (pd - mu) / sqrt(V)
 
         # Count extreme values for p-value calculation
-        b_less <- sum(Tperm[1,] <= test_stat)
-        b_greater <- sum(Tperm[1,] >= test_stat)
+        b_less <- perm_count(Tperm[1,], test_stat, "le")
+        b_greater <- perm_count(Tperm[1,], test_stat, "ge")
 
         # For two-sided tests, use absolute value method: mean(|T_perm| >= |T_obs|)
         # This matches the brunnermunzel package's approach
-        b_two_sided <- sum(abs(Tperm[1,]) >= abs(test_stat))
+        b_two_sided <- perm_count(Tperm[1,], test_stat, "abs")
 
         # CI inverts the same permutation test (see perm_crit()); the
         # two-sided interval uses the same |T| rule as the two-sided p-value

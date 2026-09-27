@@ -148,11 +148,12 @@ that are guaranteed to stay within \verb{[0, 1]}. This method is recommended whe
 relative effect is close to 0 or 1.
 \item "perm": A studentized permutation test following Neubert & Brunner (2007). This method
 is highly recommended when sample sizes are small (< 15 per group) as it provides better
-control of Type I error rates in these situations. Note: when exact permutations are
-enumerated with small or heavily tied samples, the exact p-value method (\code{b/R}) may
-return p = 0 if no permuted test statistic is as extreme as the observed value. The
-\code{plusone} method (\code{(b+1)/(R+1)}) avoids this artifact and can be selected via
-\code{p_method = "plusone"}.
+control of Type I error rates in these situations. Note: when permutations are
+sampled (rather than fully enumerated) and \code{p_method = "exact"} (\code{b/R}) is requested,
+the p-value can be 0 if no sampled permuted statistic is as extreme as the observed
+value. The default \code{plusone} method (\code{(b+1)/(R+1)}) for sampled permutations avoids
+this. With full enumeration the observed arrangement is always among the
+permutations, so \code{b/R} is never 0.
 }
 }
 

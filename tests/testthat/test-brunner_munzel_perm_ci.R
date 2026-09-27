@@ -110,3 +110,23 @@ test_that("BM two-sided permutation CI is centered on the estimate when unclampe
   est <- unname(res$estimate)
   expect_equal(est - ci[1], ci[2] - est)
 })
+
+# Floating point ties in permutation counts ----
+
+test_that("BM exact permutation test holds its level with tied data", {
+  skip_on_cran()
+  # The observed statistic (rank formula) and the permuted statistics
+  # (perm_loop) are computed by different code paths, so tied values differ in
+  # the last bits. Before tolerant counting, this 5 v 5 ordinal case rejected
+  # about 8% of the time under exchangeability; an exact test must be <= alpha.
+  pr <- c(0.1, 0.2, 0.4, 0.2, 0.1)
+  set.seed(11)
+  rej <- replicate(500, {
+    x <- sample(1:5, 5, TRUE, pr)
+    y <- sample(1:5, 5, TRUE, pr)
+    suppressWarnings(suppressMessages(
+      brunner_munzel(x, y, test_method = "perm")
+    ))$p.value <= 0.05
+  })
+  expect_lte(mean(rej), 0.05)
+})

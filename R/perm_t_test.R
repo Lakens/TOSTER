@@ -527,10 +527,45 @@ perm_crit <- function(TSTAT, a, p_method, tail = c("upper", "lower", "abs")) {
     return(if (tail == "lower") -Inf else Inf)
   }
 
-  switch(tail,
-         upper = sort(TSTAT)[R - m],
-         lower = sort(TSTAT)[m + 1],
-         abs = sort(abs(TSTAT))[R - m])
+  # Widen by the same tolerance used in perm_count() so the CI agrees with
+  # the tolerant p-value counts
+  crit <- switch(tail,
+                 upper = sort(TSTAT)[R - m],
+                 lower = sort(TSTAT)[m + 1],
+                 abs = sort(abs(TSTAT))[R - m])
+  if (tail == "lower") crit - perm_tol(crit) else crit + perm_tol(crit)
+}
+
+#' @keywords internal
+#' @noRd
+# Tolerance for comparing permutation statistics with the observed statistic
+#
+# With tied data, many permutations give mathematically identical statistics
+# that differ only by floating point error (e.g., different summation order or
+# a different code path for the observed and permuted statistics). Strict
+# comparisons can then drop tied values and undercount b, making the p-value
+# too small. A small relative tolerance treats such values as ties.
+perm_tol <- function(t) {
+  sqrt(.Machine$double.eps) * max(1, abs(t))
+}
+
+#' @keywords internal
+#' @noRd
+# Count permutation statistics at least as extreme as the observed statistic
+#
+# Arguments:
+#   TSTAT: permutation distribution of the test statistic
+#   tstat: observed test statistic (a single value)
+#   type: "ge" for #{T* >= t}, "le" for #{T* <= t}, "abs" for #{|T*| >= |t|}
+#
+# Returns: the count b, treating values within perm_tol() of t as ties
+perm_count <- function(TSTAT, tstat, type = c("ge", "le", "abs")) {
+  type <- match.arg(type)
+  tol <- perm_tol(tstat)
+  switch(type,
+         ge = sum(TSTAT >= tstat - tol),
+         le = sum(TSTAT <= tstat + tol),
+         abs = sum(abs(TSTAT) >= abs(tstat) - tol))
 }
 
 
@@ -917,26 +952,26 @@ perm_t_test.default <- function(x,
   est_ci <- if (is.null(y)) mx else diff_means
 
   if (alternative == "less") {
-    b <- sum(TSTAT <= tstat)
+    b <- perm_count(TSTAT, tstat, "le")
     perm.pval <- compute_perm_pval(b, R_used, p_method)
     perm.cint <- c(-Inf,
                    est_ci - stderr * perm_crit(TSTAT, alpha, p_method, "lower"))
 
   } else if (alternative == "greater") {
-    b <- sum(TSTAT >= tstat)
+    b <- perm_count(TSTAT, tstat, "ge")
     perm.pval <- compute_perm_pval(b, R_used, p_method)
     perm.cint <- c(est_ci - stderr * perm_crit(TSTAT, alpha, p_method, "upper"),
                    Inf)
 
   } else if (alternative == "two.sided") {
     if (symmetric) {
-      b <- sum(abs(TSTAT) >= abs(tstat))
+      b <- perm_count(TSTAT, tstat, "abs")
       perm.pval <- compute_perm_pval(b, R_used, p_method)
       crit <- perm_crit(TSTAT, alpha, p_method, "abs")
       perm.cint <- c(est_ci - stderr * crit, est_ci + stderr * crit)
     } else {
-      b_low <- sum(TSTAT <= tstat)
-      b_high <- sum(TSTAT >= tstat)
+      b_low <- perm_count(TSTAT, tstat, "le")
+      b_high <- perm_count(TSTAT, tstat, "ge")
       p_low <- compute_perm_pval(b_low, R_used, p_method)
       p_high <- compute_perm_pval(b_high, R_used, p_method)
       perm.pval <- 2 * min(p_low, p_high)
@@ -947,14 +982,14 @@ perm_t_test.default <- function(x,
 
   } else if (alternative %in% c("equivalence", "minimal.effect")) {
     if (alternative == "equivalence") {
-      b_low <- sum(TSTAT >= tstat[1])
-      b_high <- sum(TSTAT <= tstat[2])
+      b_low <- perm_count(TSTAT, tstat[1], "ge")
+      b_high <- perm_count(TSTAT, tstat[2], "le")
       p_low <- compute_perm_pval(b_low, R_used, p_method)
       p_high <- compute_perm_pval(b_high, R_used, p_method)
       perm.pval <- max(p_low, p_high)
     } else {
-      b_low <- sum(TSTAT <= tstat[1])
-      b_high <- sum(TSTAT >= tstat[2])
+      b_low <- perm_count(TSTAT, tstat[1], "le")
+      b_high <- perm_count(TSTAT, tstat[2], "ge")
       p_low <- compute_perm_pval(b_low, R_used, p_method)
       p_high <- compute_perm_pval(b_high, R_used, p_method)
       perm.pval <- min(p_low, p_high)
@@ -1001,8 +1036,8 @@ perm_t_test.default <- function(x,
 
   # For equivalence/minimal.effect, report the t-statistic corresponding to the p-value
   if (alternative == "equivalence") {
-    b_low <- sum(TSTAT >= tstat[1])
-    b_high <- sum(TSTAT <= tstat[2])
+    b_low <- perm_count(TSTAT, tstat[1], "ge")
+    b_high <- perm_count(TSTAT, tstat[2], "le")
     p_low <- compute_perm_pval(b_low, R_used, p_method)
     p_high <- compute_perm_pval(b_high, R_used, p_method)
     if (p_low >= p_high) {
@@ -1011,8 +1046,8 @@ perm_t_test.default <- function(x,
       tstat_report <- tstat[2]
     }
   } else if (alternative == "minimal.effect") {
-    b_low <- sum(TSTAT <= tstat[1])
-    b_high <- sum(TSTAT >= tstat[2])
+    b_low <- perm_count(TSTAT, tstat[1], "le")
+    b_high <- perm_count(TSTAT, tstat[2], "ge")
     p_low <- compute_perm_pval(b_low, R_used, p_method)
     p_high <- compute_perm_pval(b_high, R_used, p_method)
     if (p_low <= p_high) {

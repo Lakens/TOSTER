@@ -166,6 +166,17 @@ NEWS
   permutation distribution, and the order-statistic rules did not match the
   `p_method` counting rule. The permutation minimal effect p-value now counts
   the opposite tails directly instead of using `1 - p`.
+- Permutation p-values in `perm_t_test()`, `brunner_munzel(test_method = "perm")`,
+  and `hodges_lehmann()` now treat permutation statistics within floating point
+  error of the observed statistic as ties. With tied data (or, for
+  `brunner_munzel()`, whenever the observed and permuted statistics are computed
+  by different code paths), mathematically tied permutations could differ in the
+  last bits and be dropped from the count, making p-values too small. For
+  example, the exact Brunner-Munzel permutation test with 5 vs 5 ordinal data
+  rejected about 8% of the time under exchangeability (now about 1.4%), and
+  fully enumerated tests could return p = 0, which is impossible when the
+  observed arrangement is among the permutations. Confidence intervals use the
+  same tolerance, so they continue to agree with the p-values.
 - `smd_calc()` and `boot_smd_calc()`: the one-sample SMD now uses `mean(x) - mu` correctly
 - jamovi one-sample TOST now passes the `mu` option to the analysis.
 - `plot.TOSTt(type = "tnull")`: fixed swapped internal labels for the CI limits.
