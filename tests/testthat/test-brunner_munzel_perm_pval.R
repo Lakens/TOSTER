@@ -5,7 +5,16 @@
 hush = function(code){
   sink(nullfile())
   on.exit(sink())
-  suppressMessages(code)
+  # These tests deliberately use test_method = "perm" with equivalence and
+  # minimal effect alternatives, so muffle only the advisory warning about
+  # nulls other than 0.5 (see test-brunner_munzel_perm_logit.R)
+  withCallingHandlers(
+    suppressMessages(code),
+    warning = function(w) {
+      if (grepl("null value other than 0.5|Minimal effect tests", conditionMessage(w))) {
+        invokeRestart("muffleWarning")
+      }
+    })
 }
 
 # Test 1: Paired permutation equivalence respects p_method argument

@@ -130,3 +130,42 @@ test_that("BM exact permutation test holds its level with tied data", {
   })
   expect_lte(mean(rej), 0.05)
 })
+
+# Test method recommendation messages ----
+
+test_that("messages recommend perm for small two-sample and all paired designs", {
+  set.seed(3)
+  x20 <- rnorm(20); y20 <- rnorm(20)
+  x40 <- rnorm(40); y40 <- rnorm(40)
+
+  expect_message(brunner_munzel(x20, y20, test_method = "t"),
+                 "small \\(< 30\\)")
+  expect_message(brunner_munzel(x20, y20, test_method = "logit"),
+                 "small \\(< 30\\)")
+  expect_no_message(brunner_munzel(x40, y40, test_method = "t"),
+                    message = "recommended")
+  expect_message(brunner_munzel(x40, y40, paired = TRUE, test_method = "t"),
+                 "For paired samples")
+  expect_message(brunner_munzel(x40, y40, paired = TRUE, test_method = "logit"),
+                 "For paired samples")
+})
+
+test_that("message when the permutation test can never reject", {
+  skip_on_cran()
+  set.seed(4)
+  x5 <- rnorm(5); y5 <- x5 + rnorm(5)
+  # 5 pairs: 32 swaps, smallest two-sided p = 2/32 = 0.0625 > 0.05
+  expect_message(brunner_munzel(x5, y5, paired = TRUE, test_method = "perm"),
+                 "cannot reject")
+  # 6 pairs: 64 swaps, smallest two-sided p = 2/64 < 0.05
+  x6 <- rnorm(6); y6 <- x6 + rnorm(6)
+  expect_no_message(brunner_munzel(x6, y6, paired = TRUE, test_method = "perm"),
+                    message = "cannot reject")
+  # two-sample 3 v 3: 20 permutations, smallest two-sided p = 2/20 = 0.1
+  expect_message(brunner_munzel(c(1, 2, 3), c(4, 5, 6), test_method = "perm"),
+                 "cannot reject")
+  # one-sided test with 5 pairs: smallest p = 1/32 < 0.05
+  expect_no_message(brunner_munzel(x5, y5, paired = TRUE, test_method = "perm",
+                                   alternative = "less"),
+                    message = "cannot reject")
+})

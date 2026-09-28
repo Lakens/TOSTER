@@ -114,6 +114,31 @@ NEWS
   null (Wu & Ding, 2020), while the bootstrap targets the weak null and is
   asymptotic only. Guidance on randomized versus random-sampling designs and on
   small-sample, unequal-variance behavior is included.
+- `brunner_munzel()` gains `test_method = "perm_logit"`: a studentized
+  permutation test on the logit scale. Its confidence interval inverts the same
+  test and is back-transformed, so it is range-preserving (never clamped) and
+  always agrees with the p-value. In simulations it gave the most powerful
+  equivalence tests while keeping Type I error near nominal, and intervals that
+  do not collapse when the estimate is near 0 or 1. It is the recommended method
+  for equivalence, minimal effect, and other tests against a null value other
+  than 0.5.
+
+- `brunner_munzel()` now warns when `test_method = "t"` or `"perm"` is used for a
+  minimal effect test or any other test against a null value other than 0.5.
+  In simulations these methods had inflated Type I error for minimal effect
+  tests (up to about 15--18% in small samples with wide bounds) and low power
+  for equivalence tests. The warning suggests `"perm_logit"` or `"logit"`.
+
+- `brunner_munzel()` test method guidance is updated based on simulation studies
+  of Type I error (see the new "Choosing a test method" section):
+  - Two-sample: the message recommending `test_method = "perm"` now appears when
+    the smaller group has fewer than 30 observations (previously 15).
+  - Paired: `"perm"` is now recommended for any sample size, because the `"t"` and
+    `"logit"` methods are conservative when pairs are positively correlated. The
+    "permutation test is probably unnecessary" message is now shown only for
+    two-sample designs.
+  - A new message warns when the permutation distribution is too coarse for the
+    test to ever reject at the requested `alpha` (e.g., 5 or fewer pairs).
 
 ## Bug Fixes
 

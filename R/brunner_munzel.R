@@ -34,12 +34,16 @@
 #'
 #'   * "t" (default): approximate t-distribution with Satterthwaite-Welch degrees of freedom
 #'   * "logit": logit transformation for range-preserving confidence intervals
-#'   * "perm": studentized permutation test (recommended when sample size per condition is less
-#'     than 15, and for paired designs with correlated pairs; see "Choosing a test method" in
-#'     Details)
+#'   * "perm": studentized permutation test (recommended for the standard null of 0.5 when the
+#'     smaller group has fewer than 30 observations, and for paired designs)
+#'   * "perm_logit": studentized permutation test on the logit scale, with range-preserving
+#'     confidence intervals (recommended for equivalence, minimal effect, and other tests
+#'     against a null value other than 0.5)
 #'
-#' @param R the number of permutations for the permutation test (default is 10000). Only used when `test_method = "perm"`.
-#' @param p_method a character string specifying the method for computing permutation p-values. Only used when `test_method = "perm"`:
+#'   See "Choosing a test method" in Details.
+#'
+#' @param R the number of permutations for the permutation test (default is 10000). Only used when `test_method = "perm"` or `"perm_logit"`.
+#' @param p_method a character string specifying the method for computing permutation p-values. Only used when `test_method = "perm"` or `"perm_logit"`:
 #'
 #'   * `NULL` (default): Automatically selects "exact" for exact permutation tests (when all
 #'     permutations are enumerated) and "plusone" for randomization tests (when permutations
@@ -78,17 +82,26 @@
 #'
 #' ## Test Methods
 #'
-#' Three test methods are available:
+#' Four test methods are available:
 #'
 #' * "t": The default method uses a t-distribution approximation with Satterthwaite-Welch
 #'   degrees of freedom. This is appropriate for moderate to large sample sizes.
 #'
 #' * "logit": Uses a logit transformation to produce range-preserving confidence intervals
-#'   that are guaranteed to stay within `[0, 1]`. This method is recommended when the estimated
-#'   relative effect is close to 0 or 1.
+#'   that are guaranteed to stay within `[0, 1]`. It is conservative in small samples.
+#'
+#' * "perm_logit": A studentized permutation test carried out on the logit scale. The
+#'   observed statistic is \eqn{(\mathrm{logit}(\hat p) - \mathrm{logit}(p_0)) / SE_{logit}},
+#'   with \eqn{SE_{logit} = SE / (\hat p (1 - \hat p))}, and the permutation
+#'   distribution is the same statistic computed for each permuted data set. The
+#'   confidence interval inverts this test and is back-transformed, so it always stays
+#'   strictly inside `(0, 1)` and always agrees with the p-value. Estimates of exactly 0
+#'   or 1 are moved half a step inside the unit interval (by \eqn{1/(2 n_1 n_2)} for two
+#'   samples, \eqn{1/(2 n^2)} for paired samples) before transforming. Null values must be
+#'   strictly between 0 and 1. The `R` and `p_method` arguments work as for `"perm"`.
 #'
 #' * "perm": A studentized permutation test following Neubert & Brunner (2007). This method
-#'   is highly recommended when sample sizes are small (< 15 per group) as it provides better
+#'   is recommended for the standard null of 0.5 in small samples, as it provides better
 #'   control of Type I error rates in these situations. Note: when permutations are
 #'   sampled (rather than fully enumerated) and `p_method = "exact"` (`b/R`) is requested,
 #'   the p-value can be 0 if no sampled permuted statistic is as extreme as the observed
@@ -98,54 +111,100 @@
 #'
 #' ### Choosing a test method
 #'
-#' The following recommendations are based on simulations of Type I error at
-#' two-sided \eqn{\alpha = 0.05} with normal, heavily tied ordinal, unequal-variance,
-#' and skewed data. Smaller \eqn{\alpha} levels were not examined and may require
-#' larger samples for the `"t"` approximation to be adequate.
+#' Recommended defaults:
 #'
-#' **Two-sample (independent) designs:**
+#' | Hypothesis and design | Recommendation |
+#' |---|---|
+#' | Null of 0.5, two-sample, smaller group < 30 | `"perm"` |
+#' | Null of 0.5, two-sample, smaller group 30 or more | `"t"` (or `"perm"`; they agree) |
+#' | Null of 0.5, paired, 5 or fewer pairs | No good option (see below); treat the design as underpowered |
+#' | Null of 0.5, paired, 6 or more pairs | `"perm"` |
+#' | Null of 0.5, paired, large sample with approximately uncorrelated pairs | `"t"` is adequate |
+#' | Equivalence, minimal effect, or any other null value | `"perm_logit"` (most powerful) or `"logit"` (more conservative) |
+#' | Estimate near 0 or 1 (for the confidence interval) | `"perm_logit"` or `"logit"` |
 #'
-#' * With fewer than about 10 observations in the smaller group, `"t"` is liberal
-#'   (Type I error of roughly 7--9% at 5 per group). `"perm"` stays at or below the
-#'   nominal level when the two distributions are identical.
-#' * With about 15 or more observations in the smaller group, `"t"` and `"perm"` were
-#'   practically equivalent in every scenario. Their Type I error rates differed by at
-#'   most one percentage point, and they reached different decisions for about 1% of
-#'   data sets or fewer. Beyond roughly 20--30 per group the choice makes essentially
-#'   no practical difference, and `"t"` is much faster.
+#' These recommendations come from simulations with normal, heavily tied ordinal,
+#' unequal-variance, and skewed data, at \eqn{\alpha = 0.05}. Smaller \eqn{\alpha}
+#' levels were not examined and may require larger samples for the `"t"`
+#' approximation to be adequate.
 #'
-#' **Paired designs:** the within-pair correlation matters more than the sample size.
+#' **Equivalence, minimal effect, and other null values.** The advantage of `"perm"`
+#' only holds for the null of 0.5: a permutation test is exact only when the groups are
+#' exchangeable, which is impossible when the true relative effect equals a bound other
+#' than 0.5. In simulations with bounds of (0.4, 0.6), (0.3, 0.7), and (0.2, 0.8) and
+#' 7 to 30 observations per group or pairs:
 #'
-#' * With uncorrelated pairs, `"t"` and `"perm"` become practically equivalent from
-#'   roughly 15--20 pairs, as in the two-sample case.
-#' * With positively correlated pairs (the usual paired design), `"t"` is
-#'   conservative. For example, with a latent correlation of 0.8 its Type I error was
-#'   about 2--4% for 7--50 pairs, while `"perm"` stayed near 5%. `"perm"` is therefore
-#'   preferable, and more powerful, well beyond 15 pairs.
-#' * With 5 or fewer pairs, `"perm"` cannot reject at two-sided \eqn{\alpha = 0.05}. Full
-#'   enumeration of \eqn{2^5 = 32} within-pair swaps gives a smallest attainable
-#'   p-value of \eqn{2/32 = 0.0625}. At least 6 pairs are needed.
+#' * `"t"` and `"perm"` behaved almost identically. Equivalence tests held their level
+#'   but were overly conservative, with low power (for example about 0.31 with 10 per
+#'   group and bounds of (0.2, 0.8), compared with 0.53 for `"logit"` and 0.64 for
+#'   `"perm_logit"`). Minimal effect tests had **inflated Type I error**, up to 15--18%
+#'   in small samples with bounds of (0.2, 0.8) and still about 9--10% with 30 per group.
+#'   The function warns when `"t"` or `"perm"` is used with a null value other than 0.5.
+#' * `"logit"` held its level for both equivalence (Type I error at most about 5.5%) and
+#'   minimal effect tests (mostly at or below 5%), with more power than `"t"` or
+#'   `"perm"`.
+#' * `"perm_logit"` had the highest power. Its Type I error at the bounds was about 5--7%
+#'   for equivalence tests and mostly about 5% for minimal effect tests, but reached
+#'   8--12% for minimal effect tests in small two-sample designs with unequal spread and
+#'   wide bounds. Use `"logit"` when strict Type I error control matters more than
+#'   power in such designs.
 #'
-#' **In both designs:**
+#' **Estimates near 0 or 1.** The `"t"` and `"perm"` intervals can collapse when the
+#' estimate is at or near 0 or 1 (their standard error goes to zero), and their coverage
+#' fell as low as 52--82% for a true relative effect of 0.95 with 15 or fewer per group.
+#' `"perm_logit"` kept coverage near 95% in these settings with equal spread and in
+#' paired designs, but could undercover (roughly 72--85%) with unequal spread and a
+#' true relative effect of 0.9 or more. `"logit"` never fell below 90% coverage but
+#' produces wide intervals.
 #'
-#' * `"logit"` was markedly conservative in small samples (Type I error of roughly
-#'   1--3% with 15 or fewer observations per group) and remained below nominal at 50.
-#'   It trades power for range-preserving intervals.
-#' * Neither `"t"` nor `"perm"` is exact when the two distributions differ in spread or
-#'   shape.
-#'   - In two-sample designs with very small samples, both can be liberal when the
-#'     smaller group is the more variable one.
-#'   - In paired designs with strongly correlated pairs and unequal marginal
-#'     distributions, `"perm"` can be slightly liberal (about 6%).
-#'   - `"perm"` can be conservative with heavily tied data in very small samples.
+#' **Two-sample designs.** With fewer than about 10 observations in the smaller group,
+#' `"t"` is liberal (Type I error of roughly 7--9% at 5 per group), whereas `"perm"`
+#' stays at or below the nominal level when the two distributions are identical. From
+#' about 15 observations in the smaller group, `"t"` and `"perm"` were practically
+#' equivalent in every scenario: their Type I error rates differed by at most one
+#' percentage point, and they reached different decisions for about 1% of data sets or
+#' fewer. The cut-off of 30 in the table leaves a safety margin. It applies to the
+#' smaller group, because unbalanced designs are where `"t"` took longest to agree.
 #'
-#' The function prints a message recommending `"perm"` when either group has fewer
-#' than 15 observations. It prints a message suggesting that `"perm"` is unnecessary
-#' only for very large samples (smaller group > 250 and total > 500). That threshold is
-#' deliberately conservative. Using `"perm"` in large samples is never invalid, only
-#' slower. For two-sample designs, `"t"` is an adequate substitute well before that
-#' point, from roughly 20--30 observations per group. For paired designs with
-#' correlated pairs, `"perm"` remains preferable at larger sample sizes.
+#' **Paired designs.** The within-pair correlation matters more than the sample size.
+#' With positively correlated pairs (the usual paired design), `"t"` is conservative.
+#' For example, with a latent correlation of 0.8 its Type I error was about 2--4% for
+#' 7 to 50 pairs, while `"perm"` stayed near 5%. `"perm"` is therefore preferable, and
+#' more powerful, at every sample size studied (up to 50 pairs). With approximately
+#' uncorrelated pairs, `"t"` and `"perm"` agree from roughly 15--20 pairs. With 5 or
+#' fewer pairs, `"perm"` cannot reject at two-sided \eqn{\alpha = 0.05}: full
+#' enumeration of \eqn{2^5 = 32} within-pair swaps gives a smallest attainable p-value
+#' of \eqn{2/32 = 0.0625}. The level of `"t"` is also uncertain at such small sample
+#' sizes.
+#'
+#' **The `"logit"` method** was markedly conservative in small samples in both
+#' designs (Type I error of roughly 1--3% with 15 or fewer observations per group) and
+#' remained below nominal at 50, so it sacrifices considerable power. Its advantage is
+#' an interval that always stays within `[0, 1]`, which is useful when the estimated
+#' relative effect is close to 0 or 1. It is not a remedy for small samples.
+#'
+#' **Limitations.** Neither `"t"` nor `"perm"` is exact when the two distributions
+#' differ in spread or shape.
+#'
+#' * In two-sample designs with very small samples, both can be liberal when the
+#'   smaller group is the more variable one.
+#' * In paired designs with strongly correlated pairs and unequal marginal
+#'   distributions, `"perm"` can be slightly liberal (about 6%).
+#' * `"perm"` can be conservative with heavily tied data in very small samples.
+#'
+#' **Messages and warnings.** The function prints messages that follow these
+#' recommendations:
+#'
+#' * For the null of 0.5, it recommends `"perm"` when a two-sample test with fewer than
+#'   30 observations in the smaller group uses `"t"` or `"logit"`, and whenever a paired
+#'   test uses `"t"` or `"logit"`.
+#' * For two-sample designs it notes that a permutation test is probably unnecessary only
+#'   for very large samples (smaller group > 250 and total > 500). This is deliberately
+#'   conservative. Using a permutation test in large samples is never invalid, only slower.
+#' * It warns when `"t"` or `"perm"` is used for a minimal effect test or any other test
+#'   against a null value other than 0.5, and suggests `"perm_logit"` or `"logit"`.
+#' * When the permutation distribution is too coarse for the test to ever reject at
+#'   the requested `alpha` (for example, 5 or fewer pairs), the function says so.
 #'
 #' ## Hypothesis Testing
 #'
@@ -191,7 +250,7 @@
 #' For equivalence: \eqn{p_{TOST} = \max(p_1, p_2)}
 #'
 #' For minimal effect: \eqn{p_{MET} = \min(1 - p_1, 1 - p_2)}. For
-#' `test_method = "perm"`, the minimal effect one-sided p-values are instead
+#' `test_method = "perm"` and `"perm_logit"`, the minimal effect one-sided p-values are instead
 #' computed by counting the opposite tails of the permutation distribution
 #' directly (with the same `p_method` counting rule).
 #'
@@ -215,13 +274,21 @@
 #' `[0, 1]`. If the number of permutations is too small for the test to ever
 #' reject at the requested \eqn{\alpha}, the corresponding limit is set to 0 or 1.
 #'
+#' When `test_method = "perm_logit"`, the same inversion is carried out on the
+#' logit scale, \eqn{\mathrm{logit}(\hat{p}) - SE_{logit} \cdot q}, and the limits are
+#' back-transformed. No clamping is needed, and the interval and p-value always agree.
+#'
 #' ## Permutation Tests with Non-0.5 Null Values
 #'
-#' When `test_method = "perm"` and `mu != 0.5`, the permutation distribution is constructed by centering
-#' the permuted test statistics at 0.5 (the value implied by exchangeability), while the observed
-#' test statistic is centered at the hypothesized null value. This approach is valid because
-#' the studentized permutation distribution converges to the same limit regardless of the
-#' centering, following the asymptotic theory of Janssen (1997) and Neubert & Brunner (2007).
+#' When `test_method = "perm"` or `"perm_logit"` and `mu != 0.5`, the permutation
+#' distribution is constructed by centering the permuted test statistics at 0.5 (the
+#' value implied by exchangeability), while the observed test statistic is centered at
+#' the hypothesized null value. This approach is justified asymptotically, because the
+#' studentized permutation distribution converges to the same limit regardless of the
+#' centering (Janssen, 1997; Neubert & Brunner, 2007). It is not exact: when the true
+#' relative effect equals a null value other than 0.5, the groups cannot be
+#' exchangeable. In small samples, how well this works depends strongly on the scale
+#' of the statistic; see "Choosing a test method" above.
 #'
 #' Because the equivalence bounds are specified directly on the relative effect
 #' scale (i.e., as probabilities between 0 and 1), this avoids the difficulty
@@ -231,8 +298,10 @@
 #' These are uncalibrated (naive) procedures. For the IU direction
 #' (`"equivalence"`), the procedure can be conservative when sample sizes are
 #' small or when the equivalence bounds are close to 0.5. For the UI direction
-#' (`"minimal.effect"`), the conservatism is less pronounced. See Arboretti
-#' et al. (2021) for a detailed discussion of calibration
+#' (`"minimal.effect"`), the identity-scale `"perm"` procedure can instead be
+#' liberal, because its interval collapses when the estimate approaches 0 or 1
+#' (see "Choosing a test method"). See Arboretti et al. (2021) for a detailed
+#' discussion of calibration.
 #'
 #' @return A list with class `"htest"` containing the following components:
 #'
@@ -255,24 +324,24 @@
 #' # Test using logit transformation for range-preserving CIs
 #' brunner_munzel(mpg ~ am, data = mtcars, test_method = "logit")
 #'
-#' # Test against a specific null value
-#' brunner_munzel(mpg ~ am, data = mtcars, mu = 0.3)
+#' # Permutation test (recommended for the null of 0.5 in small samples)
+#' brunner_munzel(mpg ~ am, data = mtcars, test_method = "perm", R = 999)
+#'
+#' # Test against a specific null value (logit scale recommended for nulls other than 0.5)
+#' brunner_munzel(mpg ~ am, data = mtcars, mu = 0.3, test_method = "logit")
 #'
 #' # Equivalence test: is the relative effect between 0.35 and 0.65?
+#' # Permutation test on the logit scale (recommended for equivalence testing)
 #' brunner_munzel(mpg ~ am, data = mtcars,
 #'                alternative = "equivalence",
-#'                mu = c(0.35, 0.65))
+#'                mu = c(0.35, 0.65),
+#'                test_method = "perm_logit", R = 999)
 #'
 #' # Minimal effect test: is the relative effect outside 0.4 to 0.6?
 #' brunner_munzel(mpg ~ am, data = mtcars,
 #'                alternative = "minimal.effect",
-#'                mu = c(0.4, 0.6))
-#'
-#' # Permutation-based equivalence test
-#' brunner_munzel(mpg ~ am, data = mtcars,
-#'                alternative = "equivalence",
-#'                mu = c(0.35, 0.65),
-#'                test_method = "perm")
+#'                mu = c(0.4, 0.6),
+#'                test_method = "logit")
 #'
 #' # Report on the difference scale: P(X>Y) - P(X<Y)
 #' brunner_munzel(mpg ~ am, data = mtcars, scale = "difference")
@@ -349,6 +418,112 @@ bm_compute_perm_pval <- function(b, R, p_method) {
   }
 }
 
+#' @noRd
+bm_min_perm_pval <- function(Tperm, alternative, R, p_method) {
+  # Internal helper: smallest p-value the permutation test can attain, i.e.,
+  # the p-value for an observed statistic at the extreme of the permutation
+  # distribution. If this exceeds alpha, the test can never reject.
+  p_ge <- bm_compute_perm_pval(perm_count(Tperm, max(Tperm), "ge"), R, p_method)
+  p_le <- bm_compute_perm_pval(perm_count(Tperm, min(Tperm), "le"), R, p_method)
+  switch(alternative,
+         two.sided = bm_compute_perm_pval(perm_count(Tperm, max(abs(Tperm)), "abs"),
+                                          R, p_method),
+         less = p_le,
+         greater = p_ge,
+         equivalence = max(p_ge, p_le),
+         minimal.effect = min(p_ge, p_le))
+}
+
+#' @noRd
+bm_message_min_pval <- function(Tperm, alternative, R, p_method, alpha) {
+  # Internal helper: tell the user when the permutation distribution is too
+  # coarse for the test to ever reject at the requested alpha
+  p_min <- bm_min_perm_pval(Tperm, alternative, R, p_method)
+  if (p_min > alpha) {
+    message("The smallest attainable permutation p-value with this sample size is ",
+            signif(p_min, 3), ", which exceeds alpha = ", alpha,
+            "; the permutation test cannot reject the null hypothesis.")
+  }
+  invisible(p_min)
+}
+
+#' @noRd
+bm_logit_scale <- function(pd, se, eps) {
+  # Internal helper: estimate and standard error on the logit scale for the
+  # "perm_logit" method. Estimates of exactly 0 or 1 are moved half a step
+  # (eps) inside the unit interval, where eps is half the smallest nonzero
+  # distance between attainable estimates.
+  pl <- pmin(pmax(pd, eps), 1 - eps)
+  list(est = stats::qlogis(pl), se = se / (pl * (1 - pl)))
+}
+
+#' @noRd
+bm_perm_inference <- function(Tperm, est, se, alternative, mu, alpha, R,
+                              p_method, link = c("identity", "logit")) {
+  # Internal helper: permutation p-value, reported statistic, and confidence
+  # interval for the "perm" (identity scale) and "perm_logit" (logit scale)
+  # methods.
+  #
+  # Tperm: permutation distribution of the studentized statistic on the chosen
+  #   scale, centred at the exchangeability null (p = 0.5)
+  # est, se: observed estimate and standard error on the chosen scale
+  # mu: null value (standard alternatives) or c(lower, upper) bounds
+  #
+  # The observed statistic for a null value m is (est - link(m)) / se. The CI
+  # inverts the same permutation test (see perm_crit()) on the chosen scale
+  # and is back-transformed, so the CI and p-value always agree.
+  link <- match.arg(link)
+  g <- if (link == "logit") stats::qlogis else identity
+  ginv <- if (link == "logit") stats::plogis else identity
+  pv <- function(b) bm_compute_perm_pval(b, R, p_method)
+  tstat <- function(m) (est - g(m)) / se
+
+  if (alternative %in% c("equivalence", "minimal.effect")) {
+    test_stat_low <- tstat(mu[1])
+    test_stat_high <- tstat(mu[2])
+
+    if (alternative == "equivalence") {
+      # H1: low < p < high; p-value is the larger of the two one-sided tests
+      p_greater_low <- pv(perm_count(Tperm, test_stat_low, "ge"))
+      p_less_high <- pv(perm_count(Tperm, test_stat_high, "le"))
+      p.value <- max(p_greater_low, p_less_high)
+      test_stat <- if (p_greater_low >= p_less_high) test_stat_low else test_stat_high
+    } else {
+      # H1: p < low or p > high; one-sided p-values count the opposite tails
+      p_less_low <- pv(perm_count(Tperm, test_stat_low, "le"))
+      p_greater_high <- pv(perm_count(Tperm, test_stat_high, "ge"))
+      p.value <- min(p_less_low, p_greater_high)
+      test_stat <- if (p_less_low <= p_greater_high) test_stat_low else test_stat_high
+    }
+
+    # 1 - 2*alpha CI by inverting both one-sided permutation tests at alpha
+    lower <- ginv(est - se * perm_crit(Tperm, alpha, p_method, "upper"))
+    upper <- ginv(est - se * perm_crit(Tperm, alpha, p_method, "lower"))
+
+  } else {
+    test_stat <- tstat(mu)
+    p.value <- switch(alternative,
+                      "two.sided" = pv(perm_count(Tperm, test_stat, "abs")),
+                      "less" = pv(perm_count(Tperm, test_stat, "le")),
+                      "greater" = pv(perm_count(Tperm, test_stat, "ge")))
+
+    # The two-sided interval uses the same |T| rule as the two-sided p-value
+    if (alternative == "two.sided") {
+      crit_abs <- perm_crit(Tperm, alpha, p_method, "abs")
+      lower <- ginv(est - se * crit_abs)
+      upper <- ginv(est + se * crit_abs)
+    } else if (alternative == "less") {
+      lower <- 0
+      upper <- ginv(est - se * perm_crit(Tperm, alpha, p_method, "lower"))
+    } else {
+      lower <- ginv(est - se * perm_crit(Tperm, alpha, p_method, "upper"))
+      upper <- 1
+    }
+  }
+
+  list(p.value = p.value, test_stat = test_stat, lower = lower, upper = upper)
+}
+
 # TODO: add xname and yname arguments to allow user-specified group labels
 #brunner_munzel <- setClass("brunner_munzel")
 brunner_munzel <- function(x,
@@ -363,7 +538,7 @@ brunner_munzel <- function(x,
                            alpha = 0.05,
                            scale = c("probability", "difference",
                                      "logodds", "odds"),
-                           test_method = c("t", "logit", "perm"),
+                           test_method = c("t", "logit", "perm", "perm_logit"),
                            R = 10000,
                            p_method = NULL,
                            perm = "deprecated",
@@ -390,7 +565,7 @@ brunner_munzel.default = function(x,
                                   alpha = 0.05,
                                   scale = c("probability", "difference",
                                             "logodds", "odds"),
-                                  test_method = c("t", "logit", "perm"),
+                                  test_method = c("t", "logit", "perm", "perm_logit"),
                                   R = 10000,
                                   p_method = NULL,
                                   perm = "deprecated",
@@ -422,6 +597,10 @@ brunner_munzel.default = function(x,
 
   alternative = match.arg(alternative)
   test_method = match.arg(test_method)
+  # Permutation methods: "perm" works on the probability scale, "perm_logit"
+  # on the logit scale (range-preserving intervals)
+  use_perm <- test_method %in% c("perm", "perm_logit")
+  perm_link <- if (test_method == "perm_logit") "logit" else "identity"
   scale = match.arg(scale)
   # p_method validation deferred until we know if exact or randomization
 
@@ -449,6 +628,9 @@ brunner_munzel.default = function(x,
       }
     }
   }
+  if (test_method == "perm_logit" && any(mu <= 0 | mu >= 1)) {
+    stop("For test_method = 'perm_logit', 'mu' values must be strictly between 0 and 1")
+  }
 
   if(!is.numeric(x)) stop("'x' must be numeric")
   if(!missing(y)) {
@@ -474,13 +656,39 @@ brunner_munzel.default = function(x,
       y <- y[is.finite(y)]
     }
 
-    if(min(length(x),length(y)) < 15 && test_method != "perm"){
-      message("Sample size in at least one group is small. Permutation test (test_method = 'perm') is highly recommended.")
-    }
-    if(min(length(x),length(y)) > 250 &&
-       sum(length(x),length(y)) > 500 &&
-       test_method == "perm"){
-      message("Sample size is fairly large. Use of a permutation test is probably unnecessary.")
+    # Test method recommendations (see "Choosing a test method" in the docs)
+    n_min <- min(length(x), length(y))
+    null_is_half <- alternative %in% c("two.sided", "less", "greater") && mu == 0.5
+    if (null_is_half) {
+      # Standard null of stochastic equality
+      if (!use_perm) {
+        if (paired) {
+          message("For paired samples, the permutation test (test_method = 'perm') is recommended: ",
+                  "the 't' and 'logit' methods tend to be conservative when pairs are positively correlated.")
+        } else if (n_min < 30) {
+          message("Sample size in at least one group is small (< 30). ",
+                  "The permutation test (test_method = 'perm') is recommended.")
+        }
+      }
+      if (!paired && n_min > 250 &&
+          sum(length(x), length(y)) > 500 &&
+          use_perm) {
+        message("Sample size is fairly large. Use of a permutation test is probably unnecessary.")
+      }
+    } else if (test_method %in% c("t", "perm")) {
+      # Nulls other than 0.5 (including equivalence and minimal effect bounds)
+      if (alternative == "minimal.effect") {
+        warning("Minimal effect tests with test_method = '", test_method, "' can have ",
+                "inflated Type I error rates, particularly in small samples or with bounds ",
+                "far from 0.5. Consider test_method = 'perm_logit' or 'logit'. ",
+                "See 'Choosing a test method' in ?brunner_munzel.", call. = FALSE)
+      } else {
+        warning("Tests against a null value other than 0.5 with test_method = '", test_method,
+                "' can be inaccurate: equivalence tests tend to be overly conservative ",
+                "(low power), and tests against values near 0 or 1 can have inflated Type I ",
+                "error rates. Consider test_method = 'perm_logit' or 'logit'. ",
+                "See 'Choosing a test method' in ?brunner_munzel.", call. = FALSE)
+      }
     }
   } else {
 
@@ -530,7 +738,7 @@ brunner_munzel.default = function(x,
     v[v0] <- 1 / n
     std_err = sqrt(v/n)
 
-    if(test_method == "perm"){
+    if(use_perm){
       if(alternative %in% c("equivalence", "minimal.effect")) {
         message("NOTE: Permutation-based TOST for equivalence/minimal.effect testing.")
       }
@@ -552,6 +760,7 @@ brunner_munzel.default = function(x,
       } else {
         METHOD <- "Paired Brunner-Munzel Randomization test"
       }
+      if (perm_link == "logit") METHOD <- paste(METHOD, "(logit)")
 
       if(n<=13){
         n_perm_actual <- 2^n
@@ -593,90 +802,27 @@ brunner_munzel.default = function(x,
       vperm30<-(vperm3==0)
       vperm3[vperm30]<-1/n
 
-      # FIXED: Permuted statistics always centered at 0.5 (exchangeability assumption)
-      Tperm <- sqrt(n) * (pdperm - 0.5) / sqrt(vperm3)
-
-      # Calculate p-values based on alternative
-      if(alternative %in% c("equivalence", "minimal.effect")) {
-        # Observed test statistics for each bound
-        test_stat_low <- sqrt(n) * (pd - low_eqbound) / sqrt(v)
-        test_stat_high <- sqrt(n) * (pd - high_eqbound) / sqrt(v)
-
-        # One-sided p-values using count-based logic routed through bm_compute_perm_pval
-        # For lower bound test: H0: p <= low vs H1: p > low
-        # Large test_stat_low supports H1, so p-value = P(T >= t_obs)
-        b_greater_low <- perm_count(Tperm, test_stat_low, "ge")
-        # For upper bound test: H0: p >= high vs H1: p < high
-        # Small (negative) test_stat_high supports H1, so p-value = P(T <= t_obs)
-        b_less_high <- perm_count(Tperm, test_stat_high, "le")
-
-        p_greater_low <- bm_compute_perm_pval(b_greater_low, n_perm_actual, p_method)
-        p_less_high <- bm_compute_perm_pval(b_less_high, n_perm_actual, p_method)
-
-        if(alternative == "equivalence") {
-          # Both conditions must be met: p > low AND p < high
-          # p-value is the maximum of the two one-sided tests
-          p.value <- max(p_greater_low, p_less_high)
-
-          # Determine which bound is "binding" for reporting
-          if(p_greater_low >= p_less_high) {
-            test_stat <- test_stat_low
-          } else {
-            test_stat <- test_stat_high
-          }
-        } else { # minimal.effect
-          # At least one condition must be met: p <= low OR p >= high
-          # One-sided p-values count the opposite tails directly
-          p_less_low <- bm_compute_perm_pval(perm_count(Tperm, test_stat_low, "le"),
-                                             n_perm_actual, p_method)
-          p_greater_high <- bm_compute_perm_pval(perm_count(Tperm, test_stat_high, "ge"),
-                                                 n_perm_actual, p_method)
-          p.value <- min(p_less_low, p_greater_high)
-
-          # Determine which bound is "binding" for reporting
-          if(p_less_low <= p_greater_high) {
-            test_stat <- test_stat_low
-          } else {
-            test_stat <- test_stat_high
-          }
-        }
-
-        # 1 - 2*alpha CI by inverting both one-sided permutation tests at alpha
-        pd.lower <- pd - std_err * perm_crit(Tperm, alpha, p_method, "upper")
-        pd.upper <- pd - std_err * perm_crit(Tperm, alpha, p_method, "lower")
-
+      # Permuted statistics are centred at the exchangeability null (p = 0.5)
+      if (perm_link == "logit") {
+        # perm_logit: studentized statistic on the logit scale
+        eps_p <- 0.5 / n^2
+        pl_perm <- pmin(pmax(pdperm, eps_p), 1 - eps_p)
+        Tperm <- stats::qlogis(pl_perm) * pl_perm * (1 - pl_perm) / sqrt(vperm3 / n)
+        obs <- bm_logit_scale(pd, std_err, eps_p)
       } else {
-        # Standard alternatives (two.sided, less, greater)
-        # Observed test statistic centered at mu
-        test_stat <- sqrt(n) * (pd - mu) / sqrt(v)
-
-        # Count extreme values for p-value calculation
-        b_less <- perm_count(Tperm, test_stat, "le")
-        b_greater <- perm_count(Tperm, test_stat, "ge")
-        b_two_sided <- perm_count(Tperm, test_stat, "abs")
-
-        # Compute p-values using selected method
-        p_less <- bm_compute_perm_pval(b_less, n_perm_actual, p_method)
-        p_greater <- bm_compute_perm_pval(b_greater, n_perm_actual, p_method)
-        p_two_sided <- bm_compute_perm_pval(b_two_sided, n_perm_actual, p_method)
-
-        p.value = switch(alternative,
-                         "two.sided" = p_two_sided,
-                         "less" = p_less,
-                         "greater" = p_greater)
-
-        # CI inverts the same permutation test (see perm_crit())
-        crit_abs <- if (alternative == "two.sided") perm_crit(Tperm, alpha, p_method, "abs")
-        pd.lower = switch(alternative,
-                          "two.sided" = pd - std_err * crit_abs,
-                          "less" = 0,
-                          "greater" = pd - std_err * perm_crit(Tperm, alpha, p_method, "upper"))
-
-        pd.upper = switch(alternative,
-                          "two.sided" = pd + std_err * crit_abs,
-                          "less" = pd - std_err * perm_crit(Tperm, alpha, p_method, "lower"),
-                          "greater" = 1)
+        Tperm <- sqrt(n) * (pdperm - 0.5) / sqrt(vperm3)
+        obs <- list(est = pd, se = std_err)
       }
+      bm_message_min_pval(Tperm, alternative, n_perm_actual, p_method, alpha)
+
+      perm_res <- bm_perm_inference(
+        Tperm, obs$est, obs$se, alternative,
+        mu = if (alternative %in% c("equivalence", "minimal.effect")) c(low_eqbound, high_eqbound) else mu,
+        alpha = alpha, R = n_perm_actual, p_method = p_method, link = perm_link)
+      p.value <- perm_res$p.value
+      test_stat <- perm_res$test_stat
+      pd.lower <- perm_res$lower
+      pd.upper <- perm_res$upper
 
       # Warn if exact permutation p-value is 0 (potential artifact)
       if (p_method == "exact" && p.value == 0) {
@@ -868,7 +1014,7 @@ brunner_munzel.default = function(x,
     df.sw <- (s1 + s2)^2/(s1^2/(n.x - 1) + s2^2/(n.y - 1))
     df.sw[is.nan(df.sw)] <- 1000
 
-    if(test_method == "perm"){
+    if(use_perm){
 
       ## permutation -----
       if(alternative %in% c("equivalence", "minimal.effect")) {
@@ -898,105 +1044,33 @@ brunner_munzel.default = function(x,
       } else {
         METHOD <- "Two-sample Brunner-Munzel Randomization test"
       }
+      if (perm_link == "logit") METHOD <- paste(METHOD, "(logit)")
 
       Px<-matrix(c(x,y)[P],ncol=R_actual)
 
-      # perm_loop already centers at 0.5 (see res1[1,]<-(pdP-1/2)/sqrt(vP))
-      Tperm<-t(apply(perm_loop(x=Px[1:n.x,],y=Px[(n.x+1):N,],
-                               n.x=n.x,n.y=n.y,R=R_actual),1,sort))
-
-      if(alternative %in% c("equivalence", "minimal.effect")) {
-        # Observed test statistics for each bound
-        test_stat_low <- sqrt(N) * (pd - low_eqbound) / sqrt(V)
-        test_stat_high <- sqrt(N) * (pd - high_eqbound) / sqrt(V)
-
-        # Count extreme values for p-value calculation
-        # For lower bound test (H1: p > low): count permutations with T >= t_obs_low
-        # For upper bound test (H1: p < high): count permutations with T <= t_obs_high
-        b_greater_low <- perm_count(Tperm[1,], test_stat_low, "ge")
-        b_less_high <- perm_count(Tperm[1,], test_stat_high, "le")
-
-        # One-sided p-values using selected method
-        # p_greater_low = P(T >= t_obs | H0) for testing H1: p > low
-        # p_less_high = P(T <= t_obs | H0) for testing H1: p < high
-        p_greater_low <- bm_compute_perm_pval(b_greater_low, R_actual, p_method)
-        p_less_high <- bm_compute_perm_pval(b_less_high, R_actual, p_method)
-
-        if(alternative == "equivalence") {
-          # Both conditions must be met: p > low AND p < high
-          # p-value is the maximum of the two one-sided tests
-          p.value <- max(p_greater_low, p_less_high)
-
-          # Determine which bound is "binding" for reporting
-          if(p_greater_low >= p_less_high) {
-            test_stat <- test_stat_low
-          } else {
-            test_stat <- test_stat_high
-          }
-        } else { # minimal.effect
-          # At least one condition must be met: p <= low OR p >= high
-          # One-sided p-values count the opposite tails directly
-          p_less_low <- bm_compute_perm_pval(perm_count(Tperm[1,], test_stat_low, "le"),
-                                             R_actual, p_method)
-          p_greater_high <- bm_compute_perm_pval(perm_count(Tperm[1,], test_stat_high, "ge"),
-                                                 R_actual, p_method)
-          p.value <- min(p_less_low, p_greater_high)
-
-          if(p_less_low <= p_greater_high) {
-            test_stat <- test_stat_low
-          } else {
-            test_stat <- test_stat_high
-          }
-        }
-
-        # 1 - 2*alpha CI by inverting both one-sided permutation tests at alpha
-        pd.lower <- pd - std_err * perm_crit(Tperm[1,], alpha, p_method, "upper")
-        pd.upper <- pd - std_err * perm_crit(Tperm[1,], alpha, p_method, "lower")
-
+      # perm_loop centers at 0.5: row 1 is the identity-scale statistic
+      # (pdP - 1/2) / sqrt(vP), row 2 the logit-scale statistic. Rows are
+      # sorted independently; only the chosen row is used.
+      eps_p <- 0.5 / (n.x * n.y)
+      Tperm_all <- t(apply(perm_loop(x=Px[1:n.x,],y=Px[(n.x+1):N,],
+                                     n.x=n.x,n.y=n.y,R=R_actual, eps = eps_p),1,sort))
+      if (perm_link == "logit") {
+        Tperm <- Tperm_all[2, ]
+        obs <- bm_logit_scale(pd, std_err, eps_p)
       } else {
-        # Standard alternatives
-        # Observed test statistic centered at mu
-        test_stat <- sqrt(N) * (pd - mu) / sqrt(V)
-
-        # Count extreme values for p-value calculation
-        b_less <- perm_count(Tperm[1,], test_stat, "le")
-        b_greater <- perm_count(Tperm[1,], test_stat, "ge")
-
-        # For two-sided tests, use absolute value method: mean(|T_perm| >= |T_obs|)
-        # This matches the brunnermunzel package's approach
-        b_two_sided <- perm_count(Tperm[1,], test_stat, "abs")
-
-        # CI inverts the same permutation test (see perm_crit()); the
-        # two-sided interval uses the same |T| rule as the two-sided p-value
-        if(alternative == "two.sided"){
-          crit_abs <- perm_crit(Tperm[1,], alpha, p_method, "abs")
-          lower_ci <- pd - std_err * crit_abs
-          upper_ci <- pd + std_err * crit_abs
-        } else {
-          lower_ci <- pd - std_err * perm_crit(Tperm[1,], alpha, p_method, "upper")
-          upper_ci <- pd - std_err * perm_crit(Tperm[1,], alpha, p_method, "lower")
-        }
-
-        # Compute p-values using selected method
-        p_less <- bm_compute_perm_pval(b_less, R_actual, p_method)
-        p_greater <- bm_compute_perm_pval(b_greater, R_actual, p_method)
-        p_two_sided <- bm_compute_perm_pval(b_two_sided, R_actual, p_method)
-
-        p.value = switch(alternative,
-                         "two.sided" = p_two_sided,
-                         "less" = p_less,
-                         "greater" = p_greater)
-
-        pd.lower = switch(alternative,
-                          "two.sided" = lower_ci,
-                          "less" = 0,
-                          "greater" = lower_ci)
-
-        pd.upper = switch(alternative,
-                          "two.sided" = upper_ci,
-                          "less" = upper_ci,
-                          "greater" = 1)
+        Tperm <- Tperm_all[1, ]
+        obs <- list(est = pd, se = std_err)
       }
+      bm_message_min_pval(Tperm, alternative, R_actual, p_method, alpha)
+
+      perm_res <- bm_perm_inference(
+        Tperm, obs$est, obs$se, alternative,
+        mu = if (alternative %in% c("equivalence", "minimal.effect")) c(low_eqbound, high_eqbound) else mu,
+        alpha = alpha, R = R_actual, p_method = p_method, link = perm_link)
+      p.value <- perm_res$p.value
+      test_stat <- perm_res$test_stat
+      pd.lower <- perm_res$lower
+      pd.upper <- perm_res$upper
 
       # Warn if exact permutation p-value is 0 (potential artifact)
       if (p_method == "exact" && p.value == 0) {
@@ -1194,7 +1268,7 @@ brunner_munzel.default = function(x,
     names(mu) <- null_label
   }
 
-  if(test_method == "perm"){
+  if(use_perm){
     names(test_stat) = "t-observed"
     # For permutation tests, report number of permutations instead of df
     param <- n_perm_actual
@@ -1281,7 +1355,7 @@ brunner_munzel.formula = function(formula,
 }
 
 
-perm_loop <-function(x,y,n.x,n.y,R){
+perm_loop <-function(x,y,n.x,n.y,R,eps=0.5/(n.x*n.y)){
 
   pl1P<-matrix(0,nrow=n.x,ncol=R)
   pl2P<-matrix(0,nrow=n.y,ncol=R)
@@ -1318,12 +1392,17 @@ perm_loop <-function(x,y,n.x,n.y,R){
   # Note: This centers at 0.5, which is correct for the permutation distribution
   res1[1,]<-(pdP-1/2)/sqrt(vP)
 
+  # Logit-scale statistic (used by test_method = "perm_logit"); estimates of
+  # exactly 0 or 1 are moved eps inside the unit interval, matching the
+  # observed statistic (see bm_logit_scale())
+  plP <- pmin(pmax(pdP, eps), 1 - eps)
+  res1[2,]<-stats::qlogis(plP)*plP*(1-plP)/sqrt(vP)
+
   pdP0<-(pdP==0)
   pdP1<-(pdP==1)
   pdP[pdP0]<-0.01
   pdP[pdP1]<-0.99
 
-  res1[2,]<-log(pdP/(1-pdP))*pdP*(1-pdP)/sqrt(vP)
   res1[3,]<-qnorm(pdP)*exp(-0.5*qnorm(pdP)^2)/(sqrt(2*pi*vP))
 
   res1

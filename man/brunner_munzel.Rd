@@ -14,7 +14,7 @@
   mu = 0.5,
   alpha = 0.05,
   scale = c("probability", "difference", "logodds", "odds"),
-  test_method = c("t", "logit", "perm"),
+  test_method = c("t", "logit", "perm", "perm_logit"),
   R = 10000,
   p_method = NULL,
   perm = "deprecated",
@@ -73,14 +73,18 @@ null = 1}
 \itemize{
 \item "t" (default): approximate t-distribution with Satterthwaite-Welch degrees of freedom
 \item "logit": logit transformation for range-preserving confidence intervals
-\item "perm": studentized permutation test (recommended when sample size per condition is less
-than 15, and for paired designs with correlated pairs; see "Choosing a test method" in
-Details)
-}}
+\item "perm": studentized permutation test (recommended for the standard null of 0.5 when the
+smaller group has fewer than 30 observations, and for paired designs)
+\item "perm_logit": studentized permutation test on the logit scale, with range-preserving
+confidence intervals (recommended for equivalence, minimal effect, and other tests
+against a null value other than 0.5)
+}
 
-\item{R}{the number of permutations for the permutation test (default is 10000). Only used when \code{test_method = "perm"}.}
+See "Choosing a test method" in Details.}
 
-\item{p_method}{a character string specifying the method for computing permutation p-values. Only used when \code{test_method = "perm"}:
+\item{R}{the number of permutations for the permutation test (default is 10000). Only used when \code{test_method = "perm"} or \code{"perm_logit"}.}
+
+\item{p_method}{a character string specifying the method for computing permutation p-values. Only used when \code{test_method = "perm"} or \code{"perm_logit"}:
 \itemize{
 \item \code{NULL} (default): Automatically selects "exact" for exact permutation tests (when all
 permutations are enumerated) and "plusone" for randomization tests (when permutations
@@ -141,15 +145,23 @@ This is also referred to as the "relative" effect in the literature. Therefore, 
 The brunner_munzel function is based on the \code{npar.t.test} and \code{npar.t.test.paired} functions within the \code{nparcomp} package (Konietschke et al. 2015).
 \subsection{Test Methods}{
 
-Three test methods are available:
+Four test methods are available:
 \itemize{
 \item "t": The default method uses a t-distribution approximation with Satterthwaite-Welch
 degrees of freedom. This is appropriate for moderate to large sample sizes.
 \item "logit": Uses a logit transformation to produce range-preserving confidence intervals
-that are guaranteed to stay within \verb{[0, 1]}. This method is recommended when the estimated
-relative effect is close to 0 or 1.
+that are guaranteed to stay within \verb{[0, 1]}. It is conservative in small samples.
+\item "perm_logit": A studentized permutation test carried out on the logit scale. The
+observed statistic is \eqn{(\mathrm{logit}(\hat p) - \mathrm{logit}(p_0)) / SE_{logit}},
+with \eqn{SE_{logit} = SE / (\hat p (1 - \hat p))}, and the permutation
+distribution is the same statistic computed for each permuted data set. The
+confidence interval inverts this test and is back-transformed, so it always stays
+strictly inside \verb{(0, 1)} and always agrees with the p-value. Estimates of exactly 0
+or 1 are moved half a step inside the unit interval (by \eqn{1/(2 n_1 n_2)} for two
+samples, \eqn{1/(2 n^2)} for paired samples) before transforming. Null values must be
+strictly between 0 and 1. The \code{R} and \code{p_method} arguments work as for \code{"perm"}.
 \item "perm": A studentized permutation test following Neubert & Brunner (2007). This method
-is highly recommended when sample sizes are small (< 15 per group) as it provides better
+is recommended for the standard null of 0.5 in small samples, as it provides better
 control of Type I error rates in these situations. Note: when permutations are
 sampled (rather than fully enumerated) and \code{p_method = "exact"} (\code{b/R}) is requested,
 the p-value can be 0 if no sampled permuted statistic is as extreme as the observed
@@ -159,43 +171,81 @@ permutations, so \code{b/R} is never 0.
 }
 \subsection{Choosing a test method}{
 
-The following recommendations are based on simulations of Type I error at
-two-sided \eqn{\alpha = 0.05} with normal, heavily tied ordinal, unequal-variance,
-and skewed data. Smaller \eqn{\alpha} levels were not examined and may require
-larger samples for the \code{"t"} approximation to be adequate.
-
-\strong{Two-sample (independent) designs:}
-\itemize{
-\item With fewer than about 10 observations in the smaller group, \code{"t"} is liberal
-(Type I error of roughly 7--9\% at 5 per group). \code{"perm"} stays at or below the
-nominal level when the two distributions are identical.
-\item With about 15 or more observations in the smaller group, \code{"t"} and \code{"perm"} were
-practically equivalent in every scenario. Their Type I error rates differed by at
-most one percentage point, and they reached different decisions for about 1\% of
-data sets or fewer. Beyond roughly 20--30 per group the choice makes essentially
-no practical difference, and \code{"t"} is much faster.
+Recommended defaults:\tabular{ll}{
+   Hypothesis and design \tab Recommendation \cr
+   Null of 0.5, two-sample, smaller group < 30 \tab \code{"perm"} \cr
+   Null of 0.5, two-sample, smaller group 30 or more \tab \code{"t"} (or \code{"perm"}; they agree) \cr
+   Null of 0.5, paired, 5 or fewer pairs \tab No good option (see below); treat the design as underpowered \cr
+   Null of 0.5, paired, 6 or more pairs \tab \code{"perm"} \cr
+   Null of 0.5, paired, large sample with approximately uncorrelated pairs \tab \code{"t"} is adequate \cr
+   Equivalence, minimal effect, or any other null value \tab \code{"perm_logit"} (most powerful) or \code{"logit"} (more conservative) \cr
+   Estimate near 0 or 1 (for the confidence interval) \tab \code{"perm_logit"} or \code{"logit"} \cr
 }
 
-\strong{Paired designs:} the within-pair correlation matters more than the sample size.
+
+These recommendations come from simulations with normal, heavily tied ordinal,
+unequal-variance, and skewed data, at \eqn{\alpha = 0.05}. Smaller \eqn{\alpha}
+levels were not examined and may require larger samples for the \code{"t"}
+approximation to be adequate.
+
+\strong{Equivalence, minimal effect, and other null values.} The advantage of \code{"perm"}
+only holds for the null of 0.5: a permutation test is exact only when the groups are
+exchangeable, which is impossible when the true relative effect equals a bound other
+than 0.5. In simulations with bounds of (0.4, 0.6), (0.3, 0.7), and (0.2, 0.8) and
+7 to 30 observations per group or pairs:
 \itemize{
-\item With uncorrelated pairs, \code{"t"} and \code{"perm"} become practically equivalent from
-roughly 15--20 pairs, as in the two-sample case.
-\item With positively correlated pairs (the usual paired design), \code{"t"} is
-conservative. For example, with a latent correlation of 0.8 its Type I error was
-about 2--4\% for 7--50 pairs, while \code{"perm"} stayed near 5\%. \code{"perm"} is therefore
-preferable, and more powerful, well beyond 15 pairs.
-\item With 5 or fewer pairs, \code{"perm"} cannot reject at two-sided \eqn{\alpha = 0.05}. Full
-enumeration of \eqn{2^5 = 32} within-pair swaps gives a smallest attainable
-p-value of \eqn{2/32 = 0.0625}. At least 6 pairs are needed.
+\item \code{"t"} and \code{"perm"} behaved almost identically. Equivalence tests held their level
+but were overly conservative, with low power (for example about 0.31 with 10 per
+group and bounds of (0.2, 0.8), compared with 0.53 for \code{"logit"} and 0.64 for
+\code{"perm_logit"}). Minimal effect tests had \strong{inflated Type I error}, up to 15--18\%
+in small samples with bounds of (0.2, 0.8) and still about 9--10\% with 30 per group.
+The function warns when \code{"t"} or \code{"perm"} is used with a null value other than 0.5.
+\item \code{"logit"} held its level for both equivalence (Type I error at most about 5.5\%) and
+minimal effect tests (mostly at or below 5\%), with more power than \code{"t"} or
+\code{"perm"}.
+\item \code{"perm_logit"} had the highest power. Its Type I error at the bounds was about 5--7\%
+for equivalence tests and mostly about 5\% for minimal effect tests, but reached
+8--12\% for minimal effect tests in small two-sample designs with unequal spread and
+wide bounds. Use \code{"logit"} when strict Type I error control matters more than
+power in such designs.
 }
 
-\strong{In both designs:}
-\itemize{
-\item \code{"logit"} was markedly conservative in small samples (Type I error of roughly
-1--3\% with 15 or fewer observations per group) and remained below nominal at 50.
-It trades power for range-preserving intervals.
-\item Neither \code{"t"} nor \code{"perm"} is exact when the two distributions differ in spread or
-shape.
+\strong{Estimates near 0 or 1.} The \code{"t"} and \code{"perm"} intervals can collapse when the
+estimate is at or near 0 or 1 (their standard error goes to zero), and their coverage
+fell as low as 52--82\% for a true relative effect of 0.95 with 15 or fewer per group.
+\code{"perm_logit"} kept coverage near 95\% in these settings with equal spread and in
+paired designs, but could undercover (roughly 72--85\%) with unequal spread and a
+true relative effect of 0.9 or more. \code{"logit"} never fell below 90\% coverage but
+produces wide intervals.
+
+\strong{Two-sample designs.} With fewer than about 10 observations in the smaller group,
+\code{"t"} is liberal (Type I error of roughly 7--9\% at 5 per group), whereas \code{"perm"}
+stays at or below the nominal level when the two distributions are identical. From
+about 15 observations in the smaller group, \code{"t"} and \code{"perm"} were practically
+equivalent in every scenario: their Type I error rates differed by at most one
+percentage point, and they reached different decisions for about 1\% of data sets or
+fewer. The cut-off of 30 in the table leaves a safety margin. It applies to the
+smaller group, because unbalanced designs are where \code{"t"} took longest to agree.
+
+\strong{Paired designs.} The within-pair correlation matters more than the sample size.
+With positively correlated pairs (the usual paired design), \code{"t"} is conservative.
+For example, with a latent correlation of 0.8 its Type I error was about 2--4\% for
+7 to 50 pairs, while \code{"perm"} stayed near 5\%. \code{"perm"} is therefore preferable, and
+more powerful, at every sample size studied (up to 50 pairs). With approximately
+uncorrelated pairs, \code{"t"} and \code{"perm"} agree from roughly 15--20 pairs. With 5 or
+fewer pairs, \code{"perm"} cannot reject at two-sided \eqn{\alpha = 0.05}: full
+enumeration of \eqn{2^5 = 32} within-pair swaps gives a smallest attainable p-value
+of \eqn{2/32 = 0.0625}. The level of \code{"t"} is also uncertain at such small sample
+sizes.
+
+\strong{The \code{"logit"} method} was markedly conservative in small samples in both
+designs (Type I error of roughly 1--3\% with 15 or fewer observations per group) and
+remained below nominal at 50, so it sacrifices considerable power. Its advantage is
+an interval that always stays within \verb{[0, 1]}, which is useful when the estimated
+relative effect is close to 0 or 1. It is not a remedy for small samples.
+
+\strong{Limitations.} Neither \code{"t"} nor \code{"perm"} is exact when the two distributions
+differ in spread or shape.
 \itemize{
 \item In two-sample designs with very small samples, both can be liberal when the
 smaller group is the more variable one.
@@ -203,15 +253,21 @@ smaller group is the more variable one.
 distributions, \code{"perm"} can be slightly liberal (about 6\%).
 \item \code{"perm"} can be conservative with heavily tied data in very small samples.
 }
-}
 
-The function prints a message recommending \code{"perm"} when either group has fewer
-than 15 observations. It prints a message suggesting that \code{"perm"} is unnecessary
-only for very large samples (smaller group > 250 and total > 500). That threshold is
-deliberately conservative. Using \code{"perm"} in large samples is never invalid, only
-slower. For two-sample designs, \code{"t"} is an adequate substitute well before that
-point, from roughly 20--30 observations per group. For paired designs with
-correlated pairs, \code{"perm"} remains preferable at larger sample sizes.
+\strong{Messages and warnings.} The function prints messages that follow these
+recommendations:
+\itemize{
+\item For the null of 0.5, it recommends \code{"perm"} when a two-sample test with fewer than
+30 observations in the smaller group uses \code{"t"} or \code{"logit"}, and whenever a paired
+test uses \code{"t"} or \code{"logit"}.
+\item For two-sample designs it notes that a permutation test is probably unnecessary only
+for very large samples (smaller group > 250 and total > 500). This is deliberately
+conservative. Using a permutation test in large samples is never invalid, only slower.
+\item It warns when \code{"t"} or \code{"perm"} is used for a minimal effect test or any other test
+against a null value other than 0.5, and suggests \code{"perm_logit"} or \code{"logit"}.
+\item When the permutation distribution is too coarse for the test to ever reject at
+the requested \code{alpha} (for example, 5 or fewer pairs), the function says so.
+}
 }
 
 }
@@ -263,7 +319,7 @@ The one-sided p-values are:
 For equivalence: \eqn{p_{TOST} = \max(p_1, p_2)}
 
 For minimal effect: \eqn{p_{MET} = \min(1 - p_1, 1 - p_2)}. For
-\code{test_method = "perm"}, the minimal effect one-sided p-values are instead
+\code{test_method = "perm"} and \code{"perm_logit"}, the minimal effect one-sided p-values are instead
 computed by counting the opposite tails of the permutation distribution
 directly (with the same \code{p_method} counting rule).
 }
@@ -288,15 +344,23 @@ absolute-value rule as the two-sided p-value. As a result, the confidence
 interval and p-value always agree, apart from the interval being clamped to
 \verb{[0, 1]}. If the number of permutations is too small for the test to ever
 reject at the requested \eqn{\alpha}, the corresponding limit is set to 0 or 1.
+
+When \code{test_method = "perm_logit"}, the same inversion is carried out on the
+logit scale, \eqn{\mathrm{logit}(\hat{p}) - SE_{logit} \cdot q}, and the limits are
+back-transformed. No clamping is needed, and the interval and p-value always agree.
 }
 
 \subsection{Permutation Tests with Non-0.5 Null Values}{
 
-When \code{test_method = "perm"} and \code{mu != 0.5}, the permutation distribution is constructed by centering
-the permuted test statistics at 0.5 (the value implied by exchangeability), while the observed
-test statistic is centered at the hypothesized null value. This approach is valid because
-the studentized permutation distribution converges to the same limit regardless of the
-centering, following the asymptotic theory of Janssen (1997) and Neubert & Brunner (2007).
+When \code{test_method = "perm"} or \code{"perm_logit"} and \code{mu != 0.5}, the permutation
+distribution is constructed by centering the permuted test statistics at 0.5 (the
+value implied by exchangeability), while the observed test statistic is centered at
+the hypothesized null value. This approach is justified asymptotically, because the
+studentized permutation distribution converges to the same limit regardless of the
+centering (Janssen, 1997; Neubert & Brunner, 2007). It is not exact: when the true
+relative effect equals a null value other than 0.5, the groups cannot be
+exchangeable. In small samples, how well this works depends strongly on the scale
+of the statistic; see "Choosing a test method" above.
 
 Because the equivalence bounds are specified directly on the relative effect
 scale (i.e., as probabilities between 0 and 1), this avoids the difficulty
@@ -306,8 +370,10 @@ be expressed in terms of rank transformations.
 These are uncalibrated (naive) procedures. For the IU direction
 (\code{"equivalence"}), the procedure can be conservative when sample sizes are
 small or when the equivalence bounds are close to 0.5. For the UI direction
-(\code{"minimal.effect"}), the conservatism is less pronounced. See Arboretti
-et al. (2021) for a detailed discussion of calibration
+(\code{"minimal.effect"}), the identity-scale \code{"perm"} procedure can instead be
+liberal, because its interval collapses when the estimate approaches 0 or 1
+(see "Choosing a test method"). See Arboretti et al. (2021) for a detailed
+discussion of calibration.
 }
 }
 \examples{
@@ -318,24 +384,24 @@ brunner_munzel(mpg ~ am, data = mtcars)
 # Test using logit transformation for range-preserving CIs
 brunner_munzel(mpg ~ am, data = mtcars, test_method = "logit")
 
-# Test against a specific null value
-brunner_munzel(mpg ~ am, data = mtcars, mu = 0.3)
+# Permutation test (recommended for the null of 0.5 in small samples)
+brunner_munzel(mpg ~ am, data = mtcars, test_method = "perm", R = 999)
+
+# Test against a specific null value (logit scale recommended for nulls other than 0.5)
+brunner_munzel(mpg ~ am, data = mtcars, mu = 0.3, test_method = "logit")
 
 # Equivalence test: is the relative effect between 0.35 and 0.65?
+# Permutation test on the logit scale (recommended for equivalence testing)
 brunner_munzel(mpg ~ am, data = mtcars,
                alternative = "equivalence",
-               mu = c(0.35, 0.65))
+               mu = c(0.35, 0.65),
+               test_method = "perm_logit", R = 999)
 
 # Minimal effect test: is the relative effect outside 0.4 to 0.6?
 brunner_munzel(mpg ~ am, data = mtcars,
                alternative = "minimal.effect",
-               mu = c(0.4, 0.6))
-
-# Permutation-based equivalence test
-brunner_munzel(mpg ~ am, data = mtcars,
-               alternative = "equivalence",
-               mu = c(0.35, 0.65),
-               test_method = "perm")
+               mu = c(0.4, 0.6),
+               test_method = "logit")
 
 # Report on the difference scale: P(X>Y) - P(X<Y)
 brunner_munzel(mpg ~ am, data = mtcars, scale = "difference")

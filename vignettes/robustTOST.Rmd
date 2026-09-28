@@ -225,13 +225,17 @@ For more details on the calculative approach, I suggest reading @karch2021. At s
 
 ## Test Methods
 
-The `brunner_munzel` function provides three test methods via the `test_method` argument:
+The `brunner_munzel` function provides four test methods via the `test_method` argument:
 
-- **"t"** (default): Uses a t-distribution approximation with Satterthwaite-Welch degrees of freedom. This is appropriate for moderate to large sample sizes (generally n ≥ 15 per group).
+- **"t"** (default): Uses a t-distribution approximation with Satterthwaite-Welch degrees of freedom. This is appropriate for the standard null (0.5) with moderate to large sample sizes.
 
-- **"logit"**: Uses a logit transformation to produce range-preserving confidence intervals that are guaranteed to stay within [0, 1]. This method is recommended when the estimated relative effect is close to 0 or 1.
+- **"logit"**: Uses a logit transformation to produce range-preserving confidence intervals that are guaranteed to stay within [0, 1]. It is conservative in small samples.
 
-- **"perm"**: A studentized permutation test following @neubert2007. This method is highly recommended when sample sizes are small (< 15 per group) as it provides better control of Type I error rates in these situations.
+- **"perm"**: A studentized permutation test following @neubert2007. This method is recommended for the standard null (0.5) in small samples, as it provides better control of Type I error rates in these situations.
+
+- **"perm_logit"**: A studentized permutation test carried out on the logit scale. Its confidence interval always stays within (0, 1) and agrees with its p-value. It is recommended for equivalence, minimal effect, and other tests against a null value other than 0.5.
+
+The function warns when `"t"` or `"perm"` is used for a test against a null value other than 0.5, because in simulations these methods had inflated Type I error rates for minimal effect tests and low power for equivalence tests. See "Choosing a test method" in `?brunner_munzel` for details.
 
 ## Examples
 
@@ -265,35 +269,37 @@ brunner_munzel(formula = extra ~ group,
 
 ### Equivalence Testing
 
-The `brunner_munzel` function directly supports equivalence testing via the `alternative` argument. For equivalence tests, you specify bounds for the relative effect using the `mu` argument:
+The `brunner_munzel` function directly supports equivalence testing via the `alternative` argument. For equivalence tests, you specify bounds for the relative effect using the `mu` argument. The permutation test on the logit scale (`test_method = "perm_logit"`) is recommended for equivalence testing:
 
 ```{r}
 # Equivalence test: is the relative effect between 0.3 and 0.7?
 brunner_munzel(formula = extra ~ group,
                data = sleep,
                alternative = "equivalence",
-               mu = c(0.3, 0.7))
+               mu = c(0.3, 0.7),
+               test_method = "perm_logit")
 ```
 
 ```{r}
-# Permutation-based equivalence test
+# Logit-transformed equivalence test (more conservative, no resampling)
 brunner_munzel(formula = extra ~ group,
                data = sleep,
                alternative = "equivalence",
                mu = c(0.3, 0.7),
-               test_method = "perm")
+               test_method = "logit")
 ```
 
 ### Minimal Effect Testing
 
-You can also test whether the relative effect falls *outside* specified bounds (minimal effect test):
+You can also test whether the relative effect falls *outside* specified bounds (minimal effect test). Avoid `"t"` and `"perm"` here: their minimal effect tests can have inflated Type I error rates.
 
 ```{r}
 # Minimal effect test: is the relative effect outside 0.4 to 0.6?
 brunner_munzel(formula = extra ~ group,
                data = sleep,
                alternative = "minimal.effect",
-               mu = c(0.4, 0.6))
+               mu = c(0.4, 0.6),
+               test_method = "perm_logit")
 ```
 
 ### Paired Samples
@@ -317,13 +323,14 @@ brunner_munzel(x = sleep$extra[sleep$group == 1],
 
 ### Testing Against a Non-Standard Null
 
-You can test against null values other than 0.5:
+You can test against null values other than 0.5. As with equivalence testing, `"perm_logit"` or `"logit"` is recommended:
 
 ```{r}
 # Test if the relative effect differs from 0.3
 brunner_munzel(formula = extra ~ group,
                data = sleep,
-               mu = 0.3)
+               mu = 0.3,
+               test_method = "perm_logit")
 ```
 
 ## Interpreting Brunner-Munzel Results
@@ -337,25 +344,21 @@ When interpreting the Brunner-Munzel test results:
 
 ## Choosing the Right Test Method
 
-**Use `test_method = "t"` when:**
+The recommendations below are based on simulation studies of Type I error, coverage, and power (see "Choosing a test method" in `?brunner_munzel`).
 
-- Sample sizes are moderate to large (n ≥ 15 per group)
-- You want the fastest computation
-- The relative effect estimate is not near the boundaries [0, 1]
+**For the standard null of 0.5:**
 
-**Use `test_method = "logit"` when:**
+- Two-sample designs: use `test_method = "perm"` when the smaller group has fewer than 30 observations. With 30 or more, `"t"` and `"perm"` agree and `"t"` is faster.
+- Paired designs: use `"perm"` (with at least 6 pairs; with 5 or fewer pairs the permutation test cannot reject at α = 0.05). The `"t"` method is conservative when pairs are positively correlated.
 
-- The relative effect estimate is close to 0 or 1
-- You need confidence intervals guaranteed to stay within [0, 1]
-- Sample sizes are moderate to large
+**For equivalence, minimal effect, and other null values:**
 
-**Use `test_method = "perm"` when:**
+- Use `test_method = "perm_logit"` for the most power, or `"logit"` for a more conservative test that needs no resampling.
+- Avoid `"t"` and `"perm"`: their equivalence tests have low power, and their minimal effect tests can have inflated Type I error rates. The function warns if they are used.
 
-- Sample sizes are small (n < 15 per group)
-- You want better Type I error control in small samples
-- Precision is more important than computational speed
+**When the estimate is near 0 or 1:** use `"perm_logit"` or `"logit"`. The `"t"` and `"perm"` intervals can collapse at the boundary and undercover.
 
-Note that the permutation approach can be computationally intensive for large datasets. Additionally, with a permutation test you may observe situations where the confidence interval and the p-value would yield *different* conclusions though they should closely match in most cases.
+The permutation methods can be computationally intensive for large datasets. Their confidence intervals are obtained by inverting the same permutation test, so the interval and the p-value always lead to the same conclusion.
 
 ## Non-Inferiority Testing
 
@@ -367,7 +370,8 @@ The Brunner-Munzel test can be used for non-inferiority testing with ordered cat
 brunner_munzel(formula = extra ~ group,
                data = sleep,
                alternative = "greater",
-               mu = 0.35)
+               mu = 0.35,
+               test_method = "perm_logit")
 ```
 
 # Hodges-Lehmann Estimator and Test
