@@ -34,7 +34,9 @@
 #'
 #'   * "t" (default): approximate t-distribution with Satterthwaite-Welch degrees of freedom
 #'   * "logit": logit transformation for range-preserving confidence intervals
-#'   * "perm": studentized permutation test (recommended when sample size per condition is less than 15)
+#'   * "perm": studentized permutation test (recommended when sample size per condition is less
+#'     than 15, and for paired designs with correlated pairs; see "Choosing a test method" in
+#'     Details)
 #'
 #' @param R the number of permutations for the permutation test (default is 10000). Only used when `test_method = "perm"`.
 #' @param p_method a character string specifying the method for computing permutation p-values. Only used when `test_method = "perm"`:
@@ -93,6 +95,57 @@
 #'   value. The default `plusone` method (`(b+1)/(R+1)`) for sampled permutations avoids
 #'   this. With full enumeration the observed arrangement is always among the
 #'   permutations, so `b/R` is never 0.
+#'
+#' ### Choosing a test method
+#'
+#' The following recommendations are based on simulations of Type I error at
+#' two-sided \eqn{\alpha = 0.05} with normal, heavily tied ordinal, unequal-variance,
+#' and skewed data. Smaller \eqn{\alpha} levels were not examined and may require
+#' larger samples for the `"t"` approximation to be adequate.
+#'
+#' **Two-sample (independent) designs:**
+#'
+#' * With fewer than about 10 observations in the smaller group, `"t"` is liberal
+#'   (Type I error of roughly 7--9% at 5 per group). `"perm"` stays at or below the
+#'   nominal level when the two distributions are identical.
+#' * With about 15 or more observations in the smaller group, `"t"` and `"perm"` were
+#'   practically equivalent in every scenario. Their Type I error rates differed by at
+#'   most one percentage point, and they reached different decisions for about 1% of
+#'   data sets or fewer. Beyond roughly 20--30 per group the choice makes essentially
+#'   no practical difference, and `"t"` is much faster.
+#'
+#' **Paired designs:** the within-pair correlation matters more than the sample size.
+#'
+#' * With uncorrelated pairs, `"t"` and `"perm"` become practically equivalent from
+#'   roughly 15--20 pairs, as in the two-sample case.
+#' * With positively correlated pairs (the usual paired design), `"t"` is
+#'   conservative. For example, with a latent correlation of 0.8 its Type I error was
+#'   about 2--4% for 7--50 pairs, while `"perm"` stayed near 5%. `"perm"` is therefore
+#'   preferable, and more powerful, well beyond 15 pairs.
+#' * With 5 or fewer pairs, `"perm"` cannot reject at two-sided \eqn{\alpha = 0.05}. Full
+#'   enumeration of \eqn{2^5 = 32} within-pair swaps gives a smallest attainable
+#'   p-value of \eqn{2/32 = 0.0625}. At least 6 pairs are needed.
+#'
+#' **In both designs:**
+#'
+#' * `"logit"` was markedly conservative in small samples (Type I error of roughly
+#'   1--3% with 15 or fewer observations per group) and remained below nominal at 50.
+#'   It trades power for range-preserving intervals.
+#' * Neither `"t"` nor `"perm"` is exact when the two distributions differ in spread or
+#'   shape.
+#'   - In two-sample designs with very small samples, both can be liberal when the
+#'     smaller group is the more variable one.
+#'   - In paired designs with strongly correlated pairs and unequal marginal
+#'     distributions, `"perm"` can be slightly liberal (about 6%).
+#'   - `"perm"` can be conservative with heavily tied data in very small samples.
+#'
+#' The function prints a message recommending `"perm"` when either group has fewer
+#' than 15 observations. It prints a message suggesting that `"perm"` is unnecessary
+#' only for very large samples (smaller group > 250 and total > 500). That threshold is
+#' deliberately conservative. Using `"perm"` in large samples is never invalid, only
+#' slower. For two-sample designs, `"t"` is an adequate substitute well before that
+#' point, from roughly 20--30 observations per group. For paired designs with
+#' correlated pairs, `"perm"` remains preferable at larger sample sizes.
 #'
 #' ## Hypothesis Testing
 #'

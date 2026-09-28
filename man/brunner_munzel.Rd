@@ -73,7 +73,9 @@ null = 1}
 \itemize{
 \item "t" (default): approximate t-distribution with Satterthwaite-Welch degrees of freedom
 \item "logit": logit transformation for range-preserving confidence intervals
-\item "perm": studentized permutation test (recommended when sample size per condition is less than 15)
+\item "perm": studentized permutation test (recommended when sample size per condition is less
+than 15, and for paired designs with correlated pairs; see "Choosing a test method" in
+Details)
 }}
 
 \item{R}{the number of permutations for the permutation test (default is 10000). Only used when \code{test_method = "perm"}.}
@@ -155,6 +157,63 @@ value. The default \code{plusone} method (\code{(b+1)/(R+1)}) for sampled permut
 this. With full enumeration the observed arrangement is always among the
 permutations, so \code{b/R} is never 0.
 }
+\subsection{Choosing a test method}{
+
+The following recommendations are based on simulations of Type I error at
+two-sided \eqn{\alpha = 0.05} with normal, heavily tied ordinal, unequal-variance,
+and skewed data. Smaller \eqn{\alpha} levels were not examined and may require
+larger samples for the \code{"t"} approximation to be adequate.
+
+\strong{Two-sample (independent) designs:}
+\itemize{
+\item With fewer than about 10 observations in the smaller group, \code{"t"} is liberal
+(Type I error of roughly 7--9\% at 5 per group). \code{"perm"} stays at or below the
+nominal level when the two distributions are identical.
+\item With about 15 or more observations in the smaller group, \code{"t"} and \code{"perm"} were
+practically equivalent in every scenario. Their Type I error rates differed by at
+most one percentage point, and they reached different decisions for about 1\% of
+data sets or fewer. Beyond roughly 20--30 per group the choice makes essentially
+no practical difference, and \code{"t"} is much faster.
+}
+
+\strong{Paired designs:} the within-pair correlation matters more than the sample size.
+\itemize{
+\item With uncorrelated pairs, \code{"t"} and \code{"perm"} become practically equivalent from
+roughly 15--20 pairs, as in the two-sample case.
+\item With positively correlated pairs (the usual paired design), \code{"t"} is
+conservative. For example, with a latent correlation of 0.8 its Type I error was
+about 2--4\% for 7--50 pairs, while \code{"perm"} stayed near 5\%. \code{"perm"} is therefore
+preferable, and more powerful, well beyond 15 pairs.
+\item With 5 or fewer pairs, \code{"perm"} cannot reject at two-sided \eqn{\alpha = 0.05}. Full
+enumeration of \eqn{2^5 = 32} within-pair swaps gives a smallest attainable
+p-value of \eqn{2/32 = 0.0625}. At least 6 pairs are needed.
+}
+
+\strong{In both designs:}
+\itemize{
+\item \code{"logit"} was markedly conservative in small samples (Type I error of roughly
+1--3\% with 15 or fewer observations per group) and remained below nominal at 50.
+It trades power for range-preserving intervals.
+\item Neither \code{"t"} nor \code{"perm"} is exact when the two distributions differ in spread or
+shape.
+\itemize{
+\item In two-sample designs with very small samples, both can be liberal when the
+smaller group is the more variable one.
+\item In paired designs with strongly correlated pairs and unequal marginal
+distributions, \code{"perm"} can be slightly liberal (about 6\%).
+\item \code{"perm"} can be conservative with heavily tied data in very small samples.
+}
+}
+
+The function prints a message recommending \code{"perm"} when either group has fewer
+than 15 observations. It prints a message suggesting that \code{"perm"} is unnecessary
+only for very large samples (smaller group > 250 and total > 500). That threshold is
+deliberately conservative. Using \code{"perm"} in large samples is never invalid, only
+slower. For two-sample designs, \code{"t"} is an adequate substitute well before that
+point, from roughly 20--30 observations per group. For paired designs with
+correlated pairs, \code{"perm"} remains preferable at larger sample sizes.
+}
+
 }
 
 \subsection{Hypothesis Testing}{
