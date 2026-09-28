@@ -422,6 +422,8 @@ The `hodges_lehmann` function supports three inference approaches controlled by 
 
 - **Randomization test** (`R` < max permutations): Samples `R` permutations with replacement. Uses the (b+1)/(R+1) formula by default for exact Type I error control [@phipson2010] and is also a unstudentized approach.
 
+For both permutation approaches, the confidence interval is obtained by inverting the permutation test (the same construction as for `perm_t_test`, described below), so the interval and the p-value always agree.
+
 ## Examples
 
 ### Basic Two-Sample Test
@@ -525,7 +527,7 @@ The sample size thresholds above reflect computational practicality. For one-sam
 
 # Permutation t-test
 
-The `perm_t_test` function implements studentized permutation tests following the approaches of @janssen1997 and @chung2013. The studentized approach computes a t-statistic for each permutation, making the test valid even under heteroscedasticity (unequal variances).
+The `perm_t_test` function implements studentized permutation tests following the approaches of @janssen1997 and @chung2013. The studentized approach computes a t-statistic for each permutation. The resulting test is exact when the two groups have identical distributions, and remains asymptotically valid when only the means are equal and the variances differ (heteroscedasticity).
 
 ## Permutation Procedure
 
@@ -559,9 +561,29 @@ $$
 
 4. Compute the p-value as the proportion of permutation statistics as extreme as or more extreme than the observed statistic.
 
+5. Compute the confidence interval by inverting the same test. A null value $\mu_0$ is retained when its p-value exceeds $\alpha$, and the confidence interval is the set of all retained values. Because the permutation statistics $t^{*b}$ are computed from the unshifted data, they do not depend on $\mu_0$, so the interval has a closed form:
+
+$$
+\left[\, (\bar{x} - \bar{y}) - SE \cdot q_{\text{upper}},\; (\bar{x} - \bar{y}) - SE \cdot q_{\text{lower}} \,\right]
+$$
+
+Where $SE$ is the standard error from the original sample (the denominator of $t_{obs}$), and $q_{\text{lower}}$ and $q_{\text{upper}}$ are the order statistics of the permutation distribution at which the permutation p-value crosses $\alpha$. They use the same counting rule as the p-value ($b/R$ or $(b+1)/(R+1)$), and the same two-sided rule. With `symmetric = TRUE` the interval is $(\bar{x} - \bar{y}) \pm SE \cdot q_{|t|}$, where $q_{|t|}$ is the corresponding order statistic of $|t^{*b}|$.
+
+The interval and the p-value therefore always agree: $\mu_0$ lies inside the interval if and only if its p-value exceeds $\alpha$. This also holds for one-sided, equivalence, and minimal effect tests, whose $1 - 2\alpha$ interval inverts the two one-sided tests. With `perm_se = FALSE`, the interval reduces to a (reflected) percentile interval of the permuted mean differences. If the number of permutations is too small for the test ever to reject at the requested $\alpha$, the corresponding limit is infinite.
+
 ### Welch Variant (var.equal = FALSE)
 
-When `var.equal = FALSE` (the default), the standard error is computed separately for each group as shown above. This is the studentized permutation approach of @janssen1997 and @chung2013, which remains valid even when the two populations have different variances.
+When `var.equal = FALSE` (the default), the standard error is computed separately for each group as shown above. This is the studentized permutation approach of @janssen1997 and @chung2013. It is exact when the two populations have identical distributions, and asymptotically valid when they have equal means but different variances.
+
+### Sharp and Weak Null Hypotheses
+
+The distinction above matters when interpreting the results:
+
+- Under the **sharp null** (the groups have identical distributions), group labels are exchangeable and the permutation test is exact at any sample size, with or without studentization.
+- Under the **weak null** (equal means, but possibly different variances or shapes), no permutation test is exact. The studentized test is asymptotically valid [@janssen1997; @chung2013]. In very small samples with unequal variances it can be somewhat liberal, particularly when the smaller group has the larger variance. In that setting the Welch t-test or `boot_t_test` may perform comparably or better.
+- Exactness under the sharp null applies to the test of no effect. Tests against a non-zero `mu`, equivalence and minimal effect tests, and the confidence interval all compare against the permutation distribution of the unshifted data, so they are approximate rather than exact.
+
+See "Sharp and Weak Null Hypotheses" in `?perm_t_test` for more detail, including guidance on randomized versus random-sampling designs.
 
 ### Pooled Variance Variant (var.equal = TRUE)
 
@@ -607,7 +629,7 @@ This same procedure is applied to each permutation sample, using trimmed means a
 
 ## Studentized Permutation: The `perm_se` Argument
 
-By default, `perm_t_test` uses the **studentized** permutation approach (`perm_se = TRUE`), which recalculates the standard error for each permutation sample. This follows the recommendations of @janssen1997 and @chung2013, who showed that studentized permutation tests maintain valid Type I error control even under heteroscedasticity (unequal variances).
+By default, `perm_t_test` uses the **studentized** permutation approach (`perm_se = TRUE`), which recalculates the standard error for each permutation sample. This follows the recommendations of @janssen1997 and @chung2013, who showed that studentized permutation tests remain exact under the sharp null and asymptotically valid under heteroscedasticity (unequal variances). The non-studentized version (`perm_se = FALSE`) is also exact under the sharp null, but it is not valid for a test of equal means when the variances and group sizes differ, even in large samples.
 
 **How `perm_se` and `var.equal` interact:**
 
@@ -829,7 +851,7 @@ perm_result
 Both methods test the same hypothesis and should yield similar conclusions. Key differences to note:
 
 - **P-values**: May differ slightly due to Monte Carlo variability and the different resampling mechanisms
-- **Confidence intervals**: Bootstrap uses the resampled effect distribution; permutation uses the percentile method on permuted effects
+- **Confidence intervals**: Bootstrap uses the resampled effect distribution; permutation inverts the studentized permutation test, so its interval always agrees with its p-value
 - **Exact inference**: When sample sizes are small enough, permutation provides exact p-values with no Monte Carlo error
 
 ## Summary: Choosing Between Methods
@@ -839,7 +861,7 @@ Both methods test the same hypothesis and should yield similar conclusions. Key 
 | Resampling type | Without replacement | With replacement |
 | Exact p-values possible | Yes (small samples) | No |
 | Trimmed means support | Yes (`tr` argument) | Yes (`tr` argument in `boot_t_test`) |
-| CI methods | Percentile | Studentized, percentile, basic, BCa |
+| CI methods | Inversion of the studentized permutation test | Studentized, percentile, basic, BCa |
 | Effect size plots | No | Yes |
 | Best for | Small samples, exact inference | Moderate samples, visualization |
 
