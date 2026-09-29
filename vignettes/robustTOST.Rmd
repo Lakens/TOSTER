@@ -349,7 +349,7 @@ The recommendations below are based on simulation studies of Type I error, cover
 **For the standard null of 0.5:**
 
 - Two-sample designs: use `test_method = "perm"` when the smaller group has fewer than 30 observations. With 30 or more, `"t"` and `"perm"` agree and `"t"` is faster.
-- Paired designs: use `"perm"` (with at least 6 pairs; with 5 or fewer pairs the permutation test cannot reject at α = 0.05). The `"t"` method is conservative when pairs are positively correlated.
+- Paired designs: use `"perm"` (with at least 6 pairs; with 5 or fewer pairs the permutation test cannot reject at $\alpha = 0.05$). The `"t"` method is conservative when pairs are positively correlated.
 
 **For equivalence, minimal effect, and other null values:**
 
