@@ -50,13 +50,16 @@
 #' Four bootstrap confidence interval methods are available via the `boot_ci` argument:
 #'   - **Studentized bootstrap ("stud")**: Uses the bootstrap distribution of pivotal
 #'     t-statistics to account for variability in standard error estimates. This is the
-#'     default and usually provides the most accurate coverage.
+#'     default and usually provides the most accurate coverage of the four methods.
 #'   - **Basic bootstrap ("basic")**: Reflects the bootstrap distribution of estimates
 #'     around the observed value.
 #'   - **Percentile bootstrap ("perc")**: Uses percentiles of the bootstrap distribution directly.
 #'   - **Bias-corrected and accelerated ("bca")**: Corrects for both bias and skewness in the
-#'     bootstrap distribution using jackknife-based acceleration. Most accurate when the
-#'     bootstrap distribution is skewed, but computationally more expensive.
+#'     bootstrap distribution using jackknife-based acceleration. Its accuracy is
+#'     asymptotic, and for mean differences it tended to be too liberal in a set of
+#'     simulations (see "Choosing a Method" below), so it is not recommended for
+#'     small samples, heavy-tailed data, or outliers. It is also computationally more
+#'     expensive.
 #'
 #' ## Bootstrap P-values
 #'
@@ -104,6 +107,30 @@
 #' (e.g., observational comparisons), the bootstrap, which directly mimics the
 #' sampling process, is an equally natural choice. Neither approach supports
 #' population inference from non-random (e.g., convenience) samples.
+#'
+#' ## Choosing a Method
+#'
+#' A set of simulations covering two-sample and paired designs (small to moderate
+#' samples, normal, skewed, heavy-tailed, and discrete data) indicated the following.
+#' These are rules of thumb, not guarantees.
+#'
+#'   * **Independent groups:** [perm_t_test()] most consistently held its nominal
+#'     Type I error rate, including with unequal variances and heavy-tailed data.
+#'   * **Paired data with skewed differences:** the permutation test flips the signs of
+#'     the differences, which assumes they are symmetric. When that assumption is
+#'     clearly violated (strong skew), `boot_t_test()` with the default studentized
+#'     interval (`boot_ci = "stud"`) was the better choice.
+#'   * **Heavy tails or outliers:** without trimming, the studentized bootstrap was
+#'     too liberal. Use trimmed means (e.g., `tr = 0.2`), with either function, or
+#'     use [perm_t_test()] when the differences are roughly symmetric.
+#'   * **Groups that differ in shape or spread (e.g., one skewed group):** no method
+#'     was uniformly reliable. All of them, including Welch's t-test, could be
+#'     modestly liberal in one tail with small samples, particularly when the
+#'     more variable or skewed group was the smaller one. The studentized bootstrap
+#'     was often (not always) closest to nominal, and trimming reduced the problem.
+#'     Treat borderline results in this setting with caution.
+#'   * **Interval method:** prefer `boot_ci = "stud"`; avoid `"bca"` for mean
+#'     differences.
 #'
 #' Unlike the `t_TOST` function, this function returns a standard `htest` object for
 #' compatibility with other R functions, while still providing the benefits of bootstrapping.

@@ -114,6 +114,13 @@ NEWS
   null (Wu & Ding, 2020), while the bootstrap targets the weak null and is
   asymptotic only. Guidance on randomized versus random-sampling designs and on
   small-sample, unequal-variance behavior is included.
+- `perm_t_test()`, `boot_t_test()`, `boot_t_TOST()`, and the robust TOST
+  vignette now include a "Choosing a Method" guide based on a set of
+  simulations: studentized permutation for independent groups; the studentized
+  bootstrap for paired data with clearly skewed differences (the sign-flip
+  permutation test assumes symmetry); trimming for heavy tails or outliers;
+  caution when groups differ in shape; and `boot_ci = "bca"` is not
+  recommended for mean differences because it tended to be too liberal.
 - `brunner_munzel()` gains `test_method = "perm_logit"`: a studentized
   permutation test on the logit scale. Its confidence interval inverts the same
   test and is back-transformed, so it is range-preserving (never clamped) and

@@ -518,10 +518,17 @@ Resampling methods provide robust alternatives to parametric t-tests by using th
 | Scenario | Recommended Method | Rationale |
 |----------|-------------------|-----------|
 | Very small samples (paired/one-sample N < 17, two-sample N < 20) | Permutation | Exact permutations are computationally feasible and provide exact p-values |
-| Moderate to large samples | Bootstrap | More computationally efficient; provides stable CI estimates |
-| Outliers present | Permutation with trimming | Combines exact inference with robust location estimation |
+| Independent groups (any sample size) | Permutation (`perm_t_test`) | In a set of simulations, held its nominal Type I error rate most consistently, including with unequal variances and heavy tails |
+| Paired data, clearly skewed differences | Studentized bootstrap (`boot_t_test`, `boot_ci = "stud"`) | The sign-flip permutation test assumes symmetric differences and was too liberal with strong skew |
+| Paired data, symmetric or heavy-tailed differences | Permutation | Performed well when the symmetry assumption is reasonable |
+| Outliers present | Either, with trimming (`tr = 0.2`) | Trimming removes most of the liberal behavior of the untrimmed studentized bootstrap with heavy tails |
+| Groups differ in shape or spread | Cautious interpretation; consider trimming | No method was uniformly reliable (see below) |
 | Complex data structures | Bootstrap | More flexible for non-standard designs |
 | Publication requiring exact p-values | Permutation (if feasible) | No Monte Carlo error when exact permutations computed |
+
+These recommendations are rules of thumb drawn from a set of simulations covering two-sample and paired designs with normal, skewed, heavy-tailed, and discrete data; they are not guarantees. When the two groups differ in shape or spread (for example, one skewed group and one symmetric group), all of the methods, including Welch's t-test, could be modestly liberal in one tail at small sample sizes, particularly when the more variable or skewed group was the smaller one. The studentized bootstrap was often, but not always, closest to the nominal rate in that setting, and trimming reduced the problem. Borderline results in such designs deserve extra caution.
+
+For the bootstrap, the default studentized interval (`boot_ci = "stud"`) is recommended. The BCa interval (`boot_ci = "bca"`) tended to be too liberal for mean differences, especially with small samples or heavy tails, and is not recommended.
 
 The sample size thresholds above reflect computational practicality. For one-sample or paired tests, the number of possible sign permutations is $2^n$, which equals 65,536 when n = 16 and jumps to 131,072 at n = 17. For two-sample tests, the number of possible group assignments is $\binom{n_x + n_y}{n_x}$, which grows even faster. When exact enumeration is feasible, permutation tests yield exact p-values with no Monte Carlo error.
 

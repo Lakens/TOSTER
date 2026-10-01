@@ -56,22 +56,24 @@ brunner_munzel(formula = extra ~ group,
 brunner_munzel(formula = extra ~ group,
                data = sleep,
                alternative = "equivalence",
-               mu = c(0.3, 0.7))
+               mu = c(0.3, 0.7),
+               test_method = "perm_logit")
 
 ## -----------------------------------------------------------------------------
-# Permutation-based equivalence test
+# Logit-transformed equivalence test (more conservative, no resampling)
 brunner_munzel(formula = extra ~ group,
                data = sleep,
                alternative = "equivalence",
                mu = c(0.3, 0.7),
-               test_method = "perm")
+               test_method = "logit")
 
 ## -----------------------------------------------------------------------------
 # Minimal effect test: is the relative effect outside 0.4 to 0.6?
 brunner_munzel(formula = extra ~ group,
                data = sleep,
                alternative = "minimal.effect",
-               mu = c(0.4, 0.6))
+               mu = c(0.4, 0.6),
+               test_method = "perm_logit")
 
 ## -----------------------------------------------------------------------------
 # Paired samples test
@@ -90,7 +92,8 @@ brunner_munzel(x = sleep$extra[sleep$group == 1],
 # Test if the relative effect differs from 0.3
 brunner_munzel(formula = extra ~ group,
                data = sleep,
-               mu = 0.3)
+               mu = 0.3,
+               test_method = "perm_logit")
 
 ## -----------------------------------------------------------------------------
 # Example: test non-inferiority with lower bound of 0.35
@@ -98,7 +101,8 @@ brunner_munzel(formula = extra ~ group,
 brunner_munzel(formula = extra ~ group,
                data = sleep,
                alternative = "greater",
-               mu = 0.35)
+               mu = 0.35,
+               test_method = "perm_logit")
 
 ## -----------------------------------------------------------------------------
 data('sleep')

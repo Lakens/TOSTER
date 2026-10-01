@@ -234,6 +234,29 @@ calibrated critical value lies in the narrower interval
 \eqn{[\alpha/2, \alpha]} rather than \eqn{[\alpha, (1+\alpha)/2)}.
 }
 
+\subsection{Choosing a Method}{
+
+A set of simulations covering two-sample and paired designs (small to moderate
+samples, normal, skewed, heavy-tailed, and discrete data) indicated the following.
+These are rules of thumb, not guarantees.
+\itemize{
+\item \strong{Independent groups:} this function most consistently held its nominal
+Type I error rate, including with unequal variances and heavy-tailed data.
+\item \strong{Paired data:} the test flips the signs of the differences, so it relies on
+the differences being symmetric. With strongly skewed differences it was too
+liberal, and \code{\link[=boot_t_test]{boot_t_test()}} with the studentized interval
+(\code{boot_ci = "stud"}) was the better choice. With symmetric (including
+heavy-tailed) differences, this function performed well.
+\item \strong{Skewed paired data with outliers:} use trimmed means (e.g., \code{tr = 0.2});
+the two functions then performed similarly.
+\item \strong{Groups that differ in shape or spread (e.g., one skewed group):} no method
+was uniformly reliable. All of them, including Welch's t-test, could be
+modestly liberal in one tail with small samples, particularly when the
+more variable or skewed group was the smaller one. Trimming reduced the
+problem. Treat borderline results in this setting with caution.
+}
+}
+
 \subsection{Sharp and Weak Null Hypotheses}{
 
 Two different null hypotheses are relevant when interpreting a permutation test:
