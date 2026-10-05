@@ -767,7 +767,218 @@ test_that("boot_cor_test: stud method runs for pearson/spearman/kendall", {
                 label = paste("method string includes studentized for", m))
     expect_length(res$stderr, 2)
     expect_true(all(names(res$stderr) == c("boot.se", "z.se")))
+    expect_equal(res$boot_scale, "z")
+
+    res_r <- boot_cor_test(x, y, method = m, boot_ci = "stud", R = 499,
+                           boot_scale = "r")
+    expect_true(all(names(res_r$stderr) == c("boot.se", "r.se")))
+    expect_equal(res_r$boot_scale, "r")
+    expect_true(all(res_r$conf.int >= -1 & res_r$conf.int <= 1))
   }
+})
+
+# Influence-function SEs for studentized bootstrap -----
+
+test_that(".cor_se Pearson is the HC4-corrected fourth-moment (ADF) SE", {
+  set.seed(11)
+  n <- 60
+  x <- rexp(n)
+  y <- 0.5 * x + rt(n, 5)
+  zx <- (x - mean(x)) / sqrt(mean((x - mean(x))^2))
+  zy <- (y - mean(y)) / sqrt(mean((y - mean(y))^2))
+  r <- cor(x, y)
+
+  # uncorrected influence values reproduce the ADF variance formula
+  psi0 <- TOSTER:::.cor_if_pearson(x, y)
+  m <- function(a, b) mean(zx^a * zy^b)
+  v <- (r^2 / 4) * (m(4, 0) + m(0, 4) + 2 * m(2, 2)) -
+    r * (m(3, 1) + m(1, 3)) + m(2, 2)
+  expect_equal(sqrt(sum(psi0^2)) / n, sqrt(v / n))
+
+  # HC4 leverage correction
+  X <- cbind(x, y)
+  h <- 1 / n + mahalanobis(X, colMeans(X), cov(X)) / (n - 1)
+  expect_equal(sum(h), 3)
+  d <- pmin(4, n * h / 3)
+  expect_equal(TOSTER:::.cor_se(x, y, "pearson"),
+               sqrt(sum((psi0 * (1 - h)^(-d / 2))^2)) / n)
+  expect_gt(TOSTER:::.cor_se(x, y, "pearson"), sqrt(v / n))
+})
+
+test_that(".cor_se Spearman without ties matches Croux-Dehon influence function", {
+  set.seed(12)
+  n <- 50
+  x <- rnorm(n)
+  y <- x + rnorm(n)
+  u <- (rank(x) - 0.5) / n
+  v <- (rank(y) - 0.5) / n
+  sx <- sapply(x, function(xi) sum(v[x > xi]) + v[x == xi] / 2)
+  sy <- sapply(y, function(yi) sum(u[y > yi]) + u[y == yi] / 2)
+  h <- u * v + sx / n + sy / n
+  psi <- 12 * (h - mean(h))
+  expect_equal(TOSTER:::.cor_se(x, y, "spearman"), sqrt(sum(psi^2)) / n,
+               tolerance = 1e-3)
+})
+
+test_that(".cor_se Kendall without ties matches U-statistic variance", {
+  set.seed(13)
+  n <- 40
+  x <- rnorm(n)
+  y <- x + rnorm(n)
+  s <- sign(outer(x, x, "-")) * sign(outer(y, y, "-"))
+  a <- rowSums(s) / (n - 1)
+  expect_equal(TOSTER:::.cor_se(x, y, "kendall"),
+               sqrt(4 / n * mean((a - mean(a))^2)))
+})
+
+test_that(".cor_se agrees with the jackknife SE, with and without ties", {
+  jack_se <- function(x, y, m) {
+    n <- length(x)
+    j <- vapply(seq_len(n), function(i) cor(x[-i], y[-i], method = m), 0)
+    sqrt((n - 1) / n * sum((j - mean(j))^2))
+  }
+  set.seed(14)
+  n <- 300
+  x1 <- rnorm(n)
+  y1 <- 0.5 * x1 + rnorm(n) * sqrt(1 + x1^2)
+  x2 <- sample(1:5, n, TRUE)
+  y2 <- pmin(5, x2 + sample(0:2, n, TRUE))
+  # Pearson without the HC4 leverage correction, which deliberately inflates it
+  se_if <- function(x, y, m) {
+    if (m == "pearson") {
+      sqrt(sum(TOSTER:::.cor_if_pearson(x, y)^2)) / length(x)
+    } else {
+      TOSTER:::.cor_se(x, y, m)
+    }
+  }
+  for (m in c("pearson", "spearman", "kendall")) {
+    expect_equal(se_if(x1, y1, m), jack_se(x1, y1, m),
+                 tolerance = 0.05, label = paste("continuous", m))
+    expect_equal(se_if(x2, y2, m), jack_se(x2, y2, m),
+                 tolerance = 0.05, label = paste("tied", m))
+  }
+  expect_gt(TOSTER:::.cor_se(x1, y1, "pearson"), se_if(x1, y1, "pearson"))
+})
+
+test_that(".cor_se reduces to normal-theory values under independence", {
+  set.seed(15)
+  n <- 4000
+  x <- rnorm(n)
+  y <- rnorm(n)
+  expect_equal(TOSTER:::.cor_se(x, y, "pearson"), 1 / sqrt(n), tolerance = 0.05)
+  expect_equal(TOSTER:::.cor_se(x, y, "spearman"), 1 / sqrt(n), tolerance = 0.05)
+  expect_equal(TOSTER:::.cor_se(x, y, "kendall"), sqrt(4 / (9 * n)),
+               tolerance = 0.05)
+})
+
+test_that("boot_cor_test: stud is studentized, not basic on the z scale", {
+  skip_on_cran()
+
+  set.seed(16)
+  n <- 40
+  x <- rnorm(n)
+  y <- 0.4 * x + rnorm(n) * sqrt(1 + x^2)
+
+  for (m in c("pearson", "spearman", "kendall")) {
+    set.seed(1)
+    res_s <- boot_cor_test(x, y, method = m, boot_ci = "stud", R = 999)
+    set.seed(1)
+    res_b <- boot_cor_test(x, y, method = m, boot_ci = "basic", R = 999)
+    expect_equal(res_s$boot_res, res_b$boot_res)
+    expect_false(isTRUE(all.equal(res_s$conf.int, res_b$conf.int,
+                                  check.attributes = FALSE)),
+                 label = paste("stud differs from basic for", m))
+    r <- unname(res_s$estimate)
+    expect_equal(unname(res_s$stderr["z.se"]),
+                 TOSTER:::.cor_se(x, y, m) / (1 - r^2))
+  }
+})
+
+test_that("boot_cor_test: boot_scale only affects basic and stud", {
+  skip_on_cran()
+
+  set.seed(17)
+  x <- rnorm(30)
+  y <- 0.5 * x + rnorm(30)
+
+  for (ci_method in c("perc", "bca")) {
+    set.seed(2)
+    res_z <- boot_cor_test(x, y, boot_ci = ci_method, R = 599, boot_scale = "z")
+    set.seed(2)
+    res_r <- boot_cor_test(x, y, boot_ci = ci_method, R = 599, boot_scale = "r")
+    expect_equal(res_z$conf.int, res_r$conf.int)
+    expect_equal(res_z$p.value, res_r$p.value)
+    expect_equal(res_z$boot_scale, "r")
+  }
+
+  # basic on the r scale reproduces the untransformed basic interval
+  set.seed(3)
+  res_r <- boot_cor_test(x, y, boot_ci = "basic", R = 599, boot_scale = "r")
+  expect_equal(as.numeric(res_r$conf.int),
+               TOSTER:::basic(res_r$boot_res, cor(x, y), 0.05))
+
+  # basic on the z scale is the back-transformed z-scale interval
+  set.seed(3)
+  res_z <- boot_cor_test(x, y, boot_ci = "basic", R = 599, boot_scale = "z")
+  expect_equal(as.numeric(res_z$conf.int),
+               tanh(TOSTER:::basic(atanh(res_z$boot_res), atanh(cor(x, y)), 0.05)))
+  expect_true(all(res_z$conf.int >= -1 & res_z$conf.int <= 1))
+})
+
+test_that("boot_cor_test: CI/p-value agreement on both scales", {
+  skip_on_cran()
+
+  set.seed(18)
+  n <- 50
+  x <- rnorm(n)
+  y <- 0.3 * x + rnorm(n)
+
+  run <- function(...) {
+    set.seed(4)
+    boot_cor_test(x, y, R = 999, ...)
+  }
+  for (sc in c("z", "r")) for (ci_method in c("basic", "stud")) {
+    ci <- run(boot_ci = ci_method, boot_scale = sc)$conf.int
+    # nulls just inside and just outside each limit
+    for (nv in c(ci[1] + c(-1, 1) * 0.01, ci[2] + c(-1, 1) * 0.01)) {
+      p <- run(boot_ci = ci_method, boot_scale = sc, null = nv)$p.value
+      expect_equal(nv < ci[1] || nv > ci[2], p < 0.05,
+                   label = paste(ci_method, sc, round(nv, 3)))
+    }
+  }
+})
+
+test_that("boot_cor_test: boot_ci = 'auto' picks stud for Pearson, bca otherwise", {
+  skip_on_cran()
+
+  set.seed(19)
+  x <- rnorm(25)
+  y <- 0.5 * x + rnorm(25)
+
+  expected <- c(pearson = "stud", spearman = "bca", kendall = "bca",
+                winsorized = "bca", bendpercent = "bca")
+  for (m in names(expected)) {
+    res <- boot_cor_test(x, y, method = m, R = 199)
+    expect_equal(res$boot_ci, unname(expected[m]), label = paste("auto for", m))
+  }
+
+  # auto gives the same result as requesting the selected method directly
+  set.seed(5)
+  res_auto <- boot_cor_test(x, y, R = 199)
+  set.seed(5)
+  res_stud <- boot_cor_test(x, y, boot_ci = "stud", R = 199)
+  expect_equal(res_auto$conf.int, res_stud$conf.int)
+  expect_equal(res_auto$p.value, res_stud$p.value)
+
+  # an explicit choice overrides auto
+  expect_equal(boot_cor_test(x, y, boot_ci = "bca", R = 199)$boot_ci, "bca")
+})
+
+test_that("boot_cor_test: stud errors for perfect correlation", {
+  skip_on_cran()
+  x <- 1:20
+  expect_error(boot_cor_test(x, 2 * x, boot_ci = "stud", R = 99),
+               "undefined")
 })
 
 test_that("boot_cor_test: boot_ci returned in result", {

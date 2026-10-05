@@ -11,8 +11,9 @@ boot_cor_test(
   method = c("pearson", "kendall", "spearman", "winsorized", "bendpercent"),
   alpha = 0.05,
   null = 0,
-  boot_ci = c("bca", "stud", "basic", "perc"),
+  boot_ci = c("auto", "bca", "stud", "basic", "perc"),
   R = 1999,
+  boot_scale = c("z", "r"),
   ...
 )
 }
@@ -54,17 +55,38 @@ or a vector of two values representing the lower and upper bounds
 
 \item{boot_ci}{type of bootstrap confidence interval:
 \itemize{
-\item "basic": basic/empirical bootstrap CI (default)
+\item "auto" (default): \code{"stud"} for \code{method = "pearson"} and \code{"bca"} for all
+other methods. In simulations, the studentized interval kept Pearson's r
+near nominal coverage for skewed, heteroscedastic, and heavy-tailed data,
+where the BCa interval under-covered; for the rank and robust
+correlations BCa performed as well or better (see the "Studentized
+bootstrap" section). The method actually used is returned in \code{boot_ci}.
+\item "bca": bias-corrected and accelerated bootstrap CI. Provides
+second-order accuracy by correcting for bias and skewness, but requires
+additional computation via the jackknife (n extra evaluations of the
+statistic).
+\item "stud": studentized (bootstrap-t) CI. Each bootstrap replicate is
+standardized by a standard error estimated from that replicate's data
+(see the "Studentized bootstrap" section below). Only available for
+\code{method = "pearson"}, \code{"kendall"}, or \code{"spearman"}.
+\item "basic": basic/empirical bootstrap CI
 \item "perc": percentile bootstrap CI
-\item "bca": bias-corrected and accelerated bootstrap CI. Provides second-order
-accuracy by correcting for bias and skewness, but requires additional
-computation via the jackknife (n extra evaluations of the statistic).
-\item "stud": studentized (bootstrap-t) CI. Uses pivot statistics on the Fisher z
-scale with analytical SEs. Only available for \code{method = "pearson"},
-\code{"kendall"}, or \code{"spearman"}.
 }}
 
 \item{R}{number of bootstrap replications (default = 1999).}
+
+\item{boot_scale}{scale on which the \code{"basic"} and \code{"stud"} intervals and
+p-values are computed before being back-transformed to the correlation
+scale:
+\itemize{
+\item "z": Fisher z scale, \eqn{z = \mathrm{atanh}(r)} (default). Keeps
+the interval within [-1, 1] and is closer to variance-stabilizing.
+\item "r": correlation scale. Studentized limits are truncated to [-1, 1];
+basic limits are not.
+}
+
+Ignored for \code{"perc"} and \code{"bca"}, which give the same result on either
+scale.}
 
 \item{...}{additional arguments passed to correlation functions, such as:
 \itemize{
@@ -80,13 +102,18 @@ A list with class "htest" containing the following components:
 \item \strong{conf.int}: a bootstrap confidence interval for the correlation coefficient.
 \item \strong{estimate}: the estimated correlation coefficient, with name "r", "tau", "rho", "pb", or "wincor"
 corresponding to the method employed.
-\item \strong{stderr}: the bootstrap standard error of the correlation coefficient.
+\item \strong{stderr}: the bootstrap standard error of the correlation coefficient. For
+\code{boot_ci = "stud"}, a second element gives the influence-function standard
+error of the observed estimate on the working scale (\code{z.se} or \code{r.se}).
 \item \strong{null.value}: the value(s) of the correlation under the null hypothesis.
 \item \strong{alternative}: character string indicating the alternative hypothesis.
 \item \strong{method}: a character string indicating which bootstrapped correlation was measured.
 \item \strong{data.name}: a character string giving the names of the data.
 \item \strong{boot_res}: vector of bootstrap correlation estimates.
-\item \strong{boot_ci}: character string indicating which bootstrap CI method was used.
+\item \strong{boot_ci}: character string indicating which bootstrap CI method was used
+(with \code{boot_ci = "auto"}, the method it selected).
+\item \strong{boot_scale}: the scale (\code{"z"} or \code{"r"}) on which the CI and p-value were
+computed. Always \code{"r"} for \code{"perc"} and \code{"bca"}.
 \item \strong{call}: the matched call.
 }
 }
@@ -109,15 +136,109 @@ null value.
 (proportion of replicates beyond the null). This is the original approach from
 Wilcox (2017).
 \item \code{boot_ci = "basic"}: p-values use the reflected bootstrap distribution
-(\code{2 * est - bvec}), which is the exact inversion of the basic CI.
+(\code{2 * est - bvec}), which is the exact inversion of the basic CI. Both are
+computed on the scale chosen by \code{boot_scale}.
 \item \code{boot_ci = "bca"}: p-values are derived from the BCa probability transformation,
 using the same bias correction and acceleration parameters as the BCa CI.
-\item \code{boot_ci = "stud"}: p-values are derived from the bootstrap pivot distribution
-on the Fisher z scale. Each replicate's pivot is \code{(z_star - z_obs) / se_star},
-where \code{se_star} is the analytical SE. This method is only available for
-Pearson, Kendall, and Spearman correlations, since robust methods lack
-analytical SEs on the Fisher z scale.
+\item \code{boot_ci = "stud"}: p-values are derived from the bootstrap pivot
+distribution on the scale chosen by \code{boot_scale}. Each replicate's pivot is
+\code{(t_star - t_obs) / se_star}, where \code{se_star} is the standard error
+estimated from that replicate.
 }
+}
+\section{Studentized bootstrap}{
+
+
+A studentized (bootstrap-t) interval only improves on the basic interval if
+the standard error is re-estimated from each bootstrap resample. The
+normal-theory standard errors on the Fisher z scale (e.g.,
+\eqn{1/\sqrt{n-3}} for Pearson's r) depend only on \eqn{n} (and, for
+Spearman, on the estimate itself), so they cannot serve this purpose.
+Instead, \code{boot_cor_test()} uses an influence-function (sandwich) standard
+error that is estimated from the data and does not assume bivariate
+normality:
+
+\deqn{\widehat{SE}(\hat\rho) = \frac{1}{n}\sqrt{\sum_{i=1}^{n} \psi_i^2},}
+
+where \eqn{\psi_i} is the empirical influence of observation \eqn{i} on the
+coefficient. The same formula is applied to the observed data and to every
+bootstrap resample. With \code{boot_scale = "z"}, the standard error is moved to
+the Fisher z scale by the delta method,
+\eqn{\widehat{SE}(\hat z) = \widehat{SE}(\hat\rho) / (1 - \hat\rho^2)}.
+
+\strong{Pearson's r} uses the asymptotic distribution-free (fourth-moment)
+influence function (Steiger & Hakstian, 1982). With
+\eqn{z_{x,i} = (x_i - \bar x)/s_x} and \eqn{z_{y,i} = (y_i - \bar y)/s_y}
+(standardized with denominator \eqn{n}),
+\deqn{\psi^{0}_i = z_{x,i} z_{y,i} - \frac{r}{2}\left(z_{x,i}^2 + z_{y,i}^2\right).}
+Under bivariate normality this gives the familiar
+\eqn{\mathrm{Var}(r) \approx (1 - \rho^2)^2 / n}. On its own, this standard
+error is too small in small samples and with heavy-tailed data, because a
+sample under-represents the extreme points that dominate the variance of
+\eqn{r}. Following the HC4 heteroscedasticity-consistent estimator for
+regression (Cribari-Neto, 2004), which Wilcox (2017) also uses for testing
+correlations, each influence value is therefore inflated according to its
+leverage:
+\deqn{\psi_i = \psi^{0}_i\,(1 - h_i)^{-\delta_i/2}, \qquad h_i = \frac{1}{n} + \frac{D_i^2}{n-1}, \qquad \delta_i = \min\left(4, \frac{n h_i}{3}\right),}
+where \eqn{D_i} is the Mahalanobis distance of \eqn{(x_i, y_i)} from the
+bivariate mean (so the \eqn{h_i} sum to 3), and \eqn{h_i} is capped at 0.99.
+This leverage correction of the ADF influence function is an adaptation
+made for this package, chosen because in simulations (normal,
+heteroscedastic, \eqn{t_5}, \eqn{t_3}, and discrete data; n = 30 and 80) it
+kept coverage of the studentized interval near nominal, including for
+\eqn{t_3} data, where the uncorrected standard error under-covered badly. It
+is slightly conservative for strongly heteroscedastic data. For data with
+infinite fourth moments, no standard error of \eqn{r} is consistent, and a
+robust correlation (\code{"winsorized"} or \code{"bendpercent"}) is still the better
+choice.
+
+\strong{Spearman's rho} is Pearson's r computed on the mid-distribution
+transforms \eqn{u_i = (R(x_i) - 1/2)/n} and \eqn{v_i = (R(y_i) - 1/2)/n},
+where \eqn{R} denotes midranks. Its influence function adds, to the Pearson
+influence function for \eqn{(u, v)}, terms for estimating the transforms.
+Writing \eqn{\omega_{ij}^x = \mathbf{1}(x_j > x_i) + \frac{1}{2}\mathbf{1}(x_j = x_i)}
+(and likewise \eqn{\omega_{ij}^y}), the influence of observation \eqn{i} on
+each moment is
+\deqn{d_i(\overline{uv}) = u_i v_i + \frac{1}{n}\sum_j \omega_{ij}^x v_j + \frac{1}{n}\sum_j \omega_{ij}^y u_j - 3\,\overline{uv},}
+\deqn{d_i(\overline{u}) = u_i + \frac{1}{n}\sum_j \omega_{ij}^x - 2\bar u, \qquad d_i(\overline{u^2}) = u_i^2 + \frac{2}{n}\sum_j \omega_{ij}^x u_j - 3\,\overline{u^2},}
+(similarly for \eqn{v}), and \eqn{\psi_i} follows from the delta method for
+\eqn{r_s = C / \sqrt{S_u S_v}}, with \eqn{C = \overline{uv} - \bar u \bar v}
+and \eqn{S_u = \overline{u^2} - \bar u^2}:
+\deqn{\psi_i = \frac{d_i(C)}{\sqrt{S_u S_v}} - \frac{r_s}{2}\left(\frac{d_i(S_u)}{S_u} + \frac{d_i(S_v)}{S_v}\right),}
+where \eqn{d_i(C) = d_i(\overline{uv}) - \bar v\, d_i(\bar u) - \bar u\, d_i(\bar v)}
+and \eqn{d_i(S_u) = d_i(\overline{u^2}) - 2 \bar u\, d_i(\bar u)}.
+Without ties this is the influence function of Spearman's rho given by
+Croux and Dehon (2010); the tie terms keep the standard error accurate for
+discrete data (and for bootstrap resamples, which always contain ties).
+
+\strong{Kendall's tau} (tau-b, as returned by \code{cor(method = "kendall")}) is a
+ratio of U-statistics,
+\eqn{\tau_b = \bar a / \sqrt{\bar b^x \bar b^y}}, with
+\deqn{a_i = \frac{1}{n-1}\sum_{j \ne i} \mathrm{sign}(x_i - x_j)\,\mathrm{sign}(y_i - y_j), \qquad b_i^x = \frac{1}{n-1}\sum_{j \ne i} \mathbf{1}(x_i \ne x_j),}
+and \eqn{b_i^y} defined likewise. Using Hoeffding's (1948) projection and
+the delta method,
+\deqn{\psi_i = 2\left[\frac{a_i - \bar a}{\sqrt{\bar b^x \bar b^y}} - \frac{\tau_b}{2}\left(\frac{b_i^x - \bar b^x}{\bar b^x} + \frac{b_i^y - \bar b^y}{\bar b^y}\right)\right].}
+Without ties this reduces to the usual U-statistic variance
+\eqn{\frac{4}{n}\widehat{\mathrm{Var}}(a_i)}. Its computation is
+\eqn{O(n^2)} per resample, so the studentized Kendall interval is slower
+for large samples.
+
+Under independence, these standard errors reduce to the familiar
+\eqn{\mathrm{Var}(r) \approx \mathrm{Var}(r_s) \approx 1/n} and
+\eqn{\mathrm{Var}(\tau) \approx 4/(9n)}.
+
+Because the pivots divide by an estimated standard error, studentized
+intervals can be wide or erratic in small samples (roughly n < 30), where
+the standard error of each resample is itself imprecise. This matters most
+for the rank correlations. Kendall's standard error, for example, is nearly
+unbiased even at n = 20, but it varies a lot between samples (especially
+with ties) and is strongly correlated with the estimate. In simulations at
+n = 30, the studentized Spearman and Kendall intervals under-covered by up
+to about 2.5 percentage points for heavy-tailed or tied data, while
+\code{boot_ci = "bca"} stayed closer to nominal; at n = 80 both were accurate.
+For Spearman's rho and Kendall's tau with fewer than about 50 observations,
+\code{boot_ci = "bca"} (the \code{"auto"} choice for these methods) is therefore
+preferable.
 
 The bootstrap correlation methods in this package offer two robust correlations beyond
 the standard methods:
@@ -150,6 +271,7 @@ When performing equivalence or minimal effect testing:
 
 See \code{vignette("correlations")} for more details.
 }
+
 \section{References}{
 
 
@@ -158,6 +280,16 @@ Wilcox, R. R. (1994). The Percentage Bend Correlation Coefficient. Psychometrika
 Wilcox, R. R. (1993). Some results on a Winsorized correlation coefficient. British Journal of Mathematical and Statistical Psychology, 46(2), 339–349. https://doi.org/10.1111/j.2044-8317.1993.tb01020.x
 
 Wilcox, R.R. (2017) Introduction to Robust Estimation and Hypothesis Testing, 4th edition. Academic Press.
+
+Cribari-Neto, F. (2004). Asymptotic inference under heteroskedasticity of unknown form. Computational Statistics & Data Analysis, 45(2), 215–233. https://doi.org/10.1016/S0167-9473(02)00366-3
+
+Croux, C., & Dehon, C. (2010). Influence functions of the Spearman and Kendall correlation measures. Statistical Methods & Applications, 19(4), 497–515. https://doi.org/10.1007/s10260-010-0142-z
+
+Efron, B., & Tibshirani, R. J. (1993). An Introduction to the Bootstrap. Chapman & Hall/CRC.
+
+Hoeffding, W. (1948). A class of statistics with asymptotically normal distribution. The Annals of Mathematical Statistics, 19(3), 293–325. https://doi.org/10.1214/aoms/1177730196
+
+Steiger, J. H., & Hakstian, A. R. (1982). The asymptotic distribution of elements of a correlation matrix: Theory and application. British Journal of Mathematical and Statistical Psychology, 35(2), 208–215. https://doi.org/10.1111/j.2044-8317.1982.tb00653.x
 }
 
 \examples{

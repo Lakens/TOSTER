@@ -177,6 +177,38 @@ NEWS
   used Welch standard errors for the bootstrap replicates while the observed
   standard error and p-value used the pooled standard error. The replicates now
   use the pooled standard error, so the interval and p-value agree.
+- `boot_cor_test(boot_ci = "stud")` was not actually studentized. The pivots
+  used normal-theory Fisher z standard errors that depend only on `n` (Pearson,
+  Kendall) or on the estimate itself (Spearman), so the interval was in effect a
+  basic bootstrap interval on the z scale. Each bootstrap replicate is now
+  standardized by an influence-function (sandwich) standard error estimated from
+  that replicate's data, which does not assume bivariate normality:
+  - Pearson: asymptotic distribution-free (fourth-moment) standard error with
+    an HC4-type leverage correction, which keeps coverage near nominal for
+    small samples and heavy-tailed data.
+  - Spearman: influence function of Pearson's r on the mid-distribution
+    transforms (midranks), including the terms for estimating the
+    transforms, so it stays accurate with ties.
+  - Kendall: U-statistic (Hoeffding projection) standard error of tau-b.
+  The formulas are given in the new "Studentized bootstrap" section of
+  `?boot_cor_test` and in `vignette("correlations")`. Studentized results, and
+  the `z.se` element of `stderr`, will differ from earlier versions.
+- `boot_cor_test()` has a new default, `boot_ci = "auto"`, which uses the
+  studentized interval (`"stud"`) for Pearson's r and BCa (`"bca"`) for the
+  Spearman, Kendall, Winsorized, and percentage bend correlations. In
+  simulations, the studentized Pearson interval stayed near nominal coverage
+  for skewed, heteroscedastic, and heavy-tailed data, where BCa under-covered.
+  Results for Pearson correlations with the default settings will differ from
+  earlier versions (use `boot_ci = "bca"` for the previous default). The
+  returned `boot_ci` element reports the method that was used.
+- `boot_cor_test()` gains a `boot_scale` argument (`"z"`, the default, or
+  `"r"`) setting the scale on which the `"basic"` and `"stud"` intervals and
+  p-values are computed. The basic interval was previously computed on the
+  correlation scale while the studentized interval used the Fisher z scale; both
+  now default to the z scale, so `"basic"` results will differ from earlier
+  versions (use `boot_scale = "r"` for the previous basic interval). The
+  `"perc"` and `"bca"` methods are unaffected. The result also gains a
+  `boot_scale` element.
 - `perm_t_test()`: the confidence interval was a percentile interval of the raw
   (non-studentized) permuted differences, while the p-value came from the
   studentized permutation test. Under unequal variances and group sizes the two

@@ -2,24 +2,30 @@
 % Please edit documentation in R/corr_calcs.R
 \name{stud_ci}
 \alias{stud_ci}
-\title{Studentized bootstrap CI on the correlation scale}
+\title{Studentized bootstrap CI for a correlation}
 \usage{
-stud_ci(tvec, t0_z, se_obs, alpha)
+stud_ci(tvec, t0, se_obs, alpha, back = identity)
 }
 \arguments{
-\item{tvec}{Numeric vector of bootstrap pivots: (z_star - z_obs) / se_star}
+\item{tvec}{Numeric vector of bootstrap pivots on the working scale:
+(t_star - t0) / se_star}
 
-\item{t0_z}{Observed Fisher z value: atanh(est)}
+\item{t0}{Observed estimate on the working scale}
 
-\item{se_obs}{Analytical SE of z_obs}
+\item{se_obs}{Observed SE on the working scale}
 
 \item{alpha}{Two-tailed significance level (e.g., 0.05 for 95\% CI)}
+
+\item{back}{Function mapping the working scale back to the correlation
+scale (\code{tanh} for Fisher z, \code{identity} for the correlation scale)}
 }
 \value{
-Numeric vector of length 2: c(lower, upper) on the correlation scale
+Numeric vector of length 2: c(lower, upper) on the correlation
+scale, truncated to [-1, 1]
 }
 \description{
-Computes a studentized (bootstrap-t) confidence interval by pivoting on the
-Fisher z scale and then back-transforming.
+Computes a studentized (bootstrap-t) confidence interval on the working
+scale (Fisher z or correlation) and back-transforms it to the correlation
+scale.
 }
 \keyword{internal}
