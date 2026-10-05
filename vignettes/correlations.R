@@ -53,6 +53,15 @@ boot_cor_test(mtcars$mpg,
            null = .4)
 
 ## -----------------------------------------------------------------------------
+set.seed(993)
+boot_cor_test(mtcars$mpg,
+              mtcars$qsec,
+              method = "spearman",
+              boot_ci = "stud",
+              alternative = "e",
+              null = .4)
+
+## -----------------------------------------------------------------------------
 # Winsorized correlation with 10% trimming
 boot_cor_test(mtcars$mpg,
            mtcars$qsec,
