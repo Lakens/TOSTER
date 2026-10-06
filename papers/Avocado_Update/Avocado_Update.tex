@@ -208,14 +208,14 @@ limited capabilities compared to the R package.
 
 \section{Setting Equivalence Bounds}\label{setting-equivalence-bounds}
 
-There are two questions that I think warrant consideration when using
-equivalence testing: 1) what quantity the hypothesis concerns, and 2)
-how much of that quantity is too small to matter. The first is a choice
-of estimand, the second a choice of bounds. I believe both must be
-considered when undertaking equivalence testing because a bound is a
-magnitude on the scale of some particular quantity, and the same number
-can describe quite different hypotheses depending on what is being
-estimated.
+There are two decisions that I think warrant consideration when using
+equivalence testing. The first is to formally define the quantity
+specified by the hypothesis, that is, to choose an estimand. The second
+is to determine how much of that quantity is too small to matter, that
+is, to choose the equivalence bounds. These decisions are
+interdependent. A bound is a magnitude on the scale of some particular
+quantity (i.e., estimand), and the same numerical bound can therefore
+express quite different hypotheses depending on what is being estimated.
 
 \subsection{Choosing an Estimand}\label{choosing-an-estimand}
 
@@ -233,7 +233,7 @@ probability of superiority is exactly 0.5) so a nil test is
 comparatively forgiving of an unexamined estimand. An equivalence bound
 makes the decision more consequential. It is a specific magnitude on a
 specific scale, and there is generally no way to translate a bound on
-one scale into a bound on another (at least without making very serious
+one scale into a bound on another (at least without making very tenuous
 assumptions). Bounds of \(\pm\) 0.5 placed on a mean difference, on a
 median/pseudo-median, and on the SMD describe three different
 hypotheses, only one of which is likely to be the intended one.
@@ -349,7 +349,7 @@ is available'' (p.~25, as cited in \citet{panzarella2021}) and
 reportedly came to regret having proposed them at all
 \citep{funder2019}. These benchmarks should never be used as universal
 thresholds. When applied uncritically, these benchmarks can produce
-equivalence bounds that are too wide, too narrow, and likely entirely
+equivalence bounds that are too wide or too narrow, and likely entirely
 disconnected from the substantive research question.
 
 If a researcher cannot specify meaningful bounds, this itself is
@@ -667,10 +667,10 @@ for normality, side-by-side boxplots or density overlays for variance
 comparison, and inspection of residual plots or boxplots for extreme or
 influential observations. A worked diagnostic workflow for each design
 is provided in the \href{https://doi.org/10.5281/zenodo.22776188}{online
-supplement}. When assumptions are seriously in doubt, the bootstrap and
-permutation alternatives discussed in later sections provide valid
-inference under relaxed ----- though not eliminated ----- distributional
-requirements.
+supplement}. When these assumptions are seriously in doubt, the
+bootstrap and permutation alternatives discussed in later sections
+provide valid inference under relaxed ----- though not eliminated -----
+distributional requirements.
 
 \subsection{Using Summary Statistics}\label{using-summary-statistics}
 
@@ -937,7 +937,7 @@ benchmarks.
 
 With these caveats in mind, the following subsections describe the tools
 TOSTER provides for computing and testing standardized effect sizes
-assuming they are appropriate.
+assuming they will be utilized an appropriate amount of skepticism.
 
 \subsection{Standardized Mean Difference
 Functions}\label{standardized-mean-difference-functions}
@@ -1037,7 +1037,12 @@ However, the parametric z-test used by \texttt{smd\_calc} relies on
 distributional assumptions about the sampling distribution of the SMD
 that may not hold in practice. When a hypothesis test on the SMD is the
 goal, bootstrapping via \texttt{boot\_smd\_calc} is recommended because
-it provides more robust confidence intervals and p-values.
+it provides more robust confidence intervals and p-values\footnote{In a
+  limited set of simulations, I found that only the BCa bootstrap
+  maintained near-nominal coverage under substantial skewness with small
+  samples (n \textless{} 50). I am currently developing refinements to
+  the studentized bootstrap that should improve its coverage in these
+  settings as well.}.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1063,13 +1068,13 @@ it provides more robust confidence intervals and p-values.
 ##  g[rm]=('1'-'2')/SD_rm)
 ## 
 ## data:  extra by group
-## z-observed = -0.78495, p-value = 0.8721
+## z-observed = -0.78495, p-value = 0.8818
 ## alternative hypothesis: equivalence
 ## null values:
 ## lower bound upper bound 
 ##        -0.5         0.5 
 ## 90 percent confidence interval:
-##  -1.1648342 -0.4263419
+##  -1.1539188 -0.4066291
 ## sample estimates:
 ## SMD (g[rm]) 
 ##  -0.7513666
@@ -1158,13 +1163,13 @@ objects that integrate with the helper functions described above.
 ##  Bootstrapped Pearson's product-moment correlation (studentized)
 ## 
 ## data:  bugs$LDLF and bugs$LDHF
-## N = 91, p-value = 0.976
+## N = 91, p-value = 0.9755
 ## alternative hypothesis: equivalence
 ## null values:
 ## correlation correlation 
 ##         0.4        -0.4 
 ## 90 percent confidence interval:
-##  0.4338564 0.6896627
+##  0.4374959 0.6855093
 ## sample estimates:
 ##         r 
 ## 0.5767783
@@ -1177,8 +1182,8 @@ objects that integrate with the helper functions described above.
 \end{Shaded}
 
 The Bootstrapped Pearson's product-moment correlation (studentized) is
-not statistically significant (p = 0.976, r = 0.577, 90\% C.I.{[}0.434,
-0.69{]}) at a 0.05 alpha-level. The null hypothesis cannot be rejected.
+not statistically significant (p = 0.975, r = 0.577, 90\% C.I.{[}0.437,
+0.686{]}) at a 0.05 alpha-level. The null hypothesis cannot be rejected.
 At the desired error rate, it cannot be stated that the true correlation
 is between 0.4 and -0.4.
 
