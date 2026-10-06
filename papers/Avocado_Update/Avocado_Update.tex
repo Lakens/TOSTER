@@ -141,18 +141,6 @@ statistics, bootstrap, minimal effects test, NHST, TOST, R package,
 robust statistics
 \end{keywords}
 
-\begin{verbatim}
-## Warning: package 'ggplot2' was built under R version 4.4.3
-\end{verbatim}
-
-\begin{verbatim}
-## Warning: package 'ggdist' was built under R version 4.4.3
-\end{verbatim}
-
-\begin{verbatim}
-## Warning: package 'patchwork' was built under R version 4.4.3
-\end{verbatim}
-
 \section{Introduction}\label{introduction}
 
 Researchers routinely interpret non-significant p-values from a
@@ -375,9 +363,9 @@ treat them as direct recommendations for their own research.
 
 \section{TOST with t-tests}\label{tost-with-t-tests}
 
-The t-test is the standard tool for comparing means. We estimate a mean
-(one-sample), the mean of the paired differences (paired samples), or
-the difference in means between two groups, and then divide that
+The t-test is the standard tool for comparing means. We can estimate a
+mean (one-sample), the mean of the paired differences (paired samples),
+or the difference in means between two groups, and then divide that
 estimate by its standard error. The resulting t-statistic is compared
 against a t-distribution to obtain p-values and confidence intervals.
 Written generally, the statistic takes the form
@@ -428,7 +416,7 @@ implies a practically meaningful effect (see Figure 1)
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Types of hypotheses tests supported by two one-sided tests (TOST) procedures.}]{Avocado_Update_files/figure-latex/hypplot-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Types of hypotheses tests supported by two one-sided tests (TOST) procedures.}]{Avocado_Update_files/Avocado_Update_files/figure-latex/hypplot-1.pdf}}
 \caption{Types of hypotheses tests supported by two one-sided tests
 (TOST) procedures.}
 \end{figure}
@@ -458,15 +446,15 @@ participants who reported either female or male gender.
 \end{Highlighting}
 \end{Shaded}
 
-For the first example, we compare female and male participants' ratings
-for the low disgust, high fear (\texttt{LDHF}) bug with equivalence
-bounds (set by the \texttt{eqb} argument) of \(\pm\) 1 point on the
-rating scale. The \texttt{smd\_ci} argument can also be set to use one
-of four possible calculations for the SMD confidence interval. In the
-example below, I have opted to go with the normal approximation for
-computational ease; such approximations tend provide adequate coverage
-\citep{Viechtbauer_2007}. The formula interface works almost identically
-to \texttt{t.test}:
+For the first example, we can compare female and male participants'
+ratings for the low disgust, high fear (\texttt{LDHF}) bug with
+equivalence bounds (set by the \texttt{eqb} argument) of \(\pm\) 1 point
+on the rating scale. The \texttt{smd\_ci} argument can also be set to
+use one of four possible calculations for the SMD confidence interval.
+In the example below, I have opted to go with the normal approximation
+for computational ease; such approximations tend provide adequate
+coverage \citep{Viechtbauer_2007}. The formula interface works almost
+identically to \texttt{t.test}:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -551,7 +539,7 @@ plot.
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Results of the independent-samples equivalence test visualized with the default plot method. The top panel displays the raw mean difference with its 90\% confidence interval, and the bottom panel displays the standardized effect size (Hedges's gav) with its 90\% confidence interval. In both panels, the dashed vertical lines indicate the equivalence bounds (raw: -1 to 1; standardized: approximately -0.4 to 0.4), and the point estimate is marked by a filled circle. A 90\% confidence interval is used because it corresponds to the two one-sided tests (TOST) procedure at an alpha level of 0.05.}]{Avocado_Update_files/figure-latex/genericplot-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Results of the independent-samples equivalence test visualized with the default plot method. The top panel displays the raw mean difference with its 90\% confidence interval, and the bottom panel displays the standardized effect size (Hedges's gav) with its 90\% confidence interval. In both panels, the dashed vertical lines indicate the equivalence bounds (raw: -1 to 1; standardized: approximately -0.4 to 0.4), and the point estimate is marked by a filled circle. A 90\% confidence interval is used because it corresponds to the two one-sided tests (TOST) procedure at an alpha level of 0.05.}]{Avocado_Update_files/Avocado_Update_files/figure-latex/genericplot-1.pdf}}
 \caption{Results of the independent-samples equivalence test visualized
 with the default plot method. The top panel displays the raw mean
 difference with its 90\% confidence interval, and the bottom panel
@@ -576,7 +564,7 @@ confidence intervals, and equivalence bounds simultaneously:
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Consonance density plot for the independent-samples equivalence test. The top panel displays the standardized effect size (Hedges's gav) and the bottom panel displays the raw mean difference. In each panel, the consonance density curve represents the distribution of confidence intervals across all levels, with color-coded regions corresponding to the 68\%, 90\%, 95\%, and 99.9\% confidence intervals. The point estimate is marked by a filled circle along the x-axis. The dashed vertical lines indicate the equivalence bounds (standardized: approximately -0.4 to 0.4; raw: -1 to 1). This visualization conveys the full range of effect sizes compatible with the data at varying confidence levels, rather than relying on a single confidence interval. Wider, less certain intervals (e.g., 99.9\%) extend further from the point estimate, while narrower intervals (e.g., 68\%) cluster near it.}]{Avocado_Update_files/figure-latex/cdplot-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Consonance density plot for the independent-samples equivalence test. The top panel displays the standardized effect size (Hedges's gav) and the bottom panel displays the raw mean difference. In each panel, the consonance density curve represents the distribution of confidence intervals across all levels, with color-coded regions corresponding to the 68\%, 90\%, 95\%, and 99.9\% confidence intervals. The point estimate is marked by a filled circle along the x-axis. The dashed vertical lines indicate the equivalence bounds (standardized: approximately -0.4 to 0.4; raw: -1 to 1). This visualization conveys the full range of effect sizes compatible with the data at varying confidence levels, rather than relying on a single confidence interval. Wider, less certain intervals (e.g., 99.9\%) extend further from the point estimate, while narrower intervals (e.g., 68\%) cluster near it.}]{Avocado_Update_files/Avocado_Update_files/figure-latex/cdplot-1.pdf}}
 \caption{Consonance density plot for the independent-samples equivalence
 test. The top panel displays the standardized effect size (Hedges's
 g\textsubscript{av}) and the bottom panel displays the raw mean
@@ -678,7 +666,7 @@ more informative than formal tests: QQ plots of residuals or differences
 for normality, side-by-side boxplots or density overlays for variance
 comparison, and inspection of residual plots or boxplots for extreme or
 influential observations. A worked diagnostic workflow for each design
-is provided in the \href{https://doi.org/10.5281/zenodo.22776189}{online
+is provided in the \href{https://doi.org/10.5281/zenodo.22776188}{online
 supplement}. When assumptions are seriously in doubt, the bootstrap and
 permutation alternatives discussed in later sections provide valid
 inference under relaxed ----- though not eliminated ----- distributional
@@ -769,7 +757,7 @@ results to data frames for tabulation, and \texttt{plot\_htest\_est}
 produces estimate plots with equivalence bounds. Checking assumptions
 would follow the same workflow as \texttt{t\_TOST}, as both are using
 t-tests, as discussed in the
-\href{https://doi.org/10.5281/zenodo.22776189}{online supplement}.
+\href{https://doi.org/10.5281/zenodo.22776188}{online supplement}.
 
 \subsection{The simplified function}\label{the-simplified-function}
 
@@ -893,7 +881,7 @@ tests, the equivalence bounds are shown as dashed vertical lines:
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Estimate plot for an equivalence test via simple\_htest.}]{Avocado_Update_files/figure-latex/shplot1-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Estimate plot for an equivalence test via simple\_htest.}]{Avocado_Update_files/Avocado_Update_files/figure-latex/shplot1-1.pdf}}
 \caption{Estimate plot for an equivalence test via simple\_htest.}
 \end{figure}
 
@@ -1075,13 +1063,13 @@ it provides more robust confidence intervals and p-values.
 ##  g[rm]=('1'-'2')/SD_rm)
 ## 
 ## data:  extra by group
-## z-observed = -0.78495, p-value = 0.8937
+## z-observed = -0.78495, p-value = 0.8721
 ## alternative hypothesis: equivalence
 ## null values:
 ## lower bound upper bound 
 ##        -0.5         0.5 
 ## 90 percent confidence interval:
-##  -1.1906762 -0.4360547
+##  -1.1648342 -0.4263419
 ## sample estimates:
 ## SMD (g[rm]) 
 ##  -0.7513666
@@ -1170,13 +1158,13 @@ objects that integrate with the helper functions described above.
 ##  Bootstrapped Pearson's product-moment correlation (studentized)
 ## 
 ## data:  bugs$LDLF and bugs$LDHF
-## N = 91, p-value = 0.9805
+## N = 91, p-value = 0.976
 ## alternative hypothesis: equivalence
 ## null values:
 ## correlation correlation 
 ##         0.4        -0.4 
 ## 90 percent confidence interval:
-##  0.4360056 0.6865216
+##  0.4338564 0.6896627
 ## sample estimates:
 ##         r 
 ## 0.5767783
@@ -1189,8 +1177,8 @@ objects that integrate with the helper functions described above.
 \end{Shaded}
 
 The Bootstrapped Pearson's product-moment correlation (studentized) is
-not statistically significant (p = 0.98, r = 0.577, 90\% C.I.{[}0.436,
-0.687{]}) at a 0.05 alpha-level. The null hypothesis cannot be rejected.
+not statistically significant (p = 0.976, r = 0.577, 90\% C.I.{[}0.434,
+0.69{]}) at a 0.05 alpha-level. The null hypothesis cannot be rejected.
 At the desired error rate, it cannot be stated that the true correlation
 is between 0.4 and -0.4.
 
@@ -1214,7 +1202,7 @@ loess smoother to assess linearity or monotonicity, marginal density
 plots or QQ plots to check distributional shape, and
 jackknife-after-bootstrap plots to identify individual observations
 driving bootstrap variability. A worked diagnostic workflow is provided
-in the \href{https://doi.org/10.5281/zenodo.22776189}{online
+in the \href{https://doi.org/10.5281/zenodo.22776188}{online
 supplement}.
 
 \subsection{Comparing Standardized Effect Sizes Between
@@ -1532,7 +1520,7 @@ cleanly onto a hypothesis about central tendency.
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Empirical cumulative distribution functions for two simulated groups, with double-headed arrows marking the horizontal distance between the curves at the 10th, 50th, and 90th percentiles. (A) The location-shift assumption holds: the distributions differ only in location, the arrows are of equal length, and the Hodges-Lehmann estimator can be read as a median difference. (B) The assumption is violated: the groups differ in spread as well as location, so the horizontal gap varies in magnitude and reverses sign across the distribution, and the curves cross. In panel B there is no single shift to estimate, and a central-tendency interpretation of the WMW test is not available.}]{Avocado_Update_files/figure-latex/ecdfshift-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Empirical cumulative distribution functions for two simulated groups, with double-headed arrows marking the horizontal distance between the curves at the 10th, 50th, and 90th percentiles. (A) The location-shift assumption holds: the distributions differ only in location, the arrows are of equal length, and the Hodges-Lehmann estimator can be read as a median difference. (B) The assumption is violated: the groups differ in spread as well as location, so the horizontal gap varies in magnitude and reverses sign across the distribution, and the curves cross. In panel B there is no single shift to estimate, and a central-tendency interpretation of the WMW test is not available.}]{Avocado_Update_files/Avocado_Update_files/figure-latex/ecdfshift-1.pdf}}
 \caption{\label{fig:ecdfshift}Empirical cumulative distribution
 functions for two simulated groups, with double-headed arrows marking
 the horizontal distance between the curves at the 10th, 50th, and 90th
@@ -1548,7 +1536,7 @@ not available.}
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Symmetry plot of the paired differences from the sleep dataset, pairing each observation's distance above the median with the corresponding distance below. Under symmetry, points fall along the 45-degree reference line (dashed); systematic departures --- points consistently above or below the line --- indicate asymmetry. The signed-rank variant of WMW requires this symmetry for the pseudo-median to coincide with the mean or median of the differences.}]{Avocado_Update_files/figure-latex/symmplot-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Symmetry plot of the paired differences from the sleep dataset, pairing each observation's distance above the median with the corresponding distance below. Under symmetry, points fall along the 45-degree reference line (dashed); systematic departures --- points consistently above or below the line --- indicate asymmetry. The signed-rank variant of WMW requires this symmetry for the pseudo-median to coincide with the mean or median of the differences.}]{Avocado_Update_files/Avocado_Update_files/figure-latex/symmplot-1.pdf}}
 \caption{\label{fig:symmplot}Symmetry plot of the paired differences
 from the sleep dataset, pairing each observation's distance above the
 median with the corresponding distance below. Under symmetry, points
@@ -1895,7 +1883,7 @@ identify individual observations that dominate the bootstrap
 variability. The \texttt{tr} argument for trimmed means provides a
 straightforward robustness option when outliers are a concern.
 Diagnostic workflows for all three designs are demonstrated in the
-\href{https://doi.org/10.5281/zenodo.22776189}{online supplement}.
+\href{https://doi.org/10.5281/zenodo.22776188}{online supplement}.
 
 \subsubsection{Permutation t-test}\label{permutation-t-test}
 
@@ -1973,7 +1961,7 @@ empirical cumulative density functions and separate density plots help
 assess whether group shapes are comparable enough for exchangeability
 under the null to be credible. Diagnostic workflows for all three
 designs are demonstrated in the
-\href{https://doi.org/10.5281/zenodo.22776189}{online supplement}. As
+\href{https://doi.org/10.5281/zenodo.22776188}{online supplement}. As
 with the bootstrap, these checks reflect assumptions that are relaxed
 relative to Student's t-test but not eliminated.
 
@@ -2186,7 +2174,7 @@ factorial between-subjects, and mixed designs, and the equivalence test
 maintained its nominal Type I error rate at the boundary of the null
 hypothesis in each. Readers who want the simulation code, the full
 results, and a longer discussion of interpretation will find them in the
-\href{https://doi.org/10.5281/zenodo.22776189}{online supplement}.
+\href{https://doi.org/10.5281/zenodo.22776188}{online supplement}.
 
 The equivalence test inherits the standard ANOVA assumptions, which
 should be checked on the fitted model itself rather than on the
@@ -2612,7 +2600,7 @@ devtools::install_github("Lakens/TOSTER")
 \end{verbatim}
 
 The supplementary materials for this article are archived on Zenodo
-(\url{https://doi.org/10.5281/zenodo.22776189}). They include a
+(\url{https://doi.org/10.5281/zenodo.22776188}). They include a
 verification of TOSTER against the results reported by
 \citet{Campbell_2021} and a set of assumption checks for the procedures
 described in this article. Each supplement is provided as a Quarto
