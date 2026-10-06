@@ -577,7 +577,7 @@ $$
 # Just Estimate the SMD
 
 It was requested that a function be provided that only calculates the SMD.
-Therefore, I created the `smd_calc` and `boot_smd_calc` functions^[The results differ greatly because the bootstrap CI method, studentized, is more conservative than the parametric method. This difference is more apparent with extremely small samples like that in the `sleep` dataset.].
+Therefore, I created the `smd_calc` and `boot_smd_calc` functions^[The bootstrap and parametric intervals can differ noticeably, especially with extremely small samples like the `sleep` dataset. `boot_smd_calc` uses the BCa interval by default; in simulations the studentized interval (`boot_ci = "stud"`) was too liberal when the data were skewed, because its pivot relies on a normal-theory standard error for the SMD.].
 The interface is almost the same as `t_TOST` but you don't set an equivalence bound.
 
 ```{r}
@@ -594,7 +594,7 @@ boot_smd_calc(x = sleep$extra[sleep$group == 1],
               y = sleep$extra[sleep$group == 2],
          R = 199,
          paired = TRUE,
-         boot_ci = "stud",
+         boot_ci = "bca",
          bias_correction = F)
 ```
 
@@ -605,7 +605,7 @@ boot_smd_calc(x = sleep$extra[sleep$group == 1],
               y = sleep$extra[sleep$group == 2],
          R = 199,
          paired = TRUE,
-         boot_ci = "stud",
+         boot_ci = "bca",
          bias_correction = TRUE,
          null.value = c(-0.5,0.5), 
          alternative = "equ")

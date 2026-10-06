@@ -225,13 +225,17 @@ For more details on the calculative approach, I suggest reading @karch2021. At s
 
 ## Test Methods
 
-The `brunner_munzel` function provides three test methods via the `test_method` argument:
+The `brunner_munzel` function provides four test methods via the `test_method` argument:
 
-- **"t"** (default): Uses a t-distribution approximation with Satterthwaite-Welch degrees of freedom. This is appropriate for moderate to large sample sizes (generally n ≥ 15 per group).
+- **"t"** (default): Uses a t-distribution approximation with Satterthwaite-Welch degrees of freedom. This is appropriate for the standard null (0.5) with moderate to large sample sizes.
 
-- **"logit"**: Uses a logit transformation to produce range-preserving confidence intervals that are guaranteed to stay within [0, 1]. This method is recommended when the estimated relative effect is close to 0 or 1.
+- **"logit"**: Uses a logit transformation to produce range-preserving confidence intervals that are guaranteed to stay within [0, 1]. It is conservative in small samples.
 
-- **"perm"**: A studentized permutation test following @neubert2007. This method is highly recommended when sample sizes are small (< 15 per group) as it provides better control of Type I error rates in these situations.
+- **"perm"**: A studentized permutation test following @neubert2007. This method is recommended for the standard null (0.5) in small samples, as it provides better control of Type I error rates in these situations.
+
+- **"perm_logit"**: A studentized permutation test carried out on the logit scale. Its confidence interval always stays within (0, 1) and agrees with its p-value. It is recommended for equivalence, minimal effect, and other tests against a null value other than 0.5.
+
+The function warns when `"t"` or `"perm"` is used for a test against a null value other than 0.5, because in simulations these methods had inflated Type I error rates for minimal effect tests and low power for equivalence tests. See "Choosing a test method" in `?brunner_munzel` for details.
 
 ## Examples
 
@@ -265,35 +269,37 @@ brunner_munzel(formula = extra ~ group,
 
 ### Equivalence Testing
 
-The `brunner_munzel` function directly supports equivalence testing via the `alternative` argument. For equivalence tests, you specify bounds for the relative effect using the `mu` argument:
+The `brunner_munzel` function directly supports equivalence testing via the `alternative` argument. For equivalence tests, you specify bounds for the relative effect using the `mu` argument. The permutation test on the logit scale (`test_method = "perm_logit"`) is recommended for equivalence testing:
 
 ```{r}
 # Equivalence test: is the relative effect between 0.3 and 0.7?
 brunner_munzel(formula = extra ~ group,
                data = sleep,
                alternative = "equivalence",
-               mu = c(0.3, 0.7))
+               mu = c(0.3, 0.7),
+               test_method = "perm_logit")
 ```
 
 ```{r}
-# Permutation-based equivalence test
+# Logit-transformed equivalence test (more conservative, no resampling)
 brunner_munzel(formula = extra ~ group,
                data = sleep,
                alternative = "equivalence",
                mu = c(0.3, 0.7),
-               test_method = "perm")
+               test_method = "logit")
 ```
 
 ### Minimal Effect Testing
 
-You can also test whether the relative effect falls *outside* specified bounds (minimal effect test):
+You can also test whether the relative effect falls *outside* specified bounds (minimal effect test). Avoid `"t"` and `"perm"` here: their minimal effect tests can have inflated Type I error rates.
 
 ```{r}
 # Minimal effect test: is the relative effect outside 0.4 to 0.6?
 brunner_munzel(formula = extra ~ group,
                data = sleep,
                alternative = "minimal.effect",
-               mu = c(0.4, 0.6))
+               mu = c(0.4, 0.6),
+               test_method = "perm_logit")
 ```
 
 ### Paired Samples
@@ -317,13 +323,14 @@ brunner_munzel(x = sleep$extra[sleep$group == 1],
 
 ### Testing Against a Non-Standard Null
 
-You can test against null values other than 0.5:
+You can test against null values other than 0.5. As with equivalence testing, `"perm_logit"` or `"logit"` is recommended:
 
 ```{r}
 # Test if the relative effect differs from 0.3
 brunner_munzel(formula = extra ~ group,
                data = sleep,
-               mu = 0.3)
+               mu = 0.3,
+               test_method = "perm_logit")
 ```
 
 ## Interpreting Brunner-Munzel Results
@@ -337,25 +344,21 @@ When interpreting the Brunner-Munzel test results:
 
 ## Choosing the Right Test Method
 
-**Use `test_method = "t"` when:**
+The recommendations below are based on simulation studies of Type I error, coverage, and power (see "Choosing a test method" in `?brunner_munzel`).
 
-- Sample sizes are moderate to large (n ≥ 15 per group)
-- You want the fastest computation
-- The relative effect estimate is not near the boundaries [0, 1]
+**For the standard null of 0.5:**
 
-**Use `test_method = "logit"` when:**
+- Two-sample designs: use `test_method = "perm"` when the smaller group has fewer than 30 observations. With 30 or more, `"t"` and `"perm"` agree and `"t"` is faster.
+- Paired designs: use `"perm"` (with at least 6 pairs; with 5 or fewer pairs the permutation test cannot reject at $\alpha = 0.05$). The `"t"` method is conservative when pairs are positively correlated.
 
-- The relative effect estimate is close to 0 or 1
-- You need confidence intervals guaranteed to stay within [0, 1]
-- Sample sizes are moderate to large
+**For equivalence, minimal effect, and other null values:**
 
-**Use `test_method = "perm"` when:**
+- Use `test_method = "perm_logit"` for the most power, or `"logit"` for a more conservative test that needs no resampling.
+- Avoid `"t"` and `"perm"`: their equivalence tests have low power, and their minimal effect tests can have inflated Type I error rates. The function warns if they are used.
 
-- Sample sizes are small (n < 15 per group)
-- You want better Type I error control in small samples
-- Precision is more important than computational speed
+**When the estimate is near 0 or 1:** use `"perm_logit"` or `"logit"`. The `"t"` and `"perm"` intervals can collapse at the boundary and undercover.
 
-Note that the permutation approach can be computationally intensive for large datasets. Additionally, with a permutation test you may observe situations where the confidence interval and the p-value would yield *different* conclusions though they should closely match in most cases.
+The permutation methods can be computationally intensive for large datasets. Their confidence intervals are obtained by inverting the same permutation test, so the interval and the p-value always lead to the same conclusion.
 
 ## Non-Inferiority Testing
 
@@ -367,7 +370,8 @@ The Brunner-Munzel test can be used for non-inferiority testing with ordered cat
 brunner_munzel(formula = extra ~ group,
                data = sleep,
                alternative = "greater",
-               mu = 0.35)
+               mu = 0.35,
+               test_method = "perm_logit")
 ```
 
 # Hodges-Lehmann Estimator and Test
@@ -417,6 +421,8 @@ The `hodges_lehmann` function supports three inference approaches controlled by 
 - **Exact permutation test** (`R` $\geq$ max permutations): Enumerates all possible permutations and provides exact p-values using an unstudentized approach.
 
 - **Randomization test** (`R` < max permutations): Samples `R` permutations with replacement. Uses the (b+1)/(R+1) formula by default for exact Type I error control [@phipson2010] and is also a unstudentized approach.
+
+For both permutation approaches, the confidence interval is obtained by inverting the permutation test (the same construction as for `perm_t_test`, described below), so the interval and the p-value always agree.
 
 ## Examples
 
@@ -512,16 +518,23 @@ Resampling methods provide robust alternatives to parametric t-tests by using th
 | Scenario | Recommended Method | Rationale |
 |----------|-------------------|-----------|
 | Very small samples (paired/one-sample N < 17, two-sample N < 20) | Permutation | Exact permutations are computationally feasible and provide exact p-values |
-| Moderate to large samples | Bootstrap | More computationally efficient; provides stable CI estimates |
-| Outliers present | Permutation with trimming | Combines exact inference with robust location estimation |
+| Independent groups (any sample size) | Permutation (`perm_t_test`) | In a set of simulations, held its nominal Type I error rate most consistently, including with unequal variances and heavy tails |
+| Paired data, clearly skewed differences | Studentized bootstrap (`boot_t_test`, `boot_ci = "stud"`) | The sign-flip permutation test assumes symmetric differences and was too liberal with strong skew |
+| Paired data, symmetric or heavy-tailed differences | Permutation | Performed well when the symmetry assumption is reasonable |
+| Outliers present | Either, with trimming (`tr = 0.2`) | Trimming removes most of the liberal behavior of the untrimmed studentized bootstrap with heavy tails |
+| Groups differ in shape or spread | Cautious interpretation; consider trimming | No method was uniformly reliable (see below) |
 | Complex data structures | Bootstrap | More flexible for non-standard designs |
 | Publication requiring exact p-values | Permutation (if feasible) | No Monte Carlo error when exact permutations computed |
+
+These recommendations are rules of thumb drawn from a set of simulations covering two-sample and paired designs with normal, skewed, heavy-tailed, and discrete data; they are not guarantees. When the two groups differ in shape or spread (for example, one skewed group and one symmetric group), all of the methods, including Welch's t-test, could be modestly liberal in one tail at small sample sizes, particularly when the more variable or skewed group was the smaller one. The studentized bootstrap was often, but not always, closest to the nominal rate in that setting, and trimming reduced the problem. Borderline results in such designs deserve extra caution.
+
+For the bootstrap, the default studentized interval (`boot_ci = "stud"`) is recommended. The BCa interval (`boot_ci = "bca"`) tended to be too liberal for mean differences, especially with small samples or heavy tails, and is not recommended.
 
 The sample size thresholds above reflect computational practicality. For one-sample or paired tests, the number of possible sign permutations is $2^n$, which equals 65,536 when n = 16 and jumps to 131,072 at n = 17. For two-sample tests, the number of possible group assignments is $\binom{n_x + n_y}{n_x}$, which grows even faster. When exact enumeration is feasible, permutation tests yield exact p-values with no Monte Carlo error.
 
 # Permutation t-test
 
-The `perm_t_test` function implements studentized permutation tests following the approaches of @janssen1997 and @chung2013. The studentized approach computes a t-statistic for each permutation, making the test valid even under heteroscedasticity (unequal variances).
+The `perm_t_test` function implements studentized permutation tests following the approaches of @janssen1997 and @chung2013. The studentized approach computes a t-statistic for each permutation. The resulting test is exact when the two groups have identical distributions, and remains asymptotically valid when only the means are equal and the variances differ (heteroscedasticity).
 
 ## Permutation Procedure
 
@@ -555,9 +568,29 @@ $$
 
 4. Compute the p-value as the proportion of permutation statistics as extreme as or more extreme than the observed statistic.
 
+5. Compute the confidence interval by inverting the same test. A null value $\mu_0$ is retained when its p-value exceeds $\alpha$, and the confidence interval is the set of all retained values. Because the permutation statistics $t^{*b}$ are computed from the unshifted data, they do not depend on $\mu_0$, so the interval has a closed form:
+
+$$
+\left[\, (\bar{x} - \bar{y}) - SE \cdot q_{\text{upper}},\; (\bar{x} - \bar{y}) - SE \cdot q_{\text{lower}} \,\right]
+$$
+
+Where $SE$ is the standard error from the original sample (the denominator of $t_{obs}$), and $q_{\text{lower}}$ and $q_{\text{upper}}$ are the order statistics of the permutation distribution at which the permutation p-value crosses $\alpha$. They use the same counting rule as the p-value ($b/R$ or $(b+1)/(R+1)$), and the same two-sided rule. With `symmetric = TRUE` the interval is $(\bar{x} - \bar{y}) \pm SE \cdot q_{|t|}$, where $q_{|t|}$ is the corresponding order statistic of $|t^{*b}|$.
+
+The interval and the p-value therefore always agree: $\mu_0$ lies inside the interval if and only if its p-value exceeds $\alpha$. This also holds for one-sided, equivalence, and minimal effect tests, whose $1 - 2\alpha$ interval inverts the two one-sided tests. With `perm_se = FALSE`, the interval reduces to a (reflected) percentile interval of the permuted mean differences. If the number of permutations is too small for the test ever to reject at the requested $\alpha$, the corresponding limit is infinite.
+
 ### Welch Variant (var.equal = FALSE)
 
-When `var.equal = FALSE` (the default), the standard error is computed separately for each group as shown above. This is the studentized permutation approach of @janssen1997 and @chung2013, which remains valid even when the two populations have different variances.
+When `var.equal = FALSE` (the default), the standard error is computed separately for each group as shown above. This is the studentized permutation approach of @janssen1997 and @chung2013. It is exact when the two populations have identical distributions, and asymptotically valid when they have equal means but different variances.
+
+### Sharp and Weak Null Hypotheses
+
+The distinction above matters when interpreting the results:
+
+- Under the **sharp null** (the groups have identical distributions), group labels are exchangeable and the permutation test is exact at any sample size, with or without studentization.
+- Under the **weak null** (equal means, but possibly different variances or shapes), no permutation test is exact. The studentized test is asymptotically valid [@janssen1997; @chung2013]. In very small samples with unequal variances it can be somewhat liberal, particularly when the smaller group has the larger variance. In that setting the Welch t-test or `boot_t_test` may perform comparably or better.
+- Exactness under the sharp null applies to the test of no effect. Tests against a non-zero `mu`, equivalence and minimal effect tests, and the confidence interval all compare against the permutation distribution of the unshifted data, so they are approximate rather than exact.
+
+See "Sharp and Weak Null Hypotheses" in `?perm_t_test` for more detail, including guidance on randomized versus random-sampling designs.
 
 ### Pooled Variance Variant (var.equal = TRUE)
 
@@ -603,7 +636,7 @@ This same procedure is applied to each permutation sample, using trimmed means a
 
 ## Studentized Permutation: The `perm_se` Argument
 
-By default, `perm_t_test` uses the **studentized** permutation approach (`perm_se = TRUE`), which recalculates the standard error for each permutation sample. This follows the recommendations of @janssen1997 and @chung2013, who showed that studentized permutation tests maintain valid Type I error control even under heteroscedasticity (unequal variances).
+By default, `perm_t_test` uses the **studentized** permutation approach (`perm_se = TRUE`), which recalculates the standard error for each permutation sample. This follows the recommendations of @janssen1997 and @chung2013, who showed that studentized permutation tests remain exact under the sharp null and asymptotically valid under heteroscedasticity (unequal variances). The non-studentized version (`perm_se = FALSE`) is also exact under the sharp null, but it is not valid for a test of equal means when the variances and group sizes differ, even in large samples.
 
 **How `perm_se` and `var.equal` interact:**
 
@@ -825,7 +858,7 @@ perm_result
 Both methods test the same hypothesis and should yield similar conclusions. Key differences to note:
 
 - **P-values**: May differ slightly due to Monte Carlo variability and the different resampling mechanisms
-- **Confidence intervals**: Bootstrap uses the resampled effect distribution; permutation uses the percentile method on permuted effects
+- **Confidence intervals**: Bootstrap uses the resampled effect distribution; permutation inverts the studentized permutation test, so its interval always agrees with its p-value
 - **Exact inference**: When sample sizes are small enough, permutation provides exact p-values with no Monte Carlo error
 
 ## Summary: Choosing Between Methods
@@ -835,7 +868,7 @@ Both methods test the same hypothesis and should yield similar conclusions. Key 
 | Resampling type | Without replacement | With replacement |
 | Exact p-values possible | Yes (small samples) | No |
 | Trimmed means support | Yes (`tr` argument) | Yes (`tr` argument in `boot_t_test`) |
-| CI methods | Percentile | Studentized, percentile, basic, BCa |
+| CI methods | Inversion of the studentized permutation test | Studentized, percentile, basic, BCa |
 | Effect size plots | No | Yes |
 | Best for | Small samples, exact inference | Moderate samples, visualization |
 

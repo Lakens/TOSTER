@@ -229,21 +229,26 @@ pbcor <- function(x, y, beta=.2){
 
 # Studentized bootstrap CI for correlations -----
 
-#' Studentized bootstrap CI on the correlation scale
+#' Studentized bootstrap CI for a correlation
 #'
-#' Computes a studentized (bootstrap-t) confidence interval by pivoting on the
-#' Fisher z scale and then back-transforming.
+#' Computes a studentized (bootstrap-t) confidence interval on the working
+#' scale (Fisher z or correlation) and back-transforms it to the correlation
+#' scale.
 #'
-#' @param tvec Numeric vector of bootstrap pivots: (z_star - z_obs) / se_star
-#' @param t0_z Observed Fisher z value: atanh(est)
-#' @param se_obs Analytical SE of z_obs
+#' @param tvec Numeric vector of bootstrap pivots on the working scale:
+#'   (t_star - t0) / se_star
+#' @param t0 Observed estimate on the working scale
+#' @param se_obs Observed SE on the working scale
 #' @param alpha Two-tailed significance level (e.g., 0.05 for 95% CI)
-#' @return Numeric vector of length 2: c(lower, upper) on the correlation scale
+#' @param back Function mapping the working scale back to the correlation
+#'   scale (`tanh` for Fisher z, `identity` for the correlation scale)
+#' @return Numeric vector of length 2: c(lower, upper) on the correlation
+#'   scale, truncated to \[-1, 1\]
 #' @keywords internal
-stud_ci <- function(tvec, t0_z, se_obs, alpha) {
-  qs <- quantile(tvec, probs = c(1 - alpha / 2, alpha / 2), names = FALSE)
-  z_bounds <- t0_z - qs * se_obs
-  tanh(z_bounds)
+stud_ci <- function(tvec, t0, se_obs, alpha, back = identity) {
+  qs <- quantile(tvec, probs = c(1 - alpha / 2, alpha / 2),
+                 names = FALSE, na.rm = TRUE)
+  pmin(pmax(back(t0 - qs * se_obs), -1), 1)
 }
 
 # Bootstrap p-value dispatch -----
@@ -266,14 +271,11 @@ stud_ci <- function(tvec, t0_z, se_obs, alpha) {
 #' @param z0 BCa bias correction from `bca_params()` (required for "bca")
 #' @param acc BCa acceleration from `bca_params()` (required for "bca")
 #' @param nboot Number of bootstrap replicates
-#' @param z_transform Logical indicating whether to apply Fisher z transformation
-#'   (used for correlation estimates; default FALSE)
 #' @return A single p-value
 #' @keywords internal
 boot_pvalue <- function(bvec, est, null, alternative,
                         boot_ci, tvec = NULL, se_obs = NULL,
-                        z0 = NULL, acc = NULL, nboot,
-                        z_transform = FALSE) {
+                        z0 = NULL, acc = NULL, nboot) {
 
   boot_ci <- match.arg(boot_ci, c("perc", "basic", "bca", "stud"))
 
@@ -285,8 +287,7 @@ boot_pvalue <- function(bvec, est, null, alternative,
     sig <- .pval_bca(bvec, est, null, alternative, nboot,
                      z0 = z0, acc = acc)
   } else if (boot_ci == "stud") {
-    sig <- .pval_stud(tvec, est, null, alternative, se_obs, nboot,
-                      z_transform = z_transform)
+    sig <- .pval_stud(tvec, est, null, alternative, se_obs, nboot)
   }
 
   sig
@@ -348,13 +349,9 @@ boot_pvalue <- function(bvec, est, null, alternative,
 }
 
 # Studentized (pivot) p-value -----
-.pval_stud <- function(tvec, est, null, alternative, se_obs, nboot, z_transform = FALSE) {
-  if(z_transform){
-    t_obs <- (atanh(est) - atanh(null)) / se_obs
-  } else{
-    t_obs <- (est - null) / se_obs
-  }
-
+.pval_stud <- function(tvec, est, null, alternative, se_obs, nboot) {
+  t_obs <- (est - null) / se_obs
+  tvec <- tvec[!is.na(tvec)]
 
   if (alternative == "two.sided") {
     sig <- 2 * min(mean(tvec >= t_obs), mean(tvec <= t_obs))
@@ -366,21 +363,103 @@ boot_pvalue <- function(bvec, est, null, alternative,
   sig
 }
 
-# SE on Fisher z scale for studentized bootstrap -----
+# Influence-function SEs for studentized bootstrap -----
 
-#' Analytical SE on the Fisher z scale for a given correlation method
+#' Influence-function standard error of a correlation coefficient
 #'
-#' @param r_star Correlation estimate (can be a vector for bootstrap replicates)
-#' @param n Sample size
-#' @param method One of "pearson", "kendall", "spearman"
-#' @return SE on the Fisher z scale
+#' Estimates the standard error of a Pearson, Spearman, or Kendall correlation
+#' from the data, without assuming bivariate normality. The SE is
+#' \eqn{\sqrt{\sum_i \psi_i^2} / n}, where \eqn{\psi_i} is the empirical
+#' influence function of the coefficient evaluated at observation \eqn{i}
+#' (for Pearson, inflated by an HC4-type leverage correction).
+#' Because the SE is re-estimated from each bootstrap resample, it can be used
+#' to studentize the bootstrap. See the "Studentized bootstrap" section of
+#' [boot_cor_test()] for the formulas.
+#'
+#' @param x,y Numeric vectors of equal length (no missing values)
+#' @param method One of "pearson", "spearman", "kendall"
+#' @return SE on the correlation scale
 #' @keywords internal
-.fisher_z_se <- function(r_star, n, method) {
-  if (method == "pearson") {
-    1 / sqrt(n - 3)
-  } else if (method == "spearman") {
-    sqrt((1 + r_star^2 / 2) / (n - 3))
-  } else if (method == "kendall") {
-    sqrt(0.437 / (n - 4))
-  }
+.cor_se <- function(x, y, method) {
+  psi <- switch(method,
+                pearson = .cor_if_pearson(x, y) * .hc4_weight(x, y),
+                spearman = .cor_if_spearman(x, y),
+                kendall = .cor_if_kendall(x, y))
+  sqrt(sum(psi^2)) / length(x)
+}
+
+# HC4-type leverage inflation, (1 - h_i)^(-delta_i / 2), with leverage
+# h_i = 1/n + MD_i^2 / (n - 1) of each point in (x, y), so sum(h) = p = 3
+.hc4_weight <- function(x, y) {
+  n <- length(x)
+  X <- cbind(x, y)
+  md2 <- tryCatch(stats::mahalanobis(X, colMeans(X), stats::cov(X)),
+                  error = function(e) rep(NA_real_, n))
+  # cap leverage so a lone extreme point in a tiny resample stays finite
+  h <- pmin(1 / n + md2 / (n - 1), 0.99)
+  delta <- pmin(4, n * h / 3)
+  (1 - h)^(-delta / 2)
+}
+
+# Pearson: asymptotic distribution-free (fourth-moment) influence function
+.cor_if_pearson <- function(x, y) {
+  cx <- x - mean(x)
+  cy <- y - mean(y)
+  zx <- cx / sqrt(mean(cx^2))
+  zy <- cy / sqrt(mean(cy^2))
+  r <- mean(zx * zy)
+  zx * zy - r * (zx^2 + zy^2) / 2
+}
+
+# Spearman: influence function of the Pearson correlation of the
+# mid-distribution transforms U = F*(X), V = G*(Y) (i.e., Pearson on midranks).
+# Each moment's influence has a direct term plus a term from estimating F*, G*.
+# Without ties this reduces to the influence function of 12 E[F(X)G(Y)] - 3.
+.cor_if_spearman <- function(x, y) {
+  n <- length(x)
+  u <- (rank(x) - 0.5) / n
+  v <- (rank(y) - 0.5) / n
+  mu <- mean(u)
+  mv <- mean(v)
+  su <- mean(u^2) - mu^2
+  sv <- mean(v^2) - mv^2
+  rho <- (mean(u * v) - mu * mv) / sqrt(su * sv)
+  # influence of each moment: direct + transform-estimation terms
+  d_u <- (u - mu) + (.upper_mid_sum(x, rep(1, n)) / n - mu)
+  d_v <- (v - mv) + (.upper_mid_sum(y, rep(1, n)) / n - mv)
+  d_uv <- (u * v - mean(u * v)) +
+    (.upper_mid_sum(x, v) / n - mean(u * v)) +
+    (.upper_mid_sum(y, u) / n - mean(u * v))
+  d_uu <- (u^2 - mean(u^2)) + 2 * (.upper_mid_sum(x, u) / n - mean(u^2))
+  d_vv <- (v^2 - mean(v^2)) + 2 * (.upper_mid_sum(y, v) / n - mean(v^2))
+  # delta method for rho = C / sqrt(Su * Sv)
+  d_c <- d_uv - mv * d_u - mu * d_v
+  d_su <- d_uu - 2 * mu * d_u
+  d_sv <- d_vv - 2 * mv * d_v
+  d_c / sqrt(su * sv) - rho / 2 * (d_su / su + d_sv / sv)
+}
+
+# For each i: sum_j w_j * (1{x_j > x_i} + 1{x_j == x_i} / 2), in O(n log n)
+.upper_mid_sum <- function(x, w) {
+  g <- match(x, sort(unique(x)))
+  gs <- rowsum(w, g, reorder = TRUE)[, 1]
+  above <- rev(cumsum(rev(gs))) - gs
+  (above + gs / 2)[g]
+}
+
+# Kendall: Hoeffding projection of tau-b = A / sqrt(Bx * By), where A, Bx, By
+# are U-statistics (concordance and non-tied pairs), via the delta method
+.cor_if_kendall <- function(x, y) {
+  n <- length(x)
+  sx <- sign(outer(x, x, "-"))
+  sy <- sign(outer(y, y, "-"))
+  a <- rowSums(sx * sy) / (n - 1)
+  bx <- rowSums(sx != 0) / (n - 1)
+  by <- rowSums(sy != 0) / (n - 1)
+  A <- mean(a)
+  Bx <- mean(bx)
+  By <- mean(by)
+  tau <- A / sqrt(Bx * By)
+  2 * ((a - A) / sqrt(Bx * By) -
+         tau / 2 * ((bx - Bx) / Bx + (by - By) / By))
 }

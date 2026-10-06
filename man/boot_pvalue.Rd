@@ -14,8 +14,7 @@ boot_pvalue(
   se_obs = NULL,
   z0 = NULL,
   acc = NULL,
-  nboot,
-  z_transform = FALSE
+  nboot
 )
 }
 \arguments{
@@ -39,9 +38,6 @@ typically \code{(bvec - est) / bootstrap_se}}
 \item{acc}{BCa acceleration from \code{bca_params()} (required for "bca")}
 
 \item{nboot}{Number of bootstrap replicates}
-
-\item{z_transform}{Logical indicating whether to apply Fisher z transformation
-(used for correlation estimates; default FALSE)}
 }
 \value{
 A single p-value

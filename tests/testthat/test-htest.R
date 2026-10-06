@@ -567,13 +567,24 @@ test_that("brunner_munzel",{
                               perm = TRUE,
                               paired = TRUE))
 
+  # Large samples with the standard null: permutation test probably unnecessary
   expect_message(brunner_munzel(x = rnorm(300),
+                              y = rnorm(300),
+                              alternative = "t",
+                              perm = TRUE,
+                              R = 199
+                              ),
+                 "probably unnecessary")
+
+  # Nulls other than 0.5 with perm: warn and point to perm_logit / logit instead
+  expect_warning(suppressMessages(brunner_munzel(x = rnorm(300),
                               y = rnorm(300),
                               mu = .25,
                               alternative = "t",
                               perm = TRUE,
-                              #paired = TRUE
-                              ))
+                              R = 199
+                              )),
+                 "null value other than 0.5")
 
   # Test for completely separated small samples (issue #109 regression test) ----
   # This tests the fix for multiple bugs in permutation p-value calculation:

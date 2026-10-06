@@ -58,6 +58,14 @@ NEWS
 
 ## Improvements
 
+- **`boot_smd_calc()` now defaults to `boot_ci = "bca"`** (previously
+  `"stud"`). In simulations with skewed data, the studentized interval was
+  liberal (two-sided Type I error of about 0.10 to 0.11 at a nominal 0.05 with
+  20 to 50 observations per group), because its pivot uses a normal-theory
+  standard error for the SMD. BCa stayed at or below the nominal rate in all
+  conditions studied. Results for code that relied on the default will change;
+  set `boot_ci = "stud"` to reproduce earlier output.
+
 - **Correlation SE improvements** for `z_cor_test()` and `corsum_test()`:
   - Spearman's rho now uses the Bonett-Wright ρ-dependent SE formula
     (`sqrt((1 + r^2/2) / (n - 3))`) instead of the fixed 1.06 constant,
@@ -108,8 +116,54 @@ NEWS
   - Now shows only one-sided rejection regions appropriate to the test type
   - Equivalence tests: lower bound shows right tail, upper bound shows left tail
   - Minimal effect tests: lower bound shows left tail, upper bound shows right tail
+- `perm_t_test()` and `boot_t_test()` documentation now describes the sharp
+  (Fisher) versus weak (Neyman) null hypotheses: the permutation test is exact
+  under the sharp null and, when studentized, asymptotically valid for the weak
+  null (Wu & Ding, 2020), while the bootstrap targets the weak null and is
+  asymptotic only. Guidance on randomized versus random-sampling designs and on
+  small-sample, unequal-variance behavior is included.
+- `perm_t_test()`, `boot_t_test()`, `boot_t_TOST()`, and the robust TOST
+  vignette now include a "Choosing a Method" guide based on a set of
+  simulations: studentized permutation for independent groups; the studentized
+  bootstrap for paired data with clearly skewed differences (the sign-flip
+  permutation test assumes symmetry); trimming for heavy tails or outliers;
+  caution when groups differ in shape; and `boot_ci = "bca"` is not
+  recommended for mean differences because it tended to be too liberal.
+- `brunner_munzel()` gains `test_method = "perm_logit"`: a studentized
+  permutation test on the logit scale. Its confidence interval inverts the same
+  test and is back-transformed, so it is range-preserving (never clamped) and
+  always agrees with the p-value. In simulations it gave the most powerful
+  equivalence tests while keeping Type I error near nominal, and intervals that
+  do not collapse when the estimate is near 0 or 1. It is the recommended method
+  for equivalence, minimal effect, and other tests against a null value other
+  than 0.5.
+
+- `brunner_munzel()` now warns when `test_method = "t"` or `"perm"` is used for a
+  minimal effect test or any other test against a null value other than 0.5.
+  In simulations these methods had inflated Type I error for minimal effect
+  tests (up to about 15--18% in small samples with wide bounds) and low power
+  for equivalence tests. The warning suggests `"perm_logit"` or `"logit"`.
+
+- `brunner_munzel()` test method guidance is updated based on simulation studies
+  of Type I error (see the new "Choosing a test method" section):
+  - Two-sample: the message recommending `test_method = "perm"` now appears when
+    the smaller group has fewer than 30 observations (previously 15).
+  - Paired: `"perm"` is now recommended for any sample size, because the `"t"` and
+    `"logit"` methods are conservative when pairs are positively correlated. The
+    "permutation test is probably unnecessary" message is now shown only for
+    two-sample designs.
+  - A new message warns when the permutation distribution is too coarse for the
+    test to ever reject at the requested `alpha` (e.g., 5 or fewer pairs).
 
 ## Bug Fixes
+
+- **Two-sample bootstrap in `boot_smd_calc()` and `boot_ses_calc()` now
+  resamples within each group.** Previously, observations were resampled from
+  the pooled data, so group sizes varied across bootstrap replicates. With
+  small samples a group could be left with one or zero observations, producing
+  `NaN` estimates and an `NA` p-value or an error (about 4% of calls with
+  10 observations per group). Group sizes are now fixed at the observed `n1`
+  and `n2`, matching `boot_t_test()` and `boot_t_TOST()`.
 
 - **Consistent handling of `mu`** in `t_TOST()`, `tsum_TOST()`, and `boot_t_TOST()`:
   - The raw estimate, its confidence interval, and the raw equivalence bounds
@@ -139,6 +193,70 @@ NEWS
   used Welch standard errors for the bootstrap replicates while the observed
   standard error and p-value used the pooled standard error. The replicates now
   use the pooled standard error, so the interval and p-value agree.
+- `boot_cor_test(boot_ci = "stud")` was not actually studentized. The pivots
+  used normal-theory Fisher z standard errors that depend only on `n` (Pearson,
+  Kendall) or on the estimate itself (Spearman), so the interval was in effect a
+  basic bootstrap interval on the z scale. Each bootstrap replicate is now
+  standardized by an influence-function (sandwich) standard error estimated from
+  that replicate's data, which does not assume bivariate normality:
+  - Pearson: asymptotic distribution-free (fourth-moment) standard error with
+    an HC4-type leverage correction, which keeps coverage near nominal for
+    small samples and heavy-tailed data.
+  - Spearman: influence function of Pearson's r on the mid-distribution
+    transforms (midranks), including the terms for estimating the
+    transforms, so it stays accurate with ties.
+  - Kendall: U-statistic (Hoeffding projection) standard error of tau-b.
+  The formulas are given in the new "Studentized bootstrap" section of
+  `?boot_cor_test` and in `vignette("correlations")`. Studentized results, and
+  the `z.se` element of `stderr`, will differ from earlier versions.
+- `boot_cor_test()` has a new default, `boot_ci = "auto"`, which uses the
+  studentized interval (`"stud"`) for Pearson's r and BCa (`"bca"`) for the
+  Spearman, Kendall, Winsorized, and percentage bend correlations. In
+  simulations, the studentized Pearson interval stayed near nominal coverage
+  for skewed, heteroscedastic, and heavy-tailed data, where BCa under-covered.
+  Results for Pearson correlations with the default settings will differ from
+  earlier versions (use `boot_ci = "bca"` for the previous default). The
+  returned `boot_ci` element reports the method that was used.
+- `boot_cor_test()` gains a `boot_scale` argument (`"z"`, the default, or
+  `"r"`) setting the scale on which the `"basic"` and `"stud"` intervals and
+  p-values are computed. The basic interval was previously computed on the
+  correlation scale while the studentized interval used the Fisher z scale; both
+  now default to the z scale, so `"basic"` results will differ from earlier
+  versions (use `boot_scale = "r"` for the previous basic interval). The
+  `"perc"` and `"bca"` methods are unaffected. The result also gains a
+  `boot_scale` element.
+- `perm_t_test()`: the confidence interval was a percentile interval of the raw
+  (non-studentized) permuted differences, while the p-value came from the
+  studentized permutation test. Under unequal variances and group sizes the two
+  could disagree, and the percentile interval was also reflected in the wrong
+  direction for asymmetric permutation distributions (#120). The confidence
+  interval is now obtained by inverting the same permutation test (same
+  `p_method` counting rule and `symmetric` setting), so it always agrees with
+  the p-value. Confidence interval values will differ from earlier versions.
+- `hodges_lehmann()` permutation tests: the confidence interval was likewise a
+  percentile interval of the raw permuted estimates (shifted by the estimate)
+  rather than an inversion of the permutation test, so it could disagree with
+  the p-value. It now inverts the same test (same `p_method` counting rule and
+  absolute-value two-sided rule), matching the `perm_t_test()` fix (#120).
+- `brunner_munzel(test_method = "perm")`: the confidence interval now inverts
+  the same studentized permutation test as the p-value (#120). Previously the
+  two-sample two-sided interval was equal-tailed while the p-value used the
+  absolute-value rule, the equivalence/minimal effect interval mirrored the
+  upper quantile to both sides, the paired intervals assumed a symmetric
+  permutation distribution, and the order-statistic rules did not match the
+  `p_method` counting rule. The permutation minimal effect p-value now counts
+  the opposite tails directly instead of using `1 - p`.
+- Permutation p-values in `perm_t_test()`, `brunner_munzel(test_method = "perm")`,
+  and `hodges_lehmann()` now treat permutation statistics within floating point
+  error of the observed statistic as ties. With tied data (or, for
+  `brunner_munzel()`, whenever the observed and permuted statistics are computed
+  by different code paths), mathematically tied permutations could differ in the
+  last bits and be dropped from the count, making p-values too small. For
+  example, the exact Brunner-Munzel permutation test with 5 vs 5 ordinal data
+  rejected about 8% of the time under exchangeability (now about 1.4%), and
+  fully enumerated tests could return p = 0, which is impossible when the
+  observed arrangement is among the permutations. Confidence intervals use the
+  same tolerance, so they continue to agree with the p-values.
 - `smd_calc()` and `boot_smd_calc()`: the one-sample SMD now uses `mean(x) - mu` correctly
 - jamovi one-sample TOST now passes the `mu` option to the analysis.
 - `plot.TOSTt(type = "tnull")`: fixed swapped internal labels for the CI limits.

@@ -425,6 +425,7 @@ ggplot(sp_df, aes(x = lower, y = upper)) +
   theme_minimal()
 
 ## -----------------------------------------------------------------------------
+set.seed(506119)
 bm_test = brunner_munzel(
   formula = LDHF ~ Gender,
   data = bugs_g,
@@ -432,7 +433,10 @@ bm_test = brunner_munzel(
   alternative = "equivalence",
   # equivalence bounds 
   # on the stochastic superiority scale
-  mu = c(0.3, 0.7)
+  mu = c(0.3, 0.7),
+  # Permutation logit
+  # Best performance (so far) for equivalence testing
+  test_method = "perm_logit"
 )
 print(bm_test)
 

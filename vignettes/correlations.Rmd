@@ -98,6 +98,90 @@ boot_cor_test(mtcars$mpg,
            null = .4)
 ```
 
+## Bootstrap Confidence Intervals
+
+The `boot_ci` argument selects the bootstrap confidence interval, and the p-value is always obtained by inverting that same interval, so the two always agree.
+
+- `"auto"` (default): `"stud"` for Pearson's r and `"bca"` for all other correlations. In simulations, the studentized interval kept Pearson's r near nominal coverage for skewed, heteroscedastic, and heavy-tailed data, where BCa under-covered; for the rank and robust correlations BCa did as well or better.
+- `"bca"`: bias-corrected and accelerated percentile interval.
+- `"perc"`: percentile interval.
+- `"basic"`: basic (reflected percentile) interval.
+- `"stud"`: studentized (bootstrap-t) interval, available for Pearson, Spearman, and Kendall correlations.
+
+The method that was used is returned in the `boot_ci` element of the result. The Pearson examples above therefore used the studentized interval, and the Spearman and Kendall examples used BCa. Here is a studentized interval for Spearman's rho:
+
+```{r}
+set.seed(993)
+boot_cor_test(mtcars$mpg,
+              mtcars$qsec,
+              method = "spearman",
+              boot_ci = "stud",
+              alternative = "e",
+              null = .4)
+```
+
+The percentile and BCa intervals give the same answer on any monotone scale. The basic and studentized intervals do not, so the `boot_scale` argument sets the scale on which they are computed: the Fisher z scale (`boot_scale = "z"`, the default), or the correlation scale (`boot_scale = "r"`). The z scale keeps the interval within $[-1, 1]$ and is closer to variance-stabilizing.
+
+### Standard Errors for the Studentized Bootstrap
+
+The studentized bootstrap standardizes every bootstrap replicate by its own standard error, $t^* = (\hat\theta^* - \hat\theta) / \widehat{SE}^*$, and uses the distribution of $t^*$ in place of a normal or $t$ reference distribution. This only improves on the basic interval if $\widehat{SE}^*$ is estimated from the data in each resample. The usual normal-theory standard errors of Fisher's z (e.g., $1/\sqrt{n-3}$ for Pearson's r) depend only on the sample size and so cannot be used for this.
+
+`boot_cor_test()` therefore uses an influence-function (sandwich) standard error, which is computed from the data and does not assume bivariate normality:
+
+$$
+\widehat{SE}(\hat\rho) = \frac{1}{n}\sqrt{\sum_{i=1}^{n} \psi_i^2},
+$$
+
+where $\psi_i$ is the empirical influence of observation $i$ on the coefficient. On the z scale the delta method gives $\widehat{SE}(\hat z) = \widehat{SE}(\hat\rho) / (1 - \hat\rho^2)$. The influence functions are:
+
+**Pearson's r.** The starting point is the asymptotic distribution-free (fourth-moment) influence function [@steiger1982]. With $z_{x,i}$ and $z_{y,i}$ the standardized observations (using denominator $n$),
+
+$$
+\psi^0_i = z_{x,i} z_{y,i} - \frac{r}{2}\left(z_{x,i}^2 + z_{y,i}^2\right).
+$$
+
+Under bivariate normality this reduces to the familiar $\text{Var}(r) \approx (1-\rho^2)^2/n$. On its own, though, it gives standard errors that are too small in small samples and with heavy-tailed data, because a sample under-represents the extreme points that dominate the variance of $r$. Following the HC4 heteroscedasticity-consistent estimator for regression [@cribari2004], which @wilcox2011introduction also uses for testing correlations, each influence value is inflated according to its leverage:
+
+$$
+\psi_i = \psi^0_i\,(1 - h_i)^{-\delta_i/2}, \qquad h_i = \frac{1}{n} + \frac{D_i^2}{n-1}, \qquad \delta_i = \min\left(4, \frac{n h_i}{3}\right),
+$$
+
+where $D_i$ is the Mahalanobis distance of $(x_i, y_i)$ from the bivariate mean (so the $h_i$ sum to 3), and $h_i$ is capped at 0.99. This leverage correction of the ADF influence function is an adaptation made for TOSTER. It was chosen because in simulations (normal, heteroscedastic, $t_5$, $t_3$, and discrete data; $n$ = 30 and 80) it kept the studentized interval's coverage near nominal, including for $t_3$ data, where the uncorrected standard error under-covered badly. It is slightly conservative for strongly heteroscedastic data. When the data have infinite fourth moments, no standard error of $r$ is consistent, and a robust correlation (below) is still the better choice.
+
+**Spearman's rho.** Spearman's rho is Pearson's r computed on the mid-distribution transforms $u_i = (R(x_i) - 1/2)/n$ and $v_i = (R(y_i) - 1/2)/n$, where $R$ denotes midranks. Its influence function adds terms for estimating these transforms to the Pearson influence function of $(u, v)$. With $\omega^x_{ij} = \mathbf{1}(x_j > x_i) + \tfrac{1}{2}\mathbf{1}(x_j = x_i)$ (and $\omega^y_{ij}$ likewise), the influence of observation $i$ on each moment is
+
+$$
+\begin{aligned}
+d_i(\overline{uv}) &= u_i v_i + \tfrac{1}{n}\textstyle\sum_j \omega^x_{ij} v_j + \tfrac{1}{n}\sum_j \omega^y_{ij} u_j - 3\,\overline{uv}, \\
+d_i(\bar u) &= u_i + \tfrac{1}{n}\textstyle\sum_j \omega^x_{ij} - 2\bar u, \\
+d_i(\overline{u^2}) &= u_i^2 + \tfrac{2}{n}\textstyle\sum_j \omega^x_{ij} u_j - 3\,\overline{u^2},
+\end{aligned}
+$$
+
+(similarly for $v$), and the delta method for $r_s = C/\sqrt{S_u S_v}$, with $C = \overline{uv} - \bar u \bar v$ and $S_u = \overline{u^2} - \bar u^2$, gives
+
+$$
+\psi_i = \frac{d_i(C)}{\sqrt{S_u S_v}} - \frac{r_s}{2}\left(\frac{d_i(S_u)}{S_u} + \frac{d_i(S_v)}{S_v}\right),
+$$
+
+where $d_i(C) = d_i(\overline{uv}) - \bar v\, d_i(\bar u) - \bar u\, d_i(\bar v)$ and $d_i(S_u) = d_i(\overline{u^2}) - 2\bar u\, d_i(\bar u)$. Without ties this is the influence function of Spearman's rho derived by @croux2010. The tie terms keep the standard error accurate for discrete data, and for bootstrap resamples, which always contain ties.
+
+**Kendall's tau.** Kendall's tau-b is a ratio of U-statistics, $\tau_b = \bar a / \sqrt{\bar b^x \bar b^y}$, where
+
+$$
+a_i = \frac{1}{n-1}\sum_{j \ne i} \text{sign}(x_i - x_j)\,\text{sign}(y_i - y_j), \qquad b^x_i = \frac{1}{n-1}\sum_{j \ne i} \mathbf{1}(x_i \ne x_j),
+$$
+
+and $b^y_i$ is defined likewise. Hoeffding's projection [@hoeffding1948] and the delta method give
+
+$$
+\psi_i = 2\left[\frac{a_i - \bar a}{\sqrt{\bar b^x \bar b^y}} - \frac{\tau_b}{2}\left(\frac{b^x_i - \bar b^x}{\bar b^x} + \frac{b^y_i - \bar b^y}{\bar b^y}\right)\right].
+$$
+
+Without ties this is the usual U-statistic variance, $\frac{4}{n}\widehat{\text{Var}}(a_i)$. Computing it takes $O(n^2)$ operations per resample, so the studentized Kendall interval is slower in large samples.
+
+Under independence, all three standard errors reduce to the familiar values, $\text{Var}(r) \approx \text{Var}(r_s) \approx 1/n$ and $\text{Var}(\tau) \approx 4/(9n)$. Because each pivot divides by an estimated standard error, studentized intervals can be wide or erratic in small samples (roughly $n < 30$). This matters most for the rank correlations. Kendall's standard error, for example, is nearly unbiased even at $n = 20$, but it varies a lot between samples (especially with ties) and is strongly correlated with the estimate. In simulations at $n = 30$, the studentized Spearman and Kendall intervals under-covered by up to about 2.5 percentage points for heavy-tailed or tied data, while the BCa interval stayed closer to nominal; at $n = 80$ both were accurate. For Spearman's rho and Kendall's tau with fewer than about 50 observations, use `boot_ci = "bca"`, which is what `"auto"` selects for these methods. The studentized interval is not available for the robust correlations below, which lack a closed-form standard error.
+
 ## Robust Correlation Methods
 
 The `boot_cor_test` function also provides access to robust correlation methods that are less sensitive to outliers and violations of normality:

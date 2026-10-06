@@ -19,7 +19,7 @@ Imports:
     graphics,
     jmvcore (>= 0.9.6.4),
     ggplot2,
-    ggdist,
+    ggdist (>= 3.3.3),
     distributional,
     cowplot,
     tidyr,

@@ -118,7 +118,11 @@ and usually provides the most accurate coverage.
 around the observed value.
 \item \strong{Percentile ("perc")}: Uses percentiles of the bootstrap distribution directly.
 \item \strong{Bias-corrected and accelerated ("bca")}: Corrects for both bias and skewness
-in the bootstrap distribution using jackknife-based acceleration.
+in the bootstrap distribution using jackknife-based acceleration. For mean
+differences, a set of simulations found this method tended to be too liberal
+(particularly with small samples, heavy tails, or outliers), so it is not
+recommended; see \code{\link[=boot_t_test]{boot_t_test()}} ("Choosing a Method") for guidance on when to
+use the bootstrap versus \code{\link[=perm_t_test]{perm_t_test()}}.
 }
 }
 

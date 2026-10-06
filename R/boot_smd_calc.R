@@ -65,16 +65,31 @@
 #'   * Calculate confidence intervals using the specified method
 #'
 #' Four bootstrap confidence interval methods are available via the `boot_ci` argument:
+#'   - **Bias-corrected and accelerated ("bca")**: Corrects for both bias and skewness in the
+#'     bootstrap distribution using jackknife-based acceleration. This is the default.
+#'     It is computationally more expensive than the other methods because of the
+#'     jackknife step.
 #'   - **Studentized bootstrap ("stud")**: Uses the bootstrap distribution of pivotal
-#'     t-statistics to account for variability in standard error estimates. Usually
-#'     provides the most accurate coverage probability and is set as the default.
+#'     statistics, \eqn{(d^* - \hat{d}) / SE^*}, where \eqn{SE^*} is the parametric
+#'     standard error of the SMD computed in each bootstrap sample. Because that
+#'     standard error is derived under normality, the pivot is not pivotal when the
+#'     data are skewed, and the interval can be too narrow (see below).
 #'   - **Basic bootstrap ("basic")**: Reflects the bootstrap distribution of estimates
 #'     around the observed value. Simple approach that works well for symmetric distributions.
 #'   - **Percentile bootstrap ("perc")**: Uses percentiles of the bootstrap distribution directly.
-#'     More robust to skewness in the bootstrap distribution.
-#'   - **Bias-corrected and accelerated ("bca")**: Corrects for both bias and skewness in the
-#'     bootstrap distribution using jackknife-based acceleration. Most accurate when the
-#'     bootstrap distribution is skewed, but computationally more expensive.
+#'     It tends to be conservative at equivalence bounds, which costs power.
+#'
+#' **Choice of default.** Earlier versions defaulted to `boot_ci = "stud"`. In
+#' simulations of two independent groups with skewed (lognormal) data, the
+#' studentized interval was liberal: two-sided Type I error rates were about
+#' 0.10 to 0.11 at a nominal 0.05 with 20 or 50 observations per group, and the
+#' rate did not improve as the sample size increased. The BCa interval stayed at or
+#' below the nominal rate in every condition studied (normal, skewed, and unequal
+#' variances; 10 to 50 observations per group), so it is now the default. Under
+#' normality and with unequal variances, all four methods performed acceptably.
+#' Note that this differs from [boot_t_test()], where the studentized bootstrap
+#' is preferred: the t-statistic is close to pivotal, whereas the studentized SMD
+#' relies on a normal-theory standard error for the SMD.
 #'
 #' When hypothesis testing is requested (i.e., `alternative` is not `"none"`),
 #' the p-value is computed using the method that matches the selected `boot_ci`,
@@ -207,7 +222,7 @@ boot_smd_calc <- function(x, ...,
                           glass = NULL,
                           denom = c("auto", "z", "rm", "pooled", "avg",
                                     "glass1", "glass2"),
-                          boot_ci = c("stud","basic","perc","bca"),
+                          boot_ci = c("bca","stud","basic","perc"),
                           R = 1999,
                           output = c("htest", "data.frame"),
                           null.value = 0,
@@ -233,7 +248,7 @@ boot_smd_calc.default = function(x,
                                  glass = NULL,
                                  denom = c("auto", "z", "rm", "pooled", "avg",
                                            "glass1", "glass2"),
-                                 boot_ci = c("stud","basic","perc","bca"),
+                                 boot_ci = c("bca","stud","basic","perc"),
                                  R = 1999,
                                  output = c("htest", "data.frame"),
                                  null.value = 0,
@@ -393,14 +408,11 @@ boot_smd_calc.default = function(x,
     boots = c()
     boots_se = c()
     for(i in 1:R){
-      sampler = sample(1:nrow(data), replace = TRUE)
-      boot_dat = data[sampler,]
-      x_boot = subset(boot_dat,
-                      group == "x")
-      y_boot = subset(boot_dat,
-                      group == "y")
-      res_boot = smd_calc(x = x_boot$values,
-                          y = y_boot$values,
+      # Resample within each group so group sizes stay fixed
+      x_boot = i1[sample.int(length(i1), replace = TRUE)]
+      y_boot = i2[sample.int(length(i2), replace = TRUE)]
+      res_boot = smd_calc(x = x_boot,
+                          y = y_boot,
                           paired = paired,
                           var.equal = var.equal,
                           alpha = alpha,
@@ -575,6 +587,28 @@ boot_smd_calc.default = function(x,
 
   # Studentized bootstrap pivot: centered at observed estimate, scaled by bootstrap SE
   # Analogous to TSTAT in boot_t_test
+  # TODO: improve the SE used in the studentized pivot. boots_se comes from the
+  #   normal-theory SE of the SMD (e.g., Bonett's d_av variance in d_est_ind), so
+  #   the pivot is not pivotal under skewness; simulations showed two-sided Type I
+  #   error of ~0.10-0.11 with skewed data (n = 20-50 per group), which is why the
+  #   default moved to "bca". Options to evaluate (see
+  #   junk/boot_cor_smd_type1_summary.md):
+  #   1. Distribution-free Bonett SE: replace the normal-theory moments with sample
+  #      moments, e.g. for d_av
+  #      Var(d) ~ (s1^2/n1 + s2^2/n2)/S^2
+  #               + d^2 * ((m4_1 - s1^4)/n1 + (m4_2 - s2^4)/n2) / (16 S^4)
+  #               - d * (m3_1/n1 - m3_2/n2) / (2 S^3)
+  #      with S^2 = (s1^2 + s2^2)/2 and m3/m4 the 3rd/4th central moments.
+  #      Reduces to the current formula under normality. Needs a variance floor
+  #      and separate derivations for each denom (pooled, glass, z, rm) and tr > 0.
+  #   2. Jackknife SE within each bootstrap resample: nonparametric, works for
+  #      every denom and tr > 0 without new derivations; O(n) per resample if
+  #      leave-one-out means/variances are computed in closed form.
+  #   Option 1 is the same approach now used by boot_cor_test(boot_ci = "stud"):
+  #   a per-resample influence-function (sandwich) SE, see .cor_se() in
+  #   R/corr_calcs.R. Follow its structure (and its HC-type small-sample
+  #   correction) for the SMD.
+  #   Compare both by simulation (normal and skewed DGPs) before changing "stud".
   TSTAT <- (boots - raw_smd$estimate[1L]) / boots_se
 
   # Pre-compute BCa parameters for p-value use

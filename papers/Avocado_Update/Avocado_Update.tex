@@ -141,6 +141,18 @@ statistics, bootstrap, minimal effects test, NHST, TOST, R package,
 robust statistics
 \end{keywords}
 
+\begin{verbatim}
+## Warning: package 'ggplot2' was built under R version 4.4.3
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: package 'ggdist' was built under R version 4.4.3
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: package 'patchwork' was built under R version 4.4.3
+\end{verbatim}
+
 \section{Introduction}\label{introduction}
 
 Researchers routinely interpret non-significant p-values from a
@@ -239,14 +251,15 @@ median/pseudo-median, and on the SMD describe three different
 hypotheses, only one of which is likely to be the intended one.
 
 Table \ref{tab:estimands} lists the estimands TOSTER can place bounds on
-and the functions that target each. Two entries deserve comment. The
-trimmed mean, available through the \texttt{tr} argument of the
-resampling functions (\texttt{tr\ =\ 0} by default), coincides with the
-mean only when the distribution is symmetric; setting \texttt{tr}
-therefore changes the estimand rather than merely making the same
-estimate more robust. The SMD is a rescaling of the mean difference by a
-sample-dependent quantity, which is why it warrants the separate caution
-given later in this paper.
+and the functions that target each. The trimmed means option, available
+through the \texttt{tr} argument of the resampling functions
+(\texttt{tr\ =\ 0} by default), coincides with the mean only when the
+distribution is symmetric. Therefore, some thought should be given to
+the fact that the the estimand changes when trimmed means are utilized,
+and it is not just making the same estimate more robust. Additionally,
+all SMDs are a rescaling of the mean difference (much like a z-score) by
+a sample-dependent quantity (caution about standardizing using SMDs is
+given later).
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3684}}
@@ -311,7 +324,7 @@ decision tree and adopting whatever quantity it happens to return. This
 estimand-first style approach also makes the robust methods described
 later in this paper easier to navigate. The robust methods discussed
 here are often tests of different quantities, and only some of them
-remain answers to a hypothesis about means.
+remain hypothesis tests of means.
 
 \subsection{Justifying the Bounds}\label{justifying-the-bounds}
 
@@ -362,35 +375,36 @@ treat them as direct recommendations for their own research.
 
 \section{TOST with t-tests}\label{tost-with-t-tests}
 
-The t-test is the standard tool for comparing means. Its construction is
-simple: we estimate a mean (one-sample), the mean of the paired
-differences (paired samples), or the difference in means between two
-groups, and then divide that estimate by its standard error. The
-resulting t-statistic is compared against a t-distribution to obtain
-p-values and confidence intervals. Written generally, the statistic
-takes the form \(t = (\hat{\mu} - \mu_0)/SE_{\hat{\mu}}\), where
-\(\hat{\mu}\) is the estimate and \(\mu_0\) is the value being tested
-against.
+The t-test is the standard tool for comparing means. We estimate a mean
+(one-sample), the mean of the paired differences (paired samples), or
+the difference in means between two groups, and then divide that
+estimate by its standard error. The resulting t-statistic is compared
+against a t-distribution to obtain p-values and confidence intervals.
+Written generally, the statistic takes the form
+\(t = (\hat{\mu} - \mu_0)/SE_{\hat{\mu}}\), where \(\hat{\mu}\) is the
+estimate and \(\mu_0\) is the value being tested against.
 
-What matters for equivalence testing is that \(\mu_0\) is a choice
-rather than a fixed feature of the test. A traditional nil hypothesis
-test fixes \(\mu_0 = 0\) and asks whether the mean, or mean difference,
-is exactly zero. TOST changes none of the underlying machinery; it
-changes only what is substituted for \(\mu_0\). Two one-sided tests are
-performed --- one against the lower bound (\(\mu_0 = \Delta_L\)) and one
-against the upper bound (\(\mu_0 = \Delta_U\)) --- and equivalence is
-concluded only if both reject. Because each test is one-sided at
-\(\alpha\), the interval estimate corresponding to the procedure is a
-\(1-2\alpha\) (typically 90\%) confidence interval, which is what TOSTER
-reports and plots.
+What matters for equivalence testing is that \(\mu_0\) is a choice. A
+traditional nil hypothesis test fixes \(\mu_0 = 0\) and asks whether the
+mean, or mean difference, is exactly zero, with a ``significant''
+difference declared for any departure from this point null hypothesis.
+TOST only changes what is substituted for \(\mu_0\). Two one-sided tests
+are performed --- one against the lower bound (\(\mu_0 = \Delta_L\)) and
+one against the upper bound (\(\mu_0 = \Delta_U\)) --- and equivalence
+is concluded only if both reject. The null hypothesis is no longer a
+single point but a composite one (the effect lies at or beyond either
+bound), and the equivalence region between the bounds becomes the
+alternative. Because each test is one-sided at \(\alpha\), the interval
+estimate corresponding to the procedure is a \(1-2\alpha\) (typically
+90\%) confidence interval, which is what TOSTER reports and can plot.
 
 Throughout, the estimand for a t-test is the mean, or mean difference,
-on the original scale of measurement. As discussed above, this is a
-default rather than an inviolable property of the test, and it is worth
-restating here because several of the alternatives described later in
-this paper (the rank-based tests in particular) estimate different
-quantities entirely, and are not interchangeable substitutes when the
-hypothesis concerns means.
+on the original scale of measurement (or, more precisely, on whatever
+scale the t-test is calculated, such as log-transformed data). As
+discussed above and described later in this paper, many robust
+``alternatives'' to the t-test estimate different quantities entirely,
+and are not interchangeable substitutes when the hypothesis concerns
+means.
 
 The \texttt{t\_TOST} function in TOSTER provides a unified interface for
 equivalence and minimal effect testing with t-tests. It runs a standard
@@ -414,7 +428,7 @@ implies a practically meaningful effect (see Figure 1)
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Types of hypotheses tests supported by two one-sided tests (TOST) procedures.}]{Avocado_Update_files/Avocado_Update_files/figure-latex/hypplot-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Types of hypotheses tests supported by two one-sided tests (TOST) procedures.}]{Avocado_Update_files/figure-latex/hypplot-1.pdf}}
 \caption{Types of hypotheses tests supported by two one-sided tests
 (TOST) procedures.}
 \end{figure}
@@ -537,7 +551,7 @@ plot.
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Results of the independent-samples equivalence test visualized with the default plot method. The top panel displays the raw mean difference with its 90\% confidence interval, and the bottom panel displays the standardized effect size (Hedges's gav) with its 90\% confidence interval. In both panels, the dashed vertical lines indicate the equivalence bounds (raw: -1 to 1; standardized: approximately -0.4 to 0.4), and the point estimate is marked by a filled circle. A 90\% confidence interval is used because it corresponds to the two one-sided tests (TOST) procedure at an alpha level of 0.05.}]{Avocado_Update_files/Avocado_Update_files/figure-latex/genericplot-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Results of the independent-samples equivalence test visualized with the default plot method. The top panel displays the raw mean difference with its 90\% confidence interval, and the bottom panel displays the standardized effect size (Hedges's gav) with its 90\% confidence interval. In both panels, the dashed vertical lines indicate the equivalence bounds (raw: -1 to 1; standardized: approximately -0.4 to 0.4), and the point estimate is marked by a filled circle. A 90\% confidence interval is used because it corresponds to the two one-sided tests (TOST) procedure at an alpha level of 0.05.}]{Avocado_Update_files/figure-latex/genericplot-1.pdf}}
 \caption{Results of the independent-samples equivalence test visualized
 with the default plot method. The top panel displays the raw mean
 difference with its 90\% confidence interval, and the bottom panel
@@ -562,7 +576,7 @@ confidence intervals, and equivalence bounds simultaneously:
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Consonance density plot for the independent-samples equivalence test. The top panel displays the standardized effect size (Hedges's gav) and the bottom panel displays the raw mean difference. In each panel, the consonance density curve represents the distribution of confidence intervals across all levels, with color-coded regions corresponding to the 68\%, 90\%, 95\%, and 99.9\% confidence intervals. The point estimate is marked by a filled circle along the x-axis. The dashed vertical lines indicate the equivalence bounds (standardized: approximately -0.4 to 0.4; raw: -1 to 1). This visualization conveys the full range of effect sizes compatible with the data at varying confidence levels, rather than relying on a single confidence interval. Wider, less certain intervals (e.g., 99.9\%) extend further from the point estimate, while narrower intervals (e.g., 68\%) cluster near it.}]{Avocado_Update_files/Avocado_Update_files/figure-latex/cdplot-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Consonance density plot for the independent-samples equivalence test. The top panel displays the standardized effect size (Hedges's gav) and the bottom panel displays the raw mean difference. In each panel, the consonance density curve represents the distribution of confidence intervals across all levels, with color-coded regions corresponding to the 68\%, 90\%, 95\%, and 99.9\% confidence intervals. The point estimate is marked by a filled circle along the x-axis. The dashed vertical lines indicate the equivalence bounds (standardized: approximately -0.4 to 0.4; raw: -1 to 1). This visualization conveys the full range of effect sizes compatible with the data at varying confidence levels, rather than relying on a single confidence interval. Wider, less certain intervals (e.g., 99.9\%) extend further from the point estimate, while narrower intervals (e.g., 68\%) cluster near it.}]{Avocado_Update_files/figure-latex/cdplot-1.pdf}}
 \caption{Consonance density plot for the independent-samples equivalence
 test. The top panel displays the standardized effect size (Hedges's
 g\textsubscript{av}) and the bottom panel displays the raw mean
@@ -879,7 +893,7 @@ tests, the equivalence bounds are shown as dashed vertical lines:
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Estimate plot for an equivalence test via simple\_htest.}]{Avocado_Update_files/Avocado_Update_files/figure-latex/shplot1-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Estimate plot for an equivalence test via simple\_htest.}]{Avocado_Update_files/figure-latex/shplot1-1.pdf}}
 \caption{Estimate plot for an equivalence test via simple\_htest.}
 \end{figure}
 
@@ -1061,13 +1075,13 @@ it provides more robust confidence intervals and p-values.
 ##  g[rm]=('1'-'2')/SD_rm)
 ## 
 ## data:  extra by group
-## z-observed = -0.78495, p-value = 0.8954
+## z-observed = -0.78495, p-value = 0.8937
 ## alternative hypothesis: equivalence
 ## null values:
 ## lower bound upper bound 
 ##        -0.5         0.5 
 ## 90 percent confidence interval:
-##  -1.3018312 -0.4480945
+##  -1.1906762 -0.4360547
 ## sample estimates:
 ## SMD (g[rm]) 
 ##  -0.7513666
@@ -1153,16 +1167,16 @@ objects that integrate with the helper functions described above.
 
 \begin{verbatim}
 ## 
-##  Bootstrapped Pearson's product-moment correlation (BCa)
+##  Bootstrapped Pearson's product-moment correlation (studentized)
 ## 
 ## data:  bugs$LDLF and bugs$LDHF
-## N = 91, p-value = 0.9787
+## N = 91, p-value = 0.9805
 ## alternative hypothesis: equivalence
 ## null values:
 ## correlation correlation 
 ##         0.4        -0.4 
 ## 90 percent confidence interval:
-##  0.4360295 0.6916337
+##  0.4360056 0.6865216
 ## sample estimates:
 ##         r 
 ## 0.5767783
@@ -1174,9 +1188,9 @@ objects that integrate with the helper functions described above.
 \end{Highlighting}
 \end{Shaded}
 
-The Bootstrapped Pearson's product-moment correlation (BCa) is not
-statistically significant (p = 0.979, r = 0.577, 90\% C.I.{[}0.436,
-0.692{]}) at a 0.05 alpha-level. The null hypothesis cannot be rejected.
+The Bootstrapped Pearson's product-moment correlation (studentized) is
+not statistically significant (p = 0.98, r = 0.577, 90\% C.I.{[}0.436,
+0.687{]}) at a 0.05 alpha-level. The null hypothesis cannot be rejected.
 At the desired error rate, it cannot be stated that the true correlation
 is between 0.4 and -0.4.
 
@@ -1518,7 +1532,7 @@ cleanly onto a hypothesis about central tendency.
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Empirical cumulative distribution functions for two simulated groups, with double-headed arrows marking the horizontal distance between the curves at the 10th, 50th, and 90th percentiles. (A) The location-shift assumption holds: the distributions differ only in location, the arrows are of equal length, and the Hodges-Lehmann estimator can be read as a median difference. (B) The assumption is violated: the groups differ in spread as well as location, so the horizontal gap varies in magnitude and reverses sign across the distribution, and the curves cross. In panel B there is no single shift to estimate, and a central-tendency interpretation of the WMW test is not available.}]{Avocado_Update_files/Avocado_Update_files/figure-latex/ecdfshift-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Empirical cumulative distribution functions for two simulated groups, with double-headed arrows marking the horizontal distance between the curves at the 10th, 50th, and 90th percentiles. (A) The location-shift assumption holds: the distributions differ only in location, the arrows are of equal length, and the Hodges-Lehmann estimator can be read as a median difference. (B) The assumption is violated: the groups differ in spread as well as location, so the horizontal gap varies in magnitude and reverses sign across the distribution, and the curves cross. In panel B there is no single shift to estimate, and a central-tendency interpretation of the WMW test is not available.}]{Avocado_Update_files/figure-latex/ecdfshift-1.pdf}}
 \caption{\label{fig:ecdfshift}Empirical cumulative distribution
 functions for two simulated groups, with double-headed arrows marking
 the horizontal distance between the curves at the 10th, 50th, and 90th
@@ -1534,7 +1548,7 @@ not available.}
 
 \begin{figure}
 \centering
-\pandocbounded{\includegraphics[keepaspectratio,alt={Symmetry plot of the paired differences from the sleep dataset, pairing each observation's distance above the median with the corresponding distance below. Under symmetry, points fall along the 45-degree reference line (dashed); systematic departures --- points consistently above or below the line --- indicate asymmetry. The signed-rank variant of WMW requires this symmetry for the pseudo-median to coincide with the mean or median of the differences.}]{Avocado_Update_files/Avocado_Update_files/figure-latex/symmplot-1.pdf}}
+\pandocbounded{\includegraphics[keepaspectratio,alt={Symmetry plot of the paired differences from the sleep dataset, pairing each observation's distance above the median with the corresponding distance below. Under symmetry, points fall along the 45-degree reference line (dashed); systematic departures --- points consistently above or below the line --- indicate asymmetry. The signed-rank variant of WMW requires this symmetry for the pseudo-median to coincide with the mean or median of the differences.}]{Avocado_Update_files/figure-latex/symmplot-1.pdf}}
 \caption{\label{fig:symmplot}Symmetry plot of the paired differences
 from the sleep dataset, pairing each observation's distance above the
 median with the corresponding distance below. Under symmetry, points
@@ -1562,42 +1576,45 @@ hypothesis of stochastic equality does not require the two distributions
 to be identical (i.e., the nonparametric Behrens--Fisher problem). WMW's
 Type I error rate can depart from nominal when the groups are
 stochastically equal but differ in variance or shape; the
-Brunner--Munzel test remains valid in that setting and provides a
-directly interpretable effect size.
+Brunner--Munzel test remains asymptotically valid in that setting and
+provides a directly interpretable effect size.
 
 Stochastic superiority tests, like the Brunner-Munzel test, may be
 particularly well-suited to Likert-type scales which are ubiquitous in
-psychological research. For a single ordinal item, the spacing between
-response categories carries no guaranteed meaning, and a mean difference
-therefore has a strained interpretation. For example, what, concretely,
-does a 0.4-unit mean difference on a five-point Likert-type scale
-communicate? The stochastic superiority estimand sidesteps this
-interpretation difficulty. The probability that a randomly selected
-participant from one group outscores a randomly selected participant
-from the other is interpretable on its own terms, with no knowledge of
-the scale required. We are not suggesting that using t-tests will always
-mislead in these contexts but it is a concern that should not be quickly
-dismissed either \citep{Liddell_Kruschke_2018}. Additionally, even if we
-assume traditional parametric methods are robust to the ordinal nature
-of the data, the preserved error rate is not the same as interpretive
-clarity. For researchers whose primary outcomes live on ordinal scales,
-the Brunner-Munzel test and its associated effect size --- as well as
+psychological research. The spacing between items on an ordinal scale
+has no guaranteed meaning, and a mean difference therefore has a
+strained interpretation. For example, what, concretely, does a 0.4-unit
+mean difference on a five-point Likert-type scale communicate? An
+estimate of stochastic superiority sidesteps this interpretation
+difficulty. The probability that a randomly selected participant from
+one group outscores a randomly selected participant from the other is
+interpretable on its own terms, with no knowledge of the scale required.
+I am not suggesting that using t-tests will always mislead in these
+contexts but it is a concern that should not be quickly dismissed either
+\citep{Liddell_Kruschke_2018}. Additionally, even if we assume
+traditional parametric methods are robust to the ordinal nature of the
+data, the preserved error rate is not the same as interpretive clarity.
+For researchers whose primary outcomes live on ordinal scales, the
+Brunner-Munzel test and its associated effect size --- as well as
 ordinal models more generally \citep{Burkner_Vuorre_2019} --- may offer
-a more natural and defensible default.
+a more natural and defensible statistical analysis option.
 
 The \texttt{brunner\_munzel} function supports equivalence and minimal
 effect testing via \texttt{alternative}, with bounds on the probability
 scale via \texttt{mu}. Results can be reported on different scales
 (\texttt{"probability"}, \texttt{"difference"}, \texttt{"logodds"}, or
-\texttt{"odds"}), and three test methods are available: \texttt{"t"}
-(default), \texttt{"logit"} (range-preserving CIs), and \texttt{"perm"}
-(studentized permutation; \citet{neubert2007}). Below, the test is
-applied to the same female and male \texttt{LDHF} ratings used in the
-independent-groups t-test example, which, as bounded rating-scale
+\texttt{"odds"}), and four test methods are available: \texttt{"t"}
+(default), \texttt{"logit"} (range-preserving CIs)\texttt{"perm"}
+(studentized permutation; \citet{neubert2007}), and
+\texttt{"perm\_logit"} (studentized logit-transformed permutation;
+borrows advantages of both logit and permutation approach). Below, the
+test is applied to the same female and male \texttt{LDHF} ratings used
+in the independent-groups t-test example, which, as bounded rating-scale
 responses, are a natural candidate for this estimand.
 
 \begin{Shaded}
 \begin{Highlighting}[]
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{506119}\NormalTok{)}
 \NormalTok{bm\_test }\OtherTok{=} \FunctionTok{brunner\_munzel}\NormalTok{(}
   \AttributeTok{formula =}\NormalTok{ LDHF }\SpecialCharTok{\textasciitilde{}}\NormalTok{ Gender,}
   \AttributeTok{data =}\NormalTok{ bugs\_g,}
@@ -1605,7 +1622,10 @@ responses, are a natural candidate for this estimand.
   \AttributeTok{alternative =} \StringTok{"equivalence"}\NormalTok{,}
   \CommentTok{\# equivalence bounds }
   \CommentTok{\# on the stochastic superiority scale}
-  \AttributeTok{mu =} \FunctionTok{c}\NormalTok{(}\FloatTok{0.3}\NormalTok{, }\FloatTok{0.7}\NormalTok{)}
+  \AttributeTok{mu =} \FunctionTok{c}\NormalTok{(}\FloatTok{0.3}\NormalTok{, }\FloatTok{0.7}\NormalTok{),}
+  \CommentTok{\# Permutation logit}
+  \CommentTok{\# Best performance (so far) for equivalence testing}
+  \AttributeTok{test\_method =} \StringTok{"perm\_logit"}
 \NormalTok{)}
 \FunctionTok{print}\NormalTok{(bm\_test)}
 \end{Highlighting}
@@ -1613,16 +1633,16 @@ responses, are a natural candidate for this estimand.
 
 \begin{verbatim}
 ## 
-##  Two-sample Brunner-Munzel test
+##  Two-sample Brunner-Munzel Randomization test (logit)
 ## 
 ## data:  LDHF by Gender
-## t = -1.9498, df = 71.988, p-value = 0.02755
+## t-observed = -2.0766, N-permutations = 10000, p-value = 0.0174
 ## alternative hypothesis: equivalence
 ## null values:
 ## lower bound upper bound 
 ##         0.3         0.7 
 ## 90 percent confidence interval:
-##  0.4748075 0.6823434
+##  0.4763624 0.6742033
 ## sample estimates:
 ## P(Female>Male) + .5*P(Female=Male) 
 ##                          0.5785755
@@ -1638,13 +1658,15 @@ models, the constant-odds-ratio assumption is not required. The relative
 effect estimated within the Brunner-Munzel test is defined directly from
 the two marginal distributions and carries the same interpretation -----
 the probability that a random observation from one group exceeds one
-from the other ----- regardless of whether the shapes of the
-distributions. However, I would still recommend visual inspection of the
-data and their distribution since it is useful for understanding the
-data, but there is no distributional assumption that these checks are
-verifying. Additionally, I would strongly recommend using the
-studentized permutation variant (\texttt{method\ =\ "perm"}) with small
-samples as the t-approximation method may be less trustworthy.
+from the other ----- regardless of the shapes of the distributions.
+However, I would still recommend visual inspection of the data and their
+distribution since it is useful for understanding the data, but there is
+no distributional assumption that these checks are verifying.
+Additionally, I would strongly recommend using the studentized
+logit-tranformed permutation variant (\texttt{method\ =\ "perm\_logit"})
+for equivalence testing, and especially with small samples, as
+simulations have indicated this method is the most powerful while also
+preserving the type 1 error rate.
 
 \newpage
 
@@ -1652,10 +1674,10 @@ samples as the t-approximation method may be less trustworthy.
 
 When the goal is to test hypotheses about means, resampling methods are
 powerful tools that allow distributional assumptions to be relaxed.
-TOSTER implements botha bootstrap and a permutation approach through the
-\texttt{boot\_t\_test} and the \texttt{perm\_t\_test}, respectively. The
-methods might slightly differ in inferential logic but both evulate the
-same estimand (the difference in means) as the Student's t-test, but
+TOSTER implements both a bootstrap and a permutation approach through
+the \texttt{boot\_t\_test} and the \texttt{perm\_t\_test}, respectively.
+The methods might slightly differ in inferential logic but both evaluate
+the same estimand (the difference in means) as the Student's t-test, but
 with fewer distributional constraints.
 
 The test statistic itself is unchanged for either the bootstrap or
@@ -1667,31 +1689,34 @@ equal variances assumed in Student's t-test and unequal variances
 accommodated in Welch's t-test. The bootstrap approximates the sampling
 distribution of the same statistic by resampling from the observed data
 with replacement, whereas the permutation approach constructs an exact
-or near-exact null distribution by shuffling group labels (two-sample)
-or flipping signs (one-sample and paired). In both cases, the researcher
+or near-exact null distribution (under the sharp null hypothesis of
+identical distributions) by shuffling group labels (two-sample) or
+flipping signs (one-sample and paired). In both cases, the researcher
 continues to ask the same question about means; only the calibration of
 the reference distribution differs.
 
 Distributional requirements are relaxed, though not eliminated, because
-the reference distribution is generated from the data rather than
-assumed. The bootstrap relies on asymptotic arguments and assumes that
-the empirical distribution is a reasonable stand-in for the population
-distribution. It performs well with moderate-to-large samples and skewed
-or heavy-tailed data, but can struggle with very small samples or
-extreme outliers. The permutation approach is exact under the null
-hypothesis of exchangeability, meaning group labels carry no information
-about outcomes. In its basic form this exactness requires identical
+the reference distribution is generated from the data (rather than
+making assumptions about the distribution). The bootstrap relies on
+asymptotic arguments and assumes that the empirical distribution is a
+reasonable stand-in for the population distribution. It can perform well
+with moderate-to-large samples, but can struggle with very small
+samples, heavy tails, or extreme outliers unless trimmed means are used.
+The permutation approach is exact under the null hypothesis of
+exchangeability, meaning group labels carry no information about
+outcomes. In its basic form this exactness requires identical
 distributions under the null, which implicitly assumes equal variances.
 The studentized permutation test \citep{janssen1997, chung2013}
 addresses this limitation by permuting a scale-invariant statistic
 (essentially the Welch t-statistic), yielding asymptotically valid
 inference even under heteroscedasticity.
-\citet{Arboretti_Pesarin_Salmaso_2020} extended this logic to the
-equivalence testing setting, showing that the studentized permutation of
-TOST maintains nominal Type I error rates when variances differ across
-groups. In short, these methods are assumption-lighter rather than
-assumption-free. I would strongly recommend that users still consider
-whether these assumptions are reasonable for their design.
+\citet{Arboretti_Pesarin_Salmaso_2020} developed permutation approaches
+to equivalence testing; TOSTER's implementation is a simpler,
+uncalibrated variant that is asymptotically equivalent under
+studentization (though less powerful). In short, these methods are
+assumption-lighter rather than assumption-free. I would strongly
+recommend that users still consider whether these assumptions are
+reasonable for their design.
 
 Also, as a quick word of caution, a common reflex when normality seems
 implausible is to switch to the WMW or other rank-based tests. However,
@@ -1704,31 +1729,43 @@ research where effect sizes and interventions are naturally expressed on
 the original scale ----- bootstrap and permutation t-tests should
 generally be preferred over rank-based methods for handling such
 violations of assumptions. The rank-based tests are useful, but as
-answer different questions, and should never be considered as robust
+answers to different questions, and should never be considered as robust
 substitutes for tests of means.
 
 The choice of the bootstrap or the permutation t-test involves weighing
-the tradeoffs between tests. The studentized permutation test has the
+the tradeoffs between tests. Both are tests of means, and both return
+confidence intervals that are consistent with their p-values. The
+internal mechanisms of each type of t-test inform their usefulness. In a
+randomized experiment the permutation distribution is the randomization
+distribution which makes permutation tests attractive for randomized
+experiments. However, the permutation test is only exact under the sharp
+null hypothesis that the two groups have identical distributions, at any
+sample size. When studentized, it is also asymptotically valid under the
+weak null hypothesis that only the means are equal
+\citep{janssen1997, chung2013}. The studentized permutation test has the
 strongest theoretical footing for two-sample mean comparisons under
 heteroscedasticity, and is particularly attractive for equivalence
-testing \citep{Arboretti_Pesarin_Salmaso_2020}. In general, the use of
-bootstrap methods offers greater flexibility because it extends
-naturally to statistics beyond the mean difference, provides readily
-interpretable confidence intervals via CI inversion \citep{Thulin_2024},
-and ensures consistency between reported intervals and p-values. In
-small samples, permutation approaches tend to have better finite-sample
-calibration because the null distribution is constructed exactly (or
-nearly so) from the data at hand, whereas the bootstrap's asymptotic
-justification can produce liberal tests with very small sample sizes.
-When outliers are a concern, both methods accept the \texttt{tr}
-argument for trimmed means, which reduces the influence of extreme
-observations. As a rough heuristic, researchers comparing two
-independent, randomized groups may find the studentized permutation test
-most defensible, while those wanting a single framework that yields
-coherent intervals and p-values across a range of designs may prefer the
-bootstrap. Both are substantial improvements over ignoring assumption
-violations of the t-test, and both return standard \texttt{htest}
-objects that integrate with the TOST framework for equivalence testing.
+testing \citep{Arboretti_Pesarin_Salmaso_2020}. On the other hand, the
+bootstrap only targets the weak null, and is only asymptotically valid
+(never exact). In general, the use of bootstrap methods offers greater
+flexibility because it extends naturally to statistics beyond the mean
+difference, provides readily interpretable confidence intervals via CI
+inversion \citep{Thulin_2024}. However, for both methods validity under
+the weak null is only asymptotic. In very small sample sizes (n
+\textless{} 10) with unequal variances (1:4), even these robust methods
+can be somewhat liberal (e.g., type 1 error rising to around 8\% at
+nominal alpha of 0.05). When outliers are a concern, both methods accept
+the \texttt{tr} argument for trimmed means, which reduces the influence
+of extreme observations. Both are substantial improvements over ignoring
+assumption violations of the t-test, and both return standard
+\texttt{htest} objects that integrate with the TOST framework for
+equivalence testing. Within the package documentation, there is some
+rough guidance on which method to prefer depending on various simulated
+scenarios. As a rough rule, the permutation t-test performed well for
+two-independent groups, the bootstrap t-test using the studentized
+bootstrap performed well for paired data. In the case of heavy tails and
+outliers, the trimming option for either method was very helpful in
+maintaining the type 1 error rate.
 
 \subsubsection{Bootstrap t-test}\label{bootstrap-t-test}
 
@@ -1901,7 +1938,7 @@ the permutation implementation in the ``coin'' R package).
 ## difference in means difference in means 
 ##                -0.5                 0.5 
 ## 90 percent confidence interval:
-##  -2.1720 -0.9956
+##  -2.2607475 -0.8930238
 ## sample estimates:
 ## mean of the differences (z = '1' - '2') 
 ##                                   -1.58

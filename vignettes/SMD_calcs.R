@@ -22,7 +22,7 @@ boot_smd_calc(x = sleep$extra[sleep$group == 1],
               y = sleep$extra[sleep$group == 2],
          R = 199,
          paired = TRUE,
-         boot_ci = "stud",
+         boot_ci = "bca",
          bias_correction = F)
 
 ## -----------------------------------------------------------------------------
@@ -30,7 +30,7 @@ boot_smd_calc(x = sleep$extra[sleep$group == 1],
               y = sleep$extra[sleep$group == 2],
          R = 199,
          paired = TRUE,
-         boot_ci = "stud",
+         boot_ci = "bca",
          bias_correction = TRUE,
          null.value = c(-0.5,0.5), 
          alternative = "equ")

@@ -12,7 +12,7 @@
 
 <meta name="author" content="Aaron R. Caldwell" />
 
-<meta name="date" content="2026-02-23" />
+<meta name="date" content="2026-10-05" />
 
 <title>Correlations</title>
 
@@ -151,7 +151,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; }
 div.csl-bib-body { }
 div.csl-entry {
 clear: both;
-margin-bottom: 0em;
 }
 .hanging div.csl-entry {
 margin-left:2em;
@@ -364,7 +363,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Correlations</h1>
 <h4 class="author">Aaron R. Caldwell</h4>
-<h4 class="date">2026-02-23</h4>
+<h4 class="date">2026-10-05</h4>
 
 
 <div id="TOC">
@@ -374,6 +373,12 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <li><a href="#using-summary-statistics" id="toc-using-summary-statistics">Using Summary Statistics</a></li>
 <li><a href="#bootstrapped-correlation-test" id="toc-bootstrapped-correlation-test">Bootstrapped Correlation Test</a>
 <ul>
+<li><a href="#bootstrap-confidence-intervals" id="toc-bootstrap-confidence-intervals">Bootstrap Confidence
+Intervals</a>
+<ul>
+<li><a href="#standard-errors-for-the-studentized-bootstrap" id="toc-standard-errors-for-the-studentized-bootstrap">Standard Errors
+for the Studentized Bootstrap</a></li>
+</ul></li>
 <li><a href="#robust-correlation-methods" id="toc-robust-correlation-methods">Robust Correlation Methods</a></li>
 </ul></li>
 <li><a href="#comparing-correlations" id="toc-comparing-correlations">Comparing Correlations</a>
@@ -427,7 +432,7 @@ typically very similar to those produced by <code>cor.test</code>.</p>
 ## 95 percent confidence interval:
 ##  0.08195487 0.66961864
 ## sample estimates:
-##      cor 
+##        r 
 ## 0.418684</code></pre>
 <p>Like <code>cor.test</code>, the <code>z_cor_test</code> function
 supports Spearman and Kendall correlation coefficients:</p>
@@ -490,7 +495,7 @@ bootstrapped methods may provide more reliable results.</p>
 ## 90 percent confidence interval:
 ##  0.1397334 0.6360650
 ## sample estimates:
-##      cor 
+##        r 
 ## 0.418684</code></pre>
 <p>In this example, we’re testing whether the correlation is equivalent
 to zero within the boundaries of ±0.4.</p>
@@ -518,7 +523,7 @@ reviewing published literature or working with limited data access. The
 ## 90 percent confidence interval:
 ##  -0.0412456  0.2770284
 ## sample estimates:
-##   cor 
+##     r 
 ## 0.121</code></pre>
 <p>This example tests whether a correlation of 0.121 from a sample of
 105 paired observations is equivalent to zero within the boundaries of
@@ -537,18 +542,18 @@ violated.</p>
 <span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>           <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>,</span>
 <span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>           <span class="at">null =</span> .<span class="dv">4</span>)</span></code></pre></div>
 <pre><code>## 
-##  Bootstrapped Pearson&#39;s product-moment correlation (BCa)
+##  Bootstrapped Pearson&#39;s product-moment correlation (studentized)
 ## 
 ## data:  mtcars$mpg and mtcars$qsec
-## N = 32, p-value = 0.5183
+## N = 32, p-value = 0.5233
 ## alternative hypothesis: equivalence
 ## null values:
 ## correlation correlation 
 ##         0.4        -0.4 
 ## 90 percent confidence interval:
-##  0.2154567 0.5654231
+##  0.2232696 0.5563482
 ## sample estimates:
-##      cor 
+##        r 
 ## 0.418684</code></pre>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="co"># Bootstrapped Spearman correlation</span></span>
 <span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="fu">boot_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
@@ -590,50 +595,226 @@ violated.</p>
 ## sample estimates:
 ##       tau 
 ## 0.3153652</code></pre>
+<div id="bootstrap-confidence-intervals" class="section level2">
+<h2>Bootstrap Confidence Intervals</h2>
+<p>The <code>boot_ci</code> argument selects the bootstrap confidence
+interval, and the p-value is always obtained by inverting that same
+interval, so the two always agree.</p>
+<ul>
+<li><code>&quot;auto&quot;</code> (default): <code>&quot;stud&quot;</code> for Pearson’s r
+and <code>&quot;bca&quot;</code> for all other correlations. In simulations, the
+studentized interval kept Pearson’s r near nominal coverage for skewed,
+heteroscedastic, and heavy-tailed data, where BCa under-covered; for the
+rank and robust correlations BCa did as well or better.</li>
+<li><code>&quot;bca&quot;</code>: bias-corrected and accelerated percentile
+interval.</li>
+<li><code>&quot;perc&quot;</code>: percentile interval.</li>
+<li><code>&quot;basic&quot;</code>: basic (reflected percentile) interval.</li>
+<li><code>&quot;stud&quot;</code>: studentized (bootstrap-t) interval, available
+for Pearson, Spearman, and Kendall correlations.</li>
+</ul>
+<p>The method that was used is returned in the <code>boot_ci</code>
+element of the result. The Pearson examples above therefore used the
+studentized interval, and the Spearman and Kendall examples used BCa.
+Here is a studentized interval for Spearman’s rho:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">993</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a><span class="fu">boot_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
+<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a>              mtcars<span class="sc">$</span>qsec,</span>
+<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a>              <span class="at">method =</span> <span class="st">&quot;spearman&quot;</span>,</span>
+<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a>              <span class="at">boot_ci =</span> <span class="st">&quot;stud&quot;</span>,</span>
+<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a>              <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>,</span>
+<span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a>              <span class="at">null =</span> .<span class="dv">4</span>)</span></code></pre></div>
+<pre><code>## 
+##  Bootstrapped Spearman&#39;s rank correlation rho (studentized)
+## 
+## data:  mtcars$mpg and mtcars$qsec
+## N = 32, p-value = 0.6838
+## alternative hypothesis: equivalence
+## null values:
+##  rho  rho 
+##  0.4 -0.4 
+## 90 percent confidence interval:
+##  0.1764676 0.6526568
+## sample estimates:
+##       rho 
+## 0.4669358</code></pre>
+<p>The percentile and BCa intervals give the same answer on any monotone
+scale. The basic and studentized intervals do not, so the
+<code>boot_scale</code> argument sets the scale on which they are
+computed: the Fisher z scale (<code>boot_scale = &quot;z&quot;</code>, the
+default), or the correlation scale (<code>boot_scale = &quot;r&quot;</code>). The
+z scale keeps the interval within <span class="math inline">\([-1,
+1]\)</span> and is closer to variance-stabilizing.</p>
+<div id="standard-errors-for-the-studentized-bootstrap" class="section level3">
+<h3>Standard Errors for the Studentized Bootstrap</h3>
+<p>The studentized bootstrap standardizes every bootstrap replicate by
+its own standard error, <span class="math inline">\(t^* = (\hat\theta^*
+- \hat\theta) / \widehat{SE}^*\)</span>, and uses the distribution of
+<span class="math inline">\(t^*\)</span> in place of a normal or <span class="math inline">\(t\)</span> reference distribution. This only
+improves on the basic interval if <span class="math inline">\(\widehat{SE}^*\)</span> is estimated from the data
+in each resample. The usual normal-theory standard errors of Fisher’s z
+(e.g., <span class="math inline">\(1/\sqrt{n-3}\)</span> for Pearson’s
+r) depend only on the sample size and so cannot be used for this.</p>
+<p><code>boot_cor_test()</code> therefore uses an influence-function
+(sandwich) standard error, which is computed from the data and does not
+assume bivariate normality:</p>
+<p><span class="math display">\[
+\widehat{SE}(\hat\rho) = \frac{1}{n}\sqrt{\sum_{i=1}^{n} \psi_i^2},
+\]</span></p>
+<p>where <span class="math inline">\(\psi_i\)</span> is the empirical
+influence of observation <span class="math inline">\(i\)</span> on the
+coefficient. On the z scale the delta method gives <span class="math inline">\(\widehat{SE}(\hat z) = \widehat{SE}(\hat\rho) / (1
+- \hat\rho^2)\)</span>. The influence functions are:</p>
+<p><strong>Pearson’s r.</strong> The starting point is the asymptotic
+distribution-free (fourth-moment) influence function <span class="citation">(<a href="#ref-steiger1982">Steiger and Hakstian
+1982</a>)</span>. With <span class="math inline">\(z_{x,i}\)</span> and
+<span class="math inline">\(z_{y,i}\)</span> the standardized
+observations (using denominator <span class="math inline">\(n\)</span>),</p>
+<p><span class="math display">\[
+\psi^0_i = z_{x,i} z_{y,i} - \frac{r}{2}\left(z_{x,i}^2 +
+z_{y,i}^2\right).
+\]</span></p>
+<p>Under bivariate normality this reduces to the familiar <span class="math inline">\(\text{Var}(r) \approx (1-\rho^2)^2/n\)</span>. On
+its own, though, it gives standard errors that are too small in small
+samples and with heavy-tailed data, because a sample under-represents
+the extreme points that dominate the variance of <span class="math inline">\(r\)</span>. Following the HC4
+heteroscedasticity-consistent estimator for regression <span class="citation">(<a href="#ref-cribari2004">Cribari-Neto
+2004</a>)</span>, which <span class="citation">Wilcox (<a href="#ref-wilcox2011introduction">2011</a>)</span> also uses for
+testing correlations, each influence value is inflated according to its
+leverage:</p>
+<p><span class="math display">\[
+\psi_i = \psi^0_i\,(1 - h_i)^{-\delta_i/2}, \qquad h_i = \frac{1}{n} +
+\frac{D_i^2}{n-1}, \qquad \delta_i = \min\left(4, \frac{n
+h_i}{3}\right),
+\]</span></p>
+<p>where <span class="math inline">\(D_i\)</span> is the Mahalanobis
+distance of <span class="math inline">\((x_i, y_i)\)</span> from the
+bivariate mean (so the <span class="math inline">\(h_i\)</span> sum to
+3), and <span class="math inline">\(h_i\)</span> is capped at 0.99. This
+leverage correction of the ADF influence function is an adaptation made
+for TOSTER. It was chosen because in simulations (normal,
+heteroscedastic, <span class="math inline">\(t_5\)</span>, <span class="math inline">\(t_3\)</span>, and discrete data; <span class="math inline">\(n\)</span> = 30 and 80) it kept the studentized
+interval’s coverage near nominal, including for <span class="math inline">\(t_3\)</span> data, where the uncorrected standard
+error under-covered badly. It is slightly conservative for strongly
+heteroscedastic data. When the data have infinite fourth moments, no
+standard error of <span class="math inline">\(r\)</span> is consistent,
+and a robust correlation (below) is still the better choice.</p>
+<p><strong>Spearman’s rho.</strong> Spearman’s rho is Pearson’s r
+computed on the mid-distribution transforms <span class="math inline">\(u_i = (R(x_i) - 1/2)/n\)</span> and <span class="math inline">\(v_i = (R(y_i) - 1/2)/n\)</span>, where <span class="math inline">\(R\)</span> denotes midranks. Its influence
+function adds terms for estimating these transforms to the Pearson
+influence function of <span class="math inline">\((u, v)\)</span>. With
+<span class="math inline">\(\omega^x_{ij} = \mathbf{1}(x_j &gt; x_i) +
+\tfrac{1}{2}\mathbf{1}(x_j = x_i)\)</span> (and <span class="math inline">\(\omega^y_{ij}\)</span> likewise), the influence of
+observation <span class="math inline">\(i\)</span> on each moment is</p>
+<p><span class="math display">\[
+\begin{aligned}
+d_i(\overline{uv}) &amp;= u_i v_i + \tfrac{1}{n}\textstyle\sum_j
+\omega^x_{ij} v_j + \tfrac{1}{n}\sum_j \omega^y_{ij} u_j -
+3\,\overline{uv}, \\
+d_i(\bar u) &amp;= u_i + \tfrac{1}{n}\textstyle\sum_j \omega^x_{ij} -
+2\bar u, \\
+d_i(\overline{u^2}) &amp;= u_i^2 + \tfrac{2}{n}\textstyle\sum_j
+\omega^x_{ij} u_j - 3\,\overline{u^2},
+\end{aligned}
+\]</span></p>
+<p>(similarly for <span class="math inline">\(v\)</span>), and the delta
+method for <span class="math inline">\(r_s = C/\sqrt{S_u S_v}\)</span>,
+with <span class="math inline">\(C = \overline{uv} - \bar u \bar
+v\)</span> and <span class="math inline">\(S_u = \overline{u^2} - \bar
+u^2\)</span>, gives</p>
+<p><span class="math display">\[
+\psi_i = \frac{d_i(C)}{\sqrt{S_u S_v}} -
+\frac{r_s}{2}\left(\frac{d_i(S_u)}{S_u} + \frac{d_i(S_v)}{S_v}\right),
+\]</span></p>
+<p>where <span class="math inline">\(d_i(C) = d_i(\overline{uv}) - \bar
+v\, d_i(\bar u) - \bar u\, d_i(\bar v)\)</span> and <span class="math inline">\(d_i(S_u) = d_i(\overline{u^2}) - 2\bar u\,
+d_i(\bar u)\)</span>. Without ties this is the influence function of
+Spearman’s rho derived by <span class="citation">Croux and Dehon (<a href="#ref-croux2010">2010</a>)</span>. The tie terms keep the standard
+error accurate for discrete data, and for bootstrap resamples, which
+always contain ties.</p>
+<p><strong>Kendall’s tau.</strong> Kendall’s tau-b is a ratio of
+U-statistics, <span class="math inline">\(\tau_b = \bar a / \sqrt{\bar
+b^x \bar b^y}\)</span>, where</p>
+<p><span class="math display">\[
+a_i = \frac{1}{n-1}\sum_{j \ne i} \text{sign}(x_i -
+x_j)\,\text{sign}(y_i - y_j), \qquad b^x_i = \frac{1}{n-1}\sum_{j \ne i}
+\mathbf{1}(x_i \ne x_j),
+\]</span></p>
+<p>and <span class="math inline">\(b^y_i\)</span> is defined likewise.
+Hoeffding’s projection <span class="citation">(<a href="#ref-hoeffding1948">Hoeffding 1948</a>)</span> and the delta
+method give</p>
+<p><span class="math display">\[
+\psi_i = 2\left[\frac{a_i - \bar a}{\sqrt{\bar b^x \bar b^y}} -
+\frac{\tau_b}{2}\left(\frac{b^x_i - \bar b^x}{\bar b^x} + \frac{b^y_i -
+\bar b^y}{\bar b^y}\right)\right].
+\]</span></p>
+<p>Without ties this is the usual U-statistic variance, <span class="math inline">\(\frac{4}{n}\widehat{\text{Var}}(a_i)\)</span>.
+Computing it takes <span class="math inline">\(O(n^2)\)</span>
+operations per resample, so the studentized Kendall interval is slower
+in large samples.</p>
+<p>Under independence, all three standard errors reduce to the familiar
+values, <span class="math inline">\(\text{Var}(r) \approx
+\text{Var}(r_s) \approx 1/n\)</span> and <span class="math inline">\(\text{Var}(\tau) \approx 4/(9n)\)</span>. Because
+each pivot divides by an estimated standard error, studentized intervals
+can be wide or erratic in small samples (roughly <span class="math inline">\(n &lt; 30\)</span>). This matters most for the
+rank correlations. Kendall’s standard error, for example, is nearly
+unbiased even at <span class="math inline">\(n = 20\)</span>, but it
+varies a lot between samples (especially with ties) and is strongly
+correlated with the estimate. In simulations at <span class="math inline">\(n = 30\)</span>, the studentized Spearman and
+Kendall intervals under-covered by up to about 2.5 percentage points for
+heavy-tailed or tied data, while the BCa interval stayed closer to
+nominal; at <span class="math inline">\(n = 80\)</span> both were
+accurate. For Spearman’s rho and Kendall’s tau with fewer than about 50
+observations, use <code>boot_ci = &quot;bca&quot;</code>, which is what
+<code>&quot;auto&quot;</code> selects for these methods. The studentized interval
+is not available for the robust correlations below, which lack a
+closed-form standard error.</p>
+</div>
+</div>
 <div id="robust-correlation-methods" class="section level2">
 <h2>Robust Correlation Methods</h2>
 <p>The <code>boot_cor_test</code> function also provides access to
 robust correlation methods that are less sensitive to outliers and
 violations of normality:</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="co"># Winsorized correlation with 10% trimming</span></span>
-<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a><span class="fu">boot_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
-<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
-<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a>           <span class="at">method =</span> <span class="st">&quot;win&quot;</span>,</span>
-<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a>           <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>,</span>
-<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a>           <span class="at">null =</span> .<span class="dv">4</span>,</span>
-<span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a>           <span class="at">tr =</span> .<span class="dv">1</span>) <span class="co"># Set trim amount (default is 0.2)</span></span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="co"># Winsorized correlation with 10% trimming</span></span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a><span class="fu">boot_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
+<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a>           <span class="at">method =</span> <span class="st">&quot;win&quot;</span>,</span>
+<span id="cb21-5"><a href="#cb21-5" tabindex="-1"></a>           <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>,</span>
+<span id="cb21-6"><a href="#cb21-6" tabindex="-1"></a>           <span class="at">null =</span> .<span class="dv">4</span>,</span>
+<span id="cb21-7"><a href="#cb21-7" tabindex="-1"></a>           <span class="at">tr =</span> .<span class="dv">1</span>) <span class="co"># Set trim amount (default is 0.2)</span></span></code></pre></div>
 <pre><code>## 
 ##  Bootstrapped Winsorized correlation wincor (BCa)
 ## 
 ## data:  mtcars$mpg and mtcars$qsec
-## N = 32, p-value = 0.6303
+## N = 32, p-value = 0.6623
 ## alternative hypothesis: equivalence
 ## null values:
 ## wincor wincor 
 ##    0.4   -0.4 
 ## 90 percent confidence interval:
-##  0.1688530 0.6361305
+##  0.1867593 0.6465992
 ## sample estimates:
 ##   wincor 
 ## 0.464062</code></pre>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="co"># Percentage bend correlation</span></span>
-<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a><span class="fu">boot_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
-<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
-<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a>           <span class="at">method =</span> <span class="st">&quot;bend&quot;</span>,</span>
-<span id="cb21-5"><a href="#cb21-5" tabindex="-1"></a>           <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>,</span>
-<span id="cb21-6"><a href="#cb21-6" tabindex="-1"></a>           <span class="at">null =</span> .<span class="dv">4</span>,</span>
-<span id="cb21-7"><a href="#cb21-7" tabindex="-1"></a>           <span class="at">beta =</span> .<span class="dv">15</span>) <span class="co"># Beta parameter controlling resistance to outliers</span></span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="co"># Percentage bend correlation</span></span>
+<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a><span class="fu">boot_cor_test</span>(mtcars<span class="sc">$</span>mpg,</span>
+<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a>           mtcars<span class="sc">$</span>qsec,</span>
+<span id="cb23-4"><a href="#cb23-4" tabindex="-1"></a>           <span class="at">method =</span> <span class="st">&quot;bend&quot;</span>,</span>
+<span id="cb23-5"><a href="#cb23-5" tabindex="-1"></a>           <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>,</span>
+<span id="cb23-6"><a href="#cb23-6" tabindex="-1"></a>           <span class="at">null =</span> .<span class="dv">4</span>,</span>
+<span id="cb23-7"><a href="#cb23-7" tabindex="-1"></a>           <span class="at">beta =</span> .<span class="dv">15</span>) <span class="co"># Beta parameter controlling resistance to outliers</span></span></code></pre></div>
 <pre><code>## 
 ##  Bootstrapped percentage bend correlation pb (BCa)
 ## 
 ## data:  mtcars$mpg and mtcars$qsec
-## N = 32, p-value = 0.5973
+## N = 32, p-value = 0.6037
 ## alternative hypothesis: equivalence
 ## null values:
 ##   pb   pb 
 ##  0.4 -0.4 
 ## 90 percent confidence interval:
-##  0.1729634 0.6170026
+##  0.1720451 0.6243750
 ## sample estimates:
 ##        pb 
 ## 0.4484488</code></pre>
@@ -653,11 +834,11 @@ studies.</p>
 <h2>Summary Statistics Approach</h2>
 <p>When only summary statistics are available, the
 <code>compare_cor</code> function can be used:</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="co"># Comparing correlation r1=0.8 from n=40 with r2=0.2 from n=100</span></span>
-<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a><span class="fu">compare_cor</span>(<span class="at">r1 =</span> .<span class="dv">8</span>,</span>
-<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a>            <span class="at">df1 =</span> <span class="dv">38</span>,  <span class="co"># df = n-2</span></span>
-<span id="cb23-4"><a href="#cb23-4" tabindex="-1"></a>            <span class="at">r2 =</span> .<span class="dv">2</span>,</span>
-<span id="cb23-5"><a href="#cb23-5" tabindex="-1"></a>            <span class="at">df2 =</span> <span class="dv">98</span>)  <span class="co"># df = n-2</span></span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a><span class="co"># Comparing correlation r1=0.8 from n=40 with r2=0.2 from n=100</span></span>
+<span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a><span class="fu">compare_cor</span>(<span class="at">r1 =</span> .<span class="dv">8</span>,</span>
+<span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a>            <span class="at">df1 =</span> <span class="dv">38</span>,  <span class="co"># df = n-2</span></span>
+<span id="cb25-4"><a href="#cb25-4" tabindex="-1"></a>            <span class="at">r2 =</span> .<span class="dv">2</span>,</span>
+<span id="cb25-5"><a href="#cb25-5" tabindex="-1"></a>            <span class="at">df2 =</span> <span class="dv">98</span>)  <span class="co"># df = n-2</span></span></code></pre></div>
 <pre><code>## 
 ##  Difference between two independent correlations (Fisher&#39;s z transform)
 ## 
@@ -669,19 +850,19 @@ studies.</p>
 ##                             0.6</code></pre>
 <p>The <code>compare_cor</code> function supports different methods for
 comparing correlations:</p>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a><span class="co"># Testing equivalence using Fisher&#39;s method</span></span>
-<span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a><span class="fu">compare_cor</span>(<span class="at">r1 =</span> .<span class="dv">8</span>,</span>
-<span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a>            <span class="at">df1 =</span> <span class="dv">38</span>,</span>
-<span id="cb25-4"><a href="#cb25-4" tabindex="-1"></a>            <span class="at">r2 =</span> .<span class="dv">2</span>,</span>
-<span id="cb25-5"><a href="#cb25-5" tabindex="-1"></a>            <span class="at">df2 =</span> <span class="dv">98</span>,</span>
-<span id="cb25-6"><a href="#cb25-6" tabindex="-1"></a>            <span class="at">null =</span> .<span class="dv">2</span>,</span>
-<span id="cb25-7"><a href="#cb25-7" tabindex="-1"></a>            <span class="at">method =</span> <span class="st">&quot;f&quot;</span>, <span class="co"># Fisher (can also use &quot;fisher&quot;)</span></span>
-<span id="cb25-8"><a href="#cb25-8" tabindex="-1"></a>            <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>) <span class="co"># Equivalence test</span></span></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a><span class="co"># Testing equivalence using Fisher&#39;s method</span></span>
+<span id="cb27-2"><a href="#cb27-2" tabindex="-1"></a><span class="fu">compare_cor</span>(<span class="at">r1 =</span> .<span class="dv">8</span>,</span>
+<span id="cb27-3"><a href="#cb27-3" tabindex="-1"></a>            <span class="at">df1 =</span> <span class="dv">38</span>,</span>
+<span id="cb27-4"><a href="#cb27-4" tabindex="-1"></a>            <span class="at">r2 =</span> .<span class="dv">2</span>,</span>
+<span id="cb27-5"><a href="#cb27-5" tabindex="-1"></a>            <span class="at">df2 =</span> <span class="dv">98</span>,</span>
+<span id="cb27-6"><a href="#cb27-6" tabindex="-1"></a>            <span class="at">null =</span> .<span class="dv">2</span>,</span>
+<span id="cb27-7"><a href="#cb27-7" tabindex="-1"></a>            <span class="at">method =</span> <span class="st">&quot;f&quot;</span>, <span class="co"># Fisher (can also use &quot;fisher&quot;)</span></span>
+<span id="cb27-8"><a href="#cb27-8" tabindex="-1"></a>            <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>) <span class="co"># Equivalence test</span></span></code></pre></div>
 <pre><code>## 
 ##  Difference between two independent correlations (Fisher&#39;s z transform)
 ## 
 ## data:  Summary Statistics
-## z = 0.69315, p-value = 0.9998
+## z = 3.5872, p-value = 0.9998
 ## alternative hypothesis: equivalence
 ## null values:
 ## difference between correlations difference between correlations 
@@ -708,24 +889,24 @@ they may have limited statistical power in some scenarios <span class="citation"
 <p>When raw data is available for both correlations, the
 <code>boot_compare_cor</code> function offers a more robust approach
 through bootstrapping:</p>
-<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">8922</span>) <span class="co"># Setting seed for reproducibility</span></span>
-<span id="cb27-2"><a href="#cb27-2" tabindex="-1"></a><span class="co"># Generating example data</span></span>
-<span id="cb27-3"><a href="#cb27-3" tabindex="-1"></a>x1 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">40</span>)</span>
-<span id="cb27-4"><a href="#cb27-4" tabindex="-1"></a>y1 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">40</span>)</span>
-<span id="cb27-5"><a href="#cb27-5" tabindex="-1"></a></span>
-<span id="cb27-6"><a href="#cb27-6" tabindex="-1"></a>x2 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">100</span>)</span>
-<span id="cb27-7"><a href="#cb27-7" tabindex="-1"></a>y2 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">100</span>)</span>
-<span id="cb27-8"><a href="#cb27-8" tabindex="-1"></a></span>
-<span id="cb27-9"><a href="#cb27-9" tabindex="-1"></a><span class="co"># Bootstrap comparison with winsorized correlation</span></span>
-<span id="cb27-10"><a href="#cb27-10" tabindex="-1"></a><span class="fu">boot_compare_cor</span>(</span>
-<span id="cb27-11"><a href="#cb27-11" tabindex="-1"></a>  <span class="at">x1 =</span> x1,</span>
-<span id="cb27-12"><a href="#cb27-12" tabindex="-1"></a>  <span class="at">x2 =</span> x2,</span>
-<span id="cb27-13"><a href="#cb27-13" tabindex="-1"></a>  <span class="at">y1 =</span> y1,</span>
-<span id="cb27-14"><a href="#cb27-14" tabindex="-1"></a>  <span class="at">y2 =</span> y2,</span>
-<span id="cb27-15"><a href="#cb27-15" tabindex="-1"></a>  <span class="at">null =</span> .<span class="dv">2</span>,</span>
-<span id="cb27-16"><a href="#cb27-16" tabindex="-1"></a>  <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>, <span class="co"># Equivalence test</span></span>
-<span id="cb27-17"><a href="#cb27-17" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">&quot;win&quot;</span> <span class="co"># Winsorized correlation</span></span>
-<span id="cb27-18"><a href="#cb27-18" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">8922</span>) <span class="co"># Setting seed for reproducibility</span></span>
+<span id="cb29-2"><a href="#cb29-2" tabindex="-1"></a><span class="co"># Generating example data</span></span>
+<span id="cb29-3"><a href="#cb29-3" tabindex="-1"></a>x1 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">40</span>)</span>
+<span id="cb29-4"><a href="#cb29-4" tabindex="-1"></a>y1 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">40</span>)</span>
+<span id="cb29-5"><a href="#cb29-5" tabindex="-1"></a></span>
+<span id="cb29-6"><a href="#cb29-6" tabindex="-1"></a>x2 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">100</span>)</span>
+<span id="cb29-7"><a href="#cb29-7" tabindex="-1"></a>y2 <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">100</span>)</span>
+<span id="cb29-8"><a href="#cb29-8" tabindex="-1"></a></span>
+<span id="cb29-9"><a href="#cb29-9" tabindex="-1"></a><span class="co"># Bootstrap comparison with winsorized correlation</span></span>
+<span id="cb29-10"><a href="#cb29-10" tabindex="-1"></a><span class="fu">boot_compare_cor</span>(</span>
+<span id="cb29-11"><a href="#cb29-11" tabindex="-1"></a>  <span class="at">x1 =</span> x1,</span>
+<span id="cb29-12"><a href="#cb29-12" tabindex="-1"></a>  <span class="at">x2 =</span> x2,</span>
+<span id="cb29-13"><a href="#cb29-13" tabindex="-1"></a>  <span class="at">y1 =</span> y1,</span>
+<span id="cb29-14"><a href="#cb29-14" tabindex="-1"></a>  <span class="at">y2 =</span> y2,</span>
+<span id="cb29-15"><a href="#cb29-15" tabindex="-1"></a>  <span class="at">null =</span> .<span class="dv">2</span>,</span>
+<span id="cb29-16"><a href="#cb29-16" tabindex="-1"></a>  <span class="at">alternative =</span> <span class="st">&quot;e&quot;</span>, <span class="co"># Equivalence test</span></span>
+<span id="cb29-17"><a href="#cb29-17" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">&quot;win&quot;</span> <span class="co"># Winsorized correlation</span></span>
+<span id="cb29-18"><a href="#cb29-18" tabindex="-1"></a>)</span></code></pre></div>
 <pre><code>## 
 ##  Bootstrapped difference in Winsorized correlation wincor
 ## 
@@ -774,18 +955,40 @@ field</li>
 </div>
 <div id="references" class="section level1 unnumbered">
 <h1 class="unnumbered">References</h1>
-<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-counsell2015equ" class="csl-entry">
 Counsell, Alyssa, and Robert A Cribbie. 2015. <span>“Equivalence Tests
 for Comparing Correlation and Regression Coefficients.”</span>
 <em>British Journal of Mathematical and Statistical Psychology</em> 68
 (2): 292–309. <a href="https://doi.org/10.1111/bmsp.12045">https://doi.org/10.1111/bmsp.12045</a>.
 </div>
+<div id="ref-cribari2004" class="csl-entry">
+Cribari-Neto, Francisco. 2004. <span>“Asymptotic Inference Under
+Heteroskedasticity of Unknown Form.”</span> <em>Computational Statistics
+&amp; Data Analysis</em> 45 (2): 215–33. <a href="https://doi.org/10.1016/S0167-9473(02)00366-3">https://doi.org/10.1016/S0167-9473(02)00366-3</a>.
+</div>
+<div id="ref-croux2010" class="csl-entry">
+Croux, Christophe, and Catherine Dehon. 2010. <span>“Influence Functions
+of the <span>Spearman</span> and <span>Kendall</span> Correlation
+Measures.”</span> <em>Statistical Methods &amp; Applications</em> 19
+(4): 497–515. <a href="https://doi.org/10.1007/s10260-010-0142-z">https://doi.org/10.1007/s10260-010-0142-z</a>.
+</div>
 <div id="ref-goertzen2010" class="csl-entry">
 Goertzen, Jason R, and Robert A Cribbie. 2010. <span>“Detecting a Lack
 of Association: An Equivalence Testing Approach.”</span> <em>British
 Journal of Mathematical and Statistical Psychology</em> 63 (3): 527–37.
 <a href="https://doi.org/10.1348/000711009X475853">https://doi.org/10.1348/000711009X475853</a>.
+</div>
+<div id="ref-hoeffding1948" class="csl-entry">
+Hoeffding, Wassily. 1948. <span>“A Class of Statistics with
+Asymptotically Normal Distribution.”</span> <em>The Annals of
+Mathematical Statistics</em> 19 (3): 293–325. <a href="https://doi.org/10.1214/aoms/1177730196">https://doi.org/10.1214/aoms/1177730196</a>.
+</div>
+<div id="ref-steiger1982" class="csl-entry">
+Steiger, James H, and A Ralph Hakstian. 1982. <span>“The Asymptotic
+Distribution of Elements of a Correlation Matrix: Theory and
+Application.”</span> <em>British Journal of Mathematical and Statistical
+Psychology</em> 35 (2): 208–15. <a href="https://doi.org/10.1111/j.2044-8317.1982.tb00653.x">https://doi.org/10.1111/j.2044-8317.1982.tb00653.x</a>.
 </div>
 <div id="ref-wilcox2011introduction" class="csl-entry">
 Wilcox, Rand R. 2011. <em>Introduction to Robust Estimation and

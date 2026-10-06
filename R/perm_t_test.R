@@ -37,9 +37,12 @@
 #' @param perm_se a logical variable indicating whether to recompute the standard error for each
 #'     permutation (studentized permutation test). If `TRUE` (default), the standard error is
 #'     recomputed for each permuted sample, following the studentized permutation approach of
-#'     Janssen (1997) and Chung & Romano (2013), which is valid even under heteroscedasticity.
+#'     Janssen (1997) and Chung & Romano (2013). This test is exact under the sharp null
+#'     hypothesis and asymptotically valid for the weak null hypothesis of equal means, even
+#'     under heteroscedasticity (see "Sharp and Weak Null Hypotheses" in Details).
 #'     If `FALSE`, the standard error from the original sample is used for all permutations,
-#'     which is computationally faster but assumes homoscedasticity.
+#'     which is computationally faster and still exact under the sharp null, but is not
+#'     valid for the weak null when variances and group sizes differ.
 #' @param p_method the method for computing permutation p-values. Options are:
 #'     * `NULL` (default): Automatically selects "exact" for exact permutation tests (when all
 #'         permutations are enumerated) and "plusone" for randomization tests (when permutations
@@ -64,7 +67,26 @@
 #'   * Generate R permutation samples by randomly reassigning observations to groups
 #'   * Calculate the test statistic for each permutation sample
 #'   * Compute the p-value by comparing the original test statistic to the permutation distribution
-#'   * Calculate confidence intervals using the percentile method
+#'   * Calculate confidence intervals by inverting the permutation test
+#'
+#' ## Confidence Intervals
+#'
+#' Confidence intervals are obtained by inverting the same (studentized)
+#' permutation test that produces the p-value. Because the permutation
+#' distribution \eqn{T^*} is generated from the unshifted data, it does not
+#' depend on the null value, and the interval has the closed form
+#' \eqn{\hat\theta - SE \cdot q}, where \eqn{\hat\theta} is the estimate,
+#' \eqn{SE} is the standard error from the original sample, and \eqn{q} is the
+#' order statistic of \eqn{T^*} at which the permutation p-value (using the same
+#' `p_method` counting rule and, for two-sided tests, the same `symmetric`
+#' setting) crosses `alpha`. As a result, the confidence interval and p-value
+#' always agree: a null value lies inside the interval if and only if its
+#' p-value exceeds `alpha`. When `perm_se = TRUE` this yields a studentized
+#' interval that remains valid under unequal variances. When `perm_se = FALSE`
+#' it reduces to a (reflected) percentile interval of the permuted differences.
+#'
+#' If the number of permutations is too small for the test to ever reject at
+#' the requested `alpha`, the corresponding confidence limit is infinite.
 #'
 #' For one-sample and paired tests, permutation is performed by randomly flipping the signs of
 #' the (centered) observations or difference scores.
@@ -72,9 +94,10 @@
 #' For two-sample tests, permutation is performed by randomly reassigning observations to the
 #' two groups. When `perm_se = TRUE` (default), the studentized permutation approach of
 #' Janssen (1997) and Chung & Romano (2013) is used, which recomputes the standard error for
-#' each permutation and is valid even under heteroscedasticity. When `perm_se = FALSE`, the
-#' standard error from the original sample is used for all permutations, which is faster but
-#' assumes equal variances.
+#' each permutation and remains asymptotically valid under heteroscedasticity. When
+#' `perm_se = FALSE`, the standard error from the original sample is used for all
+#' permutations, which is faster but assumes equal variances (see "Sharp and Weak Null
+#' Hypotheses" below).
 #'
 #' When `tr > 0`, the function uses Yuen's trimmed t-test approach:
 #'   * Trimmed means are computed by removing the fraction `tr` of observations from each tail
@@ -133,6 +156,72 @@
 #' calibrated critical value lies in the narrower interval
 #' \eqn{[\alpha/2, \alpha]} rather than \eqn{[\alpha, (1+\alpha)/2)}.
 #'
+#' ## Choosing a Method
+#'
+#' A set of simulations covering two-sample and paired designs (small to moderate
+#' samples, normal, skewed, heavy-tailed, and discrete data) indicated the following.
+#' These are rules of thumb, not guarantees.
+#'
+#'   * **Independent groups:** this function most consistently held its nominal
+#'     Type I error rate, including with unequal variances and heavy-tailed data.
+#'   * **Paired data:** the test flips the signs of the differences, so it relies on
+#'     the differences being symmetric. With strongly skewed differences it was too
+#'     liberal, and [boot_t_test()] with the studentized interval
+#'     (`boot_ci = "stud"`) was the better choice. With symmetric (including
+#'     heavy-tailed) differences, this function performed well.
+#'   * **Skewed paired data with outliers:** use trimmed means (e.g., `tr = 0.2`);
+#'     the two functions then performed similarly.
+#'   * **Groups that differ in shape or spread (e.g., one skewed group):** no method
+#'     was uniformly reliable. All of them, including Welch's t-test, could be
+#'     modestly liberal in one tail with small samples, particularly when the
+#'     more variable or skewed group was the smaller one. Trimming reduced the
+#'     problem. Treat borderline results in this setting with caution.
+#'
+#' ## Sharp and Weak Null Hypotheses
+#'
+#' Two different null hypotheses are relevant when interpreting a permutation test:
+#'
+#'   * The **sharp null** (Fisher) states that there is no effect at all: the two
+#'     groups have identical distributions (for one-sample and paired tests, the
+#'     observations or difference scores are symmetric about zero). Under the sharp
+#'     null the group labels (or signs) are exchangeable, so the permutation test is
+#'     **exact** at any sample size. This holds for any test statistic, including the
+#'     studentized (Welch) statistic used by default, and for both `p_method` options.
+#'   * The **weak null** (Neyman) states only that the means (or trimmed means) are
+#'     equal, while the distributions may otherwise differ, for example in variance or
+#'     shape. Under the weak null the observations are not exchangeable and no
+#'     permutation test is exact. The studentized test (`perm_se = TRUE`) is
+#'     asymptotically valid (Janssen, 1997; Chung & Romano, 2013), so it controls the
+#'     Type I error rate for the weak null in large samples while remaining exact for
+#'     the sharp null (Wu & Ding, 2020). The non-studentized test (`perm_se = FALSE`)
+#'     does not have this property and can have incorrect Type I error rates for the
+#'     weak null even in large samples when group sizes and variances differ.
+#'
+#' Because validity for the weak null is only asymptotic, the studentized test can
+#' be anti-conservative in very small samples with unequal variances, particularly
+#' when the smaller group has the larger variance, and it offers no protection
+#' against the small-sample problems of comparing means of differently skewed
+#' distributions. In such cases the Welch t-test or [boot_t_test()] may perform
+#' comparably or better.
+#'
+#' Exactness under the sharp null applies to the test of no effect (`mu = 0`). For
+#' tests against a non-zero `mu`, for the equivalence and minimal effect tests, and
+#' for the confidence interval, the permutation distribution of the unshifted data is
+#' used as the reference distribution (see above), so these are approximate rather
+#' than exact, even under a constant-shift model.
+#'
+#' **Choosing between permutation and bootstrap methods.** In a randomized experiment,
+#' the permutation distribution corresponds to the actual randomization distribution,
+#' so the test is justified by the design itself and is exact under the sharp null.
+#' This makes `perm_t_test()` a natural choice for randomized experiments, especially
+#' small ones. When data are instead random samples from two populations (e.g.,
+#' observational comparisons), the permutation test remains exact for the null of
+#' identical population distributions and asymptotically valid for the weak null,
+#' but this justification rests on an exchangeability assumption rather than the
+#' design; in that setting the bootstrap ([boot_t_test()]), which targets the weak
+#' null directly, is an equally natural choice. Neither approach supports population
+#' inference from non-random (e.g., convenience) samples.
+#'
 #' @section Comparison with Other Packages:
 #' Results from `perm_t_test` may differ slightly from other permutation test implementations
 #' such as `MKinfer::perm.t.test` or `coin::oneway_test`. These differences arise from
@@ -162,8 +251,8 @@
 #'   - "parameter": the degrees of freedom for the t-statistic.
 #'   - "p.value": the permutation p-value for the test.
 #'   - "stderr": the standard error of the mean (difference).
-#'   - "conf.int": a permutation percentile confidence interval appropriate to the
-#'       specified alternative hypothesis.
+#'   - "conf.int": a permutation confidence interval, obtained by inverting the
+#'       permutation test, appropriate to the specified alternative hypothesis.
 #'   - "estimate": the estimated mean or difference in means (or trimmed means if tr > 0).
 #'   - "null.value": the specified hypothesized value(s) of the mean or mean difference.
 #'   - "alternative": a character string describing the alternative hypothesis.
@@ -173,7 +262,9 @@
 #'   - "R": the requested number of permutations.
 #'   - "R.used": the actual number of permutations used (may differ if exact permutations computed).
 #'   - "perm.stat": (if keep_perm = TRUE) the permutation distribution of the test statistic.
-#'   - "perm.eff": (if keep_perm = TRUE) the permutation distribution of the effect (mean differences).
+#'   - "perm.eff": (if keep_perm = TRUE) the raw permutation distribution of the effect
+#'       (permuted mean differences shifted by the estimate). This is provided for
+#'       inspection only and is not used to construct the confidence interval.
 #'
 #' @examples
 #'
@@ -215,6 +306,10 @@
 #' Phipson, B., & Smyth, G. K. (2010). Permutation P-values should never be zero:
 #' calculating exact P-values when permutations are randomly drawn.
 #' Statistical Applications in Genetics and Molecular Biology, 9(1), Article 39.
+#'
+#' Wu, J., & Ding, P. (2020). Randomization tests for weak null hypotheses in
+#' randomized experiments. Journal of the American Statistical Association,
+#' 116(536), 1898-1913. doi: 10.1080/01621459.2020.1750415
 #'
 #' @family Robust tests
 #' @name perm_t_test
@@ -413,6 +508,85 @@ compute_perm_pval <- function(b, R, p_method) {
   } else {
     stop("Unknown p_method: ", p_method)
   }
+}
+
+#' @keywords internal
+#' @noRd
+# Helper function to find the critical permutation statistic for CI construction
+#
+# The confidence interval is obtained by inverting the (studentized) permutation
+# test. Because the permutation distribution (TSTAT) is generated from unshifted
+# data, it does not depend on mu, and t(mu) = (est - mu) / stderr is decreasing
+# in mu. The critical value is the order statistic of TSTAT at which the
+# permutation p-value (with the same p_method counting rule) crosses level a.
+#
+# With b the count of permutation statistics at least as extreme as t(mu), the
+# test rejects when compute_perm_pval(b, R, p_method) <= a, i.e., when b <= m.
+#
+# Arguments:
+#   TSTAT: permutation distribution of the test statistic
+#   a: the one-sided (or symmetric two-sided) significance level
+#   p_method: one of "exact" or "plusone"
+#   tail: "upper" for a greater-type test (b = #{T* >= t}),
+#         "lower" for a less-type test (b = #{T* <= t}),
+#         "abs" for the symmetric two-sided test (b = #{|T*| >= |t|})
+#
+# Returns: the critical value. Values of mu with t(mu) <= crit ("upper"/"abs")
+#   or t(mu) >= crit ("lower") are not rejected. If the test can never reject
+#   at level a, returns Inf ("upper"/"abs") or -Inf ("lower").
+perm_crit <- function(TSTAT, a, p_method, tail = c("upper", "lower", "abs")) {
+  tail <- match.arg(tail)
+  R <- length(TSTAT)
+  c0 <- if (p_method == "plusone") 1 else 0
+
+  # Largest b at which the test rejects; small tolerance guards against
+  # floating point error when a * (R + c0) is an integer
+  m <- floor(a * (R + c0) - c0 + 1e-8)
+  m <- min(m, R - 1)
+
+  if (m < 0) {
+    return(if (tail == "lower") -Inf else Inf)
+  }
+
+  # Widen by the same tolerance used in perm_count() so the CI agrees with
+  # the tolerant p-value counts
+  crit <- switch(tail,
+                 upper = sort(TSTAT)[R - m],
+                 lower = sort(TSTAT)[m + 1],
+                 abs = sort(abs(TSTAT))[R - m])
+  if (tail == "lower") crit - perm_tol(crit) else crit + perm_tol(crit)
+}
+
+#' @keywords internal
+#' @noRd
+# Tolerance for comparing permutation statistics with the observed statistic
+#
+# With tied data, many permutations give mathematically identical statistics
+# that differ only by floating point error (e.g., different summation order or
+# a different code path for the observed and permuted statistics). Strict
+# comparisons can then drop tied values and undercount b, making the p-value
+# too small. A small relative tolerance treats such values as ties.
+perm_tol <- function(t) {
+  sqrt(.Machine$double.eps) * max(1, abs(t))
+}
+
+#' @keywords internal
+#' @noRd
+# Count permutation statistics at least as extreme as the observed statistic
+#
+# Arguments:
+#   TSTAT: permutation distribution of the test statistic
+#   tstat: observed test statistic (a single value)
+#   type: "ge" for #{T* >= t}, "le" for #{T* <= t}, "abs" for #{|T*| >= |t|}
+#
+# Returns: the count b, treating values within perm_tol() of t as ties
+perm_count <- function(TSTAT, tstat, type = c("ge", "le", "abs")) {
+  type <- match.arg(type)
+  tol <- perm_tol(tstat)
+  switch(type,
+         ge = sum(TSTAT >= tstat - tol),
+         le = sum(TSTAT <= tstat + tol),
+         abs = sum(abs(TSTAT) >= abs(tstat) - tol))
 }
 
 
@@ -794,45 +968,56 @@ perm_t_test.default <- function(x,
   }
 
   # Compute p-values and confidence intervals
+  # CIs invert the same studentized permutation test used for the p-value
+  # (est - stderr * critical value), so the CI and p-value always agree
+  est_ci <- if (is.null(y)) mx else diff_means
+
   if (alternative == "less") {
-    b <- sum(TSTAT <= tstat)
+    b <- perm_count(TSTAT, tstat, "le")
     perm.pval <- compute_perm_pval(b, R_used, p_method)
-    perm.cint <- c(-Inf, quantile(EFF, conf.level, names = FALSE))
+    perm.cint <- c(-Inf,
+                   est_ci - stderr * perm_crit(TSTAT, alpha, p_method, "lower"))
 
   } else if (alternative == "greater") {
-    b <- sum(TSTAT >= tstat)
+    b <- perm_count(TSTAT, tstat, "ge")
     perm.pval <- compute_perm_pval(b, R_used, p_method)
-    perm.cint <- c(quantile(EFF, 1 - conf.level, names = FALSE), Inf)
+    perm.cint <- c(est_ci - stderr * perm_crit(TSTAT, alpha, p_method, "upper"),
+                   Inf)
 
   } else if (alternative == "two.sided") {
     if (symmetric) {
-      b <- sum(abs(TSTAT) >= abs(tstat))
+      b <- perm_count(TSTAT, tstat, "abs")
       perm.pval <- compute_perm_pval(b, R_used, p_method)
+      crit <- perm_crit(TSTAT, alpha, p_method, "abs")
+      perm.cint <- c(est_ci - stderr * crit, est_ci + stderr * crit)
     } else {
-      b_low <- sum(TSTAT <= tstat)
-      b_high <- sum(TSTAT >= tstat)
+      b_low <- perm_count(TSTAT, tstat, "le")
+      b_high <- perm_count(TSTAT, tstat, "ge")
       p_low <- compute_perm_pval(b_low, R_used, p_method)
       p_high <- compute_perm_pval(b_high, R_used, p_method)
       perm.pval <- 2 * min(p_low, p_high)
       perm.pval <- min(perm.pval, 1)
+      perm.cint <- c(est_ci - stderr * perm_crit(TSTAT, alpha / 2, p_method, "upper"),
+                     est_ci - stderr * perm_crit(TSTAT, alpha / 2, p_method, "lower"))
     }
-    perm.cint <- quantile(EFF, c(alpha / 2, 1 - alpha / 2), names = FALSE)
 
-  } else if (alternative == "equivalence") {
-    b_low <- sum(TSTAT >= tstat[1])
-    b_high <- sum(TSTAT <= tstat[2])
-    p_low <- compute_perm_pval(b_low, R_used, p_method)
-    p_high <- compute_perm_pval(b_high, R_used, p_method)
-    perm.pval <- max(p_low, p_high)
-    perm.cint <- quantile(EFF, c(alpha, 1 - alpha), names = FALSE)
-
-  } else if (alternative == "minimal.effect") {
-    b_low <- sum(TSTAT <= tstat[1])
-    b_high <- sum(TSTAT >= tstat[2])
-    p_low <- compute_perm_pval(b_low, R_used, p_method)
-    p_high <- compute_perm_pval(b_high, R_used, p_method)
-    perm.pval <- min(p_low, p_high)
-    perm.cint <- quantile(EFF, c(alpha, 1 - alpha), names = FALSE)
+  } else if (alternative %in% c("equivalence", "minimal.effect")) {
+    if (alternative == "equivalence") {
+      b_low <- perm_count(TSTAT, tstat[1], "ge")
+      b_high <- perm_count(TSTAT, tstat[2], "le")
+      p_low <- compute_perm_pval(b_low, R_used, p_method)
+      p_high <- compute_perm_pval(b_high, R_used, p_method)
+      perm.pval <- max(p_low, p_high)
+    } else {
+      b_low <- perm_count(TSTAT, tstat[1], "le")
+      b_high <- perm_count(TSTAT, tstat[2], "ge")
+      p_low <- compute_perm_pval(b_low, R_used, p_method)
+      p_high <- compute_perm_pval(b_high, R_used, p_method)
+      perm.pval <- min(p_low, p_high)
+    }
+    # 1 - 2*alpha interval: two one-sided tests, each at level alpha
+    perm.cint <- c(est_ci - stderr * perm_crit(TSTAT, alpha, p_method, "upper"),
+                   est_ci - stderr * perm_crit(TSTAT, alpha, p_method, "lower"))
   }
 
   # Set up null value
@@ -872,8 +1057,8 @@ perm_t_test.default <- function(x,
 
   # For equivalence/minimal.effect, report the t-statistic corresponding to the p-value
   if (alternative == "equivalence") {
-    b_low <- sum(TSTAT >= tstat[1])
-    b_high <- sum(TSTAT <= tstat[2])
+    b_low <- perm_count(TSTAT, tstat[1], "ge")
+    b_high <- perm_count(TSTAT, tstat[2], "le")
     p_low <- compute_perm_pval(b_low, R_used, p_method)
     p_high <- compute_perm_pval(b_high, R_used, p_method)
     if (p_low >= p_high) {
@@ -882,8 +1067,8 @@ perm_t_test.default <- function(x,
       tstat_report <- tstat[2]
     }
   } else if (alternative == "minimal.effect") {
-    b_low <- sum(TSTAT <= tstat[1])
-    b_high <- sum(TSTAT >= tstat[2])
+    b_low <- perm_count(TSTAT, tstat[1], "le")
+    b_high <- perm_count(TSTAT, tstat[2], "ge")
     p_low <- compute_perm_pval(b_low, R_used, p_method)
     p_high <- compute_perm_pval(b_high, R_used, p_method)
     if (p_low <= p_high) {

@@ -1,0 +1,112 @@
+normal / two_sided / n = 10 done (45.3 secs)
+skewed / two_sided / n = 10 done (1.9 mins)
+hetero / two_sided / n = 10 done (3 mins)
+normal / equivalence / n = 10 done (3.7 mins)
+skewed / equivalence / n = 10 done (4.3 mins)
+hetero / equivalence / n = 10 done (4.9 mins)
+normal / two_sided / n = 20 done (5.6 mins)
+skewed / two_sided / n = 20 done (6.3 mins)
+hetero / two_sided / n = 20 done (7 mins)
+normal / equivalence / n = 20 done (7.7 mins)
+skewed / equivalence / n = 20 done (8.3 mins)
+hetero / equivalence / n = 20 done (9 mins)
+normal / two_sided / n = 50 done (9.8 mins)
+skewed / two_sided / n = 50 done (10.7 mins)
+hetero / two_sided / n = 50 done (12.6 mins)
+normal / equivalence / n = 50 done (14.3 mins)
+skewed / equivalence / n = 50 done (16.3 mins)
+hetero / equivalence / n = 50 done (17.9 mins)
+
+nsim = 5000  R = 999  alpha = 0.05  (MC SE near alpha ~ 0.0031 )
+
+   dist         hyp  n     method    rej lo_miss hi_miss agree  mean_est n_fail
+ normal   two_sided 10   boot_bca 0.0560  0.0268  0.0344 0.995 -0.007133      0
+ normal   two_sided 10  boot_stud 0.0360  0.0172  0.0204 0.998 -0.007133      0
+ normal   two_sided 10 boot_basic 0.2170  0.1004  0.1166 1.000 -0.007133      0
+ normal   two_sided 10  boot_perc 0.0914  0.0444  0.0502 0.997 -0.007133      0
+ normal   two_sided 10   fisher_z 0.0480  0.0220  0.0260 1.000 -0.007133      0
+ skewed   two_sided 10   boot_bca 0.0514  0.0278  0.0280 0.996 -0.006380      0
+ skewed   two_sided 10  boot_stud 0.0432  0.0238  0.0216 0.998 -0.006380      0
+ skewed   two_sided 10 boot_basic 0.2326  0.1138  0.1188 1.000 -0.006380      0
+ skewed   two_sided 10  boot_perc 0.0852  0.0408  0.0470 0.997 -0.006380      0
+ skewed   two_sided 10   fisher_z 0.0578  0.0282  0.0296 1.000 -0.006380      0
+ hetero   two_sided 10   boot_bca 0.0936  0.0456  0.0546 0.993 -0.001936      0
+ hetero   two_sided 10  boot_stud 0.0800  0.0406  0.0418 0.998 -0.001936      0
+ hetero   two_sided 10 boot_basic 0.3336  0.1646  0.1690 1.000 -0.001936      0
+ hetero   two_sided 10  boot_perc 0.1146  0.0530  0.0636 0.998 -0.001936      0
+ hetero   two_sided 10   fisher_z 0.1270  0.0622  0.0648 1.000 -0.001936      0
+ normal equivalence 10   boot_bca 0.0002  0.0624  0.0534 1.000  0.286481      0
+ normal equivalence 10  boot_stud 0.0000  0.0490  0.0502 1.000  0.286481      0
+ normal equivalence 10 boot_basic 0.0000  0.1788  0.0876 1.000  0.286481      0
+ normal equivalence 10  boot_perc 0.0002  0.0916  0.0640 1.000  0.286481      0
+ normal equivalence 10   fisher_z 0.0000  0.0574  0.0478 1.000  0.286481      0
+ skewed equivalence 10   boot_bca 0.0000  0.0556  0.0492 1.000  0.290135      0
+ skewed equivalence 10  boot_stud 0.0000  0.0520  0.0594 1.000  0.290135      0
+ skewed equivalence 10 boot_basic 0.0000  0.1902  0.0930 1.000  0.290135      0
+ skewed equivalence 10  boot_perc 0.0000  0.0964  0.0564 1.000  0.290135      0
+ skewed equivalence 10   fisher_z 0.0000  0.0670  0.0466 1.000  0.290135      0
+ hetero equivalence 10   boot_bca 0.0002  0.0810  0.0656 1.000  0.274407      0
+ hetero equivalence 10  boot_stud 0.0002  0.0690  0.0748 1.000  0.274407      0
+ hetero equivalence 10 boot_basic 0.0002  0.2282  0.1264 1.000  0.274407      0
+ hetero equivalence 10  boot_perc 0.0002  0.1118  0.0698 1.000  0.274407      0
+ hetero equivalence 10   fisher_z 0.0000  0.0974  0.0906 1.000  0.274407      0
+ normal   two_sided 20   boot_bca 0.0764  0.0378  0.0410 0.998 -0.006207      0
+ normal   two_sided 20  boot_stud 0.0674  0.0334  0.0368 0.997 -0.006207      0
+ normal   two_sided 20 boot_basic 0.1590  0.0770  0.0820 1.000 -0.006207      0
+ normal   two_sided 20  boot_perc 0.0854  0.0416  0.0460 0.998 -0.006207      0
+ normal   two_sided 20   fisher_z 0.0614  0.0288  0.0326 1.000 -0.006207      0
+ skewed   two_sided 20   boot_bca 0.0606  0.0360  0.0282 0.996  0.004179      0
+ skewed   two_sided 20  boot_stud 0.0616  0.0340  0.0312 0.996  0.004179      0
+ skewed   two_sided 20 boot_basic 0.1552  0.0812  0.0740 1.000  0.004179      0
+ skewed   two_sided 20  boot_perc 0.0802  0.0454  0.0376 0.997  0.004179      0
+ skewed   two_sided 20   fisher_z 0.0490  0.0266  0.0224 1.000  0.004179      0
+ hetero   two_sided 20   boot_bca 0.1018  0.0524  0.0522 0.997 -0.004635      0
+ hetero   two_sided 20  boot_stud 0.1066  0.0528  0.0568 0.997 -0.004635      0
+ hetero   two_sided 20 boot_basic 0.2446  0.1180  0.1266 1.000 -0.004635      0
+ hetero   two_sided 20  boot_perc 0.0984  0.0490  0.0512 0.998 -0.004635      0
+ hetero   two_sided 20   fisher_z 0.1496  0.0712  0.0784 1.000 -0.004635      0
+ normal equivalence 20   boot_bca 0.0038  0.0634  0.0578 1.000  0.290420      0
+ normal equivalence 20  boot_stud 0.0034  0.0550  0.0544 1.000  0.290420      0
+ normal equivalence 20 boot_basic 0.0030  0.1246  0.0634 1.000  0.290420      0
+ normal equivalence 20  boot_perc 0.0034  0.0756  0.0584 1.000  0.290420      0
+ normal equivalence 20   fisher_z 0.0000  0.0524  0.0480 1.000  0.290420      0
+ skewed equivalence 20   boot_bca 0.0060  0.0758  0.0658 0.999  0.304570      0
+ skewed equivalence 20  boot_stud 0.0090  0.0742  0.0750 1.000  0.304570      0
+ skewed equivalence 20 boot_basic 0.0086  0.1664  0.0806 1.000  0.304570      0
+ skewed equivalence 20  boot_perc 0.0052  0.0918  0.0606 0.999  0.304570      0
+ skewed equivalence 20   fisher_z 0.0000  0.0772  0.0580 1.000  0.304570      0
+ hetero equivalence 20   boot_bca 0.0008  0.0876  0.0690 1.000  0.280270      0
+ hetero equivalence 20  boot_stud 0.0012  0.0904  0.0760 1.000  0.280270      0
+ hetero equivalence 20 boot_basic 0.0012  0.1826  0.0982 1.000  0.280270      0
+ hetero equivalence 20  boot_perc 0.0008  0.0940  0.0622 1.000  0.280270      0
+ hetero equivalence 20   fisher_z 0.0000  0.1096  0.1046 1.000  0.280270      0
+ normal   two_sided 50   boot_bca 0.0634  0.0318  0.0336 0.998  0.001652      0
+ normal   two_sided 50  boot_stud 0.0590  0.0298  0.0314 0.998  0.001652      0
+ normal   two_sided 50 boot_basic 0.0954  0.0488  0.0466 1.000  0.001652      0
+ normal   two_sided 50  boot_perc 0.0682  0.0342  0.0362 0.998  0.001652      0
+ normal   two_sided 50   fisher_z 0.0526  0.0250  0.0276 1.000  0.001652      0
+ skewed   two_sided 50   boot_bca 0.0722  0.0358  0.0386 0.998  0.000574      0
+ skewed   two_sided 50  boot_stud 0.0694  0.0344  0.0374 0.998  0.000574      0
+ skewed   two_sided 50 boot_basic 0.1058  0.0522  0.0536 1.000  0.000574      0
+ skewed   two_sided 50  boot_perc 0.0692  0.0356  0.0360 0.998  0.000574      0
+ skewed   two_sided 50   fisher_z 0.0496  0.0248  0.0248 1.000  0.000574      0
+ hetero   two_sided 50   boot_bca 0.0822  0.0440  0.0408 0.997  0.004717      0
+ hetero   two_sided 50  boot_stud 0.0850  0.0452  0.0418 0.998  0.004717      0
+ hetero   two_sided 50 boot_basic 0.1470  0.0768  0.0702 1.000  0.004717      0
+ hetero   two_sided 50  boot_perc 0.0760  0.0420  0.0360 0.998  0.004717      0
+ hetero   two_sided 50   fisher_z 0.1554  0.0806  0.0748 1.000  0.004717      0
+ normal equivalence 50   boot_bca 0.0512  0.0526  0.0588 0.999  0.296385      0
+ normal equivalence 50  boot_stud 0.0518  0.0518  0.0588 1.000  0.296385      0
+ normal equivalence 50 boot_basic 0.0454  0.0938  0.0530 1.000  0.296385      0
+ normal equivalence 50  boot_perc 0.0500  0.0608  0.0574 0.999  0.296385      0
+ normal equivalence 50   fisher_z 0.0464  0.0464  0.0514 1.000  0.296385      0
+ skewed equivalence 50   boot_bca 0.0598  0.0728  0.0736 0.999  0.298832      0
+ skewed equivalence 50  boot_stud 0.0658  0.0668  0.0830 0.997  0.298832      0
+ skewed equivalence 50 boot_basic 0.0584  0.1126  0.0738 1.000  0.298832      0
+ skewed equivalence 50  boot_perc 0.0510  0.0716  0.0604 0.999  0.298832      0
+ skewed equivalence 50   fisher_z 0.0530  0.0720  0.0618 1.000  0.298832      0
+ hetero equivalence 50   boot_bca 0.0182  0.0722  0.0656 0.999  0.290995      0
+ hetero equivalence 50  boot_stud 0.0174  0.0754  0.0664 0.999  0.290995      0
+ hetero equivalence 50 boot_basic 0.0154  0.1286  0.0640 1.000  0.290995      0
+ hetero equivalence 50  boot_perc 0.0172  0.0758  0.0580 0.999  0.290995      0
+ hetero equivalence 50   fisher_z 0.0802  0.1114  0.1110 1.000  0.290995      0

@@ -17,15 +17,33 @@
 #'
 #'   Can be abbreviated.
 #' @param boot_ci type of bootstrap confidence interval:
-#'   * "basic": basic/empirical bootstrap CI (default)
+#'   * "auto" (default): `"stud"` for `method = "pearson"` and `"bca"` for all
+#'     other methods. In simulations, the studentized interval kept Pearson's r
+#'     near nominal coverage for skewed, heteroscedastic, and heavy-tailed data,
+#'     where the BCa interval under-covered; for the rank and robust
+#'     correlations BCa performed as well or better (see the "Studentized
+#'     bootstrap" section). The method actually used is returned in `boot_ci`.
+#'   * "bca": bias-corrected and accelerated bootstrap CI. Provides
+#'     second-order accuracy by correcting for bias and skewness, but requires
+#'     additional computation via the jackknife (n extra evaluations of the
+#'     statistic).
+#'   * "stud": studentized (bootstrap-t) CI. Each bootstrap replicate is
+#'     standardized by a standard error estimated from that replicate's data
+#'     (see the "Studentized bootstrap" section below). Only available for
+#'     `method = "pearson"`, `"kendall"`, or `"spearman"`.
+#'   * "basic": basic/empirical bootstrap CI
 #'   * "perc": percentile bootstrap CI
-#'   * "bca": bias-corrected and accelerated bootstrap CI. Provides second-order
-#'     accuracy by correcting for bias and skewness, but requires additional
-#'     computation via the jackknife (n extra evaluations of the statistic).
-#'   * "stud": studentized (bootstrap-t) CI. Uses pivot statistics on the Fisher z
-#'     scale with analytical SEs. Only available for `method = "pearson"`,
-#'     `"kendall"`, or `"spearman"`.
 #' @param R number of bootstrap replications (default = 1999).
+#' @param boot_scale scale on which the `"basic"` and `"stud"` intervals and
+#'   p-values are computed before being back-transformed to the correlation
+#'   scale:
+#'   * "z": Fisher z scale, \eqn{z = \mathrm{atanh}(r)} (default). Keeps
+#'     the interval within \[-1, 1\] and is closer to variance-stabilizing.
+#'   * "r": correlation scale. Studentized limits are truncated to \[-1, 1\];
+#'     basic limits are not.
+#'
+#'   Ignored for `"perc"` and `"bca"`, which give the same result on either
+#'   scale.
 #' @param ... additional arguments passed to correlation functions, such as:
 #'   * tr: trim for Winsorized correlation (default = 0.2)
 #'   * beta: for percentage bend correlation (default = 0.2)
@@ -43,16 +61,109 @@
 #'   Wilcox (2017).
 #'
 #' * `boot_ci = "basic"`: p-values use the reflected bootstrap distribution
-#'   (`2 * est - bvec`), which is the exact inversion of the basic CI.
+#'   (`2 * est - bvec`), which is the exact inversion of the basic CI. Both are
+#'   computed on the scale chosen by `boot_scale`.
 #'
 #' * `boot_ci = "bca"`: p-values are derived from the BCa probability transformation,
 #'   using the same bias correction and acceleration parameters as the BCa CI.
 #'
-#' * `boot_ci = "stud"`: p-values are derived from the bootstrap pivot distribution
-#'   on the Fisher z scale. Each replicate's pivot is `(z_star - z_obs) / se_star`,
-#'   where `se_star` is the analytical SE. This method is only available for
-#'   Pearson, Kendall, and Spearman correlations, since robust methods lack
-#'   analytical SEs on the Fisher z scale.
+#' * `boot_ci = "stud"`: p-values are derived from the bootstrap pivot
+#'   distribution on the scale chosen by `boot_scale`. Each replicate's pivot is
+#'   `(t_star - t_obs) / se_star`, where `se_star` is the standard error
+#'   estimated from that replicate.
+#'
+#' @section Studentized bootstrap:
+#'
+#' A studentized (bootstrap-t) interval only improves on the basic interval if
+#' the standard error is re-estimated from each bootstrap resample. The
+#' normal-theory standard errors on the Fisher z scale (e.g.,
+#' \eqn{1/\sqrt{n-3}} for Pearson's r) depend only on \eqn{n} (and, for
+#' Spearman, on the estimate itself), so they cannot serve this purpose.
+#' Instead, `boot_cor_test()` uses an influence-function (sandwich) standard
+#' error that is estimated from the data and does not assume bivariate
+#' normality:
+#'
+#' \deqn{\widehat{SE}(\hat\rho) = \frac{1}{n}\sqrt{\sum_{i=1}^{n} \psi_i^2},}
+#'
+#' where \eqn{\psi_i} is the empirical influence of observation \eqn{i} on the
+#' coefficient. The same formula is applied to the observed data and to every
+#' bootstrap resample. With `boot_scale = "z"`, the standard error is moved to
+#' the Fisher z scale by the delta method,
+#' \eqn{\widehat{SE}(\hat z) = \widehat{SE}(\hat\rho) / (1 - \hat\rho^2)}.
+#'
+#' **Pearson's r** uses the asymptotic distribution-free (fourth-moment)
+#' influence function (Steiger & Hakstian, 1982). With
+#' \eqn{z_{x,i} = (x_i - \bar x)/s_x} and \eqn{z_{y,i} = (y_i - \bar y)/s_y}
+#' (standardized with denominator \eqn{n}),
+#' \deqn{\psi^{0}_i = z_{x,i} z_{y,i} - \frac{r}{2}\left(z_{x,i}^2 + z_{y,i}^2\right).}
+#' Under bivariate normality this gives the familiar
+#' \eqn{\mathrm{Var}(r) \approx (1 - \rho^2)^2 / n}. On its own, this standard
+#' error is too small in small samples and with heavy-tailed data, because a
+#' sample under-represents the extreme points that dominate the variance of
+#' \eqn{r}. Following the HC4 heteroscedasticity-consistent estimator for
+#' regression (Cribari-Neto, 2004), which Wilcox (2017) also uses for testing
+#' correlations, each influence value is therefore inflated according to its
+#' leverage:
+#' \deqn{\psi_i = \psi^{0}_i\,(1 - h_i)^{-\delta_i/2}, \qquad h_i = \frac{1}{n} + \frac{D_i^2}{n-1}, \qquad \delta_i = \min\left(4, \frac{n h_i}{3}\right),}
+#' where \eqn{D_i} is the Mahalanobis distance of \eqn{(x_i, y_i)} from the
+#' bivariate mean (so the \eqn{h_i} sum to 3), and \eqn{h_i} is capped at 0.99.
+#' This leverage correction of the ADF influence function is an adaptation
+#' made for this package, chosen because in simulations (normal,
+#' heteroscedastic, \eqn{t_5}, \eqn{t_3}, and discrete data; n = 30 and 80) it
+#' kept coverage of the studentized interval near nominal, including for
+#' \eqn{t_3} data, where the uncorrected standard error under-covered badly. It
+#' is slightly conservative for strongly heteroscedastic data. For data with
+#' infinite fourth moments, no standard error of \eqn{r} is consistent, and a
+#' robust correlation (`"winsorized"` or `"bendpercent"`) is still the better
+#' choice.
+#'
+#' **Spearman's rho** is Pearson's r computed on the mid-distribution
+#' transforms \eqn{u_i = (R(x_i) - 1/2)/n} and \eqn{v_i = (R(y_i) - 1/2)/n},
+#' where \eqn{R} denotes midranks. Its influence function adds, to the Pearson
+#' influence function for \eqn{(u, v)}, terms for estimating the transforms.
+#' Writing \eqn{\omega_{ij}^x = \mathbf{1}(x_j > x_i) + \frac{1}{2}\mathbf{1}(x_j = x_i)}
+#' (and likewise \eqn{\omega_{ij}^y}), the influence of observation \eqn{i} on
+#' each moment is
+#' \deqn{d_i(\overline{uv}) = u_i v_i + \frac{1}{n}\sum_j \omega_{ij}^x v_j + \frac{1}{n}\sum_j \omega_{ij}^y u_j - 3\,\overline{uv},}
+#' \deqn{d_i(\overline{u}) = u_i + \frac{1}{n}\sum_j \omega_{ij}^x - 2\bar u, \qquad d_i(\overline{u^2}) = u_i^2 + \frac{2}{n}\sum_j \omega_{ij}^x u_j - 3\,\overline{u^2},}
+#' (similarly for \eqn{v}), and \eqn{\psi_i} follows from the delta method for
+#' \eqn{r_s = C / \sqrt{S_u S_v}}, with \eqn{C = \overline{uv} - \bar u \bar v}
+#' and \eqn{S_u = \overline{u^2} - \bar u^2}:
+#' \deqn{\psi_i = \frac{d_i(C)}{\sqrt{S_u S_v}} - \frac{r_s}{2}\left(\frac{d_i(S_u)}{S_u} + \frac{d_i(S_v)}{S_v}\right),}
+#' where \eqn{d_i(C) = d_i(\overline{uv}) - \bar v\, d_i(\bar u) - \bar u\, d_i(\bar v)}
+#' and \eqn{d_i(S_u) = d_i(\overline{u^2}) - 2 \bar u\, d_i(\bar u)}.
+#' Without ties this is the influence function of Spearman's rho given by
+#' Croux and Dehon (2010); the tie terms keep the standard error accurate for
+#' discrete data (and for bootstrap resamples, which always contain ties).
+#'
+#' **Kendall's tau** (tau-b, as returned by `cor(method = "kendall")`) is a
+#' ratio of U-statistics,
+#' \eqn{\tau_b = \bar a / \sqrt{\bar b^x \bar b^y}}, with
+#' \deqn{a_i = \frac{1}{n-1}\sum_{j \ne i} \mathrm{sign}(x_i - x_j)\,\mathrm{sign}(y_i - y_j), \qquad b_i^x = \frac{1}{n-1}\sum_{j \ne i} \mathbf{1}(x_i \ne x_j),}
+#' and \eqn{b_i^y} defined likewise. Using Hoeffding's (1948) projection and
+#' the delta method,
+#' \deqn{\psi_i = 2\left[\frac{a_i - \bar a}{\sqrt{\bar b^x \bar b^y}} - \frac{\tau_b}{2}\left(\frac{b_i^x - \bar b^x}{\bar b^x} + \frac{b_i^y - \bar b^y}{\bar b^y}\right)\right].}
+#' Without ties this reduces to the usual U-statistic variance
+#' \eqn{\frac{4}{n}\widehat{\mathrm{Var}}(a_i)}. Its computation is
+#' \eqn{O(n^2)} per resample, so the studentized Kendall interval is slower
+#' for large samples.
+#'
+#' Under independence, these standard errors reduce to the familiar
+#' \eqn{\mathrm{Var}(r) \approx \mathrm{Var}(r_s) \approx 1/n} and
+#' \eqn{\mathrm{Var}(\tau) \approx 4/(9n)}.
+#'
+#' Because the pivots divide by an estimated standard error, studentized
+#' intervals can be wide or erratic in small samples (roughly n < 30), where
+#' the standard error of each resample is itself imprecise. This matters most
+#' for the rank correlations. Kendall's standard error, for example, is nearly
+#' unbiased even at n = 20, but it varies a lot between samples (especially
+#' with ties) and is strongly correlated with the estimate. In simulations at
+#' n = 30, the studentized Spearman and Kendall intervals under-covered by up
+#' to about 2.5 percentage points for heavy-tailed or tied data, while
+#' `boot_ci = "bca"` stayed closer to nominal; at n = 80 both were accurate.
+#' For Spearman's rho and Kendall's tau with fewer than about 50 observations,
+#' `boot_ci = "bca"` (the `"auto"` choice for these methods) is therefore
+#' preferable.
 #'
 #' The bootstrap correlation methods in this package offer two robust correlations beyond
 #' the standard methods:
@@ -91,13 +202,18 @@
 #' * **conf.int**: a bootstrap confidence interval for the correlation coefficient.
 #' * **estimate**: the estimated correlation coefficient, with name "r", "tau", "rho", "pb", or "wincor"
 #'   corresponding to the method employed.
-#' * **stderr**: the bootstrap standard error of the correlation coefficient.
+#' * **stderr**: the bootstrap standard error of the correlation coefficient. For
+#'   `boot_ci = "stud"`, a second element gives the influence-function standard
+#'   error of the observed estimate on the working scale (`z.se` or `r.se`).
 #' * **null.value**: the value(s) of the correlation under the null hypothesis.
 #' * **alternative**: character string indicating the alternative hypothesis.
 #' * **method**: a character string indicating which bootstrapped correlation was measured.
 #' * **data.name**: a character string giving the names of the data.
 #' * **boot_res**: vector of bootstrap correlation estimates.
-#' * **boot_ci**: character string indicating which bootstrap CI method was used.
+#' * **boot_ci**: character string indicating which bootstrap CI method was used
+#'   (with `boot_ci = "auto"`, the method it selected).
+#' * **boot_scale**: the scale (`"z"` or `"r"`) on which the CI and p-value were
+#'   computed. Always `"r"` for `"perc"` and `"bca"`.
 #' * **call**: the matched call.
 #'
 #' @examples
@@ -134,6 +250,16 @@
 #'
 #' Wilcox, R.R. (2017) Introduction to Robust Estimation and Hypothesis Testing, 4th edition. Academic Press.
 #'
+#' Cribari-Neto, F. (2004). Asymptotic inference under heteroskedasticity of unknown form. Computational Statistics & Data Analysis, 45(2), 215–233. https://doi.org/10.1016/S0167-9473(02)00366-3
+#'
+#' Croux, C., & Dehon, C. (2010). Influence functions of the Spearman and Kendall correlation measures. Statistical Methods & Applications, 19(4), 497–515. https://doi.org/10.1007/s10260-010-0142-z
+#'
+#' Efron, B., & Tibshirani, R. J. (1993). An Introduction to the Bootstrap. Chapman & Hall/CRC.
+#'
+#' Hoeffding, W. (1948). A class of statistics with asymptotically normal distribution. The Annals of Mathematical Statistics, 19(3), 293–325. https://doi.org/10.1214/aoms/1177730196
+#'
+#' Steiger, J. H., & Hakstian, A. R. (1982). The asymptotic distribution of elements of a correlation matrix: Theory and application. British Journal of Mathematical and Statistical Psychology, 35(2), 208–215. https://doi.org/10.1111/j.2044-8317.1982.tb00653.x
+#'
 #' @family Correlations
 #' @export
 
@@ -145,18 +271,25 @@ boot_cor_test <- function(x,
                                      "winsorized", "bendpercent"),
                           alpha = 0.05,
                           null = 0,
-                          boot_ci = c("bca","stud", "basic", "perc"),
+                          boot_ci = c("auto", "bca", "stud", "basic", "perc"),
                           R = 1999,
+                          boot_scale = c("z", "r"),
                           ...) {
   boot_ci = match.arg(boot_ci)
+  boot_scale = match.arg(boot_scale)
   DNAME <- paste(deparse(substitute(x)), "and", deparse(substitute(y)))
   alternative = match.arg(alternative)
 
   method = match.arg(method)
 
+  # Default CI method by correlation type (see simulation notes in docs)
+  if (boot_ci == "auto") {
+    boot_ci <- if (method == "pearson") "stud" else "bca"
+  }
+
   if (boot_ci == "stud" && method %in% c("winsorized", "bendpercent")) {
     stop(
-      "Studentized bootstrap requires an analytical SE and is only available ",
+      "Studentized bootstrap requires a closed-form SE and is only available ",
       "for method = 'pearson', 'kendall', or 'spearman'.",
       call. = FALSE
     )
@@ -231,15 +364,34 @@ boot_cor_test <- function(x,
                   alpha*2,
                   alpha)
 
-  # Compute pivots for studentized bootstrap
+  # Working scale for scale-dependent intervals (basic, stud) -----
+  # Percentile and BCa intervals are invariant to monotone transformations,
+  # so they are always computed on the correlation scale.
+  use_z <- boot_scale == "z" && boot_ci %in% c("basic", "stud")
+  to_work <- if (use_z) atanh else identity
+  from_work <- if (use_z) tanh else identity
+  b_work <- to_work(bvec)
+  est_work <- to_work(est)
+
+  # Pivots for studentized bootstrap -----
+  # The SE is re-estimated from every resample (influence-function SE)
   tvec <- NULL
   se_obs <- NULL
   if (boot_ci == "stud") {
-    se_obs <- .fisher_z_se(est, n, method)
-    se_star <- .fisher_z_se(bvec, n, method)
-    z_star <- atanh(bvec)
-    z_obs <- atanh(est)
-    tvec <- (z_star - z_obs) / se_star
+    se_obs <- .cor_se(x, y, method)
+    se_star <- apply(data, 1, function(i) .cor_se(x[i], y[i], method))
+    if (use_z) {
+      se_obs <- se_obs / (1 - est^2)
+      se_star <- se_star / (1 - bvec^2)
+    }
+    if (!is.finite(se_obs) || se_obs <= 0) {
+      stop(
+        "Studentized bootstrap is undefined when the observed correlation ",
+        "is +/-1 or its standard error is zero.",
+        call. = FALSE
+      )
+    }
+    tvec <- (b_work - est_work) / se_star
   }
 
   # Jackknife for BCa (if needed)
@@ -264,50 +416,34 @@ boot_cor_test <- function(x,
 
   # CI computation
   boot.cint = switch(boot_ci,
-                     "basic" = basic(bvec, t0 = est, alpha2),
+                     "basic" = from_work(basic(b_work, t0 = est_work, alpha2)),
                      "perc" = perc(bvec, alpha2),
                      "bca" = bca_ci(boots_est = bvec, t0 = est,
                                     jack_est = jack_est, alpha = alpha2),
-                     "stud" = stud_ci(tvec, t0_z = atanh(est),
-                                      se_obs = se_obs, alpha = alpha2))
+                     "stud" = stud_ci(tvec, t0 = est_work, se_obs = se_obs,
+                                      alpha = alpha2, back = from_work))
   attr(boot.cint, "conf.level") <- ci
 
-  # P-value computation (method-consistent)
+  # P-value computation (method-consistent, on the same working scale as the CI)
+  pval <- function(null, alternative) {
+    boot_pvalue(bvec = b_work, est = est_work, null = to_work(null),
+                alternative = alternative, boot_ci = boot_ci,
+                tvec = tvec, se_obs = se_obs,
+                z0 = z0, acc = acc, nboot = nboot)
+  }
   if (alternative %in% c("two.sided", "greater", "less")) {
-    sig <- boot_pvalue(bvec = bvec, est = est, null = null.value,
-                       alternative = alternative, boot_ci = boot_ci,
-                       tvec = tvec, se_obs = se_obs,
-                       z0 = z0, acc = acc, nboot = nboot,
-                       z_transform= TRUE)
+    sig <- pval(null.value, alternative)
   } else if (alternative == "equivalence") {
-    sig1 <- boot_pvalue(bvec = bvec, est = est, null = min(null.value),
-                        alternative = "greater", boot_ci = boot_ci,
-                        tvec = tvec, se_obs = se_obs,
-                        z0 = z0, acc = acc, nboot = nboot,
-                        z_transform= TRUE)
-    sig2 <- boot_pvalue(bvec = bvec, est = est, null = max(null.value),
-                        alternative = "less", boot_ci = boot_ci,
-                        tvec = tvec, se_obs = se_obs,
-                        z0 = z0, acc = acc, nboot = nboot,
-                        z_transform= TRUE)
-    sig <- max(sig1, sig2)
+    sig <- max(pval(min(null.value), "greater"),
+               pval(max(null.value), "less"))
   } else if (alternative == "minimal.effect") {
-    sig1 <- boot_pvalue(bvec = bvec, est = est, null = max(null.value),
-                        alternative = "greater", boot_ci = boot_ci,
-                        tvec = tvec, se_obs = se_obs,
-                        z0 = z0, acc = acc, nboot = nboot,
-                        z_transform= TRUE)
-    sig2 <- boot_pvalue(bvec = bvec, est = est, null = min(null.value),
-                        alternative = "less", boot_ci = boot_ci,
-                        tvec = tvec, se_obs = se_obs,
-                        z0 = z0, acc = acc, nboot = nboot,
-                        z_transform= TRUE)
-    sig <- min(sig1, sig2)
+    sig <- min(pval(max(null.value), "greater"),
+               pval(min(null.value), "less"))
   }
 
   # CI method label for method string
   ci_label <- switch(boot_ci,
-                     "basic" = "(basic)",
+                     "basic" = " (basic)",
                      "perc" = " (percentile)",
                      "bca" = " (BCa)",
                      "stud" = " (studentized)")
@@ -340,9 +476,11 @@ boot_cor_test <- function(x,
   N = n
   names(N) = "N"
 
-  # SE: for stud, report both bootstrap SE and analytical z-scale SE
+  # SE: for stud, report both the bootstrap SE and the observed
+  # influence-function SE on the working scale
   if (boot_ci == "stud") {
-    se_out <- c(boot.se = sd(bvec, na.rm = TRUE), z.se = se_obs)
+    se_out <- c(boot.se = sd(bvec, na.rm = TRUE), se_obs)
+    names(se_out)[2] <- if (use_z) "z.se" else "r.se"
   } else {
     se_out <- sd(bvec, na.rm = TRUE)
   }
@@ -359,6 +497,7 @@ boot_cor_test <- function(x,
                data.name = DNAME,
                boot_res = bvec,
                boot_ci = boot_ci,
+               boot_scale = if (use_z) "z" else "r",
                call = match.call())
   class(rval) <- "htest"
   return(rval)

@@ -59,9 +59,10 @@ test_that("brunner_munzel scale works with paired samples", {
 })
 
 test_that("brunner_munzel scale works with equivalence tests", {
-  res_prob <- brunner_munzel(mpg ~ am, data = mtcars,
+  # logit is a recommended method for equivalence tests (no null-value warning)
+  res_prob <- brunner_munzel(mpg ~ am, data = mtcars, test_method = "logit",
                              alternative = "equivalence", mu = c(0.35, 0.65))
-  res_diff <- brunner_munzel(mpg ~ am, data = mtcars,
+  res_diff <- brunner_munzel(mpg ~ am, data = mtcars, test_method = "logit",
                              alternative = "equivalence", mu = c(0.35, 0.65),
                              scale = "difference")
   # Null values should be transformed

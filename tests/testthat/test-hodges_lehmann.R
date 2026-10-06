@@ -756,3 +756,86 @@ test_that("print method works without error", {
   # Should print without error
   expect_output(print(result))
 })
+
+
+# Permutation CI / p-value duality (#120) ----
+
+# Re-run at a new null value with the same permutations (same seed)
+hl_p_at <- function(args, mu, seed = 1) {
+  args$mu <- mu
+  set.seed(seed)
+  suppressMessages(do.call(hodges_lehmann, args))$p.value
+}
+
+# mu just inside the CI gives p > alpha; just outside gives p <= alpha
+expect_hl_duality <- function(args, seed = 1) {
+  alpha <- if (is.null(args$alpha)) 0.05 else args$alpha
+  set.seed(seed)
+  res <- suppressMessages(do.call(hodges_lehmann, args))
+  ci <- res$conf.int
+  eps <- 1e-6 * max(1, diff(range(c(args$x, args$y))))
+
+  if (is.finite(ci[1])) {
+    expect_gt(hl_p_at(args, ci[1] + eps, seed), alpha)
+    expect_lte(hl_p_at(args, ci[1] - eps, seed), alpha)
+  }
+  if (is.finite(ci[2])) {
+    expect_gt(hl_p_at(args, ci[2] - eps, seed), alpha)
+    expect_lte(hl_p_at(args, ci[2] + eps, seed), alpha)
+  }
+  invisible(res)
+}
+
+set.seed(2024)
+hl_bf_x <- rnorm(8, mean = 1, sd = 3)
+hl_bf_y <- rnorm(20, mean = 0, sd = 1)
+hl_skew <- rexp(12) - 0.5
+
+test_that("HL permutation CI agrees with p-value: two-sample", {
+  skip_on_cran()
+  for (alt in c("two.sided", "less", "greater")) {
+    for (sc in c("S1", "S2")) {
+      expect_hl_duality(list(x = hl_bf_x, y = hl_bf_y, alternative = alt,
+                             scale = sc, R = 999))
+    }
+    expect_hl_duality(list(x = hl_bf_x, y = hl_bf_y, alternative = alt,
+                           R = 999, p_method = "exact"))
+  }
+})
+
+test_that("HL permutation CI agrees with p-value: one-sample and paired", {
+  skip_on_cran()
+  for (alt in c("two.sided", "less", "greater")) {
+    # exact sign-flip enumeration (4096 permutations)
+    expect_hl_duality(list(x = hl_skew, alternative = alt, R = 5000))
+    # randomized, plusone
+    expect_hl_duality(list(x = c(hl_skew, hl_skew * 1.3), alternative = alt,
+                           R = 999))
+    # paired
+    expect_hl_duality(list(x = paired_x, y = paired_y, paired = TRUE,
+                           alternative = alt, R = 999))
+  }
+})
+
+test_that("HL permutation CI agrees with p-value for other alpha levels", {
+  skip_on_cran()
+  expect_hl_duality(list(x = hl_bf_x, y = hl_bf_y, alpha = 0.1, R = 999))
+  expect_hl_duality(list(x = hl_skew, alpha = 0.01, R = 999))
+})
+
+test_that("HL two-sided permutation CI is centered on the estimate", {
+  skip_on_cran()
+  set.seed(1)
+  res <- suppressMessages(hodges_lehmann(hl_bf_x, hl_bf_y, R = 999))
+  est <- unname(res$estimate)
+  expect_equal(est - res$conf.int[1], res$conf.int[2] - est)
+})
+
+test_that("HL permutation CI is infinite when too few permutations to reject", {
+  # n = 4: 16 sign flips; with plusone the smallest one-sided p is 1/17 > 0.05
+  x4 <- c(1.2, 0.8, 2.1, 1.5)
+  res <- suppressMessages(hodges_lehmann(x4, alternative = "less", R = 100,
+                                         p_method = "plusone"))
+  expect_equal(res$R.used, 16)
+  expect_equal(res$conf.int[2], Inf)
+})
