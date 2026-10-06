@@ -435,12 +435,11 @@ boot_ses_calc.default = function(x,
     boots = c()
     boots_se = c()
     for(i in 1:R){
-      sampler = sample(1:nrow(data), replace = TRUE)
-      boot_dat = data[sampler,]
-      x_boot = subset(boot_dat, group == "x")
-      y_boot = subset(boot_dat, group == "y")
-      res_boot = ses_calc(x = x_boot$values,
-                          y = y_boot$values,
+      # Resample within each group so group sizes stay fixed
+      x_boot = i1[sample.int(n1, replace = TRUE)]
+      y_boot = i2[sample.int(n2, replace = TRUE)]
+      res_boot = ses_calc(x = x_boot,
+                          y = y_boot,
                           paired = paired,
                           ses = "rb",
                           mu = mu,
@@ -449,7 +448,7 @@ boot_ses_calc.default = function(x,
                           output = "data.frame")
       boots = c(boots, to_working(res_boot$estimate))
 
-      rfSE <- compute_boot_se(x_boot$values, y_boot$values, paired = FALSE, se_method, mu)
+      rfSE <- compute_boot_se(x_boot, y_boot, paired = FALSE, se_method, mu)
       boots_se = c(boots_se, rfSE)
     }
 

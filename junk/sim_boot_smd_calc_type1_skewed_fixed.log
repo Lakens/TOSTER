@@ -1,0 +1,95 @@
+skewed / two_sided / n = 10 done (2.8 mins)
+skewed / equivalence / n = 10 done (5.6 mins)
+skewed / two_sided / n = 20 done (8.4 mins)
+skewed / equivalence / n = 20 done (11.3 mins)
+skewed / two_sided / n = 50 done (14.1 mins)
+skewed / equivalence / n = 50 done (16.9 mins)
+
+nsim = 1000  R = 999  alpha = 0.05  (MC SE near alpha ~ 0.0069 )
+
+   dist         hyp  n     method   rej ci_rej lo_miss hi_miss agree  mean_est
+ skewed   two_sided 10  boot_stud 0.080  0.080   0.036   0.044 1.000 -0.023375
+ skewed   two_sided 10 boot_basic 0.038  0.038   0.021   0.017 1.000 -0.023375
+ skewed   two_sided 10  boot_perc 0.071  0.074   0.035   0.039 0.997 -0.023375
+ skewed   two_sided 10   boot_bca 0.042  0.045   0.022   0.023 0.997 -0.023375
+ skewed   two_sided 10      smd_z 0.014  0.014   0.006   0.008 1.000 -0.023375
+ skewed   two_sided 10      smd_t 0.008  0.008   0.004   0.004 1.000 -0.023375
+ skewed   two_sided 10    smd_nct 0.014  0.030   0.017   0.013 0.984 -0.023375
+ skewed equivalence 10  boot_stud 0.000  0.000   0.097   0.090 1.000  0.602470
+ skewed equivalence 10 boot_basic 0.000  0.000   0.055   0.084 1.000  0.602470
+ skewed equivalence 10  boot_perc 0.000  0.000   0.198   0.022 1.000  0.602470
+ skewed equivalence 10   boot_bca 0.000  0.000   0.117   0.029 1.000  0.602470
+ skewed equivalence 10      smd_z 0.000  0.000   0.066   0.026 1.000  0.602470
+ skewed equivalence 10      smd_t 0.000  0.000   0.052   0.014 1.000  0.602470
+ skewed equivalence 10    smd_nct 0.000  0.000   0.079   0.052 1.000  0.602470
+ skewed   two_sided 20  boot_stud 0.114  0.114   0.059   0.055 1.000  0.002362
+ skewed   two_sided 20 boot_basic 0.091  0.091   0.048   0.043 1.000  0.002362
+ skewed   two_sided 20  boot_perc 0.071  0.077   0.035   0.042 0.994  0.002362
+ skewed   two_sided 20   boot_bca 0.048  0.050   0.025   0.025 0.998  0.002362
+ skewed   two_sided 20      smd_z 0.030  0.030   0.013   0.017 1.000  0.002362
+ skewed   two_sided 20      smd_t 0.022  0.022   0.008   0.014 1.000  0.002362
+ skewed   two_sided 20    smd_nct 0.030  0.040   0.017   0.023 0.990  0.002362
+ skewed equivalence 20  boot_stud 0.000  0.000   0.104   0.073 1.000  0.562453
+ skewed equivalence 20 boot_basic 0.000  0.000   0.080   0.070 1.000  0.562453
+ skewed equivalence 20  boot_perc 0.000  0.000   0.155   0.019 1.000  0.562453
+ skewed equivalence 20   boot_bca 0.000  0.000   0.094   0.033 1.000  0.562453
+ skewed equivalence 20      smd_z 0.000  0.000   0.073   0.042 1.000  0.562453
+ skewed equivalence 20      smd_t 0.000  0.000   0.063   0.037 1.000  0.562453
+ skewed equivalence 20    smd_nct 0.000  0.000   0.085   0.055 1.000  0.562453
+ skewed   two_sided 50  boot_stud 0.104  0.104   0.045   0.059 1.000 -0.000815
+ skewed   two_sided 50 boot_basic 0.094  0.094   0.039   0.055 1.000 -0.000815
+ skewed   two_sided 50  boot_perc 0.060  0.061   0.030   0.031 0.999 -0.000815
+ skewed   two_sided 50   boot_bca 0.047  0.053   0.029   0.024 0.994 -0.000815
+ skewed   two_sided 50      smd_z 0.039  0.039   0.019   0.020 1.000 -0.000815
+ skewed   two_sided 50      smd_t 0.036  0.036   0.019   0.017 1.000 -0.000815
+ skewed   two_sided 50    smd_nct 0.039  0.044   0.022   0.022 0.995 -0.000815
+ skewed equivalence 50  boot_stud 0.055  0.055   0.098   0.060 1.000  0.536305
+ skewed equivalence 50 boot_basic 0.053  0.053   0.088   0.060 1.000  0.536305
+ skewed equivalence 50  boot_perc 0.018  0.018   0.136   0.018 1.000  0.536305
+ skewed equivalence 50   boot_bca 0.036  0.036   0.091   0.036 1.000  0.536305
+ skewed equivalence 50      smd_z 0.051  0.051   0.087   0.051 1.000  0.536305
+ skewed equivalence 50      smd_t 0.050  0.050   0.086   0.050 1.000  0.536305
+ skewed equivalence 50    smd_nct 0.051  0.055   0.090   0.055 0.996  0.536305
+ n_fail
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0
+      0

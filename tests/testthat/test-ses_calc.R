@@ -1344,3 +1344,15 @@ for (ci_method in c("perc", "basic", "bca", "stud")) {
                  label = paste(ci_method, "CI/p agreement two.sided"))
   })
 }
+
+test_that("boot_ses_calc two-sample bootstrap resamples within groups (no NA with small n)", {
+  for (s in 1:5) {
+    set.seed(s)
+    x <- rnorm(5)
+    y <- rnorm(5, mean = 0.5)
+    res <- suppressWarnings(suppressMessages(
+      boot_ses_calc(x = x, y = y, alternative = "two.sided", R = 199)))
+    expect_true(is.finite(res$p.value), label = paste("seed", s, "finite p-value"))
+    expect_true(all(is.finite(res$conf.int)), label = paste("seed", s, "finite CI"))
+  }
+})

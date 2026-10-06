@@ -58,6 +58,14 @@ NEWS
 
 ## Improvements
 
+- **`boot_smd_calc()` now defaults to `boot_ci = "bca"`** (previously
+  `"stud"`). In simulations with skewed data, the studentized interval was
+  liberal (two-sided Type I error of about 0.10 to 0.11 at a nominal 0.05 with
+  20 to 50 observations per group), because its pivot uses a normal-theory
+  standard error for the SMD. BCa stayed at or below the nominal rate in all
+  conditions studied. Results for code that relied on the default will change;
+  set `boot_ci = "stud"` to reproduce earlier output.
+
 - **Correlation SE improvements** for `z_cor_test()` and `corsum_test()`:
   - Spearman's rho now uses the Bonett-Wright ρ-dependent SE formula
     (`sqrt((1 + r^2/2) / (n - 3))`) instead of the fixed 1.06 constant,
@@ -148,6 +156,14 @@ NEWS
     test to ever reject at the requested `alpha` (e.g., 5 or fewer pairs).
 
 ## Bug Fixes
+
+- **Two-sample bootstrap in `boot_smd_calc()` and `boot_ses_calc()` now
+  resamples within each group.** Previously, observations were resampled from
+  the pooled data, so group sizes varied across bootstrap replicates. With
+  small samples a group could be left with one or zero observations, producing
+  `NaN` estimates and an `NA` p-value or an error (about 4% of calls with
+  10 observations per group). Group sizes are now fixed at the observed `n1`
+  and `n2`, matching `boot_t_test()` and `boot_t_TOST()`.
 
 - **Consistent handling of `mu`** in `t_TOST()`, `tsum_TOST()`, and `boot_t_TOST()`:
   - The raw estimate, its confidence interval, and the raw equivalence bounds

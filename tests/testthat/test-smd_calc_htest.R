@@ -387,3 +387,24 @@ for (ci_method in c("perc", "basic", "bca", "stud")) {
                  label = paste(ci_method, "CI/p agreement two.sided"))
   })
 }
+
+# --- boot_smd_calc two-sample resampling ---
+
+test_that("boot_smd_calc two-sample bootstrap resamples within groups (no NA with small n)", {
+  # Pooled resampling let a group shrink to <= 1 observation, giving NaN SMDs
+  # and NA p-values (stud/basic) or errors (perc/bca)
+  for (ci_method in c("stud", "basic", "perc", "bca")) {
+    for (s in 1:5) {
+      set.seed(s)
+      x <- rnorm(5)
+      y <- rnorm(5)
+      res <- boot_smd_calc(x = x, y = y,
+                           alternative = "two.sided",
+                           boot_ci = ci_method, R = 199)
+      expect_true(is.finite(res$p.value),
+                  label = paste(ci_method, "seed", s, "finite p-value"))
+      expect_true(all(is.finite(res$conf.int)),
+                  label = paste(ci_method, "seed", s, "finite CI"))
+    }
+  }
+})

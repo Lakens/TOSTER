@@ -16,7 +16,7 @@ boot_smd_calc(
   rm_correction = FALSE,
   glass = NULL,
   denom = c("auto", "z", "rm", "pooled", "avg", "glass1", "glass2"),
-  boot_ci = c("stud", "basic", "perc", "bca"),
+  boot_ci = c("bca", "stud", "basic", "perc"),
   R = 1999,
   output = c("htest", "data.frame"),
   null.value = 0,
@@ -36,7 +36,7 @@ boot_smd_calc(
   rm_correction = FALSE,
   glass = NULL,
   denom = c("auto", "z", "rm", "pooled", "avg", "glass1", "glass2"),
-  boot_ci = c("stud", "basic", "perc", "bca"),
+  boot_ci = c("bca", "stud", "basic", "perc"),
   R = 1999,
   output = c("htest", "data.frame"),
   null.value = 0,
@@ -170,17 +170,32 @@ The function implements the following bootstrap approach:
 
 Four bootstrap confidence interval methods are available via the \code{boot_ci} argument:
 \itemize{
+\item \strong{Bias-corrected and accelerated ("bca")}: Corrects for both bias and skewness in the
+bootstrap distribution using jackknife-based acceleration. This is the default.
+It is computationally more expensive than the other methods because of the
+jackknife step.
 \item \strong{Studentized bootstrap ("stud")}: Uses the bootstrap distribution of pivotal
-t-statistics to account for variability in standard error estimates. Usually
-provides the most accurate coverage probability and is set as the default.
+statistics, \eqn{(d^* - \hat{d}) / SE^*}, where \eqn{SE^*} is the parametric
+standard error of the SMD computed in each bootstrap sample. Because that
+standard error is derived under normality, the pivot is not pivotal when the
+data are skewed, and the interval can be too narrow (see below).
 \item \strong{Basic bootstrap ("basic")}: Reflects the bootstrap distribution of estimates
 around the observed value. Simple approach that works well for symmetric distributions.
 \item \strong{Percentile bootstrap ("perc")}: Uses percentiles of the bootstrap distribution directly.
-More robust to skewness in the bootstrap distribution.
-\item \strong{Bias-corrected and accelerated ("bca")}: Corrects for both bias and skewness in the
-bootstrap distribution using jackknife-based acceleration. Most accurate when the
-bootstrap distribution is skewed, but computationally more expensive.
+It tends to be conservative at equivalence bounds, which costs power.
 }
+
+\strong{Choice of default.} Earlier versions defaulted to \code{boot_ci = "stud"}. In
+simulations of two independent groups with skewed (lognormal) data, the
+studentized interval was liberal: two-sided Type I error rates were about
+0.10 to 0.11 at a nominal 0.05 with 20 or 50 observations per group, and the
+rate did not improve as the sample size increased. The BCa interval stayed at or
+below the nominal rate in every condition studied (normal, skewed, and unequal
+variances; 10 to 50 observations per group), so it is now the default. Under
+normality and with unequal variances, all four methods performed acceptably.
+Note that this differs from \code{\link[=boot_t_test]{boot_t_test()}}, where the studentized bootstrap
+is preferred: the t-statistic is close to pivotal, whereas the studentized SMD
+relies on a normal-theory standard error for the SMD.
 
 When hypothesis testing is requested (i.e., \code{alternative} is not \code{"none"}),
 the p-value is computed using the method that matches the selected \code{boot_ci},
