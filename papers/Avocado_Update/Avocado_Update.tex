@@ -1068,13 +1068,13 @@ it provides more robust confidence intervals and p-values\footnote{In a
 ##  g[rm]=('1'-'2')/SD_rm)
 ## 
 ## data:  extra by group
-## z-observed = -0.78495, p-value = 0.8818
+## z-observed = -0.78495, p-value = 0.9013
 ## alternative hypothesis: equivalence
 ## null values:
 ## lower bound upper bound 
 ##        -0.5         0.5 
 ## 90 percent confidence interval:
-##  -1.1539188 -0.4066291
+##  -1.2263719 -0.4506583
 ## sample estimates:
 ## SMD (g[rm]) 
 ##  -0.7513666
@@ -1163,13 +1163,13 @@ objects that integrate with the helper functions described above.
 ##  Bootstrapped Pearson's product-moment correlation (studentized)
 ## 
 ## data:  bugs$LDLF and bugs$LDHF
-## N = 91, p-value = 0.9755
+## N = 91, p-value = 0.9715
 ## alternative hypothesis: equivalence
 ## null values:
 ## correlation correlation 
 ##         0.4        -0.4 
 ## 90 percent confidence interval:
-##  0.4374959 0.6855093
+##  0.4333455 0.6928408
 ## sample estimates:
 ##         r 
 ## 0.5767783
@@ -1182,8 +1182,8 @@ objects that integrate with the helper functions described above.
 \end{Shaded}
 
 The Bootstrapped Pearson's product-moment correlation (studentized) is
-not statistically significant (p = 0.975, r = 0.577, 90\% C.I.{[}0.437,
-0.686{]}) at a 0.05 alpha-level. The null hypothesis cannot be rejected.
+not statistically significant (p = 0.971, r = 0.577, 90\% C.I.{[}0.433,
+0.693{]}) at a 0.05 alpha-level. The null hypothesis cannot be rejected.
 At the desired error rate, it cannot be stated that the true correlation
 is between 0.4 and -0.4.
 
@@ -2618,12 +2618,10 @@ with TOSTER v0.9.0.
 I would like to thank everyone from the Lakens laboratory group for
 their input and suggestions. I must also thank David Eisner, Jakub
 Tomek, and James Selig for their feedback on drafts of this manuscript.
-
-\subsection*{Disclosure statement}\label{disclosure-statement}
-\addcontentsline{toc}{subsection}{Disclosure statement}
-
-The author of this manuscript is the author of the TOSTER package.
-Citations of this manuscript will benefit his citation count.
+Daniel Lakens provided a review of many of the materials that have been
+incorporated into the update of TOSTER, and was the original author of
+this package. Without his help and encouragement, the TOSTER package and
+this update would not exist.
 
 \subsection*{AI Use Disclosure}\label{ai-use-disclosure}
 \addcontentsline{toc}{subsection}{AI Use Disclosure}
@@ -2637,19 +2635,6 @@ errors, and identifying inconsistencies across sections. The manuscript
 was written by the author, and all AI-assisted output was reviewed,
 revised, and verified by the author, who takes full responsibility for
 the content of the package and the manuscript.
-
-\subsection*{Funding}\label{funding}
-\addcontentsline{toc}{subsection}{Funding}
-
-No funding was provided for this work.
-
-\subsection*{Notes on contributor(s)}\label{notes-on-contributors}
-\addcontentsline{toc}{subsection}{Notes on contributor(s)}
-
-Daniel Lakens provided a review of many of the materials that have been
-incorporated into the update of TOSTER, and was the original author of
-this package. Without his help and encouragement, the TOSTER package and
-this update would not exist.
 
 \subsection*{Nomenclature/Notation}\label{nomenclaturenotation}
 \addcontentsline{toc}{subsection}{Nomenclature/Notation}
@@ -2682,6 +2667,72 @@ this update would not exist.
 
 The R package is also (partially) implemented in
 \href{https://www.jamovi.org/}{jamovi} as the TOSTER module.
+
+\section*{Declarations}\label{declarations}
+\addcontentsline{toc}{section}{Declarations}
+
+\subsection*{Funding}\label{funding}
+\addcontentsline{toc}{subsection}{Funding}
+
+No funding was received for this work.
+
+\subsection*{Conflicts of interest/Competing
+interests}\label{conflicts-of-interestcompeting-interests}
+\addcontentsline{toc}{subsection}{Conflicts of interest/Competing
+interests}
+
+The author is the maintainer of the TOSTER R package described in this
+manuscript. The package is free and open-source software, and the author
+receives no financial compensation related to it. The author declares no
+other competing interests.
+
+\subsection*{Ethics approval}\label{ethics-approval}
+\addcontentsline{toc}{subsection}{Ethics approval}
+
+Not applicable. This article describes statistical software and uses
+only publicly available, de-identified example datasets distributed with
+R packages; no new data were collected from human participants or
+animals.
+
+\subsection*{Consent to participate}\label{consent-to-participate}
+\addcontentsline{toc}{subsection}{Consent to participate}
+
+Not applicable.
+
+\subsection*{Consent for publication}\label{consent-for-publication}
+\addcontentsline{toc}{subsection}{Consent for publication}
+
+Not applicable.
+
+\subsection*{Availability of data and
+materials}\label{availability-of-data-and-materials}
+\addcontentsline{toc}{subsection}{Availability of data and materials}
+
+No new data were generated for this article. All example datasets are
+publicly available within R packages: \texttt{bugs} (jmv package),
+\texttt{sleep} and \texttt{InsectSprays} (base R datasets package), and
+\texttt{md\_12.1} (afex package). The supplementary materials, including
+the verification against \citet{Campbell_2021} and the assumption-check
+workflows, are archived on Zenodo
+(\url{https://doi.org/10.5281/zenodo.22776188}). None of the analyses
+reported here were preregistered.
+
+\subsection*{Code availability}\label{code-availability}
+\addcontentsline{toc}{subsection}{Code availability}
+
+The TOSTER R package (v0.9.0) is freely available under the GPL-3
+license from CRAN (\url{https://CRAN.R-project.org/package=TOSTER}) and
+GitHub (\url{https://github.com/Lakens/TOSTER}). The R code needed to
+reproduce all examples is included in the manuscript, and the Quarto
+source files for the supplementary materials are archived on Zenodo
+(\url{https://doi.org/10.5281/zenodo.22776188}).
+
+\subsection*{Authors' contributions}\label{authors-contributions}
+\addcontentsline{toc}{subsection}{Authors' contributions}
+
+A.R.C. is the sole author and was responsible for conceptualization,
+software development, formal analysis, visualization, and writing
+(original draft and review \& editing).
 
 \newpage
 

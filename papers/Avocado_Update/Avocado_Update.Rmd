@@ -1118,26 +1118,11 @@ The supplementary materials for this article are archived on Zenodo (<https://do
 
 ## Acknowledgement(s) {-}
 
-I would like to thank everyone from the Lakens laboratory group for their input and suggestions. I must also thank David Eisner, Jakub Tomek, and James Selig for their feedback on drafts of this manuscript. 
-
-## Disclosure statement {-}
-
-The author of this manuscript is the author of the TOSTER package.
-Citations of this manuscript will benefit his citation count.
+I would like to thank everyone from the Lakens laboratory group for their input and suggestions. I must also thank David Eisner, Jakub Tomek, and James Selig for their feedback on drafts of this manuscript. Daniel Lakens provided a review of many of the materials that have been incorporated into the update of TOSTER, and was the original author of this package. Without his help and encouragement, the TOSTER package and this update would not exist.
 
 ## AI Use Disclosure {-}
 
 During the preparation of the TOSTER package updates and this manuscript, the author used Claude Opus 4.5-5.0 (Anthropic) to assist with editing R code and drafting unit tests. For the manuscript text, Claude Opus was used only for targeted copy-editing — suggesting revisions to specific passages, catching typographical and grammatical errors, and identifying inconsistencies across sections. The manuscript was written by the author, and all AI-assisted output was reviewed, revised, and verified by the author, who takes full responsibility for the content of the package and the manuscript.
-
-## Funding {-}
-
-No funding was provided for this work.
-
-## Notes on contributor(s) {-}
-
-Daniel Lakens provided a review of many of the materials that have been incorporated
-into the update of TOSTER, and was the original author of this package.
-Without his help and encouragement, the TOSTER package and this update would not exist.
 
 ## Nomenclature/Notation {-}
 
@@ -1154,6 +1139,40 @@ Without his help and encouragement, the TOSTER package and this update would not
 ## Notes {-}
 
 The R package is also (partially) implemented in [jamovi](https://www.jamovi.org/) as the TOSTER module.
+
+# Declarations {-}
+
+## Funding {-}
+
+No funding was received for this work.
+
+## Conflicts of interest/Competing interests {-}
+
+The author is the maintainer of the TOSTER R package described in this manuscript. The package is free and open-source software, and the author receives no financial compensation related to it. The author declares no other competing interests.
+
+## Ethics approval {-}
+
+Not applicable. This article describes statistical software and uses only publicly available, de-identified example datasets distributed with R packages; no new data were collected from human participants or animals.
+
+## Consent to participate {-}
+
+Not applicable.
+
+## Consent for publication {-}
+
+Not applicable.
+
+## Availability of data and materials {-}
+
+No new data were generated for this article. All example datasets are publicly available within R packages: `bugs` (jmv package), `sleep` and `InsectSprays` (base R datasets package), and `md_12.1` (afex package). The supplementary materials, including the verification against @Campbell_2021 and the assumption-check workflows, are archived on Zenodo (<https://doi.org/10.5281/zenodo.22776188>). None of the analyses reported here were preregistered.
+
+## Code availability {-}
+
+The TOSTER R package (v0.9.0) is freely available under the GPL-3 license from CRAN (<https://CRAN.R-project.org/package=TOSTER>) and GitHub (<https://github.com/Lakens/TOSTER>). The R code needed to reproduce all examples is included in the manuscript, and the Quarto source files for the supplementary materials are archived on Zenodo (<https://doi.org/10.5281/zenodo.22776188>).
+
+## Authors' contributions {-}
+
+A.R.C. is the sole author and was responsible for conceptualization, software development, formal analysis, visualization, and writing (original draft and review & editing).
 
 \newpage
 
