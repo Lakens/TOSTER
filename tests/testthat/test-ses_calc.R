@@ -1328,7 +1328,7 @@ test_that("paired score handles zero differences (dropped)", {
 
 for (ci_method in c("perc", "basic", "bca", "stud")) {
   test_that(paste0("boot_ses_calc: CI/p-value agreement for ", ci_method), {
-    skip_on_cran()
+    skip_if_not_extended()
 
     set.seed(42)
     x <- c(1.2, 2.3, 3.1, 4.6, 5.2, 6.7, 7.0, 8.1, 2.5, 3.3)
@@ -1351,7 +1351,7 @@ test_that("boot_ses_calc two-sample bootstrap resamples within groups (no NA wit
     x <- rnorm(5)
     y <- rnorm(5, mean = 0.5)
     res <- suppressWarnings(suppressMessages(
-      boot_ses_calc(x = x, y = y, alternative = "two.sided", R = 199)))
+      boot_ses_calc(x = x, y = y, alternative = "two.sided", R = 99)))
     expect_true(is.finite(res$p.value), label = paste("seed", s, "finite p-value"))
     expect_true(all(is.finite(res$conf.int)), label = paste("seed", s, "finite CI"))
   }

@@ -24,6 +24,7 @@ test_that("two-sided test at mu = 0 returns plausible result", {
 
 # Test 2: Equivalence test where obs_rb is clearly inside bounds --------
 test_that("equivalence test with obs_rb inside bounds yields small p-value", {
+  skip_on_cran()
   set.seed(1234)
   # Generate data with no real difference, very wide bounds
   x <- rnorm(50)
@@ -236,6 +237,7 @@ test_that("all ses scales produce valid output", {
 
 # Test 14: Minimal effect test --------
 test_that("minimal effect test returns valid result", {
+  skip_on_cran()
   set.seed(666)
   # Very large group separation, narrow bounds: obs_rb should be well outside
   x <- rnorm(40, mean = 0)

@@ -104,6 +104,8 @@ boot_compare_cor <- function(
   DNAME <- paste(deparse(substitute(x1)), "and", deparse(substitute(y1)),
                  "vs.",
                  deparse(substitute(x2)), "and", deparse(substitute(y2)))
+  alternative = match.arg(alternative)
+  method = match.arg(method)
   nboot = R
   null.value = null
   if(!is.vector(x1) || !is.vector(x2) || !is.vector(y1) || !is.vector(y2)){
@@ -149,8 +151,6 @@ boot_compare_cor <- function(
     }
   }
 
-  alternative = match.arg(alternative)
-  method = match.arg(method)
 
   df <- cbind(x1,y1)
   df <- df[complete.cases(df), ]

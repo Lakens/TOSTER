@@ -15,6 +15,7 @@ jobs:
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       NOT_CRAN: true
+      TOSTER_EXTENDED_TESTS: true
 
     steps:
       - uses: actions/checkout@v4

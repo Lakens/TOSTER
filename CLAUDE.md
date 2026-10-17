@@ -126,11 +126,30 @@ describe.TOSTt <- function(x, digits = 3, ...) {
 
 ### Running Tests
 ```r
-devtools::test()                    # Run all tests
+devtools::test()                    # Run CRAN + full tiers (NOT_CRAN=true)
 testthat::test_file("tests/testthat/test-tTOST.R")  # Single file
+Sys.setenv(TOSTER_EXTENDED_TESTS = "true"); devtools::test()  # Everything
+Sys.setenv(NOT_CRAN = "false"); testthat::test_local()        # Simulate CRAN
 ```
+`junk/time_tests.R` times each tier (`Rscript junk/time_tests.R cran|full|extended`).
+
+### Test Tiers
+CRAN has complained about test run times, so tests are split into three tiers. Keep the CRAN tier under about 1 minute.
+
+| Tier | Guard | Runs when |
+|---|---|---|
+| CRAN | none | always |
+| Full | `skip_on_cran()` | `NOT_CRAN=true` (`devtools::test()`, `devtools::check()`, GitHub CI) |
+| Extended | `skip_if_not_extended()` (`tests/testthat/helper-skips.R`) | `TOSTER_EXTENDED_TESTS=true` (always set in GitHub workflows; opt-in locally) |
+
+Rules of thumb for new tests:
+- **CRAN tier**: analytic tests, plus one or two fast smoke tests per resampling function (`R` ≤ 99, small n; check class, CI length and p-value range).
+- **Full tier** (`skip_on_cran()`): resampling with `R` > 99, slow plots (`plot()`, `plot_pes()`, `plot_smd()`, `plot_cor()` all build ggdist layers and take about 0.5–5 s each), and loops over CI methods or alternatives.
+- **Extended tier** (`skip_if_not_extended()`): `R` ≥ 4999, validation against other packages at high `R`, and CI/p-value agreement sweeps.
+- To skip only the slow tail of a test, place `skip_on_cran()` after the fast expectations instead of skipping the whole block.
 
 ### Test Coverage
+GitHub coverage runs with both `NOT_CRAN` and `TOSTER_EXTENDED_TESTS` set, so it reflects the full suite.
 ```r
 covr::package_coverage()            # Check coverage
 covr::report()                      # HTML coverage report

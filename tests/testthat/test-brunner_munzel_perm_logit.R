@@ -106,7 +106,7 @@ pl_px <- rnorm(15)
 pl_py <- pl_px + rnorm(15, -0.4, 1.2)
 
 test_that("perm_logit CI agrees with its p-value", {
-  skip_on_cran()
+  skip_if_not_extended()
   for (alt in c("two.sided", "less", "greater")) {
     expect_pl_duality(list(x = pl_x, y = pl_y, alternative = alt, R = 999))
     expect_pl_duality(list(x = pl_px, y = pl_py, paired = TRUE,
@@ -117,7 +117,7 @@ test_that("perm_logit CI agrees with its p-value", {
 })
 
 test_that("perm_logit equivalence/MET decisions agree with the 1 - 2*alpha CI", {
-  skip_on_cran()
+  skip_if_not_extended()
   eps <- 1e-7
   for (paired in c(FALSE, TRUE)) {
     args <- if (paired) list(x = pl_px, y = pl_py, paired = TRUE, R = 999) else

@@ -720,6 +720,11 @@ test_that("brunner_munzel",{
                           "p_less =", result_less_rev$p.value,
                           ", p_greater =", result_greater_rev$p.value))
 
+})
+
+test_that("brunner_munzel permutation matches brunnermunzel package", {
+  skip_if_not_extended()
+
   # Validation against brunnermunzel R package reference values ----
   # These tests verify that TOSTER's permutation test gives results consistent
 

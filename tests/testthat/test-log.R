@@ -263,7 +263,7 @@ test_that("Run examples for paired samples", {
 
 for (ci_method in c("perc", "basic", "bca", "stud")) {
   test_that(paste0("boot_log_TOST: CI/p-value agreement for ", ci_method), {
-    skip_on_cran()
+    skip_if_not_extended()
 
     set.seed(42)
     x <- rlnorm(30, meanlog = 3.5, sdlog = 0.4)

@@ -157,6 +157,9 @@ NEWS
 
 ## Bug Fixes
 
+- `boot_compare_cor()` no longer errors when `alternative` or `method` is left
+  at its default; the arguments are now matched before they are used.
+
 - **Two-sample bootstrap in `boot_smd_calc()` and `boot_ses_calc()` now
   resamples within each group.** Previously, observations were resampled from
   the pooled data, so group sizes varied across bootstrap replicates. With

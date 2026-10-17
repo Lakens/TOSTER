@@ -257,6 +257,7 @@ test_that("Run examples for one sample", {
 
   prtest = hush(print(test4))
   des = hush(describe(test4))
+  skip_on_cran()
   p1 = plot(test4)
   p2 = plot(test4,
             type = "c")
@@ -1035,6 +1036,11 @@ test_that("Run examples for plot_smd", {
                 type = "cd",
                 smd_ci = "goulet")
 
+  expect_error(plot_smd(df = c(test1$smd$d_df),
+                        SE = c(test1$smd$d_sigma)))
+
+  skip_on_cran()
+
   p1 = plot_smd(lambda = c(test1$smd$d_lambda),
                 df = c(test1$smd$d_df),
                 d = c(test1$smd$d),
@@ -1054,14 +1060,11 @@ test_that("Run examples for plot_smd", {
                 smd_ci = "goulet")
 
 
-  expect_error(plot_smd(df = c(test1$smd$d_df),
-                        SE = c(test1$smd$d_sigma)))
-
-
 
 })
 
 test_that("plot generic function",{
+  skip_on_cran()
   set.seed(1812)
 
   samp1 = rnorm(25)

@@ -808,7 +808,7 @@ small_x <- rnorm(5, mean = 1, sd = 3)
 small_y <- rnorm(9, mean = 0, sd = 1)
 
 test_that("CI agrees with p-value: two-sample Welch (Behrens-Fisher), randomized", {
-  skip_on_cran()
+  skip_if_not_extended()
   for (alt in c("two.sided", "less", "greater")) {
     for (sym in c(TRUE, FALSE)) {
       expect_ci_duality(list(x = bf_x, y = bf_y, alternative = alt,
@@ -818,7 +818,7 @@ test_that("CI agrees with p-value: two-sample Welch (Behrens-Fisher), randomized
 })
 
 test_that("CI agrees with p-value: two-sample exact enumeration, both p_methods", {
-  skip_on_cran()
+  skip_if_not_extended()
   for (pm in c("exact", "plusone")) {
     for (alt in c("two.sided", "less", "greater")) {
       expect_ci_duality(list(x = small_x, y = small_y, alternative = alt,
@@ -830,7 +830,7 @@ test_that("CI agrees with p-value: two-sample exact enumeration, both p_methods"
 })
 
 test_that("CI agrees with p-value: var.equal, trimming, and perm_se = FALSE", {
-  skip_on_cran()
+  skip_if_not_extended()
   for (alt in c("two.sided", "less", "greater")) {
     expect_ci_duality(list(x = bf_x, y = bf_y, alternative = alt,
                            var.equal = TRUE, R = 499))
@@ -845,7 +845,7 @@ test_that("CI agrees with p-value: var.equal, trimming, and perm_se = FALSE", {
 })
 
 test_that("CI agrees with p-value: one-sample and paired", {
-  skip_on_cran()
+  skip_if_not_extended()
   set.seed(7)
   x1 <- rexp(10) - 0.3
   for (alt in c("two.sided", "less", "greater")) {
@@ -863,14 +863,14 @@ test_that("CI agrees with p-value: one-sample and paired", {
 })
 
 test_that("CI agrees with p-value for alpha other than 0.05", {
-  skip_on_cran()
+  skip_if_not_extended()
   expect_ci_duality(list(x = bf_x, y = bf_y, alpha = 0.1, R = 999))
   expect_ci_duality(list(x = bf_x, y = bf_y, alpha = 0.01, R = 999,
                          symmetric = FALSE))
 })
 
 test_that("equivalence and minimal effect decisions agree with the 1 - 2*alpha CI", {
-  skip_on_cran()
+  skip_if_not_extended()
   base <- list(x = bf_x, y = bf_y, R = 999)
   set.seed(1)
   ci <- suppressMessages(do.call(perm_t_test, c(base, list(

@@ -189,10 +189,10 @@ test_that("boot_t_TOST results are invariant to shifting data, mu, and bounds", 
   for (ci in c("stud", "perc")) {
     set.seed(1111)
     res <- boot_t_TOST(x = x_one, mu = m0, eqb = c(5.5, 8.5),
-                       R = 199, boot_ci = ci)
+                       R = 99, boot_ci = ci)
     set.seed(1111)
     res0 <- boot_t_TOST(x = x_one - m0, eqb = c(5.5, 8.5) - m0,
-                        R = 199, boot_ci = ci)
+                        R = 99, boot_ci = ci)
 
     expect_equal(res$mu, m0)
     expect_equal(res$TOST$p.value, res0$TOST$p.value)
@@ -206,9 +206,9 @@ test_that("boot_t_TOST results are invariant to shifting data, mu, and bounds", 
 
   set.seed(2222)
   res <- boot_t_TOST(x = x_two, y = y_two, mu = 0.5, eqb = c(-0.5, 1.5),
-                     R = 199)
+                     R = 99)
   set.seed(2222)
-  res0 <- boot_t_TOST(x = x_two - 0.5, y = y_two, eqb = c(-1, 1), R = 199)
+  res0 <- boot_t_TOST(x = x_two - 0.5, y = y_two, eqb = c(-1, 1), R = 99)
   expect_equal(res$TOST$p.value, res0$TOST$p.value)
   expect_equal(res$effsize$estimate[1], mean(x_two) - mean(y_two))
 })

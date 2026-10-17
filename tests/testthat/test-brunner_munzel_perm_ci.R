@@ -40,7 +40,7 @@ bm_px <- rnorm(20)
 bm_py <- bm_px + rnorm(20, -0.2, 1.5)
 
 test_that("BM permutation CI agrees with p-value: two-sample randomized", {
-  skip_on_cran()
+  skip_if_not_extended()
   for (alt in c("two.sided", "less", "greater")) {
     expect_bm_duality(list(x = bm_x, y = bm_y, alternative = alt, R = 999))
     expect_bm_duality(list(x = bm_x, y = bm_y, alternative = alt, R = 999,
@@ -49,7 +49,7 @@ test_that("BM permutation CI agrees with p-value: two-sample randomized", {
 })
 
 test_that("BM permutation CI agrees with p-value: two-sample exact enumeration", {
-  skip_on_cran()
+  skip_if_not_extended()
   # choose(14, 6) = 3003 permutations
   for (alt in c("two.sided", "less", "greater")) {
     for (pm in c("exact", "plusone")) {
@@ -60,7 +60,7 @@ test_that("BM permutation CI agrees with p-value: two-sample exact enumeration",
 })
 
 test_that("BM permutation CI agrees with p-value: paired", {
-  skip_on_cran()
+  skip_if_not_extended()
   for (alt in c("two.sided", "less", "greater")) {
     # n > 13: randomized
     expect_bm_duality(list(x = bm_px, y = bm_py, paired = TRUE,
@@ -72,7 +72,7 @@ test_that("BM permutation CI agrees with p-value: paired", {
 })
 
 test_that("BM permutation equivalence/MET decisions agree with the 1 - 2*alpha CI", {
-  skip_on_cran()
+  skip_if_not_extended()
   eps <- 1e-7
   for (paired in c(FALSE, TRUE)) {
     args <- if (paired) {
@@ -114,7 +114,7 @@ test_that("BM two-sided permutation CI is centered on the estimate when unclampe
 # Floating point ties in permutation counts ----
 
 test_that("BM exact permutation test holds its level with tied data", {
-  skip_on_cran()
+  skip_if_not_extended()
   # The observed statistic (rank formula) and the permuted statistics
   # (perm_loop) are computed by different code paths, so tied values differ in
   # the last bits. Before tolerant counting, this 5 v 5 ordinal case rejected

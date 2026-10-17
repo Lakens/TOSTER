@@ -792,7 +792,7 @@ hl_bf_y <- rnorm(20, mean = 0, sd = 1)
 hl_skew <- rexp(12) - 0.5
 
 test_that("HL permutation CI agrees with p-value: two-sample", {
-  skip_on_cran()
+  skip_if_not_extended()
   for (alt in c("two.sided", "less", "greater")) {
     for (sc in c("S1", "S2")) {
       expect_hl_duality(list(x = hl_bf_x, y = hl_bf_y, alternative = alt,
@@ -804,7 +804,7 @@ test_that("HL permutation CI agrees with p-value: two-sample", {
 })
 
 test_that("HL permutation CI agrees with p-value: one-sample and paired", {
-  skip_on_cran()
+  skip_if_not_extended()
   for (alt in c("two.sided", "less", "greater")) {
     # exact sign-flip enumeration (4096 permutations)
     expect_hl_duality(list(x = hl_skew, alternative = alt, R = 5000))
@@ -818,7 +818,7 @@ test_that("HL permutation CI agrees with p-value: one-sample and paired", {
 })
 
 test_that("HL permutation CI agrees with p-value for other alpha levels", {
-  skip_on_cran()
+  skip_if_not_extended()
   expect_hl_duality(list(x = hl_bf_x, y = hl_bf_y, alpha = 0.1, R = 999))
   expect_hl_duality(list(x = hl_skew, alpha = 0.01, R = 999))
 })

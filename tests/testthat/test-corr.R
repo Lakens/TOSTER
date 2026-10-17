@@ -926,7 +926,7 @@ test_that("boot_cor_test: boot_scale only affects basic and stud", {
 })
 
 test_that("boot_cor_test: CI/p-value agreement on both scales", {
-  skip_on_cran()
+  skip_if_not_extended()
 
   set.seed(18)
   n <- 50
@@ -997,7 +997,7 @@ test_that("boot_cor_test: boot_ci returned in result", {
 })
 
 test_that("boot_cor_test: CI/p-value agreement for perc", {
-  skip_on_cran()
+  skip_if_not_extended()
 
   set.seed(42)
   n <- 50
@@ -1014,7 +1014,7 @@ test_that("boot_cor_test: CI/p-value agreement for perc", {
 })
 
 test_that("boot_cor_test: CI/p-value agreement for basic", {
-  skip_on_cran()
+  skip_if_not_extended()
 
   set.seed(42)
   n <- 50
@@ -1030,7 +1030,7 @@ test_that("boot_cor_test: CI/p-value agreement for basic", {
 })
 
 test_that("boot_cor_test: CI/p-value agreement for bca", {
-  skip_on_cran()
+  skip_if_not_extended()
 
   set.seed(42)
   n <- 50
@@ -1046,7 +1046,7 @@ test_that("boot_cor_test: CI/p-value agreement for bca", {
 })
 
 test_that("boot_cor_test: CI/p-value agreement for stud", {
-  skip_on_cran()
+  skip_if_not_extended()
 
   set.seed(42)
   n <- 50

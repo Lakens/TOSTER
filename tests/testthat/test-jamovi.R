@@ -527,6 +527,8 @@ test_that("datatosttwoprop tests",{
   t2 = plot_cor(r = .43, n =32, method = "spearman")
   t3 = plot_cor(r = .21, n =100, method = "kendall")
 
+  skip_on_cran()
+
   # density
   t1 = plot_cor(r = .3, n =22, method = "pearson",
                 type = "cd")

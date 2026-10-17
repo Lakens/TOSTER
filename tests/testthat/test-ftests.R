@@ -43,23 +43,10 @@ test_that("Equivalence F-tests",{
   t3 = suppressMessages(equ_anova(aovmodel, eqbound = .01)$p.equ)
   expect_equal(t3, t1$p.value)
 
-  p1 = plot_pes(Fstat = 1.5,
-           df1 = 2,
-           df2 = 45)
-
   p2 = plot_pes(0.49348,
                 df1 = 2,
                 df2 = 4577,
                 type = "cd")
-
-  p3 = plot_pes(Fstat = 1.5,
-                df1 = 2,
-                df2 = 45,
-                type = "c")
-
-  p4 = plot_pes(0.49348,
-                df1 = 2,
-                df2 = 4577)
 
   # Test power function
 
@@ -87,6 +74,8 @@ test_that("Equivalence F-tests",{
   t2 =  suppressMessages(equ_anova(npk.aovE, eqbound = .01))
 
   # test with car and afex
+  skip_if_not_installed("afex")
+  skip_if_not_installed("car")
 
   suppressMessages(hush(suppressWarnings(
     library(afex,verbose=FALSE,
@@ -106,6 +95,27 @@ test_that("Equivalence F-tests",{
 
   expect_error(suppressMessages(equ_anova(t.test(rnorm(1:10)))))
 
+})
+
+test_that("plot_pes plot types", {
+  skip_on_cran()
+
+  p1 = plot_pes(Fstat = 1.5,
+                df1 = 2,
+                df2 = 45)
+
+  p3 = plot_pes(Fstat = 1.5,
+                df1 = 2,
+                df2 = 45,
+                type = "c")
+
+  p4 = plot_pes(0.49348,
+                df1 = 2,
+                df2 = 4577)
+
+  expect_true(inherits(p1, "ggplot") || inherits(p1, "gg"))
+  expect_true(inherits(p3, "ggplot") || inherits(p3, "gg"))
+  expect_true(inherits(p4, "ggplot") || inherits(p4, "gg"))
 })
 
 

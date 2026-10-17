@@ -11,7 +11,7 @@ hush = function(code) {
 
 # Test 1: Bootstrap p-value is not anticonservatively below parametric (Welch) ----
 test_that("bootstrap Welch p-value is not anticonservative relative to parametric", {
-  skip_on_cran()
+  skip_if_not_extended()
   set.seed(42)
   res_boot  <- boot_t_test(extra ~ group, data = sleep, R = 4999)
   res_param <- t.test(extra ~ group, data = sleep)
@@ -22,7 +22,7 @@ test_that("bootstrap Welch p-value is not anticonservative relative to parametri
 
 # Test 2: One-sample p-value near 1 when mu equals sample mean ----
 test_that("one-sample p-value near 1 when mu equals sample mean", {
-  skip_on_cran()
+  skip_if_not_extended()
   set.seed(1)
   x <- rnorm(30, mean = 5, sd = 1)
   set.seed(42)
@@ -32,7 +32,7 @@ test_that("one-sample p-value near 1 when mu equals sample mean", {
 
 # Test 3: One-sided p-values sum to approximately 1 ----
 test_that("one-sided p-values sum to approximately 1", {
-  skip_on_cran()
+  skip_if_not_extended()
   set.seed(10)
   p_less    <- boot_t_test(extra ~ group, data = sleep,
                            alternative = "less",    R = 4999)$p.value
@@ -44,7 +44,7 @@ test_that("one-sided p-values sum to approximately 1", {
 
 # Test 4: Equal-variance p-value is not anticonservative relative to parametric ----
 test_that("var.equal p-value is not anticonservative relative to parametric", {
-  skip_on_cran()
+  skip_if_not_extended()
   set.seed(42)
   res_eq  <- boot_t_test(extra ~ group, data = sleep,
                          var.equal = TRUE, R = 4999)
@@ -55,7 +55,7 @@ test_that("var.equal p-value is not anticonservative relative to parametric", {
 
 # Test 5: Trimmed-mean path is unaffected (non-regression) ----
 test_that("trimmed path p-values unchanged after fix", {
-  skip_on_cran()
+  skip_if_not_extended()
   set.seed(99)
   res <- boot_t_test(extra ~ group, data = sleep, tr = 0.1, R = 4999)
   expect_s3_class(res, "htest")
@@ -65,7 +65,7 @@ test_that("trimmed path p-values unchanged after fix", {
 
 # Test 6: One-sample paired test is not anticonservative ----
 test_that("paired bootstrap p-value is not anticonservative", {
-  skip_on_cran()
+  skip_if_not_extended()
   x <- sleep$extra[sleep$group == 1]
   y <- sleep$extra[sleep$group == 2]
   set.seed(42)
@@ -79,7 +79,7 @@ test_that("paired bootstrap p-value is not anticonservative", {
 
 for (ci_method in c("perc", "basic", "bca", "stud")) {
   test_that(paste0("boot_t_test: CI/p-value agreement for ", ci_method), {
-    skip_on_cran()
+    skip_if_not_extended()
 
     # Use data with a clear effect to avoid boundary discretization issues
     set.seed(42)

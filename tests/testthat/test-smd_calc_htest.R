@@ -371,7 +371,7 @@ test_that("boot_smd_calc method string is correct", {
 
 for (ci_method in c("perc", "basic", "bca", "stud")) {
   test_that(paste0("boot_smd_calc: CI/p-value agreement for ", ci_method), {
-    skip_on_cran()
+    skip_if_not_extended()
 
     set.seed(42)
     x <- rnorm(30, mean = 0.5)
@@ -400,7 +400,7 @@ test_that("boot_smd_calc two-sample bootstrap resamples within groups (no NA wit
       y <- rnorm(5)
       res <- boot_smd_calc(x = x, y = y,
                            alternative = "two.sided",
-                           boot_ci = ci_method, R = 199)
+                           boot_ci = ci_method, R = 99)
       expect_true(is.finite(res$p.value),
                   label = paste(ci_method, "seed", s, "finite p-value"))
       expect_true(all(is.finite(res$conf.int)),
