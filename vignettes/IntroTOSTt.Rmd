@@ -1,5 +1,6 @@
 ---
 title: "An Introduction to t_TOST"
+description: "Equivalence and minimal effect testing for t-tests in R with t_TOST(), tsum_TOST() and simple_htest(), including result plots and power analysis with power_t_TOST()."
 subtitle: "A new function for TOST with t-tests"
 author: "Aaron R. Caldwell"
 date: "`r Sys.Date()`"
@@ -50,7 +51,7 @@ The functions also provide enhanced summary information and visualizations that 
 
 These functions are not limited to equivalence tests. Minimal effects testing (MET) is also supported, which is useful for situations where the hypothesis concerns a minimal effect and the null hypothesis *is* equivalence. This reverses the typical TOST paradigm and can be valuable in contexts where you want to demonstrate that an effect exceeds some minimal threshold.
 
-```{r tostplots,echo=FALSE, message = FALSE, warning = FALSE, fig.show='hold'}
+```{r tostplots,echo=FALSE, message = FALSE, warning = FALSE, fig.show='hold', fig.alt = c("Diagram of a minimal effect test: dashed lines mark the lower and upper equivalence bounds, with the null hypothesis (H0) between the bounds and the alternative hypothesis (H1) outside them.", "Diagram of an equivalence test: dashed lines mark the lower and upper equivalence bounds, with the alternative hypothesis (H1) between the bounds and the null hypothesis (H0) outside them.")}
 
 ggplot() +
   geom_vline(aes(xintercept = -.5),
@@ -251,7 +252,7 @@ One of the advantages of `t_TOST` is its built-in visualization capabilities. Th
 
 This is the default plot type, showing the point estimate and confidence intervals relative to the equivalence bounds:
 
-```{r fig.width=6, fig.height=6}
+```{r fig.width=6, fig.height=6, fig.alt = "Side-by-side dot-and-whisker plots of the raw mean difference and Hedges's g(av), each with a 90% confidence interval that extends past the lower dashed equivalence bound, so equivalence cannot be concluded."}
 plot(res1, type = "simple", layout = "combined")
 ```
 
@@ -261,7 +262,7 @@ This plot clearly shows where our observed difference (with confidence intervals
 
 This plot shows the distribution of possible effect sizes, with shading for different confidence levels:
 
-```{r fig.width=6, fig.height=6, eval=TRUE}
+```{r fig.width=6, fig.height=6, eval=TRUE, fig.alt = "Consonance density plots for Hedges's g(av) (top) and the raw mean difference (bottom) with the 90% and 95% confidence regions shaded; most of each distribution lies below the lower dashed equivalence bound."}
 # Shade the 90% and 95% CI areas
 plot(res1, type = "cd",
      ci_shades = c(.9, .95))
@@ -273,7 +274,7 @@ The darker shaded region represents the 90% confidence interval, while the light
 
 This plot shows multiple confidence intervals simultaneously:
 
-```{r fig.width=6, fig.height=6}
+```{r fig.width=6, fig.height=6, fig.alt = "Consonance curves of the two-tailed p-value against Hedges's g(av) (top) and the raw mean difference (bottom), with horizontal lines marking the 90% and 95% confidence intervals, both of which cross the lower dashed equivalence bound."}
 plot(res1, type = "c",
      ci_lines = c(.9, .95))
 ```
@@ -284,7 +285,7 @@ Here, we can see both the 90% and 95% confidence intervals represented as differ
 
 This plot visualizes the null distribution:
 
-```{r fig.width=6, fig.height=6}
+```{r fig.width=6, fig.height=6, fig.alt = "Null distributions for the two one-sided tests, centred on the equivalence bounds of -0.5 and 0.5 with their rejection regions shaded green, above the observed mean difference and its 90% confidence interval; the estimate falls in only one rejection region, so equivalence is not shown."}
 plot(res1, type = "tnull")
 ```
 
@@ -448,7 +449,7 @@ Required arguments vary depending on the test type:
 
 The same visualization and description methods work with `tsum_TOST`:
 
-```{r fig.width=6, fig.height=6}
+```{r fig.width=6, fig.height=6, fig.alt = "Stacked dot-and-whisker plots for the one-sample test of mean sepal length: the raw mean and its 90% confidence interval lie inside the equivalence bounds of 5.5 and 8.5, so the equivalence test is significant, and a lower panel shows Hedges's g against its standardized bounds."}
 plot(res_tsum)
 ```
 

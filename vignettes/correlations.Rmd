@@ -1,5 +1,6 @@
 ---
 title: "Correlations"
+description: "Equivalence and minimal effect tests for Pearson, Spearman and Kendall correlations in R with z_cor_test(), boot_cor_test() and corsum_test(), and comparing correlations with compare_cor()."
 author: "Aaron R. Caldwell"
 date: "`r Sys.Date()`"
 output: 

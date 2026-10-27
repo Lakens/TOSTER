@@ -12,7 +12,48 @@
 
 *An R package and jamovi module for equivalence testing*
 
+TOSTER provides equivalence tests and minimal effect tests based on the two one-sided tests (TOST) procedure. It covers t-tests, correlations, differences in proportions, F-tests/ANOVA, and robust or nonparametric alternatives (bootstrap, permutation, Wilcoxon, Brunner-Munzel, and log-ratio tests). It also calculates standardized mean differences and rank-based effect sizes with confidence intervals, and power for equivalence tests. Equivalence bounds can be set on the raw scale or as standardized effect sizes.
+
 Please see the package's [website](https://aaroncaldwell.us/TOSTERpkg/) for updates, vignettes, and other details about the package.
+
+## Which function should I use?
+
+| Task | Function(s) | Guide |
+|---|---|---|
+| Equivalence or minimal effect t-test (one-sample, paired, two-sample) from raw data | `t_TOST()` | [t_TOST](https://aaroncaldwell.us/TOSTERpkg/articles/IntroTOSTt.html) |
+| The same t-tests from summary statistics (means, SDs, n) | `tsum_TOST()` | [t_TOST](https://aaroncaldwell.us/TOSTERpkg/articles/IntroTOSTt.html) |
+| Estimate the paired-samples correlation needed by `tsum_TOST()` | `extract_r_paired()` | [reference](https://aaroncaldwell.us/TOSTERpkg/reference/extract_r_paired.html) |
+| Equivalence test that returns a standard `htest` object | `simple_htest()` | [Hypothesis testing](https://aaroncaldwell.us/TOSTERpkg/articles/hypothesis_testing.html) |
+| Print, plot, or describe `t_TOST()`/`wilcox_TOST()` results | `print()`, `plot()`, `describe()` | [t_TOST](https://aaroncaldwell.us/TOSTERpkg/articles/IntroTOSTt.html) |
+| Convert TOSTER results to `htest`; tabulate, describe, or plot any `htest` | `as_htest()`, `df_htest()`, `describe_htest()`, `plot_htest_est()` | [Hypothesis testing](https://aaroncaldwell.us/TOSTERpkg/articles/hypothesis_testing.html) |
+| Power or sample size for TOST t-tests | `power_t_TOST()` | [t_TOST](https://aaroncaldwell.us/TOSTERpkg/articles/IntroTOSTt.html) |
+| Bootstrap TOST or bootstrap t-test for means | `boot_t_TOST()`, `boot_t_test()` | [Robust TOST](https://aaroncaldwell.us/TOSTERpkg/articles/robustTOST.html) |
+| Permutation t-test (including equivalence alternatives) | `perm_t_test()` | [Robust TOST](https://aaroncaldwell.us/TOSTERpkg/articles/robustTOST.html) |
+| Ratio of means (log-transformed TOST) | `log_TOST()`, `boot_log_TOST()` | [Robust TOST](https://aaroncaldwell.us/TOSTERpkg/articles/robustTOST.html) |
+| Wilcoxon-Mann-Whitney / signed-rank TOST | `wilcox_TOST()` | [Robust TOST](https://aaroncaldwell.us/TOSTERpkg/articles/robustTOST.html) |
+| Brunner-Munzel test (probability of superiority) | `brunner_munzel()` | [Robust TOST](https://aaroncaldwell.us/TOSTERpkg/articles/robustTOST.html) |
+| Hodges-Lehmann test (location shift) | `hodges_lehmann()` | [Robust TOST](https://aaroncaldwell.us/TOSTERpkg/articles/robustTOST.html) |
+| Rank-based effect sizes (rank-biserial, concordance, odds) and tests of them | `ses_calc()`, `boot_ses_calc()`, `boot_ses_test()` | [Robust TOST](https://aaroncaldwell.us/TOSTERpkg/articles/robustTOST.html) |
+| Rank-difference transformation for paired data; rescale probability-scale effect sizes | `rank_diff()`, `trans_rank_prob()` | [reference](https://aaroncaldwell.us/TOSTERpkg/reference/index.html) |
+| Equivalence test for a correlation (Pearson, Spearman, Kendall) from raw data | `z_cor_test()`, `boot_cor_test()` | [Correlations](https://aaroncaldwell.us/TOSTERpkg/articles/correlations.html) |
+| Equivalence test for a correlation from summary statistics | `corsum_test()` | [Correlations](https://aaroncaldwell.us/TOSTERpkg/articles/correlations.html) |
+| Compare correlations between independent studies | `compare_cor()`, `boot_compare_cor()` | [Correlations](https://aaroncaldwell.us/TOSTERpkg/articles/correlations.html) |
+| Plot the uncertainty in a correlation | `plot_cor()` | [reference](https://aaroncaldwell.us/TOSTERpkg/reference/plot_cor.html) |
+| Power for correlation equivalence tests | `power_z_cor()` | [Introduction](https://aaroncaldwell.us/TOSTERpkg/articles/IntroductionToTOSTER.html) |
+| Equivalence test for two independent proportions | `twoprop_test()` | [reference](https://aaroncaldwell.us/TOSTERpkg/reference/twoprop_test.html) |
+| Power for two-proportion equivalence tests | `power_twoprop()` | [reference](https://aaroncaldwell.us/TOSTERpkg/reference/power_twoprop.html) |
+| Equivalence test for an F-test or ANOVA (partial eta-squared) | `equ_ftest()`, `equ_anova()` | [F-tests](https://aaroncaldwell.us/TOSTERpkg/articles/the_ftestTOSTER.html) |
+| Power for F-test equivalence tests | `power_eq_f()` | [F-tests](https://aaroncaldwell.us/TOSTERpkg/articles/the_ftestTOSTER.html) |
+| Plot the uncertainty in partial eta-squared | `plot_pes()` | [F-tests](https://aaroncaldwell.us/TOSTERpkg/articles/the_ftestTOSTER.html) |
+| Standardized mean differences (Cohen's d, Hedges' g, Glass's delta) with CIs | `smd_calc()`, `boot_smd_calc()` | [SMDs](https://aaroncaldwell.us/TOSTERpkg/articles/SMD_calcs.html) |
+| Plot the uncertainty in an SMD | `plot_smd()` | [SMDs](https://aaroncaldwell.us/TOSTERpkg/articles/SMD_calcs.html) |
+| Compare SMDs between original and replication studies | `compare_smd()`, `boot_compare_smd()` | [SMDs](https://aaroncaldwell.us/TOSTERpkg/articles/SMD_calcs.html) |
+| TOST for a meta-analytic effect size (legacy; no newer replacement) | `TOSTmeta()` | [Introduction](https://aaroncaldwell.us/TOSTERpkg/articles/IntroductionToTOSTER.html) |
+| *Superseded:* legacy t-test TOST functions; use `t_TOST()` or `tsum_TOST()` | `TOSTone()`, `TOSTone.raw()`, `TOSTpaired()`, `TOSTpaired.raw()`, `TOSTtwo()`, `TOSTtwo.raw()` | [Introduction](https://aaroncaldwell.us/TOSTERpkg/articles/IntroductionToTOSTER.html) |
+| *Superseded:* legacy correlation and proportion TOST; use `corsum_test()` or `twoprop_test()` | `TOSTr()`, `TOSTtwo.prop()` | [Introduction](https://aaroncaldwell.us/TOSTERpkg/articles/IntroductionToTOSTER.html) |
+| *Superseded:* legacy power functions; use `power_t_TOST()`, `power_z_cor()`, or `power_twoprop()` | `powerTOSTone()`, `powerTOSTone.raw()`, `powerTOSTpaired()`, `powerTOSTpaired.raw()`, `powerTOSTtwo()`, `powerTOSTtwo.raw()`, `powerTOSTr()`, `powerTOSTtwo.prop()` | [Introduction](https://aaroncaldwell.us/TOSTERpkg/articles/IntroductionToTOSTER.html) |
+| *Deprecated:* nonparametric effect sizes; use `ses_calc()` | `rbs()`, `np_ses()` | [reference](https://aaroncaldwell.us/TOSTERpkg/reference/rbs.html) |
+| *jamovi only:* back ends for the jamovi module, not intended for use in R | `dataTOSTone()`, `dataTOSTpaired()`, `dataTOSTtwo()`, `dataTOSTr()`, `datatosttwoprop()` | [reference](https://aaroncaldwell.us/TOSTERpkg/reference/index.html) |
 
 **Background**
 
