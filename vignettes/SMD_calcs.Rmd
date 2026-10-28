@@ -1,5 +1,6 @@
 ---
 title: "Standardized Mean Differences"
+description: "How TOSTER calculates standardized mean differences (Cohen's d, Hedges' g, Glass's delta) and their confidence intervals with smd_calc() and boot_smd_calc(), plots them with plot_smd(), and compares studies with compare_smd()."
 subtitle: "The calculation of Cohen's d type effect sizes"
 author: "Aaron R. Caldwell"
 link-citations: true
@@ -626,7 +627,7 @@ Two types of plots can be produced: consonance (`type = "c"`),
 consonance density (`type = "cd"`), or both (the default option;
 (`type = c("c","cd")`))
 
-```{r fig.width=6, fig.height=6}
+```{r fig.width=6, fig.height=6, fig.alt = "Consonance plots for a Cohen's d of 0.43: a density curve shaded by 50%, 90%, 95% and 99.9% confidence regions (top) and a two-tailed p-value curve with matching interval lines (bottom), showing that the 90% and wider intervals include zero."}
 plot_smd(d = .43,
          df = 58,
          sigma = .33,
@@ -693,7 +694,7 @@ knitr::kable(boot_test$df_ci, digits = 4)
 The results of the bootstrapping are stored in the results. So we can
 even visualize the differences in SMDs.
 
-```{r}
+```{r, fig.alt = c("Overlaid histograms and density curves of bootstrapped SMDs for the original and replication studies: the original centres near 1, the replication near 0, and the two distributions barely overlap.", "Histogram and density curve of the bootstrapped difference in SMDs between the original and replication studies, centred near 0.8 with almost no estimates below zero.")}
 library(ggplot2)
 
 list_res = boot_test$boot_res

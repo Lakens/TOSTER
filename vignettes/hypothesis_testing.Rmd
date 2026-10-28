@@ -1,5 +1,6 @@
 ---
 title: "Hypothesis Testing with TOSTER"
+description: "Run equivalence and minimal effect tests that return standard htest objects with simple_htest() and as_htest(), then report them with df_htest(), describe_htest() and plot_htest_est()."
 output: rmarkdown::html_vignette
 link-citations: true
 vignette: >
@@ -221,19 +222,19 @@ This is useful for inline reporting in R Markdown. For example, you could write 
 
 `plot_htest_est()` produces a point-range plot showing the point estimate and confidence interval alongside the null value(s):
 
-```{r, fig.width=6, fig.height=3}
+```{r, fig.width=6, fig.height=3, fig.alt = "Estimate plot for a Welch two-sample t-test showing a mean difference of -1.58 with a 95% confidence interval that crosses the dashed null value of 0, with the test statistic and p-value in the subtitle."}
 plot_htest_est(res_t)
 ```
 
 For equivalence tests, the plot displays both equivalence bounds as dashed reference lines:
 
-```{r, fig.width=6, fig.height=3}
+```{r, fig.width=6, fig.height=3, fig.alt = "Estimate plot for an equivalence test with dashed bounds at -2 and 2, showing a mean difference of -1.58 whose 90% confidence interval extends below the lower bound, so equivalence is not shown."}
 plot_htest_est(res_equiv)
 ```
 
 Set `describe = FALSE` for a cleaner plot without the statistical summary in the subtitle:
 
-```{r, fig.width=6, fig.height=3}
+```{r, fig.width=6, fig.height=3, fig.alt = "The same equivalence-test estimate plot without the statistical summary subtitle: a mean difference of -1.58 and its 90% confidence interval against dashed bounds at -2 and 2."}
 plot_htest_est(res_equiv, describe = FALSE)
 ```
 
@@ -243,7 +244,7 @@ Because the result is a `ggplot2` object, you can customize it further with stan
 
 Here is a compact workflow tying together the full set of tools. We run an equivalence test, tabulate the result, describe it in text, and visualize it:
 
-```{r, fig.width=6, fig.height=3}
+```{r, fig.width=6, fig.height=3, fig.alt = "Estimate plot from the complete workflow: a mean difference of -1.58 with a 90% confidence interval that extends below the lower dashed equivalence bound of -2, so equivalence is not shown."}
 # Run equivalence test
 result <- simple_htest(extra ~ group,
                        data = sleep,

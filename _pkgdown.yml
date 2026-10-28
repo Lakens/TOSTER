@@ -1,6 +1,14 @@
 home:
-  title: TOSTER R package
-  description: An R pacakge for equivalence testing through two one-sided tests (TOST).
+  title: "TOSTER: Equivalence Testing with Two One-Sided Tests (TOST) in R"
+  description: >-
+    TOSTER is an R package and jamovi module for equivalence testing and
+    minimal effect testing with the two one-sided tests (TOST) procedure.
+    It covers t-tests (t_TOST, tsum_TOST), correlations, differences in
+    proportions, F-test/ANOVA equivalence (equ_ftest, equ_anova), and
+    robust or nonparametric TOST (bootstrap, permutation, Wilcoxon,
+    Brunner-Munzel, log-ratio). It also calculates standardized mean
+    differences (Cohen's d, Hedges' g) with confidence intervals and
+    power for equivalence tests.
 
 url: https://aaroncaldwell.us/TOSTERpkg
 

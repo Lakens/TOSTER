@@ -1,5 +1,6 @@
 ---
 title: "Robust TOST Procedures"
+description: "Robust and nonparametric equivalence tests in R: Wilcoxon (wilcox_TOST()), Brunner-Munzel, Hodges-Lehmann, permutation (perm_t_test()), bootstrap (boot_t_TOST()) and log-ratio (log_TOST()) TOST, with rank-based effect sizes from ses_calc()."
 author: "Aaron R. Caldwell"
 date: "`r Sys.Date()`"
 link-citations: true
@@ -802,7 +803,7 @@ Larger values of R provide more stable results but increase computation time. Fo
 
 We can use the sleep data to see the bootstrapped results. Notice that the plots show how the re-sampling via bootstrapping indicates the instability of Hedges's d~z~.
 
-```{r}
+```{r, fig.alt = "Stacked dot-and-whisker plots for the bootstrapped paired test: the raw mean difference and its 90% confidence interval lie entirely below the lower equivalence bound of -0.5, while the Hedges's g(z) interval is very wide and spans both standardized bounds."}
 data('sleep')
 
 # For paired tests with bootstrap methods, use separate vectors

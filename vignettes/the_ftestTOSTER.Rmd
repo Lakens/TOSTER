@@ -1,5 +1,6 @@
 ---
 title: "Equivalence Testing for F-tests"
+description: "Equivalence and minimal effect tests for ANOVA and F-tests in R with equ_ftest() and equ_anova(), partial eta-squared consonance plots with plot_pes(), and power with power_eq_f()."
 author: "Aaron R. Caldwell"
 link-citations: true
 date: "`r Sys.Date()`"
@@ -171,7 +172,7 @@ In this case, the minimal effect test is significant (p < 0.001), confirming tha
 
 TOSTER provides a function to visualize the uncertainty around partial eta-squared estimates through consonance plots. The `plot_pes()` function requires the F-statistic, numerator degrees of freedom, and denominator degrees of freedom.
 
-```{r, fig.width=7, fig.height=6}
+```{r, fig.width=7, fig.height=6, fig.alt = "Consonance plots for partial eta-squared from F(5, 66) = 34.7: a density curve shaded by 68%, 90%, 95% and 99.9% confidence regions (top) and a p-value curve with matching interval lines (bottom), both centred near 0.7 and far above zero."}
 plot_pes(Fstat = 34.70228,
          df1 = 5,
          df2 = 66)
@@ -189,7 +190,7 @@ These visualizations help you understand the precision of your effect size estim
 
 Let's create a second example with a smaller effect to demonstrate the other possible outcome:
 
-```{r}
+```{r, fig.alt = "Consonance plots for partial eta-squared from F(2, 87) = 2.36: a right-skewed density shaded by confidence level (top) and a p-value curve (bottom), peaking near 0.04 with the 90% interval ending below 0.15."}
 # Simulate data with a small effect
 set.seed(123)
 groups <- factor(rep(1:3, each = 30))

@@ -1,5 +1,6 @@
 ---
 title: "Introduction to Equivalence Testing with TOSTER"
+description: "Worked examples of TOST equivalence tests in R for meta-analytic effects, independent-groups and one-sample t-tests, and correlations, using tsum_TOST(), corsum_test(), power_t_TOST() and power_z_cor()."
 author: "Daniel Lakens; Updated by Aaron Caldwell"
 date: "`r Sys.Date()`"
 link-citations: true
@@ -49,7 +50,7 @@ Hyde, Lindberg, Linn, Ellis, and Williams (2008) report that effect sizes for ge
 |Grade 10	|0.04 +/- 0.003|
 |Grade 11	|0.06 +/- 0.003|
 
-```{r, fig.width=6}
+```{r, fig.width=6, fig.alt = "TOSTmeta() plot of a meta-analytic effect size of 0.06 whose very narrow 90% and 95% confidence intervals lie inside the dashed equivalence bounds of -0.1 and 0.1 but exclude zero, so the effect is both equivalent and significant."}
 library("TOSTER")
 TOSTmeta(ES = 0.06, se = 0.003, low_eqbound_d=-0.1, high_eqbound_d=0.1, alpha=0.05)
 ```
@@ -70,7 +71,7 @@ We see that indeed, all effect size estimates are measured with such high precis
 
 Eskine (2013) showed that participants who had been exposed to organic food were substantially harsher in their moral judgments relative to those exposed to control (d = 0.81, 95% CI: [0.19, 1.45]). A replication by Moery & Calin-Jageman (2016, Study 2) did not observe a significant effect (Control: n = 95, M = 5.25, SD = 0.91, Organic Food: n = 89, M = 5.22, SD = 0.83). Following Simonsohn's (2015) recommendation the equivalence bound was set to the effect size the original study had 33% power to detect (with n = 21 in each condition, this means the equivalence bound is d = 0.48, which equals a difference of 0.429 on a 7-point scale given the sample sizes and a pooled standard deviation of 0.894). Using a TOST equivalence test with alpha = 0.05, assuming equal variances, and equivalence bounds of d = -0.48 and d = 0.48 is significant, t(182) = -3.03, p = 0.001. We can reject effects more extreme than d = 0.48 (or a raw difference of 0.429 scalepoints). 
 
-```{r, fig.width=6}
+```{r, fig.width=6, fig.alt = "TOSTtwo.raw() plot of a mean difference of 0.03 in moral judgments whose 90% confidence interval lies inside the dashed equivalence bounds of -0.429 and 0.429 and whose 95% interval includes zero, supporting equivalence."}
 # OLD CODE
 #TOSTtwo(m1=5.25,m2=5.22,sd1=0.95,sd2=0.83,n1=95,n2=89,low_eqbound_d=-0.48, high_eqbound=0.48, alpha = 0.05, var.equal=TRUE)
 TOSTtwo.raw(m1=5.25,m2=5.22,sd1=0.95,sd2=0.83,n1=95,n2=89,low_eqbound=-0.429, high_eqbound=0.429, alpha = 0.05, var.equal=TRUE)
@@ -90,7 +91,7 @@ tsum_TOST(m1=5.25,m2=5.22,sd1=0.95,sd2=0.83,n1=95,n2=89,eqb=0.429, alpha = 0.05,
 Deary, Thorpe, Wilson, Starr, and Whally (2003) report the IQ scores of 79,376 children in Scotland (39,343 girls and 40,033 boys). The IQ score for girls (M = 100.64, SD = 14.1) girls and boys (100.48, SD = 14.9) was non-significant. With such a huge sample, we can examine whether the data is equivalent using very small equivalence bounds, such as -0.05 and 0.05. Because sample sizes are unequal, and variances are unequal, Welch's t-test is used, and we can conclude IQ scores are indeed equivalent, based on equivalence bounds of -0.05 and 0.05.  
 
 
-```{r, fig.width=6}
+```{r, fig.width=6, fig.alt = "TOSTtwo() plot of a mean IQ difference of 0.16 between girls and boys whose 90% confidence interval lies well inside the dashed equivalence bounds of -0.725 and 0.725 and whose 95% interval includes zero, supporting equivalence."}
 # OLD CODE
 TOSTtwo(m1=100.64,m2=100.48,sd1=14.1,sd2=14.9,n1=39343,n2=40033,low_eqbound_d=-0.05, high_eqbound_d=0.05, alpha = 0.05, var.equal=FALSE)
 
@@ -134,7 +135,7 @@ power_t_TOST(type = "one.sample",eqb = 0.68,
 
 When we perform 5 equivalence tests using equivalence bounds of -0.68 and 0.68, using a Holm-Bonferroni sequential procedure to control error rates, we can conclude statistical equivalence for the data in row 1, 3, and 6, but the conclusion is undetermined for tests 2 and 4, where the data is neither significantly different from guessing average, nor statistically equivalent. For example, performing the test for the data in row 6:
 
-```{r, fig.width=6}
+```{r, fig.width=6, fig.alt = "TOSTone() plot of a difference of -0.29 from the guessing average whose 90% confidence interval lies inside the dashed equivalence bounds of -1.217 and 1.217 and whose 95% interval includes zero, supporting equivalence."}
 # OLD CODE
 TOSTone(m=5.71,mu=6,sd=1.79,n=20,low_eqbound_d=-0.68, high_eqbound_d=0.68, alpha=0.05)
 
@@ -182,7 +183,7 @@ The correlations observed by Olson et al (2007), Study 1, are presented in the t
 
 We can test each correlation, for example the correlation between the IAT and the Rosenberg self-esteem scale of -0.12, given 71 participants, and using equivalence bounds of r_U = 0.24 and r_L = -0.24. 
 
-```{r, fig.width=6}
+```{r, fig.width=6, fig.alt = "TOSTr() plot of a correlation of r = -0.12 whose 90% confidence interval extends past the lower dashed equivalence bound of -0.24 and whose 95% interval includes zero, so the result is neither equivalent nor significant."}
 # OLD CODE
 TOSTr(n=71, r=-0.12, low_eqbound_r=-0.24, high_eqbound_r=0.24, alpha=0.05)
 
